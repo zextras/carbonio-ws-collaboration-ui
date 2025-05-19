@@ -10,6 +10,7 @@ import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';
 import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
+import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
 import { meetingParticipantSubscribedEventHandler } from './MeetingParticipantSubscribedEventHandler';
 import { meetingParticipantTalkingEventHandler } from './MeetingParticipantTalkingHandler';
 import { meetingRecordingStartedEventHandler } from './MeetingRecordingStartedEventHandler';
@@ -31,15 +32,17 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.MEETING_CREATED: {
-			state.addMeeting({
-				id: event.meetingId,
-				name: '',
-				roomId: event.roomId,
-				active: false,
-				participants: [],
-				createdAt: event.sentDate,
-				meetingType: MeetingType.PERMANENT
-			});
+			state.addMeetings([
+				{
+					id: event.meetingId,
+					name: '',
+					roomId: event.roomId,
+					active: false,
+					participants: [],
+					createdAt: event.sentDate,
+					meetingType: MeetingType.PERMANENT
+				}
+			]);
 			break;
 		}
 		case WsEventType.MEETING_STARTED: {
@@ -116,6 +119,14 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MEETING_RECORDING_STOPPED: {
 			meetingRecordingStoppedEventHandler(event);
+			break;
+		}
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED: {
+			meetingParticipantHandRaisedHandler(event);
+			break;
+		}
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
+			// event for mobile apps
 			break;
 		}
 		default: {

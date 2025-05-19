@@ -4,29 +4,30 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
-import { MeetingRoutesParams } from '../../hooks/useRouting';
+import usePiPWindow from '../../hooks/usePipWindow';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCapability, getUserId } from '../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
-import { CapabilityType } from '../../types/store/SessionTypes';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
+import { PiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
+import PictureInPictureView from '../components/pictureInPicture/PictureInPictureView';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
+import { RouterContext } from '../contexts/routerContext';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -45,19 +46,19 @@ export type MeetingViewProps = {
 };
 
 const MeetingSkeleton = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	const meetingViewSelected = useStore(getMeetingViewSelected);
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
+	const virtualBackgroundEnabled = useStore((store) =>
+		getAttribute(store, 'virtualBackgroundEnabled')
 	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	useGeneralMeetingControls(meetingId);
+	useGeneralMeetingControls(meetingId!);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {
@@ -67,28 +68,39 @@ const MeetingSkeleton = (): ReactElement => {
 	}, [meetingViewSelected, numberOfTiles]);
 
 	const isVirtualBackgroundVisible = useMemo(
-		() => canUseVirtualBackground ?? isUserGuest,
-		[canUseVirtualBackground, isUserGuest]
+		() => virtualBackgroundEnabled ?? isUserGuest,
+		[virtualBackgroundEnabled, isUserGuest]
 	);
 
+	const { pipWindow } = usePiPWindow();
+
 	return (
-		<SkeletonContainer orientation="horizontal" borderRadius="none">
-			<MeetingSidebar />
-			<ViewContainer
-				ref={streamsWrapperRef}
-				background={'gray0'}
-				crossAlignment="center"
-				orientation="horizontal"
-				data-testid="meeting_view_container"
-			>
-				<RecordingInfo meetingId={meetingId} />
-				<Logo />
-				<ViewToDisplay>
-					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
-				</ViewToDisplay>
-			</ViewContainer>
-			{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
-		</SkeletonContainer>
+		<>
+			{pipWindow && (
+				<PiPWindow pipWindow={pipWindow}>
+					<PictureInPictureView />
+				</PiPWindow>
+			)}
+			{
+				<SkeletonContainer orientation="horizontal" borderRadius="none">
+					<MeetingSidebar />
+					<ViewContainer
+						ref={streamsWrapperRef}
+						background={'gray0'}
+						crossAlignment="center"
+						orientation="horizontal"
+						data-testid="meeting_view_container"
+					>
+						<RecordingInfo meetingId={meetingId!} />
+						<Logo />
+						<ViewToDisplay>
+							<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
+						</ViewToDisplay>
+					</ViewContainer>
+					{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
+				</SkeletonContainer>
+			}
+		</>
 	);
 };
 

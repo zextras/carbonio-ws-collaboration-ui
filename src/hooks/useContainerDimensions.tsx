@@ -28,4 +28,5 @@ const useContainerDimensions = (
 
 	return dimensions;
 };
+
 export default useContainerDimensions;

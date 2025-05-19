@@ -18,7 +18,7 @@ import useDarkReader from '../../../../hooks/useDarkReader';
 import useMessage from '../../../../hooks/useMessage';
 import { getUserName, getUserSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MessageType, TextMessage } from '../../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 type RepliedTextMessageSectionViewProps = {

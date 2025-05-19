@@ -26,9 +26,8 @@ import {
 	getPictureUpdatedAt,
 	getRoomNameSelector
 } from '../../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 
 type RoomPictureProps = {
 	roomId: string;
@@ -59,9 +58,7 @@ const CustomFileLoader = styled(FileLoader)`
 `;
 
 const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
-	const maxRoomImageSize = useStore((store) =>
-		getCapability(store, CapabilityType.MAX_ROOM_IMAGE_SIZE)
-	);
+	const maxRoomImageSize = useStore((store) => getAttribute(store, 'maxRoomPictureSize') as number);
 
 	const [t] = useTranslation();
 	const oneMemberAccordionTitle = t('participantsList.oneMemberAccordionTitle', 'One member');
@@ -75,7 +72,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	);
 	const imageSizeTooLargeSnackbar = t(
 		'settings.room.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}kb`,
+		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}MB`,
 		{ size: maxRoomImageSize }
 	);
 	const errorDeleteImageSnackbar = t(

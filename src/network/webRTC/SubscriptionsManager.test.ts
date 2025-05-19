@@ -88,9 +88,9 @@ beforeEach(() => {
 	act(() => {
 		const store = useStore.getState();
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-		store.addRoom(groupRoom);
-		store.addMeeting(groupMeeting);
-		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		store.addRooms([groupRoom]);
+		store.addMeetings([groupMeeting]);
+		store.meetingConnection(groupMeeting.id);
 	});
 });
 

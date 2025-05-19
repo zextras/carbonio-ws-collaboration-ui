@@ -6,18 +6,24 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, remove } from 'lodash';
+import { filter, find, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { MessageType } from '../../types/store/MessageTypes';
-import { RoomType } from '../../types/store/RoomTypes';
-import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
+import { MessageType } from '../../types/store/ChatsRegistryTypes';
+import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
+import { getMeetingIdFromRoom } from '../selectors/RoomsSelectors';
 
-export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: any) => void) => ({
+export const useRoomsStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	RoomsStoreSlice
+> = (set) => ({
 	rooms: {},
-	setRooms: (roomsBe: RoomBe[]): void => {
+	addRooms: (roomsBe: RoomBe[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				forEach(roomsBe, (roomBe) => {
@@ -27,226 +33,133 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 						description: roomBe.description,
 						type: roomBe.type,
 						createdAt: roomBe.createdAt,
-						updatedAt: roomBe.createdAt,
+						updatedAt: roomBe.updatedAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
-						members: roomBe.members,
+						members: roomBe.members ?? [],
 						userSettings: roomBe.userSettings,
-						meetingId: roomBe.meetingId
+						meetingId: roomBe.meetingId ?? draft.rooms[roomBe.id]?.meetingId
 					};
 
-					// Delete stored messages that have a date previous clearedAt date
-					if (roomBe.userSettings?.clearedAt != null) {
-						forEach(draft.messages[roomBe.id], (message) => {
-							if (
-								roomBe.userSettings?.clearedAt &&
-								isBefore(message.date, roomBe.userSettings.clearedAt)
-							) {
-								remove(draft.messages[roomBe.id], (mes) => mes.id === message.id);
-							}
-						});
+					// Remove messages sent before the clearedAt timestamp
+					const clearedAt = roomBe.userSettings?.clearedAt;
+					const messages = draft.chatsRegistry[roomBe.id]?.messages;
+					if (clearedAt && size(messages) > 0) {
+						draft.chatsRegistry[roomBe.id].messages = filter(
+							messages,
+							(message) => !isBefore(message.date, clearedAt)
+						);
 					}
 				});
 			}),
 			false,
-			'ROOMS/SET_ROOMS'
+			'ROOMS/ADD_ROOMS'
 		);
 	},
-	addRoom: (roomBe: RoomBe): void => {
+	removeRoom: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.rooms[roomBe.id] = {
-					id: roomBe.id,
-					name: roomBe.name ?? '',
-					description: roomBe.description ?? '',
-					type: roomBe.type,
-					createdAt: roomBe.createdAt,
-					updatedAt: roomBe.createdAt,
-					pictureUpdatedAt: roomBe.pictureUpdatedAt,
-					members: roomBe.members,
-					userSettings: roomBe.userSettings,
-					meetingId: draft.rooms[roomBe.id]?.meetingId ?? roomBe.meetingId
-				};
+				delete draft.rooms[roomId];
+				delete draft.activeConversations[roomId];
+				delete draft.chatsRegistry[roomId];
+
+				const meetingId = getMeetingIdFromRoom(draft, roomId);
+				if (meetingId) delete draft.meetings[meetingId];
 			}),
 			false,
-			'ROOMS/ADD_ROOM'
+			'ROOMS/REMOVE_ROOM'
 		);
 	},
-	deleteRoom: (id: string): void => {
+	editRoom: (roomId: string, updates: Partial<Room>): void => {
 		set(
 			produce((draft: RootStore) => {
-				delete draft.messages[id];
-				delete draft.markers[id];
-				delete draft.activeConversations[id];
-				delete draft.rooms[id];
-			}),
-			false,
-			'ROOMS/DELETE_ROOM'
-		);
-	},
-	setRoomName: (id: string, newName: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					name: newName
-				};
-			}),
-			false,
-			'ROOMS/CHANGE_NAME'
-		);
-	},
-	setRoomDescription: (id: string, newDescription: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					description: newDescription
-				};
-			}),
-			false,
-			'ROOMS/CHANGE_DESCRIPTION'
-		);
-	},
-	setRoomNameAndDescription: (
-		id: string,
-		newName: string | undefined,
-		newDescription: string | undefined
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					name: newName ?? '',
-					description: newDescription ?? ''
-				};
-			}),
-			false,
-			'ROOMS/CHANGE_NAME_DESCRIPTION'
-		);
-	},
-	setRoomMuted: (id: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.rooms[id]) {
-					draft.rooms[id].userSettings = {
-						...draft.rooms[id].userSettings,
-						muted: true
+				if (draft.rooms[roomId]) {
+					draft.rooms[roomId] = {
+						...draft.rooms[roomId],
+						...updates
 					};
 				}
 			}),
 			false,
-			'ROOMS/MUTE_ROOM'
+			'ROOMS/EDIT_ROOM_PROPERTIES'
 		);
 	},
-	setRoomUnmuted: (id: string): void => {
+	setRoomMuteStatus: (roomId: string, muted: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[id]) {
-					draft.rooms[id].userSettings = {
-						...draft.rooms[id].userSettings,
-						muted: false
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.userSettings = {
+						...room.userSettings,
+						muted
 					};
 				}
 			}),
 			false,
-			'ROOMS/UNMUTE_ROOM'
+			'ROOMS/SET_ROOM_MUTE_STATUS'
 		);
 	},
-	addRoomMember: (id: string, member: MemberBe): void => {
+	addRoomMember: (roomId: string, member: MemberBe): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[id].members == null) draft.rooms[id].members = [];
-				draft.rooms[id].members!.push(member);
+				const room = draft.rooms[roomId];
+				if (room) {
+					const alreadyExists = some(room.members, (m) => m.userId === member.userId);
+					if (!alreadyExists) {
+						room.members.push(member);
+					}
+				}
 			}),
 			false,
 			'ROOMS/ADD_ROOM_MEMBER'
 		);
 	},
-	removeRoomMember: (id: string, userId: string | undefined): void => {
+	removeRoomMember: (roomId: string, memberId: string | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (
-					draft.rooms[id].members != null &&
-					userId &&
-					find(draft.rooms[id].members, { userId })
-				) {
-					remove(draft.rooms[id].members!, { userId });
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.members = filter(room.members, (member) => member.userId !== memberId);
 				}
 			}),
 			false,
 			'ROOMS/REMOVE_ROOM_MEMBER'
 		);
 	},
-	promoteMemberToModerator: (id: string, userId: string): void => {
+	setMemberModeratorStatus: (roomId: string, userId: string, isModerator: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				const memberToPromote = find(draft.rooms[id]?.members, { userId });
-				if (memberToPromote) {
-					memberToPromote.owner = true;
-					const index = findIndex(draft.rooms[id].members, { userId });
-					draft.rooms[id].members!.splice(index, 1, memberToPromote);
+				const room = draft.rooms[roomId];
+				if (room) {
+					const member = find(room.members, (member) => member.userId === userId);
+					if (member) {
+						member.owner = isModerator;
+					}
 				}
 			}),
 			false,
-			'ROOMS/PROMOTE_ROOM_MEMBER'
+			'ROOMS/SET_MEMBER_MODERATOR_STATUS'
 		);
 	},
-	demoteMemberFromModerator: (id: string, userId: string): void => {
+	clearConversation: (roomId: string, clearedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const memberToDemote = find(draft.rooms[id]?.members, { userId });
-				if (memberToDemote) {
-					memberToDemote.owner = false;
-					const index = findIndex(draft.rooms[id].members, { userId });
-					draft.rooms[id].members!.splice(index, 1, memberToDemote);
-				}
-			}),
-			false,
-			'ROOMS/DEMOTE_ROOM_MEMBER'
-		);
-	},
-	setClearedAt: (roomId: string, clearedAt: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.rooms[roomId]) {
-					draft.rooms[roomId].userSettings = {
-						...draft.rooms[roomId].userSettings,
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.userSettings = {
+						...room.userSettings,
 						clearedAt
 					};
-					draft.messages[roomId] = [];
+					delete draft.chatsRegistry[roomId];
 				}
 			}),
 			false,
-			'ROOMS/SET_CLEARED_AT'
-		);
-	},
-	setRoomPictureUpdated: (id: string, date: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					pictureUpdatedAt: date
-				};
-			}),
-			false,
-			'ROOMS/ROOM_PICTURE_CHANGED'
-		);
-	},
-	setRoomPictureDeleted: (id: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					pictureUpdatedAt: undefined
-				};
-			}),
-			false,
-			'ROOMS/ROOM_PICTURE_DELETED'
+			'ROOMS/CLEAR_CONVERSATION'
 		);
 	},
 	setPlaceholderRoom: (userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
+				const now = Date.now();
 				const roomId = `placeholder-${userId}`;
 				draft.rooms[roomId] = {
 					id: roomId,
@@ -258,38 +171,41 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 							owner: true
 						}
 					],
-					createdAt: dateToISODate(Date.now()),
-					updatedAt: dateToISODate(Date.now())
+					createdAt: dateToISODate(now),
+					updatedAt: dateToISODate(now)
 				};
-
 				draft.activeConversations[roomId] = {
+					...draft.activeConversations[roomId],
 					isHistoryFullyLoaded: true
 				};
-
-				draft.messages[roomId] = [
-					{
-						type: MessageType.DATE_MSG,
-						date: Date.now(),
-						id: `date-${Date.now()}`,
-						roomId
-					}
-				];
+				draft.chatsRegistry[roomId] = {
+					messages: [
+						{
+							type: MessageType.DATE_MSG,
+							date: now,
+							id: `date-${now}`,
+							roomId
+						}
+					],
+					fastenings: {},
+					markers: {},
+					unread: 0
+				};
 			}),
 			false,
 			'ROOMS/SET_PLACEHOLDER_ROOM'
 		);
 	},
-	replacePlaceholderRoom: (userId: string, newRoomId: string): void => {
+	removePlaceholderRoom: (userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const placeholderRoomId = `placeholder-${userId}`;
-				draft.rooms[newRoomId] = draft.rooms[placeholderRoomId];
 				delete draft.rooms[placeholderRoomId];
-				delete draft.messages[placeholderRoomId];
 				delete draft.activeConversations[placeholderRoomId];
+				delete draft.chatsRegistry[placeholderRoomId];
 			}),
 			false,
-			'ROOMS/CREATE_AND_REPLACE_PLACEHOLDER_ROOM'
+			'ROOMS/REMOVE_PLACEHOLDER_ROOM'
 		);
 	}
 });

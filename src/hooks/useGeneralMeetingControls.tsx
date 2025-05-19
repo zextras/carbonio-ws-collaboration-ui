@@ -14,12 +14,14 @@ import useEventListener, {
 	EventName,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
-import useRouting, { PAGE_INFO_TYPE } from './useRouting';
+import usePiPWindow from './usePipWindow';
+import useRouting from './useRouting';
+import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import { MeetingsApi } from '../network';
+import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipantsByMeetingId,
-	getTiles
+	getMeetingParticipants
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
@@ -39,13 +41,14 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
+		getMeetingParticipants(store, meetingId)
 	);
-	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
-	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
+	const { closePipWindow } = usePiPWindow();
+	const tiles = useTiles(meetingId);
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
@@ -76,24 +79,23 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	// Handle pinned tile disappearance
 	useEffect(() => {
-		const pinnedTile = useStore.getState().activeMeeting[meetingId]?.pinnedTile;
+		const pinnedTile = useStore.getState().activeMeeting?.pinnedTile;
 		const isDisappeared = !find(
 			tiles,
 			(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
 		);
 		if (pinnedTile) {
-			const { setPinnedTile } = useStore.getState();
 			// Remove pin in face to face mode || Remove pin video if participant left
 			if (size(tiles) < 3 || (isDisappeared && pinnedTile?.type === STREAM_TYPE.VIDEO)) {
-				setPinnedTile(meetingId, undefined);
+				setPinnedTile(undefined);
 			} else if (isDisappeared && pinnedTile?.type === STREAM_TYPE.SCREEN) {
 				// Remove pin screen if participant left or stopped sharing replacing with another screen
 				const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
 				const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
-				setPinnedTile(meetingId, screenToPin);
+				setPinnedTile(screenToPin);
 			}
 		}
-	}, [tiles, meetingId]);
+	}, [tiles, setPinnedTile]);
 
 	// Pin screen share tile if I join a meeting with it (to do only once after join)
 	useEffect(() => {
@@ -102,21 +104,22 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 			(user) => user.screenStreamOn === true
 		);
 		if (screenShareParticipant) {
-			setPinnedTile(meetingId, {
+			setPinnedTile({
 				userId: screenShareParticipant.userId,
 				type: STREAM_TYPE.SCREEN
 			});
 		}
 		// eslint-disable-next-line
-	}, [meetingId, setPinnedTile]);
+	}, [setPinnedTile]);
 
 	// Disconnect user if he joins the meeting with other session
 	const meetingParticipantClashedHandler = useCallback(
 		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
 			meetingDisconnection(event?.detail.meetingId ?? '');
+			closePipWindow();
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
-		[goToInfoPage, meetingDisconnection]
+		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 
@@ -160,7 +163,6 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		createSnackbar,
 		goToInfoPage,
 		goToMeetingPage,
-		meetingConnection,
 		meetingDisconnection,
 		meetingId,
 		websocketNetworkStatus

@@ -15,10 +15,13 @@ import { setup } from '../../../tests/test-utils';
 
 const room = createMockRoom();
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+});
+
 describe('ScrollButton', () => {
 	test('Display ScrollButton without unread message', async () => {
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(<ScrollButton roomId={room.id} onClickCb={jest.fn()} />);
 
 		const scrollButton = screen.getByTestId('scrollButton');
@@ -28,9 +31,7 @@ describe('ScrollButton', () => {
 	});
 
 	test('Display sScrollButton with 1 unread message', async () => {
-		const store = useStore.getState();
-		store.addRoom(room);
-		store.incrementUnreadCount(room.id);
+		useStore.getState().incrementUnreadCount(room.id, 1);
 		setup(<ScrollButton roomId={room.id} onClickCb={jest.fn()} />);
 
 		const scrollButton = screen.getByTestId('scrollButton');

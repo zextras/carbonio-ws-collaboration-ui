@@ -3,16 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo } from 'react';
 
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getParticipantScreenStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { RouterContext } from '../../contexts/routerContext';
 
 const ScreenShareButton = (): ReactElement => {
 	const [t] = useTranslation();
@@ -24,11 +23,11 @@ const ScreenShareButton = (): ReactElement => {
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const myUserId = useStore(getUserId);
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
-	const screenOutConn = useStore((store) => store.activeMeeting[meetingId]?.screenOutConn);
+	const screenOutConn = useStore((store) => store.activeMeeting?.screenOutConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const toggleScreenStream = useCallback(() => {

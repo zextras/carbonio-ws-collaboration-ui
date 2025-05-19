@@ -19,7 +19,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FasteningAction, TextMessage } from '../../../../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 
 const loggedUser = createMockUser({ id: 'loggedUser', name: 'Logged User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -71,11 +71,8 @@ const reactionChipTestId = 'reaction-chip';
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
+	store.setUserInfo([loggedUser, user1, user2, user3]);
+	store.addRooms([room]);
 	store.newMessage(simpleTextMessage);
 });
 

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { pushHistory } from '@zextras/carbonio-shell-ui';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { ROUTES } from '../../hooks/useRouting';
+import { CHATS_ROUTE } from '../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
@@ -36,10 +36,11 @@ import {
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
 	UnmuteRoomResponse,
+	UpdateRoomOwnersResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';
@@ -66,8 +67,8 @@ class RoomsApi implements IRoomsApi {
 			params = `?${array.join('&')}`;
 		}
 		return fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
-			const { setRooms } = useStore.getState();
-			setRooms(resp);
+			const { addRooms } = useStore.getState();
+			addRooms(resp);
 			return resp;
 		});
 	}
@@ -116,8 +117,8 @@ class RoomsApi implements IRoomsApi {
 
 	public updateRoomPicture(roomId: string, file: File): Promise<UpdateRoomPictureResponse> {
 		return new Promise<UpdateRoomPictureResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.capabilities?.maxRoomImageSizeInKb;
-			if (sizeLimit && file.size > sizeLimit * 1000) {
+			const sizeLimit = useStore.getState().session.attributes?.maxRoomPictureSize;
+			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 				reject(new Error('File too large'));
 			} else {
 				uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
@@ -164,6 +165,10 @@ class RoomsApi implements IRoomsApi {
 
 	public demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse> {
 		return fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
+	}
+
+	public updateRoomOwners(roomId: string, userIds: string[]): Promise<UpdateRoomOwnersResponse> {
+		return fetchAPI(`rooms/${roomId}/members/owners`, RequestType.PUT, { Members: userIds });
 	}
 
 	public getRoomAttachments(
@@ -224,17 +229,27 @@ class RoomsApi implements IRoomsApi {
 			}
 		});
 
-		return uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
-			description: optionalFields.description,
-			replyId: optionalFields.replyId,
-			messageId: uuid,
-			area: optionalFields.area
-		})
-			.then((resp: AddRoomAttachmentResponse) => resp)
-			.catch((error) => {
+		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
+			const sizeLimit = useStore.getState().session.attributes?.maxAttachmentSize;
+			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return Promise.reject(new Error(error));
-			});
+				reject(new Error('file_too_large'));
+			} else {
+				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+					description: optionalFields.description,
+					replyId: optionalFields.replyId,
+					messageId: uuid,
+					area: optionalFields.area
+				})
+					.then((resp: AddRoomAttachmentResponse) => {
+						resolve(resp);
+					})
+					.catch((error) => {
+						useStore.getState().removePlaceholderMessage(roomId, uuid);
+						return Promise.reject(new Error(error));
+					});
+			}
+		});
 	}
 
 	public forwardMessages(
@@ -276,7 +291,7 @@ class RoomsApi implements IRoomsApi {
 		text: string,
 		file?: File
 	): Promise<AddRoomResponse> {
-		const { setPlaceholderMessage, replacePlaceholderRoom } = useStore.getState();
+		const { setPlaceholderMessage, removePlaceholderRoom } = useStore.getState();
 		setPlaceholderMessage({
 			roomId: `placeholder-${userId}`,
 			id: uuidGenerator(),
@@ -290,8 +305,13 @@ class RoomsApi implements IRoomsApi {
 			type: RoomType.ONE_TO_ONE,
 			members: [{ userId, owner: true }]
 		}).then((response) => {
-			replacePlaceholderRoom(userId, response.id);
-			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
+			removePlaceholderRoom(userId);
+			sendCustomEvent({
+				name: EventName.ROUTE_REDIRECT,
+				data: {
+					path: `/${CHATS_ROUTE}/${response.id}`
+				}
+			});
 			return response;
 		});
 	}

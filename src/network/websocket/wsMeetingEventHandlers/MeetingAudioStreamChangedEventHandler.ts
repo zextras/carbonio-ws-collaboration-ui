@@ -19,7 +19,7 @@ export const meetingAudioStreamChangedEventHandler = (
 	if (isMeetingActive(event.meetingId)) {
 		// If user is talking, delete his id from the isTalking array
 		if (!event.active) {
-			state.setTalkingUser(event.meetingId, event.userId, false);
+			state.setTalkingUser(event.userId, false);
 		}
 
 		if (isMyId(event.userId)) {
@@ -30,8 +30,7 @@ export const meetingAudioStreamChangedEventHandler = (
 
 			// Mute the tile if someone performed this state on me
 			if (!event.active && !!event.moderatorId) {
-				const activeMeeting = state.activeMeeting[event.meetingId];
-				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+				state.activeMeeting?.bidirectionalAudioConn?.closeRtpSenderTrack();
 				// Custom event to show snackbar
 				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
 			}

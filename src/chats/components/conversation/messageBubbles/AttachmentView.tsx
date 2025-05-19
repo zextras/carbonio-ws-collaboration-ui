@@ -7,7 +7,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
-import { split } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -16,9 +15,11 @@ import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { AttachmentType } from '../../../../types/network/apis/IAttachmentsApi';
-import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
-import { getAttachmentExtension, getThumbnailURL } from '../../../../utils/attachmentUtils';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
+import {
+	getAttachmentDimensions,
+	getAttachmentThumbnailURL
+} from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const HoverContainer = styled(Container)`
@@ -44,7 +45,8 @@ const CustomButton = styled(Button)`
 `;
 
 const PreviewContainer = styled(Container)<{ $isLoaded: boolean; $previewError: boolean }>`
-	${({ $isLoaded }): false | string => $isLoaded && `background: black;`};
+	${({ $isLoaded, theme }): false | string =>
+		$isLoaded && `background: ${theme.palette.gray0.regular};`};
 	${({ $previewError, theme }): false | string =>
 		$previewError &&
 		`border-radius: 0.25rem;
@@ -63,16 +65,15 @@ const PreviewErrorContainer = styled(Container)<{
 	$imgHeight: number;
 	$maxWidth: number;
 }>`
-	${({ $imgWidth, $maxWidth }): string | false =>
-		$imgWidth === 0
-			? `width: ${$maxWidth * 0.063}rem;`
-			: $maxWidth === 0
-				? 'width: 100%'
-				: `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`};
-	${({ $imgWidth, $imgHeight }): string | false =>
-		$imgWidth !== 0
-			? `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`
-			: 'aspect-ratio: 1;'};
+	${({ $imgWidth, $maxWidth }): string => {
+		if ($imgWidth === 0) return `width: ${$maxWidth * 0.063}rem;`;
+		if ($maxWidth === 0) return 'width: 100%';
+		return `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`;
+	}};
+	${({ $imgWidth, $imgHeight }): string => {
+		if ($imgWidth === 0) return 'aspect-ratio: 1;';
+		return `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`;
+	}};
 	max-height: 37.5rem;
 `;
 
@@ -138,10 +139,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 
 	const senderIdentifier = useStore((store) => getUserName(store, from));
 
-	const dimensions = useMemo(() => {
-		if (getAttachmentExtension(attachment.mimeType) === AttachmentType.PDF) return ['2480', '3508'];
-		return split(attachment.area, 'x');
-	}, [attachment.area, attachment.mimeType]);
+	const { width, height } = getAttachmentDimensions(attachment);
 
 	const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
@@ -183,7 +181,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier), [senderIdentifier]);
 
 	const previewURL = useMemo(
-		() => getThumbnailURL(attachment.id, attachment.mimeType),
+		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
 		[attachment.id, attachment.mimeType]
 	);
 
@@ -262,8 +260,8 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 				{previewError ? (
 					<PreviewErrorContainer
 						background={'gray5'}
-						$imgWidth={Number(dimensions[0])}
-						$imgHeight={Number(dimensions[1])}
+						$imgWidth={width}
+						$imgHeight={height}
 						$maxWidth={attachmentBubbleMaxWidth}
 					>
 						<Icon size="large" icon="Image" color="gray2" />
@@ -277,8 +275,8 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 							onError={setError}
 							data-testid="attachmentImg"
 							$isPreviewLoaded={isPreviewLoaded}
-							width={Number(dimensions[0])}
-							height={Number(dimensions[1])}
+							width={width}
+							height={height}
 						/>
 					</>
 				)}

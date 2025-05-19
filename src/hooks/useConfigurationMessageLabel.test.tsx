@@ -19,7 +19,7 @@ import {
 	createMockUser
 } from '../tests/createMock';
 import { ProvidersWrapper, setup } from '../tests/test-utils';
-import { OperationType } from '../types/store/MessageTypes';
+import { OperationType } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
 
 const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
@@ -46,11 +46,8 @@ const oneToOneRoom = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.addRoom(groupRoom);
-	store.addRoom(oneToOneRoom);
+	store.setUserInfo([loggedUser, user1, user2]);
+	store.addRooms([groupRoom, oneToOneRoom]);
 });
 describe('useConfigurationMessageLabel', () => {
 	describe('Change room name and topic labels', () => {

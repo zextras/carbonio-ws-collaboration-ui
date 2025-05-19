@@ -11,7 +11,7 @@ import { act, screen } from '@testing-library/react';
 import UserAvatar from './UserAvatar';
 import useStore from '../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -109,22 +109,22 @@ const meeting2: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
-	store.setUserInfo(user1Info);
-	store.setUserInfo(user2Info);
-	store.setUserInfo(user3Info);
-	store.addRoom(room);
-	store.addRoom(roomWithPicture);
-	store.addRoom(singleConversationWithUnloadUser);
-	store.addRoom(roomMuted);
-	store.addRoom(roomMutedWithMeeting);
-	store.addMeeting(meeting);
-	store.addMeeting(meeting2);
+	store.setUserInfo([user1Info, user2Info, user3Info]);
+	store.addRooms([
+		room,
+		roomWithPicture,
+		singleConversationWithUnloadUser,
+		roomMuted,
+		roomMutedWithMeeting
+	]);
+	store.addMeetings([meeting, meeting2]);
 });
+
 describe('User avatar', () => {
 	describe('Presence dot', () => {
-		test('User presence dot should be visible when canSeeUsersPresence capability is set to true', () => {
+		test('User presence dot should be visible when carbonioWscShowUsersPresence attribute is set to true', () => {
 			const store = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 
 			// User2 is online
@@ -137,9 +137,9 @@ describe('User avatar', () => {
 			const presenceDotOffline = screen.queryByTestId('user_presence_dot');
 			expect(presenceDotOffline).toBeInTheDocument();
 		});
-		test('User presence dot should not be visible when canSeeUsersPresence capability is set to false', () => {
+		test('User presence dot should not be visible when carbonioWscShowUsersPresence attribute is set to false', () => {
 			const store = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'FALSE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 
 			// User2 is online
@@ -154,7 +154,7 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should be gray and shows he is offline', async () => {
 			const store = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const avatar = screen.getByTestId('avatar_box');
 			expect(avatar).toBeVisible();
@@ -164,7 +164,7 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should be green and shows he is online', async () => {
 			const store = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			store.setUserPresence('user2', true);
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const avatar = screen.getByTestId('avatar_box');
@@ -179,8 +179,8 @@ describe('User avatar', () => {
 		test('Check if the conversation has notifications disabled and user is online', () => {
 			const store = useStore.getState();
 			store.setUserPresence('user2', true);
-			store.setRoomMuted(room.id);
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setRoomMuteStatus(room.id, true);
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const iconOff = screen.getByTestId(iconBellOff);
 			expect(iconOff).toBeVisible();
@@ -190,8 +190,8 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications disabled and user is offline', () => {
 			const store = useStore.getState();
-			store.setRoomMuted(room.id);
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setRoomMuteStatus(room.id, true);
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const iconOff = screen.getByTestId(iconBellOff);
 			expect(iconOff).toBeVisible();
@@ -202,7 +202,7 @@ describe('User avatar', () => {
 		test('Check if the conversation has notifications enabled and user is online', () => {
 			const store = useStore.getState();
 			store.setUserPresence('user2', true);
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const userAvatar = screen.getByTestId('User 2-avatar');
 			expect(userAvatar).toBeVisible();
@@ -212,7 +212,7 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications enabled and user is offline', () => {
 			const store = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const userAvatar = screen.getByTestId('User 2-avatar');
 			expect(userAvatar).toBeVisible();
@@ -235,21 +235,21 @@ describe('User avatar', () => {
 	describe('Draft message', () => {
 		test('Check if there is the draft message and notifications enabled', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 		test('Check if there is the draft message and notifications disabled', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 		test('Check if there is the draft message and there is an ongoing meeting', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={roomWithMeeting.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();

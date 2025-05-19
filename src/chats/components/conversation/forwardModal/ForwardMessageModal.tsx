@@ -35,6 +35,7 @@ import {
 	map,
 	mapValues,
 	omit,
+	orderBy,
 	remove,
 	size
 } from 'lodash';
@@ -43,11 +44,12 @@ import styled from 'styled-components';
 
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
+import useRouting from '../../../../hooks/useRouting';
 import { RoomsApi } from '../../../../network';
-import { getRoomIdsOrderedLastMessage } from '../../../../store/selectors/MessagesSelectors';
+import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const CustomContainer = styled(Container)`
@@ -73,7 +75,11 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	messagesToForward
 }): ReactElement => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const rooms = useStore(getRoomIdsOrderedLastMessage);
+	const roomsNotOrdered = useStore(getRoomIdsWithLastMessage);
+	const rooms = useMemo(
+		() => orderBy(roomsNotOrdered, ['lastMessageTimestamp'], ['desc']),
+		[roomsNotOrdered]
+	);
 
 	const [t] = useTranslation();
 	const modalTitle = t('modal.forward.title', `Forward message from ${roomName}`, {
@@ -98,6 +104,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<ChatListItemProp[]>([]);
 	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
+
+	const { goToRoomPage } = useRouting();
 
 	const select = useCallback(
 		(id: string) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
@@ -176,9 +184,14 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const forwardMessage = useCallback(() => {
 		const roomsId = map(selected, (key, value) => value);
 		RoomsApi.forwardMessages(roomsId, messagesToForward || [])
-			.then(() => onClose())
+			.then(() => {
+				if (roomsId.length === 1) {
+					goToRoomPage(roomsId[0]);
+				}
+				onClose();
+			})
 			.catch(() => onClose());
-	}, [messagesToForward, onClose, selected]);
+	}, [goToRoomPage, messagesToForward, onClose, selected]);
 
 	const disabledForwardButton = useMemo(() => size(selected) === 0, [selected]);
 

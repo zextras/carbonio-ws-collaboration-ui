@@ -51,7 +51,7 @@ const MeetingActive = styled.div<{ $meetingIsActive?: boolean }>`
 
 const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 	const room = useStore((state) => getRoomSelector(state, roomId));
-	const meetingIsActive: boolean = useStore((store) => getMeetingActive(store, roomId));
+	const meetingIsActive = useStore((store) => getMeetingActive(store, roomId));
 	const amIParticipating = useStore((state) => getMyMeetingParticipation(state, roomId));
 	const userIsModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 

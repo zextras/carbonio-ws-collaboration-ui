@@ -12,6 +12,6 @@ export const meetingParticipantTalkingEventHandler = (
 ): void => {
 	const state = useStore.getState();
 	if (isMeetingActive(event.meetingId)) {
-		state.setTalkingUser(event.meetingId, event.userId, event.isTalking);
+		state.setTalkingUser(event.userId, event.isTalking);
 	}
 };

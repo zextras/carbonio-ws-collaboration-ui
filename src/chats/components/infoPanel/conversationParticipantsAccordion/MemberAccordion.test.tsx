@@ -43,6 +43,14 @@ const members = [
 	}
 ];
 
+const room: RoomBe = createMockRoom({ type: RoomType.GROUP });
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+	store.setUserInfo([user1Be, user2Be]);
+});
+
 describe('Participants accordion', () => {
 	test('Title should be plural', () => {
 		const room: RoomBe = {
@@ -57,9 +65,8 @@ describe('Participants accordion', () => {
 		};
 
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
+		store.addRooms([room]);
+		store.setUserInfo([user1Be, user2Be]);
 		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsPlural = screen.getByText(/2 members/i);
 		expect(titleIsPlural).toBeInTheDocument();
@@ -78,18 +85,14 @@ describe('Participants accordion', () => {
 		};
 
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
+		store.addRooms([room]);
+		store.setUserInfo([user1Be]);
 		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsSingular = screen.getByText(/One member/i);
 		expect(titleIsSingular).toBeInTheDocument();
 	});
 
 	test('Set open/close accordion status', async () => {
-		const room: RoomBe = createMockRoom({ type: RoomType.GROUP });
-		const store = useStore.getState();
-		store.addRoom(room);
-
 		// Default status: open
 		const { user } = setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.getByText(/Search members/i)).toBeVisible();
@@ -107,9 +110,7 @@ describe('Participants accordion', () => {
 	});
 
 	test('Initial accordion status: true', async () => {
-		const room: RoomBe = createMockRoom({ type: RoomType.GROUP });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.setParticipantsAccordionStatus(room.id, true);
 
 		setup(<MemberAccordion roomId={room.id} />);
@@ -118,9 +119,7 @@ describe('Participants accordion', () => {
 	});
 
 	test('Initial accordion status: false', async () => {
-		const room: RoomBe = createMockRoom({ type: RoomType.GROUP });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.setParticipantsAccordionStatus(room.id, false);
 
 		setup(<MemberAccordion roomId={room.id} />);

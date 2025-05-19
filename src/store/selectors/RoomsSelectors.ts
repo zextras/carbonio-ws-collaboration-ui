@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { useMemo } from 'react';
+
 import {
 	countBy,
 	differenceWith,
@@ -21,24 +23,48 @@ import { RoomsApi } from '../../network';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import useStore from '../Store';
 
-export const getRoomIdsList = (state: RootStore): string[] => {
-	const idsList: string[] = [];
-	forEach(state.rooms, (room) => {
-		idsList.push(room.id);
-	});
-	return idsList;
+export const useRoomIdsList = (): string[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const idsList: string[] = [];
+		forEach(rooms, (room) => {
+			idsList.push(room.id);
+		});
+		return idsList;
+	}, [rooms]);
 };
 
-export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[] => {
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
-	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['desc']);
-	return map(orderedRooms, (room) => room.id);
+export const useTemporaryRoomIdsOrderedByCreation = (): string[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const filteredRooms = filter(rooms, (room) => room.type === RoomType.TEMPORARY);
+		return [...map(orderBy(filteredRooms, ['createdAt'], ['desc']), (room) => room.id)];
+	}, [rooms]);
 };
 
-export const getVirtualRoomsList = (store: RootStore): Room[] => {
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
-	return orderBy(filteredRooms, ['createdAt'], ['desc']);
+export const useVirtualRoomsList = (): Room[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const filteredRooms = filter(rooms, (room) => room.type === RoomType.TEMPORARY);
+		return [...orderBy(filteredRooms, ['createdAt'], ['desc'])];
+	}, [rooms]);
+};
+
+export const useOwners = (roomId: string): string[] => {
+	const members = useStore((store) => store.rooms[roomId]?.members);
+	return useMemo(() => {
+		const ownersList: string[] = [];
+		if (members != null) {
+			map(members, (member) => {
+				if (member.owner) {
+					ownersList.push(member.userId);
+				}
+			});
+		}
+		return ownersList;
+	}, [members]);
 };
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
@@ -65,14 +91,6 @@ export const getRoomDescriptionSelector = (state: RootStore, id: string): string
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
 
-export type RoomMainInfosType = {
-	id?: string;
-	name?: string;
-	description?: string;
-	type?: RoomType;
-	muted?: boolean;
-};
-
 export const getOwnershipOfTheRoom = (
 	state: RootStore,
 	roomId: string,
@@ -88,18 +106,6 @@ export const getOwnershipOfTheRoom = (
 	return false;
 };
 
-export const getOwners = (state: RootStore, roomId: string): string[] => {
-	const ownersList: string[] = [];
-	if (state.rooms[roomId]?.members != null) {
-		map(state.rooms[roomId]?.members, (member) => {
-			if (member.owner) {
-				ownersList.push(member.userId);
-			}
-		});
-	}
-	return ownersList;
-};
-
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
 	if (state.rooms[roomId]?.members != null) {
 		return countBy(state.rooms[roomId]?.members, (member) => member.owner).true;
@@ -107,8 +113,10 @@ export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): nu
 	return 0;
 };
 
+const FALLBACK_ARRAY: Member[] = [];
+
 export const getRoomMembers = (state: RootStore, roomId: string): Member[] =>
-	state.rooms[roomId]?.members ?? [];
+	state.rooms[roomId]?.members ?? FALLBACK_ARRAY;
 
 export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): number =>
 	size(state.rooms[roomId]?.members);
@@ -130,8 +138,10 @@ export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string |
 export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
 	state.rooms[roomId]?.placeholder ?? false;
 
+const userIds: string[] = [];
+
 export const getSingleConversationsUserId = (state: RootStore): string[] => {
-	const userIds: string[] = [];
+	userIds.length = 0;
 	forEach(state.rooms, (room) => {
 		if (room.type === RoomType.ONE_TO_ONE) {
 			const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);

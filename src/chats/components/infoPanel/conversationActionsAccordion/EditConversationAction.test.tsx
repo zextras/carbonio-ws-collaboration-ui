@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, renderHook, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
 import useStore from '../../../../store/Store';
@@ -14,7 +14,6 @@ import { createMockMember, createMockRoom, createMockUser } from '../../../../te
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
 const user1Info: User = createMockUser();
@@ -50,10 +49,15 @@ const testRoom2: RoomBe = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo([user1Info, user2Info]);
+	store.addRooms([testRoom, testRoom2]);
+});
+
 describe('Edit conversation action', () => {
 	test('open/close modal', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);
 
 		await user.click(screen.getByText(/Edit Details/i));
@@ -62,16 +66,10 @@ describe('Edit conversation action', () => {
 		await user.click(screen.getByTestId('icon: Close'));
 		expect(screen.queryByTestId('edit_conversation_modal')).not.toBeInTheDocument();
 	});
+
 	test('edit conversation', async () => {
 		const spyOnUpdateRoom = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM);
 		spyOnUpdateRoom.mockRejectedValueOnce('Not edited');
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user1Info);
-			result.current.setUserInfo(user2Info);
-			result.current.addRoom(testRoom2);
-		});
 
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);
 		await user.click(screen.getByText(/Edit Details/i));
@@ -84,7 +82,7 @@ describe('Edit conversation action', () => {
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeVisible();
-		expect(result.current.rooms[testRoom2.id].name).toBe('A Group');
+		expect(useStore.getState().rooms[testRoom2.id].name).toBe('A Group');
 
 		await user.click(editButton);
 		expect(spyOnUpdateRoom).toHaveBeenCalledTimes(2);

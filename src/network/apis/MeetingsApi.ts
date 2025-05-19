@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
+import { chain, find } from 'lodash';
 
+import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
@@ -28,6 +29,7 @@ import {
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	LoginV3ConfigResponse,
+	RaiseHandResponse,
 	StartMeetingResponse,
 	StartRecordingResponse,
 	StopMeetingResponse,
@@ -40,6 +42,7 @@ import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes'
 import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import { fetchAPI } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
@@ -56,8 +59,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public listMeetings(): Promise<ListMeetingsResponse> {
 		return fetchAPI(`meetings`, RequestType.GET).then((resp: ListMeetingsResponse) => {
-			const { setMeetings } = useStore.getState();
-			setMeetings(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings(resp);
 			return resp;
 		});
 	}
@@ -83,8 +86,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse> {
 		return fetchAPI(`meetings/${meetingId}`, RequestType.GET).then((resp: GetMeetingResponse) => {
-			const { addMeeting } = useStore.getState();
-			addMeeting(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings([resp]);
 			return resp;
 		});
 	}
@@ -104,10 +107,8 @@ class MeetingsApi implements IMeetingsApi {
 					.getState()
 					.meetingConnection(
 						meetingId,
-						settings.audioStreamEnabled,
-						devicesId.audioDevice,
-						settings.videoStreamEnabled,
-						devicesId.videoDevice
+						{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
+						{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
 					);
 				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
 					if (meeting.meetingType === MeetingType.SCHEDULED) {
@@ -118,6 +119,14 @@ class MeetingsApi implements IMeetingsApi {
 						);
 						if (iAmOwner) this.getWaitingList(meetingId);
 					}
+					// order hand raised if there's any
+					chain(meeting.participants)
+						.filter((p) => p.handRaisedAt !== undefined)
+						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
+						.each((participant) => {
+							useStore.getState().setUserWithHandRaised(participant.userId, true);
+						})
+						.value();
 					return resp;
 				});
 			}
@@ -130,7 +139,7 @@ class MeetingsApi implements IMeetingsApi {
 		settings: JoinSettings,
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<string> {
-		const meeting = useStore.getState().meetings[roomId];
+		const meeting = getMeetingByRoomId(useStore.getState(), roomId);
 		if (meeting) {
 			if (meeting.active) {
 				return this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id);
@@ -139,7 +148,7 @@ class MeetingsApi implements IMeetingsApi {
 				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
 			);
 		}
-		const roomName = useStore.getState().rooms[roomId]?.name || '';
+		const roomName = useStore.getState().rooms[roomId]?.name ?? '';
 		return this.createMeeting(roomId, MeetingType.PERMANENT, roomName).then((response) =>
 			this.startMeeting(response.id).then(() =>
 				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
@@ -160,7 +169,7 @@ class MeetingsApi implements IMeetingsApi {
 
 				// Leave temporary room when a member leaves the scheduled meeting
 				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
-					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
+					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 				}
 				if (isExternal) {
 					BrowserUtils.clearAuthCookies();
@@ -285,11 +294,22 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
+	public raiseHand(
+		meetingId: string,
+		value: boolean,
+		userToModerate?: string
+	): Promise<RaiseHandResponse> {
+		return fetchAPI(`meetings/${meetingId}/hand`, RequestType.PUT, {
+			raised: value,
+			userToModerate
+		});
+	}
+
 	public authLogin(): Promise<LoginV3ConfigResponse> {
 		return fetch('/zx/login/v3/config', { method: RequestType.GET })
 			.then((resp) => {
 				if (resp.ok) return resp;
-				return Promise.reject(resp);
+				return Promise.reject(new Error(`${resp.status}`));
 			})
 			.then((resp) => resp.json())
 			.catch((err: Error) => Promise.reject(err));
@@ -304,7 +324,7 @@ class MeetingsApi implements IMeetingsApi {
 		})
 			.then((resp) => {
 				if (resp.ok) return resp;
-				return Promise.reject(resp);
+				return Promise.reject(new Error(`${resp.status}`));
 			})
 			.then((res) => res.text())
 			.then((res) => JSON.parse(res))

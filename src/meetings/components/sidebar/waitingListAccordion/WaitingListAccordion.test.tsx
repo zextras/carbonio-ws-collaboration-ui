@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import WaitingListAccordion from './WaitingListAccordion';
 import useStore from '../../../../store/Store';
@@ -19,6 +19,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
@@ -37,9 +38,9 @@ const meeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1.id, 'user1');
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 });
 describe('WaitingListAccordion tests', () => {
 	test('Accordion is visible if the user is a moderator and there are waiting users', () => {
@@ -74,7 +75,7 @@ describe('WaitingListAccordion tests', () => {
 		const store = useStore.getState();
 		store.addUserToWaitingList(meeting.id, user2.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
-		act(() => store.setWaitingListAccordionStatus(meeting.id, false));
+		act(() => store.setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, false));
 		expect(screen.getByText('1')).toBeVisible();
 	});
 
@@ -82,7 +83,7 @@ describe('WaitingListAccordion tests', () => {
 		const store = useStore.getState();
 		store.addUserToWaitingList(meeting.id, user2.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
-		act(() => store.setWaitingListAccordionStatus(meeting.id, true));
+		act(() => store.setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, true));
 		expect(screen.queryByText('1')).not.toBeInTheDocument();
 	});
 });

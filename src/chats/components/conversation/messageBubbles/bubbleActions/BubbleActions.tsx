@@ -12,7 +12,7 @@ import styled, { css } from 'styled-components';
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useBubbleReactions from './useBubbleReactions';
 import { Z_INDEX_RANK } from '../../../../../types/generics';
-import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
 const DropDownWrapper = styled(Container)`
 	position: relative;

@@ -1,16 +1,20 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /*
  * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { Results, SelfieSegmentation } from '@mediapipe/selfie_segmentation';
+// @ts-expect-error
 import selfie_segmentation_binarypb from '@mediapipe/selfie_segmentation/selfie_segmentation.binarypb';
+// @ts-expect-error
 import selfie_segmentation from '@mediapipe/selfie_segmentation/selfie_segmentation.tflite';
+// @ts-expect-error
 import selfie_segmentation_landscape from '@mediapipe/selfie_segmentation/selfie_segmentation_landscape.tflite';
+// @ts-expect-error
 import selfie_segmentation_solution_simd_wasm_bin from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin';
+// @ts-expect-error
 import selfie_segmentation_solution_simd_wasm_bin_wasm from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin.wasm';
 
 export interface ISelfieSegmentation {
@@ -21,9 +25,9 @@ export interface ISelfieSegmentation {
 }
 
 export default class SelfieSegmentationManager implements ISelfieSegmentation {
-	private onResultsCallback: (results: Results) => void;
+	private onResultsCallback: ((results: Results) => void) | undefined;
 
-	private selfieSegmentation: SelfieSegmentation;
+	private selfieSegmentation: SelfieSegmentation | null;
 
 	constructor() {
 		this.selfieSegmentation = new SelfieSegmentation({
@@ -66,7 +70,7 @@ export default class SelfieSegmentationManager implements ISelfieSegmentation {
 
 	public async initialize(): Promise<void> {
 		try {
-			await this.selfieSegmentation.initialize();
+			await this.selfieSegmentation?.initialize();
 		} catch (error) {
 			console.error('Error during selfieSegmentation initialization: ', error);
 		}
@@ -74,11 +78,11 @@ export default class SelfieSegmentationManager implements ISelfieSegmentation {
 
 	public async send(input: HTMLVideoElement | null): Promise<void> {
 		if (input) {
-			await this.selfieSegmentation.send({ image: input });
+			await this.selfieSegmentation?.send({ image: input });
 		}
 	}
 
-	public async close(): void {
+	public async close(): Promise<void> {
 		try {
 			if (this.selfieSegmentation) {
 				await this.selfieSegmentation.close();

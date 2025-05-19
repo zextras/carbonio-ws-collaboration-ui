@@ -33,10 +33,9 @@ const single2 = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionId', 'User Name');
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 });
+
 describe('Test useFilterRoomsOnInput custom hook', () => {
 	test('Rooms list is empty with no filters', () => {
 		const { result } = renderHook(() => useFilterRoomsOnInput(''));
@@ -45,14 +44,14 @@ describe('Test useFilterRoomsOnInput custom hook', () => {
 
 	test('Rooms list contains all rooms if there is no text filter', () => {
 		const store = useStore.getState();
-		store.setRooms([group1, group2, group3, single1, single2]);
+		store.addRooms([group1, group2, group3, single1, single2]);
 		const { result } = renderHook(() => useFilterRoomsOnInput(''));
 		expect(result.current.length).toEqual(5);
 	});
 
 	test('Rooms list contains 1to1 that have the filter in the other member name', () => {
 		const store = useStore.getState();
-		store.setRooms([single1, single2]);
+		store.addRooms([single1, single2]);
 		const { result } = renderHook(() => useFilterRoomsOnInput('User 1'));
 		expect(result.current.length).toEqual(1);
 		expect(result.current[0].roomId).toEqual(single1.id);
@@ -60,7 +59,7 @@ describe('Test useFilterRoomsOnInput custom hook', () => {
 
 	test('Rooms list contains groups that have the filter in the name', () => {
 		const store = useStore.getState();
-		store.setRooms([group1, group2, group3]);
+		store.addRooms([group1, group2, group3]);
 		const { result } = renderHook(() => useFilterRoomsOnInput('Room 1'));
 		expect(result.current.length).toEqual(1);
 		expect(result.current[0].roomId).toEqual(group1.id);
@@ -68,7 +67,7 @@ describe('Test useFilterRoomsOnInput custom hook', () => {
 
 	test('Rooms list contains groups that have the filter in the member name', () => {
 		const store = useStore.getState();
-		store.setRooms([
+		store.addRooms([
 			{
 				...group1,
 				members: [

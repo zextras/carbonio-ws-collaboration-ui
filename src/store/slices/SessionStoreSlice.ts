@@ -5,35 +5,32 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
 import { produce } from 'immer';
 import { StateCreator } from 'zustand';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
-import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
+import { AttributesList, ExportStatus, SessionStoreSlice } from '../../types/store/SessionTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
 
-export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
-	set: (...any: any) => void
-) => ({
-	session: {
-		filterHasFocus: false
-	},
+export const useSessionStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	SessionStoreSlice
+> = (set) => ({
+	session: {},
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.session = {
+					...draft.session,
 					id,
 					name,
 					displayName,
-					userType: userType ?? UserType.INTERNAL,
-					connections: {
-						chats_be: undefined,
-						xmpp: undefined,
-						websocket: undefined
-					},
-					filterHasFocus: draft.session.filterHasFocus
+					userType: userType ?? UserType.INTERNAL
 				};
 				UserDataRetriever.getDebouncedUser(id, true);
 			}),
@@ -41,42 +38,54 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			'SESSION/LOGIN_INFO'
 		);
 	},
-	setSessionId: (sessionId: string): void => {
+	setAttributes: (attrs: AccountSettingsAttrs): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.session.sessionId = sessionId;
+				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
+				draft.session.attributes = {
+					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
+					groupChatCreation:
+						attrs.carbonioWscGroupChatCreation === 'TRUE' &&
+						Number(attrs.carbonioWscMaxGroupMembers || 0) > 2,
+					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
+					messageDeleteTimeLimit: minutesToNumber(
+						(attrs.carbonioWscMessageDeleteTimeLimit as string) || '0m'
+					),
+					messageEditTimeLimit: minutesToNumber(
+						(attrs.carbonioWscMessageEditTimeLimit as string) || '0m'
+					),
+					maxRoomPictureSize: Number(attrs.carbonioWscMaxRoomPictureSize || 0),
+					attachmentUpload: attrs.carbonioWscAttachmentUpload === 'TRUE',
+					maxAttachmentSize: Number(attrs.carbonioWscMaxAttachmentSize || 0),
+					showMessageReads: attrs.carbonioWscShowMessageReads === 'TRUE',
+					showUsersPresence: attrs.carbonioWscShowUsersPresence === 'TRUE',
+					videoCallEnabled: attrs.carbonioWscVideoCallEnabled === 'TRUE',
+					recordingEnabled: attrs.carbonioWscRecordingEnabled === 'TRUE',
+					virtualBackgroundEnabled: attrs.carbonioWscVirtualBackgroundEnabled === 'TRUE'
+				} as AttributesList;
 			}),
 			false,
-			'SESSION/SESSION_ID'
+			'SESSION/SET_ATTRS'
 		);
 	},
-	setCapabilities: (capabilities: CapabilityList): void => {
+	setQueueId: (queueId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.session.capabilities = capabilities;
+				draft.session.queueId = queueId;
 			}),
 			false,
-			'SESSION/SET_CAPABILITIES'
+			'SESSION/QUEUE_ID'
 		);
 	},
-	setSelectedRoomOneToOneGroup: (roomId: string): void => {
+	setSelectedRoom: (roomId?: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session.selectedRoomOneToOneGroup !== roomId) {
-					draft.session.selectedRoomOneToOneGroup = roomId;
+				if (draft.session.selectedRoom !== roomId) {
+					draft.session.selectedRoom = roomId;
 				}
 			}),
 			false,
-			'SESSION/SET_SELECTED_ROOM_ONE_TO_ONE_GROUP'
-		);
-	},
-	setFilterHasFocus: (hasFocus: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.session.filterHasFocus = hasFocus;
-			}),
-			false,
-			'SESSION/SET_FILTER_FOCUS'
+			'SESSION/SET_SELECTED_ROOM'
 		);
 	},
 	setCustomLogo: (logo: string | false): void => {

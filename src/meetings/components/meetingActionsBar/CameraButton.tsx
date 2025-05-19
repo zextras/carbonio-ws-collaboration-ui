@@ -8,23 +8,18 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useState
 } from 'react';
 
-import {
-	CreateSnackbarFn,
-	DropdownItem,
-	Tooltip,
-	useSnackbar
-} from '@zextras/carbonio-design-system';
-import { filter, map } from 'lodash';
+import { DropdownItem, Tooltip } from '@zextras/carbonio-design-system';
+import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import useBrowserPermission from '../../../hooks/useMediaDevices';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
@@ -32,6 +27,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts/routerContext';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;
@@ -48,7 +44,6 @@ const CameraButton = ({
 
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
-	const understoodAction = t('action.understood', 'UNDERSTOOD');
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
@@ -58,71 +53,55 @@ const CameraButton = ({
 		'meeting.interactions.disabled',
 		'There are connection problems, please try again later.'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
+	const selectedVideoDeviceId = useStore(getSelectedVideoDeviceId);
+	const videoOutConn = useStore((store) => store.activeMeeting?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
+	const { permission, deviceList, noDevices } = useBrowserPermission('video');
+
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
-	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
-	const mediaPermissionSnackbar = useCallback(
-		() =>
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				severity: 'info',
-				label: giveMediaPermissionSnackbar,
-				actionLabel: understoodAction,
-				disableAutoHide: true
-			}),
-		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
-	);
 
 	useEffect(() => {
 		setButtonStatus(true);
 	}, [videoStatus]);
 
+	const onClickVideoItem = useCallback(
+		(videoItem: MediaDeviceInfo) => {
+			if (videoStatus) {
+				getVideoStream(videoItem.deviceId).then((stream) => {
+					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
+						setLocalStreams(STREAM_TYPE.VIDEO, stream);
+						setSelectedDeviceId(STREAM_TYPE.VIDEO, videoItem.deviceId);
+					});
+				});
+			} else {
+				setSelectedDeviceId(STREAM_TYPE.VIDEO, videoItem.deviceId);
+			}
+		},
+		[setLocalStreams, setSelectedDeviceId, videoOutConn, videoStatus]
+	);
+
 	const mediaVideoList: DropdownItem[] = useMemo(
 		() =>
-			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
+			map(deviceList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: videoItem.label ? videoItem.label : `device-${i}`,
-				onClick: (): void => {
-					if (videoStatus) {
-						getVideoStream(videoItem.deviceId).then((stream) => {
-							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
-								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
-								setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
-							});
-						});
-					} else {
-						setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
-					}
-				},
+				label: videoItem.label ? videoItem.label : unknownDeviceLabel,
+				onClick: () => onClickVideoItem(videoItem),
 				icon: selectedVideoDeviceId === videoItem.deviceId ? 'AcceptanceMeeting' : undefined,
 				disabled: selectedVideoDeviceId === videoItem.deviceId,
 				tooltipLabel:
 					selectedVideoDeviceId === videoItem.deviceId ? selectedDeviceTooltip : undefined,
 				value: videoItem.deviceId
 			})),
-		[
-			videoMediaList,
-			selectedVideoDeviceId,
-			selectedDeviceTooltip,
-			videoStatus,
-			meetingId,
-			videoOutConn,
-			setLocalStreams,
-			setSelectedDeviceId
-		]
+		[deviceList, unknownDeviceLabel, selectedVideoDeviceId, selectedDeviceTooltip, onClickVideoItem]
 	);
 
 	const toggleVideoStream = useCallback(
@@ -132,7 +111,6 @@ const CameraButton = ({
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
 					videoOutConn?.startVideo(selectedVideoDeviceId).catch(() => {
-						mediaPermissionSnackbar();
 						setButtonStatus(true);
 					});
 				} else {
@@ -140,7 +118,7 @@ const CameraButton = ({
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							setButtonStatus(true);
@@ -151,42 +129,22 @@ const CameraButton = ({
 				videoOutConn?.stopVideo();
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
 	);
 
-	const updateListOfDevices = useCallback(() => {
-		navigator.mediaDevices
-			.enumerateDevices()
-			.then((devices) => {
-				const videoInputs: [] | MediaDeviceInfo[] = filter(
-					devices,
-					(device) => device.kind === 'videoinput' && device
-				) as MediaDeviceInfo[];
-				setVideoMediaList(videoInputs);
-			})
-			.catch((e) => {
-				console.log(e);
-			});
-	}, []);
-
-	/**
-	 * This useEffect check when the user connects a new webcam device and update the list of resources
-	 * on Firefox to be able to works it needs to have a device already in use otherwise if user is muted
-	 * it will not show the new device
-	 */
-	useEffect(() => {
-		updateListOfDevices();
-		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
-
-		return (): void => {
-			navigator.mediaDevices.removeEventListener('devicechange', updateListOfDevices);
-		};
-	}, [updateListOfDevices]);
-
 	const tooltipLabel = useMemo(() => {
+		if (permission !== 'granted') return giveMediaPermissionSnackbar;
 		if (!websocketNetworkStatus) return disableButtonLabel;
 		return videoStatus ? disableCamLabel : enableCamLabel;
-	}, [websocketNetworkStatus, disableButtonLabel, videoStatus, disableCamLabel, enableCamLabel]);
+	}, [
+		permission,
+		giveMediaPermissionSnackbar,
+		websocketNetworkStatus,
+		disableButtonLabel,
+		videoStatus,
+		disableCamLabel,
+		enableCamLabel
+	]);
 
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
@@ -195,7 +153,7 @@ const CameraButton = ({
 				setShowItems={setIsVideoListOpen}
 				onClick={toggleVideoStream}
 				items={mediaVideoList}
-				disabled={!buttonStatus || !websocketNetworkStatus}
+				disabled={!buttonStatus || !websocketNetworkStatus || permission !== 'granted' || noDevices}
 				data-testid="cameraButton"
 				icon={videoStatus ? 'Video' : 'VideoOff'}
 				listRef={videoDropdownRef}

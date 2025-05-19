@@ -50,10 +50,9 @@ describe('clear history action', () => {
 		const spyOnClearRoomHistory = spyOnRoomsApi(RoomsApiToSpy.CLEAR_ROOM_HISTORY);
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(mockedRoom);
+			result.current.addRooms([mockedRoom]);
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user1Info);
-			result.current.setUserInfo(user2Info);
+			result.current.setUserInfo([user1Info, user2Info]);
 			result.current.newMessage(message);
 		});
 

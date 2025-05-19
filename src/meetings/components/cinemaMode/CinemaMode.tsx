@@ -4,21 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { ReactElement, useRef, useMemo, useCallback, useEffect, useContext } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
+import { concat } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import TilesBar from './TilesBar';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
@@ -53,9 +53,9 @@ const SidebarButton = styled(Button)`
 `;
 
 const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
-	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
+	const carouselIsVisible = useStore(getMeetingCarouselVisibility);
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
@@ -71,7 +71,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const cinemaModeRef = useRef<null | HTMLDivElement>(null);
 
-	const { centralTile, carouselTiles } = useTilesOrder(meetingId);
+	const { centralTile, carouselTiles } = useTilesOrder(meetingId!);
 	const cinemaModeDimensions = useContainerDimensions(cinemaModeRef);
 
 	const centralTileWidth = useMemo(() => {
@@ -85,20 +85,21 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	}, [cinemaModeDimensions]);
 
 	const toggleCarousel = useCallback(() => {
-		setIsCarouselVisible(meetingId, !carouselIsVisible);
-	}, [carouselIsVisible, meetingId, setIsCarouselVisible]);
+		setIsCarouselVisible(!carouselIsVisible);
+	}, [carouselIsVisible, setIsCarouselVisible]);
 
 	useEffect(() => {
 		if (!carouselIsVisible) {
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
-			setUpdateSubscription(meetingId, [subscription]);
+			setUpdateSubscription(meetingId!, [subscription]);
 		}
 	}, [carouselIsVisible, centralTile, meetingId, setUpdateSubscription]);
 
 	return (
 		<Container orientation="horizontal">
 			<CustomContainer ref={cinemaModeRef} padding={{ vertical: '3.25rem' }}>
-				<WhoIsSpeaking centralTile={centralTile} />
+				{!carouselIsVisible && <WhoIsSpeaking visibleTiles={[centralTile]} />}
+				<WhoIsSpeaking visibleTiles={concat(carouselTiles, centralTile)} />
 				<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 					<Tile
 						userId={centralTile?.userId}

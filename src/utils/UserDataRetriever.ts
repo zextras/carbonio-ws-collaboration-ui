@@ -50,7 +50,7 @@ class UserDataRetriever {
 			});
 	}
 
-	private debouncedUserGetter = debounce(this.getRequestedUsers, 600);
+	private readonly debouncedUserGetter = debounce(this.getRequestedUsers, 600);
 
 	// Create groups of 10 users to request
 	public getDebouncedUser(userId: string | undefined, immediately: boolean = false): void {
@@ -73,12 +73,16 @@ class UserDataRetriever {
 		}
 	}
 
-	public async getAsyncUsername(userId: string): Promise<string> {
-		if (useStore.getState().users[userId]) {
-			return getUserName(useStore.getState(), userId);
-		}
-		await UsersApi.getUsers([userId]);
-		return getUserName(useStore.getState(), userId);
+	public getAsyncUsername(userId: string): Promise<string> {
+		return new Promise((resolve) => {
+			if (useStore.getState().users[userId]) {
+				resolve(getUserName(useStore.getState(), userId));
+			} else {
+				UsersApi.getUser(userId)
+					.then((response) => resolve(response.name || response.email || ''))
+					.catch(() => resolve(''));
+			}
+		});
 	}
 }
 

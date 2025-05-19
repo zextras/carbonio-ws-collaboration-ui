@@ -4,25 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import * as shell from '@zextras/carbonio-shell-ui';
+
 import displayMessageBrowserNotification from './displayMessageBrowserNotification';
 import { mockNotify } from '../../../../__mocks__/@zextras/carbonio-shell-ui';
 import useStore from '../../../store/Store';
-import {
-	createMockMeeting,
-	createMockRoom,
-	createMockTextMessage,
-	createMockUser
-} from '../../../tests/createMock';
+import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
 
 const room = createMockRoom();
-const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
+const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(user);
-	store.addRoom(room);
+	store.setUserInfo([user]);
+	store.addRooms([room]);
 });
 describe('Test display message browser notification', () => {
 	test('Send desktop notification on new message', async () => {
@@ -40,7 +37,7 @@ describe('Test display message browser notification', () => {
 
 	test('Avoid sending desktop notification on conversation with focused input', async () => {
 		const store = useStore.getState();
-		store.setSelectedRoomOneToOneGroup(room.id);
+		store.setSelectedRoom(room.id);
 		store.setInputHasFocus(room.id, true);
 
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
@@ -51,7 +48,7 @@ describe('Test display message browser notification', () => {
 
 	test('Avoid sending desktop notification on muted conversation', async () => {
 		const store = useStore.getState();
-		store.setRoomMuted(room.id);
+		store.setRoomMuteStatus(room.id, true);
 
 		const newMessage = createMockTextMessage({ roomId: room.id });
 		await displayMessageBrowserNotification(newMessage);
@@ -60,12 +57,7 @@ describe('Test display message browser notification', () => {
 	});
 
 	test('Avoid sending desktop notification on meeting tab', async () => {
-		const room = createMockRoom();
-		const store = useStore.getState();
-		const meeting = createMockMeeting({ roomId: room.id });
-		store.addMeeting(meeting);
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-
+		jest.mocked(shell).IS_FOCUS_MODE = true;
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
 		await displayMessageBrowserNotification(newMessage);
 

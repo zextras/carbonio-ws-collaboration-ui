@@ -9,18 +9,16 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
-	useEffect,
-	useMemo,
-	useState
+	useContext,
+	useMemo
 } from 'react';
 
-import { CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
-import { filter, map } from 'lodash';
+import { Tooltip } from '@zextras/carbonio-design-system';
+import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import useMediaDevices from '../../../hooks/useMediaDevices';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -28,6 +26,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts/routerContext';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;
@@ -44,7 +43,6 @@ const MicrophoneButton = ({
 
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
-	const understoodAction = t('action.understood', 'UNDERSTOOD');
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
@@ -53,59 +51,42 @@ const MicrophoneButton = ({
 		'meeting.interactions.disabled',
 		'There are connection problems, please try again later.'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const selectedAudioDeviceId = useStore(getSelectedAudioDeviceId);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
-	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+	const { permission, deviceList, noDevices } = useMediaDevices('audio');
 
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
-	const mediaPermissionSnackbar = useCallback(
-		() =>
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				severity: 'info',
-				label: giveMediaPermissionSnackbar,
-				actionLabel: understoodAction,
-				disableAutoHide: true
-			}),
-		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
+	const onClickAudioItem = useCallback(
+		(audioItem: MediaDeviceInfo) => {
+			if (audioStatus) {
+				getAudioStream(true, true, audioItem.deviceId).then((stream) => {
+					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+					setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
+				});
+			} else {
+				setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
+			}
+		},
+		[audioStatus, bidirectionalAudioConn, setSelectedDeviceId]
 	);
 
 	const mediaAudioList = useMemo(
 		() =>
-			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
+			map(deviceList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: audioItem.label ? audioItem.label : `device-${i}`,
-				onClick: (): void => {
-					if (audioStatus) {
-						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
-							bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-							setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
-						});
-					} else {
-						setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
-					}
-				},
+				label: audioItem.label ? audioItem.label : unknownDeviceLabel,
+				onClick: (): void => onClickAudioItem(audioItem),
 				selected: audioItem.deviceId === selectedAudioDeviceId,
 				value: audioItem.deviceId
 			})),
-		[
-			audioMediaList,
-			selectedAudioDeviceId,
-			audioStatus,
-			bidirectionalAudioConn,
-			setSelectedDeviceId,
-			meetingId
-		]
+		[deviceList, unknownDeviceLabel, selectedAudioDeviceId, onClickAudioItem]
 	);
 
 	const toggleAudioStream = useCallback(
@@ -115,49 +96,19 @@ const MicrophoneButton = ({
 				getAudioStream(true, true, selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
-						mediaPermissionSnackbar();
 						console.log(e);
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
-		[audioStatus, bidirectionalAudioConn, mediaPermissionSnackbar, meetingId, selectedAudioDeviceId]
+		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
 	);
-
-	const updateListOfDevices = useCallback(() => {
-		navigator.mediaDevices
-			.enumerateDevices()
-			.then((devices) => {
-				const audioInputs: [] | MediaDeviceInfo[] = filter(
-					devices,
-					(device) => device.kind === 'audioinput' && device
-				) as MediaDeviceInfo[];
-				setAudioMediaList(audioInputs);
-			})
-			.catch((e) => {
-				console.log(e);
-			});
-	}, []);
-
-	/**
-	 * This useEffect check when the user connects a new mic device and update the list of resources
-	 * on Firefox to be able to works it needs to have a device already in use otherwise if user is muted
-	 * it will not show the new device
-	 */
-	useEffect(() => {
-		updateListOfDevices();
-		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
-
-		return (): void => {
-			navigator.mediaDevices.removeEventListener('devicechange', updateListOfDevices);
-		};
-	}, [updateListOfDevices]);
 
 	const tooltipLabel = useMemo(() => {
 		if (!websocketNetworkStatus) return disableButtonLabel;
@@ -165,13 +116,16 @@ const MicrophoneButton = ({
 	}, [websocketNetworkStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
 
 	return (
-		<Tooltip placement="top" label={tooltipLabel}>
+		<Tooltip
+			placement="top"
+			label={permission !== 'granted' ? giveMediaPermissionSnackbar : tooltipLabel}
+		>
 			<MultiActionButton
 				showItems={isAudioListOpen}
 				setShowItems={setIsAudioListOpen}
 				onClick={toggleAudioStream}
 				items={mediaAudioList}
-				disabled={!websocketNetworkStatus}
+				disabled={!websocketNetworkStatus || permission !== 'granted' || noDevices}
 				data-testid="microphone-button"
 				icon={audioStatus ? 'Mic' : 'MicOff'}
 				listRef={audioDropdownRef}

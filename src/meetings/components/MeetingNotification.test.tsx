@@ -24,9 +24,9 @@ const mockRemoveNotification = jest.fn();
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setUserInfo(user);
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.setUserInfo([user]);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 });
 
 describe('MeetingNotification', () => {

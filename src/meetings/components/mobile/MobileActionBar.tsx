@@ -8,12 +8,13 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 
 import { Button, Container } from '@zextras/carbonio-design-system';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { getAudioStream } from '../../../utils/UserMediaManager';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
 type MobileActionBarProps = {
@@ -27,9 +28,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {

@@ -3,12 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
-import { includes, isEmpty } from 'lodash';
+import { getNotificationManager, IS_FOCUS_MODE } from '@zextras/carbonio-shell-ui';
+import { includes } from 'lodash';
 
 import { CHATS_ROUTE } from '../../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';
@@ -17,20 +18,19 @@ export const displayChatNotification = (roomId: string): boolean => {
 	const store = useStore.getState();
 	const room = store.rooms[roomId];
 	const roomIsMuted = room?.userSettings?.muted;
-	const isMeetingTab = !isEmpty(store.activeMeeting);
-	const isOneToOneGroupMessage = includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room?.type);
+	const isVirtualRoom = includes([RoomType.TEMPORARY], room?.type);
 	const inputIsFocused =
-		store.session.selectedRoomOneToOneGroup === roomId &&
-		store.activeConversations[roomId].inputHasFocus;
+		store.session.selectedRoom === roomId && store.activeConversations[roomId].inputHasFocus;
 	const chatsNotificationsSettingsEnabled = getLocalStorageItem(
 		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	)?.DesktopNotifications;
 
 	return (
+		!IS_FOCUS_MODE &&
 		room &&
 		!roomIsMuted &&
 		!inputIsFocused &&
-		((!isMeetingTab && isOneToOneGroupMessage) || (isMeetingTab && !isOneToOneGroupMessage)) &&
+		!isVirtualRoom &&
 		chatsNotificationsSettingsEnabled
 	);
 };
@@ -55,9 +55,11 @@ const displayMessageBrowserNotification = async (message: TextMessage): Promise<
 			message: textMessage,
 			onClick: (): void => {
 				window.focus();
-				replaceHistory({
-					path: `/${message.roomId}`,
-					route: CHATS_ROUTE
+				sendCustomEvent({
+					name: EventName.ROUTE_REDIRECT,
+					data: {
+						path: `/${CHATS_ROUTE}/${message.roomId}`
+					}
 				});
 			}
 		});

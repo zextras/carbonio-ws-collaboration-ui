@@ -10,7 +10,6 @@ import './global';
 // Network mocks
 import './AutoCompleteGal';
 import './SearchUsersByFeature';
-import './SelfieSegmentationManager';
 
 // Hooks mocks
 import './useRouting';

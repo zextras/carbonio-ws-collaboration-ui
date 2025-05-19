@@ -10,10 +10,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
-import { getCapability, getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
+import { getAttribute, getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserOnline } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 
 const CustomAvatar = styled(Avatar)`
 	min-width: 1.5rem;
@@ -57,9 +56,7 @@ const UserPopoverRow = ({ userId, displayPresence }: UserPopoverRowProps): React
 	const username = useStore((store) => getUserName(store, userId));
 	const isLoggedUser = useStore((store) => getIsLoggedUser(store, userId));
 	const memberOnline: boolean = useStore((store) => getUserOnline(store, userId));
-	const canSeeUsersPresence = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
-	);
+	const showUsersPresence = useStore((store) => getAttribute(store, 'showUsersPresence'));
 
 	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
 
@@ -81,7 +78,7 @@ const UserPopoverRow = ({ userId, displayPresence }: UserPopoverRowProps): React
 					icon={avatarIcon}
 				/>
 			)}
-			{canSeeUsersPresence && displayPresence && <Presence $online={memberOnline} />}
+			{showUsersPresence && displayPresence && <Presence $online={memberOnline} />}
 			<Text size="small">{isLoggedUser ? youLabel : username}</Text>
 		</Container>
 	);

@@ -35,15 +35,15 @@ const event: MeetingWaitingParticipantJoinedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'myUserId' }));
 });
 describe('MeetingWaitingParticipantJoinedEventHandler tests', () => {
 	test('When a new user joins the waiting room and he is added to waiting list and a custom event is sent', () => {
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingWaitingParticipantJoinedEventHandler(event);
-		expect(useStore.getState().meetings[room.id].waitingList).toContain(event.userId);
+		expect(useStore.getState().meetings[meeting.id].waitingList).toContain(event.userId);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.NEW_WAITING_USER, { detail: event })
 		);

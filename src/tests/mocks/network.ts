@@ -9,6 +9,7 @@
 import attachmentsApi from '../../network/apis/AttachmentsApi';
 import meetingsApi from '../../network/apis/MeetingsApi';
 import roomsApi from '../../network/apis/RoomsApi';
+import usersApi from '../../network/apis/UsersApi';
 
 export enum RoomsApiToSpy {
 	GET_ROOM = 'getRoom',
@@ -19,6 +20,7 @@ export enum RoomsApiToSpy {
 	DELETE_ROOM_MEMBER = 'deleteRoomMember',
 	PROMOTE_ROOM_MEMBER = 'promoteRoomMember',
 	DEMOTE_ROOM_MEMBER = 'demotesRoomMember',
+	UPDATE_ROOM_OWNERS = 'updateRoomOwners',
 	UPDATE_ROOM_PICTURE = 'updateRoomPicture',
 	DELETE_ROOM_PICTURE = 'deleteRoomPicture',
 	MUTE_ROOM_NOTIFICATION = 'muteRoomNotification',
@@ -50,7 +52,13 @@ export enum MeetingsApiToSpy {
 	STOP_RECORDING = 'stopRecording',
 	ACCEPT_WAITING_USER = 'acceptWaitingUser',
 	AUTH_LOGIN = 'authLogin',
-	CREATE_GUEST_ACCOUNT = 'createGuestAccount'
+	CREATE_GUEST_ACCOUNT = 'createGuestAccount',
+	RAISE_HAND = 'raiseHand'
+}
+
+export enum UsersApiToSpy {
+	GET_USERS = 'getUsers',
+	GET_USER = 'getUser'
 }
 
 export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
@@ -64,3 +72,7 @@ export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => jest.SpyInstance = (
 export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance = (
 	apiToSpy: MeetingsApiToSpy
 ) => jest.spyOn(meetingsApi, apiToSpy);
+
+export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
+	apiToSpy: UsersApiToSpy
+) => jest.spyOn(usersApi, apiToSpy);

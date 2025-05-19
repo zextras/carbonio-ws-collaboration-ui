@@ -15,7 +15,7 @@ import {
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../../../types/store/MessageTypes';
+} from '../../../types/store/ChatsRegistryTypes';
 
 const createXMPPTextMessage = (textMessage: TextMessage): Element => {
 	const parser = new DOMParser();
@@ -76,8 +76,8 @@ describe('XMPP newMessageHandler', () => {
 		// Check if information are stored correctly
 		const store = useStore.getState();
 		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const dateMessage = store.messages[message.roomId][0] as DateMessage;
-		const textMessage = store.messages[message.roomId][1] as TextMessage;
+		const dateMessage = store.chatsRegistry[message.roomId].messages[0] as DateMessage;
+		const textMessage = store.chatsRegistry[message.roomId].messages[1] as TextMessage;
 		expect(dateMessage).not.toBeNull();
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(message.id);
@@ -96,7 +96,7 @@ describe('XMPP newMessageHandler', () => {
 		// Check if information are stored correctly
 		const store = useStore.getState();
 		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const textMessage = store.messages[info.roomId][1] as TextMessage;
+		const textMessage = store.chatsRegistry[info.roomId].messages[1] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.id);
 		expect(textMessage.stanzaId).toBe(info.stanzaId);
@@ -118,7 +118,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		const roomFastening = store.fastenings[deletionFastening.roomId];
+		const roomFastening = store.chatsRegistry[deletionFastening.roomId].fastenings;
 		expect(roomFastening).toBeDefined();
 		expect(roomFastening[deletionFastening.originalStanzaId]).toBeDefined();
 		expect(size(roomFastening[deletionFastening.originalStanzaId])).toBe(1);
@@ -137,7 +137,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		const roomFastening = store.fastenings[editFastening.roomId];
+		const roomFastening = store.chatsRegistry[editFastening.roomId].fastenings;
 		expect(roomFastening).toBeDefined();
 		expect(roomFastening[editFastening.originalStanzaId]).toBeDefined();
 		expect(size(roomFastening[editFastening.originalStanzaId])).toBe(1);

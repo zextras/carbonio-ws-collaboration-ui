@@ -10,8 +10,13 @@ import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
-import { AttachmentMessageType } from '../types/store/MessageTypes';
-import { getAttachmentInfo, getAttachmentType, getAttachmentURL } from '../utils/attachmentUtils';
+import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import {
+	getAttachmentExtension,
+	getAttachmentSize,
+	getAttachmentType,
+	getAttachmentURL
+} from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -22,7 +27,9 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	const { createPreview } = useContext(PreviewsManagerContext);
 
 	const attachmentType = getAttachmentType(attachment.mimeType);
-	const { extension, size } = getAttachmentInfo(attachment.mimeType, attachment.size);
+
+	const extension = getAttachmentExtension(attachment.mimeType);
+	const size = getAttachmentSize(attachment.size);
 
 	const attachmentURL = useMemo(
 		() => getAttachmentURL(attachment.id, attachment.mimeType),

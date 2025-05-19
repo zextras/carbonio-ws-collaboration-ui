@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import useEventListener, { EventName, NewWaitingUserEvent } from '../../hooks/useEventListener';
 import {
-	getMeetingByMeetingId,
+	getMeeting,
 	getWaitingListSizeForMyVirtualMeeting
 } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
@@ -33,7 +33,7 @@ const WaitingListSnackbar = (): ReactElement | null => {
 	const [showWaitingUserSnackbar, setShowWaitingUserSnackbar] = useState(false);
 	const [meetingId, setMeetingId] = useState<string>('');
 
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const meeting = useStore((store) => getMeeting(store, meetingId));
 
 	const snackbarLabel = t(
 		'meeting.snackbar.waitingInfo',

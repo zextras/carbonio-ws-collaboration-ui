@@ -40,9 +40,9 @@ const iconDown = 'icon: ChevronDown';
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1.id, 'user1');
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 });
 
 describe('RecordingAccordion tests', () => {

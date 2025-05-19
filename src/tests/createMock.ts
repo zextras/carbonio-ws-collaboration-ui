@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+
 import {
 	MeetingBe,
 	MeetingParticipantBe,
@@ -12,18 +14,18 @@ import {
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
-import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	DateMessage,
 	FasteningAction,
+	Marker,
+	MarkerStatus,
 	MessageFastening,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../types/store/MessageTypes';
+} from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
-import { CapabilityList } from '../types/store/SessionTypes';
 import { User, UserType } from '../types/store/UserTypes';
 
 const timeStampString = '2022-08-25T17:24:28.961+02:00';
@@ -104,21 +106,26 @@ export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 	from: 'from',
 	messageId: 'messageId',
 	markerDate: 1662541394393,
-	type: MarkerType.DISPLAYED,
+	type: 'displayed',
 	...fields
 });
 
-export const createMockCapabilityList = (fields?: Partial<CapabilityList>): CapabilityList => ({
-	canSeeMessageReads: true,
-	canSeeUsersPresence: true,
-	canVideoCall: true,
-	canVideoCallRecord: true,
-	canUseVirtualBackground: true,
-	editMessageTimeLimitInMinutes: 10,
-	deleteMessageTimeLimitInMinutes: 10,
-	maxGroupMembers: 128,
-	maxRoomImageSizeInKb: 512,
-	maxUserImageSizeInKb: 512,
+export const createMockAttributesList = (
+	fields?: Partial<AccountSettingsAttrs>
+): AccountSettingsAttrs => ({
+	carbonioWscAttachmentUpload: 'TRUE',
+	carbonioWscGroupChatCreation: 'TRUE',
+	carbonioWscMaxAttachmentSize: '2',
+	carbonioWscMaxGroupMembers: '32',
+	carbonioWscMaxRoomPictureSize: '2',
+	carbonioWscMessageDeleteTimeLimit: '5m',
+	carbonioWscMessageEditTimeLimit: '5m',
+	carbonioWscPrivateChatCreation: 'TRUE',
+	carbonioWscRecordingEnabled: 'TRUE',
+	carbonioWscShowMessageReads: 'TRUE',
+	carbonioWscShowUsersPresence: 'TRUE',
+	carbonioWscVideoCallEnabled: 'TRUE',
+	carbonioWscVirtualBackgroundEnabled: 'TRUE',
 	...fields
 });
 

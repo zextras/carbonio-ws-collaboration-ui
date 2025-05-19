@@ -7,7 +7,6 @@ import React from 'react';
 
 import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import CameraButton from './CameraButton';
 import useStore from '../../../store/Store';
@@ -17,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -52,14 +51,13 @@ const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(
+	const { user } = routerContextSetup(
 		<CameraButton
 			videoDropdownRef={refList}
 			isVideoListOpen={false}
 			setIsVideoListOpen={mockSetIsVideoListOpen}
-		/>
+		/>,
+		{ meetingId: meeting.id }
 	);
 	return { user };
 };
@@ -67,12 +65,11 @@ const defaultSetup = (): { user: UserEvent } => {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setWebsocketStatus(true);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 });
 describe('Camera button - permission denied', () => {
 	test('User clicks on the button', async () => {

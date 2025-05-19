@@ -7,33 +7,38 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import MeetingSkeletonMobile from './MeetingSkeletonMobile';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
+import { PiPProvider } from '../../components/pictureInPicture/PictureInPictureProvider';
 
 const room = createMockRoom({ meetingId: 'meetingId' });
 const meeting = createMockMeeting({ roomId: room.id });
 
-beforeEach(() => {
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: 'meetingId' });
-});
-
 describe('MeetingSkeletonMobile test', () => {
 	test('Default view is tiles view', () => {
-		setup(<MeetingSkeletonMobile />);
+		routerContextSetup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>,
+			{ meetingId: room.meetingId }
+		);
 		const view = screen.getByTestId('mobile_skeleton_view');
 		expect(view).toBeInTheDocument();
 	});
 
 	test('Conversation view', async () => {
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		store.addRooms([room]);
+		store.addMeetings([meeting]);
+		const { user } = routerContextSetup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>,
+			{ meetingId: room.meetingId }
+		);
 		const conversationButton = screen.getByTestId('icon: MessageCircle');
 		expect(conversationButton).toBeInTheDocument();
 
@@ -44,9 +49,14 @@ describe('MeetingSkeletonMobile test', () => {
 
 	test('Participants view', async () => {
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		store.addRooms([room]);
+		store.addMeetings([meeting]);
+		const { user } = routerContextSetup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>,
+			{ meetingId: room.meetingId }
+		);
 		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
 

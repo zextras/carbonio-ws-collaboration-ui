@@ -53,16 +53,14 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 		type: RoomType.GROUP,
 		members: [member1, member2, member3]
 	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant, user3Participant]
 	});
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	const { user } = setup(<MeetingParticipantsAccordion meetingId={meeting.id} />);
 	return { user, store };
 };
@@ -81,17 +79,16 @@ const storeSetupParticipantModerator = (): {
 		type: RoomType.GROUP,
 		members: [member1, member2]
 	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant]
 	});
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 
 	const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
 	return { meeting, user, store };

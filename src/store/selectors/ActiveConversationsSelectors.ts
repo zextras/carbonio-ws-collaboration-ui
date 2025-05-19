@@ -8,20 +8,8 @@
 import { filter, find, includes, last, map } from 'lodash';
 
 import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import UserDataRetriever from "../../utils/UserDataRetriever";
-
-export const getRoomIsWritingList = (store: RootStore, id: string): string[] | undefined =>
-	store.activeConversations[id]?.isWritingList
-		? map(
-				store.activeConversations[id]?.isWritingList,
-				(userId) => {
-					UserDataRetriever.getAsyncUsername(userId);
-					return store.users[userId]?.name || store.users[userId]?.email || '';
-				}
-		  )
-		: store.activeConversations[id]?.isWritingList;
 
 export const getReferenceMessage = (
 	store: RootStore,
@@ -87,10 +75,18 @@ export const maxForwardLimitNotReached = (store: RootStore, roomId: string): boo
 	return true;
 };
 
-export const getIsNewReaction = (store: RootStore, roomId: string, stanzaId: string, reaction: string): boolean => {
+export const getIsNewReaction = (
+	store: RootStore,
+	roomId: string,
+	stanzaId: string,
+	reaction: string
+): boolean => {
 	const activeConversations = store.activeConversations[roomId];
 	if (activeConversations?.newReactions) {
-		const newReactions = filter(activeConversations.newReactions, (reaction) => reaction.stanzaId === stanzaId);
+		const newReactions = filter(
+			activeConversations.newReactions,
+			(reaction) => reaction.stanzaId === stanzaId
+		);
 		return includes(map(newReactions, 'reaction'), reaction);
 	}
 	return false;

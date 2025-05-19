@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { TextMessage } from '../../store/MessageTypes';
+import { TextMessage } from '../../store/ChatsRegistryTypes';
 import { AddMemberFields, RoomCreationFields, RoomEditableFields } from '../models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
@@ -24,6 +24,7 @@ import {
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
 	UnmuteRoomResponse,
+	UpdateRoomOwnersResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../responses/roomsResponses';
@@ -52,6 +53,7 @@ interface IRoomsApi {
 	deleteRoomMember(roomId: string, userId: string): Promise<DeleteRoomMemberResponse>;
 	promoteRoomMember(roomId: string, userId: string): Promise<PromoteRoomMemberResponse>;
 	demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse>;
+	updateRoomOwners(roomId: string, userIds: string[]): Promise<UpdateRoomOwnersResponse>;
 	// Room attachments
 	getRoomAttachments(
 		roomId: string,

@@ -12,7 +12,7 @@ import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
@@ -22,12 +22,12 @@ import {
 import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import {
+	MarkerStatus,
 	ConfigurationMessage,
 	MessageType,
 	OperationType
-} from '../../../../types/store/MessageTypes';
+} from '../../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
@@ -36,25 +36,19 @@ const iconDoneAll = 'icon: DoneAll';
 const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const user1Be: User = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User1'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4Id',
 	email: 'user4@domain.com',
-	name: 'User4',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 4"
+	name: 'User4'
 });
 
 const mockedGroup: RoomBe = createMockRoom({
@@ -160,19 +154,16 @@ const mockedAttachmentMessage = createMockTextMessage({
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setUserInfo(user1Be);
-	store.setUserInfo(user2Be);
-	store.setUserInfo(user4Be);
-	store.addRoom(mockedGroup);
-	store.addRoom(mockedOneToOne);
-	store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+	store.setUserInfo([user1Be, user2Be, user4Be]);
+	store.addRooms([mockedGroup, mockedOneToOne]);
+	store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'TRUE' }));
 });
 
 describe('Expanded sidebar list item', () => {
 	describe('Group List Item', () => {
 		test('User cannot see message reads - I sent a message but it is in pending state', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.setPlaceholderMessage({
 				roomId: mockedTextMessageUnread.roomId,
 				id: mockedTextMessageUnread.id,
@@ -187,7 +178,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageUnread);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
@@ -197,7 +188,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message and someone read it', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageReadBySomeone);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
@@ -207,7 +198,6 @@ describe('Expanded sidebar list item', () => {
 
 		test('I sent a message but it is in pending state', async () => {
 			const store: RootStore = useStore.getState();
-			store.addRoom(mockedGroup);
 			store.setPlaceholderMessage({
 				roomId: mockedTextMessageUnread.roomId,
 				id: mockedTextMessageUnread.id,
@@ -262,7 +252,7 @@ describe('Expanded sidebar list item', () => {
 		test('Check if there is the draft message', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageRead);
-			store.setDraftMessage(mockedGroup.id, false, 'hi everyone!');
+			store.setDraftMessage(mockedGroup.id, 'hi everyone!');
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			const IconWithDraft = screen.getByTestId('icon: Edit2');
 			expect(IconWithDraft).toBeVisible();
@@ -308,7 +298,7 @@ describe('Expanded sidebar list item', () => {
 				const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
 				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
-			expect(screen.getByText(`${user4Be.name} is typing...`));
+			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
@@ -340,7 +330,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMeIntoOneToOne.text}`);
@@ -359,7 +349,7 @@ describe('Expanded sidebar list item', () => {
 		test('Check if there is the draft message', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageSentByOther);
-			store.setDraftMessage(mockedOneToOne.id, false, 'hi everyone!');
+			store.setDraftMessage(mockedOneToOne.id, 'hi everyone!');
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			const IconWithDraft = screen.getByTestId('icon: Edit2');
 			expect(IconWithDraft).toBeVisible();
@@ -384,7 +374,7 @@ describe('Expanded sidebar list item', () => {
 				const composingMessage = composingStanza(mockedOneToOne.id, user2Be.id);
 				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
-			expect(screen.getByText(`${user2Be.name} is typing...`));
+			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedOneToOne.id, user2Be.id);

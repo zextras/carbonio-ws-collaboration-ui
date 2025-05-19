@@ -57,7 +57,8 @@ export const meetingEvents = [
 	WsEventType.MEETING_USER_REJECTED,
 	WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED,
 	WsEventType.MEETING_RECORDING_STARTED,
-	WsEventType.MEETING_RECORDING_STOPPED
+	WsEventType.MEETING_RECORDING_STOPPED,
+	WsEventType.MEETING_PARTICIPANT_HAND_RAISED
 ];
 
 describe('eventHandlersUtilities tests', () => {
@@ -94,11 +95,9 @@ describe('eventHandlersUtilities tests', () => {
 
 	beforeEach(() => {
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.addMeeting(meeting);
-		store.addRoom(activeRoom);
-		store.addMeeting(activeMeeting);
-		store.meetingConnection(activeMeeting.id, false, undefined, false, undefined);
+		store.addRooms([room, activeRoom]);
+		store.addMeetings([meeting, activeMeeting]);
+		store.meetingConnection(activeMeeting.id);
 	});
 	describe('isMeetingActive tests', () => {
 		test('isMeetingActive returns false if the user never connected to it', () => {
@@ -111,7 +110,7 @@ describe('eventHandlersUtilities tests', () => {
 
 		test('isMeetingActive returns false if the connected and disconnected from it', () => {
 			const store = useStore.getState();
-			store.meetingConnection(meeting.id, false, undefined, false, undefined);
+			store.meetingConnection(meeting.id);
 			store.meetingDisconnection(meeting.id);
 			expect(isMeetingActive('nonExistentMeeting')).toBe(false);
 		});

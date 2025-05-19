@@ -17,18 +17,33 @@ import {
 	size
 } from 'lodash';
 
+import useTiles from './useTiles';
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
-import { getTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
-	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
-	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
-	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
+	const pinnedTile: TileData | undefined = useStore(getPinnedTile);
+	const isTalkingList = useStore(getTalkingList);
+
+	const tilesData = useTiles(meetingId);
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
+
+	// Add/remove tiles when tilesData changes
+	useEffect(() => {
+		if (size(tilesData) > size(tiles)) {
+			setTiles((tiles) => {
+				const newTiles = differenceWith(tilesData, tiles, isEqual);
+				return [...tiles, ...newTiles];
+			});
+		}
+
+		if (size(tilesData) < size(tiles)) {
+			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
+		}
+	}, [tilesData, tiles]);
 
 	// Swap new pinned tile with the first tile
 	useEffect(() => {
@@ -48,23 +63,9 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		}
 	}, [pinnedTile]);
 
-	// Add/remove tiles when tilesData changes
-	useEffect(() => {
-		if (size(tilesData) > size(tiles)) {
-			setTiles((tiles) => {
-				const newTiles = differenceWith(tilesData, tiles, isEqual);
-				return [...tiles, ...newTiles];
-			});
-		}
-
-		if (size(tilesData) < size(tiles)) {
-			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
-		}
-	}, [tilesData, tiles]);
-
 	const checkIfIsStillTalking = useCallback(
 		(prevFirstIsTalking: string) => {
-			const isTalkingUsers = useStore.getState().activeMeeting[meetingId].talkingUsers;
+			const isTalkingUsers = useStore.getState().activeMeeting?.talkingUsers || [];
 			if (
 				first(isTalkingUsers) === prevFirstIsTalking &&
 				(!pinnedTile ||
@@ -74,7 +75,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 				setTiles((tiles) => orderSpeakingTiles(tiles, prevFirstIsTalking, !!pinnedTile));
 			}
 		},
-		[meetingId, pinnedTile]
+		[pinnedTile]
 	);
 
 	// swap tiles handler based on who is talking

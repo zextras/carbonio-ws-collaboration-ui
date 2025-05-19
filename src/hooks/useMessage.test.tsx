@@ -13,14 +13,19 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../tests/createMock';
-import { FasteningAction, TextMessage } from '../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../types/store/ChatsRegistryTypes';
+
+const room = createMockRoom();
+const message = createMockTextMessage();
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+});
 
 describe('Test useMessage custom hook', () => {
 	test('Message without modification', () => {
-		const room = createMockRoom();
-		const message = createMockTextMessage();
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 
 		const { result } = renderHook(() => useMessage(message.roomId, message.id));
@@ -29,10 +34,8 @@ describe('Test useMessage custom hook', () => {
 	});
 
 	test('Deletion of a message ', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage();
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 
 		const { result } = renderHook(() => useMessage(message.roomId, message.id));
@@ -50,10 +53,8 @@ describe('Test useMessage custom hook', () => {
 	});
 
 	test('Edit of a message ', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage();
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 
 		const { result } = renderHook(() => useMessage(message.roomId, message.id));

@@ -18,8 +18,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { MessageType } from '../../../../types/store/MessageTypes';
+import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
@@ -43,11 +42,14 @@ const mockedMessage = createMockTextMessage({
 	read: MarkerStatus.UNREAD
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRooms([mockedRoom]);
+	store.newMessage(mockedMessage);
+});
+
 describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
 		const { user } = setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedMessage.id}`);
 		expect(messageBubble).toBeVisible();
@@ -57,15 +59,12 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.REPLY
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
 		expect(referenceMessage).toBeInTheDocument();
@@ -74,15 +73,12 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Close reference message', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.REPLY
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
 		expect(referenceMessage).toBeInTheDocument();

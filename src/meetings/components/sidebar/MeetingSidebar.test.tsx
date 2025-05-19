@@ -7,19 +7,18 @@
 import React from 'react';
 
 import { act, screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import MeetingSidebar from './MeetingSidebar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
@@ -96,18 +95,16 @@ const scheduledMeeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
-	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
-	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
-	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
+	store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'TRUE' }));
+	store.addRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
+	store.addMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
+	store.meetingConnection(oneToOneMeeting.id);
 	store.setWaitingList(scheduledMeetingMod.id, [user1.id]);
 });
 
 describe('Meeting sidebar', () => {
 	test('OneToOne meeting has Recording and Chat accordions ', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		setup(<MeetingSidebar />);
+		routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
@@ -119,9 +116,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Group meeting has Recording, Participant and Chat accordions ', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
-		setup(<MeetingSidebar />);
+		routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -133,9 +128,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Scheduled meeting moderator has Recording, WaitingList, Participant and Chat accordions ', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: scheduledMeetingMod.id });
-		setup(<MeetingSidebar />);
+		routerContextSetup(<MeetingSidebar />, { meetingId: scheduledMeetingMod.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting list/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -147,9 +140,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Scheduled meeting member has Participant and Chat accordions ', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: scheduledMeeting.id });
-		setup(<MeetingSidebar />);
+		routerContextSetup(<MeetingSidebar />, { meetingId: scheduledMeeting.id });
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -161,18 +152,16 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Recording accordion is not visible with recording capability set to false', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-		setup(<MeetingSidebar />);
+		useStore
+			.getState()
+			.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
+		routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const recordingAccordion = screen.queryByText(/Recording/);
 		expect(recordingAccordion).not.toBeInTheDocument();
 	});
 
 	test('toggle Sidebar', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		const { user } = setup(<MeetingSidebar />);
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const button = screen.getByTestId('icon: ChevronLeftOutline');
 		expect(button).toBeInTheDocument();
 		await user.click(button);
@@ -181,9 +170,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('when user click the sidebar button, the sidebar closes', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		const { user } = setup(<MeetingSidebar />);
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 
 		const sidebarButton = screen.getByTestId('sidebar_button');
 		await user.click(sidebarButton);
@@ -193,17 +180,16 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('when user select a virtual background, the one selected has green border', async () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		useStore.getState().setCapabilities(createMockCapabilityList());
-		const { user } = setup(<MeetingSidebar />);
+		useStore.getState().setAttributes(createMockAttributesList());
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+
 		const t = screen.getAllByTestId('icon: ChevronDown');
 		await user.click(t[1]);
 
 		expect(screen.getByTestId(VirtualBackgroundType.NONE)).toBeVisible();
 
 		act(() => {
-			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.LIVING_ROOM);
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.LIVING_ROOM);
 		});
 
 		const styles = getComputedStyle(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM));
@@ -211,7 +197,7 @@ describe('Meeting sidebar', () => {
 		expect(styles.outline).toBe('2px solid #639030');
 
 		act(() => {
-			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.BLUR);
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.BLUR);
 		});
 
 		expect(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM)).not.toHaveStyle(

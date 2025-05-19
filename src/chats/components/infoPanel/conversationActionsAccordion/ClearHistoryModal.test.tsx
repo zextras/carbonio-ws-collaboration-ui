@@ -16,10 +16,13 @@ import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 
 const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([mockRoom]);
+});
+
 describe('Clear history', () => {
 	test('Clear history modal should be visible', () => {
-		useStore.getState().addRoom(mockRoom);
-
 		setup(
 			<ClearHistoryModal
 				roomId={mockRoom.id}
@@ -35,7 +38,6 @@ describe('Clear history', () => {
 	});
 
 	test('Clear history modal closing after cleared', async () => {
-		useStore.getState().addRoom(mockRoom);
 		const closeModal = jest.fn();
 
 		const { user } = setup(

@@ -51,15 +51,13 @@ const pdfToUpload: FileToUpload = createMockFileToUpload({
 
 const storeSetupBasic = (file: FileToUpload): UserEvent => {
 	const store = useStore.getState();
-	store.addRoom(mockedRoom);
-	store.setFilesToAttach(mockedRoom.id, [file]);
+	store.addFilesToAttach(mockedRoom.id, [file]);
 	const { user } = setup(<UploadAttachmentManagerView roomId={mockedRoom.id} />);
 	return user;
 };
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.addRoom(mockedRoom);
 	const { user } = setup(
 		<>
 			<UploadAttachmentManagerView roomId={mockedRoom.id} />
@@ -68,6 +66,11 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	);
 	return { user, store };
 };
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([mockedRoom]);
+});
 
 describe('Upload attachment view', () => {
 	test('Test if upload manager is displayed when a file is added to be uploaded', async () => {
@@ -182,8 +185,6 @@ describe('Upload attachment view', () => {
 		expect(composerText).toBeInTheDocument();
 	});
 	test('input has text in it and user decides to upload one file with drag&drop => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
@@ -216,7 +217,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -253,7 +254,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -296,7 +297,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -318,7 +319,7 @@ describe('Upload attachment view', () => {
 	test('there is a file with description in the attachmentViewManager and user close the widget => the widget will become closed and the input get cleared and the file removed', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -343,7 +344,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileThree',
 			file: createMockFile({ name: 'there!', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
 		const inputText = genericDescription;
 		const titleCounter = screen.queryByText('Add 3 attachments');
 		expect(titleCounter).toBeInTheDocument();
@@ -374,7 +375,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -406,7 +407,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileThree',
 			file: createMockFile({ name: 'there!' })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -421,8 +422,6 @@ describe('Upload attachment view', () => {
 		expect(filesToAttachUpdated?.length).toBeUndefined();
 	});
 	test('input has text in it and user decides to upload more file with drag&drop => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
@@ -457,7 +456,6 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add a new file with drag&drop => new file is added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
@@ -465,7 +463,7 @@ describe('Upload attachment view', () => {
 			hasFocus: true,
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const titleCounter = screen.queryByText(add1Attachment);
@@ -485,7 +483,6 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add more files with drag&drop => new files are added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
@@ -493,7 +490,7 @@ describe('Upload attachment view', () => {
 			hasFocus: true,
 			file: createMockFile({ name: 'sunrise', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const composerTextArea = screen.getByRole('textbox');
@@ -531,7 +528,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
 		const inputText = 'description fileOne';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -553,7 +550,7 @@ describe('Upload attachment view', () => {
 	test('Keep description - input has text, file is selected and user add new file from picker => description of the file will be kept in the input and the old file will stay focused', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -577,7 +574,7 @@ describe('Upload attachment view', () => {
 	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne{enter}';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -590,7 +587,7 @@ describe('Upload attachment view', () => {
 	test('Save description - input has text, file is selected and user click send button => description of the file will be saved, and message sent', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
 		await user.click(sendButton);
@@ -603,7 +600,7 @@ describe('Upload attachment view', () => {
 	test('Remove description - file is selected and so the input has the description and user clean the input manually => description will be removed', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'hello';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);

@@ -17,8 +17,8 @@ import { filter, forEach, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
-import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
-import { getOwners, getRoomNameSelector } from '../../../../../store/selectors/RoomsSelectors';
+import { getMeetingParticipantsByRoomId } from '../../../../../store/selectors/MeetingSelectors';
+import { getRoomNameSelector, useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserEmail, getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -38,8 +38,8 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	roomId
 }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const owners = useStore((state) => getOwners(state, roomId));
-	const meetingParticipants = useStore((state) => getMeetingParticipants(state, roomId));
+	const owners = useOwners(roomId);
+	const meetingParticipants = useStore((state) => getMeetingParticipantsByRoomId(state, roomId));
 
 	const [t] = useTranslation();
 	const modalTitle = t('meeting.virtual.modal.edit.title ', `Edit "${roomName}" Virtual Room`, {
@@ -85,20 +85,22 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const { ownersToAdd, ownersToRemove, ownersToUpgrade, ownerToDemote } = useMemo(() => {
-		const newOwners = contactsSelected
-			.map((user) => user.id)
-			.filter((userId) => !owners.some((owner) => owner === userId));
-		const ownersToAdd = newOwners.filter((userId) => !meetingParticipants?.[userId]);
-		const ownersToUpgrade = newOwners.filter((userId) => meetingParticipants?.[userId]);
+	const { ownersToAdd, ownersToRemove, ownersToUpgrade, ownerToDemote, ownersToModify } =
+		useMemo(() => {
+			const newOwners = contactsSelected
+				.map((user) => user.id)
+				.filter((userId) => !owners.some((owner) => owner === userId));
+			const ownersToAdd = newOwners.filter((userId) => !meetingParticipants?.[userId]);
+			const ownersToUpgrade = newOwners.filter((userId) => meetingParticipants?.[userId]);
 
-		const oldOwners = owners
-			.filter((userId) => !contactsSelected.some((contactChip) => contactChip.id === userId))
-			.filter((userId) => userId !== getUserId(useStore.getState()));
-		const ownersToRemove = oldOwners.filter((userId) => !meetingParticipants?.[userId]);
-		const ownerToDemote = oldOwners.filter((userId) => meetingParticipants?.[userId]);
-		return { ownersToAdd, ownersToUpgrade, ownersToRemove, ownerToDemote };
-	}, [contactsSelected, meetingParticipants, owners]);
+			const oldOwners = owners
+				.filter((userId) => !contactsSelected.some((contactChip) => contactChip.id === userId))
+				.filter((userId) => userId !== getUserId(useStore.getState()));
+			const ownersToRemove = oldOwners.filter((userId) => !meetingParticipants?.[userId]);
+			const ownerToDemote = oldOwners.filter((userId) => meetingParticipants?.[userId]);
+			const ownersToModify = ownerToDemote.concat(ownersToUpgrade);
+			return { ownersToAdd, ownersToUpgrade, ownersToRemove, ownerToDemote, ownersToModify };
+		}, [contactsSelected, meetingParticipants, owners]);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -118,15 +120,8 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 				promises.push(RoomsApi.deleteRoomMember(roomId, userId));
 			});
 		}
-		if (size(ownersToUpgrade) > 0) {
-			forEach(ownersToUpgrade, (userId) => {
-				promises.push(RoomsApi.promoteRoomMember(roomId, userId));
-			});
-		}
-		if (size(ownerToDemote) > 0) {
-			forEach(ownerToDemote, (userId) => {
-				promises.push(RoomsApi.demotesRoomMember(roomId, userId));
-			});
+		if (size(ownersToModify) > 0) {
+			promises.push(RoomsApi.updateRoomOwners(roomId, ownersToModify));
 		}
 
 		Promise.all(promises)
@@ -144,10 +139,9 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		createSnackbar,
 		errorSnackbar,
 		newName,
-		ownerToDemote,
 		ownersToAdd,
+		ownersToModify,
 		ownersToRemove,
-		ownersToUpgrade,
 		roomId,
 		roomName,
 		setShowModal

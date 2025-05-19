@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, act, renderHook } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
@@ -61,13 +61,15 @@ const testRoom2: RoomBe = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRooms([testRoom2]);
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo([user1Info, user2Info]);
+});
+
 describe('delete conversation action', () => {
 	test('open/close modal', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom2);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom2.id} type={testRoom2.type} numberOfMembers={2} />
 		);
@@ -80,17 +82,12 @@ describe('delete conversation action', () => {
 	});
 
 	test('delete conversation', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.addRoom(testRoom);
-		});
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom.id} type={testRoom.type} numberOfMembers={2} />
 		);
 
-		expect(result.current.rooms[testRoom.id]).toBeDefined();
+		expect(useStore.getState().rooms[testRoom.id]).toBeDefined();
 
 		const deleteRoomLabel = screen.getByText(/Delete Group/i);
 		await user.click(deleteRoomLabel);

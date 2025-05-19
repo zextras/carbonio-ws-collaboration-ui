@@ -41,9 +41,9 @@ import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
-import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
@@ -52,8 +52,7 @@ import {
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType, TextMessage } from '../../../../types/store/MessageTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
+import { Message, MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
@@ -90,6 +89,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const uploadingLabel = t('tooltip.uploading', 'Uploading');
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
+	const actionLabel = t('action.understood', 'Understood');
 
 	const myUserId = useStore(getUserId);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
@@ -98,16 +98,23 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
+	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
-	const editMessageTimeLimitInMinutes = useStore((store) =>
-		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	const messageEditTimeLimit = useStore((store) =>
+		getAttribute(store, 'messageEditTimeLimit')
 	) as number;
 	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const maxAttachmentSize = useStore((store) => getAttribute(store, 'maxAttachmentSize'));
+
+	const fileSizeTooLargeLabel = t(
+		'attachments.upload.tooLarge',
+		`Upload failed: The file exceeds the maximum file size of ${maxAttachmentSize}MB.`,
+		{ size: maxAttachmentSize }
+	);
 
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
@@ -162,9 +169,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');
 	}, [filesToUploadArray?.length, checkMaxLengthAndSetMessage]);
 
-	const errorHandler = (reason: DOMException, fileName: string): void => {
+	const errorHandler = (reason: Error, fileName: string): void => {
 		if (reason.name !== 'AbortError') {
-			const errorString = t(
+			const errorLabel = t(
 				'attachments.errorUploadingFile',
 				`Something went wrong uploading ${fileName}`,
 				{ file: fileName }
@@ -172,8 +179,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			createSnackbar({
 				key: new Date().toLocaleString(),
 				severity: 'error',
-				label: errorString,
-				actionLabel: 'UNDERSTOOD',
+				label: reason.message === 'file_too_large' ? fileSizeTooLargeLabel : errorLabel,
+				actionLabel,
 				disableAutoHide: true
 			});
 		}
@@ -307,24 +314,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			);
 
 			// Clean input composer
-			unsetFilesToAttach(roomId);
-			setDraftMessage(roomId, true);
+			removeFilesToAttach(roomId);
+			setDraftMessage(roomId);
 			setTextMessage('');
 			if (referenceMessage) unsetReferenceMessage(roomId);
 
 			uploadFilesInOrder
 				.then(() => {
-					unsetFilesToAttach(roomId);
+					removeFilesToAttach(roomId);
 					setIsUploading(false);
 				})
 				.catch((error) => console.log(error));
 		} else if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
 			actionToPerformBasedOnType(referenceMessage, message, completeReferenceMessage);
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
 			xmppClient.sendChatMessage(roomId, message);
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 			setTextMessage('');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,23 +367,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				canPerformAction(
 					lastMessageOfRoom,
 					lastMessageOfRoom.from === myUserId,
-					editMessageTimeLimitInMinutes,
+					messageEditTimeLimit,
 					messageActionType.EDIT
 				)
 			) {
-				setDraftMessage(lastMessageOfRoom.roomId, false, lastMessageOfRoom.text);
-				setReferenceMessage(
-					lastMessageOfRoom.roomId,
-					lastMessageOfRoom.id,
-					lastMessageOfRoom.from,
-					lastMessageOfRoom.stanzaId,
-					messageActionType.EDIT,
-					lastMessageOfRoom.attachment
-				);
+				setDraftMessage(lastMessageOfRoom.roomId, lastMessageOfRoom.text);
+				setReferenceMessage(lastMessageOfRoom.roomId, {
+					messageId: lastMessageOfRoom.id,
+					senderId: lastMessageOfRoom.from,
+					stanzaId: lastMessageOfRoom.stanzaId,
+					actionType: messageActionType.EDIT,
+					attachment: lastMessageOfRoom.attachment
+				});
 			}
 		},
 		[
-			editMessageTimeLimitInMinutes,
+			messageEditTimeLimit,
 			lastMessageOfRoom,
 			myUserId,
 			setDraftMessage,
@@ -400,9 +406,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const handleOnBlur = useCallback(() => {
 		if (size(textMessage) > 0) {
-			setDraftMessage(roomId, false, textMessage);
+			setDraftMessage(roomId, textMessage);
 		} else {
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 		}
 		setInputHasFocus(roomId, false);
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
@@ -459,10 +465,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			// clean the composer section and remove all file uploading if user
 			// is uploading files and then decide to edit a message
 			if (filesToUploadArray && referenceMessage.actionType === messageActionType.EDIT) {
-				unsetFilesToAttach(roomId);
+				removeFilesToAttach(roomId);
 			}
 		}
-	}, [referenceMessage, filesToUploadArray, unsetFilesToAttach, roomId]);
+	}, [referenceMessage, filesToUploadArray, removeFilesToAttach, roomId]);
 
 	useEffect(() => {
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');

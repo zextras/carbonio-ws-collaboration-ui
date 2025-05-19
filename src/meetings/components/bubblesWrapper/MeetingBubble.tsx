@@ -3,10 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import AttachmentView from '../../../chats/components/conversation/messageBubbles/AttachmentView';
@@ -15,20 +14,23 @@ import BubbleHeader from '../../../chats/components/conversation/messageBubbles/
 import ForwardInfo from '../../../chats/components/conversation/messageBubbles/ForwardInfo';
 import RepliedTextMessageSectionView from '../../../chats/components/conversation/messageBubbles/RepliedTextMessageSectionView';
 import TextContentBubble from '../../../chats/components/conversation/messageBubbles/TextContentBubble';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getInputHasFocus } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import {
 	getMessageAttachment,
 	getMessageSelector
-} from '../../../store/selectors/MessagesSelectors';
+} from '../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MessageType } from '../../../types/store/MessageTypes';
+import {
+	MeetingChatVisibility,
+	MeetingAccordionType
+} from '../../../types/store/ActiveMeetingTypes';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { getAttachmentInfo } from '../../../utils/attachmentUtils';
+import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
+import { RouterContext } from '../../contexts/routerContext';
 
 const BubbleContainer = styled(Container)<{
 	$messageAttachment: boolean;
@@ -76,9 +78,9 @@ type MeetingBubbleProps = {
 };
 
 const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }) => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const message = useStore((store) => getMessageSelector(store, roomId ?? '', messageId));
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
@@ -93,10 +95,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const hoverRef = useRef<HTMLDivElement>(null);
 	const timer = useRef<NodeJS.Timeout>();
 
-	const { extension, size } = getAttachmentInfo(
-		messageAttachment?.mimeType,
-		messageAttachment?.size
-	);
+	const extension = getAttachmentExtension(messageAttachment?.mimeType);
+	const size = getAttachmentSize(messageAttachment?.size);
 
 	const messageFormatted = useMemo(
 		() => message?.type === MessageType.TEXT_MSG && parseUrlOnMessage(message.text),
@@ -104,19 +104,12 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	);
 
 	const onClickHandler = useCallback(() => {
-		setMeetingSidebarStatus(meetingId, true);
-		setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
+		setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true);
+		setMeetingChatVisibility(MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
 			setInputHasFocus(roomId ?? '', true);
 		}
-	}, [
-		inputHasFocus,
-		meetingId,
-		roomId,
-		setInputHasFocus,
-		setMeetingChatVisibility,
-		setMeetingSidebarStatus
-	]);
+	}, [inputHasFocus, roomId, setInputHasFocus, setMeetingChatVisibility, setMeetingSidebarStatus]);
 
 	const handleHoverMouse = useCallback(() => {
 		clearTimeout(timer.current);

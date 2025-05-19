@@ -9,35 +9,21 @@ import { produce } from 'immer';
 import { forEach } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { ConnectionsStoreSlice, RootStore } from '../../types/store/StoreTypes';
+import { WebSocketClient } from '../../network/websocket/WebSocketClient';
+import XMPPClient from '../../network/xmpp/XMPPClient';
+import { ConnectionsStoreSlice } from '../../types/store/ConnectionsTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const useConnectionsStoreSlice: StateCreator<ConnectionsStoreSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useConnectionsStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	ConnectionsStoreSlice
+> = (set) => ({
 	connections: {
+		xmppClient: new XMPPClient(),
+		wsClient: new WebSocketClient(),
 		status: {}
-	},
-	setXmppClient: (xmppClient: IXMPPClient): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.connections.xmppClient = xmppClient;
-			}),
-			false,
-			'CONNECTIONS/SET_XMPP_CLIENT'
-		);
-	},
-	setWebSocketClient: (wsClient: IWebSocketClient): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.connections.wsClient = wsClient;
-			}),
-			false,
-			'CONNECTIONS/SET_WS_CLIENT'
-		);
 	},
 	setChatsBeStatus: (status: boolean): void => {
 		set(
@@ -73,14 +59,11 @@ export const useConnectionsStoreSlice: StateCreator<ConnectionsStoreSlice> = (
 					draft.users[user.id] = {
 						...draft.users[user.id],
 						online: undefined,
-						last_activity: undefined
+						lastActivity: undefined
 					};
 				});
-				draft.messages = {};
-				draft.markers = {};
-				draft.fastenings = {};
+				draft.chatsRegistry = {};
 				draft.activeConversations = {};
-				draft.unreads = {};
 			}),
 			false,
 			'CONNECTIONS/RESET_XMPP_DATA'

@@ -21,12 +21,14 @@ import {
 	getIdMessageWhereScrollIsStopped,
 	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getMessagesSelector,
+	getMyLastMarkerOfRoom
+} from '../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
-import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors';
-import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
@@ -54,9 +56,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
-	const setIdMessageWhereScrollIsStopped = useStore(
-		(store) => store.setIdMessageWhereScrollIsStopped
-	);
+	const setScrollPosition = useStore((store) => store.setScrollPosition);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
@@ -97,10 +97,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const debouncedSetterScrollPosition = useCallback(
 		debounce((refId) => {
-			setIdMessageWhereScrollIsStopped(roomId, refId);
+			const oldScrollPosition =
+				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+			if (oldScrollPosition !== refId) {
+				setScrollPosition(roomId, refId);
+			}
 			readMessage(refId);
 		}, 150),
-		[setIdMessageWhereScrollIsStopped, readMessage, roomId]
+		[setScrollPosition, readMessage, roomId]
 	);
 
 	const intersectionObserverCallback = useCallback(
@@ -160,11 +164,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-		const lastMsg = last(store.messages[roomId])?.id;
+		const lastMsg = last(store.chatsRegistry[roomId]?.messages)?.id;
 		if (
-			store.unreads[roomId] > 0 ||
+			store.chatsRegistry[roomId]?.unread > 0 ||
 			!actualPosition ||
-			(lastMsg === actualPosition && store.unreads[roomId] === 0)
+			(lastMsg === actualPosition && store.chatsRegistry[roomId].unread === 0)
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {

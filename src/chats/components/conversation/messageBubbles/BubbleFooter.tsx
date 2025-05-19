@@ -15,7 +15,7 @@ import MessageReactionsList from './MessageReactionsList';
 import ReadByPopoverList from './readByPopoverList/ReadByPopoverList';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
@@ -100,7 +100,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	);
 
 	const messageExtensionSizeLabel = useMemo(
-		() => `${messageExtension} • ${messageSize}`,
+		() => `${messageExtension?.toUpperCase()} • ${messageSize}`,
 		[messageExtension, messageSize]
 	);
 

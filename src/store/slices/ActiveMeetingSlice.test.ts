@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { size } from 'lodash';
-
 import {
+	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
+	STREAM_TYPE,
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import useStore from '../Store';
@@ -18,124 +17,274 @@ const meetingId = 'meetingId';
 
 describe('Active Meeting Slice', () => {
 	test('Add and remove active meeting', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		useStore.getState().meetingConnection(meetingId);
 
 		// Check store data
-		expect(size(result.current.activeMeeting)).toBe(1);
-		expect(result.current.activeMeeting[meetingId].sidebarStatus).toStrictEqual({
-			sidebarIsOpened: true,
-			participantsAccordionIsOpened: false,
-			waitingListAccordionIsOpened: true,
-			visualEffectsAccordionIsOpened: false,
-			recordingAccordionIsOpened: false
+		const store = useStore.getState();
+		expect(store.activeMeeting).toBeDefined();
+		expect(store.activeMeeting?.meetingId).toBe(meetingId);
+		expect(store.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
+
+		useStore.getState().meetingDisconnection(meetingId);
+		expect(useStore.getState().activeMeeting).toBeUndefined();
+	});
+
+	describe('Local streams', () => {
+		test('Set local audio stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, streamMedia);
+			expect(useStore.getState().activeMeeting?.localStreams.audio).toBe(streamMedia);
 		});
-		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
-		act(() => result.current.meetingDisconnection(meetingId));
-		expect(result.current.activeMeeting[meetingId]).toBeUndefined();
-	});
-	test('Meeting default view is GRID', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
-		expect(result.current.activeMeeting[meetingId].meetingViewSelected).toBe(MeetingViewType.GRID);
-	});
-	test('Change sidebar status', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setMeetingSidebarStatus(meetingId, false));
-		expect(result.current.activeMeeting[meetingId].sidebarStatus.sidebarIsOpened).toBeFalsy();
+		test('Set local video stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, streamMedia);
+			expect(useStore.getState().activeMeeting?.localStreams.video).toBe(streamMedia);
+		});
 
-		act(() => result.current.setMeetingSidebarStatus(meetingId, true));
-		expect(result.current.activeMeeting[meetingId].sidebarStatus.sidebarIsOpened).toBeTruthy();
-	});
+		test('Set local screen stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, streamMedia);
+			expect(useStore.getState().activeMeeting?.localStreams.screen).toBe(streamMedia);
+		});
 
-	test('Change participants accordion status', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		test('Remove local audio stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, streamMedia);
+			expect(useStore.getState().activeMeeting?.localStreams.audio).toBe(streamMedia);
+			useStore.getState().removeLocalStreams(STREAM_TYPE.AUDIO);
+			expect(useStore.getState().activeMeeting?.localStreams.audio).toBeUndefined();
+		});
 
-		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, false));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.participantsAccordionIsOpened
-		).toBeFalsy();
+		test('Set audio device', () => {
+			const deviceId = 'deviceId';
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setSelectedDeviceId(STREAM_TYPE.AUDIO, deviceId);
+			expect(useStore.getState().activeMeeting?.localStreams.selectedAudioDeviceId).toBe(deviceId);
+		});
 
-		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, true));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.participantsAccordionIsOpened
-		).toBeTruthy();
-	});
-
-	test('Change waiting list accordion status', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
-
-		act(() => result.current.setWaitingListAccordionStatus(meetingId, false));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
-		).toBeFalsy();
-
-		act(() => result.current.setWaitingListAccordionStatus(meetingId, true));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
-		).toBeTruthy();
+		test('Set video device', () => {
+			const deviceId = 'deviceId';
+			useStore.getState().meetingConnection(meetingId);
+			useStore.getState().setSelectedDeviceId(STREAM_TYPE.VIDEO, deviceId);
+			expect(useStore.getState().activeMeeting?.localStreams.selectedVideoDeviceId).toBe(deviceId);
+		});
 	});
 
-	test('Change recording accordion status', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+	beforeEach(() => {
+		useStore.getState().meetingConnection(meetingId);
+	});
+	describe('Sidebar accordions status', () => {
+		test('Default sidebar accordions status', () => {
+			expect(useStore.getState().activeMeeting?.sidebarStatus).toStrictEqual({
+				[MeetingAccordionType.GENERAL]: true,
+				[MeetingAccordionType.PARTICIPANTS]: false,
+				[MeetingAccordionType.WAITING_LIST]: true,
+				[MeetingAccordionType.VISUAL_EFFECTS]: false,
+				[MeetingAccordionType.RECORDING]: false,
+				[MeetingAccordionType.RAISE_HAND]: true
+			});
+		});
 
-		act(() => result.current.setRecordingAccordionStatus(meetingId, false));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened
-		).toBeFalsy();
+		test('Set sidebar accordions status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]
+			).toBeTruthy();
+		});
 
-		act(() => result.current.setRecordingAccordionStatus(meetingId, true));
-		expect(
-			result.current.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened
-		).toBeTruthy();
+		test('Set participant accordion status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS]
+			).toBeTruthy();
+		});
+
+		test('Set waiting list accordion status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST]
+			).toBeTruthy();
+		});
+
+		test('Set recording accordion status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RECORDING, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RECORDING, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING]
+			).toBeTruthy();
+		});
+
+		test('Set visual effects accordion status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.VISUAL_EFFECTS, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.VISUAL_EFFECTS]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.VISUAL_EFFECTS, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.VISUAL_EFFECTS]
+			).toBeTruthy();
+		});
+
+		test('Set raise hand accordion status', () => {
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, false);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.RAISE_HAND]
+			).toBeFalsy();
+			useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, true);
+			expect(
+				useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.RAISE_HAND]
+			).toBeTruthy();
+		});
 	});
 
-	test('Change chat visibility ', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+	describe('Chat visibility', () => {
+		test('Default chat visibility', () => {
+			expect(useStore.getState().activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		});
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.CLOSED));
-		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
-			MeetingChatVisibility.CLOSED
-		);
+		test('Set chat visibility to OPEN', () => {
+			useStore.getState().setMeetingChatVisibility(MeetingChatVisibility.OPEN);
+			expect(useStore.getState().activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		});
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN));
-		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		test('Set chat visibility to CLOSED', () => {
+			useStore.getState().setMeetingChatVisibility(MeetingChatVisibility.CLOSED);
+			expect(useStore.getState().activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.CLOSED);
+		});
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.EXPANDED));
-		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
-			MeetingChatVisibility.EXPANDED
-		);
-	});
-	test('Change background status', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
-
-		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.COWORKING));
-		expect(result.current.activeMeeting[meetingId].virtualBackground.backgroundImage).toBe(
-			VirtualBackgroundType.COWORKING
-		);
-
-		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.NONE));
-		expect(result.current.activeMeeting[meetingId].virtualBackground.backgroundImage).toBe(
-			VirtualBackgroundType.NONE
-		);
+		test('Set chat visibility to EXPANDED', () => {
+			useStore.getState().setMeetingChatVisibility(MeetingChatVisibility.EXPANDED);
+			expect(useStore.getState().activeMeeting?.chatVisibility).toBe(
+				MeetingChatVisibility.EXPANDED
+			);
+		});
 	});
 
-	test('Change updated stream', () => {
-		const streamMedia = new MediaStream();
+	describe('Meeting view', () => {
+		test('Set GRID view', () => {
+			useStore.getState().setMeetingViewSelected(MeetingViewType.GRID);
+			expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.GRID);
+		});
 
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		test('Set CINEMA view', () => {
+			useStore.getState().setMeetingViewSelected(MeetingViewType.CINEMA);
+			expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.CINEMA);
+		});
+	});
 
-		act(() => result.current.setBackgroundStream(meetingId, streamMedia));
-		expect(result.current.activeMeeting[meetingId].virtualBackground.updatedStream).toBe(
-			streamMedia
-		);
+	describe('Carousel visibility', () => {
+		test('Default carousel visibility', () => {
+			expect(useStore.getState().activeMeeting?.isCarouselVisible).toBe(true);
+		});
+
+		test('Set carousel visibility to false', () => {
+			useStore.getState().setIsCarouseVisible(false);
+			expect(useStore.getState().activeMeeting?.isCarouselVisible).toBe(false);
+		});
+
+		test('Set carousel visibility to true', () => {
+			useStore.getState().setIsCarouseVisible(true);
+			expect(useStore.getState().activeMeeting?.isCarouselVisible).toBe(true);
+		});
+	});
+
+	describe('Talking users', () => {
+		test('Default talking users', () => {
+			expect(useStore.getState().activeMeeting?.talkingUsers).toStrictEqual([]);
+		});
+
+		test('Add talking users', () => {
+			useStore.getState().setTalkingUser('userId1', true);
+			useStore.getState().setTalkingUser('userId2', true);
+			expect(useStore.getState().activeMeeting?.talkingUsers).toStrictEqual(['userId1', 'userId2']);
+		});
+
+		test('Remove talking user', () => {
+			const userId = 'userId';
+			useStore.getState().setTalkingUser(userId, true);
+			expect(useStore.getState().activeMeeting?.talkingUsers).toStrictEqual([userId]);
+
+			useStore.getState().setTalkingUser(userId, false);
+			expect(useStore.getState().activeMeeting?.talkingUsers).toStrictEqual([]);
+		});
+	});
+
+	describe('Virtual background', () => {
+		test('Default virtual background', () => {
+			expect(useStore.getState().activeMeeting?.virtualBackground).toStrictEqual({
+				backgroundImage: VirtualBackgroundType.NONE
+			});
+		});
+
+		test('Set background stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().setBackgroundStream(streamMedia);
+			expect(useStore.getState().activeMeeting?.virtualBackground.updatedStream).toBe(streamMedia);
+		});
+
+		test('Remove background stream', () => {
+			const streamMedia = new MediaStream();
+			useStore.getState().setBackgroundStream(streamMedia);
+			expect(useStore.getState().activeMeeting?.virtualBackground.updatedStream).toBe(streamMedia);
+
+			useStore.getState().removeBackgroundStream();
+			expect(useStore.getState().activeMeeting?.virtualBackground.updatedStream).toBeUndefined();
+		});
+
+		test('Set virtual background', () => {
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.COWORKING);
+			expect(useStore.getState().activeMeeting?.virtualBackground.backgroundImage).toBe(
+				VirtualBackgroundType.COWORKING
+			);
+
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.BLUR);
+			expect(useStore.getState().activeMeeting?.virtualBackground.backgroundImage).toBe(
+				VirtualBackgroundType.BLUR
+			);
+		});
+	});
+
+	describe('Users with raised hands', () => {
+		test('Default raised hands', () => {
+			expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
+		});
+
+		test('Add raised hands', () => {
+			useStore.getState().setUserWithHandRaised('userId1', true);
+			useStore.getState().setUserWithHandRaised('userId2', true);
+			expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([
+				'userId1',
+				'userId2'
+			]);
+		});
+
+		test('Remove raised hand', () => {
+			const userId = 'userId';
+			useStore.getState().setUserWithHandRaised(userId, true);
+			expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([userId]);
+
+			useStore.getState().setUserWithHandRaised(userId, false);
+			expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
+		});
 	});
 });

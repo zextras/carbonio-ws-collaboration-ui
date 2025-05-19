@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import ParticipantElement from './ParticipantElement';
 import useStore from '../../../store/Store';
@@ -21,16 +21,13 @@ const activeMeeting = createMockMeeting({});
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addMeeting(activeMeeting);
+	store.addMeetings([activeMeeting]);
 	store.setLoginInfo(loggedUser.id, loggedUser.name, loggedUser.type);
 });
 
 describe('ParticipantElement', () => {
 	test('Internal user in meeting', async () => {
-		act(() => {
-			const store = useStore.getState();
-			store.setUserInfo(internalUser);
-		});
+		useStore.getState().setUserInfo([internalUser]);
 
 		setup(
 			<ParticipantElement memberId={internalUser.id} meetingId={activeMeeting.id} isInsideMeeting />
@@ -43,11 +40,7 @@ describe('ParticipantElement', () => {
 	});
 
 	test('External user in meeting', async () => {
-		act(() => {
-			const store = useStore.getState();
-			store.setUserInfo(externalUser);
-		});
-
+		useStore.getState().setUserInfo([externalUser]);
 		setup(
 			<ParticipantElement memberId={externalUser.id} meetingId={activeMeeting.id} isInsideMeeting />
 		);

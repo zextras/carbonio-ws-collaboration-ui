@@ -21,6 +21,8 @@ import { I18nextProvider } from 'react-i18next';
 
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
+import { PiPProvider } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
 
 interface ProvidersWrapperProps {
 	children?: React.ReactNode;
@@ -36,7 +38,9 @@ export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Eleme
 		<I18nextProvider i18n={i18n}>
 			<ThemeProvider>
 				<ModalManager>
-					<SnackbarManager>{children}</SnackbarManager>
+					<PiPProvider>
+						<SnackbarManager>{children}</SnackbarManager>
+					</PiPProvider>
 				</ModalManager>
 			</ThemeProvider>
 		</I18nextProvider>
@@ -87,3 +91,28 @@ export async function triggerObserver(observedElement: HTMLElement): Promise<voi
 		])
 	);
 }
+
+export const routerContextSetup = (
+	children: React.ReactElement,
+	{
+		meetingId,
+		infoType,
+		route = MEETINGS_ROUTES.MEETING
+	}: {
+		meetingId?: string;
+		infoType?: PAGE_INFO_TYPE;
+		route?: MEETINGS_ROUTES;
+	}
+): { user: ReturnType<(typeof userEvent)['setup']> } & ReturnType<typeof customRender> =>
+	setup(
+		<RouterContext.Provider
+			value={{
+				route,
+				meetingId,
+				infoType,
+				navigate: jest.fn()
+			}}
+		>
+			<ProvidersWrapper>{children}</ProvidersWrapper>
+		</RouterContext.Provider>
+	);

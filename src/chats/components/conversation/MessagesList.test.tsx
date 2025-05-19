@@ -21,14 +21,14 @@ import {
 import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	FasteningAction,
+	MarkerStatus,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/MessageTypes';
+} from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
 
@@ -42,33 +42,25 @@ const userC = createMockUser({ id: 'userC', name: 'userC' });
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const user3Be: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User3',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 3"
+	name: 'User3'
 });
 
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User1'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
-	name: 'User4',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 4"
+	name: 'User4'
 });
 
 const room: RoomBe = {
@@ -100,6 +92,8 @@ const room: RoomBe = {
 		}
 	]
 };
+
+const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 
 const mockedAddMemberMessage = createMockConfigurationMessage({
 	id: 'AddMemberId',
@@ -148,20 +142,24 @@ const messages = generateListMessage([
 	{ from: fromId }
 ]);
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+});
+
 describe('render list of messages with history loader visible for first time opening the conversation', () => {
 	test('Render the list of messages', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		// Simulate the loading of the full history
+		const store = useStore.getState();
 		act(() => {
-			result.current.setHistoryIsFullyLoaded(room.id);
-			result.current.updateHistory(room.id, messages);
-			result.current.addCreateRoomMessage(room.id);
+			store.setHistoryIsFullyLoaded(room.id);
+			store.updateHistory(room.id, messages);
+			store.addCreateRoomMessage(room.id);
 		});
-		expect(result.current.messages[room.id]).toHaveLength(6);
+		expect(useStore.getState().chatsRegistry[room.id].messages).toHaveLength(6);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
 		expect(message).toBeVisible();
@@ -174,8 +172,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Render the history message loader', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
@@ -184,13 +180,11 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display new message bubble on MessageList', () => {
-		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id
 		});
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessage);
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
@@ -198,14 +192,12 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display text message bubble with URL on MessageList', () => {
-		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedURLTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessageWithUrl',
 			roomId: 'roomTest',
 			text: 'Hi! Look at this site: https://www.awesomeTest.com/test'
 		});
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedURLTextMessage);
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedURLTextMessage.id}`);
@@ -215,7 +207,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display message bubble deleted on MessageList', () => {
-		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: helloString
@@ -227,7 +218,6 @@ describe('render list of messages with history loader visible for first time ope
 		});
 
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Delete text message
 		act(() => result.current.addFastening(mockedDeletedMessage));
@@ -239,7 +229,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display edited message bubble on MessageList', () => {
-		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: helloString
@@ -252,7 +241,6 @@ describe('render list of messages with history loader visible for first time ope
 		});
 
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Edit text message
 		act(() => result.current.addFastening(mockedEditedMessage));
@@ -264,7 +252,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display reply message bubble on MessageList', () => {
-		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id,
@@ -278,7 +265,6 @@ describe('render list of messages with history loader visible for first time ope
 			repliedMessage: mockedTextMessage
 		});
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);
@@ -291,7 +277,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display a reply of a deleted message', () => {
-		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: helloString
@@ -309,7 +294,6 @@ describe('render list of messages with history loader visible for first time ope
 		});
 
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Reply to text message
 		act(() => result.current.newMessage(mockedReplyTextMessage));
@@ -323,7 +307,6 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display a reply of an edited message', () => {
-		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: helloString
@@ -342,7 +325,6 @@ describe('render list of messages with history loader visible for first time ope
 		});
 
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Edit text message
 		act(() => result.current.addFastening(mockedEditedMessage));
@@ -358,8 +340,7 @@ describe('render list of messages with history loader visible for first time ope
 	test('Configuration message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
-			result.current.setUserInfo(user2Be);
+			result.current.setUserInfo([user2Be]);
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
@@ -379,8 +360,7 @@ describe('render list of messages with history loader visible for first time ope
 	test('Add member message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
-			result.current.setUserInfo(user4Be);
+			result.current.setUserInfo([user4Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedAddMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -399,8 +379,7 @@ describe('render list of messages with history loader visible for first time ope
 	test('Removed member message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
-			result.current.setUserInfo(user3Be);
+			result.current.setUserInfo([user3Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedRemoveMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -417,19 +396,20 @@ describe('render list of messages with history loader visible for first time ope
 	});
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+});
 describe('Scroll position', () => {
 	test('Opening a conversation for the first time sets scroll to the bottom', () => {
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});
 
 	test('Opening an already opened conversation sets scroll to the previous position', () => {
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.updateHistory(room.id, messages);
-		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
+		store.setScrollPosition(room.id, messages[0].id);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToMessage).toHaveBeenCalled();
 		expect(mockedScrollToMessage).toHaveBeenCalledWith(messages[0].id);
@@ -437,18 +417,23 @@ describe('Scroll position', () => {
 
 	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.updateHistory(room.id, messages);
-		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
-		store.addUnreadCount(room.id, 1);
+		store.setScrollPosition(room.id, messages[0].id);
+		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([mockedRoom]);
+	store.setLoginInfo('userId', 'User');
+	store.setUserInfo([userA, userB, userC]);
+});
+
 describe('Display group of messages', () => {
 	test('Display a group of messages sent as: first user A, 3 messages user B , last user C', async () => {
-		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const messages = generateListMessage([
 			{ roomId: mockedRoom.id, from: userA.id },
 			{ roomId: mockedRoom.id, from: userB.id },
@@ -459,10 +444,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
-			result.current.addRoom(mockedRoom);
+			result.current.addRooms([mockedRoom]);
 		});
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
@@ -492,10 +474,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
-			result.current.addRoom(mockedRoom);
+			result.current.setUserInfo([userA, userB, userC]);
 		});
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
@@ -519,7 +498,6 @@ describe('forward mode', () => {
 	test('Select of one or more messages to forward', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
 			result.current.updateHistory(room.id, messages);
 		});
 		const { user } = setup(<MessagesList roomId={room.id} />);

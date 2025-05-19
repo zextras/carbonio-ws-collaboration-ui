@@ -33,8 +33,8 @@ const event: MeetingWaitingParticipantClashed = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'myUserId' }));
 });
 describe('MeetingWaitingParticipantClashedEventHandler tests', () => {

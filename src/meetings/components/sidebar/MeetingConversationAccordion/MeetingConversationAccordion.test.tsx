@@ -8,19 +8,18 @@ import React from 'react';
 
 import { screen, waitFor, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
+import { routerContextSetup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
@@ -66,16 +65,14 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
+		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
-		result.current.setUserInfo(mockUser2);
-		result.current.addRoom(groupRoom);
-		result.current.addMeeting(groupMeeting);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		result.current.setUserInfo([mockUser2]);
+		result.current.addRooms([groupRoom]);
+		result.current.addMeetings([groupMeeting]);
+		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
-	const { user } = setup(<MeetingSidebar />);
+	const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 	return { user, store: result.current };
 };
 

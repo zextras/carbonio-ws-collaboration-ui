@@ -23,21 +23,21 @@ const event: MeetingParticipantTalkingEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 });
 describe('meetingParticipantTalkingEventHandler tests', () => {
 	test('Talking user information are saved only the meeting is active', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingParticipantTalkingEventHandler(event);
-		expect(useStore.getState().activeMeeting[meeting.id].talkingUsers).toContain('userId');
+		expect(useStore.getState().activeMeeting?.talkingUsers).toContain('userId');
 	});
 
 	test('Talking user information are not  saved if the meeting is inactive', () => {
 		const state = useStore.getState();
-		state.meetingConnection(meeting.id, false, undefined, false, undefined);
+		state.meetingConnection(meeting.id);
 		state.meetingDisconnection(meeting.id);
 		meetingParticipantTalkingEventHandler(event);
-		expect(useStore.getState().activeMeeting[meeting.id]).toBeUndefined();
+		expect(useStore.getState().activeMeeting).toBeUndefined();
 	});
 });

@@ -46,9 +46,9 @@ const meeting = createMockMeeting({ roomId: virtualRoom.id });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRoom(virtualRoom);
-	store.addMeeting(meeting);
-	store.setUserInfo(member1);
+	store.addRooms([virtualRoom]);
+	store.addMeetings([meeting]);
+	store.setUserInfo([member1]);
 	mockSearchUsersByFeatureRequest.mockResolvedValueOnce([user1, user2]);
 });
 describe('EditVirtualRoomModal test', () => {
@@ -125,8 +125,7 @@ describe('EditVirtualRoomModal test', () => {
 		const store = useStore.getState();
 		store.addParticipant(meeting.id, createMockParticipants({ userId: member1.id }));
 		store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
-		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
-		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
+		const spyUpdateOwners = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_OWNERS);
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
@@ -147,7 +146,6 @@ describe('EditVirtualRoomModal test', () => {
 		await user.click(listUser2);
 
 		await user.click(screen.getByRole('button', { name: 'Edit' }));
-		expect(spyOnPromoteRoomMember).toHaveBeenCalled();
-		expect(spyOnDemoteRoomMember).toHaveBeenCalled();
+		expect(spyUpdateOwners).toHaveBeenCalled();
 	});
 });

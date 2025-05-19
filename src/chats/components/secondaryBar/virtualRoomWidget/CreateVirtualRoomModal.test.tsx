@@ -11,7 +11,7 @@ import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import useStore from '../../../../store/Store';
-import { createMockCapabilityList, createMockUser } from '../../../../tests/createMock';
+import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
@@ -42,9 +42,8 @@ const contactUser2: ContactInfo = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setCapabilities(createMockCapabilityList());
+	store.setUserInfo([user1, user2]);
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('VirtualRoomsModal', () => {
@@ -65,7 +64,7 @@ describe('VirtualRoomsModal', () => {
 
 		await user.type(textArea, 'a{backspace}');
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -86,7 +85,7 @@ describe('VirtualRoomsModal', () => {
 			'Lorem dolo ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 		);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -114,7 +113,7 @@ describe('VirtualRoomsModal', () => {
 		await user.click(chipContactOne);
 		await user.click(chipContactTwo);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -154,7 +153,7 @@ describe('VirtualRoomsModal', () => {
 		// removing chip
 		await user.click(chipContactOne);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -186,7 +185,7 @@ describe('VirtualRoomsModal', () => {
 		const chipContactOne = await screen.findByText('User One');
 		await user.click(chipContactOne);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -214,7 +213,7 @@ describe('VirtualRoomsModal', () => {
 		);
 		expect(noResults).toBeInTheDocument();
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -237,7 +236,7 @@ describe('VirtualRoomsModal', () => {
 		);
 		expect(noMatch).toBeInTheDocument();
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 });

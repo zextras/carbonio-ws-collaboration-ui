@@ -11,7 +11,7 @@ import { act } from '@testing-library/react';
 import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
@@ -27,25 +27,25 @@ const iconChevronDown = 'icon: ChevronDown';
 const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User 1'
 });
 
 const user2Be: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User 2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User 2'
 });
 
 const user3Be: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User 3',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 3"
+	name: 'User 3'
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setUserInfo([user1Be, user2Be, user3Be]);
+	store.setLoginInfo(user1Be.id, user1Be.name);
 });
 
 describe('Actions Accordion', () => {
@@ -60,12 +60,8 @@ describe('Actions Accordion', () => {
 		});
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.newMessage(message);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
@@ -82,10 +78,7 @@ describe('Actions Accordion', () => {
 			members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 		});
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRooms([room]);
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.queryByText(/Add New Members/i)).not.toBeInTheDocument();
@@ -104,11 +97,7 @@ describe('Actions Accordion', () => {
 			]
 		});
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRooms([room]);
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
@@ -121,11 +110,7 @@ describe('Actions Accordion', () => {
 		const room: RoomBe = createMockRoom({ members: [createMockMember({ userId: user1Be.id })] });
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRooms([room]);
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.queryByText(/Clear History/i)).not.toBeInTheDocument();
@@ -137,7 +122,7 @@ describe('Actions Accordion', () => {
 	test('Set open/close accordion status', async () => {
 		const room: RoomBe = createMockRoom();
 		const store = useStore.getState();
-		store.addRoom(room);
+		store.addRooms([room]);
 		// Default status: open
 		const { user } = setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute notifications/i)).toBeVisible();
@@ -159,7 +144,7 @@ describe('Actions Accordion', () => {
 	test('Initial accordion status: true', async () => {
 		const room: RoomBe = createMockRoom();
 		const store = useStore.getState();
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.setActionsAccordionStatus(room.id, true);
 
 		setup(<ActionsAccordion roomId={room.id} />);
@@ -170,7 +155,7 @@ describe('Actions Accordion', () => {
 	test('Initial accordion status: false', async () => {
 		const room: RoomBe = createMockRoom();
 		const store = useStore.getState();
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.setActionsAccordionStatus(room.id, false);
 
 		setup(<ActionsAccordion roomId={room.id} />);
@@ -188,12 +173,8 @@ describe('Actions Accordion', () => {
 			]
 		});
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 }));
+		store.addRooms([room]);
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '3' }));
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberActionButton = screen.getByRoleWithIcon('button', {
@@ -212,12 +193,8 @@ describe('Actions Accordion', () => {
 			]
 		});
 		const store = useStore.getState();
-		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 }));
+		store.addRooms([room]);
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberAction = screen.getByTestId('addNewMemberAction');

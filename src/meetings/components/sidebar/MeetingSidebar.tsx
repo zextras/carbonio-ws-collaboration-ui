@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
+import RaiseHandAccordion from './raiseHandAccordion/RaiseHandAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
 	getMeetingSidebarStatus
@@ -26,14 +25,17 @@ import {
 	getOwnershipOfTheRoom,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
-import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingAccordionType,
+	MeetingChatVisibility
+} from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import { RouterContext } from '../../contexts/routerContext';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
@@ -63,7 +65,7 @@ const AccordionContainer = styled(Container)`
 `;
 
 const MeetingSidebar = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');
@@ -71,28 +73,26 @@ const MeetingSidebar = (): ReactElement => {
 
 	const myUserId = useStore(getUserId);
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const meetingChatVisibility = useStore(getMeetingChatVisibility);
+	const sidebarIsVisible: boolean = useStore(getMeetingSidebarStatus);
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
-	const canVideoCallRecord = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
-	);
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
+	const virtualBackgroundEnabled = useStore((store) =>
+		getAttribute(store, 'virtualBackgroundEnabled')
 	);
 
 	const toggleSidebar = useCallback(
-		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
-		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
+		() => setMeetingSidebarStatus(MeetingAccordionType.GENERAL, !sidebarIsVisible),
+		[setMeetingSidebarStatus, sidebarIsVisible]
 	);
 
 	const showRecordingAccordion = useMemo(
-		() => canVideoCallRecord && amIModerator,
-		[amIModerator, canVideoCallRecord]
+		() => recordingEnabled && amIModerator,
+		[amIModerator, recordingEnabled]
 	);
 
 	const showWaitingListAccordion = useMemo(
@@ -123,16 +123,15 @@ const MeetingSidebar = (): ReactElement => {
 				>
 					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 						<AccordionContainer height="fit" mainAlignment="flex-start">
-							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
-							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
-							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
-							{(canUseVirtualBackground || isUserGuest) && (
-								<VisualEffectsAccordion meetingId={meetingId} />
-							)}
+							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId!} />}
+							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
+							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
+							{<RaiseHandAccordion meetingId={meetingId!} />}
+							{(virtualBackgroundEnabled || isUserGuest) && <VisualEffectsAccordion />}
 						</AccordionContainer>
 					)}
 				</Container>
-				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId} />
+				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId!} />
 			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip

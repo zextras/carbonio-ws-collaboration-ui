@@ -11,7 +11,7 @@ import { screen, act } from '@testing-library/react';
 import ConversationHeader from './ConversationHeader';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockUser
@@ -67,7 +67,7 @@ const mockedRoom: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 	store.setPlaceholderRoom(mockPaoloUser.id);
 });
 describe('Conversation header test', () => {
@@ -86,21 +86,21 @@ describe('Conversation header test', () => {
 
 	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
 	});
 
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
 
 	test("Meeting button isn't displayed when the room is a placeholder", async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(
 			<ConversationHeader roomId={`placeholder-${mockPaoloUser.id}`} setInfoPanelOpen={jest.fn()} />
 		);
@@ -108,15 +108,15 @@ describe('Conversation header test', () => {
 	});
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
+	store.setUserInfo([mockRobertoUser, mockLucaUser, mockGianniUser, mockQuintoUser]);
+	store.addRooms([mockedRoom]);
+});
 describe('isWriting functionality', () => {
 	test('is writing appears when someone is writing and disappear if not', async () => {
-		const store: RootStore = useStore.getState();
-		act(() => {
-			store.addRoom(mockedRoom);
-			store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
-			store.setUserInfo(mockRobertoUser);
-			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
-		});
+		useStore.getState().setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
 
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 
@@ -124,7 +124,7 @@ describe('isWriting functionality', () => {
 		expect(isWriting).toBeInTheDocument();
 
 		act(() => {
-			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, false);
+			useStore.getState().setIsWriting(mockedRoom.id, mockRobertoUser.id, false);
 			jest.advanceTimersByTime(4000);
 		});
 
@@ -133,19 +133,10 @@ describe('isWriting functionality', () => {
 
 	test('is writing label for four or more users that are writing', async () => {
 		const store: RootStore = useStore.getState();
-		act(() => {
-			store.addRoom(mockedRoom);
-			store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
-			store.setUserInfo(mockRobertoUser);
-			store.setUserInfo(mockLucaUser);
-			store.setUserInfo(mockGianniUser);
-			store.setUserInfo(mockQuintoUser);
-
-			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
-			store.setIsWriting(mockedRoom.id, mockGianniUser.id, true);
-			store.setIsWriting(mockedRoom.id, mockLucaUser.id, true);
-			store.setIsWriting(mockedRoom.id, mockQuintoUser.id, true);
-		});
+		store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
+		store.setIsWriting(mockedRoom.id, mockGianniUser.id, true);
+		store.setIsWriting(mockedRoom.id, mockLucaUser.id, true);
+		store.setIsWriting(mockedRoom.id, mockQuintoUser.id, true);
 
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 

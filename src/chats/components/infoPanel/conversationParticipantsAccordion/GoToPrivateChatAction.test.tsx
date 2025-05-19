@@ -10,7 +10,12 @@ import { screen } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
+import {
+	createMockAttributesList,
+	createMockMember,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
 import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -23,6 +28,10 @@ const room = createMockRoom({
 	members: [createMockMember({ userId: user1.id })]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
+});
 describe('GoToPrivateChatAction tests', () => {
 	test('Button is smaller if it is mount on the chat page', async () => {
 		setup(<GoToPrivateChatAction memberId="memberId" />);
@@ -52,7 +61,7 @@ describe('GoToPrivateChatAction tests', () => {
 	});
 
 	test('User click the "Go to private chat" and chat already exists', async () => {
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1.id} />);
 		const button = screen.getByRole('button');
 		await user.click(button);

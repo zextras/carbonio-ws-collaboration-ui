@@ -21,8 +21,9 @@ import useStore from '../../../../store/Store';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import {
 	canDisplayPreviewOnLoad,
+	getAttachmentExtension,
 	getAttachmentIcon,
-	getAttachmentInfo,
+	getAttachmentSize,
 	getAttachmentType
 } from '../../../../utils/attachmentUtils';
 
@@ -111,14 +112,10 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const setFileFocusedToModify = useStore((store) => store.setFileFocusedToModify);
-	const removeFileToAttach = useStore((store) => store.removeFileToAttach);
-	const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
-	const removeDescriptionToFileToAttach = useStore(
-		(store) => store.removeDescriptionToFileToAttach
-	);
+	const setFileFocus = useStore((store) => store.setFileFocus);
+	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
+	const setFileDescription = useStore((store) => store.setFileDescription);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
@@ -132,26 +129,21 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 			forEach(filesToUploadArray, (file) => {
 				if (file.hasFocus) {
 					fileIdActuallyFocused = file.fileId;
-					if (draftMessage) {
-						addDescriptionToFileToAttach(roomId, file.fileId, draftMessage);
-					} else {
-						removeDescriptionToFileToAttach(roomId, file.fileId);
-					}
+					setFileDescription(roomId, file.fileId, draftMessage);
 				}
 			});
 			if (fileIdActuallyFocused !== fileId) {
-				setDraftMessage(roomId, false, description);
+				setDraftMessage(roomId, description);
 			}
-			setFileFocusedToModify(roomId, fileId, true);
+			setFileFocus(roomId, fileId, true);
 			setInputHasFocus(roomId, true);
 		},
 		[
 			roomId,
-			setFileFocusedToModify,
+			setFileFocus,
 			setDraftMessage,
 			setInputHasFocus,
-			addDescriptionToFileToAttach,
-			removeDescriptionToFileToAttach,
+			setFileDescription,
 			draftMessage,
 			filesToUploadArray
 		]
@@ -161,27 +153,26 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		(ev: { stopPropagation: () => void }, fileId: string) => {
 			ev.stopPropagation();
 			if (filesToUploadArray && filesToUploadArray.length === 1) {
-				unsetFilesToAttach(roomId);
-				setDraftMessage(roomId, true);
+				removeFilesToAttach(roomId);
+				setDraftMessage(roomId);
 			} else {
 				// if the file I'm removing is the selected one with text on input, clean the input and remove the file
 				if (draftMessage) {
 					forEach(filesToUploadArray, (file) => {
 						if (file.hasFocus && file.fileId === fileId) {
-							setDraftMessage(roomId, true);
+							setDraftMessage(roomId);
 						}
 					});
 				}
-				removeFileToAttach(roomId, fileId);
+				removeFilesToAttach(roomId, fileId);
 				setInputHasFocus(roomId, true);
 			}
 		},
 		[
 			roomId,
 			setDraftMessage,
-			removeFileToAttach,
+			removeFilesToAttach,
 			filesToUploadArray,
-			unsetFilesToAttach,
 			draftMessage,
 			setInputHasFocus
 		]
@@ -189,7 +180,8 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	const previewClick = useCallback(
 		(file: FileToUpload) => {
-			const { extension, size } = getAttachmentInfo(file.file.type, file.file.size);
+			const extension = getAttachmentExtension(file.file.type);
+			const size = getAttachmentSize(file.file.size);
 			return createPreview({
 				previewType: getAttachmentType(file.file.type),
 				filename: file.file.name,
@@ -293,9 +285,9 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	]);
 
 	const closeUploadAttachmentManagerView = useCallback(() => {
-		unsetFilesToAttach(roomId);
-		setDraftMessage(roomId, true);
-	}, [roomId, unsetFilesToAttach, setDraftMessage]);
+		removeFilesToAttach(roomId);
+		setDraftMessage(roomId);
+	}, [roomId, removeFilesToAttach, setDraftMessage]);
 
 	const loadFiles = useUploadFile(roomId);
 

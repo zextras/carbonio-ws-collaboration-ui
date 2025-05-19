@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router';
 
@@ -19,14 +19,16 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import {
+	MeetingChatVisibility,
+	MeetingAccordionType
+} from '../../../types/store/ActiveMeetingTypes';
+import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { MessageType } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
@@ -65,16 +67,14 @@ const message = createMockTextMessage({
 const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setMeetingSidebarStatus(meeting.id, false);
+	store.setUserInfo([user1, user2, user3]);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
+	store.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<BubblesWrapper />);
+	const { user } = routerContextSetup(<BubblesWrapper />, { meetingId: meeting.id });
 
 	return { store, user };
 };
@@ -111,7 +111,7 @@ describe('BubblesWrapper', () => {
 		await waitFor(() => user.click(messageBubble));
 
 		const updatedStore = useStore.getState();
-		expect(updatedStore.activeMeeting[meeting.id].sidebarStatus.sidebarIsOpened).toBeTruthy();
-		expect(updatedStore.activeMeeting[meeting.id].chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		expect(updatedStore.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]).toBeTruthy();
+		expect(updatedStore.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
 	});
 });

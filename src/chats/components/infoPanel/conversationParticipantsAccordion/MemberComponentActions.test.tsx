@@ -6,14 +6,18 @@
 
 import React from 'react';
 
-import { act, renderHook, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../../tests/createMock';
+import {
+	createMockAttributesList,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockGoToMainPage, mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -49,6 +53,7 @@ const userInfoMember = {
 };
 
 const mockedOneToOne = createMockRoom({
+	id: 'mockedOneToOneId',
 	type: RoomType.ONE_TO_ONE,
 	members: [
 		{
@@ -92,7 +97,7 @@ const mockedRoom = createMockRoom({
 });
 
 const mockedRoom2 = createMockRoom({
-	id: 'roomId',
+	id: 'room2Id',
 	type: RoomType.GROUP,
 	members: [
 		{
@@ -104,22 +109,25 @@ const mockedRoom2 = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo([user1Info, user2Info, user3Info]);
+	store.addRooms([mockedOneToOne, mockedRoom, mockedRoom2]);
+	store.setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE'
+		})
+	);
+});
 describe('participants actions - go to private chat', () => {
 	test('existent chat', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedOneToOne);
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
 		expect(mockGoToRoomPage).toHaveBeenCalled();
 	});
 	test('non-existent chat', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user2Info.id, user2Info.name);
-			result.current.setUserInfo(user1Info);
-		});
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
@@ -131,9 +139,6 @@ describe('participants actions - go to private chat', () => {
 
 describe('participants actions - leave/delete conversation', () => {
 	test('leave conversation - open and close modal', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedRoom);
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner={false}
@@ -151,11 +156,6 @@ describe('participants actions - leave/delete conversation', () => {
 	});
 	test('leave conversation', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user2Info.id, user2Info.name);
-			result.current.addRoom(mockedRoom);
-		});
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -175,9 +175,6 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 	test('delete conversation - open and close modal', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.addRoom(mockedRoom2);
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner
@@ -195,11 +192,6 @@ describe('participants actions - leave/delete conversation', () => {
 	});
 	test('delete conversation', async () => {
 		const spyOnDeleteRoom = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.addRoom(mockedRoom2);
-		});
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -222,13 +214,6 @@ describe('participants actions - leave/delete conversation', () => {
 describe('participants actions - promote/demote member', () => {
 	test('Promote member', async () => {
 		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
-			result.current.addRoom(mockedRoom);
-		});
-
 		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -243,13 +228,6 @@ describe('participants actions - promote/demote member', () => {
 
 	test('Demote member', async () => {
 		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user3Info);
-			result.current.addRoom(mockedRoom);
-		});
-
 		const { user } = setup(
 			<MemberComponentInfo
 				roomId={mockedRoom.id}
@@ -274,10 +252,6 @@ describe('participants actions - promote/demote member', () => {
 
 describe('participants actions - delete user', () => {
 	test('open/close modal', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user2Info);
-		store.addRoom(mockedRoom);
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
@@ -291,13 +265,6 @@ describe('participants actions - delete user', () => {
 
 	test('delete user', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
-			result.current.addRoom(mockedRoom);
-		});
-
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);

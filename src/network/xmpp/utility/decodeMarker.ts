@@ -7,7 +7,7 @@
 
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getId } from './decodeJid';
-import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
+import { Marker } from '../../../types/store/ChatsRegistryTypes';
 import { getRequiredAttribute } from './decodeStanza';
 
 export function decodeMarker(markerStanza: Element): Marker {
@@ -15,6 +15,6 @@ export function decodeMarker(markerStanza: Element): Marker {
 		from: getId(getRequiredAttribute(markerStanza, 'from')),
 		messageId: getRequiredAttribute(markerStanza, 'id'),
 		markerDate: dateToTimestamp(getRequiredAttribute(markerStanza, 'timestamp')),
-		type: getRequiredAttribute(markerStanza, 'type') as MarkerType
+		type: getRequiredAttribute(markerStanza, 'type') as 'displayed'
 	};
 }

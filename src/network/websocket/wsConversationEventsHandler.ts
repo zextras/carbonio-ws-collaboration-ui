@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
@@ -15,41 +17,55 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
+			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) =>
+				state.addRooms([response])
+			);
 			state.connections.xmppClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
-			state.setRoomNameAndDescription(event.roomId, event.name, event.description);
+			state.editRoom(event.roomId, { name: event.name, description: event.description });
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
-			state.deleteRoom(event.roomId);
+			state.removeRoom(event.roomId);
 			break;
 		}
 		case WsEventType.ROOM_OWNER_PROMOTED: {
-			state.promoteMemberToModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, true);
+			if (isMyId(event.userId)) {
+				sendCustomEvent({
+					name: EventName.MEMBER_PROMOTED,
+					data: event
+				});
+			}
 			break;
 		}
 		case WsEventType.ROOM_OWNER_DEMOTED: {
-			state.demoteMemberFromModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, false);
+			if (isMyId(event.userId)) {
+				sendCustomEvent({
+					name: EventName.MEMBER_DEMOTED,
+					data: event
+				});
+			}
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
-			state.setRoomPictureUpdated(event.roomId, event.updatedAt);
+			state.editRoom(event.roomId, { pictureUpdatedAt: event.updatedAt });
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_DELETED: {
-			state.setRoomPictureDeleted(event.roomId);
+			state.editRoom(event.roomId, { pictureUpdatedAt: undefined });
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
 			if (isMyId(event.userId)) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
-					state.addRoom(response);
+					state.addRooms([response]);
 					if (response.meetingId) {
 						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
-							state.addMeeting(meetingResponse)
+							state.addMeetings([meetingResponse])
 						);
 					}
 				});
@@ -63,25 +79,26 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
 			if (isMyId(event.userId)) {
-				if (state.meetings[event.roomId]) {
-					state.deleteMeeting(state.meetings[event.roomId].id);
+				const meetingId = getMeetingIdFromRoom(useStore.getState(), event.roomId);
+				if (meetingId) {
+					state.deleteMeeting(meetingId);
 				}
-				state.deleteRoom(event.roomId);
+				state.removeRoom(event.roomId);
 			} else {
 				state.removeRoomMember(event.roomId, event.userId);
 			}
 			break;
 		}
 		case WsEventType.ROOM_MUTED: {
-			state.setRoomMuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, true);
 			break;
 		}
 		case WsEventType.ROOM_UNMUTED: {
-			state.setRoomUnmuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, false);
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
-			state.setClearedAt(event.roomId, event.clearedAt);
+			state.clearConversation(event.roomId, event.clearedAt);
 			break;
 		}
 		default: {

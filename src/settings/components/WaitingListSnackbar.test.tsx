@@ -28,10 +28,9 @@ const meeting = createMockMeeting({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setUserInfo(user);
-	store.setUserInfo(user0);
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.setUserInfo([user, user0]);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 });
 
 describe('WaitingListSnackbar', () => {

@@ -4,15 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { UserBe } from '../network/models/userBeTypes';
+
+export type UsersStoreSlice = {
+	users: UsersMap;
+	setUserInfo: (users: UserBe[]) => void;
+	setUserPresence: (id: string, presence: boolean) => void;
+	setUserLastActivity: (id: string, date?: number) => void;
+	setAnonymousUser: (id: string) => void;
+};
+
 export type User = {
 	id: string;
 	email: string;
 	name: string;
 	type: UserType;
-	lastSeen?: number;
-	statusMessage?: string;
 	online?: boolean;
-	last_activity?: number;
+	lastActivity?: number;
 };
 
 export type UsersMap = {

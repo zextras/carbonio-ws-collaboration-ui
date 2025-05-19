@@ -28,7 +28,7 @@ describe('CopyRoomIntegration tests', () => {
 	test('Chats group has duplicate group in WSC', () => {
 		useStore
 			.getState()
-			.addRoom(createMockRoom({ name: 'test', type: RoomType.GROUP, members: [sessionMember] }));
+			.addRooms([createMockRoom({ name: 'test', type: RoomType.GROUP, members: [sessionMember] })]);
 		setup(
 			<CopyRoomWidget
 				name={'test'}
@@ -82,7 +82,7 @@ describe('CopyRoomIntegration tests', () => {
 			type: RoomType.GROUP,
 			members: [sessionMember]
 		});
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		setup(
 			<CopyRoomWidget
 				name={room.name!}

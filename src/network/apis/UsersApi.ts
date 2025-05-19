@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach, join, map } from 'lodash';
+import { join, map } from 'lodash';
 
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -26,7 +26,7 @@ class UsersApi implements IUsersApi {
 	public getUser(userId: string): Promise<GetUserResponse> {
 		const { setUserInfo } = useStore.getState();
 		return fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
-			setUserInfo(resp);
+			setUserInfo([resp]);
 			return resp;
 		});
 	}
@@ -35,7 +35,7 @@ class UsersApi implements IUsersApi {
 		const { setUserInfo } = useStore.getState();
 		const ids = map(userIds, (id) => `userIds=${id}`);
 		return fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then((resp: GetUsersResponse) => {
-			forEach(resp, (user) => setUserInfo(user));
+			setUserInfo(resp);
 			return resp;
 		});
 	}

@@ -7,18 +7,17 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import MeetingActionsBar from './MeetingActionsBar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -49,48 +48,54 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
-const mockUseContainerDimensions = jest.fn(() => ({ width: 100 }));
+const mockUseContainerDimensions = jest.fn();
 jest.mock('../../../hooks/useContainerDimensions', () => ({
 	__esModule: true,
 	default: (): { width: number } => mockUseContainerDimensions()
 }));
 
 beforeEach(() => {
+	mockUseContainerDimensions.mockReset();
+	mockUseContainerDimensions.mockReturnValue({ width: 100 });
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.setUserInfo([user1, user2, user3]);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	store.setCapabilities(createMockCapabilityList());
+	store.meetingConnection(meeting.id);
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
-		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const buttons = await screen.findAllByRole('button');
 		expect(buttons).toHaveLength(8);
 	});
 
 	test('Meeting duration is displayed', async () => {
-		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const meetingDuration = await screen.findByTestId('meeting_duration_component');
 		expect(meetingDuration).toBeInTheDocument();
 	});
 
 	test('MetingActionBar is not compact by default', async () => {
-		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		expect(meetingActionBar).toHaveStyle('padding: 0px 3.25rem 0px 3.25rem');
 	});
 
 	test('Leave meeting button is shown in a separate wrapper by default', async () => {
-		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
 	});

@@ -15,22 +15,21 @@ import { getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import Conversation from '../components/conversation/Conversation';
 
-// Render TestRoom ONLY when we are sure room is present in the store
 const RoomView = (): ReactElement => {
 	// Retrieve room id from url
-	const params: { roomId?: string } = useParams();
+	const { roomId } = useParams();
 	const selectedRoomId: string = useMemo(
-		() => (params?.roomId ? decodeURIComponent(params.roomId) : ''),
-		[params]
+		() => (roomId ? decodeURIComponent(roomId) : ''),
+		[roomId]
 	);
 
-	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
+	const setSelectedRoom = useStore((state) => state.setSelectedRoom);
 	const roomType = useStore((store) => getRoomTypeSelector(store, selectedRoomId));
 
-	// Keep selectedRoomOneToOneGroup update
+	// Keep selectedRoom update
 	useEffect(() => {
-		setSelectedRoomOneToOneGroup(selectedRoomId);
-	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
+		setSelectedRoom(selectedRoomId);
+	}, [selectedRoomId, setSelectedRoom]);
 
 	if (!roomType) {
 		return (

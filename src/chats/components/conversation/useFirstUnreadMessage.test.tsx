@@ -93,27 +93,25 @@ describe('useFirstUnreadMessage with text messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
 		store.setLoginInfo(myUserId, 'User');
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.updateHistory(room.id, textHistory);
 	});
 	test('User has never read a message', () => {
 		// Update unread
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, []);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(size(textHistory));
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(size(textHistory));
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		// the reference should be the firs text message arrived
-		expect(result.current).toBeUndefined();
+		// the reference should be the first text message arrived
+		expect(result.current).toBe(textHistory[0].id);
 	});
 
 	test('User some messages', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(2);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(2);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId4');
@@ -125,11 +123,9 @@ describe('useFirstUnreadMessage with text messages', () => {
 			from: myUserId,
 			messageId: last(textHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(0);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(0);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('noUnread');
@@ -138,11 +134,9 @@ describe('useFirstUnreadMessage with text messages', () => {
 	test('Reading a message after first access', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId2' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(3);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId3');
@@ -153,26 +147,24 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
 		store.setLoginInfo(myUserId, 'User');
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.updateHistory(room.id, complexHistory);
 	});
 	test('User has never read a message', () => {
 		// Update unread
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, []);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(4);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(4);
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		expect(result.current).toBeUndefined();
+		expect(result.current).toBe(complexHistory[0].id);
 	});
 
 	test('User last read is his message and after there is a deleted message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId1' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(3);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
 		// Check customHook result, deleted is set as message to read
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId2');
@@ -184,11 +176,9 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 			from: myUserId,
 			messageId: last(complexHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(0);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(0);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('noUnread');
@@ -197,11 +187,9 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	test('Reading a message before a configuration message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(1);
+		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(1);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId4');

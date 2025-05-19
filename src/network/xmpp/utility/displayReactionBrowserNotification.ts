@@ -3,13 +3,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { t, getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
+import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import { displayChatNotification } from './displayMessageBrowserNotification';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MessageFastening, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageFastening, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';
@@ -19,7 +20,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 	const room = store.rooms[message.roomId];
 
 	const refToMyMessage = !!find(
-		store.messages[message.roomId],
+		store.chatsRegistry[message.roomId].messages,
 		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId && msg.from === store.session.id
 	);
 
@@ -47,9 +48,11 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 			message: textMessage,
 			onClick: (): void => {
 				window.focus();
-				replaceHistory({
-					path: `/${message.roomId}`,
-					route: CHATS_ROUTE
+				sendCustomEvent({
+					name: EventName.ROUTE_REDIRECT,
+					data: {
+						path: `/${CHATS_ROUTE}/${message.roomId}`
+					}
 				});
 			}
 		});

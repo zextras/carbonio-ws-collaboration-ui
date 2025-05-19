@@ -18,7 +18,7 @@ const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
 
 describe('Delete user modal', () => {
 	test('User click the "Remove" button', async () => {
-		useStore.getState().addRoom(mockRoom);
+		useStore.getState().addRooms([mockRoom]);
 		const deleteUser = jest.fn();
 		const { user } = setup(
 			<DeleteUserModal deleteUser={deleteUser} closeModal={jest.fn} deleteUserModalOpen />

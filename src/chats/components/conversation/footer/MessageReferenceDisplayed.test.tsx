@@ -48,9 +48,7 @@ const myMockedRepliedTextMessage = createMockTextMessage({
 const user1: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1', // on DS them will be color #FFA726
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User 1' // on DS them will be color #FFA726
 });
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId' });
@@ -84,10 +82,8 @@ const attachmentTextMessage = createMockTextMessage({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(forwardedUser);
-	store.addRoom(mockedRoom);
+	store.setUserInfo([loggedUser, user1, forwardedUser]);
+	store.addRooms([mockedRoom]);
 });
 describe('Message reference displayed', () => {
 	test('Display the reference message of another user in a reply action of user', async () => {

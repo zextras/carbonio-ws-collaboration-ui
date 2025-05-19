@@ -11,12 +11,12 @@ import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import { getSelectedConversation } from '../../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
@@ -40,7 +40,7 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 
 	const openConversation = useCallback(() => goToRoomPage(roomId), [goToRoomPage, roomId]);

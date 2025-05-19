@@ -7,11 +7,12 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { now } from 'moment';
 
 import Bubble from './Bubble';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
@@ -21,11 +22,11 @@ import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
+import { dateToTimestamp } from '../../../../utils/dateUtils';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
@@ -33,17 +34,13 @@ const iconArrowIosDownward = 'icon: ArrowIosDownward';
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User1'
 });
 
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });
@@ -109,6 +106,7 @@ const mockedAttachmentMessageMb = createMockTextMessage({
 const mockedAttachmentMessageGb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
+	date: dateToTimestamp(now()),
 	attachment: {
 		id: 'pngAttachmentId',
 		name: 'image.jpeg',
@@ -138,6 +136,7 @@ const mockedTextMessageSentByMe = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: mockedRoom.id,
 	read: MarkerStatus.READ,
+	date: dateToTimestamp(now()),
 	from: user1Be.id
 });
 
@@ -164,10 +163,13 @@ const mockedTextMessagePending = createMockTextMessage({
 	text: 'This is a message'
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRooms([mockedRoom]);
+});
+
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		setup(
 			<Bubble
 				message={mockedRepliedTextMessage}
@@ -183,7 +185,6 @@ describe('Message bubble component visualization', () => {
 	});
 	test('Display image', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageKb);
 		setup(
 			<Bubble
@@ -196,8 +197,6 @@ describe('Message bubble component visualization', () => {
 		expect(screen.getByTestId('attachmentImg')).toBeInTheDocument();
 	});
 	test('Hover on image reply', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(
 			<Bubble
 				message={mockedRepliedTextMessageWithAttachment}
@@ -230,7 +229,6 @@ const readsMessages: Array<[string, TextMessage, boolean, string]> = [
 describe('Attachment footer', () => {
 	test.each(sizeFormatMessages)('Display size in %s', async (format, msg, evaluate) => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(msg);
 		setup(
 			<Bubble
@@ -245,10 +243,11 @@ describe('Attachment footer', () => {
 	});
 	test.each(readsMessages)('Display message sent from me, %s', (format, msg, cap, iconToCheck) => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(msg);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: cap }));
+		store.setAttributes(
+			createMockAttributesList({ carbonioWscShowMessageReads: cap ? 'TRUE' : 'FALSE' })
+		);
 		setup(
 			<Bubble
 				message={msg}
@@ -262,10 +261,9 @@ describe('Attachment footer', () => {
 	});
 	test('Display reads for a message sent from me, me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageSentByMe);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 		setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}
@@ -278,10 +276,9 @@ describe('Attachment footer', () => {
 	});
 	test('Display unread message sent from me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageUnread);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 		setup(
 			<Bubble
 				message={mockedTextMessageUnread}
@@ -294,12 +291,14 @@ describe('Attachment footer', () => {
 	});
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setUserInfo([guestUser, user1Be]);
+});
+
 describe('Message header', () => {
 	test('Sender is guest user', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(guestUser);
 		setup(
 			<Bubble
 				message={mockedMsgFromGuest}
@@ -312,10 +311,6 @@ describe('Message header', () => {
 		expect(guestLabel).toBeInTheDocument();
 	});
 	test('Sender is internal user', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}
@@ -329,12 +324,15 @@ describe('Message header', () => {
 	});
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
+	store.addRooms([mockedTempRoom]);
+	store.setUserInfo([user1Be]);
+});
 describe('Actions', () => {
-	test('download an attachment', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
+	test('Download an attachment', async () => {
 		const { user } = setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
@@ -358,9 +356,6 @@ describe('Actions', () => {
 	test('Delete a message with attachment', async () => {
 		const spyOnDeleteAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.DELETE_ATTACHMENT);
 		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		store.newMessage(mockedAttachmentMessageGb);
 		const { user } = setup(
 			<Bubble
@@ -385,9 +380,6 @@ describe('Actions', () => {
 			.mockImplementation(() => 'deleted');
 
 		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(
 			<Bubble

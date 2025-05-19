@@ -59,14 +59,9 @@ const memberMeeting = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(sessionUser);
-	store.setUserInfo(userOne);
-	store.addRoom(ownerRoom);
-	store.addMeeting(ownerMeeting);
-	store.addRoom(ownersRoom);
-	store.addMeeting(ownersMeeting);
-	store.addRoom(memberRoom);
-	store.addMeeting(memberMeeting);
+	store.setUserInfo([sessionUser, userOne]);
+	store.addRooms([ownerRoom, ownersRoom, memberRoom]);
+	store.addMeetings([ownerMeeting, ownersMeeting, memberMeeting]);
 });
 
 describe('VirtualRoomCard', () => {
@@ -122,8 +117,8 @@ describe('VirtualRoomCard', () => {
 		const actionsButtons = screen.getByTestId(moreVerticalIcon);
 		await user.click(actionsButtons);
 
-		const edit = screen.getByText(deleteVirtualRoomLabel);
-		await user.click(edit);
+		const deleteAct = screen.getByText(deleteVirtualRoomLabel);
+		await user.click(deleteAct);
 
 		expect(screen.getByText(`Delete "${ownerRoom.name}" Virtual Room`)).toBeInTheDocument();
 	});

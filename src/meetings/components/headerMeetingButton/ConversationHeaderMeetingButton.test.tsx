@@ -7,11 +7,11 @@
 import React from 'react';
 
 import { act, screen } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useStore from '../../../store/Store';
 import {
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -21,130 +21,76 @@ import {
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { mockGoToRoomPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
-const storeSetupOneToOne = (): void => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const room: RoomBe = createMockRoom({
-		name: '',
-		description: '',
-		type: RoomType.ONE_TO_ONE,
-		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
-	});
-	store.addRoom(room);
-	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-};
-const storeSetupOneToOneMeeting = (): { store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const room: RoomBe = createMockRoom({
-		name: '',
-		description: '',
-		type: RoomType.ONE_TO_ONE,
-		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
-	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
+
+const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
+
+const user3: UserBe = createMockUser({
+	id: 'user3Id',
+	name: 'user 3'
+});
+
+const oneToOneRoom = createMockRoom({
+	id: 'oneToOneRoomId',
+	type: RoomType.ONE_TO_ONE,
+	members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
+});
+
+const meetingOneToOne = createMockMeeting({
+	id: 'meetingOneToOneId',
+	roomId: oneToOneRoom.id,
+	participants: [
+		createMockParticipants({ userId: user1.id }),
+		createMockParticipants({ userId: user2.id })
+	]
+});
+
+const groupRoom = createMockRoom({
+	id: 'groupRoomId',
+	type: RoomType.GROUP,
+	members: [
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id }),
+		createMockMember({ userId: user3.id })
+	]
+});
+
+const groupMeeting = createMockMeeting({
+	id: 'meetingGroupId',
+	roomId: groupRoom.id,
+	participants: [
+		createMockParticipants({ userId: user1.id }),
+		createMockParticipants({ userId: user2.id }),
+		createMockParticipants({ userId: user3.id })
+	]
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-	const meeting: MeetingBe = createMockMeeting({
-		roomId: room.id,
-		participants: [user1Participant, user2Participant]
-	});
-	store.addMeeting(meeting);
-	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-	return { store };
-};
-const storeSetupGroup = (): void => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const room: RoomBe = createMockRoom({
-		type: RoomType.GROUP,
-		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
-	});
-	store.addRoom(room);
-	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-};
-const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const room: RoomBe = createMockRoom({
-		name: '',
-		description: '',
-		type: RoomType.GROUP,
-		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
-	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	mockGoToRoomPage.mockReturnValue(`room of ${user2.name}`);
-	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-	const meeting: MeetingBe = createMockMeeting({
-		roomId: room.id,
-		participants: [user1Participant, user2Participant]
-	});
-	store.addMeeting(meeting);
-	const { user } = setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-	return { user, store };
-};
-const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const user3: UserBe = createMockUser({
-		id: 'user3Id',
-		name: 'user 3'
-	});
-	const room: RoomBe = createMockRoom({
-		name: '',
-		description: '',
-		type: RoomType.GROUP,
-		members: [
-			createMockMember({ userId: user1.id }),
-			createMockMember({ userId: user2.id }),
-			createMockMember({ userId: user3.id })
-		]
-	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
-	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-	const meeting: MeetingBe = createMockMeeting({
-		roomId: room.id,
-		participants: [user3Participant, user2Participant]
-	});
-	store.addMeeting(meeting);
-	const { user } = setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-	return { user, store };
-};
+	store.setUserInfo([user1, user2, user3]);
+	store.addRooms([oneToOneRoom, groupRoom]);
+	store.setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE'
+		})
+	);
+});
 
 describe('Conversation header meeting button - one to one', () => {
 	test('everything is rendered correctly', () => {
-		storeSetupOneToOne();
+		setup(<ConversationHeaderMeetingButton roomId={oneToOneRoom.id} />);
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		expect(joinMeetingButton).toBeVisible();
 		expect(joinMeetingButton).not.toBeDisabled();
 	});
 
 	test('everything is rendered correctly - meeting started', () => {
-		storeSetupOneToOneMeeting();
+		useStore.getState().addMeetings([meetingOneToOne]);
+		setup(<ConversationHeaderMeetingButton roomId={oneToOneRoom.id} />);
 		const disabledButton = screen.getByTestId('join_meeting_button');
 		expect(disabledButton).toBeEnabled();
 	});
@@ -152,7 +98,7 @@ describe('Conversation header meeting button - one to one', () => {
 
 describe('Conversation header meeting button - group', () => {
 	test('everything is rendered correctly', () => {
-		storeSetupGroup();
+		setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		expect(joinMeetingButton).toBeVisible();
 		expect(joinMeetingButton).not.toBeDisabled();
@@ -160,10 +106,7 @@ describe('Conversation header meeting button - group', () => {
 
 	test('open meeting for the first time', async () => {
 		const spyOnCreateMeeting = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_MEETING);
-		const room = createMockRoom();
-		const store = useStore.getState();
-		store.addRoom(room);
-		const { user } = setup(<ConversationHeaderMeetingButton roomId={room.id} />);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		await user.click(joinMeetingButton);
@@ -172,7 +115,8 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('everything is rendered correctly - meeting started', () => {
-		storeSetupGroupMeeting();
+		useStore.getState().addMeetings([groupMeeting]);
+		setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const disabledButton = screen.getByTestId('join_meeting_button');
 		expect(disabledButton).toBeEnabled();
 		const videoButton = screen.getByTestId('video_button');
@@ -182,7 +126,8 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test("toggle dropdown - I'm inside the meeting", async () => {
-		const { user } = storeSetupGroupMeeting();
+		useStore.getState().addMeetings([groupMeeting]);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const participantListButton = screen.getByTestId('participant_list_button');
 		expect(screen.getByTestId('participant_dropdown')).not.toBeVisible();
@@ -192,11 +137,14 @@ describe('Conversation header meeting button - group', () => {
 
 		const list = await screen.findByTestId('participant_list');
 		expect(list).toBeInTheDocument();
-		expect(list.children).toHaveLength(2);
+		expect(list.children).toHaveLength(3);
 	});
 
 	test("toggle dropdown - I'm not inside the meeting", async () => {
-		const { user } = storeSetupGroupMeetingWithoutMe();
+		const store = useStore.getState();
+		store.addMeetings([groupMeeting]);
+		store.removeParticipant(groupMeeting.id, user1.id);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const participantListButton = screen.getByTestId('participant_list_button');
 		expect(participantListButton).not.toBeDisabled();
@@ -214,21 +162,25 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('go to private chat from dropdown', async () => {
-		const { user } = storeSetupGroupMeeting();
+		useStore.getState().addMeetings([groupMeeting]);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const participantListButton = screen.getByTestId('participant_list_button');
 		await user.click(participantListButton);
 
 		// there's two participants inside the meeting, so the one who's not me will have the 'go to private chat' button
 		const goToPrivateChatButton = await screen.findAllByTestId('go_to_private_chat');
-		expect(goToPrivateChatButton).toHaveLength(1);
+		expect(goToPrivateChatButton).toHaveLength(2);
 		await user.click(goToPrivateChatButton[0]);
 		expect(mockGoToRoomPage).toBeCalled();
 	});
 
 	test('open meeting', async () => {
 		const meetingOpen = jest.spyOn(window, 'open');
-		const { user } = storeSetupGroupMeetingWithoutMe();
+		const store = useStore.getState();
+		store.addMeetings([groupMeeting]);
+		store.removeParticipant(groupMeeting.id, user1.id);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		expect(joinMeetingButton).toBeVisible();
 		expect(joinMeetingButton).not.toBeDisabled();
@@ -238,15 +190,18 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test("hide dropdown when there's no one else inside the meeting", async () => {
-		const { user } = storeSetupGroupMeetingWithoutMe();
+		const store = useStore.getState();
+		store.addMeetings([groupMeeting]);
+		store.removeParticipant(groupMeeting.id, user1.id);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const participantListButton = screen.getByTestId('participant_list_button');
 		expect(screen.getByTestId('participant_dropdown')).not.toBeVisible();
 		await user.click(participantListButton);
 		expect(screen.getByTestId('participant_dropdown')).toBeVisible();
 
 		act(() => {
-			useStore.getState().removeParticipant('meetingId', 'user2Id');
-			useStore.getState().removeParticipant('meetingId', 'user3Id');
+			useStore.getState().removeParticipant(groupMeeting.id, user2.id);
+			useStore.getState().removeParticipant(groupMeeting.id, user3.id);
 		});
 		expect(screen.getByTestId('participant_dropdown')).not.toBeVisible();
 	});

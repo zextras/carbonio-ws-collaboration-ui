@@ -6,14 +6,13 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import InfoPage from './InfoPage';
-import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
-import { setup } from '../../tests/test-utils';
+import { routerContextSetup } from '../../tests/test-utils';
 import { UserType } from '../../types/store/UserTypes';
+import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const pages = [
 	[PAGE_INFO_TYPE.ROOM_EMPTY, 'This Room is empty', 'Try later', 'It seems nobody is in this Room'],
@@ -74,9 +73,7 @@ describe('Info page', () => {
 	test.each([...pages, ...pagesToCheckGuest])(
 		'Display %s info page',
 		async (type, title, central, desc) => {
-			const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-			spyUseParams.mockReturnValueOnce({ infoType: type });
-			setup(<InfoPage />);
+			routerContextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
 
 			expect(screen.getAllByText(new RegExp(title, 'i'))[0]).toBeVisible();
 			expect(screen.getByText(new RegExp(central, 'i'))).toBeVisible();
@@ -89,9 +86,7 @@ describe('Info page', () => {
 		const guestUser = createMockUser({ type: UserType.GUEST });
 		const store = useStore.getState();
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValueOnce({ infoType: type });
-		setup(<InfoPage />);
+		routerContextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
 
 		expect(document.cookie).toBe('');
 	});

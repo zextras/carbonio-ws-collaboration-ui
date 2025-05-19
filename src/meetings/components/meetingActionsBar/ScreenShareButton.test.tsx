@@ -15,8 +15,9 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
+import { MEETINGS_ROUTES } from '../../contexts/routerContext';
 
 const meeting: MeetingBe = createMockMeeting({ roomId: createMockRoom().id });
 
@@ -39,29 +40,31 @@ describe('ScreenShare button', () => {
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
 		store.setLoginInfo('userId', 'User', 'User');
-		store.addMeeting(
+		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: false })]
 			})
-		);
+		]);
 		setup(<ScreenShareButton />);
 		const disabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOff');
 		expect(disabledScreenShareIcon).toBeVisible();
 	});
 
 	test('ScreenSharingOn icon when screenshare is enabled', async () => {
-		useParams.mockReturnValue({ meetingId: meeting.id });
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
 		store.setLoginInfo('userId', 'User', 'User');
-		store.addMeeting(
+		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: true })]
 			})
-		);
-		setup(<ScreenShareButton />);
+		]);
+		routerContextSetup(<ScreenShareButton />, {
+			meetingId: meeting.id,
+			route: MEETINGS_ROUTES.MEETING
+		});
 		const enabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOn');
 		expect(enabledScreenShareIcon).toBeVisible();
 	});

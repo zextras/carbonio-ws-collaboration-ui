@@ -5,7 +5,7 @@
  */
 
 import { messageActionType } from '../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../types/store/MessageTypes';
+import { Message, MessageType } from '../types/store/ChatsRegistryTypes';
 
 export const canPerformAction = (
 	message: Message,
@@ -13,8 +13,8 @@ export const canPerformAction = (
 	actionTimeLimitInMinutes: number,
 	actionType?: messageActionType
 ): boolean => {
-	const inTime =
-		!actionTimeLimitInMinutes || Date.now() <= message.date + actionTimeLimitInMinutes * 60000;
+	if (actionTimeLimitInMinutes === 0) return false;
+	const inTime = Date.now() <= message.date + actionTimeLimitInMinutes * 60000;
 	if (actionType === messageActionType.EDIT && message.type === MessageType.TEXT_MSG)
 		return isMyMessage && inTime && !message.forwarded;
 	return isMyMessage && inTime;

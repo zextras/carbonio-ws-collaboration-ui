@@ -7,7 +7,7 @@
 import { act, renderHook, waitFor, screen } from '@testing-library/react';
 
 import useGeneralMeetingControls from './useGeneralMeetingControls';
-import { PAGE_INFO_TYPE } from './useRouting';
+import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../tests/mocks/network';
@@ -21,8 +21,8 @@ beforeEach(() => {
 	store.setLoginInfo('userId', 'User');
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
+	store.addMeetings([meeting]);
 });
 describe('useGeneralMeetingControl hook', () => {
 	test('Show a snackbar when the WebSocket connection is restored and the user is still in the meeting', async () => {

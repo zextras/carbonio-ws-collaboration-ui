@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import usePinnedTile from '../../../hooks/usePinnedTile';
+import { getUserHandRank } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -23,8 +24,7 @@ const InfoContainer = styled(Container)`
 	z-index: ${Z_INDEX_RANK.TILE_INFO};
 `;
 
-const TextContainer = styled(Container)`
-	position: absolute;
+const TextContainer = styled(Row)`
 	max-width: 90%;
 	background-color: ${({ theme }): string => theme.palette.text.regular};
 	border-radius: 0.25rem;
@@ -32,7 +32,7 @@ const TextContainer = styled(Container)`
 	user-select: none;
 `;
 
-const CustomContainer = styled(Container)`
+const CustomContainer = styled(Row)`
 	border-radius: 0.25rem;
 `;
 
@@ -42,6 +42,7 @@ type tileUserInfoProps = {
 	videoStreamEnabled: boolean;
 	audioStreamEnabled: boolean;
 	isScreenShare: boolean | undefined;
+	isHandRaised: boolean;
 };
 
 const TileUserInfo: FC<tileUserInfoProps> = ({
@@ -49,7 +50,8 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	userId,
 	videoStreamEnabled,
 	audioStreamEnabled,
-	isScreenShare
+	isScreenShare,
+	isHandRaised
 }) => {
 	const [t] = useTranslation();
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
@@ -58,6 +60,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	const userName = useStore((store) => getUserName(store, userId ?? ''));
 	const isSessionTile = useStore(getUserId) === userId;
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
+	const userHandRank = useStore((store) => getUserHandRank(store, userId ?? ''));
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
 		meetingId ?? '',
@@ -107,12 +110,13 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	);
 
 	return (
-		<InfoContainer orientation="horizontal">
+		<InfoContainer orientation="vertical" mainAlignment="space-between" maxWidth="100%">
 			<Row
 				orientation="horizontal"
 				mainAlignment={'flex-start'}
 				crossAlignment={'flex-start'}
-				height="fill"
+				height="fit"
+				width="fill"
 				padding="0.5rem"
 				style={{ gap: '0.5rem' }}
 			>
@@ -121,14 +125,30 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 			<Row
 				mainAlignment={'flex-end'}
 				crossAlignment={'flex-end'}
-				height="fill"
-				takeAvailableSpace
+				height="fit"
+				width="fill"
 				padding="0.5rem"
+				gap="0.5rem"
+				wrap="nowrap"
 			>
-				<TextContainer orientation={'horizontal'} width={'fit'} height={'fit'} gap={'0.25rem'}>
-					<Text color={'gray6'}>{userName}</Text>
-					{isUserGuest && <GuestUserLabel />}
-				</TextContainer>
+				<Row takeAvailableSpace mainAlignment={'flex-end'} crossAlignment={'flex-end'}>
+					<TextContainer orientation={'horizontal'} width={'fit'} height={'fit'} gap={'0.25rem'}>
+						<Text color={'gray6'}>{userName}</Text>
+						{isUserGuest && <GuestUserLabel />}
+					</TextContainer>
+				</Row>
+				{isHandRaised && !isScreenShare && (
+					<CustomContainer
+						background={'gray0'}
+						height="fit"
+						width="fit"
+						padding="0.35rem"
+						gap="0.25rem"
+					>
+						<Icon icon="Hand" color="warning" />
+						<Text color={'gray6'}>{userHandRank}</Text>
+					</CustomContainer>
+				)}
 			</Row>
 		</InfoContainer>
 	);

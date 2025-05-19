@@ -29,19 +29,19 @@ const event: MeetingRecordingStoppedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
-	store.addMeeting(meeting);
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
 });
 describe('MeetingRecordingStoppedEventHandler tests', () => {
 	test('Meeting starting information are reset into store', () => {
 		meetingRecordingStoppedEventHandler(event);
 		const state = useStore.getState();
-		expect(state.meetings[room.id].recStartedAt).toBeUndefined();
-		expect(state.meetings[room.id].recUserId).toBeUndefined();
+		expect(state.meetings[meeting.id].recStartedAt).toBeUndefined();
+		expect(state.meetings[meeting.id].recUserId).toBeUndefined();
 	});
 
 	test('A custom event is sent if the session user is inside meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingRecordingStoppedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(

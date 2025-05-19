@@ -7,7 +7,7 @@
 import roomsApi from './RoomsApi';
 import useStore from '../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage
@@ -99,7 +99,7 @@ describe('Rooms API', () => {
 	test('deleteRoomAndMeeting with an associated meeting is called correctly', async () => {
 		const room = createMockRoom();
 		const meeting = createMockMeeting({ roomId: room.id });
-		useStore.getState().addMeeting(meeting);
+		useStore.getState().addMeetings([meeting]);
 		// Send deleteRoom request
 		await roomsApi.deleteRoomAndMeeting(room.id);
 
@@ -142,12 +142,12 @@ describe('Rooms API', () => {
 	});
 
 	test('updateRoomPicture is called with a file too large', async () => {
-		// Set maxRoomImageSizeInKb to 512kb
+		// Set maxRoomImageSizeInKb to 2MB
 		const store = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ maxRoomImageSizeInKb: 512 }));
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '2' }));
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
-		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 + 1 });
+		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 * 3 });
 
 		expect(roomsApi.updateRoomPicture('roomId', testFile)).rejects.toThrowError('File too large');
 		expect(spyOnFetch).not.toHaveBeenCalled();
@@ -252,6 +252,8 @@ describe('Rooms API', () => {
 	});
 
 	test('addRoomAttachment is called correctly', async () => {
+		const store = useStore.getState();
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
 		const spyOnUploadFileFetchAPI = jest
 			.spyOn(FetchUtils, 'uploadFileFetchAPI')
 			.mockImplementation(() => Promise.resolve());

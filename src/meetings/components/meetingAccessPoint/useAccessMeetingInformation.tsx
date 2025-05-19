@@ -19,13 +19,14 @@ import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../constants/appConstants';
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 type UseAccessMeetingInformationReturnType = {
 	meetingName: string;
@@ -44,7 +45,7 @@ const useAccessMeetingInformation = (): UseAccessMeetingInformationReturnType =>
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
-	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 

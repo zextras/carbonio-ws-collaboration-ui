@@ -18,7 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { OperationType } from '../../../types/store/MessageTypes';
+import { OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const loggedUser = createMockUser({ id: 'logged-user', name: 'Logged User' });
@@ -40,10 +40,8 @@ const groupRoom = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(otherUser);
-	store.addRoom(singleRoom);
-	store.addRoom(groupRoom);
+	store.setUserInfo([loggedUser, otherUser]);
+	store.addRooms([singleRoom, groupRoom]);
 });
 describe('ChatItem test', () => {
 	test('1-to-1 ChatItem displays user name', () => {

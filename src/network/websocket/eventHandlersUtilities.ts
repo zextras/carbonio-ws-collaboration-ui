@@ -54,7 +54,9 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.MEETING_USER_REJECTED:
 		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED:
 		case WsEventType.MEETING_RECORDING_STARTED:
-		case WsEventType.MEETING_RECORDING_STOPPED: {
+		case WsEventType.MEETING_RECORDING_STOPPED:
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED:
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
 			return EventArea.MEETING;
 		}
 		default: {
@@ -66,7 +68,7 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 export const isMyId = (userId: string): boolean => userId === getUserId(useStore.getState());
 
 export const isMeetingActive = (meetingId: string): boolean =>
-	useStore.getState().activeMeeting[meetingId] !== undefined;
+	useStore.getState().activeMeeting?.meetingId === meetingId;
 
 export const inThisMeetingTab = (meetingId: string): boolean =>
 	window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);

@@ -13,7 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { FasteningAction } from '../../../types/store/MessageTypes';
+import { FasteningAction } from '../../../types/store/ChatsRegistryTypes';
 
 const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });
@@ -35,8 +35,8 @@ const messageFromUser = createMockTextMessage({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(user);
-	store.addRoom(room);
+	store.setUserInfo([user]);
+	store.addRooms([room]);
 	store.newMessage(messageFromMe);
 	store.newMessage(messageFromUser);
 });

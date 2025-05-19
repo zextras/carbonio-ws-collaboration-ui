@@ -10,8 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { forEach, map, reverse } from 'lodash';
 
 import ReactionChip from './ReactionChip';
-import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
-import useStore from '../../../../store/Store';
+import { useReactionFastenings } from '../../../../store/selectors/chatsRegistrySelectors/useReactionFastenings';
 
 type BubbleReactionsProps = {
 	roomId: string;
@@ -19,7 +18,7 @@ type BubbleReactionsProps = {
 };
 
 const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) => {
-	const reactions = useStore((store) => getReactionFastenings(store, roomId, stanzaId));
+	const reactions = useReactionFastenings(roomId, stanzaId);
 
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};

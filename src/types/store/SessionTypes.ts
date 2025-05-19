@@ -4,24 +4,31 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+
 import { UserType } from './UserTypes';
 import { IChatExporter } from '../../settings/components/chatExporter/ChatExporter';
+
+export type SessionStoreSlice = {
+	session: Session;
+	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
+	setAttributes: (attrs: AccountSettingsAttrs) => void;
+	setQueueId: (queueId: string) => void;
+	setSelectedRoom: (roomId?: string) => void;
+	setCustomLogo: (logo: string | false) => void;
+	setChatExporting: (roomId?: string) => void;
+	setChatExportStatus: (status: ExportStatus) => void;
+};
 
 export type Session = {
 	id?: string;
 	email?: string;
 	name?: string;
 	displayName?: string;
-	sessionId?: string;
+	queueId?: string;
 	userType?: UserType;
-	capabilities?: CapabilityList;
-	connections?: {
-		chats_be: boolean | undefined;
-		xmpp: boolean | undefined;
-		websocket: boolean | undefined;
-	};
-	selectedRoomOneToOneGroup?: string;
-	filterHasFocus: boolean;
+	attributes?: AttributesList;
+	selectedRoom?: string;
 	customLogo?: string | false;
 	chatExporting?: {
 		roomId: string;
@@ -30,31 +37,21 @@ export type Session = {
 	};
 };
 
-export type CapabilityList = {
-	canSeeMessageReads: boolean;
-	canSeeUsersPresence?: boolean;
-	canVideoCall?: boolean;
-	canVideoCallRecord?: boolean;
-	canUseVirtualBackground?: boolean;
-	editMessageTimeLimitInMinutes: number;
-	deleteMessageTimeLimitInMinutes: number;
-	maxGroupMembers?: number;
-	maxRoomImageSizeInKb?: number;
-	maxUserImageSizeInKb?: number;
+export type AttributesList = {
+	privateChatCreation: boolean;
+	groupChatCreation: boolean;
+	maxGroupMembers: number;
+	messageDeleteTimeLimit: number;
+	messageEditTimeLimit: number;
+	maxRoomPictureSize: number;
+	attachmentUpload: boolean;
+	maxAttachmentSize: number;
+	showMessageReads: boolean;
+	showUsersPresence: boolean;
+	videoCallEnabled: boolean;
+	recordingEnabled: boolean;
+	virtualBackgroundEnabled: boolean;
 };
-
-export enum CapabilityType {
-	CAN_SEE_MESSAGE_READS = 'canSeeMessageReads',
-	CAN_SEE_USERS_PRESENCE = 'canSeeUsersPresence',
-	CAN_VIDEO_CALL = 'canVideoCall',
-	CAN_VIDEO_CALL_RECORD = 'canVideoCallRecord',
-	CAN_USE_VIRTUAL_BACKGROUND = 'canUseVirtualBackground',
-	EDIT_MESSAGE_TIME_LIMIT = 'editMessageTimeLimitInMinutes',
-	DELETE_MESSAGE_TIME_LIMIT = 'deleteMessageTimeLimitInMinutes',
-	MAX_GROUP_MEMBERS = 'maxGroupMembers',
-	MAX_ROOM_IMAGE_SIZE = 'maxRoomImageSizeInKb',
-	MAX_USER_IMAGE_SIZE = 'maxUserImageSizeInKb'
-}
 
 export enum ExportStatus {
 	EXPORTING = 'exporting',

@@ -238,6 +238,7 @@ class XMPPClient implements IXMPPClient {
 
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void {
+		if (!useStore.getState().rooms[roomId]) return;
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
 		// Ask for ${QUANTITY} messages before end date but not before start date
@@ -277,6 +278,7 @@ class XMPPClient implements IXMPPClient {
 		olderMessageId: string,
 		newerMessageId: string
 	): void {
+		if (!useStore.getState().rooms[roomId]) return;
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM })
 			.c('x', { xmlns: jabberData })
@@ -300,6 +302,7 @@ class XMPPClient implements IXMPPClient {
 		messageSubjectOfReplyId: string,
 		replyMessageId: string
 	): void {
+		if (!useStore.getState().rooms[roomId]) return;
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: jabberData })
@@ -331,6 +334,7 @@ class XMPPClient implements IXMPPClient {
 	}
 
 	requestFullHistory(roomId: string, from?: number): void {
+		if (!useStore.getState().rooms[roomId]) return;
 		const room = useStore.getState().rooms[roomId];
 		const clearedAt = room.userSettings?.clearedAt;
 		const startHistory = from ?? clearedAt ?? room.createdAt;
@@ -388,7 +392,7 @@ class XMPPClient implements IXMPPClient {
 	// Send confirmation that I read a certain message
 	readMessage(roomId: string, messageId: string): void {
 		const message = find(
-			useStore.getState().messages[roomId],
+			useStore.getState().chatsRegistry[roomId].messages,
 			(message) => message.id === messageId
 		);
 		if (message) {

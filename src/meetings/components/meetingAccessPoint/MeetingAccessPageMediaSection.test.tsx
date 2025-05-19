@@ -50,14 +50,13 @@ const groupMeeting: MeetingBe = createMockMeeting({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(groupRoom);
-	store.addMeeting(groupMeeting);
+	store.addRooms([groupRoom]);
+	store.addMeetings([groupMeeting]);
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
-	store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+	store.meetingConnection(groupMeeting.id);
 	localStorage.setItem(
 		'ChatsMeetingSettings',
 		JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
