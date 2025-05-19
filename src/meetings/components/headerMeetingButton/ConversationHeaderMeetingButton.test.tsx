@@ -89,7 +89,7 @@ describe('Conversation header meeting button - one to one', () => {
 	});
 
 	test('everything is rendered correctly - meeting started', () => {
-		useStore.getState().addMeeting(meetingOneToOne);
+		useStore.getState().addMeetings([meetingOneToOne]);
 		setup(<ConversationHeaderMeetingButton roomId={oneToOneRoom.id} />);
 		const disabledButton = screen.getByTestId('join_meeting_button');
 		expect(disabledButton).toBeEnabled();
@@ -115,7 +115,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('everything is rendered correctly - meeting started', () => {
-		useStore.getState().addMeeting(groupMeeting);
+		useStore.getState().addMeetings([groupMeeting]);
 		setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const disabledButton = screen.getByTestId('join_meeting_button');
 		expect(disabledButton).toBeEnabled();
@@ -126,7 +126,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test("toggle dropdown - I'm inside the meeting", async () => {
-		useStore.getState().addMeeting(groupMeeting);
+		useStore.getState().addMeetings([groupMeeting]);
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const participantListButton = screen.getByTestId('participant_list_button');
@@ -142,7 +142,7 @@ describe('Conversation header meeting button - group', () => {
 
 	test("toggle dropdown - I'm not inside the meeting", async () => {
 		const store = useStore.getState();
-		store.addMeeting(groupMeeting);
+		store.addMeetings([groupMeeting]);
 		store.removeParticipant(groupMeeting.id, user1.id);
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
@@ -162,7 +162,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('go to private chat from dropdown', async () => {
-		useStore.getState().addMeeting(groupMeeting);
+		useStore.getState().addMeetings([groupMeeting]);
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const participantListButton = screen.getByTestId('participant_list_button');
@@ -178,7 +178,7 @@ describe('Conversation header meeting button - group', () => {
 	test('open meeting', async () => {
 		const meetingOpen = jest.spyOn(window, 'open');
 		const store = useStore.getState();
-		store.addMeeting(groupMeeting);
+		store.addMeetings([groupMeeting]);
 		store.removeParticipant(groupMeeting.id, user1.id);
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
@@ -191,7 +191,7 @@ describe('Conversation header meeting button - group', () => {
 
 	test("hide dropdown when there's no one else inside the meeting", async () => {
 		const store = useStore.getState();
-		store.addMeeting(groupMeeting);
+		store.addMeetings([groupMeeting]);
 		store.removeParticipant(groupMeeting.id, user1.id);
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 		const participantListButton = screen.getByTestId('participant_list_button');

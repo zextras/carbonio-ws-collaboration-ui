@@ -15,10 +15,6 @@ import { getBackgroundImage } from '../../../../store/selectors/ActiveMeetingSel
 import useStore from '../../../../store/Store';
 import { VirtualBackgroundType } from '../../../../types/store/ActiveMeetingTypes';
 
-type VisualEffectCardsProps = {
-	meetingId: string;
-};
-
 const PictureContainer = styled(Container)<{ $picture?: string | false; $isSelected: boolean }>`
 	aspect-ratio: 1.2959;
 	border-radius: 0.5rem;
@@ -45,10 +41,10 @@ const ListContainer = styled(Container)`
 	grid-template-columns: repeat(3, 1fr);
 `;
 
-const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
+const VisualEffectsList: FC = () => {
 	const [t] = useTranslation();
 	const setBackgroundImage = useStore((store) => store.setBackgroundImage);
-	const backgroundSelected = useStore((store) => getBackgroundImage(store, meetingId));
+	const backgroundSelected = useStore(getBackgroundImage);
 
 	const { virtualBackgroundImages } = useVirtualBackground();
 
@@ -60,7 +56,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 				const isSelected = element === backgroundSelected;
 
 				const changeBackground = (): void => {
-					setBackgroundImage(meetingId, element);
+					setBackgroundImage(element);
 				};
 
 				const elementLabel =
@@ -94,7 +90,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 					</PictureContainer>
 				);
 			}),
-		[backgroundSelected, meetingId, setBackgroundImage, t, virtualBackgroundImages]
+		[backgroundSelected, setBackgroundImage, t, virtualBackgroundImages]
 	);
 
 	return (

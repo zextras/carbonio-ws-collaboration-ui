@@ -41,8 +41,8 @@ beforeEach(() => {
 	store.setLoginInfo(user1.id, 'user1');
 	store.setUserInfo([user1, user2]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 });
 describe('RecordingInfo tests', () => {
 	test('Recording red bar is not visible only when the meeting is not being recorded', () => {

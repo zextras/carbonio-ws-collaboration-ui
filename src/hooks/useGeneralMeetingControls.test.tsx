@@ -21,8 +21,8 @@ beforeEach(() => {
 	store.setLoginInfo('userId', 'User');
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
+	store.addMeetings([meeting]);
 });
 describe('useGeneralMeetingControl hook', () => {
 	test('Show a snackbar when the WebSocket connection is restored and the user is still in the meeting', async () => {

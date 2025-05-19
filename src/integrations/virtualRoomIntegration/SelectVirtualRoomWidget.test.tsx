@@ -41,7 +41,7 @@ describe('SelectVirtualRoomWidget', () => {
 			store.setLoginInfo(sessionUser.id, sessionUser.name);
 			store.setAttributes(createMockAttributesList());
 			store.addRooms([temporaryRoomMod]);
-			store.setMeetings([scheduledMeetingMod]);
+			store.addMeetings([scheduledMeetingMod]);
 		});
 		await act(async () => {
 			setup(

@@ -41,7 +41,7 @@ describe('wsMeetingEventsHandler', () => {
 			sentDate: '2024-05-30T12:34:56Z'
 		};
 		wsMeetingEventsHandler(event);
-		expect(useStore.getState().meetings[event.roomId]).toBeDefined();
+		expect(useStore.getState().meetings[event.meetingId]).toBeDefined();
 	});
 
 	test('MEETING_STARTED event is handled', () => {
@@ -75,7 +75,7 @@ describe('wsMeetingEventsHandler', () => {
 	test('MEETING_DELETED event is handled', () => {
 		const store = useStore.getState();
 		store.addRooms([createMockRoom({ id: 'roomId' })]);
-		store.addMeeting(createMockMeeting({ id: 'meetingId', roomId: 'roomId' }));
+		store.addMeetings([createMockMeeting({ id: 'meetingId', roomId: 'roomId' })]);
 		const event: MeetingDeletedEvent = {
 			type: WsEventType.MEETING_DELETED,
 			meetingId: 'meetingId',
@@ -116,7 +116,7 @@ describe('wsMeetingEventsHandler', () => {
 	});
 
 	test('MEETING_SDP_ANSWERED event is handled', () => {
-		const event = { type: WsEventType.MEETING_SDP_ANSWERED };
+		const event = { type: WsEventType.MEETING_SDP_ANSWERED, mediaType: STREAM_TYPE.SCREEN };
 		const handler = jest.spyOn(MeetingSDPAnsweredEventHandler, 'meetingSDPAnsweredEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);

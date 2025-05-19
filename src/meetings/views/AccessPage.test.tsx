@@ -70,10 +70,10 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setUserInfo([user1, user2, user3]);
 		result.current.setLoginInfo(user3.id, user3.name);
 		result.current.addRooms([groupRoom]);
-		result.current.addMeeting(groupMeeting);
+		result.current.addMeetings([groupMeeting]);
 		result.current.setChatsBeStatus(true);
 		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		result.current.meetingConnection(groupMeeting.id);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
@@ -87,10 +87,10 @@ const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setUserInfo([user2, user3]);
 		result.current.setLoginInfo(user2.id, user2.name);
 		result.current.addRooms([groupForWaitingRoom]);
-		result.current.addMeeting(meetingForWaitingRoom);
+		result.current.addMeetings([meetingForWaitingRoom]);
 		result.current.setChatsBeStatus(true);
 		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		result.current.meetingConnection(groupMeeting.id);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });

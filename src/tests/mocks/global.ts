@@ -15,60 +15,12 @@ Object.defineProperty(global, 'URL', {
 	}
 });
 
-export const mockedDevicesList = jest.fn(() => [
-	{
-		deviceId: 'audioDefault',
-		kind: 'audioinput',
-		label: 'Audio Default',
-		groupId: 'default'
-	},
-	{
-		deviceId: 'audioDevice1',
-		kind: 'audioinput',
-		label: 'Audio Device 1',
-		groupId: 'device1'
-	},
-	{
-		deviceId: 'audioDevice2',
-		kind: 'audioinput',
-		label: 'Audio Device 2',
-		groupId: 'device2'
-	},
-	{
-		deviceId: 'videoDefault',
-		kind: 'videoinput',
-		label: 'Video Default',
-		groupId: 'default'
-	},
-	{
-		deviceId: 'videoDevice 1',
-		kind: 'videoinput',
-		label: 'Video Device 1',
-		groupId: 'device1'
-	},
-	{
-		deviceId: 'videoDevice 2',
-		kind: 'videoinput',
-		label: 'Video Device 2',
-		groupId: 'device2'
-	}
-]);
-
 Object.defineProperty(global.navigator, 'userAgent', {
 	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 	set: jest.fn()
-});
-
-Object.defineProperty(window, 'RTCPeerConnection', {
-	value: jest.fn(() => ({
-		addTrack: jest.fn(),
-		createAnswer: jest.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
-		setRemoteDescription: jest.fn(() => Promise.resolve()),
-		setLocalDescription: jest.fn(() => Promise.resolve())
-	}))
 });
 
 Object.defineProperty(window, 'RTCSessionDescription', {

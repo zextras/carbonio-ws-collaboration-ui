@@ -59,11 +59,11 @@ beforeEach(() => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setTalkingUser(meeting.id, user3.id, true);
-	store.setTalkingUser(meeting.id, user2.id, true);
-	store.setTalkingUser(meeting.id, user1.id, true);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
+	store.setTalkingUser(user3.id, true);
+	store.setTalkingUser(user2.id, true);
+	store.setTalkingUser(user1.id, true);
 });
 
 describe('Who is speaking', () => {

@@ -49,7 +49,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const meetingViewSelected = useStore(getMeetingViewSelected);
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const virtualBackgroundEnabled = useStore((store) =>
 		getAttribute(store, 'virtualBackgroundEnabled')

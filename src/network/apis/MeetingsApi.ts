@@ -6,6 +6,7 @@
 
 import { chain, find } from 'lodash';
 
+import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
@@ -58,8 +59,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public listMeetings(): Promise<ListMeetingsResponse> {
 		return fetchAPI(`meetings`, RequestType.GET).then((resp: ListMeetingsResponse) => {
-			const { setMeetings } = useStore.getState();
-			setMeetings(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings(resp);
 			return resp;
 		});
 	}
@@ -85,8 +86,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse> {
 		return fetchAPI(`meetings/${meetingId}`, RequestType.GET).then((resp: GetMeetingResponse) => {
-			const { addMeeting } = useStore.getState();
-			addMeeting(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings([resp]);
 			return resp;
 		});
 	}
@@ -106,10 +107,8 @@ class MeetingsApi implements IMeetingsApi {
 					.getState()
 					.meetingConnection(
 						meetingId,
-						settings.audioStreamEnabled,
-						devicesId.audioDevice,
-						settings.videoStreamEnabled,
-						devicesId.videoDevice
+						{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
+						{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
 					);
 				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
 					if (meeting.meetingType === MeetingType.SCHEDULED) {
@@ -125,7 +124,7 @@ class MeetingsApi implements IMeetingsApi {
 						.filter((p) => p.handRaisedAt !== undefined)
 						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
 						.each((participant) => {
-							useStore.getState().setUserWithHandRaised(meetingId, participant.userId, true);
+							useStore.getState().setUserWithHandRaised(participant.userId, true);
 						})
 						.value();
 					return resp;
@@ -140,7 +139,7 @@ class MeetingsApi implements IMeetingsApi {
 		settings: JoinSettings,
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<string> {
-		const meeting = useStore.getState().meetings[roomId];
+		const meeting = getMeetingByRoomId(useStore.getState(), roomId);
 		if (meeting) {
 			if (meeting.active) {
 				return this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id);

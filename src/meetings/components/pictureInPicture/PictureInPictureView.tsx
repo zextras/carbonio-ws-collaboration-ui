@@ -18,7 +18,7 @@ import {
 	getSelectedVideoDeviceId
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import {
-	getMeetingByMeetingId,
+	getMeeting,
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
@@ -53,23 +53,21 @@ const PictureInPictureView = (): ReactElement => {
 	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now.");
 
 	const myUserId = useStore(getUserId);
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId!));
-	const whoIsSpeaking = useStore((store) => getNameOfFirstTalkingUser(store, meetingId!));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId!]?.videoOutConn);
+	const meeting = useStore((store) => getMeeting(store, meetingId!));
+	const whoIsSpeaking = useStore(getNameOfFirstTalkingUser);
+	const videoOutConn = useStore((store) => store.activeMeeting?.videoOutConn);
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId!));
+	const selectedVideoDeviceId = useStore(getSelectedVideoDeviceId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
+	const selectedAudioDeviceId = useStore(getSelectedAudioDeviceId);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 
 	const { permission: audioPermission } = useMediaDevices('audio');
 	const { permission: videoPermission } = useMediaDevices('video');
 
 	const isSpeakingLabel = t('meeting.pip.speaking', `${whoIsSpeaking} is speaking.`, {
-		speaker: whoIsSpeaking
+		userName: whoIsSpeaking
 	});
 
 	const [isSpeaking, setIsSpeaking] = useState<string | boolean | undefined>(true);

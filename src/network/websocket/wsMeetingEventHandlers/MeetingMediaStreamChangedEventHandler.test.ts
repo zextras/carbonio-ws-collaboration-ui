@@ -5,6 +5,7 @@
  */
 
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -33,23 +34,23 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
 });
 describe('meetingMediaStreamChangedEventHandler tests', () => {
 	test('New stream status information are saved into store', () => {
 		meetingMediaStreamChangedEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId].videoStreamOn).toBe(event.active);
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId].videoStreamOn).toBe(event.active);
 	});
 
 	test('Screen share is pinned when active', () => {
 		event.mediaType = STREAM_TYPE.SCREEN;
 		meetingMediaStreamChangedEventHandler(event);
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
-		expect(activeMeeting.pinnedTile).toHaveProperty('userId', event.userId);
-		expect(activeMeeting.pinnedTile).toHaveProperty('type', event.mediaType);
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
+		expect(activeMeeting?.pinnedTile).toHaveProperty('userId', event.userId);
+		expect(activeMeeting?.pinnedTile).toHaveProperty('type', event.mediaType);
 	});
 
 	test('Audio feedback is sent when screen sharing', () => {
@@ -61,6 +62,7 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 	test('Audio feedback is not sent for new screen sharing outside active meeting', () => {
 		event.mediaType = STREAM_TYPE.SCREEN;
 		useStore.getState().meetingDisconnection(meeting.id);
+		expect(useStore.getState().activeMeeting).toBeUndefined();
 		meetingMediaStreamChangedEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
@@ -73,8 +75,8 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 
 	test('RemoveSubscription is been called when new stream is inactive', () => {
 		event.active = false;
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
-		const subscriptionManager = activeMeeting.videoScreenIn?.subscriptionManager;
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
+		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
 		const removeSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'removeSubscription');
 		meetingMediaStreamChangedEventHandler(event);
 		expect(removeSub).toHaveBeenCalled();
@@ -82,8 +84,8 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 
 	test('AddSubscription is been called when new stream is active', () => {
 		event.active = true;
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
-		const subscriptionManager = activeMeeting.videoScreenIn?.subscriptionManager;
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
+		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
 		const addSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'addSubscription');
 		meetingMediaStreamChangedEventHandler(event);
 		expect(addSub).toHaveBeenCalled();

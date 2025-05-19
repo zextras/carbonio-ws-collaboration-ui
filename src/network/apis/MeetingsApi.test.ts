@@ -37,7 +37,7 @@ const userId = 'userId';
 
 const ongoingMeetingSetup = (): void => {
 	const store = useStore.getState();
-	store.addMeeting(meetingMock);
+	store.addMeetings([meetingMock]);
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
 		audioStreamOn: false,
@@ -64,9 +64,8 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(size(store.meetings)).toEqual(2);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(size(store.meetings[meetingMock.roomId].participants)).toEqual(
+		expect(store.meetings[meetingMock.id]).toBeDefined();
+		expect(size(store.meetings[meetingMock.id].participants)).toEqual(
 			size(meetingMock.participants)
 		);
 	});
@@ -121,7 +120,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}`, RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
+		expect(store.activeMeeting).toBeDefined();
 	});
 
 	test('joinMeeting is called correctly for a scheduled meeting', async () => {
@@ -148,11 +147,11 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${scheduledMeetingMock.id}`, RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[scheduledMeetingMock.id]).toBeDefined();
+		expect(store.activeMeeting).toBeDefined();
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
-		useStore.getState().addMeeting(meetingMock);
+		useStore.getState().addMeetings([meetingMock]);
 		await meetingsApi.enterMeeting(
 			meetingMock.roomId,
 			{
@@ -169,7 +168,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
-		useStore.getState().addMeeting(meetingNotActiveMock);
+		useStore.getState().addMeetings([meetingNotActiveMock]);
 		await meetingsApi.enterMeeting(
 			meetingNotActiveMock.roomId,
 			{
@@ -237,7 +236,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('');
 	});
 
@@ -249,7 +248,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
 	});
 
@@ -261,7 +260,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
 	});
 
@@ -275,7 +274,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('');
 	});
 
@@ -550,8 +549,8 @@ describe('Meetings API', () => {
 			videoStreamEnabled: false
 		});
 		const store = useStore.getState();
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[0]).toBe('user4');
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[1]).toBe('user2');
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[2]).toBe('user3');
+		expect(store.activeMeeting?.usersWithHandRaised[0]).toBe('user4');
+		expect(store.activeMeeting?.usersWithHandRaised[1]).toBe('user2');
+		expect(store.activeMeeting?.usersWithHandRaised[2]).toBe('user3');
 	});
 });

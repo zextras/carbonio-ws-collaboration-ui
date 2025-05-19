@@ -22,6 +22,7 @@ import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../../../types/network/websocket/wsEvents';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
@@ -45,9 +46,9 @@ beforeEach(() => {
 	store.setLoginInfo(user1.id, 'user1');
 	store.setUserInfo([user1, user2]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setRaiseHandAccordionStatus(meeting.id, true); // default open
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
+	store.setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, true); // default open
 });
 
 describe('RaiseHandAccordion', () => {
@@ -55,7 +56,7 @@ describe('RaiseHandAccordion', () => {
 		const store = useStore.getState();
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {
-			store.setUserWithHandRaised(meeting.id, user2.id, true);
+			store.setUserWithHandRaised(user2.id, true);
 		});
 		expect(screen.getByText(/1 raised hands/i)).toBeInTheDocument();
 	});
@@ -70,7 +71,7 @@ describe('RaiseHandAccordion', () => {
 
 		const { user } = setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {
-			store.setUserWithHandRaised(meeting.id, user2.id, true);
+			store.setUserWithHandRaised(user2.id, true);
 		});
 		const iconUp = 'icon: ChevronUp';
 		const iconDown = 'icon: ChevronDown';
@@ -86,7 +87,7 @@ describe('RaiseHandAccordion', () => {
 		const store = useStore.getState();
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {
-			store.setUserWithHandRaised(meeting.id, user2.id, true);
+			store.setUserWithHandRaised(user2.id, true);
 		});
 		expect(screen.getByTestId('icon: Hand')).toBeInTheDocument();
 	});
@@ -111,7 +112,7 @@ describe('Snackbar notifications', () => {
 		const store = useStore.getState();
 		act(() => {
 			store.setLoginInfo(user2.id, 'user2');
-			store.setUserWithHandRaised(meeting.id, user2.id, true);
+			store.setUserWithHandRaised(user2.id, true);
 		});
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {

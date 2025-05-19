@@ -60,11 +60,11 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
+	store.setLocalStreams(STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
-	store.setTalkingUser(meeting.id, user2.id, true);
+	store.setTalkingUser(user2.id, true);
 	const { user } = routerContextSetup(<PictureInPictureView />, { meetingId: meeting.id });
 
 	return { user, store };

@@ -6,8 +6,9 @@
 
 import { find } from 'lodash';
 
-import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import {
+	ActiveMeeting,
+	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
@@ -16,39 +17,43 @@ import {
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMeetingSidebarStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.sidebarIsOpened;
-
-export const getMeetingParticipantsAccordionStatus = (
+export const getActiveMeeting = (
 	store: RootStore,
 	meetingId: string
-): boolean => store.activeMeeting[meetingId]?.sidebarStatus.participantsAccordionIsOpened;
+): ActiveMeeting | undefined => {
+	if (store.activeMeeting?.meetingId === meetingId) return store.activeMeeting;
+	return undefined;
+};
 
-export const getWaitingListAccordionStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.waitingListAccordionIsOpened;
+export const getMeetingSidebarStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 
-export const getRecordingAccordionStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.recordingAccordionIsOpened;
+export const getMeetingParticipantsAccordionStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS];
 
-export const getVisualEffectsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.visualEffectsAccordionIsOpened;
+export const getWaitingListAccordionStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST];
 
-export const getRaiseHandAccordionStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.raiseHandAccordionStatusIsOpened;
+export const getRecordingAccordionStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING];
 
-export const getMeetingChatVisibility = (
-	store: RootStore,
-	meetingId: string
-): MeetingChatVisibility => store.activeMeeting[meetingId]?.chatVisibility;
+export const getVisualEffectsAccordionStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.VISUAL_EFFECTS];
 
-export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
-	store.activeMeeting[meetingId]?.meetingViewSelected;
+export const getRaiseHandAccordionStatus = (store: RootStore): boolean =>
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.RAISE_HAND];
 
-export const getSelectedAudioDeviceId = (store: RootStore, meetingId: string): string | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.selectedAudioDeviceId;
+export const getMeetingChatVisibility = (store: RootStore): MeetingChatVisibility =>
+	store.activeMeeting?.chatVisibility ?? MeetingChatVisibility.CLOSED;
 
-export const getSelectedVideoDeviceId = (store: RootStore, meetingId: string): string | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.selectedVideoDeviceId;
+export const getMeetingViewSelected = (store: RootStore): MeetingViewType =>
+	store.activeMeeting?.meetingViewSelected ?? MeetingViewType.GRID;
+
+export const getSelectedAudioDeviceId = (store: RootStore): string | undefined =>
+	store.activeMeeting?.localStreams?.selectedAudioDeviceId;
+
+export const getSelectedVideoDeviceId = (store: RootStore): string | undefined =>
+	store.activeMeeting?.localStreams?.selectedVideoDeviceId;
 
 export const getStream = (
 	store: RootStore,
@@ -58,76 +63,62 @@ export const getStream = (
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
 		if (
-			store.activeMeeting[meetingId] &&
-			store.activeMeeting[meetingId]?.virtualBackground.backgroundImage !==
-				VirtualBackgroundType.NONE &&
+			store.activeMeeting?.meetingId === meetingId &&
+			store.activeMeeting?.virtualBackground.backgroundImage !== VirtualBackgroundType.NONE &&
 			streamType !== STREAM_TYPE.SCREEN
 		) {
-			return store.activeMeeting[meetingId].virtualBackground.updatedStream;
+			return store.activeMeeting.virtualBackground.updatedStream;
 		}
 		if (streamType === STREAM_TYPE.VIDEO) {
-			return store.activeMeeting[meetingId]?.localStreams?.video;
+			return store.activeMeeting?.localStreams?.video;
 		}
 		if (streamType === STREAM_TYPE.SCREEN) {
-			return store.activeMeeting[meetingId]?.localStreams?.screen;
+			return store.activeMeeting?.localStreams?.screen;
 		}
 	}
 	const subscriptionId = `${userId}-${streamType}`;
-	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;
+	return store.activeMeeting?.subscription[subscriptionId]?.stream;
 };
 
-export const getLocalStreamVideo = (store: RootStore, meetingId: string): MediaStream | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.video;
+export const getLocalStreamVideo = (store: RootStore): MediaStream | undefined =>
+	store.activeMeeting?.localStreams?.video;
 
-export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.isCarouselVisible;
+export const getMeetingCarouselVisibility = (store: RootStore): boolean =>
+	!!store.activeMeeting?.isCarouselVisible;
 
-export const getPinnedTile = (store: RootStore, meetingId: string): TileData | undefined =>
-	store.activeMeeting[meetingId]?.pinnedTile;
+export const getPinnedTile = (store: RootStore): TileData | undefined =>
+	store.activeMeeting?.pinnedTile;
 
-export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
-	store.activeMeeting[meetingId]?.talkingUsers;
+const FALLBACK_ARRAY: string[] = [];
 
-export const getNameOfFirstTalkingUser = (
-	store: RootStore,
-	meetingId: string
-): string | undefined => {
-	const id = store.activeMeeting[meetingId]?.talkingUsers
-		? store.activeMeeting[meetingId]?.talkingUsers[0]
-		: undefined;
+export const getTalkingList = (store: RootStore): string[] =>
+	store.activeMeeting?.talkingUsers || FALLBACK_ARRAY;
+
+export const getNameOfFirstTalkingUser = (store: RootStore): string | undefined => {
+	const id = store.activeMeeting?.talkingUsers ? store.activeMeeting?.talkingUsers[0] : undefined;
 	if (id) {
 		return store.users[id]?.name || store.users[id]?.email || '';
 	}
 	return undefined;
 };
 
-export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
-	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;
+export const getUserIsTalking = (store: RootStore, userId: string): boolean =>
+	find(store.activeMeeting?.talkingUsers, (user) => user === userId) !== undefined;
 
-export const getVideoScreenIn = (
-	store: RootStore,
-	meetingId: string
-): IVideoScreenInConnection | undefined => store.activeMeeting[meetingId]?.videoScreenIn;
+export const getBackgroundImage = (store: RootStore): VirtualBackgroundType =>
+	store.activeMeeting?.virtualBackground.backgroundImage ?? VirtualBackgroundType.NONE;
 
-export const getBackgroundImage = (store: RootStore, meetingId: string): VirtualBackgroundType =>
-	store.activeMeeting[meetingId]?.virtualBackground.backgroundImage;
+export const getUpdatedStream = (store: RootStore): MediaStream | undefined =>
+	store.activeMeeting?.virtualBackground?.updatedStream;
 
-export const getUpdatedStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
-	store.activeMeeting[meetingId]?.virtualBackground?.updatedStream;
-
-export const getUserHasHandRaised = (
-	store: RootStore,
-	meetingId: string,
-	userId: string
-): boolean =>
-	find(store.activeMeeting[meetingId]?.usersWithHandRaised, (user) => user === userId) !==
-	undefined;
+export const getUserHasHandRaised = (store: RootStore, userId: string): boolean =>
+	find(store.activeMeeting?.usersWithHandRaised, (user) => user === userId) !== undefined;
 
 // 0 means that the user is not found in the array
-export const getUserHandRank = (store: RootStore, meetingId: string, userId: string): number => {
-	const index = store.activeMeeting[meetingId]?.usersWithHandRaised.indexOf(userId);
+export const getUserHandRank = (store: RootStore, userId: string): number => {
+	const index = store.activeMeeting?.usersWithHandRaised.indexOf(userId) ?? -1;
 	return index >= 0 ? index + 1 : 0;
 };
 
-export const getHandRaisedList = (store: RootStore, meetingId: string): string[] | undefined =>
-	store.activeMeeting[meetingId]?.usersWithHandRaised;
+export const getHandRaisedList = (store: RootStore): string[] | undefined =>
+	store.activeMeeting?.usersWithHandRaised;

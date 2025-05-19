@@ -27,7 +27,10 @@ import {
 } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingAccordionType,
+	MeetingChatVisibility
+} from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
@@ -73,8 +76,8 @@ const MeetingSidebar = (): ReactElement => {
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId!));
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
+	const meetingChatVisibility = useStore(getMeetingChatVisibility);
+	const sidebarIsVisible: boolean = useStore(getMeetingSidebarStatus);
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
@@ -83,8 +86,8 @@ const MeetingSidebar = (): ReactElement => {
 	);
 
 	const toggleSidebar = useCallback(
-		() => setMeetingSidebarStatus(meetingId!, !sidebarIsVisible),
-		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
+		() => setMeetingSidebarStatus(MeetingAccordionType.GENERAL, !sidebarIsVisible),
+		[setMeetingSidebarStatus, sidebarIsVisible]
 	);
 
 	const showRecordingAccordion = useMemo(
@@ -124,9 +127,7 @@ const MeetingSidebar = (): ReactElement => {
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
 							{<RaiseHandAccordion meetingId={meetingId!} />}
-							{(virtualBackgroundEnabled || isUserGuest) && (
-								<VisualEffectsAccordion meetingId={meetingId!} />
-							)}
+							{(virtualBackgroundEnabled || isUserGuest) && <VisualEffectsAccordion />}
 						</AccordionContainer>
 					)}
 				</Container>

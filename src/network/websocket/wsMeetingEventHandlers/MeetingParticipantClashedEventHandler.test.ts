@@ -29,11 +29,11 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingParticipantClashedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(

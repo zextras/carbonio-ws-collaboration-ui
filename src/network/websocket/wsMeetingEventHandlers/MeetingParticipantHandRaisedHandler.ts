@@ -19,7 +19,7 @@ export const meetingParticipantHandRaisedHandler = (
 	const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 
 	if (isMeetingActive(event.meetingId)) {
-		state.setUserWithHandRaised(event.meetingId, event.userId, event.raised);
+		state.setUserWithHandRaised(event.userId, event.raised);
 		sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_RAISE_HAND, data: event });
 		if (meeting?.participants && Object.keys(meeting?.participants).length < 20) {
 			sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);

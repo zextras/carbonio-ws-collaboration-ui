@@ -70,7 +70,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
+	const meetingChatVisibility = useStore(getMeetingChatVisibility);
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
@@ -79,21 +79,19 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 
 	const toggleChatStatus = useCallback(() => {
 		setMeetingChatVisibility(
-			meetingId,
 			MeetingChatVisibility.CLOSED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.CLOSED
 		);
-	}, [setMeetingChatVisibility, meetingId, meetingChatVisibility]);
+	}, [setMeetingChatVisibility, meetingChatVisibility]);
 
 	const toggleChatExpanded = useCallback(() => {
 		setMeetingChatVisibility(
-			meetingId,
 			MeetingChatVisibility.EXPANDED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.EXPANDED
 		);
-	}, [setMeetingChatVisibility, meetingChatVisibility, meetingId]);
+	}, [setMeetingChatVisibility, meetingChatVisibility]);
 
 	const chatFullExpanded = useMemo(
 		() => meetingChatVisibility === MeetingChatVisibility.EXPANDED,
@@ -136,9 +134,9 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 
 	useEffect(() => {
 		if (roomType === RoomType.ONE_TO_ONE && !recordingEnabled) {
-			setMeetingChatVisibility(meetingId, MeetingChatVisibility.EXPANDED);
+			setMeetingChatVisibility(MeetingChatVisibility.EXPANDED);
 		}
-	}, [recordingEnabled, meetingId, roomType, setMeetingChatVisibility]);
+	}, [recordingEnabled, roomType, setMeetingChatVisibility]);
 
 	const minHeight = useMemo(() => {
 		if (chatFullExpanded) return '100%';

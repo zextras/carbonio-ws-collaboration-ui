@@ -74,28 +74,23 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room, room2]);
-	store.addMeeting(meeting);
-	store.addMeeting(meetingWith21Participants);
+	store.addMeetings([meeting, meetingWith21Participants]);
 });
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingParticipantHandRaisedHandler(event);
-		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([
-			'myUserId'
-		]);
+		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual(['myUserId']);
 	});
 
 	test('audio feedback is  sent when users are less than 20', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingParticipantHandRaisedHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
 
 	test('audio feedback is not sent when users are more than 20', () => {
-		useStore
-			.getState()
-			.meetingConnection(meetingWith21Participants.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meetingWith21Participants.id);
 		meetingParticipantHandRaisedHandler(event2);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});

@@ -14,6 +14,7 @@ import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
+import { getMeetingIdFromRoom } from '../selectors/RoomsSelectors';
 
 export const useRoomsStoreSlice: StateCreator<
 	RootStore,
@@ -59,8 +60,10 @@ export const useRoomsStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				delete draft.rooms[roomId];
 				delete draft.activeConversations[roomId];
-				delete draft.meetings[roomId];
 				delete draft.chatsRegistry[roomId];
+
+				const meetingId = getMeetingIdFromRoom(draft, roomId);
+				if (meetingId) delete draft.meetings[meetingId];
 			}),
 			false,
 			'ROOMS/REMOVE_ROOM'

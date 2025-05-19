@@ -12,7 +12,6 @@ export const meetingParticipantSubscribedEventHandler = (
 ): void => {
 	const state = useStore.getState();
 	if (isMeetingActive(event.meetingId)) {
-		const activeMeeting = state.activeMeeting[event.meetingId];
-		activeMeeting.videoScreenIn?.handleParticipantsSubscribed(event.streams);
+		state.activeMeeting?.videoScreenIn?.handleParticipantsSubscribed(event.streams);
 	}
 };

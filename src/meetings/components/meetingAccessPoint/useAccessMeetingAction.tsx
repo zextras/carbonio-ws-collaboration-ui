@@ -11,7 +11,7 @@ import useDarkReader from '../../../hooks/useDarkReader';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
@@ -90,8 +90,9 @@ const useAccessMeetingAction = (
 			mediaDevicesEnabled?: { audio: boolean; video: boolean },
 			selectedDevicesId?: { audio?: string; video?: string }
 		) => {
+			const roomId = getRoomIdByMeetingId(useStore.getState(), meetingId) ?? '';
 			MeetingsApi.enterMeeting(
-				getRoomIdFromMeeting(useStore.getState(), meetingId) ?? '',
+				roomId,
 				{
 					videoStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.video : false,
 					audioStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.audio : false

@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
-import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
+import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 
@@ -49,7 +49,7 @@ const MeetingNotification = ({
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const userName: string = useStore((store) => getUserName(store, from));
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const meeting = useStore((store) => getMeeting(store, meetingId));
 
 	const [t] = useTranslation();
 	const userIsInvitingYouLabel = (

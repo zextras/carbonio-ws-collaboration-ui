@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState, useContext } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -22,7 +22,10 @@ import {
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingChatVisibility,
+	MeetingAccordionType
+} from '../../../types/store/ActiveMeetingTypes';
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
@@ -101,19 +104,12 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	);
 
 	const onClickHandler = useCallback(() => {
-		setMeetingSidebarStatus(meetingId!, true);
-		setMeetingChatVisibility(meetingId!, MeetingChatVisibility.OPEN);
+		setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true);
+		setMeetingChatVisibility(MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
 			setInputHasFocus(roomId ?? '', true);
 		}
-	}, [
-		inputHasFocus,
-		meetingId,
-		roomId,
-		setInputHasFocus,
-		setMeetingChatVisibility,
-		setMeetingSidebarStatus
-	]);
+	}, [inputHasFocus, roomId, setInputHasFocus, setMeetingChatVisibility, setMeetingSidebarStatus]);
 
 	const handleHoverMouse = useCallback(() => {
 		clearTimeout(timer.current);

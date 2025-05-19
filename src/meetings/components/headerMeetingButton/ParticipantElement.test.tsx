@@ -21,7 +21,7 @@ const activeMeeting = createMockMeeting({});
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addMeeting(activeMeeting);
+	store.addMeetings([activeMeeting]);
 	store.setLoginInfo(loggedUser.id, loggedUser.name, loggedUser.type);
 });
 

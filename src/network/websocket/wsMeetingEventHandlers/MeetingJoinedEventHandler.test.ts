@@ -60,15 +60,13 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionUserId', 'User');
 	store.addRooms([room, room2, groupRoom]);
-	store.addMeeting(meeting);
-	store.addMeeting(groupMeeting);
-	store.addMeeting(meetingWith10Participants);
+	store.addMeetings([meeting, groupMeeting, meetingWith10Participants]);
 });
 describe('meetingJoinedEventHandler tests', () => {
 	test('Joined participant information are added into store', () => {
 		meetingJoinedEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId]).toBeDefined();
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId]).toBeDefined();
 	});
 
 	test('A custom event is sent if the joined user is the session user and the room is a one-to-one', () => {
@@ -98,7 +96,7 @@ describe('meetingJoinedEventHandler tests', () => {
 	test('Audio feedback is sent when session user is inside meeting', () => {
 		event.userId = 'anotherUserId';
 		event.meetingId = meeting.id;
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingJoinedEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
@@ -106,16 +104,14 @@ describe('meetingJoinedEventHandler tests', () => {
 	test('Audio feedback is not sent when participants are more than 10', () => {
 		event2.userId = 'anotherUserId';
 		event2.meetingId = meetingWith10Participants.id;
-		useStore
-			.getState()
-			.meetingConnection(meetingWith10Participants.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meetingWith10Participants.id);
 		meetingJoinedEventHandler(event2);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent outside active meeting', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		meetingJoinedEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();

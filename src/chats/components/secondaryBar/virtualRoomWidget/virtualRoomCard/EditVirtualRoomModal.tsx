@@ -17,7 +17,7 @@ import { filter, forEach, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
-import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
+import { getMeetingParticipantsByRoomId } from '../../../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserEmail, getUserName } from '../../../../../store/selectors/UsersSelectors';
@@ -39,7 +39,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const owners = useOwners(roomId);
-	const meetingParticipants = useStore((state) => getMeetingParticipants(state, roomId));
+	const meetingParticipants = useStore((state) => getMeetingParticipantsByRoomId(state, roomId));
 
 	const [t] = useTranslation();
 	const modalTitle = t('meeting.virtual.modal.edit.title ', `Edit "${roomName}" Virtual Room`, {

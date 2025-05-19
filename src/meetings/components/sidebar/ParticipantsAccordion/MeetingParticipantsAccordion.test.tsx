@@ -60,7 +60,7 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 		roomId: room.id,
 		participants: [user1Participant, user2Participant, user3Participant]
 	});
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	const { user } = setup(<MeetingParticipantsAccordion meetingId={meeting.id} />);
 	return { user, store };
 };
@@ -87,8 +87,8 @@ const storeSetupParticipantModerator = (): {
 		roomId: room.id,
 		participants: [user1Participant, user2Participant]
 	});
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 
 	const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
 	return { meeting, user, store };

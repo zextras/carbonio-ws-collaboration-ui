@@ -32,15 +32,17 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.MEETING_CREATED: {
-			state.addMeeting({
-				id: event.meetingId,
-				name: '',
-				roomId: event.roomId,
-				active: false,
-				participants: [],
-				createdAt: event.sentDate,
-				meetingType: MeetingType.PERMANENT
-			});
+			state.addMeetings([
+				{
+					id: event.meetingId,
+					name: '',
+					roomId: event.roomId,
+					active: false,
+					participants: [],
+					createdAt: event.sentDate,
+					meetingType: MeetingType.PERMANENT
+				}
+			]);
 			break;
 		}
 		case WsEventType.MEETING_STARTED: {

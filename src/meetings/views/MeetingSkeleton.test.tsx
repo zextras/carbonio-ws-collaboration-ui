@@ -18,7 +18,6 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
@@ -28,6 +27,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import SelfieSegmentationManager from '../components/virtualBackground/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
@@ -67,9 +67,9 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
-	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id, { enabled: false }, { enabled: true, deviceId: 'videoId' });
+	store.setLocalStreams(STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	const { user } = routerContextSetup(<MeetingSkeleton />, {
 		route: MEETINGS_ROUTES.MEETING,
@@ -135,9 +135,7 @@ describe('Grid mode meeting view', () => {
 	test('Toggle pin video and switch to cinema mode', async () => {
 		storeSetupGroupMeetingSkeleton();
 		await waitFor(() => {
-			act(() =>
-				useStore.getState().setPinnedTile(meeting.id, { userId: user3.id, type: STREAM_TYPE.VIDEO })
-			);
+			act(() => useStore.getState().setPinnedTile({ userId: user3.id, type: STREAM_TYPE.VIDEO }));
 		});
 		const cinemaModeView = await screen.findByTestId('cinemaModeView');
 		expect(cinemaModeView).toBeInTheDocument();
@@ -149,7 +147,7 @@ describe('Grid mode meeting view', () => {
 
 		await waitFor(() => {
 			act(() => {
-				store.setPinnedTile(meeting.id, { userId: user2.id, type: STREAM_TYPE.VIDEO });
+				store.setPinnedTile({ userId: user2.id, type: STREAM_TYPE.VIDEO });
 				store.removeParticipant(meeting.id, user3.id);
 			});
 		});
@@ -166,7 +164,7 @@ describe('Grid mode meeting view', () => {
 			act(() => {
 				store.addParticipant(meeting.id, user4Participant);
 				store.changeStreamStatus(meeting.id, user3.id, STREAM_TYPE.SCREEN, true);
-				store.setPinnedTile(meeting.id, { userId: user3.id, type: STREAM_TYPE.SCREEN });
+				store.setPinnedTile({ userId: user3.id, type: STREAM_TYPE.SCREEN });
 			});
 		});
 
@@ -197,30 +195,31 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
+		const mockInitialize = jest
+			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
+			.mockImplementation(() => Promise.resolve());
+
 		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
 
-		mockInitialize.mockReturnValue('initialized');
 		const { store } = storeSetupGroupMeetingSkeleton();
-		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 
 		// turn on blur
 		act(() => {
-			store.setBackgroundImage(meeting.id, VirtualBackgroundType.BLUR);
+			store.setBackgroundImage(VirtualBackgroundType.BLUR);
 		});
 
 		await waitFor(() => {
 			const updatedStore = useStore.getState();
-			expect(updatedStore.activeMeeting[meeting.id].virtualBackground.updatedStream).toBeDefined();
+			expect(updatedStore.activeMeeting?.virtualBackground.updatedStream).toBeDefined();
 		});
 		expect(mockInitialize).toHaveBeenCalled();
 
 		// turn off blur
 		act(() => {
-			store.setBackgroundImage(meeting.id, VirtualBackgroundType.NONE);
+			store.setBackgroundImage(VirtualBackgroundType.NONE);
 		});
 		const updatedStore2 = useStore.getState();
-		expect(
-			updatedStore2.activeMeeting[meeting.id].virtualBackground.updatedStream
-		).not.toBeDefined();
+		expect(updatedStore2.activeMeeting?.virtualBackground.updatedStream).not.toBeDefined();
 	});
 });

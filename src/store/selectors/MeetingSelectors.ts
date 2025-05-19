@@ -11,23 +11,20 @@ import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
-	store.meetings[roomId];
+export const getMeeting = (store: RootStore, meetingId: string): Meeting | undefined =>
+	store.meetings[meetingId];
 
-export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId);
+export const getMeetingByRoomId = (store: RootStore, roomId: string): Meeting | undefined =>
+	find(store.meetings, (meeting) => meeting.roomId === roomId);
 
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
-
-export const getRoomIdFromMeeting = (store: RootStore, meetingId: string): string | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
+	store.meetings[meetingId]?.roomId;
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
-	store.meetings[roomId] && store.meetings[roomId].active;
+	!!find(store.meetings, (meeting) => meeting.roomId === roomId)?.active;
 
 export const getMeetingActiveByMeetingId = (store: RootStore, meetingId: string): boolean =>
-	!!find(store.meetings, (meeting) => meeting.id === meetingId)?.active;
+	!!store.meetings[meetingId]?.active;
 
 export const getIfThereAreActiveVirtualRooms = (store: RootStore): boolean =>
 	some(
@@ -35,38 +32,35 @@ export const getIfThereAreActiveVirtualRooms = (store: RootStore): boolean =>
 		(meeting) => meeting.meetingType === MeetingType.SCHEDULED && meeting.active
 	);
 
-const FALLBACK_EMPTY_PARTICIPANTS = {};
-
-export const getMeetingParticipants = (store: RootStore, roomId: string): MeetingParticipantMap =>
-	store.meetings[roomId] ? store.meetings[roomId].participants : FALLBACK_EMPTY_PARTICIPANTS;
-
-export const getMeetingParticipantsByMeetingId = (
+export const getMeetingParticipants = (
 	store: RootStore,
 	meetingId: string
-): MeetingParticipantMap | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.participants;
+): MeetingParticipantMap | undefined => store.meetings[meetingId]?.participants;
+
+export const getMeetingParticipantsByRoomId = (
+	store: RootStore,
+	roomId: string
+): MeetingParticipantMap | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.roomId === roomId);
+	return meeting?.participants;
+};
 
 export const getMyMeetingParticipation = (store: RootStore, roomId: string): boolean => {
-	if (store.meetings[roomId]?.participants && store.session.id != null) {
-		const sessionMember = find(
-			store.meetings[roomId].participants,
-			(member) => member.userId === store.session.id
-		);
+	const participants = getMeetingParticipantsByRoomId(store, roomId);
+	if (participants && store.session.id != null) {
+		const sessionMember = find(participants, (member) => member.userId === store.session.id);
 		return sessionMember != null;
 	}
 	return false;
 };
 
-export const getNumberOfMeetingParticipants = (
-	store: RootStore,
-	roomId: string
-): number | undefined => size(store.meetings[roomId]?.participants);
+export const getNumberOfMeetingParticipants = (store: RootStore, roomId: string): number =>
+	size(getMeetingParticipantsByRoomId(store, roomId));
 
 export const getNumberOfMeetingParticipantsByMeetingId = (
 	store: RootStore,
 	meetingId: string
-): number | undefined =>
-	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);
+): number => size(store.meetings[meetingId]?.participants);
 
 export const getParticipantAudioStatus = (
 	store: RootStore,
@@ -74,7 +68,7 @@ export const getParticipantAudioStatus = (
 	userId: string | undefined
 ): boolean => {
 	if (!meetingId || !userId) return false;
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.audioStreamOn ?? false;
 };
@@ -84,7 +78,8 @@ export const getParticipantVideoStatus = (
 	meetingId: string | undefined,
 	userId: string | undefined
 ): boolean => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (!meetingId || !userId) return false;
+	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.videoStreamOn ?? false;
 };
@@ -94,7 +89,8 @@ export const getParticipantScreenStatus = (
 	meetingId: string | undefined,
 	userId: string | undefined
 ): boolean => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (!meetingId || !userId) return false;
+	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.screenStreamOn ?? false;
 };
@@ -103,7 +99,7 @@ const centralTileData: TileData = <TileData>{};
 
 export const getCentralTileData = (store: RootStore, meetingId: string): TileData | undefined => {
 	Object.assign(centralTileData, {});
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const meeting = store.meetings[meetingId];
 	const participant = find(
 		meeting?.participants,
 		(participant) => participant.userId !== store.session.id
@@ -130,7 +126,7 @@ export const getCentralTileData = (store: RootStore, meetingId: string): TileDat
 };
 
 export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const meeting = store.meetings[meetingId];
 	if (meeting) {
 		const participantWithScreen = filter(
 			meeting.participants,
@@ -144,7 +140,7 @@ export const getNumberOfTiles = (store: RootStore, meetingId: string): number =>
 const emptyList: string[] = [];
 
 export const getWaitingList = (store: RootStore, meetingId: string): string[] => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const meeting = store.meetings[meetingId];
 	if (meeting) {
 		return meeting.waitingList || emptyList;
 	}
@@ -170,27 +166,17 @@ export const getMeetingStartedAt = (
 	store: RootStore,
 	meetingId: string | undefined
 ): string | undefined => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return meeting?.startedAt;
+	if (!meetingId) return undefined;
+	return store.meetings[meetingId]?.startedAt;
 };
 
 export const getMeetingRecordingTimestamp = (
 	store: RootStore,
 	meetingId: string
-): string | undefined => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return meeting?.recStartedAt;
-};
+): string | undefined => store.meetings[meetingId]?.recStartedAt;
 
-export const getIsMeetingRecording = (store: RootStore, meetingId: string): boolean => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return !!meeting?.recStartedAt;
-};
+export const getIsMeetingRecording = (store: RootStore, meetingId: string): boolean =>
+	!!store.meetings[meetingId]?.recStartedAt;
 
-export const getStartRecordingUserId = (
-	store: RootStore,
-	meetingId: string
-): string | undefined => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return meeting?.recUserId;
-};
+export const getStartRecordingUserId = (store: RootStore, meetingId: string): string | undefined =>
+	store.meetings[meetingId]?.recUserId;

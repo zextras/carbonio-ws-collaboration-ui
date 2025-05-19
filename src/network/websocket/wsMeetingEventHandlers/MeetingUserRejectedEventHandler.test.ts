@@ -35,13 +35,13 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.addUserToWaitingList(meeting.id, 'rejectedId');
 });
 describe('MeetingUserRejectedEventHandler tests', () => {
 	test('Rejected user is removed from the waiting list', () => {
 		meetingUserRejectedEventHandler(event);
-		expect(useStore.getState().meetings[room.id].waitingList).not.toContain('rejectedId');
+		expect(useStore.getState().meetings[meeting.id].waitingList).not.toContain('rejectedId');
 	});
 
 	test('Do not send user rejected custom event if another user is rejected', () => {

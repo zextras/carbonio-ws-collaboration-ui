@@ -28,9 +28,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {

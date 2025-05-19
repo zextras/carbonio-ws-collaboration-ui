@@ -31,7 +31,7 @@ import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useLocalStorage from '../../../hooks/useLocalStorage';
-import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../utils/localStorageUtils';
@@ -80,7 +80,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
-	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 
 	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');

@@ -26,8 +26,8 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('0', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 });
 
 describe('useTilesOrder custom hook - ordered by joined time', () => {
@@ -141,9 +141,7 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		act(() =>
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
-		);
+		act(() => useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO }));
 
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
@@ -165,10 +163,8 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		act(() =>
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
-		);
-		act(() => useStore.getState().setPinnedTile(meeting.id, undefined));
+		act(() => useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO }));
+		act(() => useStore.getState().setPinnedTile(undefined));
 
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
@@ -189,9 +185,7 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		act(() =>
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
-		);
+		act(() => useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO }));
 
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
@@ -212,13 +206,11 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		act(() =>
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
-		);
+		act(() => useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO }));
 
 		act(() => {
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO });
-			useStore.getState().setPinnedTile(meeting.id, { userId: '1', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setPinnedTile({ userId: '1', type: STREAM_TYPE.VIDEO });
 		});
 
 		expect(result.current.centralTile).toEqual({
@@ -241,7 +233,7 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
 		act(() => {
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO });
 			useStore.getState().addParticipant(meeting.id, participant5);
 		});
 
@@ -267,7 +259,7 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
 		act(() => {
-			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setPinnedTile({ userId: '3', type: STREAM_TYPE.VIDEO });
 			useStore.getState().removeParticipant(meeting.id, participant2.userId);
 		});
 
@@ -292,8 +284,8 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
 		act(() => {
-			useStore.getState().setPinnedTile(meeting.id, { userId: '2', type: STREAM_TYPE.VIDEO });
-			useStore.getState().setTalkingUser(meeting.id, participant3.userId, true);
+			useStore.getState().setPinnedTile({ userId: '2', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setTalkingUser(participant3.userId, true);
 			jest.advanceTimersByTime(1000);
 		});
 

@@ -48,20 +48,22 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
-const mockUseContainerDimensions = jest.fn(() => ({ width: 100 }));
+const mockUseContainerDimensions = jest.fn();
 jest.mock('../../../hooks/useContainerDimensions', () => ({
 	__esModule: true,
 	default: (): { width: number } => mockUseContainerDimensions()
 }));
 
 beforeEach(() => {
+	mockUseContainerDimensions.mockReset();
+	mockUseContainerDimensions.mockReturnValue({ width: 100 });
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.setAttributes(createMockAttributesList());
 });
 

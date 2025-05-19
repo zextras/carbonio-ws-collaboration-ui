@@ -23,7 +23,11 @@ import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingViewType, STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingAccordionType,
+	MeetingViewType,
+	STREAM_TYPE
+} from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
@@ -72,8 +76,8 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
 
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
@@ -88,8 +92,8 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 		result.current.setUserInfo([user1]);
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRooms([room]);
-		result.current.addMeeting(meetingWithOnePerson);
-		result.current.meetingConnection(meetingWithOnePerson.id, false, undefined, false, undefined);
+		result.current.addMeetings([meetingWithOnePerson]);
+		result.current.meetingConnection(meetingWithOnePerson.id);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meetingWithOnePerson.id });
@@ -110,11 +114,11 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
+	store.addMeetings([meeting]);
+	store.meetingConnection(meeting.id);
+	store.setLocalStreams(STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
-	store.setTalkingUser(meeting.id, user2.id, true);
+	store.setTalkingUser(user2.id, true);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
@@ -144,7 +148,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 	});
 
 	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
-		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.GRID);
+		useStore.getState().setMeetingViewSelected(MeetingViewType.GRID);
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
@@ -152,12 +156,13 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		const sidebarIsOpened =
+			useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 		expect(sidebarIsOpened).toBe(false);
 	});
 
 	test('When full screen mode is enabled in cinema view, meeting sidebar and carousel will be closed ', async () => {
-		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
+		useStore.getState().setMeetingViewSelected(MeetingViewType.CINEMA);
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
@@ -170,9 +175,10 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		const sidebarIsOpened =
+			useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 		expect(sidebarIsOpened).toBe(false);
-		const { isCarouselVisible } = useStore.getState().activeMeeting[meeting.id];
+		const isCarouselVisible = useStore.getState().activeMeeting?.isCarouselVisible;
 		expect(isCarouselVisible).toBe(false);
 	});
 
@@ -204,9 +210,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 	test('SwitchView button toggles between grid and cinema view', async () => {
 		const { user } = storeSetupGroupMeeting();
 
-		expect(useStore.getState().activeMeeting[meeting.id].meetingViewSelected).toBe(
-			MeetingViewType.GRID
-		);
+		expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.GRID);
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
 		await user.click(moreActions);
@@ -214,9 +218,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 		const switchButton = await screen.findByText(/Cinema view/i);
 		await user.click(switchButton);
 
-		expect(useStore.getState().activeMeeting[meeting.id].meetingViewSelected).toBe(
-			MeetingViewType.CINEMA
-		);
+		expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.CINEMA);
 	});
 
 	test('user toggle pip', async () => {
