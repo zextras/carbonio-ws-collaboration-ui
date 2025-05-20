@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.16](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.15...v0.9.16) (2025-05-19)
+
+
+### Features
+
+* add test on meetingsApi refs: WSC-1897 ([0eab23d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0eab23de8635504980bf894b6b4accf30f96ffe6))
+* added test refs: WSC-1897 ([543db46](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/543db46261dabaed9d542d00180744fe30f026f4))
+* added translation's keys refs: WSC-1843 ([39503e4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/39503e4fb563f5c03803b58e3719c8f9fbb47b9c))
+* avoid to stress users with meeting sounds refs: WSC-1881 ([a05b549](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a05b549fdffd0bee07e4b8f9df7a4ca2264c9da1))
+* avoid to stress users with meeting sounds refs: WSC-1881 ([382aacb](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/382aacb10ec0fbfc6f57f896e31bada4ad56ec01))
+* bulk api for updating owners refs: WSC-1894 ([27b03ca](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/27b03ca5f4566a918b00f8790b54d55770f12c03))
+* bulk apy for updating owners refs: WSC-1894 ([dff848c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/dff848c0643e97373dc9f519a6b97d1db5a70856))
+* display features based on LDAP attributes ref: WSC-1516 ([#492](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/492)) ([bc4c2e6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bc4c2e61ab3d56e3f1bd67eb64444436317a1bb5))
+* display talking users in every view ref: WSC-1828 ([#480](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/480)) ([8cc8725](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8cc8725f4a5afa1da35be9f8f461d475a686cd39))
+* enhance full screen layout mode ref: WSC-1751 ([#494](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/494)) ([c6b9b3e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c6b9b3e3a3ab61e663a8887b7fcbd15d7ada76fa))
+* event handling and graphic refs: WSC-1843 ([30efdff](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/30efdff56c9374da175d33531eba28f30b4ffd97))
+* forward to one room redirect to that room refs: WSC-1822 ([#481](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/481)) ([058e0eb](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/058e0eb52045be1faeee7373e6c289d6a5de14c9))
+* git merge origin/devel refs: WSC-1881 ([5a97745](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5a97745168f4713f277a7d34b461fd15077e97bd))
+* improve virtual room widget button refs: WSC-1912 ([7953c83](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7953c835f7c36283a9a94b0d61b393e177150d06))
+* improve virtual room widget button refs: WSC-1912 ([2a25a38](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2a25a38849bf5961546a8478009d1d77b46d991b))
+* let use know when he's promoted to moderator refs: WSC-1306 ([#483](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/483)) ([065a63f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/065a63f15bb7453f0e88f9b019637b133a4d9908))
+* merge origin/devel refs: WSC-1843 ([41014e0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/41014e09e9870b26a7e8959d016a41a840cf6d98))
+* new tests refs:wsc-1897 ([c1467b9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c1467b93ec6748bad966a3073e12b854aeaa055c))
+* PiP feature refs: WSC-1753 ([#478](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/478)) ([3fd109a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3fd109a228e1da6c741bc3dd1a973e7a2230035d))
+* raise hand first implementation refs: WSC-1843 ([8939aae](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8939aae631c48e43c4f460f5823162ee9ab2b9e9))
+* raise hand order refs: WSC-1897 ([8b58269](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8b582691d40857566e8ff3368ae82ea979373b19))
+* raise hand order refs: WSC-1897 ([98f6e6a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/98f6e6a20d80911abe9d23a816b21b21c2ce6ada))
+* raise hand third step refs: WSC-1886 ([#521](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/521)) ([f0eafab](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f0eafab4beca04cf7c0a7ecd6c2251578da9d426))
+* removed delete virtual room button from calendar integration refs: WSC-1868 ([f7c9760](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f7c9760b08f7543aa917acfbfa81eb0231cf2657))
+* removed delete virtual room button from calendar integration refs: WSC-1868 ([eca3211](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/eca32119c56ece9fd7ed59019a5bebbc12510ad4))
+* tests refs: WSC-1843 ([c87c639](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c87c63913852a873d79f8a0020f911c16b4f51ed))
+* tests refs: WSC-1987 ([5e08d05](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5e08d05cc75ebb646fea58a928f33b757a561c05))
+
+
+### Bug Fixes
+
+* add missing translation on Calendars widget ref: WSC-1958 ([#524](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/524)) ([637b387](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/637b3872adc9ab67b0311148d755a4ca804e0070))
+* avoid calling requestHistory for an unknown room ref: WSC-1901 ([#503](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/503)) ([eb116ee](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/eb116ee65fa01fe490245206536179bddc6eaa0f))
+* avoid sending browser notification in focus mode ref: WSC-1926 ([#518](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/518)) ([4d724bc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4d724bce533cf21e48f52882c77645f049fa44c2))
+* fix sonarQube refs: WSC-1843 ([f363ce1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f363ce1ef9c2178d9ff633aa1aee49205a36491e))
+* fixed inconsistency of translations refs: WSC-1900 ([919f3df](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/919f3df563da9406c96d6f721a6c2ac49a40b4e1))
+* fixed inconsistency of translations refs: WSC-1900 ([f797154](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f797154a661f8a6913b1a10e7a1b2c81ccc96659))
+* fixed ref refs: WSC-1874 ([ea906cd](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ea906cdc78cb85e18304ef259f68b5bd1b3c2403))
+* fixed stretch of layout refs: WSC-1831 ([a4b1cbd](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a4b1cbd38e5282f4d8f97e0852ecadb602cc596a))
+* fixed stretch of layout when room has a long name refs: WSC-1831 ([145e64b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/145e64b9d5d26e36fa24a4850c1a43500738009c))
+* fixed tests refs: WSC-1843 ([74c9b02](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/74c9b02de046014b1d233948d29a30afb53b4f3f))
+* fixed text on collapsed sidebar refs: WSC-1987 ([512f28c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/512f28cb901675b47f0c0c557fac5e442650f753))
+* fixed timer refs: WSC-1843 ([5a431a9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5a431a959b27ea91bc39f63de10c57564e628de2))
+* fixed virtual rooms button not visible refs: WSC-1987 ([bac8857](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bac8857bc8e93b1b793b4381beb14ae74ce7528b))
+* fixed virtual rooms button not visible refs: WSC-1987 ([38e2a63](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/38e2a6325de42ffdea13387cb613313207524dd7))
+* fixed wrong ref inside popover refs: WSC-1874 ([c4a6a9a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c4a6a9a991ba1f6f8376d329617858c58ac447b4))
+* managing shimmering effect on loading tiles ref: WSC-1840 ([#500](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/500)) ([2bd9588](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2bd9588663ecaebd995b1e3eaec40ff077c53ad1))
+* restored tests refs: WSC-1843 ([1275cec](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1275cec9af419894b27edcb5105086698044205e))
+* review screen share autopin flow ref: WSC-1883 ([#498](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/498)) ([0bf7956](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0bf79567ec4681c193748a44b694f32c8161464b))
+* validation fixes refs: WSC-1868 ([c907367](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c907367cdc86bdc76adb1e89a15b80493f5534a6))
+* validation fixes refs: WSC-1868 ([9e3bbc4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9e3bbc450089da494b3da93b99e15eafba128660))
+* validation fixes refs:wsc-1897 ([484f768](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/484f768c1ad896fe23f640f80a0f41db5fdcd109))
+* wait user info response before showing browser notification ([#496](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/496)) ([430d667](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/430d66718f49e9b6ba03ae4b908b1a5cd8567fc8))
+
 ### [0.9.15](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.14...v0.9.15) (2025-02-27)
 
 
