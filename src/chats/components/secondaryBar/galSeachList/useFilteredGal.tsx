@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
-import { debounce, differenceWith, map, size } from 'lodash';
+import { debounce, differenceWith, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,7 +15,10 @@ import GalListItem from './GalListItem';
 import { searchUsersByFeatureRequest } from '../../../../network/soap/SearchUsersByFeatureRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { SearchUsersByFeatureSoapResponse } from '../../../../types/network/soap/searchUsersByFeatureRequest';
+import {
+	ContactInfo,
+	SearchUsersByFeatureSoapResponse
+} from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
@@ -47,9 +50,11 @@ const useFilteredGal = (
 		'There seems to be a problem with your search, please retry.'
 	);
 	const retryLabel = t('action.retry', 'Retry');
+	const showMoreUsersLabel = t('action.showMoreUsers', 'Show more users');
 
-	const [filteredGal, setFilteredGal] = useState<SearchUsersByFeatureSoapResponse>([]);
+	const [filteredGal, setFilteredGal] = useState<ContactInfo[]>([]);
 	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');
+	const [hasMore, setHasMore] = useState<boolean>(false);
 
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
@@ -58,16 +63,33 @@ const useFilteredGal = (
 		debounce((text: string) => {
 			if (text !== '') {
 				setRequestStatus('loading');
+				setHasMore(false);
 				searchUsersByFeatureRequest(text)
-					.then((response: SearchUsersByFeatureSoapResponse) => {
+					.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
 						setRequestStatus('success');
-						setFilteredGal(response);
+						setFilteredGal(contacts);
+						setHasMore(more);
 					})
-					.catch(() => setRequestStatus('error'));
+					.catch(() => {
+						setRequestStatus('error');
+						setHasMore(false);
+					});
 			}
 		}, 500),
 		[]
 	);
+
+	const loadMoreContacts = useCallback(() => {
+		setHasMore(false);
+		searchUsersByFeatureRequest(input ?? '', filteredGal.length)
+			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+				setFilteredGal((prevResults) => union(prevResults, contacts));
+				setHasMore(more);
+			})
+			.catch(() => {
+				setHasMore(true);
+			});
+	}, [filteredGal.length, input]);
 
 	useEffect(() => {
 		searchOnGal(input);
@@ -95,10 +117,25 @@ const useFilteredGal = (
 			singleConversationsUserId,
 			(gal, userId) => gal.id === userId
 		);
-		return map(filteredGalWithUserId, (contactInfo) => (
+		const users = map(filteredGalWithUserId, (contactInfo) => (
 			<GalListItem contact={contactInfo} expanded={expanded} key={contactInfo.id} />
 		));
-	}, [expanded, filteredGal, singleConversationsUserId]);
+		if (hasMore) {
+			users.push(
+				<Container width="fill" height="fit" padding="0.5rem" key="load-more">
+					<Button label={showMoreUsersLabel} type="ghost" size="small" onClick={loadMoreContacts} />
+				</Container>
+			);
+		}
+		return users;
+	}, [
+		expanded,
+		filteredGal,
+		hasMore,
+		loadMoreContacts,
+		showMoreUsersLabel,
+		singleConversationsUserId
+	]);
 
 	const PendingComponent = useMemo(
 		() => (

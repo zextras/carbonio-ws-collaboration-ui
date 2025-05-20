@@ -7,7 +7,6 @@
 import { soapFetch } from '@zextras/carbonio-shell-ui';
 import { find, map, remove } from 'lodash';
 
-import { autoCompleteGalRequest } from './AutoCompleteRequest';
 import {
 	SearchUsersByFeatureRequest,
 	SearchUsersByFeatureResponse,
@@ -16,16 +15,15 @@ import {
 import { isMyId } from '../websocket/eventHandlersUtilities';
 
 export const searchUsersByFeatureRequest = (
-	text: string
+	text: string,
+	offset = 0
 ): Promise<SearchUsersByFeatureSoapResponse> =>
 	soapFetch<SearchUsersByFeatureRequest, SearchUsersByFeatureResponse>('SearchUsersByFeature', {
 		_jsns: 'urn:zimbraAccount',
 		name: text,
-		feature: 'WSC'
+		feature: 'WSC',
+		offset
 	}).then((response: SearchUsersByFeatureResponse) => {
-		if (response.Fault?.Detail?.Error?.Code === 'service.UNKNOWN_DOCUMENT') {
-			return autoCompleteGalRequest(text);
-		}
 		const results = map(response.account, (user) => {
 			const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
 			const email = find(user.a, (attr) => attr.n === 'email')?._content;
@@ -36,5 +34,5 @@ export const searchUsersByFeatureRequest = (
 			};
 		});
 		remove(results, (user) => isMyId(user.id));
-		return results;
+		return { contacts: results, more: response.more, total: response.total };
 	});

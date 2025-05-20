@@ -60,8 +60,8 @@ describe('SearchUsersByFeatureRequest', () => {
 		mockSoapFetch.mockResolvedValueOnce({
 			account: [contact1Match, contact2Match, contact3Match]
 		});
-		const results = await searchUsersByFeatureRequest('search text');
-		expect(results).toEqual([contact1Info, contact2Info, contact3Info]);
+		const { contacts } = await searchUsersByFeatureRequest('search text');
+		expect(contacts).toEqual([contact1Info, contact2Info, contact3Info]);
 	});
 
 	test('Contact info of the current user will be removed', async () => {
@@ -69,7 +69,7 @@ describe('SearchUsersByFeatureRequest', () => {
 		mockSoapFetch.mockResolvedValueOnce({
 			account: [contact1Match, contact2Match, contact3Match]
 		});
-		const results = await searchUsersByFeatureRequest('search text');
-		expect(results).toEqual([contact2Info, contact3Info]);
+		const { contacts } = await searchUsersByFeatureRequest('search text');
+		expect(contacts).toEqual([contact2Info, contact3Info]);
 	});
 });
