@@ -7,6 +7,7 @@
 import { soapFetch } from '@zextras/carbonio-shell-ui';
 import { find, map, remove } from 'lodash';
 
+import { autoCompleteGalRequest } from './AutoCompleteRequest';
 import {
 	SearchUsersByFeatureRequest,
 	SearchUsersByFeatureResponse,
@@ -24,6 +25,11 @@ export const searchUsersByFeatureRequest = (
 		feature: 'WSC',
 		offset
 	}).then((response: SearchUsersByFeatureResponse) => {
+		if (response.Fault?.Detail?.Error?.Code === 'service.UNKNOWN_DOCUMENT') {
+			return autoCompleteGalRequest(text)
+				.then((response) => ({ contacts: response, more: false, total: response.length }))
+				.catch(() => ({ contacts: [], more: false, total: 0 }));
+		}
 		const results = map(response.account, (user) => {
 			const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
 			const email = find(user.a, (attr) => attr.n === 'email')?._content;
