@@ -69,7 +69,7 @@ const ContactsSelector = ({
 	);
 	const demoteModeratorLabel = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel = t('tooltip.promoteModerator', 'Promote to moderator');
-	const showMoreUsersLabel = t('action.showMoreUsers', 'Show more users');
+	const showMoreUsersLabel = t('participantsList.creationList.loadMore', 'Show more users');
 
 	const [searchResult, setSearchResult] = useState<ContactInfo[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
@@ -233,7 +233,7 @@ const ContactsSelector = ({
 		if (hasMore) {
 			Items.push(
 				<Container width="fill" padding="0.5rem" key="load-more">
-					<Button label={showMoreUsersLabel} type="ghost" size="small" onClick={loadMoreContacts} />
+					<Button label={showMoreUsersLabel} type="ghost" onClick={loadMoreContacts} />
 				</Container>
 			);
 		}

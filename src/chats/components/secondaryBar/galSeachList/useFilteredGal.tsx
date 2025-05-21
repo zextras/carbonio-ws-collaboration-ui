@@ -50,7 +50,7 @@ const useFilteredGal = (
 		'There seems to be a problem with your search, please retry.'
 	);
 	const retryLabel = t('action.retry', 'Retry');
-	const showMoreUsersLabel = t('action.showMoreUsers', 'Show more users');
+	const showMoreUsersLabel = t('participantsList.creationList.loadMore', 'Show more users');
 
 	const [filteredGal, setFilteredGal] = useState<ContactInfo[]>([]);
 	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');

@@ -58,18 +58,22 @@ const contact3Info = {
 describe('SearchUsersByFeatureRequest', () => {
 	test('Contact info wll be formatted as ContactInfo type', async () => {
 		mockSoapFetch.mockResolvedValueOnce({
-			account: [contact1Match, contact2Match, contact3Match]
+			account: [contact1Match, contact2Match, contact3Match],
+			more: true
 		});
-		const { contacts } = await searchUsersByFeatureRequest('search text');
+		const { contacts, more } = await searchUsersByFeatureRequest('search text');
 		expect(contacts).toEqual([contact1Info, contact2Info, contact3Info]);
+		expect(more).toBeTruthy();
 	});
 
 	test('Contact info of the current user will be removed', async () => {
 		useStore.getState().setLoginInfo(contact1Info.id, contact1Info.email);
 		mockSoapFetch.mockResolvedValueOnce({
-			account: [contact1Match, contact2Match, contact3Match]
+			account: [contact1Match, contact2Match, contact3Match],
+			more: false
 		});
-		const { contacts } = await searchUsersByFeatureRequest('search text');
+		const { contacts, more } = await searchUsersByFeatureRequest('search text');
 		expect(contacts).toEqual([contact2Info, contact3Info]);
+		expect(more).toBeFalsy();
 	});
 });
