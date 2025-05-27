@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
 import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
@@ -116,5 +116,22 @@ describe('ContactsSelector', () => {
 			screen.getByTestId('chip_input_contact_selector')
 		).findByTestId(iconCrown);
 		expect(crownIconOnChip).toBeInTheDocument();
+	});
+
+	test('If there are more contacts, clicking on "Show more users" loads more contacts', async () => {
+		mockSearchUsersByFeatureRequest.mockResolvedValueOnce({
+			contacts: [user1],
+			more: true
+		});
+		jest.spyOn(console, 'error').mockImplementation(() => {});
+		const { user } = setup(<MockComponent />);
+
+		await waitFor(() => {
+			expect(screen.getByText('Show more users')).toBeInTheDocument();
+		});
+		await user.click(screen.getByText('Show more users'));
+		await waitFor(() => {
+			expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
+		});
 	});
 });
