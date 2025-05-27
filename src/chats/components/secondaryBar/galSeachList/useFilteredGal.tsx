@@ -95,21 +95,18 @@ const useFilteredGal = (
 		searchOnGal(input);
 	}, [input, searchOnGal]);
 
-	const GalSearchHeader = useMemo(
-		() =>
-			expanded ? (
+	const GalSearchHeader = useMemo(() => {
+		if (expanded) {
+			return (
 				<Padding horizontal="large" vertical="large" bottom="small">
 					<CustomText size="small" color="primary">
 						{createNewChatLabel}
 					</CustomText>
 				</Padding>
-			) : (
-				<Container width="fill" height="fit" padding={{ all: 'small' }}>
-					<Button type="ghost" icon="Plus" size="large" onClick={() => null} />
-				</Container>
-			),
-		[expanded, createNewChatLabel]
-	);
+			);
+		}
+		return undefined;
+	}, [expanded, createNewChatLabel]);
 
 	const GalUsersComponent = useMemo(() => {
 		const filteredGalWithUserId = differenceWith(
@@ -123,7 +120,16 @@ const useFilteredGal = (
 		if (hasMore) {
 			users.push(
 				<Container width="fill" height="fit" padding="0.5rem" key="load-more">
-					<Button label={showMoreUsersLabel} type="ghost" size="small" onClick={loadMoreContacts} />
+					{expanded ? (
+						<Button
+							label={showMoreUsersLabel}
+							type="ghost"
+							size="small"
+							onClick={loadMoreContacts}
+						/>
+					) : (
+						<Button icon="Plus" onClick={loadMoreContacts} type="outlined" labelColor="primary" />
+					)}
 				</Container>
 			);
 		}
