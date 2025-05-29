@@ -6,7 +6,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Divider,
+	Padding,
+	Spinner,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { debounce, differenceWith, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -128,7 +136,9 @@ const useFilteredGal = (
 							onClick={loadMoreContacts}
 						/>
 					) : (
-						<Button icon="Plus" onClick={loadMoreContacts} type="outlined" labelColor="primary" />
+						<Tooltip label={showMoreUsersLabel}>
+							<Button icon="Plus" onClick={loadMoreContacts} type="outlined" labelColor="primary" />
+						</Tooltip>
 					)}
 				</Container>
 			);
@@ -146,7 +156,7 @@ const useFilteredGal = (
 	const PendingComponent = useMemo(
 		() => (
 			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
-				<Icon icon="Refresh" />
+				<Spinner color="primary" />
 			</CustomContainer>
 		),
 		[]
@@ -154,19 +164,22 @@ const useFilteredGal = (
 
 	const ErrorComponent = useMemo(
 		() => (
-			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit" gap="1rem">
-				<SecondaryBarInfoText
-					color="gray1"
-					size="small"
-					weight="light"
-					overflow={expanded ? 'break-word' : 'ellipsis'}
-				>
-					{errorLabel}
-				</SecondaryBarInfoText>
+			<CustomContainer
+				padding={{ vertical: 'small', horizontal: expanded ? 'large' : 'small' }}
+				height="fit"
+				gap="1rem"
+			>
 				{expanded ? (
-					<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
+					<>
+						<SecondaryBarInfoText color="gray1" size="small" weight="light" overflow="break-word">
+							{errorLabel}
+						</SecondaryBarInfoText>
+						<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
+					</>
 				) : (
-					<Button type="ghost" icon="Refresh" onClick={() => searchOnGal(input)} />
+					<Tooltip label={retryLabel}>
+						<Button color="gray1" icon="Refresh" onClick={() => searchOnGal(input)} />
+					</Tooltip>
 				)}
 			</CustomContainer>
 		),
