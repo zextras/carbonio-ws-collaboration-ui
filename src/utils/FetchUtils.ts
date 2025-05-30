@@ -27,11 +27,9 @@ export const fetchAPI = (
 	const headers = new Headers();
 	headers.append('Content-Type', 'application/json');
 
-	// Add sessionId to headers only id it is already defined
-	const { queueId } = useStore.getState().session;
-	if (queueId) {
-		headers.append('queue-id', queueId);
-	}
+	const { queueId, apiVersion } = useStore.getState().session;
+	if (queueId) headers.append('queue-id', queueId);
+	if (apiVersion) headers.append('X-WSC-API-VERSION', apiVersion);
 
 	return fetch(URL, {
 		method,
@@ -73,11 +71,10 @@ export const uploadFileFetchAPI = (
 				optionalFields.area && headers.append('area', optionalFields.area);
 			}
 
-			// Add sessionId to headers only if it is already defined
-			const { queueId } = useStore.getState().session;
-			if (queueId) {
-				headers.append('session-id', queueId);
-			}
+			const { queueId, apiVersion } = useStore.getState().session;
+			if (queueId) headers.append('queue-id', queueId);
+			if (apiVersion) headers.append('X-WSC-API-VERSION', apiVersion);
+
 			fetch(BASE_PATH + endpoint, {
 				method: requestType,
 				headers,
