@@ -18,6 +18,7 @@ export type SessionStoreSlice = {
 	setCustomLogo: (logo: string | false) => void;
 	setChatExporting: (roomId?: string) => void;
 	setChatExportStatus: (status: ExportStatus) => void;
+	setApiVersion: (apiVersion: Version) => void;
 };
 
 export type Session = {
@@ -26,6 +27,7 @@ export type Session = {
 	name?: string;
 	displayName?: string;
 	queueId?: string;
+	apiVersion?: Version;
 	userType?: UserType;
 	attributes?: AttributesList;
 	selectedRoom?: string;
@@ -36,6 +38,8 @@ export type Session = {
 		status: ExportStatus;
 	};
 };
+
+export type Version = `${number}.${number}.${number}`;
 
 export type AttributesList = {
 	privateChatCreation: boolean;

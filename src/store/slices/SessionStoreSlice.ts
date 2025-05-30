@@ -10,7 +10,12 @@ import { produce } from 'immer';
 import { StateCreator } from 'zustand';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { AttributesList, ExportStatus, SessionStoreSlice } from '../../types/store/SessionTypes';
+import {
+	AttributesList,
+	ExportStatus,
+	SessionStoreSlice,
+	Version
+} from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
@@ -123,6 +128,15 @@ export const useSessionStoreSlice: StateCreator<
 			}),
 			false,
 			'SESSION/SET_CHAT_EXPORTING_STATUS'
+		);
+	},
+	setApiVersion: (apiVersion: Version): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.apiVersion = apiVersion;
+			}),
+			false,
+			'SESSION/SET_API_VERSION'
 		);
 	}
 });
