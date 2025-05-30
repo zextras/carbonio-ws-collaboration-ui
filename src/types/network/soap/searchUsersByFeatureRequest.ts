@@ -8,10 +8,13 @@ export type SearchUsersByFeatureRequest = {
 	_jsns: 'urn:zimbraAccount';
 	name: string;
 	feature: 'WSC';
+	offset: number;
 };
 
 export type SearchUsersByFeatureResponse = {
 	account: ContactMatch[];
+	more: boolean;
+	total: number;
 } & { Fault: { Detail: { Error: { Code: string } } } };
 
 export type ContactMatch = {
@@ -20,7 +23,11 @@ export type ContactMatch = {
 	name: string;
 };
 
-export type SearchUsersByFeatureSoapResponse = ContactInfo[];
+export type SearchUsersByFeatureSoapResponse = {
+	contacts: ContactInfo[];
+	more: boolean;
+	total: number;
+};
 
 export type ContactInfo = {
 	id: string;

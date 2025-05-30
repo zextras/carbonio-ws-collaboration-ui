@@ -80,7 +80,7 @@ describe('Add new member action', () => {
 
 	test('Add new member', async () => {
 		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
 		await user.click(screen.getByText(/Add new Members/i));
