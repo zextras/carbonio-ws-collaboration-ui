@@ -64,10 +64,10 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	&:hover {
 		${({ $picture }): ReturnType<typeof css> => css`
 			background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${$picture});
-			background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-				url(${$picture});
-			background-image: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-				url(${$picture});
+			background-image:
+				-webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${$picture});
+			background-image:
+				-moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${$picture});
 		`}
 		background-size: cover;
 		background-position: center;

@@ -35,7 +35,7 @@ beforeEach(() => {
 
 describe('VirtualRoomsButton', () => {
 	test('create virtual modal', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 
 		const { user } = setup(<VirtualRoomsButton expanded />);

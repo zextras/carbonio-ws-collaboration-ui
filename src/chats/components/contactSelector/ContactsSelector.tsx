@@ -16,6 +16,7 @@ import React, {
 } from 'react';
 
 import {
+	Button,
 	ChipAction,
 	ChipInput,
 	ChipItem,
@@ -68,10 +69,12 @@ const ContactsSelector = ({
 	);
 	const demoteModeratorLabel = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel = t('tooltip.promoteModerator', 'Promote to moderator');
+	const showMoreUsersLabel = t('participantsList.creationList.loadMore', 'Show more users');
 
 	const [searchResult, setSearchResult] = useState<ContactInfo[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [hasMore, setHasMore] = useState<boolean>(false);
 
 	const chipInputRef = useRef<HTMLInputElement>(null);
 
@@ -140,9 +143,9 @@ const ContactsSelector = ({
 	]);
 
 	const filterResponse = useCallback(
-		(response: SearchUsersByFeatureSoapResponse) =>
+		(contacts: ContactInfo[]) =>
 			filter(
-				response,
+				contacts,
 				(contact) => !find(currentMembers, (member) => member.userId === contact.id)
 			),
 		[currentMembers]
@@ -150,15 +153,30 @@ const ContactsSelector = ({
 
 	const searchContacts = useCallback(() => {
 		setLoading(true);
+		setHasMore(false);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '')
-			.then((response: SearchUsersByFeatureSoapResponse) => {
-				setSearchResult(filterResponse(response));
+			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+				setSearchResult(filterResponse(contacts));
 				setLoading(false);
+				setHasMore(more);
 			})
 			.catch(() => {
 				setLoading(false);
+				setHasMore(false);
 			});
 	}, [filterResponse, inputRef]);
+
+	const loadMoreContacts = useCallback(() => {
+		setHasMore(false);
+		searchUsersByFeatureRequest(inputRef.current?.value ?? '', searchResult.length)
+			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+				setSearchResult((prevResults) => union(prevResults, filterResponse(contacts)));
+				setHasMore(more);
+			})
+			.catch(() => {
+				setHasMore(true);
+			});
+	}, [filterResponse, inputRef, searchResult]);
 
 	useEffect(
 		() => searchContacts(),
@@ -193,35 +211,44 @@ const ContactsSelector = ({
 		[chips, setContactSelected]
 	);
 
-	const items = useMemo(
-		() =>
-			map(searchResult, (item) => {
-				const contactSelected = find(contactsSelected, { id: item.id });
-				return (
-					<ListItem key={item.id} active={!!contactSelected}>
-						{() => (
-							<ListParticipant
-								item={item}
-								selected={!!contactSelected}
-								onClickCb={onClickListedContact}
-								isDisabled={chipInputError}
-								updateOwnership={updateOwnership}
-								isOwner={contactSelected?.owner || false}
-								canBeModerator={canSelectOwnership}
-							/>
-						)}
-					</ListItem>
-				);
-			}),
-		[
-			canSelectOwnership,
-			chipInputError,
-			contactsSelected,
-			onClickListedContact,
-			searchResult,
-			updateOwnership
-		]
-	);
+	const items = useMemo(() => {
+		const Items = map(searchResult, (item) => {
+			const contactSelected = find(contactsSelected, { id: item.id });
+			return (
+				<ListItem key={item.id} active={!!contactSelected}>
+					{() => (
+						<ListParticipant
+							item={item}
+							selected={!!contactSelected}
+							onClickCb={onClickListedContact}
+							isDisabled={chipInputError}
+							updateOwnership={updateOwnership}
+							isOwner={contactSelected?.owner || false}
+							canBeModerator={canSelectOwnership}
+						/>
+					)}
+				</ListItem>
+			);
+		});
+		if (hasMore) {
+			Items.push(
+				<Container width="fill" padding="0.5rem" key="load-more">
+					<Button label={showMoreUsersLabel} type="ghost" onClick={loadMoreContacts} />
+				</Container>
+			);
+		}
+		return Items;
+	}, [
+		canSelectOwnership,
+		chipInputError,
+		contactsSelected,
+		hasMore,
+		loadMoreContacts,
+		onClickListedContact,
+		searchResult,
+		showMoreUsersLabel,
+		updateOwnership
+	]);
 
 	const ListContacts = useMemo(() => {
 		if (loading) return <Spinner color="primary" />;
