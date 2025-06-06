@@ -56,7 +56,7 @@ beforeEach(() => {
 });
 describe('Chat Creation Modal', () => {
 	test('All elements are rendered', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1] });
 		setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		const title = await screen.findByText('New Chat');
@@ -73,7 +73,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Creating a 1to1 Chat add a placeholder room', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
+		mockSearchUsersByFeatureRequest.mockReturnValue({ contacts: [user1] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
@@ -104,7 +104,7 @@ describe('Chat Creation Modal', () => {
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -137,7 +137,7 @@ describe('Chat Creation Modal', () => {
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -162,7 +162,7 @@ describe('Chat Creation Modal', () => {
 	test('title and topic fields are filled properly', async () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add user1 and user2 chips
@@ -187,7 +187,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on title input', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -210,7 +210,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on topic input', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add user1 and user2 chips
@@ -237,7 +237,7 @@ describe('Chat Creation Modal', () => {
 		const store = useStore.getState();
 		store.addRooms([testRoom]);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add user1 to ChipInput
@@ -251,7 +251,7 @@ describe('Chat Creation Modal', () => {
 	test('Check creation disabled if user reach the limit available, and check list checkbox are disabled', async () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '3' }));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2, user3] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
@@ -272,7 +272,7 @@ describe('Chat Creation Modal', () => {
 	test('Check list checkbox are enabled when user can add other members', async () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '4' }));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2, user3] });
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
@@ -292,7 +292,7 @@ describe('Chat Creation Modal', () => {
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
 		// Add users
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');

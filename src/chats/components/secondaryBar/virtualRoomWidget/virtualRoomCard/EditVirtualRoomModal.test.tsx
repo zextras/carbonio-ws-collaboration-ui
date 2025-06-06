@@ -49,7 +49,7 @@ beforeEach(() => {
 	store.addRooms([virtualRoom]);
 	store.addMeetings([meeting]);
 	store.setUserInfo([member1]);
-	mockSearchUsersByFeatureRequest.mockResolvedValueOnce([user1, user2]);
+	mockSearchUsersByFeatureRequest.mockResolvedValueOnce({ contacts: [user1, user2] });
 });
 describe('EditVirtualRoomModal test', () => {
 	test('Initial modal rendering', async () => {

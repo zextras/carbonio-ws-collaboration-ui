@@ -6,8 +6,16 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
-import { debounce, differenceWith, map, size } from 'lodash';
+import {
+	Button,
+	Container,
+	Divider,
+	Padding,
+	Spinner,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
+import { debounce, differenceWith, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,7 +23,10 @@ import GalListItem from './GalListItem';
 import { searchUsersByFeatureRequest } from '../../../../network/soap/SearchUsersByFeatureRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { SearchUsersByFeatureSoapResponse } from '../../../../types/network/soap/searchUsersByFeatureRequest';
+import {
+	ContactInfo,
+	SearchUsersByFeatureSoapResponse
+} from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
@@ -47,9 +58,11 @@ const useFilteredGal = (
 		'There seems to be a problem with your search, please retry.'
 	);
 	const retryLabel = t('action.retry', 'Retry');
+	const showMoreUsersLabel = t('participantsList.creationList.loadMore', 'Show more users');
 
-	const [filteredGal, setFilteredGal] = useState<SearchUsersByFeatureSoapResponse>([]);
+	const [filteredGal, setFilteredGal] = useState<ContactInfo[]>([]);
 	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');
+	const [hasMore, setHasMore] = useState<boolean>(false);
 
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
@@ -58,36 +71,50 @@ const useFilteredGal = (
 		debounce((text: string) => {
 			if (text !== '') {
 				setRequestStatus('loading');
+				setHasMore(false);
 				searchUsersByFeatureRequest(text)
-					.then((response: SearchUsersByFeatureSoapResponse) => {
+					.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
 						setRequestStatus('success');
-						setFilteredGal(response);
+						setFilteredGal(contacts);
+						setHasMore(more);
 					})
-					.catch(() => setRequestStatus('error'));
+					.catch(() => {
+						setRequestStatus('error');
+						setHasMore(false);
+					});
 			}
 		}, 500),
 		[]
 	);
 
+	const loadMoreContacts = useCallback(() => {
+		setHasMore(false);
+		searchUsersByFeatureRequest(input ?? '', filteredGal.length)
+			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+				setFilteredGal((prevResults) => union(prevResults, contacts));
+				setHasMore(more);
+			})
+			.catch(() => {
+				setHasMore(true);
+			});
+	}, [filteredGal.length, input]);
+
 	useEffect(() => {
 		searchOnGal(input);
 	}, [input, searchOnGal]);
 
-	const GalSearchHeader = useMemo(
-		() =>
-			expanded ? (
+	const GalSearchHeader = useMemo(() => {
+		if (expanded) {
+			return (
 				<Padding horizontal="large" vertical="large" bottom="small">
 					<CustomText size="small" color="primary">
 						{createNewChatLabel}
 					</CustomText>
 				</Padding>
-			) : (
-				<Container width="fill" height="fit" padding={{ all: 'small' }}>
-					<Button type="ghost" icon="Plus" size="large" onClick={() => null} />
-				</Container>
-			),
-		[expanded, createNewChatLabel]
-	);
+			);
+		}
+		return undefined;
+	}, [expanded, createNewChatLabel]);
 
 	const GalUsersComponent = useMemo(() => {
 		const filteredGalWithUserId = differenceWith(
@@ -95,15 +122,41 @@ const useFilteredGal = (
 			singleConversationsUserId,
 			(gal, userId) => gal.id === userId
 		);
-		return map(filteredGalWithUserId, (contactInfo) => (
+		const users = map(filteredGalWithUserId, (contactInfo) => (
 			<GalListItem contact={contactInfo} expanded={expanded} key={contactInfo.id} />
 		));
-	}, [expanded, filteredGal, singleConversationsUserId]);
+		if (hasMore) {
+			users.push(
+				<Container width="fill" height="fit" padding="0.5rem" key="load-more">
+					{expanded ? (
+						<Button
+							label={showMoreUsersLabel}
+							type="ghost"
+							size="small"
+							onClick={loadMoreContacts}
+						/>
+					) : (
+						<Tooltip label={showMoreUsersLabel}>
+							<Button icon="Plus" onClick={loadMoreContacts} type="outlined" labelColor="primary" />
+						</Tooltip>
+					)}
+				</Container>
+			);
+		}
+		return users;
+	}, [
+		expanded,
+		filteredGal,
+		hasMore,
+		loadMoreContacts,
+		showMoreUsersLabel,
+		singleConversationsUserId
+	]);
 
 	const PendingComponent = useMemo(
 		() => (
 			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
-				<Icon icon="Refresh" />
+				<Spinner color="primary" />
 			</CustomContainer>
 		),
 		[]
@@ -111,19 +164,22 @@ const useFilteredGal = (
 
 	const ErrorComponent = useMemo(
 		() => (
-			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit" gap="1rem">
-				<SecondaryBarInfoText
-					color="gray1"
-					size="small"
-					weight="light"
-					overflow={expanded ? 'break-word' : 'ellipsis'}
-				>
-					{errorLabel}
-				</SecondaryBarInfoText>
+			<CustomContainer
+				padding={{ vertical: 'small', horizontal: expanded ? 'large' : 'small' }}
+				height="fit"
+				gap="1rem"
+			>
 				{expanded ? (
-					<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
+					<>
+						<SecondaryBarInfoText color="gray1" size="small" weight="light" overflow="break-word">
+							{errorLabel}
+						</SecondaryBarInfoText>
+						<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
+					</>
 				) : (
-					<Button type="ghost" icon="Refresh" onClick={() => searchOnGal(input)} />
+					<Tooltip label={retryLabel}>
+						<Button color="gray1" icon="Refresh" onClick={() => searchOnGal(input)} />
+					</Tooltip>
 				)}
 			</CustomContainer>
 		),

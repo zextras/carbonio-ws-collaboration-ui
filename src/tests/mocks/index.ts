@@ -8,7 +8,6 @@
 import './global';
 
 // Network mocks
-import './AutoCompleteGal';
 import './SearchUsersByFeature';
 
 // Hooks mocks

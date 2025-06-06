@@ -90,7 +90,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('create virtual room with 2 moderators', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
@@ -128,7 +128,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('create virtual room by selecting and removing one moderator', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
@@ -178,7 +178,7 @@ describe('VirtualRoomsModal', () => {
 		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 		await user.type(textArea, virtualRoomName);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1] });
 		const moderatorInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(moderatorInput, 'User One');
 
@@ -218,7 +218,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('Search user returns no matches', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				toggleModal={noop}

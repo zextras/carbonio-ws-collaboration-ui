@@ -106,7 +106,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 							</>
 						)}
 					</ScrollContainer>
-					{videoCallEnabled && <VirtualRoomsButton expanded={expanded} />}
+					{videoCallEnabled && filteredInput === '' && <VirtualRoomsButton expanded={expanded} />}
 				</Container>
 			) : (
 				<DefaultUserSidebarView expanded={expanded} />
