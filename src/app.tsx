@@ -31,7 +31,9 @@ export default function App(): React.JSX.Element {
 	const authenticated = useAuthenticated();
 	const { prefs, attrs } = useUserSettings();
 
-	setApiVersion('1.6.0');
+	useEffect(() => {
+		setApiVersion('1.6.0');
+	}, []);
 
 	// STORE: init with user session main infos
 	useEffect(() => {
