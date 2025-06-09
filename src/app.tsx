@@ -33,7 +33,7 @@ export default function App(): React.JSX.Element {
 
 	useEffect(() => {
 		setApiVersion('1.6.0');
-	}, []);
+	}, [setApiVersion]);
 
 	// STORE: init with user session main infos
 	useEffect(() => {
