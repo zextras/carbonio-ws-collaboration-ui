@@ -298,9 +298,11 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ vertical: 'small' }} crossAlignment="flex-start">
-					<Text color="secondary" overflow="ellipsis">
-						{attachment.name}
-					</Text>
+					<Tooltip label={attachment.name} overflowTooltip>
+						<Text color="secondary" overflow="ellipsis">
+							{attachment.name}
+						</Text>
+					</Tooltip>
 				</Container>
 			</Row>
 		</FileContainer>

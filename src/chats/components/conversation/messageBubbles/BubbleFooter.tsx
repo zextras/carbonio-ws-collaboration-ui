@@ -117,7 +117,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				padding={{ right: 'medium' }}
 				wrap="nowrap"
 			>
-				<Container orientation="horizontal" gap="0.5rem">
+				<Container orientation="horizontal" mainAlignment="flex-start" gap="0.5rem">
 					{messageExtension && messageSize && (
 						<Tooltip label={messageExtensionSizeLabel} overflowTooltip>
 							<Text color="secondary" size="small" overflow="ellipsis">
