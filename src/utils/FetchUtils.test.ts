@@ -6,7 +6,7 @@
 
 import { act } from '@testing-library/react';
 
-import { fetchAPI, uploadFileFetchAPI } from './FetchUtils';
+import { fetchAPI, uploadFileFetchAPI, wscApiVersionHeader } from './FetchUtils';
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
 import { spyOnFetch } from '../tests/jest-env-setup';
@@ -46,7 +46,7 @@ describe('FetchUtils', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 		headers.append('queue-id', 'idUser1');
-		headers.append('X-WSC-API-VERSION', '1.0.0');
+		headers.append(wscApiVersionHeader, '1.0.0');
 		getHeaders.mockResolvedValueOnce(headers);
 
 		await fetchAPI('test', RequestType.GET);
@@ -91,7 +91,7 @@ describe('FetchUtils', () => {
 		headers.append('replyId', optField.replyId);
 		headers.append('area', optField.area);
 		headers.append('queue-id', 'idUser1');
-		headers.append('X-WSC-API-VERSION', '1.0.0');
+		headers.append(wscApiVersionHeader, '1.0.0');
 
 		const { signal } = new AbortController();
 

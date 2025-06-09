@@ -18,7 +18,6 @@ import {
 } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
-import UserDataRetriever from '../../utils/UserDataRetriever';
 
 export const useSessionStoreSlice: StateCreator<
 	RootStore,
@@ -37,7 +36,6 @@ export const useSessionStoreSlice: StateCreator<
 					displayName,
 					userType: userType ?? UserType.INTERNAL
 				};
-				UserDataRetriever.getDebouncedUser(id, true);
 			}),
 			false,
 			'SESSION/LOGIN_INFO'
