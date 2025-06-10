@@ -69,6 +69,23 @@ describe('FetchUtils', () => {
 		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
+	test('Set correct version after version mismatch error', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		spyOnFetch.mockRestore();
+		const mockErrResp = {
+			ok: false,
+			status: 422,
+			headers: {
+				// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+				get: (header: string) => (header === wscApiVersionHeader ? '1.6.0' : null)
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValue(mockErrResp);
+
+		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
+		expect(useStore.getState().session.apiVersion).toBe('1.6.0');
+	});
+
 	test('test uploadFileFetchAPI is called correctly', async () => {
 		act(() => {
 			const store = useStore.getState();
