@@ -293,12 +293,16 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			crossAlignment="flex-start"
 			$userBorderColor={isMyMessage ? undefined : userColor}
 		>
-			<Row>
+			<Row wrap="nowrap">
 				<AttachmentSmallView attachment={attachment} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container padding={{ vertical: 'small' }} wrap="wrap" crossAlignment="flex-start">
-					<Text color="secondary">{attachment.name}</Text>
+				<Container padding={{ vertical: 'small' }} crossAlignment="flex-start">
+					<Tooltip label={attachment.name} overflowTooltip>
+						<Text color="secondary" overflow="ellipsis">
+							{attachment.name}
+						</Text>
+					</Tooltip>
 				</Container>
 			</Row>
 		</FileContainer>
