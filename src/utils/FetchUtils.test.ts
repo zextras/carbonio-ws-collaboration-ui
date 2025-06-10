@@ -76,8 +76,8 @@ describe('FetchUtils', () => {
 			ok: false,
 			status: 422,
 			headers: {
-				// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-				get: (header: string) => (header === wscApiVersionHeader ? '1.6.0' : null)
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
 		(global.fetch as jest.Mock).mockResolvedValue(mockErrResp);
