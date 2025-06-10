@@ -118,12 +118,6 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	useEffect(() => {
 		if (inputHasFocus) {
 			textareaRef.current?.focus();
-			// Focus the end of the input if there is a draft message;
-			if (textareaRef.current) {
-				const textAreaValue = textareaRef.current.value;
-				textareaRef.current.value = '';
-				textareaRef.current.value = textAreaValue;
-			}
 		}
 	}, [inputHasFocus, textareaRef]);
 

@@ -66,8 +66,13 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 				const text = `${prevPosition}${emoji.native}${nextPosition}`;
 				setMessage(text);
 				const cursorMiddlePosition = emoji.native.length + position;
-				messageInputRef.current.focus();
-				messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
+				// Apply selection after the value update to ensure the cursor is placed correctly
+				setTimeout(() => {
+					if (messageInputRef.current) {
+						messageInputRef.current.focus();
+						messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
+					}
+				}, 0);
 			}
 		},
 		[setMessage, messageInputRef]
