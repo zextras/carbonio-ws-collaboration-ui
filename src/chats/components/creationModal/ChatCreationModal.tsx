@@ -50,7 +50,7 @@ const ChatCreationModal = ({
 	);
 	const listTextLabel = t(
 		'modal.creation.contactList',
-		'Select more than an address to create a Group'
+		'Select more than one address to create a Group'
 	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);

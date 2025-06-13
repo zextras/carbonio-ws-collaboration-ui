@@ -241,14 +241,15 @@ const Bubble: FC<BubbleProps> = ({
 					/>
 				)}
 				{messageAttachment && (
-					<Padding bottom="0.5rem">
+					<>
 						<AttachmentView
 							attachment={messageAttachment}
 							isMyMessage={isMyMessage}
 							from={message.from}
 							messageListRef={messageListRef}
 						/>
-					</Padding>
+						<Padding bottom="0.5rem" />
+					</>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
 				{messageAttachment && (
