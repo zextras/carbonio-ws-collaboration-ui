@@ -172,7 +172,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		};
 	}, [resizeHandler]);
 
-	const setLoaded = useCallback(() => setIsPreviewLoaded(true), []);
+	const setLoaded = useCallback(() => {
+		setIsPreviewLoaded(true);
+		window.dispatchEvent(new Event('imageLoadedInChat'));
+	}, []);
 	const setError = useCallback(() => {
 		setIsPreviewLoaded(true);
 		setPreviewError(true);

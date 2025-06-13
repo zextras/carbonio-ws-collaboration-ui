@@ -6,11 +6,11 @@
 
 import { RefObject } from 'react';
 
-export const scrollToEnd = (element?: RefObject<HTMLDivElement>): void =>
-	element?.current?.scrollTo({
-		top: element.current.scrollHeight,
-		behavior: 'auto'
-	});
+export const scrollToEnd = (element?: RefObject<HTMLDivElement>): void => {
+	if (element?.current?.scrollHeight && element.current.scrollHeight > 0) {
+		element.current.scrollTo({ top: element.current.scrollHeight, behavior: 'auto' });
+	}
+};
 
 export const scrollToMessage = (messageId?: string): void => {
 	if (messageId) {
