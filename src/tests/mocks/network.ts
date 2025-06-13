@@ -12,6 +12,7 @@ import roomsApi from '../../network/apis/RoomsApi';
 import usersApi from '../../network/apis/UsersApi';
 
 export enum RoomsApiToSpy {
+	LIST_ROOMS = 'listRooms',
 	GET_ROOM = 'getRoom',
 	ADD_ROOM = 'addRoom',
 	DELETE_ROOM = 'deleteRoom',
@@ -39,6 +40,7 @@ export enum AttachmentsApiToSpy {
 }
 
 export enum MeetingsApiToSpy {
+	LIST_MEETINGS = 'listMeetings',
 	CREATE_MEETING = 'createMeeting',
 	GET_MEETING = 'getMeeting',
 	LEAVE_MEETING = 'leaveMeeting',
