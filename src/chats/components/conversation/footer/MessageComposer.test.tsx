@@ -775,11 +775,12 @@ describe('MessageComposer - draft message', () => {
 		expect(composerTextArea as HTMLTextAreaElement).toHaveValue(draftMessage);
 	});
 
-	test('The cursor position is in the end of the draft message on opening the conversation', () => {
+	test('The cursor position is in the end of the draft message on opening the conversation', async () => {
 		const store = useStore.getState();
 		store.setDraftMessage(mockedRoom.id, draftMessage);
 
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { rerender } = setup(<MessageComposer roomId="anotherRoomId" />);
+		rerender(<MessageComposer roomId={mockedRoom.id} />);
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(draftMessage.length);
