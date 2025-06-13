@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
 
@@ -26,9 +26,14 @@ export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
+	const setApiVersion = useStore((state) => state.setApiVersion);
 
 	const authenticated = useAuthenticated();
 	const { prefs, attrs } = useUserSettings();
+
+	useEffect(() => {
+		setApiVersion('1.6.0');
+	}, [setApiVersion]);
 
 	// STORE: init with user session main infos
 	useEffect(() => {
@@ -45,23 +50,32 @@ export default function App(): React.JSX.Element {
 	}, [prefs, authenticated]);
 
 	// NETWORKS: init XMPP and WebSocket clients
+	const connect = useCallback(() => {
+		SessionApi.getToken()
+			.then((resp) => {
+				Promise.all([RoomsApi.listRooms(true, true), MeetingsApi.listMeetings()])
+					.then(() => {
+						setChatsBeStatus(true);
+						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+						const { xmppClient, wsClient } = useStore.getState().connections;
+						xmppClient.connect(resp.zmToken);
+						wsClient.connect();
+					})
+					.catch(() => setChatsBeStatus(false));
+			})
+			.catch((error) => {
+				setChatsBeStatus(false);
+				if (error.message === 'version_mismatch') {
+					connect();
+				}
+			});
+	}, [setChatsBeStatus]);
+
 	useEffect(() => {
 		if (authenticated) {
-			Promise.all([
-				SessionApi.getToken(),
-				RoomsApi.listRooms(true, true),
-				MeetingsApi.listMeetings()
-			])
-				.then((resp) => {
-					setChatsBeStatus(true);
-					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-					const { xmppClient, wsClient } = useStore.getState().connections;
-					xmppClient.connect(resp[0].zmToken);
-					wsClient.connect();
-				})
-				.catch(() => setChatsBeStatus(false));
+			connect();
 		}
-	}, [authenticated, setChatsBeStatus]);
+	}, [authenticated, connect]);
 
 	initChats();
 	initMeetings();

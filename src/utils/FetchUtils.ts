@@ -10,8 +10,10 @@ import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
 import { RequestType } from '../types/network/apis/IBaseAPI';
 import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
+import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
+export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 
 export const mimeTypeToAppend = (mimeTypeToCheck: string | undefined): string =>
 	mimeTypeToCheck !== undefined && mimeTypeToCheck.length !== 0
@@ -27,11 +29,9 @@ export const fetchAPI = (
 	const headers = new Headers();
 	headers.append('Content-Type', 'application/json');
 
-	// Add sessionId to headers only id it is already defined
-	const { queueId } = useStore.getState().session;
-	if (queueId) {
-		headers.append('queue-id', queueId);
-	}
+	const { queueId, apiVersion } = useStore.getState().session;
+	if (queueId) headers.append('queue-id', queueId);
+	if (apiVersion) headers.append(wscApiVersionHeader, apiVersion);
 
 	return fetch(URL, {
 		method,
@@ -40,6 +40,14 @@ export const fetchAPI = (
 	})
 		.then((resp: Response) => {
 			if (resp.ok) return resp;
+			if (resp.status === 422) {
+				const serverApiVersion = resp.headers.get(wscApiVersionHeader);
+				const clientApiVersion = useStore.getState().session.apiVersion;
+				if (!!serverApiVersion && serverApiVersion !== clientApiVersion) {
+					useStore.getState().setApiVersion(serverApiVersion as Version);
+					return Promise.reject(new Error('version_mismatch'));
+				}
+			}
 			return Promise.reject(new Error('status ko'));
 		})
 		.then((resp: Response) => {
@@ -73,11 +81,10 @@ export const uploadFileFetchAPI = (
 				optionalFields.area && headers.append('area', optionalFields.area);
 			}
 
-			// Add sessionId to headers only if it is already defined
-			const { queueId } = useStore.getState().session;
-			if (queueId) {
-				headers.append('session-id', queueId);
-			}
+			const { queueId, apiVersion } = useStore.getState().session;
+			if (queueId) headers.append('queue-id', queueId);
+			if (apiVersion) headers.append(wscApiVersionHeader, apiVersion);
+
 			fetch(BASE_PATH + endpoint, {
 				method: requestType,
 				headers,

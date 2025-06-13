@@ -47,7 +47,10 @@ export const NOTIFICATION_MANAGER = {
 
 export const IS_FOCUS_MODE = false;
 
-export const useAuthenticated: typeof Shell.useAuthenticated = (): boolean => false;
+export const useAuthenticated = jest.fn<
+	ReturnType<typeof Shell.useAuthenticated>,
+	Parameters<typeof Shell.useAuthenticated>
+>(() => true);
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
 
@@ -57,6 +60,14 @@ export const getUserAccount: typeof Shell.getUserAccount = () => ACCOUNT;
 
 export const getNotificationManager: typeof Shell.getNotificationManager = () =>
 	NOTIFICATION_MANAGER;
+
+export const addRoute: typeof Shell.addRoute = () => '';
+
+export const addSettingsView: typeof Shell.addSettingsView = () => '';
+
+export const registerComponents: typeof Shell.registerComponents = () => undefined;
+
+export const removeActions: typeof Shell.removeActions = () => undefined;
 
 export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings header</div>;
 

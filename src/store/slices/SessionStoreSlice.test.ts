@@ -37,6 +37,12 @@ describe('SessionStoreSlice tests', () => {
 		expect(useStore.getState().session.queueId).toBe(testQueueId);
 	});
 
+	test('apiVersion', () => {
+		const apiVersion = '1.6.0';
+		useStore.getState().setApiVersion(apiVersion);
+		expect(useStore.getState().session.apiVersion).toBe(apiVersion);
+	});
+
 	describe('attributes', () => {
 		test('Set boolean attributes to true', () => {
 			useStore.getState().setAttributes({
