@@ -338,5 +338,17 @@ export const useActiveConversationsSlice: StateCreator<
 			false,
 			'AC/SET_NEW_REACTION'
 		);
+	},
+	unsetNewReactions(roomId: string): void {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				if (conversation.newReactions) {
+					delete conversation.newReactions;
+				}
+			}),
+			false,
+			'AC/UNSET_NEW_REACTIONS'
+		);
 	}
 });
