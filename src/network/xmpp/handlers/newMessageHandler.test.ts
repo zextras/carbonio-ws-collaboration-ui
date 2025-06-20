@@ -8,7 +8,13 @@ import { size } from 'lodash';
 
 import { onNewMessageStanza } from './newMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockMessageFastening, createMockTextMessage } from '../../../tests/createMock';
+import {
+	createMockMessageFastening,
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../../tests/createMock';
+import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
 import {
 	DateMessage,
 	FasteningAction,
@@ -151,5 +157,52 @@ describe('XMPP newMessageHandler', () => {
 		const messageXMPP = createXMPPTextMessage(message);
 		onNewMessageStanza.call(xmppClient, messageXMPP);
 		expect(spyOnReadMessage).not.toHaveBeenCalled();
+	});
+
+	test('New reaction removed when input has focus', () => {
+		jest.useFakeTimers();
+		const sessionUser = createMockUser({ id: 'sessionUser' });
+		const otherUser = createMockUser({ id: 'otherUser' });
+		const room = createMockRoom({ id: 'roomId' });
+		const store = useStore.getState();
+		store.setLoginInfo(sessionUser.id, sessionUser.name || '');
+		store.setUserInfo([otherUser]);
+		store.addRooms([room]);
+		const myMessage = createMockTextMessage({
+			roomId: room.id,
+			from: sessionUser.id,
+			stanzaId: 'stanza1'
+		});
+		store.newMessage(myMessage);
+		store.setInputHasFocus(room.id, true);
+
+		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
+		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
+		jest.runAllTimers();
+		expect(useStore.getState().activeConversations[room.id].newReactions).toBeUndefined();
+	});
+
+	test('New reaction is kept when input is not focused', () => {
+		jest.useFakeTimers();
+		const sessionUser = createMockUser({ id: 'sessionUser2' });
+		const otherUser = createMockUser({ id: 'otherUser2' });
+		const room = createMockRoom({ id: 'roomId2' });
+		const store = useStore.getState();
+		store.setLoginInfo(sessionUser.id, sessionUser.name || '');
+		store.setUserInfo([otherUser]);
+		store.addRooms([room]);
+		const myMessage = createMockTextMessage({
+			roomId: room.id,
+			from: sessionUser.id,
+			stanzaId: 'stanza2'
+		});
+		store.newMessage(myMessage);
+
+		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
+		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
+		jest.runAllTimers();
+		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 	});
 });

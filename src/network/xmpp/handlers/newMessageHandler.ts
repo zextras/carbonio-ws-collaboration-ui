@@ -62,6 +62,11 @@ export function onNewMessageStanza(message: Element): true {
 					newMessage.value ?? '',
 					newMessage.from
 				);
+				if (store.activeConversations[newMessage.roomId]?.inputHasFocus) {
+					setTimeout(() => {
+						useStore.getState().unsetNewReactions(newMessage.roomId);
+					}, 0);
+				}
 			}
 			break;
 		}
