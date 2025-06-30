@@ -25,6 +25,7 @@ import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtils';
 import { RoomsApi } from '../index';
+import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 
 const jabberData = 'jabber:x:data';
 
@@ -154,7 +155,7 @@ class XMPPClient implements IXMPPClient {
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
-			.t(message)
+			.t(sanitizeXmppMessage(message))
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
@@ -184,7 +185,7 @@ class XMPPClient implements IXMPPClient {
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
-			.t(message)
+			.t(sanitizeXmppMessage(message))
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS })
 			.up()
@@ -218,7 +219,7 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.up()
 			.c('body')
-			.t(message);
+			.t(sanitizeXmppMessage(message));
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
