@@ -230,24 +230,45 @@ class RoomsApi implements IRoomsApi {
 		});
 
 		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.attributes?.maxAttachmentSize;
+			const { session, removePlaceholderMessage } = useStore.getState();
+			const sizeLimit = session.attributes?.maxAttachmentSize;
 			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
-				useStore.getState().removePlaceholderMessage(roomId, uuid);
+				removePlaceholderMessage(roomId, uuid);
 				reject(new Error('file_too_large'));
 			} else {
-				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+				const optional = {
 					description: optionalFields.description,
 					replyId: optionalFields.replyId,
-					messageId: uuid,
-					area: optionalFields.area
-				})
-					.then((resp: AddRoomAttachmentResponse) => {
-						resolve(resp);
-					})
+					area: optionalFields.area,
+					messageId: uuid
+				};
+				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
+					.then((resp: AddRoomAttachmentResponse) => resolve(resp))
 					.catch((error) => {
-						useStore.getState().removePlaceholderMessage(roomId, uuid);
-						return Promise.reject(new Error(error));
+						removePlaceholderMessage(roomId, uuid);
+						reject(new Error(error));
 					});
+				// if (!session.apiVersion || session.apiVersion === '1.6.0') {
+				// 	uploadFileFetchAPI(
+				// 		`rooms/${roomId}/attachments`,
+				// 		RequestType.POST,
+				// 		file,
+				// 		signal,
+				// 		optional
+				// 	)
+				// 		.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+				// 		.catch((error) => {
+				// 			removePlaceholderMessage(roomId, uuid);
+				// 			reject(new Error(error));
+				// 		});
+				// } else {
+				// sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
+				// 	.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+				// 	.catch((error) => {
+				// 		removePlaceholderMessage(roomId, uuid);
+				// 		reject(new Error(error));
+				// 	});
+				// }
 			}
 		});
 	}
