@@ -109,7 +109,7 @@ class XMPPClient implements IXMPPClient {
 	 * Request chat initial information like unread messages or active conversations.
 	 */
 
-	// Request the supported forms
+	// Request the supported form
 	public getInbox(): void {
 		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
@@ -398,7 +398,6 @@ class XMPPClient implements IXMPPClient {
 				xmlns: Strophe.NS.MARKERS,
 				id: messageId
 			});
-			console.log('read sent');
 			this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 		}
 	}
