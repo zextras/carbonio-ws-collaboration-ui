@@ -608,4 +608,29 @@ describe('Upload attachment view', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 	});
+
+	test('Focused file does not change when user clicks on "Show preview"', async () => {
+		const { user, store } = storeSetupAdvanced();
+		const fileOne = createMockFileToUpload({
+			fileId: 'fileOne',
+			file: createMockFile({ name: 'First', options: { type: 'image/png' } }),
+			hasFocus: true
+		});
+		const fileTwo = createMockFileToUpload({
+			fileId: 'fileTwo',
+			file: createMockFile({ name: 'Second', options: { type: 'image/png' } })
+		});
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
+
+		const previewButton = await screen.findByTestId(`previewSingleFile-${fileTwo.fileId}`);
+		await user.click(previewButton);
+		const firstFilePreview = await screen.findByTestId(
+			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
+		);
+		expect(firstFilePreview).toHaveStyle(borderColor);
+		const updatedStore = useStore.getState();
+		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
+		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
+		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
+	});
 });
