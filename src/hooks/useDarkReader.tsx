@@ -26,7 +26,7 @@ const useDarkReader = (): UseDarkReaderReturnType => {
 
 	const darkReaderMode = useMemo(() => {
 		if (inMeetingTab) return 'enabled';
-		return prefs.carbonioPrefDarkMode || 'disabled';
+		return prefs.carbonioPrefDarkMode ?? 'disabled';
 	}, [inMeetingTab, prefs]);
 
 	const enableDarkReader = useCallback(() => {
