@@ -44,7 +44,7 @@ describe('FetchUtils', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('content-type', applicationJson);
+		headers.append(contentType, applicationJson);
 		headers.append('queue-id', 'idUser1');
 		headers.append(wscApiVersionHeader, '1.0.0');
 		getHeaders.mockResolvedValueOnce(headers);
