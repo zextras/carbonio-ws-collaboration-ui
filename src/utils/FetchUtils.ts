@@ -68,7 +68,7 @@ export const sendFileFetchAPI = (
 	optionalFields?: AdditionalHeaders
 ): Promise<any> => {
 	const formData = new FormData();
-	formData.append('file', file);
+	formData.append('file', file, charToUnicode(file.name));
 	formData.append('contentLength', file.size.toString());
 	optionalFields?.description &&
 		formData.append('description', charToUnicode(optionalFields.description));
