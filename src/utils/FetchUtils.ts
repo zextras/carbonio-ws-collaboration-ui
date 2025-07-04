@@ -14,6 +14,7 @@ import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
+export const contentTypeHeader = 'Content-Type';
 
 const buildHeaders = (): Headers => {
 	const headers = new Headers();
@@ -37,7 +38,7 @@ const handleResponse = async (response: Response): Promise<any> => {
 		return Promise.reject(new Error('status ko'));
 	}
 
-	const contentType = response.headers.get('content-type');
+	const contentType = response.headers.get(contentTypeHeader);
 	if (contentType === 'application/json') return response.json();
 	if (includes(contentType, 'image/')) return response.blob();
 	return response;
@@ -47,14 +48,17 @@ export const fetchAPI = (
 	endpoint: string,
 	method: RequestType,
 	data?: Record<string, unknown> | Array<Record<string, unknown>>
-): Promise<any> =>
-	fetch(BASE_PATH + endpoint, {
+): Promise<any> => {
+	const headers = buildHeaders();
+	headers.append(contentTypeHeader, 'application/json');
+	return fetch(BASE_PATH + endpoint, {
 		method,
-		headers: buildHeaders(),
+		headers,
 		body: JSON.stringify(data)
 	})
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error) => Promise.reject(err));
+};
 
 export const sendFileFetchAPI = (
 	endpoint: string,
@@ -82,7 +86,6 @@ export const sendFileFetchAPI = (
 		.catch((err: Error) => Promise.reject(err));
 };
 
-// Old fetch API for file upload, used in v1.6.0
 export const uploadFileFetchAPI = (
 	endpoint: string,
 	requestType: RequestType,
@@ -112,23 +115,13 @@ export const uploadFileFetchAPI = (
 				signal
 			})
 				.then((resp: Response) => {
-					if (resp.ok) return resp;
-					return Promise.reject(new Error());
+					if (!resp.ok) reject(new Error());
+					const contentType = resp.headers.get(contentTypeHeader);
+					if (includes(contentType, 'image/')) resolve(resp.blob());
+					else resolve(resp);
 				})
-				.then((resp: Response) => {
-					const contentType = resp.headers.get('content-type');
-					if (includes(contentType, 'image/')) {
-						resolve(resp.blob());
-					} else {
-						resolve(resp);
-					}
-				})
-				.catch((err: Error) => {
-					reject(err);
-				});
+				.catch((err: Error) => reject(err));
 		});
-		reader.addEventListener('error', () => {
-			reject(new Error());
-		});
+		reader.addEventListener('error', () => reject(new Error()));
 		reader.readAsArrayBuffer(file);
 	});

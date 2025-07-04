@@ -42,7 +42,7 @@ import {
 } from '../../types/network/responses/roomsResponses';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
@@ -242,33 +242,28 @@ class RoomsApi implements IRoomsApi {
 					area: optionalFields.area,
 					messageId: uuid
 				};
-				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
-					.then((resp: AddRoomAttachmentResponse) => resolve(resp))
-					.catch((error) => {
-						removePlaceholderMessage(roomId, uuid);
-						reject(new Error(error));
-					});
-				// if (!session.apiVersion || session.apiVersion === '1.6.0') {
-				// 	uploadFileFetchAPI(
-				// 		`rooms/${roomId}/attachments`,
-				// 		RequestType.POST,
-				// 		file,
-				// 		signal,
-				// 		optional
-				// 	)
-				// 		.then((resp: AddRoomAttachmentResponse) => resolve(resp))
-				// 		.catch((error) => {
-				// 			removePlaceholderMessage(roomId, uuid);
-				// 			reject(new Error(error));
-				// 		});
-				// } else {
-				// sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
-				// 	.then((resp: AddRoomAttachmentResponse) => resolve(resp))
-				// 	.catch((error) => {
-				// 		removePlaceholderMessage(roomId, uuid);
-				// 		reject(new Error(error));
-				// 	});
-				// }
+				const x = true;
+				if (x) {
+					uploadFileFetchAPI(
+						`rooms/${roomId}/attachments`,
+						RequestType.POST,
+						file,
+						signal,
+						optional
+					)
+						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.catch((error) => {
+							removePlaceholderMessage(roomId, uuid);
+							reject(new Error(error));
+						});
+				} else {
+					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
+						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.catch((error) => {
+							removePlaceholderMessage(roomId, uuid);
+							reject(new Error(error));
+						});
+				}
 			}
 		});
 	}
