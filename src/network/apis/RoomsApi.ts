@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
@@ -242,8 +243,14 @@ class RoomsApi implements IRoomsApi {
 					area: optionalFields.area,
 					messageId: uuid
 				};
-				const x = true;
-				if (x) {
+				if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
+					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
+						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.catch((error) => {
+							removePlaceholderMessage(roomId, uuid);
+							reject(new Error(error));
+						});
+				} else {
 					uploadFileFetchAPI(
 						`rooms/${roomId}/attachments`,
 						RequestType.POST,
@@ -251,13 +258,6 @@ class RoomsApi implements IRoomsApi {
 						signal,
 						optional
 					)
-						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
-						.catch((error) => {
-							removePlaceholderMessage(roomId, uuid);
-							reject(new Error(error));
-						});
-				} else {
-					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
 						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
 						.catch((error) => {
 							removePlaceholderMessage(roomId, uuid);

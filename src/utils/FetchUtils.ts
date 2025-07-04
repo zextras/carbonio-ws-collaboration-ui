@@ -70,8 +70,7 @@ export const sendFileFetchAPI = (
 	const formData = new FormData();
 	formData.append('file', file);
 	formData.append('contentLength', file.size.toString());
-	optionalFields?.description &&
-		formData.append('description', charToUnicode(optionalFields.description));
+	optionalFields?.description && formData.append('description', optionalFields.description);
 	optionalFields?.messageId && formData.append('messageId', optionalFields.messageId);
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
