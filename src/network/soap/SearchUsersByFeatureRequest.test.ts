@@ -80,4 +80,13 @@ describe('SearchUsersByFeatureRequest', () => {
 		expect(contacts).toEqual([contact2Info, contact3Info]);
 		expect(more).toBeFalsy();
 	});
+
+	test('SearchUsersByFeatureRequest should throw an error on failure', async () => {
+		mockSoapFetchV2.mockReturnValueOnce({
+			Fault: { Code: 'some error code', Detail: 'some error detail' }
+		});
+		await expect(searchUsersByFeatureRequest('search text')).rejects.toThrow(
+			'Error fetching SearchUsersByFeature results'
+		);
+	});
 });
