@@ -5,7 +5,7 @@
  */
 
 import { searchUsersByFeatureRequest } from './SearchUsersByFeatureRequest';
-import { mockSoapFetch } from '../../../__mocks__/@zextras/carbonio-shell-ui';
+import { mockSoapFetchV2 } from '../../../__mocks__/@zextras/carbonio-ui-soap-lib';
 import useStore from '../../store/Store';
 
 jest.unmock('./SearchUsersByFeatureRequest');
@@ -57,9 +57,11 @@ const contact3Info = {
 
 describe('SearchUsersByFeatureRequest', () => {
 	test('Contact info wll be formatted as ContactInfo type', async () => {
-		mockSoapFetch.mockResolvedValueOnce({
-			account: [contact1Match, contact2Match, contact3Match],
-			more: true
+		mockSoapFetchV2.mockReturnValueOnce({
+			SearchUsersByFeatureResponse: {
+				account: [contact1Match, contact2Match, contact3Match],
+				more: true
+			}
 		});
 		const { contacts, more } = await searchUsersByFeatureRequest('');
 		expect(contacts).toEqual([contact1Info, contact2Info, contact3Info]);
@@ -68,9 +70,11 @@ describe('SearchUsersByFeatureRequest', () => {
 
 	test('Contact info of the current user will be removed', async () => {
 		useStore.getState().setLoginInfo(contact1Info.id, contact1Info.email);
-		mockSoapFetch.mockResolvedValueOnce({
-			account: [contact1Match, contact2Match, contact3Match],
-			more: false
+		mockSoapFetchV2.mockReturnValueOnce({
+			SearchUsersByFeatureResponse: {
+				account: [contact1Match, contact2Match, contact3Match],
+				more: false
+			}
 		});
 		const { contacts, more } = await searchUsersByFeatureRequest('search text');
 		expect(contacts).toEqual([contact2Info, contact3Info]);

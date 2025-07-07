@@ -11,11 +11,11 @@ export type SearchUsersByFeatureRequest = {
 	offset: number;
 };
 
-export type SearchUsersByFeatureResponse = {
+export type SearchUsersByFeatureResponseType = {
 	account: ContactMatch[];
 	more: boolean;
 	total: number;
-} & { Fault: { Detail: { Error: { Code: string } } } };
+};
 
 export type ContactMatch = {
 	a: { n: string; _content: string }[];
