@@ -29,10 +29,7 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
-import {
-	FILE_DESCRIPTION_CHAR_LIMIT,
-	MESSAGE_CHAR_LIMIT
-} from '../../../../constants/messageConstants';
+import { MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
@@ -150,19 +147,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback(
-		(textareaValue: string): void => {
-			const filesToUpload = useStore.getState().activeConversations[roomId]?.filesToAttach;
-			const charsLimit = size(filesToUpload) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
-			if (textareaValue.length >= charsLimit) {
-				setTextMessage(textareaValue.slice(0, charsLimit));
-				setNoMoreCharsOnInputComposer(true);
-			} else {
-				setNoMoreCharsOnInputComposer(false);
-			}
-		},
-		[roomId]
-	);
+	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
+		if (textareaValue.length >= MESSAGE_CHAR_LIMIT) {
+			setTextMessage(textareaValue.slice(0, MESSAGE_CHAR_LIMIT));
+			setNoMoreCharsOnInputComposer(true);
+		} else {
+			setNoMoreCharsOnInputComposer(false);
+		}
+	}, []);
 
 	// Check message max length when some files are attached
 	useEffect(() => {
