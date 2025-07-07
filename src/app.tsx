@@ -32,7 +32,7 @@ export default function App(): React.JSX.Element {
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setApiVersion('1.6.0');
+		setApiVersion('1.6.1');
 	}, [setApiVersion]);
 
 	// STORE: init with user session main infos

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
@@ -42,7 +43,7 @@ import {
 } from '../../types/network/responses/roomsResponses';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
@@ -230,24 +231,39 @@ class RoomsApi implements IRoomsApi {
 		});
 
 		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.attributes?.maxAttachmentSize;
+			const { session, removePlaceholderMessage } = useStore.getState();
+			const sizeLimit = session.attributes?.maxAttachmentSize;
 			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
-				useStore.getState().removePlaceholderMessage(roomId, uuid);
+				removePlaceholderMessage(roomId, uuid);
 				reject(new Error('file_too_large'));
 			} else {
-				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+				const optional = {
 					description: optionalFields.description,
 					replyId: optionalFields.replyId,
-					messageId: uuid,
-					area: optionalFields.area
-				})
-					.then((resp: AddRoomAttachmentResponse) => {
-						resolve(resp);
-					})
-					.catch((error) => {
-						useStore.getState().removePlaceholderMessage(roomId, uuid);
-						return Promise.reject(new Error(error));
-					});
+					area: optionalFields.area,
+					messageId: uuid
+				};
+				if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
+					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
+						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.catch((error) => {
+							removePlaceholderMessage(roomId, uuid);
+							reject(new Error(error));
+						});
+				} else {
+					uploadFileFetchAPI(
+						`rooms/${roomId}/attachments`,
+						RequestType.POST,
+						file,
+						signal,
+						optional
+					)
+						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.catch((error) => {
+							removePlaceholderMessage(roomId, uuid);
+							reject(new Error(error));
+						});
+				}
 			}
 		});
 	}
