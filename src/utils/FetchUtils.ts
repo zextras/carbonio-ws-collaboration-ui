@@ -14,48 +14,75 @@ import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
+export const contentTypeHeader = 'Content-Type';
 
-export const mimeTypeToAppend = (mimeTypeToCheck: string | undefined): string =>
-	mimeTypeToCheck !== undefined && mimeTypeToCheck.length !== 0
-		? mimeTypeToCheck
-		: 'application/octet-stream';
+const buildHeaders = (): Headers => {
+	const headers = new Headers();
+	const { queueId, apiVersion } = useStore.getState().session;
+	if (queueId) headers.append('queue-id', queueId);
+	if (apiVersion) headers.append(wscApiVersionHeader, apiVersion);
+	return headers;
+};
+
+const handleResponse = async (response: Response): Promise<any> => {
+	if (!response.ok) {
+		if (response.status === 422) {
+			const { session, setApiVersion } = useStore.getState();
+			const serverApiVersion = response.headers.get(wscApiVersionHeader);
+			const clientApiVersion = session.apiVersion;
+			if (!!serverApiVersion && serverApiVersion !== clientApiVersion) {
+				setApiVersion(serverApiVersion as Version);
+				return Promise.reject(new Error('version_mismatch'));
+			}
+		}
+		return Promise.reject(new Error('status ko'));
+	}
+
+	const contentType = response.headers.get(contentTypeHeader);
+	if (contentType === 'application/json') return response.json();
+	if (includes(contentType, 'image/')) return response.blob();
+	return response;
+};
 
 export const fetchAPI = (
 	endpoint: string,
 	method: RequestType,
 	data?: Record<string, unknown> | Array<Record<string, unknown>>
 ): Promise<any> => {
-	const URL = BASE_PATH + endpoint;
-	const headers = new Headers();
-	headers.append('Content-Type', 'application/json');
-
-	const { queueId, apiVersion } = useStore.getState().session;
-	if (queueId) headers.append('queue-id', queueId);
-	if (apiVersion) headers.append(wscApiVersionHeader, apiVersion);
-
-	return fetch(URL, {
+	const headers = buildHeaders();
+	headers.append(contentTypeHeader, 'application/json');
+	return fetch(BASE_PATH + endpoint, {
 		method,
 		headers,
 		body: JSON.stringify(data)
 	})
-		.then((resp: Response) => {
-			if (resp.ok) return resp;
-			if (resp.status === 422) {
-				const serverApiVersion = resp.headers.get(wscApiVersionHeader);
-				const clientApiVersion = useStore.getState().session.apiVersion;
-				if (!!serverApiVersion && serverApiVersion !== clientApiVersion) {
-					useStore.getState().setApiVersion(serverApiVersion as Version);
-					return Promise.reject(new Error('version_mismatch'));
-				}
-			}
-			return Promise.reject(new Error('status ko'));
-		})
-		.then((resp: Response) => {
-			const contentType = resp.headers.get('content-type');
-			if (contentType === 'application/json') return resp.json();
-			if (includes(contentType, 'image/')) return resp.blob();
-			return resp;
-		})
+		.then((resp: Response) => handleResponse(resp))
+		.catch((err: Error) => Promise.reject(err));
+};
+
+export const sendFileFetchAPI = (
+	endpoint: string,
+	method: RequestType,
+	file: File,
+	signal?: AbortSignal,
+	optionalFields?: AdditionalHeaders
+): Promise<any> => {
+	const formData = new FormData();
+	formData.append('file', file, charToUnicode(file.name));
+	formData.append('contentLength', file.size.toString());
+	optionalFields?.description &&
+		formData.append('description', charToUnicode(optionalFields.description));
+	optionalFields?.messageId && formData.append('messageId', optionalFields.messageId);
+	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
+	optionalFields?.area && formData.append('area', optionalFields.area);
+
+	return fetch(BASE_PATH + endpoint, {
+		method,
+		headers: buildHeaders(),
+		body: formData,
+		signal
+	})
+		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error) => Promise.reject(err));
 };
 
@@ -70,9 +97,9 @@ export const uploadFileFetchAPI = (
 		const reader = new FileReader();
 		reader.addEventListener('load', () => {
 			// Headers have to be encoded in unicode to be sent
-			const headers = new Headers();
+			const headers = buildHeaders();
 			headers.append('fileName', charToUnicode(file.name));
-			headers.append('mimeType', mimeTypeToAppend(file.type));
+			headers.append('mimeType', file.type || 'application/octet-stream');
 			if (optionalFields) {
 				optionalFields.description &&
 					headers.append('description', charToUnicode(optionalFields.description));
@@ -81,10 +108,6 @@ export const uploadFileFetchAPI = (
 				optionalFields.area && headers.append('area', optionalFields.area);
 			}
 
-			const { queueId, apiVersion } = useStore.getState().session;
-			if (queueId) headers.append('queue-id', queueId);
-			if (apiVersion) headers.append(wscApiVersionHeader, apiVersion);
-
 			fetch(BASE_PATH + endpoint, {
 				method: requestType,
 				headers,
@@ -92,23 +115,13 @@ export const uploadFileFetchAPI = (
 				signal
 			})
 				.then((resp: Response) => {
-					if (resp.ok) return resp;
-					return Promise.reject(new Error());
+					if (!resp.ok) reject(new Error());
+					const contentType = resp.headers.get(contentTypeHeader);
+					if (includes(contentType, 'image/')) resolve(resp.blob());
+					else resolve(resp);
 				})
-				.then((resp: Response) => {
-					const contentType = resp.headers.get('content-type');
-					if (includes(contentType, 'image/')) {
-						resolve(resp.blob());
-					} else {
-						resolve(resp);
-					}
-				})
-				.catch((err: Error) => {
-					reject(err);
-				});
+				.catch((err: Error) => reject(err));
 		});
-		reader.addEventListener('error', () => {
-			reject(new Error());
-		});
+		reader.addEventListener('error', () => reject(new Error()));
 		reader.readAsArrayBuffer(file);
 	});

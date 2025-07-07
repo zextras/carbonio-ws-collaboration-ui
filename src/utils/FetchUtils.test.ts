@@ -6,7 +6,7 @@
 
 import { act } from '@testing-library/react';
 
-import { fetchAPI, uploadFileFetchAPI, wscApiVersionHeader } from './FetchUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI, wscApiVersionHeader } from './FetchUtils';
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
 import { spyOnFetch } from '../tests/jest-env-setup';
@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 describe('FetchUtils', () => {
-	test('test fetchApi is called correctly', async () => {
+	test('fetchApi is called correctly', async () => {
 		spyOnFetch.mockRestore();
 		act(() => {
 			useStore.getState().setQueueId('idUser1');
@@ -58,7 +58,7 @@ describe('FetchUtils', () => {
 		});
 	});
 
-	test('test fetchApi reject for response status not ok', async () => {
+	test('fetchApi reject for response status not ok', async () => {
 		spyOnFetch.mockRestore();
 		const mockErrResp = {
 			ok: false,
@@ -86,7 +86,42 @@ describe('FetchUtils', () => {
 		expect(useStore.getState().session.apiVersion).toBe('1.6.0');
 	});
 
-	test('test uploadFileFetchAPI is called correctly', async () => {
+	test('sendFileFetchApi is called correctly', async () => {
+		spyOnFetch.mockRestore();
+		act(() => {
+			useStore.getState().setQueueId('idUser1');
+			useStore.getState().setApiVersion('1.6.1');
+		});
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+		headers.append('queue-id', 'idUser1');
+		headers.append(wscApiVersionHeader, '1.6.1');
+		getHeaders.mockResolvedValueOnce(headers);
+
+		const testImageFile = new File([], 'hello.png', { type: 'image/png' });
+
+		const optField = {
+			description: 'description',
+			messageId: 'messageId',
+			replyId: 'replyId',
+			area: '0x0'
+		};
+
+		await sendFileFetchAPI('test', RequestType.PUT, testImageFile, undefined, optField);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			defPath,
+			expect.objectContaining({
+				method: RequestType.PUT,
+				headers,
+				signal: undefined
+			})
+		);
+	});
+
+	test('uploadFileFetchAPI is called correctly', async () => {
 		act(() => {
 			const store = useStore.getState();
 			store.setQueueId('idUser1');
@@ -131,7 +166,7 @@ describe('FetchUtils', () => {
 		});
 	});
 
-	test('test uploadFileFetchAPI rejects', async () => {
+	test('uploadFileFetchAPI rejects', async () => {
 		const testImageFile = new File([], 'hello.png', { type: 'image/png' });
 
 		const mockErrResp = {

@@ -26,6 +26,7 @@ import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 const applicationPdf = 'application/pdf';
+const roomId = 'roomId';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
@@ -108,10 +109,10 @@ describe('Rooms API', () => {
 	});
 
 	test('getURLRoomPicture is called correctly', () => {
-		const room = createMockRoom({ id: 'roomId', name: 'new name' });
+		const room = createMockRoom({ id: roomId, name: 'new name' });
 		const url = roomsApi.getURLRoomPicture(room.id);
 
-		expect(url).toEqual(`http://localhost/services/chats/rooms/roomId/picture`);
+		expect(url).toEqual(`http://localhost/services/chats/rooms/${roomId}/picture`);
 	});
 
 	test('getRoomPicture is called correctly', async () => {
@@ -127,7 +128,7 @@ describe('Rooms API', () => {
 			.mockResolvedValue(true);
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
-		await roomsApi.updateRoomPicture('roomId', testFile);
+		await roomsApi.updateRoomPicture(roomId, testFile);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -135,7 +136,7 @@ describe('Rooms API', () => {
 		headers.append('mimeType', testFile.type);
 
 		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
-			'rooms/roomId/picture',
+			`rooms/${roomId}/picture`,
 			RequestType.PUT,
 			testFile
 		);
@@ -149,43 +150,43 @@ describe('Rooms API', () => {
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 * 3 });
 
-		expect(roomsApi.updateRoomPicture('roomId', testFile)).rejects.toThrowError('File too large');
+		expect(roomsApi.updateRoomPicture(roomId, testFile)).rejects.toThrowError('File too large');
 		expect(spyOnFetch).not.toHaveBeenCalled();
 	});
 
 	test('deleteRoomPicture is called correctly', async () => {
 		// Send deleteRoomPicture request
-		await roomsApi.deleteRoomPicture('roomId');
+		await roomsApi.deleteRoomPicture(roomId);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/picture`, RequestType.DELETE);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/picture`, RequestType.DELETE);
 	});
 
 	test('muteRoomNotification is called correctly', async () => {
 		// Send muteRoomNotification request
-		await roomsApi.muteRoomNotification('roomId');
+		await roomsApi.muteRoomNotification(roomId);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/mute`, RequestType.PUT);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/mute`, RequestType.PUT);
 	});
 
 	test('unmuteRoomNotification is called correctly', async () => {
 		// Send unmuteRoomNotification request
-		await roomsApi.unmuteRoomNotification('roomId');
+		await roomsApi.unmuteRoomNotification(roomId);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/mute`, RequestType.DELETE);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/mute`, RequestType.DELETE);
 	});
 
 	test('clearRoomHistory is called correctly', async () => {
 		// Send clearRoomHistory request
-		await roomsApi.clearRoomHistory('roomId');
+		await roomsApi.clearRoomHistory(roomId);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/clear`, RequestType.PUT);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/clear`, RequestType.PUT);
 	});
 
 	test('getRoomMembers is called correctly', async () => {
 		// Send getRoomMembers request
-		await roomsApi.getRoomMembers('roomId');
+		await roomsApi.getRoomMembers(roomId);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members`, RequestType.GET);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/members`, RequestType.GET);
 	});
 
 	test('addRoomMember is called correctly', async () => {
@@ -197,27 +198,30 @@ describe('Rooms API', () => {
 				historyCleared: true
 			}
 		];
-		await roomsApi.addRoomMembers('roomId', member);
+		await roomsApi.addRoomMembers(roomId, member);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members`, RequestType.POST, member);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/members`, RequestType.POST, member);
 	});
 
 	test('deleteRoomMember is called correctly', async () => {
 		// Send deleteRoomMember request
-		await roomsApi.deleteRoomMember('roomId', 'userId');
+		await roomsApi.deleteRoomMember(roomId, 'userId');
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members/userId`, RequestType.DELETE);
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${roomId}/members/userId`, RequestType.DELETE);
 	});
 
 	test('promoteRoomMember is called correctly', async () => {
 		// Send promoteRoomMember request
-		await roomsApi.promoteRoomMember('roomId', 'userId');
+		await roomsApi.promoteRoomMember(roomId, 'userId');
 
-		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members/userId/owner`, RequestType.PUT);
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			`rooms/${roomId}/members/userId/owner`,
+			RequestType.PUT
+		);
 	});
 
 	test('demotesRoomMember is called correctly', async () => {
@@ -251,63 +255,112 @@ describe('Rooms API', () => {
 		);
 	});
 
-	test('addRoomAttachment is called correctly', async () => {
-		const store = useStore.getState();
-		store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-		const spyOnUploadFileFetchAPI = jest
-			.spyOn(FetchUtils, 'uploadFileFetchAPI')
-			.mockImplementation(() => Promise.resolve());
-		// Send addRoomAttachments request
-		const testFile = new File([], 'file.pdf', { type: applicationPdf });
-		const { signal } = new AbortController();
-		const area = '0x0';
-		await roomsApi.addRoomAttachment('roomId', testFile, { area }, signal);
+	describe('addRoomAttachments', () => {
+		test('addRoomAttachment is called correctly', async () => {
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			const spyOnUploadFileFetchAPI = jest
+				.spyOn(FetchUtils, 'uploadFileFetchAPI')
+				.mockImplementation(() => Promise.resolve());
+			// Send addRoomAttachments request
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			const area = '0x0';
+			await roomsApi.addRoomAttachment(roomId, testFile, { area }, signal);
 
-		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
-			'rooms/roomId/attachments',
-			RequestType.POST,
-			testFile,
-			signal,
-			{ area, messageId: mockedUuid }
-		);
-	});
+			expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.POST,
+				testFile,
+				signal,
+				{ area, messageId: mockedUuid }
+			);
+		});
 
-	test('addRoomAttachment is called correctly with optionalParams', async () => {
-		const spyOnUploadFileFetchAPI = jest
-			.spyOn(FetchUtils, 'uploadFileFetchAPI')
-			.mockImplementation(() => Promise.resolve());
-		// Send addRoomAttachments request
-		const testFile = new File([], 'file.pdf', { type: applicationPdf });
-		const { signal } = new AbortController();
-		const area = '0x0';
-		await roomsApi.addRoomAttachment(
-			'roomId',
-			testFile,
-			{ description: 'description', replyId: 'stanzaId', area },
-			signal
-		);
+		test('addRoomAttachment is called correctly with optionalParams', async () => {
+			const spyOnUploadFileFetchAPI = jest
+				.spyOn(FetchUtils, 'uploadFileFetchAPI')
+				.mockImplementation(() => Promise.resolve());
+			// Send addRoomAttachments request
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			const area = '0x0';
+			await roomsApi.addRoomAttachment(
+				roomId,
+				testFile,
+				{ description: 'description', replyId: 'stanzaId', area },
+				signal
+			);
 
-		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
-			'rooms/roomId/attachments',
-			RequestType.POST,
-			testFile,
-			signal,
-			{ description: 'description', replyId: 'stanzaId', area, messageId: mockedUuid }
-		);
-	});
+			expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.POST,
+				testFile,
+				signal,
+				{ description: 'description', replyId: 'stanzaId', area, messageId: mockedUuid }
+			);
+		});
 
-	test('addRoomAttachment is called correctly with placeholderRoom', async () => {
-		spyOnFetch.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
-		spyOnFetch.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
-		// Send addRoomAttachments request
-		const testFile = new File([], 'file.pdf', { type: applicationPdf });
-		const { signal } = new AbortController();
-		const area = '0x0';
-		await roomsApi.addRoomAttachment('placeholder-userId', testFile, { area }, signal);
+		test('addRoomAttachment is called correctly with placeholderRoom', async () => {
+			spyOnFetch.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
+			spyOnFetch.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
+			// Send addRoomAttachments request
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			const area = '0x0';
+			await roomsApi.addRoomAttachment('placeholder-userId', testFile, { area }, signal);
 
-		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
-			type: RoomType.ONE_TO_ONE,
-			members: [{ userId: 'userId', owner: true }]
+			expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
+				type: RoomType.ONE_TO_ONE,
+				members: [{ userId: 'userId', owner: true }]
+			});
+		});
+
+		test('addRoomAttachment(1.6.1) is called correctly', async () => {
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			store.setApiVersion('1.6.1');
+			const spyOnSendFileFetchAPI = jest
+				.spyOn(FetchUtils, 'sendFileFetchAPI')
+				.mockImplementation(() => Promise.resolve());
+			// Send addRoomAttachments request
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			const area = '0x0';
+			await roomsApi.addRoomAttachment(roomId, testFile, { area }, signal);
+
+			expect(spyOnSendFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.PUT,
+				testFile,
+				signal,
+				{ area, messageId: mockedUuid }
+			);
+		});
+
+		test('addRoomAttachment(1.6.1) is called correctly with optionalParams', async () => {
+			useStore.getState().setApiVersion('1.6.1');
+			const spyOnSendFileFetchAPI = jest
+				.spyOn(FetchUtils, 'sendFileFetchAPI')
+				.mockImplementation(() => Promise.resolve());
+			// Send addRoomAttachments request
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			const area = '0x0';
+			await roomsApi.addRoomAttachment(
+				roomId,
+				testFile,
+				{ description: 'description', replyId: 'stanzaId', area },
+				signal
+			);
+
+			expect(spyOnSendFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.PUT,
+				testFile,
+				signal,
+				{ description: 'description', replyId: 'stanzaId', area, messageId: mockedUuid }
+			);
 		});
 	});
 
