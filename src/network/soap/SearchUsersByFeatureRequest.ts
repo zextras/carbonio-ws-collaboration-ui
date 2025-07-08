@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { RawErrorSoapResponse, RawSoapResponse, soapFetchV2 } from '@zextras/carbonio-ui-soap-lib';
+import { soapFetchV2 } from '@zextras/carbonio-ui-soap-lib';
 import { find, map, remove } from 'lodash';
 
 import {
@@ -13,12 +13,6 @@ import {
 	SearchUsersByFeatureSoapResponse
 } from '../../types/network/soap/searchUsersByFeatureRequest';
 import { isMyId } from '../websocket/eventHandlersUtilities';
-
-function isRawErrorSoapResponse(
-	item: RawSoapResponse<Record<string, unknown>>
-): item is RawErrorSoapResponse {
-	return item.Body.Fault !== undefined;
-}
 
 export const searchUsersByFeatureRequest = (
 	text: string,
@@ -34,7 +28,7 @@ export const searchUsersByFeatureRequest = (
 		offset
 	})
 		.then((rawSoapResponse) => {
-			if (isRawErrorSoapResponse(rawSoapResponse)) {
+			if ('Fault' in rawSoapResponse.Body) {
 				throw new Error('Error fetching SearchUsersByFeature results');
 			}
 			return rawSoapResponse.Body.SearchUsersByFeatureResponse;
