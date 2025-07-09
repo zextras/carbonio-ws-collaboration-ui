@@ -14,7 +14,6 @@ import {
 	onRequestHistory,
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
-import { onGetInboxResponse, onSetInboxResponse } from './handlers/inboxMessageHandler';
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
@@ -115,8 +114,7 @@ class XMPPClient implements IXMPPClient {
 		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onGetInboxResponse
+			elem: iq
 		});
 	}
 
@@ -125,8 +123,7 @@ class XMPPClient implements IXMPPClient {
 		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onSetInboxResponse
+			elem: iq
 		});
 	}
 
