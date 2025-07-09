@@ -20,16 +20,11 @@ export function onInboxMessageStanza(message: Element): true {
 	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
 	const insideMessage = getRequiredTagElement(result, 'message');
 	const inboxMessage = decodeXMPPMessageStanza(insideMessage, { date: dateToTimestamp(date) });
-	const sessionId = useStore.getState().session.id;
 
 	if (inboxMessage) {
-		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();
 		const { xmppClient } = store.connections;
-		store.incrementUnreadCount(
-			inboxMessage.roomId,
-			parseInt(unreadMessagesOfSingleConversation, 10)
-		);
+		xmppClient.lastMarkers(inboxMessage.roomId);
 
 		switch (inboxMessage.type) {
 			case MessageType.TEXT_MSG:
@@ -42,11 +37,6 @@ export function onInboxMessageStanza(message: Element): true {
 						inboxMessage.replyTo,
 						inboxMessage.id
 					);
-				}
-
-				// Ask smart markers to update Check icon
-				if (inboxMessage.from === sessionId) {
-					xmppClient.lastMarkers(inboxMessage.roomId);
 				}
 				break;
 			case MessageType.CONFIGURATION_MSG: {
@@ -62,13 +52,5 @@ export function onInboxMessageStanza(message: Element): true {
 				break;
 		}
 	}
-	return true;
-}
-
-export function onGetInboxResponse(): true {
-	return true;
-}
-
-export function onSetInboxResponse(): true {
 	return true;
 }

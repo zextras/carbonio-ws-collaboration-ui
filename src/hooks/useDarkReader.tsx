@@ -7,7 +7,6 @@ import { useCallback, useMemo } from 'react';
 
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { isEnabled, enable, disable } from 'darkreader';
-import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../constants/appConstants';
 
@@ -21,18 +20,14 @@ type UseDarkReaderReturnType = {
 };
 
 const useDarkReader = (): UseDarkReaderReturnType => {
-	const settings = useUserSettings();
+	const { prefs } = useUserSettings();
 
 	const inMeetingTab = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
 	const darkReaderMode = useMemo(() => {
-		if (inMeetingTab) {
-			return 'enabled';
-		}
-		const mode = find(settings.props, (value) => value.name === 'zappDarkreaderMode')
-			?._content as DarkReaderModeType;
-		return mode || 'disabled';
-	}, [inMeetingTab, settings.props]);
+		if (inMeetingTab) return 'enabled';
+		return prefs.carbonioPrefDarkMode ?? 'disabled';
+	}, [inMeetingTab, prefs]);
 
 	const enableDarkReader = useCallback(() => {
 		enable(
