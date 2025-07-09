@@ -86,13 +86,6 @@ export const useIntegratedFunction: typeof Shell.useIntegratedFunction<AnyFuncti
 
 export const updatePrimaryBadge: typeof Shell.updatePrimaryBadge = () => undefined;
 
-export const mockSoapFetch = jest.fn();
-export const soapFetch: typeof Shell.soapFetch = () =>
-	new Promise((resolve, reject) => {
-		const result = mockSoapFetch();
-		result ? resolve(result) : reject(new Error('error'));
-	});
-
 export const useTracker: typeof Shell.useTracker = () => ({
 	capture: jest.fn(),
 	enableTracker: jest.fn(),

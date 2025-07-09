@@ -172,7 +172,7 @@ describe('SecondaryBar tests', () => {
 			});
 		});
 
-		test('User filter gal but AutoCompleteGalRequest fails', async () => {
+		test('User filter gal but SearchUsersByFeatureRequest fails', async () => {
 			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
 			const { user } = setup(<SecondaryBarView expanded />);
 			// user search a user
