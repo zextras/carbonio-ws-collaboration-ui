@@ -136,5 +136,18 @@ export const useSessionStoreSlice: StateCreator<
 			false,
 			'SESSION/SET_API_VERSION'
 		);
+	},
+	setSupportedVersions: (versions: Version[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session = {
+					...draft.session,
+					supportedVersions: versions,
+					apiVersion: versions[0]
+				};
+			}),
+			false,
+			'SESSION/SET_SUPPORTED_VERSIONS'
+		);
 	}
 });

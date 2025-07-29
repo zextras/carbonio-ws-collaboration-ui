@@ -26,14 +26,14 @@ export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
-	const setApiVersion = useStore((state) => state.setApiVersion);
+	const setSupportedVersions = useStore((state) => state.setSupportedVersions);
 
 	const authenticated = useAuthenticated();
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setApiVersion('1.6.1');
-	}, [setApiVersion]);
+		setSupportedVersions(['1.6.1', '1.6.0']);
+	}, [setSupportedVersions]);
 
 	// STORE: init with user session main infos
 	useEffect(() => {

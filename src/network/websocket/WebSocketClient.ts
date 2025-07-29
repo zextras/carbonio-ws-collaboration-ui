@@ -11,6 +11,7 @@ import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
+import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
 
 enum WsReadyState {
@@ -43,8 +44,9 @@ export class WebSocketClient implements IWebSocketClient {
 
 	connect(): void {
 		const wsUrl = '/services/chats/events';
+		const versions = useStore.getState().session.supportedVersions;
 		// Creating WebSocket
-		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`);
+		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`, versions);
 		wsDebug('WebSocket connection...');
 
 		// Attach handler
@@ -74,8 +76,12 @@ export class WebSocketClient implements IWebSocketClient {
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
 
+		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		// Set WebSocket connection status on store
-		useStore.getState().setWebsocketStatus(true);
+		setWebsocketStatus(true);
+		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
+			setApiVersion(this._webSocket.protocol as Version);
+		}
 	};
 
 	_onClose = (): void => {
