@@ -5,7 +5,9 @@
  */
 
 import { debounce, DebouncedFunc, includes } from 'lodash';
+import { gte } from 'semver';
 
+import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
@@ -72,7 +74,8 @@ export class WebSocketClient implements IWebSocketClient {
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
-			this.send({ type: 'ping' });
+			const ping = this._webSocket && gte(this._webSocket?.protocol, '1.6.1') ? 'Ping' : 'ping';
+			this.send({ type: ping });
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
 
@@ -97,7 +100,8 @@ export class WebSocketClient implements IWebSocketClient {
 
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
-			const event: WsEvent = JSON.parse(e.data);
+			const rowEvent = JSON.parse(e.data);
+			const event = normalizeEventType(rowEvent) as WsEvent;
 			if (event.type === WsEventType.PONG) {
 				this._disconnectionCheckFunction.cancel();
 			} else {
