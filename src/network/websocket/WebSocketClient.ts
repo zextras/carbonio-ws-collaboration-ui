@@ -11,7 +11,7 @@ import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
@@ -101,7 +101,7 @@ export class WebSocketClient implements IWebSocketClient {
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
 			const rowEvent = JSON.parse(e.data);
-			const event = normalizeEventType(rowEvent) as WsEvent;
+			const event = normalizeEventType(rowEvent);
 			if (event.type === WsEventType.PONG) {
 				this._disconnectionCheckFunction.cancel();
 			} else {
