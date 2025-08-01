@@ -14,6 +14,6 @@ export const meetingUserRejectedEventHandler = (event: MeetingUserRejectedEvent)
 
 	// Send custom event to let session user know he is rejected
 	if (isMyId(event.userId) && inThisMeetingTab(event.meetingId)) {
-		sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
+		sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_REJECTED, data: event });
 	}
 };
