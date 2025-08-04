@@ -5,9 +5,9 @@
  */
 import React, { ReactElement, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { forEach, some } from 'lodash';
-import styled from 'styled-components';
 
 import SpeakingElement from './SpeakingElement';
 import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors';

@@ -15,6 +15,7 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	ChipInput,
 	ChipItem,
@@ -40,7 +41,6 @@ import {
 	size
 } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';

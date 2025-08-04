@@ -6,9 +6,9 @@
 
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Badge, Button, Container, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';

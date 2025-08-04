@@ -6,9 +6,9 @@
 
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';

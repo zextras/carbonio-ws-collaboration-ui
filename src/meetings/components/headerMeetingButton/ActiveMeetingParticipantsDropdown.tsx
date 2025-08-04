@@ -6,10 +6,10 @@
 
 import React, { Dispatch, ReactElement, SetStateAction, useEffect, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ParticipantElement from './ParticipantElement';
 import {

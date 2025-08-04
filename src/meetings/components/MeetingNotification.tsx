@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Button, Container, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';

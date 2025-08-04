@@ -14,8 +14,8 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import CameraButton from './CameraButton';
 import LeaveMeetingButton from './LeaveMeetingButton';

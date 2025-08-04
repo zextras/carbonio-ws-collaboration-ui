@@ -15,9 +15,9 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Input, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 const FilterContainer = styled(Container)`
 	height: fit-content;

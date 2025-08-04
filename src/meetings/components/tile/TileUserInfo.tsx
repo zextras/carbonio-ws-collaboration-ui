@@ -5,9 +5,9 @@
  */
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserHandRank } from '../../../store/selectors/ActiveMeetingSelectors';

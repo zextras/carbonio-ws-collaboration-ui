@@ -6,10 +6,10 @@
 
 import React, { FC, useState, useMemo, useEffect } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ListOfMembers from './ListOfMembers';
 import SearchUserAction from './SearchUserAction';

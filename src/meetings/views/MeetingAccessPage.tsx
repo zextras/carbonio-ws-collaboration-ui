@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { calcScaleDivisor } from '../../utils/styleUtils';
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';

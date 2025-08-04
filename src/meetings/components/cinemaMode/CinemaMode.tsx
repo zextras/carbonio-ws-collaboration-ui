@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useRef, useMemo, useCallback, useEffect, useContext } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { concat } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import TilesBar from './TilesBar';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';

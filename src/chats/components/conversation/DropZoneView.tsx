@@ -6,9 +6,9 @@
 
 import React, { ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Text, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 const BackDropLayout = styled(Container)`
 	width: 100%;

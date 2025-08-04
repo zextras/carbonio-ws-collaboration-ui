@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -17,7 +18,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { debounce, differenceWith, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import GalListItem from './GalListItem';
 import { searchUsersByFeatureRequest } from '../../../../network/soap/SearchUsersByFeatureRequest';

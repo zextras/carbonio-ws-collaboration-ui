@@ -6,8 +6,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import useStore from '../../../../store/Store';

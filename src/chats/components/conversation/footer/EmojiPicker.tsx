@@ -15,10 +15,10 @@ import React, {
 } from 'react';
 
 import data from '@emoji-mart/data';
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { Picker } from 'emoji-mart';
 import moment from 'moment-timezone';
-import styled from 'styled-components';
 
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';

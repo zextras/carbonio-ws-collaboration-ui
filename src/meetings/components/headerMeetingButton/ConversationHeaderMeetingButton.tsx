@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ActiveMeetingParticipantsDropdown from './ActiveMeetingParticipantsDropdown';
 import useRoomMeeting from '../../../hooks/useRoomMeeting';

@@ -14,6 +14,7 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -24,7 +25,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import AccessTile from './mediaHandlers/AccessTile';
 import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';

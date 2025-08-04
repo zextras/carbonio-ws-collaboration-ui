@@ -6,9 +6,9 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import VisualEffectsList from './VisualEffectsList';
 import { getVisualEffectsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';

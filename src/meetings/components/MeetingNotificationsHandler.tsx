@@ -6,11 +6,11 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Portal } from '@zextras/carbonio-design-system';
 import { useCurrentRoute } from '@zextras/carbonio-shell-ui';
 import { find, map, remove, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MeetingNotification from './MeetingNotification';
 import { MEETINGS_ROUTE } from '../../constants/appConstants';

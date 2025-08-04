@@ -6,10 +6,10 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, List } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';

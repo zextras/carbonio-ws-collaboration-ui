@@ -6,9 +6,9 @@
 
 import React, { ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useTimer from '../../../hooks/useTimer';
 import { getMeetingStartedAt } from '../../../store/selectors/MeetingSelectors';

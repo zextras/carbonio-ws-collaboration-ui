@@ -5,9 +5,9 @@
  */
 import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useMediaDevices from '../../../hooks/useMediaDevices';
 import useTilesOrder from '../../../hooks/useTilesOrder';
