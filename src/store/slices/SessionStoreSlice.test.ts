@@ -44,11 +44,11 @@ describe('SessionStoreSlice tests', () => {
 			expect(useStore.getState().session.apiVersion).toBe(apiVersion);
 		});
 
-		test('setSupportedVersions', () => {
-			const versions = ['1.7.0', '1.6.1', '1.6.0'] as Version[];
+		test('setSupportedVersions sets the highest version as the default version', () => {
+			const versions = ['1.6.1', '1.7.0', '1.6.0'] as Version[];
 			useStore.getState().setSupportedVersions(versions);
 			expect(useStore.getState().session.supportedVersions).toEqual(versions);
-			expect(useStore.getState().session.apiVersion).toEqual(versions[0]);
+			expect(useStore.getState().session.apiVersion).toEqual('1.7.0');
 		});
 	});
 
