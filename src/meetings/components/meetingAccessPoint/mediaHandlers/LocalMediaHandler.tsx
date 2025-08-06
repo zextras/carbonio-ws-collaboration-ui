@@ -207,9 +207,17 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 
 	useEffect(() => {
 		if (selectedDevicesId.audio === undefined && mediaAudioList[0]) {
-			setSelectedDevicesId({ audio: mediaAudioList[0].value, video: selectedDevicesId.video });
+			const defaultDevice = find(mediaAudioList, ['value', 'default']) ?? mediaAudioList[0];
+			setSelectedDevicesId({ audio: defaultDevice.value, video: selectedDevicesId.video });
 		}
 	}, [mediaAudioList, selectedDevicesId, setSelectedDevicesId]);
+
+	useEffect(() => {
+		if (selectedDevicesId.video === undefined && mediaVideoList[0]) {
+			const defaultDevice = find(mediaVideoList, ['value', 'default']) ?? mediaVideoList[0];
+			setSelectedDevicesId({ audio: selectedDevicesId.audio, video: defaultDevice.value });
+		}
+	}, [mediaVideoList, selectedDevicesId.audio, selectedDevicesId.video, setSelectedDevicesId]);
 
 	useEffect(() => {
 		if (mediaDevicesEnabled.video && videoPermission === 'denied') {
