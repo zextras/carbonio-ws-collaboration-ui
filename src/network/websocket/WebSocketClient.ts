@@ -74,7 +74,9 @@ export class WebSocketClient implements IWebSocketClient {
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
-			const ping = this._webSocket && gte(this._webSocket?.protocol, '1.6.1') ? 'Ping' : 'ping';
+			// DEPRECATED: This function exists for backward compatibility with previous versions.
+			//  * Remove once support for v1.6.1 is officially dropped.
+			const ping = this._webSocket && gte(this._webSocket?.protocol, '1.6.2') ? 'Ping' : 'ping';
 			this.send({ type: ping });
 			this._disconnectionCheckFunction();
 		}, this._pingTime);

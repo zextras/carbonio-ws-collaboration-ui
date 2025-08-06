@@ -47,8 +47,8 @@ const legacyEventMap: Record<string, string> = {
 	MEETING_PARTICIPANT_HAND_RAISED_LIST: WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST
 };
 
-// DEPRECATED: This function exists for backward compatibility with version 1.6.0.
-//  * Remove once support for v1.6.0 is officially dropped.
+// DEPRECATED: This function exists for backward compatibility with previous versions.
+//  * Remove once support for v1.6.1 is officially dropped.
 export function normalizeEventType(event: Record<string, unknown>): WsEvent {
 	return {
 		...event,
