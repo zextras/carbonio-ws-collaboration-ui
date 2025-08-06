@@ -267,7 +267,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		}
 	}, [streamTrack, mediaDevicesEnabled, setEnterButtonIsEnabled]);
 
-	useEventListener(EventName.MEETING_USER_ACCEPTED, waitingRoomHandler);
+	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, waitingRoomHandler);
 
 	return (
 		<ResizeWrapper

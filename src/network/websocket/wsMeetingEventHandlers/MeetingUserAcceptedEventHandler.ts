@@ -14,6 +14,6 @@ export const meetingUserAcceptedEventHandler = (event: MeetingUserAcceptedEvent)
 
 	// Send custom event to let session user know he is accepted
 	if (isMyId(event.userId) && inThisMeetingTab(event.meetingId)) {
-		sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
+		sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, data: event });
 	}
 };

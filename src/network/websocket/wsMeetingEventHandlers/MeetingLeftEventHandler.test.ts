@@ -43,14 +43,14 @@ const meetingWith12Participants = createMockMeeting({
 	]
 });
 const event: MeetingLeftEvent = {
-	type: WsEventType.MEETING_LEFT,
+	type: WsEventType.MEETING_PARTICIPANT_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'userId'
 };
 
 const event2: MeetingLeftEvent = {
-	type: WsEventType.MEETING_LEFT,
+	type: WsEventType.MEETING_PARTICIPANT_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meetingWith12Participants.id,
 	userId: 'sessionUserId'

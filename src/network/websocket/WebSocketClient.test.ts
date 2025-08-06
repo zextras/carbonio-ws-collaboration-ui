@@ -107,4 +107,16 @@ describe('WebSocketClient', () => {
 
 		expect(wsClient._reconnectionTime).toBeLessThanOrEqual(1000 * 60 * 5 + 10000);
 	});
+
+	test('Set apiVersion on store when selected protocol is different from session apiVersion', () => {
+		const wsClient = new WebSocketClient();
+		useStore.getState().setApiVersion('1.6.0');
+		wsClient.connect();
+		wsClient._webSocket = {
+			...wsClient._webSocket,
+			protocol: '1.6.1'
+		} as WebSocket;
+		wsClient._onOpen();
+		expect(useStore.getState().session.apiVersion).toBe('1.6.1');
+	});
 });

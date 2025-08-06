@@ -66,7 +66,7 @@ describe('MeetingNotificationsHandler', () => {
 		const joinEvent: MeetingJoinedEvent = {
 			sentDate: '2412412421',
 			meetingId: meeting.id,
-			type: WsEventType.MEETING_JOINED,
+			type: WsEventType.MEETING_PARTICIPANT_JOINED,
 			userId: 'userId'
 		};
 		act(() => sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: joinEvent }));

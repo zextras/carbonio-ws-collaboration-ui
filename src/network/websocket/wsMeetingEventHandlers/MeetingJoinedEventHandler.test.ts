@@ -43,14 +43,14 @@ const groupRoom = createMockRoom({ id: 'groupRoomId', type: RoomType.GROUP });
 const groupMeeting = createMockMeeting({ id: 'groupMeetingId', roomId: groupRoom.id });
 
 const event: MeetingJoinedEvent = {
-	type: WsEventType.MEETING_JOINED,
+	type: WsEventType.MEETING_PARTICIPANT_JOINED,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'userId'
 };
 
 const event2: MeetingJoinedEvent = {
-	type: WsEventType.MEETING_JOINED,
+	type: WsEventType.MEETING_PARTICIPANT_JOINED,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meetingWith10Participants.id,
 	userId: 'sessionUserId'
