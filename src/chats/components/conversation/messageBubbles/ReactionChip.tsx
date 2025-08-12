@@ -7,14 +7,14 @@
 import React, { ReactElement, useState, useEffect, useCallback, useMemo } from 'react';
 
 import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
-import { includes, map, size } from 'lodash';
+import { includes, size } from 'lodash';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import { getUserName } from '../../../../store/selectors/UsersSelectors';
+import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';
 import useStore from '../../../../store/Store';
 
 const CustomContainer = styled(Container)<{ $animation: boolean }>`
@@ -61,6 +61,7 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 	const xmppClient = useStore(getXmppClient);
 	const sessionId = useStore(getUserId);
 	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
+	const userNameList = useUserNameList(from);
 
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [backgroundEffect, setBackgroundEffect] = useState(isNewReaction);
@@ -77,10 +78,7 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 
 	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(from[0]);
 
-	const tooltipLabel = useMemo(
-		() => map(from, (from) => getUserName(useStore.getState(), from)).join(', '),
-		[from]
-	);
+	const tooltipLabel = useMemo(() => userNameList.join(', '), [userNameList]);
 
 	const pictureToShow = useMemo(
 		() => (size(from) === 1 ? avatarPicture : undefined),
@@ -88,8 +86,8 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 	);
 
 	const avatarLabel = useMemo(
-		() => (size(from) === 1 ? getUserName(useStore.getState(), from[0]) : size(from).toString()),
-		[from]
+		() => (size(from) === 1 ? userNameList[0] : size(from).toString()),
+		[userNameList, from]
 	);
 
 	const colorToShow = useMemo(
