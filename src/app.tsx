@@ -15,7 +15,7 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { MeetingsApi, RoomsApi, SessionApi } from './network';
+import { MeetingsApi, RoomsApi, InfoApi } from './network';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -51,7 +51,7 @@ export default function App(): React.JSX.Element {
 
 	// NETWORKS: init XMPP and WebSocket clients
 	const connect = useCallback(() => {
-		SessionApi.getToken()
+		InfoApi.getToken()
 			.then((resp) => {
 				Promise.all([RoomsApi.listRooms(true, true), MeetingsApi.listMeetings()])
 					.then(() => {

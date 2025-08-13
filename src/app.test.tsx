@@ -11,7 +11,7 @@ import App from './app';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
 import { useAuthenticated } from '../__mocks__/@zextras/carbonio-shell-ui';
-import sessionApi from './network/apis/SessionApi';
+import sessionApi from './network/apis/InfoApi';
 import {
 	MeetingsApiToSpy,
 	RoomsApiToSpy,
