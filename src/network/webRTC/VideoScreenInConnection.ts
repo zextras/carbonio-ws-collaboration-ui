@@ -55,14 +55,17 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	public handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {
+		const temporaryStreams: StreamMap = {};
 		forEach(streamsMap, (stream) => {
 			const streamsKey = `${stream.userId}-${stream.type.toLowerCase()}`;
-			this.streamsMap[streamsKey] = {
+			temporaryStreams[streamsKey] = {
 				...this.streamsMap[streamsKey],
 				userId: stream.userId,
 				type: stream.type.toLowerCase() as STREAM_TYPE
 			};
 		});
+
+		this.streamsMap = temporaryStreams;
 		this.updateStreams();
 	}
 
