@@ -61,6 +61,14 @@ describe('Entry point', () => {
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
+	test('Connection is not established on app load if listRooms do not respond', async () => {
+		useAuthenticated.mockReturnValue(true);
+		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockRejectedValueOnce(new Error());
+		setup(<LicensedApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
+	});
+
 	test('Retry getToken on version_mismatch error', async () => {
 		useAuthenticated.mockReturnValue(true);
 		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('version_mismatch'));
