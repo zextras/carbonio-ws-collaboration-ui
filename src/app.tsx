@@ -30,8 +30,8 @@ export default function App(): React.JSX.Element | null {
 				setIsLicensed(response.licensed);
 			})
 			.catch(() => {
-				setIsLicensed(false);
-				console.error('Failed to fetch wsc license information');
+				// Display app to avoid blocking it on CarbonioCE
+				setIsLicensed(true);
 			});
 	}, []);
 

@@ -32,16 +32,6 @@ describe('App tests', () => {
 		});
 	});
 
-	test('App is not rendered when there is an error on fetching license', async () => {
-		jest.spyOn(InfoApi, 'getLicense').mockRejectedValueOnce({});
-		const error = jest.spyOn(console, 'error').mockImplementation();
-		const { container } = setup(<App />);
-		await waitFor(() => {
-			expect(error).toHaveBeenCalled();
-		});
-		expect(container).toBeEmptyDOMElement();
-	});
-
 	test('Redirect to login when license is disabled and we are in meeting path', async () => {
 		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: false });
 		jest.mocked(shell).IS_FOCUS_MODE = true;
