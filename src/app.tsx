@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { MEETINGS_PATH } from './constants/appConstants';
-import LicensedApp from './LicensedApp';
+import MainApp from './MainApp';
 import { InfoApi } from './network';
 
 const UnlicensedApp = (): null => {
@@ -27,9 +27,7 @@ export default function App(): React.JSX.Element | null {
 	const isCarbonioCE = useIsCarbonioCE();
 
 	useEffect(() => {
-		if (isCarbonioCE) {
-			setIsLicensed(true);
-		} else {
+		if (!isCarbonioCE) {
 			InfoApi.getLicense()
 				.then((response) => {
 					setIsLicensed(response.licensed);
@@ -40,9 +38,9 @@ export default function App(): React.JSX.Element | null {
 		}
 	}, [isCarbonioCE]);
 
-	if (isLicensed === null) {
+	if (!isCarbonioCE && isLicensed === null) {
 		return null;
 	}
 
-	return isLicensed ? <LicensedApp /> : <UnlicensedApp />;
+	return isCarbonioCE || isLicensed ? <MainApp /> : <UnlicensedApp />;
 }

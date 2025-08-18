@@ -22,7 +22,7 @@ import useStore from './store/Store';
 import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
 
-export default function LicensedApp(): React.JSX.Element {
+export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);

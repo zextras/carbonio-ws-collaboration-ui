@@ -7,7 +7,7 @@ import React from 'react';
 
 import { waitFor } from '@testing-library/react';
 
-import LicensedApp from './LicensedApp';
+import MainApp from './MainApp';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
 import { useAuthenticated } from '../__mocks__/@zextras/carbonio-shell-ui';
@@ -21,13 +21,13 @@ import {
 
 describe('Entry point', () => {
 	test('Set app version', () => {
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		expect(useStore.getState().session.apiVersion).toBeDefined();
 	});
 
 	test('Set login info of an authenticated user', () => {
 		useAuthenticated.mockReturnValue(true);
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeDefined();
 		expect(name).toBeDefined();
@@ -37,7 +37,7 @@ describe('Entry point', () => {
 
 	test('Avoid setting login info of an unauthenticated user', () => {
 		useAuthenticated.mockReturnValue(false);
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeUndefined();
 		expect(name).toBeUndefined();
@@ -50,14 +50,14 @@ describe('Entry point', () => {
 		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
 		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 	});
 
 	test('Connection is not established on app load if getToken do not respond', async () => {
 		useAuthenticated.mockReturnValue(true);
 		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('Token error'));
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
@@ -65,7 +65,7 @@ describe('Entry point', () => {
 		useAuthenticated.mockReturnValue(true);
 		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockRejectedValueOnce(new Error());
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
@@ -74,7 +74,7 @@ describe('Entry point', () => {
 		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('version_mismatch'));
 		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
 		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
-		setup(<LicensedApp />);
+		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 		expect(sessionApi.getToken).toHaveBeenCalledTimes(2);
 	});
