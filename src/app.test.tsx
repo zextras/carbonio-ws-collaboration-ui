@@ -15,8 +15,9 @@ import { setup } from './tests/test-utils';
 
 describe('App tests', () => {
 	test('App is rendered when license is enabled', async () => {
-		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: true });
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
 		jest.mocked(shell).IS_FOCUS_MODE = false;
+		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: true });
 		const addRoute = jest.spyOn(shell, 'addRoute');
 		setup(<App />);
 		await waitFor(() => {
@@ -25,6 +26,7 @@ describe('App tests', () => {
 	});
 
 	test('App is not rendered when license is disabled', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
 		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: false });
 		const { container } = setup(<App />);
 		await waitFor(() => {
@@ -33,6 +35,7 @@ describe('App tests', () => {
 	});
 
 	test('Redirect to login when license is disabled and we are in meeting path', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
 		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: false });
 		jest.mocked(shell).IS_FOCUS_MODE = true;
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}meetingId`;
@@ -42,5 +45,17 @@ describe('App tests', () => {
 		await waitFor(() => {
 			expect(assign).toHaveBeenCalled();
 		});
+	});
+
+	test('App is rendered without license check on Carbonio CE', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValue(true);
+		jest.mocked(shell).IS_FOCUS_MODE = false;
+		const getLicenseApi = jest.spyOn(InfoApi, 'getLicense');
+		const addRoute = jest.spyOn(shell, 'addRoute');
+		setup(<App />);
+		await waitFor(() => {
+			expect(addRoute).toBeCalled();
+		});
+		expect(getLicenseApi).not.toHaveBeenCalled();
 	});
 });

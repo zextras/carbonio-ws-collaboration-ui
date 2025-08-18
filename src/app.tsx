@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { IS_FOCUS_MODE } from '@zextras/carbonio-shell-ui';
+import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { MEETINGS_PATH } from './constants/appConstants';
 import LicensedApp from './LicensedApp';
@@ -24,16 +24,21 @@ const UnlicensedApp = (): null => {
 export default function App(): React.JSX.Element | null {
 	const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
 
+	const isCarbonioCE = useIsCarbonioCE();
+
 	useEffect(() => {
-		InfoApi.getLicense()
-			.then((response) => {
-				setIsLicensed(response.licensed);
-			})
-			.catch(() => {
-				// Display app to avoid blocking it on CarbonioCE
-				setIsLicensed(true);
-			});
-	}, []);
+		if (isCarbonioCE) {
+			setIsLicensed(true);
+		} else {
+			InfoApi.getLicense()
+				.then((response) => {
+					setIsLicensed(response.licensed);
+				})
+				.catch(() => {
+					setIsLicensed(true);
+				});
+		}
+	}, [isCarbonioCE]);
 
 	if (isLicensed === null) {
 		return null;
