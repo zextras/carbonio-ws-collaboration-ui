@@ -7,5 +7,5 @@
 export type WsMessage = WsPingMessage;
 
 export type WsPingMessage = {
-	type: 'ping';
+	type: 'ping' | 'Ping';
 };

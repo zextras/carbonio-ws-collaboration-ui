@@ -28,12 +28,6 @@ const TileContainer = styled(Container)`
 	gap: 1rem;
 `;
 
-const WhoIsSpeakingCustom = styled(WhoIsSpeaking)`
-	position: absolute;
-	top: 0;
-	left: -13rem;
-`;
-
 const ButtonUpContainer = styled(Container)`
 	position: absolute;
 	top: 1rem;

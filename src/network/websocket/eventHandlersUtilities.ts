@@ -37,8 +37,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		}
 		case WsEventType.MEETING_CREATED:
 		case WsEventType.MEETING_STARTED:
-		case WsEventType.MEETING_JOINED:
-		case WsEventType.MEETING_LEFT:
+		case WsEventType.MEETING_PARTICIPANT_JOINED:
+		case WsEventType.MEETING_PARTICIPANT_LEFT:
 		case WsEventType.MEETING_STOPPED:
 		case WsEventType.MEETING_DELETED:
 		case WsEventType.MEETING_AUDIO_STREAM_CHANGED:
@@ -50,8 +50,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.MEETING_PARTICIPANT_TALKING:
 		case WsEventType.MEETING_PARTICIPANT_CLASHED:
 		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED:
-		case WsEventType.MEETING_USER_ACCEPTED:
-		case WsEventType.MEETING_USER_REJECTED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED:
 		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED:
 		case WsEventType.MEETING_RECORDING_STARTED:
 		case WsEventType.MEETING_RECORDING_STOPPED:

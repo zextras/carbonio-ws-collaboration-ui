@@ -33,8 +33,8 @@ export enum EventName {
 	MEMBER_MUTED = 'memberMuted',
 	MEETING_PARTICIPANT_CLASHED = 'meetingParticipantClashed',
 	NEW_WAITING_USER = 'newWaitingUser',
-	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
-	MEETING_USER_REJECTED = 'meetingUserRejected',
+	MEETING_WAITING_PARTICIPANT_ACCEPTED = 'meetingUserAccepted',
+	MEETING_WAITING_PARTICIPANT_REJECTED = 'meetingUserRejected',
 	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed',
 	MEETING_STOPPED = 'meetingStopped',
 	MEETING_RECORDING_STARTED = 'meetingRecordingStarted',
@@ -76,12 +76,12 @@ export type NewWaitingUserEvent = {
 };
 
 export type MeetingAcceptedEvent = {
-	name: EventName.MEETING_USER_ACCEPTED;
+	name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED;
 	data: MeetingUserAcceptedEvent;
 };
 
 export type MeetingRejectedEvent = {
-	name: EventName.MEETING_USER_REJECTED;
+	name: EventName.MEETING_WAITING_PARTICIPANT_REJECTED;
 	data: MeetingUserRejectedEvent;
 };
 

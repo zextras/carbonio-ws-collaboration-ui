@@ -19,6 +19,7 @@ export type SessionStoreSlice = {
 	setChatExporting: (roomId?: string) => void;
 	setChatExportStatus: (status: ExportStatus) => void;
 	setApiVersion: (apiVersion: Version) => void;
+	setSupportedVersions: (versions: Version[]) => void;
 };
 
 export type Session = {
@@ -28,6 +29,7 @@ export type Session = {
 	displayName?: string;
 	queueId?: string;
 	apiVersion?: Version;
+	supportedVersions?: Version[];
 	userType?: UserType;
 	attributes?: AttributesList;
 	selectedRoom?: string;

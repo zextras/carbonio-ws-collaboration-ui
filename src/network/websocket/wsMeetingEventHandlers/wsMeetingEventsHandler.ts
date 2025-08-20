@@ -49,11 +49,11 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 			meetingStartedEventHandler(event);
 			break;
 		}
-		case WsEventType.MEETING_JOINED: {
+		case WsEventType.MEETING_PARTICIPANT_JOINED: {
 			meetingJoinedEventHandler(event);
 			break;
 		}
-		case WsEventType.MEETING_LEFT: {
+		case WsEventType.MEETING_PARTICIPANT_LEFT: {
 			meetingLeftEventHandler(event);
 			break;
 		}
@@ -101,11 +101,11 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 			meetingWaitingParticipantJoinedEventHandler(event);
 			break;
 		}
-		case WsEventType.MEETING_USER_ACCEPTED: {
+		case WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED: {
 			meetingUserAcceptedEventHandler(event);
 			break;
 		}
-		case WsEventType.MEETING_USER_REJECTED: {
+		case WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED: {
 			meetingUserRejectedEventHandler(event);
 			break;
 		}

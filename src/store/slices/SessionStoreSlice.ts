@@ -7,6 +7,7 @@
 
 import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
 import { produce } from 'immer';
+import { maxSatisfying } from 'semver';
 import { StateCreator } from 'zustand';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
@@ -135,6 +136,19 @@ export const useSessionStoreSlice: StateCreator<
 			}),
 			false,
 			'SESSION/SET_API_VERSION'
+		);
+	},
+	setSupportedVersions: (versions: Version[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.supportedVersions = versions;
+				const maxVersion = maxSatisfying(versions, '>=0.0.0');
+				if (maxVersion) {
+					draft.session.apiVersion = maxVersion;
+				}
+			}),
+			false,
+			'SESSION/SET_SUPPORTED_VERSIONS'
 		);
 	}
 });

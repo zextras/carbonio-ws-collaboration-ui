@@ -243,6 +243,8 @@ class RoomsApi implements IRoomsApi {
 					area: optionalFields.area,
 					messageId: uuid
 				};
+				// DEPRECATED: This check exists for backward compatibility with previous versions.
+				//  * Remove once support for v1.6.0 is officially dropped.
 				if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
 					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
 						.then((resp: AddRoomAttachmentResponse) => resolve(resp))

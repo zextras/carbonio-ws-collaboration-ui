@@ -48,12 +48,12 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_JOINED;
+	type: WsEventType.MEETING_PARTICIPANT_JOINED;
 	userId: string;
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_LEFT;
+	type: WsEventType.MEETING_PARTICIPANT_LEFT;
 	userId: string;
 };
 
@@ -121,12 +121,12 @@ export type MeetingWaitingParticipantJoinedEvent = BasicMeetingEvent & {
 };
 
 export type MeetingUserAcceptedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_USER_ACCEPTED;
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED;
 	userId: string;
 };
 
 export type MeetingUserRejectedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_USER_REJECTED;
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED;
 	userId: string;
 };
 
