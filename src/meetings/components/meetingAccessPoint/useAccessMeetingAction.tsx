@@ -59,7 +59,7 @@ const useAccessMeetingAction = (
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage, streamTrack]);
 
-	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
+	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_REJECTED, handleRejected);
 
 	const handleRejoin = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
@@ -94,12 +94,12 @@ const useAccessMeetingAction = (
 			MeetingsApi.enterMeeting(
 				roomId,
 				{
-					videoStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.video : false,
-					audioStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.audio : false
+					videoStreamEnabled: !!mediaDevicesEnabled?.video,
+					audioStreamEnabled: !!mediaDevicesEnabled?.audio
 				},
 				{
-					audioDevice: selectedDevicesId ? selectedDevicesId.audio : undefined,
-					videoDevice: selectedDevicesId ? selectedDevicesId.video : undefined
+					audioDevice: selectedDevicesId?.audio,
+					videoDevice: selectedDevicesId?.video
 				}
 			)
 				.then((meetingId) => {
@@ -119,12 +119,12 @@ const useAccessMeetingAction = (
 			MeetingsApi.joinMeeting(
 				meetingId,
 				{
-					videoStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.video : false,
-					audioStreamEnabled: mediaDevicesEnabled ? mediaDevicesEnabled.audio : false
+					videoStreamEnabled: !!mediaDevicesEnabled?.video,
+					audioStreamEnabled: !!mediaDevicesEnabled?.audio
 				},
 				{
-					audioDevice: selectedDevicesId ? selectedDevicesId.audio : undefined,
-					videoDevice: selectedDevicesId ? selectedDevicesId.video : undefined
+					audioDevice: selectedDevicesId?.audio,
+					videoDevice: selectedDevicesId?.video
 				}
 			)
 				.then((resp) => {

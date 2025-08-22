@@ -5,12 +5,15 @@
  */
 
 import { debounce, DebouncedFunc, includes } from 'lodash';
+import { gte } from 'semver';
 
+import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
+import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
 
 enum WsReadyState {
@@ -43,8 +46,9 @@ export class WebSocketClient implements IWebSocketClient {
 
 	connect(): void {
 		const wsUrl = '/services/chats/events';
+		const versions = useStore.getState().session.supportedVersions;
 		// Creating WebSocket
-		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`);
+		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`, versions);
 		wsDebug('WebSocket connection...');
 
 		// Attach handler
@@ -70,12 +74,19 @@ export class WebSocketClient implements IWebSocketClient {
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
-			this.send({ type: 'ping' });
+			// DEPRECATED: This function exists for backward compatibility with previous versions.
+			//  * Remove once support for v1.6.1 is officially dropped.
+			const ping = this._webSocket && gte(this._webSocket?.protocol, '1.6.2') ? 'Ping' : 'ping';
+			this.send({ type: ping });
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
 
+		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		// Set WebSocket connection status on store
-		useStore.getState().setWebsocketStatus(true);
+		setWebsocketStatus(true);
+		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
+			setApiVersion(this._webSocket.protocol as Version);
+		}
 	};
 
 	_onClose = (): void => {
@@ -91,7 +102,8 @@ export class WebSocketClient implements IWebSocketClient {
 
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
-			const event: WsEvent = JSON.parse(e.data);
+			const rowEvent = JSON.parse(e.data);
+			const event = normalizeEventType(rowEvent);
 			if (event.type === WsEventType.PONG) {
 				this._disconnectionCheckFunction.cancel();
 			} else {

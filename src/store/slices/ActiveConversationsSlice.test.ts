@@ -348,5 +348,18 @@ describe('Active conversations slice', () => {
 				useStore.getState().activeConversations?.[mockedRoom.id]?.newReactions
 			).toBeUndefined();
 		});
+
+		test('unsetNewReactions clears all reactions', () => {
+			const message = createMockTextMessage({
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const store = useStore.getState();
+			store.newMessage(message);
+			store.setNewReaction(mockedRoom.id, message.stanzaId, '👍', mockedUser0.userId);
+			expect(useStore.getState().activeConversations[mockedRoom.id].newReactions).toHaveLength(1);
+			useStore.getState().unsetNewReactions(mockedRoom.id);
+			expect(useStore.getState().activeConversations[mockedRoom.id].newReactions).toBeUndefined();
+		});
 	});
 });

@@ -47,7 +47,10 @@ export const NOTIFICATION_MANAGER = {
 
 export const IS_FOCUS_MODE = false;
 
-export const useAuthenticated: typeof Shell.useAuthenticated = (): boolean => false;
+export const useAuthenticated = jest.fn<
+	ReturnType<typeof Shell.useAuthenticated>,
+	Parameters<typeof Shell.useAuthenticated>
+>(() => true);
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
 
@@ -55,8 +58,18 @@ export const useCurrentRoute: typeof Shell.useCurrentRoute = () => ROUTE_SETTING
 
 export const getUserAccount: typeof Shell.getUserAccount = () => ACCOUNT;
 
+export const useIsCarbonioCE: typeof Shell.useIsCarbonioCE = () => false;
+
 export const getNotificationManager: typeof Shell.getNotificationManager = () =>
 	NOTIFICATION_MANAGER;
+
+export const addRoute: typeof Shell.addRoute = () => '';
+
+export const addSettingsView: typeof Shell.addSettingsView = () => '';
+
+export const registerComponents: typeof Shell.registerComponents = () => undefined;
+
+export const removeActions: typeof Shell.removeActions = () => undefined;
 
 export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings header</div>;
 
@@ -74,13 +87,6 @@ export const useIntegratedFunction: typeof Shell.useIntegratedFunction<AnyFuncti
 };
 
 export const updatePrimaryBadge: typeof Shell.updatePrimaryBadge = () => undefined;
-
-export const mockSoapFetch = jest.fn();
-export const soapFetch: typeof Shell.soapFetch = () =>
-	new Promise((resolve, reject) => {
-		const result = mockSoapFetch();
-		result ? resolve(result) : reject(new Error('error'));
-	});
 
 export const useTracker: typeof Shell.useTracker = () => ({
 	capture: jest.fn(),

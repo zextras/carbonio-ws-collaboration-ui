@@ -13,19 +13,29 @@ import styled from 'styled-components';
 import SettingsCard from './SettingsCard';
 import { MeetingRecordingType } from '../../utils/localStorageUtils';
 
-const CustomButton = styled(Button)`
-	border-radius: 0.125rem;
-`;
-
 const CustomInput = styled(Input)`
 	cursor: default;
 	pointer-events: none;
 `;
 
+const noop = (): void => undefined;
+
 type RecordingSettingsProps = {
 	recordingDefaults: MeetingRecordingType;
 	setRecordingDefaults: Dispatch<SetStateAction<MeetingRecordingType>>;
 };
+type NodeWithMetadata = {
+	id: string;
+	name: string;
+	permissions?: {
+		can_read: boolean;
+		can_write_file: boolean;
+		can_write_folder: boolean;
+	};
+};
+const isValidSelection = (node: NodeWithMetadata): boolean =>
+	node.permissions?.can_write_folder === true;
+
 const RecordingSettings: FC<RecordingSettingsProps> = ({
 	recordingDefaults,
 	setRecordingDefaults
@@ -40,6 +50,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 	const browseLabel = t('settings.recording.browseAction', 'Browse');
 	const resetLabel = t('settings.recording.resetAction', 'Reset');
 	const dialogTitle = t('settings.recording.dialog.title', 'Select Folder');
+	const homeFolderLabel = t('settings.recording.homeFolder', 'Home');
 	const saveAction = t('action.save', 'Save');
 
 	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
@@ -48,7 +59,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 	const confirmAction = useCallback(
 		(nodes: { id: string; name: string }[]) => {
 			setRecordingDefaults({
-				name: nodes[0].id === 'LOCAL_ROOT' ? 'Home' : nodes[0].name,
+				name: nodes[0].name,
 				id: nodes[0].id
 			});
 		},
@@ -62,7 +73,9 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 			confirmLabel: saveAction,
 			allowFiles: false,
 			allowFolders: true,
-			canCreateFolder: true
+			canCreateFolder: true,
+			maxSelection: 1,
+			isValidSelection
 		};
 
 		filesSelectFilesAction(actionTarget);
@@ -72,7 +85,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 		setRecordingDefaults({ name: 'Home', id: 'LOCAL_ROOT' });
 	}, [setRecordingDefaults]);
 
-	const isRootDefault = useMemo(() => recordingDefaults.name === 'Home', [recordingDefaults]);
+	const isDefaultRoot = useMemo(() => recordingDefaults.id === 'LOCAL_ROOT', [recordingDefaults]);
 
 	if (filesSelectFilesActionAvailable) {
 		return (
@@ -86,14 +99,15 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 				>
 					<Container width="15.625rem">
 						<CustomInput
-							backgroundColor={'gray5'}
-							value={recordingDefaults.name}
+							background={'gray5'}
+							value={isDefaultRoot ? homeFolderLabel : recordingDefaults.name}
 							label={destinationFolderLabel}
-							onChange={handleBrowse}
+							// TODO: remove when the carbonio-design-system is updated to accept readonly prop
+							onChange={noop}
 						/>
 					</Container>
 					<Padding left="medium" />
-					<CustomButton
+					<Button
 						width="fit"
 						label={browseLabel}
 						color="primary"
@@ -101,12 +115,12 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 						onClick={handleBrowse}
 					/>
 					<Padding left="medium" />
-					<CustomButton
+					<Button
 						width="fit"
 						label={resetLabel}
 						color="secondary"
 						type="outlined"
-						disabled={isRootDefault}
+						disabled={isDefaultRoot}
 						onClick={handleReset}
 					/>
 				</Container>

@@ -18,14 +18,14 @@ const room = createMockRoom({ type: RoomType.TEMPORARY });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
 const event: MeetingUserRejectedEvent = {
-	type: WsEventType.MEETING_USER_REJECTED,
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'rejectedId'
 };
 
 const iAmRejectedEvent: MeetingUserRejectedEvent = {
-	type: WsEventType.MEETING_USER_REJECTED,
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'myUserId'
@@ -56,7 +56,7 @@ describe('MeetingUserRejectedEventHandler tests', () => {
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(iAmRejectedEvent);
 		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_USER_REJECTED, { detail: iAmRejectedEvent })
+			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_REJECTED, { detail: iAmRejectedEvent })
 		);
 	});
 

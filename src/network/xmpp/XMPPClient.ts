@@ -14,7 +14,6 @@ import {
 	onRequestHistory,
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
-import { onGetInboxResponse, onSetInboxResponse } from './handlers/inboxMessageHandler';
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
@@ -25,6 +24,7 @@ import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtils';
 import { RoomsApi } from '../index';
+import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 
 const jabberData = 'jabber:x:data';
 
@@ -114,8 +114,7 @@ class XMPPClient implements IXMPPClient {
 		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onGetInboxResponse
+			elem: iq
 		});
 	}
 
@@ -124,8 +123,7 @@ class XMPPClient implements IXMPPClient {
 		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onSetInboxResponse
+			elem: iq
 		});
 	}
 
@@ -154,7 +152,7 @@ class XMPPClient implements IXMPPClient {
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
-			.t(message)
+			.t(sanitizeXmppMessage(message))
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
@@ -184,7 +182,7 @@ class XMPPClient implements IXMPPClient {
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
-			.t(message)
+			.t(sanitizeXmppMessage(message))
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS })
 			.up()
@@ -218,7 +216,7 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.up()
 			.c('body')
-			.t(message);
+			.t(sanitizeXmppMessage(message));
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 

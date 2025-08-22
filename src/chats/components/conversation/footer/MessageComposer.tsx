@@ -29,10 +29,7 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
-import {
-	FILE_DESCRIPTION_CHAR_LIMIT,
-	MESSAGE_CHAR_LIMIT
-} from '../../../../constants/messageConstants';
+import { MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
@@ -150,19 +147,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback(
-		(textareaValue: string): void => {
-			const filesToUpload = useStore.getState().activeConversations[roomId]?.filesToAttach;
-			const charsLimit = size(filesToUpload) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
-			if (textareaValue.length >= charsLimit) {
-				setTextMessage(textareaValue.slice(0, charsLimit));
-				setNoMoreCharsOnInputComposer(true);
-			} else {
-				setNoMoreCharsOnInputComposer(false);
-			}
-		},
-		[roomId]
-	);
+	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
+		if (textareaValue.length >= MESSAGE_CHAR_LIMIT) {
+			setTextMessage(textareaValue.slice(0, MESSAGE_CHAR_LIMIT));
+			setNoMoreCharsOnInputComposer(true);
+		} else {
+			setNoMoreCharsOnInputComposer(false);
+		}
+	}, []);
 
 	// Check message max length when some files are attached
 	useEffect(() => {
@@ -186,48 +178,37 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	};
 
-	const uploadAttachmentPromise = (
+	const uploadAttachmentPromise = async (
 		file: FileToUpload,
 		controller: AbortController
-	): Promise<void | AddRoomAttachmentResponse> => {
+	): Promise<AddRoomAttachmentResponse> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
 		// Send as reply only the first file of the array
 		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
 
-		// get the attachment type
-		const isImage = isAttachmentImage(file.file.type);
-		// we have to check if it's supported by the previewer or not
-		// if it's not supported we can avoid to send the area field
-		if (isImage) {
-			return AttachmentsApi.getImageSize(file.localUrl)
-				.then((res) =>
-					RoomsApi.addRoomAttachment(
-						roomId,
-						file.file,
-						{
-							description: file.description,
-							replyId: sendAsReply ? referenceMessage?.stanzaId : undefined,
-							area: `${res.width}x${res.height}`
-						},
-						signal
-					).catch((reason: DOMException) => {
-						errorHandler(reason, fileName);
-					})
-				)
-				.catch((err) => Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`)));
+		let area;
+		if (isAttachmentImage(file.file.type)) {
+			try {
+				const imageSize = await AttachmentsApi.getImageSize(file.localUrl);
+				area = `${imageSize.width}x${imageSize.height}`;
+			} catch (err) {
+				return Promise.reject(err);
+			}
 		}
 		return RoomsApi.addRoomAttachment(
 			roomId,
 			file.file,
 			{
 				description: file.description,
-				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
+				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined,
+				area
 			},
 			signal
 		).catch((reason: DOMException) => {
 			errorHandler(reason, fileName);
+			return Promise.reject(reason);
 		});
 	};
 
@@ -324,7 +305,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					removeFilesToAttach(roomId);
 					setIsUploading(false);
 				})
-				.catch((error) => console.log(error));
+				.catch(() => {
+					setDraftMessage(roomId, message);
+					setIsUploading(false);
+				});
 		} else if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
 			actionToPerformBasedOnType(referenceMessage, message, completeReferenceMessage);
 			setDraftMessage(roomId);

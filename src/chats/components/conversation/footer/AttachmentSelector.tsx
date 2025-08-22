@@ -72,13 +72,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
-	const clearInput = useCallback(() => {
-		if (fileSelectorInputRef.current) {
-			fileSelectorInputRef.current.value = '';
-		}
-	}, [fileSelectorInputRef]);
-
-	const loadFiles = useLoadFiles(roomId, clearInput);
+	const loadFiles = useLoadFiles(roomId);
 
 	const selectFiles = useCallback(
 		(ev: { target: HTMLInputElement }) => {

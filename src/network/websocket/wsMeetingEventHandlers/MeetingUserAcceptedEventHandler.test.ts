@@ -18,7 +18,7 @@ const room = createMockRoom({ type: RoomType.TEMPORARY });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
 const event: MeetingUserAcceptedEvent = {
-	type: WsEventType.MEETING_USER_ACCEPTED,
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'acceptedId'
@@ -50,7 +50,7 @@ describe('MeetingUserAcceptedEventHandler tests', () => {
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_USER_ACCEPTED, { detail: event })
+			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, { detail: event })
 		);
 	});
 

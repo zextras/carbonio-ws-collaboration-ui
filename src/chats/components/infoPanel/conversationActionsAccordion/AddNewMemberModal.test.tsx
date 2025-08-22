@@ -37,7 +37,7 @@ beforeEach(() => {
 
 describe('Add new Member Modal', () => {
 	test('Everything should be rendered - checkbox selected', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
+		mockSearchUsersByFeatureRequest.mockReturnValue({ contacts: [user1] });
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
@@ -73,7 +73,7 @@ describe('Add new Member Modal', () => {
 	});
 
 	test('Everything should be rendered - checkbox not selected', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
+		mockSearchUsersByFeatureRequest.mockReturnValue({ contacts: [user1] });
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen

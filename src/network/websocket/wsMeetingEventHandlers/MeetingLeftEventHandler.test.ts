@@ -43,14 +43,14 @@ const meetingWith12Participants = createMockMeeting({
 	]
 });
 const event: MeetingLeftEvent = {
-	type: WsEventType.MEETING_LEFT,
+	type: WsEventType.MEETING_PARTICIPANT_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: 'userId'
 };
 
 const event2: MeetingLeftEvent = {
-	type: WsEventType.MEETING_LEFT,
+	type: WsEventType.MEETING_PARTICIPANT_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meetingWith12Participants.id,
 	userId: 'sessionUserId'
@@ -73,7 +73,6 @@ describe('meetingLeftEventHandler tests', () => {
 
 	test('Left participant video subscription is been removed', () => {
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
-		console.log(activeMeeting);
 		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
 		const deleteSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
 		meetingLeftEventHandler(event);

@@ -6,18 +6,21 @@
 
 import React from 'react';
 
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
 import useStore from '../../../store/Store';
 import {
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconCloseOutline = 'icon: CloseOutline';
@@ -103,6 +106,18 @@ const mkdTextMsgUser3Group2 = createMockTextMessage({
 	date: 1704776670 // 2024-01-09 06:04:30
 });
 
+const contactUser1: ContactInfo = {
+	id: user1Be.id,
+	displayName: user1Be.name,
+	email: user1Be.email
+};
+
+const contactUser2: ContactInfo = {
+	id: user2Be.id,
+	displayName: user2Be.name,
+	email: user2Be.email
+};
+
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setChatsBeStatus(true);
@@ -113,6 +128,7 @@ beforeEach(() => {
 	store.newMessage(mkdTextMsgUser1OneToOne);
 	store.newMessage(mkdTextMsgUser2OneToOne);
 	store.newMessage(mkdTextMsgUser3Group2);
+	store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 });
 describe('SecondaryBar tests', () => {
 	test('Default SecondaryBar contains conversationList', () => {
@@ -138,6 +154,60 @@ describe('SecondaryBar tests', () => {
 		setup(<SecondaryBarView expanded={false} />);
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
+	});
+
+	describe('FilteredGal inside SecondaryBarView tests', () => {
+		test('User filter gal and expect only one user to be visible', async () => {
+			mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1] });
+			const { user } = setup(<SecondaryBarView expanded />);
+			// user search a user
+			const textArea = screen.getByRole('textbox', {
+				name: /type to filter list/i
+			});
+			await user.type(textArea, '1');
+
+			await waitFor(() => {
+				const galListItems = screen.getAllByTestId('gal_list_item');
+				expect(galListItems).toHaveLength(1);
+			});
+		});
+
+		test('User filter gal but SearchUsersByFeatureRequest fails', async () => {
+			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
+			const { user } = setup(<SecondaryBarView expanded />);
+			// user search a user
+			const textArea = screen.getByRole('textbox');
+			await user.type(textArea, '1');
+			const noMatchText = await screen.findByText(
+				/There seems to be a problem with your search, please retry./i
+			);
+			expect(noMatchText).toBeInTheDocument();
+		});
+
+		test('If there are other users in the gal, user can click on "Show more users" button', async () => {
+			mockSearchUsersByFeatureRequest.mockResolvedValueOnce({
+				contacts: [contactUser1],
+				more: true
+			});
+			const { user } = setup(<SecondaryBarView expanded />);
+			// user search a user
+			const textArea = screen.getByRole('textbox', {
+				name: /type to filter list/i
+			});
+			await user.type(textArea, '1');
+
+			await waitFor(() => {
+				const showMoreButton = screen.getByText(/show more users/i);
+				expect(showMoreButton).toBeInTheDocument();
+			});
+
+			const showMoreButton = screen.getByText(/show more users/i);
+			await user.click(showMoreButton);
+
+			await waitFor(() => {
+				expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
+			});
+		});
 	});
 
 	describe('ConversationList inside SecondaryBarView tests', () => {
@@ -247,54 +317,4 @@ describe('SecondaryBar tests', () => {
 			expect(listElements).toHaveLength(10);
 		});
 	});
-
-	// TODO fix test
-	// describe('FilteredGal inside SecondaryBarView tests', () => {
-	// 	test('User filter gal and expect only one user to be visible', async () => {
-	// 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
-	// 		const { user } = setup(<SecondaryBarView expanded />);
-	// 		// user search a user
-	// 		const textArea = screen.getByRole('textbox', {
-	// 			name: /type to filter list/i
-	// 		});
-	// 		await user.type(textArea, '1');
-	//
-	// 		await waitFor(() => {
-	// 			const galListItems = screen.getAllByTestId('gal_list_item');
-	// 			expect(galListItems).toHaveLength(1);
-	// 		});
-	// 	});
-	//
-	// 	test('User filter gal but AutoCompleteGalRequest fails', async () => {
-	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-	// 		const { user } = setup(<SecondaryBarView expanded />);
-	// 		// user search a user
-	// 		const textArea = screen.getByRole('textbox');
-	// 		await user.type(textArea, '1');
-	// 		const noMatchText = await screen.findByText(
-	// 			/There seems to be a problem with your search, please retry./i
-	// 		);
-	// 		expect(noMatchText).toBeInTheDocument();
-	// 	});
-	//
-	// 	test('User try to search again using Retry button after a failed search', async () => {
-	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-	// 		const { user } = setup(<SecondaryBarView expanded />);
-	// 		// user search a user
-	// 		const textArea = screen.getByRole('textbox');
-	// 		await user.type(textArea, '1');
-	// 		const noMatchText = await screen.findByText(
-	// 			/There seems to be a problem with your search, please retry./i
-	// 		);
-	// 		expect(noMatchText).toBeInTheDocument();
-	//
-	// 		const retryButton = screen.getByText('Retry');
-	// 		expect(retryButton).toBeInTheDocument();
-	//
-	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-	// 		await user.click(retryButton);
-	//
-	// 		expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
-	// 	});
-	// });
 });

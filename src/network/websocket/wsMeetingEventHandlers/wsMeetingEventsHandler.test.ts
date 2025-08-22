@@ -51,15 +51,15 @@ describe('wsMeetingEventsHandler', () => {
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
-	test('MEETING_JOINED event is handled', () => {
-		const event = { type: WsEventType.MEETING_JOINED };
+	test('MEETING_PARTICIPANT_JOINED event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_JOINED };
 		const handler = jest.spyOn(MeetingJoinedEventHandler, 'meetingJoinedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
-	test('MEETING_LEFT event is handled', () => {
-		const event = { type: WsEventType.MEETING_LEFT };
+	test('MEETING_PARTICIPANT_LEFT event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_LEFT };
 		const handler = jest.spyOn(MeetingLeftEventHandler, 'meetingLeftEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
@@ -169,15 +169,15 @@ describe('wsMeetingEventsHandler', () => {
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
-	test('MEETING_USER_ACCEPTED event is handled', () => {
-		const event = { type: WsEventType.MEETING_USER_ACCEPTED };
+	test('MEETING_WAITING_PARTICIPANT_ACCEPTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED };
 		const handler = jest.spyOn(MeetingUserAcceptedEventHandler, 'meetingUserAcceptedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
-	test('MEETING_USER_REJECTED event is handled', () => {
-		const event = { type: WsEventType.MEETING_USER_REJECTED };
+	test('MEETING_WAITING_PARTICIPANT_REJECTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED };
 		const handler = jest.spyOn(MeetingUserRejectedEventHandler, 'meetingUserRejectedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);

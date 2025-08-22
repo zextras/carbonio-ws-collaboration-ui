@@ -1,80 +1,46 @@
 /*
- * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
+import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
-import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
-import RegisterCreationButton from './chats/components/RegisterCreationButton';
-import RegisterVirtualRoomCreationButton from './chats/components/RegisterVirtualRoomCreationButton';
-import initChats from './chats/initChats';
-import initIntegrations from './integrations/initIntegrations';
-import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
-import initMeetings from './meetings/initMeetings';
-import { MeetingsApi, RoomsApi, SessionApi } from './network';
-import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
-import initSettings from './settings/initSettings';
-import useStore from './store/Store';
-import { UserType } from './types/store/UserTypes';
-import { setDateDefault } from './utils/dateUtils';
+import { MEETINGS_PATH } from './constants/appConstants';
+import MainApp from './MainApp';
+import { InfoApi } from './network';
 
-export default function App(): React.JSX.Element {
-	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setAttributes = useStore((state) => state.setAttributes);
-	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
-
-	const authenticated = useAuthenticated();
-	const { prefs, attrs } = useUserSettings();
-
-	// STORE: init with user session main infos
+const UnlicensedApp = (): null => {
 	useEffect(() => {
-		const userAccount = getUserAccount();
-		if (authenticated && userAccount) {
-			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
-			setAttributes(attrs);
+		if (IS_FOCUS_MODE && window.location.pathname.includes(MEETINGS_PATH)) {
+			window.location.assign(`${window.location.origin}/static/login`);
 		}
-	}, [setLoginInfo, authenticated, setAttributes, attrs]);
+	}, []);
+	return null;
+};
 
-	// SET TIMEZONE and LOCALE
-	useEffect(() => {
-		if (authenticated) setDateDefault(prefs?.zimbraPrefLocale);
-	}, [prefs, authenticated]);
+export default function App(): React.JSX.Element | null {
+	const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
 
-	// NETWORKS: init XMPP and WebSocket clients
+	const isCarbonioCE = useIsCarbonioCE();
+
 	useEffect(() => {
-		if (authenticated) {
-			Promise.all([
-				SessionApi.getToken(),
-				RoomsApi.listRooms(true, true),
-				MeetingsApi.listMeetings()
-			])
-				.then((resp) => {
-					setChatsBeStatus(true);
-					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-					const { xmppClient, wsClient } = useStore.getState().connections;
-					xmppClient.connect(resp[0].zmToken);
-					wsClient.connect();
+		if (!isCarbonioCE) {
+			InfoApi.getLicense()
+				.then((response) => {
+					setIsLicensed(response.licensed);
 				})
-				.catch(() => setChatsBeStatus(false));
+				.catch(() => {
+					setIsLicensed(true);
+				});
 		}
-	}, [authenticated, setChatsBeStatus]);
+	}, [isCarbonioCE]);
 
-	initChats();
-	initMeetings();
-	initSettings();
-	initIntegrations();
+	if (!isCarbonioCE && isLicensed === null) {
+		return null;
+	}
 
-	return (
-		<>
-			<RegisterCreationButton />
-			<RegisterVirtualRoomCreationButton />
-			<CounterBadgeUpdater />
-			<MeetingNotificationHandler />
-			<WaitingListSnackbar />
-		</>
-	);
+	return isCarbonioCE || isLicensed ? <MainApp /> : <UnlicensedApp />;
 }

@@ -71,9 +71,13 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		'New avatar has been successfully uploaded'
 	);
 	const imageSizeTooLargeSnackbar = t(
-		'settings.room.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}MB`,
+		'attachments.upload.tooLarge',
+		`The selected image is too large. Please upload a file smaller than ${maxRoomImageSize}MB.`,
 		{ size: maxRoomImageSize }
+	);
+	const genericErrorSnackbar = t(
+		'attachments.upload.genericError',
+		'Something went wrong while uploading the image. Please try again.'
 	);
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',
@@ -131,18 +135,28 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 							autoHideTimeout: 5000
 						});
 					})
-					.catch(() => {
-						createSnackbar({
-							key: new Date().toLocaleString(),
-							severity: 'error',
-							label: imageSizeTooLargeSnackbar,
-							hideButton: true,
-							autoHideTimeout: 5000
-						});
+					.catch((error: Error) => {
+						if (error.message === 'File too large') {
+							createSnackbar({
+								key: new Date().toLocaleString(),
+								severity: 'error',
+								label: imageSizeTooLargeSnackbar,
+								hideButton: true,
+								autoHideTimeout: 5000
+							});
+						} else {
+							createSnackbar({
+								key: new Date().toLocaleString(),
+								severity: 'error',
+								label: genericErrorSnackbar,
+								hideButton: true,
+								autoHideTimeout: 5000
+							});
+						}
 					});
 			}
 		},
-		[createSnackbar, imageSizeTooLargeSnackbar, roomId, updatedImageSnackbar]
+		[createSnackbar, genericErrorSnackbar, imageSizeTooLargeSnackbar, roomId, updatedImageSnackbar]
 	);
 
 	const onDeleteGroupImage = useCallback(() => {

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import ReactionChip from './ReactionChip';
 import useStore from '../../../../store/Store';
@@ -38,6 +38,24 @@ describe('ReactionChip', () => {
 		);
 		expect(screen.getByText('👍')).toBeInTheDocument();
 		expect(screen.getByText('U1')).toBeInTheDocument();
+	});
+
+	test('User information are available only after the first render', async () => {
+		const user4 = createMockUser({ id: 'user4', name: 'User 4' });
+		setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user4.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
+		expect(screen.getByText('👍')).toBeInTheDocument();
+		expect(screen.queryByText('U4')).not.toBeInTheDocument();
+		act(() => {
+			useStore.getState().setUserInfo([user4]);
+		});
+		expect(await screen.findByText('U4')).toBeInTheDocument();
 	});
 
 	test('Display a reaction sent by multiple users', () => {

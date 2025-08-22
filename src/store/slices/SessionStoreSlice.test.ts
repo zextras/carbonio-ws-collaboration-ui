@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { ExportStatus } from '../../types/store/SessionTypes';
+import { ExportStatus, Version } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 import useStore from '../Store';
 
@@ -35,6 +35,21 @@ describe('SessionStoreSlice tests', () => {
 		const testQueueId = 'test-queueId';
 		useStore.getState().setQueueId(testQueueId);
 		expect(useStore.getState().session.queueId).toBe(testQueueId);
+	});
+
+	describe('versions', () => {
+		test('apiVersion', () => {
+			const apiVersion = '1.6.0';
+			useStore.getState().setApiVersion(apiVersion);
+			expect(useStore.getState().session.apiVersion).toBe(apiVersion);
+		});
+
+		test('setSupportedVersions sets the highest version as the default version', () => {
+			const versions = ['1.6.1', '1.7.0', '1.6.0'] as Version[];
+			useStore.getState().setSupportedVersions(versions);
+			expect(useStore.getState().session.supportedVersions).toEqual(versions);
+			expect(useStore.getState().session.apiVersion).toEqual('1.7.0');
+		});
 	});
 
 	describe('attributes', () => {

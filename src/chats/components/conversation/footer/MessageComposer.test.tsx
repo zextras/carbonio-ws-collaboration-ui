@@ -485,6 +485,42 @@ describe('MessageComposer - send message', () => {
 
 		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();
 	});
+
+	test('File description is preserved in input when upload failed', async () => {
+		useStore
+			.getState()
+			.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '1' }));
+
+		const size = 1024 * 1024 * 2;
+		const blob = new ArrayBuffer(size);
+		const file = new File([blob], 'test.bin', { type: 'application/octet-stream' });
+
+		const { user } = storeSetupAdvanced();
+		const composerTextArea = await screen.findByTestId('textAreaComposer');
+		await user.type(composerTextArea, 'text');
+
+		const inputFile = screen.getByTestId('inputSelector') as HTMLInputElement;
+		await user.upload(inputFile, file);
+		const filesToAttach = useStore.getState().activeConversations[mockedRoom.id]?.filesToAttach;
+		expect(filesToAttach).toHaveLength(1);
+
+		const filePreview = await screen.findByTestId(
+			`previewFileUpload-${file.name}-${filesToAttach?.[0].fileId}`
+		);
+		await user.click(filePreview);
+		const storedFile = useStore.getState().activeConversations[mockedRoom.id].filesToAttach?.[0];
+		expect(storedFile?.description).toBe('text');
+
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
+
+		await waitFor(() => {
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('text');
+		});
+	});
 });
 
 describe('MessageComposer - paste on textbox', () => {
@@ -775,11 +811,12 @@ describe('MessageComposer - draft message', () => {
 		expect(composerTextArea as HTMLTextAreaElement).toHaveValue(draftMessage);
 	});
 
-	test('The cursor position is in the end of the draft message on opening the conversation', () => {
+	test('The cursor position is in the end of the draft message on opening the conversation', async () => {
 		const store = useStore.getState();
 		store.setDraftMessage(mockedRoom.id, draftMessage);
 
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { rerender } = setup(<MessageComposer roomId="anotherRoomId" />);
+		rerender(<MessageComposer roomId={mockedRoom.id} />);
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(draftMessage.length);

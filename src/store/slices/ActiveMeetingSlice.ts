@@ -40,11 +40,11 @@ export const useActiveMeetingSlice: StateCreator<
 		meetingId: string,
 		audioStream?: {
 			enabled: boolean;
-			selectedDeviceId?: string;
+			deviceId?: string;
 		},
 		videoStream?: {
 			enabled: boolean;
-			selectedDeviceId?: string;
+			deviceId?: string;
 		}
 	): void => {
 		set(
@@ -54,19 +54,19 @@ export const useActiveMeetingSlice: StateCreator<
 					// Peer connections and streams
 					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
 						meetingId,
-						audioStream?.enabled || false,
-						audioStream?.selectedDeviceId
+						!!audioStream?.enabled,
+						audioStream?.deviceId
 					),
 					videoScreenIn: new VideoScreenInConnection(meetingId),
 					videoOutConn: new VideoOutConnection(
 						meetingId,
-						videoStream?.enabled || false,
-						videoStream?.selectedDeviceId
+						!!videoStream?.enabled,
+						videoStream?.deviceId
 					),
 					screenOutConn: new ScreenOutConnection(meetingId),
 					localStreams: {
-						selectedAudioDeviceId: audioStream?.selectedDeviceId,
-						selectedVideoDeviceId: videoStream?.selectedDeviceId
+						selectedAudioDeviceId: audioStream?.deviceId,
+						selectedVideoDeviceId: videoStream?.deviceId
 					},
 					subscription: {},
 					// Default graphic values

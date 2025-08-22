@@ -129,7 +129,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		userIsReady
 	]);
 
-	useEventListener(EventName.MEETING_USER_ACCEPTED, () =>
+	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, () =>
 		handleWaitingRoom({ audio: audioOn, video: false })
 	);
 
