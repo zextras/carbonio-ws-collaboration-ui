@@ -6,68 +6,56 @@
 import React from 'react';
 
 import { waitFor } from '@testing-library/react';
+import * as shell from '@zextras/carbonio-shell-ui';
 
 import App from './app';
-import useStore from './store/Store';
+import { MEETINGS_PATH } from './constants/appConstants';
+import InfoApi from './network/apis/InfoApi';
 import { setup } from './tests/test-utils';
-import { useAuthenticated } from '../__mocks__/@zextras/carbonio-shell-ui';
-import sessionApi from './network/apis/SessionApi';
-import {
-	MeetingsApiToSpy,
-	RoomsApiToSpy,
-	spyOnMeetingsApi,
-	spyOnRoomsApi
-} from './tests/mocks/network';
 
-describe('Entry point', () => {
-	test('Set app version', () => {
+describe('App tests', () => {
+	test('App is rendered when license is enabled', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
+		jest.mocked(shell).IS_FOCUS_MODE = false;
+		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: true });
+		const addRoute = jest.spyOn(shell, 'addRoute');
 		setup(<App />);
-		expect(useStore.getState().session.apiVersion).toBeDefined();
+		await waitFor(() => {
+			expect(addRoute).toBeCalled();
+		});
 	});
 
-	test('Set login info of an authenticated user', () => {
-		useAuthenticated.mockReturnValue(true);
-		setup(<App />);
-		const { id, name, displayName, userType } = useStore.getState().session;
-		expect(id).toBeDefined();
-		expect(name).toBeDefined();
-		expect(displayName).toBeDefined();
-		expect(userType).toBe('internal');
+	test('App is not rendered when license is disabled', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
+		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: false });
+		const { container } = setup(<App />);
+		await waitFor(() => {
+			expect(container).toBeEmptyDOMElement();
+		});
 	});
 
-	test('Avoid setting login info of an unauthenticated user', () => {
-		useAuthenticated.mockReturnValue(false);
+	test('Redirect to login when license is disabled and we are in meeting path', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValueOnce(false);
+		jest.spyOn(InfoApi, 'getLicense').mockResolvedValueOnce({ licensed: false });
+		jest.mocked(shell).IS_FOCUS_MODE = true;
+		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}meetingId`;
+
+		const assign = jest.spyOn(window.location, 'assign');
 		setup(<App />);
-		const { id, name, displayName, userType } = useStore.getState().session;
-		expect(id).toBeUndefined();
-		expect(name).toBeUndefined();
-		expect(displayName).toBeUndefined();
-		expect(userType).toBeUndefined();
+		await waitFor(() => {
+			expect(assign).toHaveBeenCalled();
+		});
 	});
 
-	test('Connection is established on app load', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
-		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
+	test('App is rendered without license check on Carbonio CE', async () => {
+		jest.spyOn(shell, 'useIsCarbonioCE').mockReturnValue(true);
+		jest.mocked(shell).IS_FOCUS_MODE = false;
+		const getLicenseApi = jest.spyOn(InfoApi, 'getLicense');
+		const addRoute = jest.spyOn(shell, 'addRoute');
 		setup(<App />);
-		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
-	});
-
-	test('Connection is not established on app load if getToken do not respond', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('Token error'));
-		setup(<App />);
-		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
-	});
-
-	test('Retry getToken on version_mismatch error', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('version_mismatch'));
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
-		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
-		setup(<App />);
-		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
-		expect(sessionApi.getToken).toHaveBeenCalledTimes(2);
+		await waitFor(() => {
+			expect(addRoute).toBeCalled();
+		});
+		expect(getLicenseApi).not.toHaveBeenCalled();
 	});
 });

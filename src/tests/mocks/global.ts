@@ -70,7 +70,8 @@ Object.defineProperty(window, 'location', {
 		href: 'https://localhost/carbonio/chats',
 		pathname: 'https://localhost/carbonio/chats',
 		replace: mockReplace,
-		includes: jest.fn()
+		includes: jest.fn(),
+		assign: jest.fn()
 	},
 	writable: true
 });

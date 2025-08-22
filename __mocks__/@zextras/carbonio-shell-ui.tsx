@@ -58,6 +58,8 @@ export const useCurrentRoute: typeof Shell.useCurrentRoute = () => ROUTE_SETTING
 
 export const getUserAccount: typeof Shell.getUserAccount = () => ACCOUNT;
 
+export const useIsCarbonioCE: typeof Shell.useIsCarbonioCE = () => false;
+
 export const getNotificationManager: typeof Shell.getNotificationManager = () =>
 	NOTIFICATION_MANAGER;
 
