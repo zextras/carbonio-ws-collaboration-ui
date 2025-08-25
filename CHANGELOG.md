@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.17](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.16...v0.9.17) (2025-08-22)
+
+
+### Features
+
+* added two snackbar for upload group picture refs: WSC-1965 ([8c18b17](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8c18b177059e7b54a7ecb4277d9b8a6379aa4437))
+* added two snackbar for upload group picture refs: WSC-1965 ([5846cf9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5846cf93707e1203b4797e2f493f15be5dd27213))
+* hide zapp when wsc license is disabled ref: WSC-1837 ([#580](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/580)) ([1617646](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/161764600de001678e5df7d91348b392162367f0))
+* implement api versioning ref: WSC-1947 ([#553](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/553)) ([1ad1e53](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1ad1e535bfc55e3e65e27bcebdb64102feeadc8f))
+* implement pagination for SearchUsersByFeatureRequest ref: WSC-1445 ([#540](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/540)) ([c936c69](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c936c690510568d83da626efcf4f7c906fb7b87a))
+* implement websocket api versioning ref: WSC-2015 ([#570](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/570)) ([ab72a05](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ab72a0521446fcdf00de7c18749ea74cd63f3644))
+
+
+### Bug Fixes
+
+* change attachment caption handling to support 682 characters ref: WSC-2043 ([#566](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/566)) ([cf9e8be](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/cf9e8be59123e4604bcacf3c649843dbaa7684af))
+* cursor position after emoji insert ([#554](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/554)) ([e758b83](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e758b834b49c869a34889a093355d811ad1e7c2e))
+* delete unsubscribed streams ([#581](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/581)) ([de1f324](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/de1f32439fb2d216d7f3014ce525edb4087e5f00))
+* disable multiselection and add permission validation ([d5e25a7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d5e25a7caceed54b827cfe5adc5626d85477c690)), closes [#579](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/579)
+* fix scroll on reload conversation refs: WSC-1877 ([072b28d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/072b28dfb3710232d349c6c7ed8f7921a1b65c92))
+* fix scroll on reload conversation refs: WSC-1877 ([e82022b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e82022bbe3631a2bbdd12523ea40259b4c855281))
+* forward messages with special characters ref: WSC-2067 ([#568](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/568)) ([2ab299b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2ab299bc577d3efbf03d5794d2f73bc7396e2952))
+* incorrect highlight color when clicking on referenced message ([#564](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/564)) ([00d249a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/00d249a44932e8e80714611a6485d6471aeb6730))
+* keep file caption while attachment file api fails ref: WSC-2042 ([#556](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/556)) ([081ade2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/081ade270edacc0c8177b5effbb1da7df745f379))
+* long titles are not handled in attachments without preview ref: WSC-2031 ([#551](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/551)) ([fc98f02](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fc98f022315bcf9bd899252f65c1727b6ce64455))
+* missing reaction chip information ref: WSC-2101 ([#578](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/578)) ([99a8926](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/99a892630ec80bf5ba95ac1299e0527bd4b8a279))
+* missing translation key ([#571](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/571)) ([b5dbb43](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b5dbb431211d0ac01f57b3cb26af1715bf924332))
+* sanitize xmpp message ref: WSC-1864 ([3ed3448](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3ed3448e1652d678ce9d9b3d76b7d05e979e77f7))
+* select audio e video device before joining meeting ([#569](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/569)) ([85ffe26](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/85ffe262018a35bbb7ed66736e459b6823e45fd4))
+* unread badge randomly appears on chat ref: WSC-2061 ([#558](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/558)) ([ff278e5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ff278e501de94c72700e0504d3bd43d628e8a2df))
+* unsetNewReactions during input focus ([#555](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/555)) ([fe4f191](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fe4f191f5c2912b6375e19bd01493c6e40f47879))
+* update reuse check ([#543](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/543)) ([177ef5d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/177ef5d03111339286bd610244076dbe6d8583cd))
+
 ### [0.9.16](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.15...v0.9.16) (2025-05-19)
 
 
