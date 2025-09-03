@@ -28,10 +28,9 @@ updates:
       testing-library:
         patterns:
           - "@testing-library/*"
-      styled-components:
+      lodash:
         patterns:
-          - "styled-components"
-          - "@types/styled-components"
+          - "lodash"
       zustand:
         patterns:
           - "zustand"
