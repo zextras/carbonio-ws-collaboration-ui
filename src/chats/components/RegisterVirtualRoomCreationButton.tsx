@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	ACTION_TYPES,
@@ -41,10 +41,6 @@ const RegisterVirtualRoomCreationButton = (): ReactElement => {
 		[t]
 	);
 
-	const toggleModal = useCallback(() => {
-		setShowCreationModal((prevState) => !prevState);
-	}, []);
-
 	useEffect(() => {
 		if (videoCallEnabled) {
 			registerActions<NewAction>({
@@ -58,9 +54,8 @@ const RegisterVirtualRoomCreationButton = (): ReactElement => {
 
 	return (
 		<CreateVirtualRoomModal
-			toggleModal={toggleModal}
-			showCreationModal={showCreationModal}
-			setShowCreationModal={setShowCreationModal}
+			open={showCreationModal}
+			onClose={() => setShowCreationModal(false)}
 			createModalRef={createModalRef}
 		/>
 	);
