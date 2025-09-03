@@ -32,9 +32,6 @@ updates:
         patterns:
           - "styled-components"
           - "@types/styled-components"
-      lodash:
-        patterns:
-          - "lodash"
       zustand:
         patterns:
           - "zustand"
