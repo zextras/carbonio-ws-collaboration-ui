@@ -5,6 +5,7 @@
  */
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -20,7 +21,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ChatItem from './ChatItem';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';

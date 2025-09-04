@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
-import styled from 'styled-components';
 
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';

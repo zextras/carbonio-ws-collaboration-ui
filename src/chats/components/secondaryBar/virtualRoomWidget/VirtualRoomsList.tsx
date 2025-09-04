@@ -14,10 +14,10 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Text } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import VirtualRoomCard from './virtualRoomCard/VirtualRoomCard';

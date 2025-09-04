@@ -6,6 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Checkbox,
 	Container,
@@ -14,7 +15,6 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';
 import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActions';

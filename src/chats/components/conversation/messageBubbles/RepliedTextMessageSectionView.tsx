@@ -6,9 +6,9 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
+import styled from '@emotion/styled';
+import { Container, Padding, Row, Text, Theme } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import { ANIMATION_STYLES } from './BubbleAnimationsGlobalStyle';
@@ -27,7 +27,7 @@ type RepliedTextMessageSectionViewProps = {
 };
 
 const RepliedTextMessageContainer = styled(Container)<{
-	$userBorderColor: keyof DefaultTheme['avatarColors'];
+	$userBorderColor: keyof Theme['avatarColors'];
 }>`
 	border-left: ${({ $userBorderColor, theme }): string =>
 		`0.25rem solid ${theme.avatarColors[$userBorderColor]}`};

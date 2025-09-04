@@ -6,8 +6,8 @@
 
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text, Row, Tooltip } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import InfoSection from './InfoSection';
 import ManageMeetingButtons from './ManageMeetingButtons';

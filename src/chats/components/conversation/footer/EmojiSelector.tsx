@@ -5,9 +5,9 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import EmojiPicker from './EmojiPicker';
 import { Emoji } from '../../../../types/generics';

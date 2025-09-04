@@ -6,8 +6,8 @@
 
 import React, { useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
 import { RoomsApi } from '../../network';

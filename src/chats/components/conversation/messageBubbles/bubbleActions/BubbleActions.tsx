@@ -6,8 +6,9 @@
 
 import React, { FC, useCallback, useEffect } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Container, Padding } from '@zextras/carbonio-design-system';
-import styled, { css } from 'styled-components';
 
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useBubbleReactions from './useBubbleReactions';

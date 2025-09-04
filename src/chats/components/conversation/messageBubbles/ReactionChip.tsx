@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useState, useEffect, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { includes, size } from 'lodash';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';

@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -17,7 +18,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';

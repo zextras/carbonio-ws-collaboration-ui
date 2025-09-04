@@ -5,9 +5,9 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { map, pull } from 'lodash';
-import styled from 'styled-components';
 
 import MeetingBubble from './MeetingBubble';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';

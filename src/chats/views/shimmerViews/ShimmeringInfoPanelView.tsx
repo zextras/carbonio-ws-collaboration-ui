@@ -6,16 +6,17 @@
 
 import React, { ReactElement } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Container, Padding, Shimmer } from '@zextras/carbonio-design-system';
-import styled, { css } from 'styled-components';
 
 const CustomContainer = styled(Container)<{ $isTopContainer?: boolean }>`
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray6.active};
-	${({ $isTopContainer }): ReturnType<typeof css> | false | undefined =>
+	${({ $isTopContainer, theme }): ReturnType<typeof css> | false | undefined =>
 		$isTopContainer &&
 		css`
-			background-color: ${({ theme }): string => theme.palette.gray4.regular};
+			background-color: ${theme.palette.gray4.regular};
 			min-height: 3rem;
 			max-height: 3rem;
 		`};

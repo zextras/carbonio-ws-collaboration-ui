@@ -6,10 +6,11 @@
 
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Container, Padding, Text, useTheme } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
-import styled, { css } from 'styled-components';
 
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 

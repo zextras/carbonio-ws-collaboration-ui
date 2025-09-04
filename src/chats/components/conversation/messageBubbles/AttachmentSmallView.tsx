@@ -6,9 +6,9 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';

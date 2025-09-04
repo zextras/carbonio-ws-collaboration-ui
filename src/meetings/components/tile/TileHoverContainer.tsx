@@ -5,9 +5,9 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useMuteForAll from '../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../hooks/usePinnedTile';

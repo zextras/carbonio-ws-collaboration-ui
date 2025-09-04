@@ -5,11 +5,11 @@
  */
 import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTracker } from '@zextras/carbonio-shell-ui';
 import { map, range } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';

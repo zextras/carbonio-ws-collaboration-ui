@@ -5,9 +5,9 @@
  */
 import React, { ReactElement, useCallback } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ExternalGuestForm from './ExternalGuestForm';
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';

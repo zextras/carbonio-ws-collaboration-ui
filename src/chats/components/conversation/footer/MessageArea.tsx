@@ -7,8 +7,9 @@
 
 import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useTranslation } from 'react-i18next';
-import styled, { css } from 'styled-components';
 
 import { getInputHasFocus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';

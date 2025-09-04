@@ -6,8 +6,8 @@
 
 import React, { Dispatch, FC, SetStateAction } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import { ActionsAccordion } from './conversationActionsAccordion/ActionsAccordion';
 import ConversationInfo from './conversationInfo/ConversationInfo';

@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { concat, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
@@ -26,12 +26,6 @@ const TilesBarContainer = styled(Container)`
 
 const TileContainer = styled(Container)`
 	gap: 1rem;
-`;
-
-const WhoIsSpeakingCustom = styled(WhoIsSpeaking)`
-	position: absolute;
-	top: 0;
-	left: -13rem;
 `;
 
 const ButtonUpContainer = styled(Container)`

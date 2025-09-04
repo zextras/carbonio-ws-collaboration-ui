@@ -6,9 +6,9 @@
 
 import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Button, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import OneToOneRoomPictureHandler from './OneToOneRoomPictureHandler';

@@ -6,8 +6,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Shimmer } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import TileAvatarComponent from './TileAvatarComponent';
 import TileHoverContainer, { HoverContainer } from './TileHoverContainer';

@@ -5,9 +5,9 @@
  */
 import React, { ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import { Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 const CustomText = styled(Text)`
 	flex-shrink: 0;

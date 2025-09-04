@@ -13,9 +13,10 @@ import React, {
 	useState
 } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Container, Row, Text, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { css } from 'styled-components';
 
 import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';

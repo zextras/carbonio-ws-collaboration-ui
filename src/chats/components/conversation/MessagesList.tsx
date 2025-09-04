@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, last, map, size } from 'lodash';
-import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
