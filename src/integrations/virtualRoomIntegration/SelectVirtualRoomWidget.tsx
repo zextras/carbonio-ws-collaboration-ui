@@ -251,9 +251,8 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			)}
 			{showCreationModal && (
 				<CreateVirtualRoomModal
-					toggleModal={toggleModal}
-					showCreationModal={showCreationModal}
-					setShowCreationModal={setShowCreationModal}
+					open={showCreationModal}
+					onClose={() => setShowCreationModal(false)}
 					createModalRef={createModalRef}
 					onChangeVirtualRoom={onChangeVirtualRoom}
 				/>
