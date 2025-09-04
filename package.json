@@ -66,7 +66,7 @@
 		"@emotion/styled": "^11.14.1",
 		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
 		"@zextras/carbonio-design-system": " 11.0.0-devel.1",
-		"@zextras/carbonio-shell-ui": "12.0.0-playground.1756904713171",
+		"@zextras/carbonio-shell-ui": "12.0.0-devel.1756979172527",
 		"@zextras/carbonio-ui-preview": "3.3.0-devel.1",
 		"@zextras/carbonio-ui-soap-lib": "^1.0.3",
 		"emoji-mart": "5.6.0",
