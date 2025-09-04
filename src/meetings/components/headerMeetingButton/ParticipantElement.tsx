@@ -6,8 +6,8 @@
 
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Text, Row, Shimmer } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';

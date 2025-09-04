@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { Theme } from '@zextras/carbonio-design-system';
 import { parseToHsl, toColorString } from 'polished';
 import { HslColor } from 'polished/lib/types/color';
-import { DefaultTheme } from 'styled-components';
 
-export const calculateAvatarColor = (label: string): keyof DefaultTheme['avatarColors'] => {
+export const calculateAvatarColor = (label: string): keyof Theme['avatarColors'] => {
 	let sum = 0;
 	// eslint-disable-next-line no-plusplus
 	for (let i = 0; i < label.length; i++) {

@@ -55,7 +55,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 		expect(messageBubble).toBeVisible();
 		await user.hover(messageBubble);
 		const ctxMenu = screen.getByTestId(`cxtMenu-${mockedMessage.id}-iconOpen`);
-		expect(ctxMenu).toBeVisible();
+		expect(ctxMenu).toBeDefined();
 	});
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();

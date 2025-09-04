@@ -5,6 +5,7 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -18,7 +19,6 @@ import {
 import { filter, size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { RoomsApi } from '../../network';

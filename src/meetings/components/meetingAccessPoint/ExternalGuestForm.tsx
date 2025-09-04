@@ -5,6 +5,7 @@
  */
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -14,7 +15,6 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';

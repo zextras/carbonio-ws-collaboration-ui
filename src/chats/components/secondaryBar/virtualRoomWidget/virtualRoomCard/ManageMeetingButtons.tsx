@@ -5,6 +5,7 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	CreateSnackbarFn,
@@ -15,7 +16,6 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../../network';

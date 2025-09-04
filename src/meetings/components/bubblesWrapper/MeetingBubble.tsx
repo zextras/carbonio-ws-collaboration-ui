@@ -5,8 +5,8 @@
  */
 import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Padding } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import AttachmentView from '../../../chats/components/conversation/messageBubbles/AttachmentView';
 import BubbleFooter from '../../../chats/components/conversation/messageBubbles/BubbleFooter';

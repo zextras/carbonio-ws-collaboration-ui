@@ -6,6 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Avatar,
 	Container,
@@ -16,7 +17,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MemberComponentActions from './MemberComponentActions';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';

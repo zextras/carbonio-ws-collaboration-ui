@@ -5,8 +5,8 @@
  */
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Shimmer } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { getUserName } from '../../../store/selectors/UsersSelectors';

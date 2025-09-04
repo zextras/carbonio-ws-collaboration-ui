@@ -5,10 +5,10 @@
  */
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Text } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useVirtualBackground from '../../../../hooks/useVirtualBackground';
 import { getBackgroundImage } from '../../../../store/selectors/ActiveMeetingSelectors';

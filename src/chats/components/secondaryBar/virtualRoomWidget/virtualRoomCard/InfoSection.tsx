@@ -5,10 +5,10 @@
  */
 import React, { FC, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { useOwners } from '../../../../../store/selectors/RoomsSelectors';

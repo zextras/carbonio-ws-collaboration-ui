@@ -6,10 +6,10 @@
 
 import React, { FC, useCallback } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';

@@ -44,7 +44,6 @@ const user4: UserBe = createMockUser({ id: 'user4Id', name: 'user 4' });
 const member1: MemberBe = { userId: user1.id, owner: true };
 const member2: MemberBe = { userId: user2.id, owner: false };
 const member3: MemberBe = { userId: user3.id, owner: true };
-const member4: MemberBe = { userId: user4.id, owner: false };
 
 const room: RoomBe = createMockRoom({
 	name: '',

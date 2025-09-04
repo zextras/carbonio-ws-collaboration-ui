@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';

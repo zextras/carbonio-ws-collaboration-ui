@@ -5,7 +5,7 @@
  */
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import SelfieSegmentationManager from './SelfieSegmentationManager';
 import useVirtualBackground from '../../../hooks/useVirtualBackground';

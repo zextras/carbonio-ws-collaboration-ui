@@ -13,6 +13,7 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -23,7 +24,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { debounce, find, forEach, map, size, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';

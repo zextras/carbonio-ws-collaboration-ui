@@ -6,9 +6,9 @@
 
 import React, { FC, ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text, Icon, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 const CustomText = styled(Text)`
 	text-align: center;

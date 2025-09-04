@@ -6,6 +6,7 @@
 
 import React, { FC, ReactElement, useCallback, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Accordion,
 	AccordionItem,
@@ -19,7 +20,6 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import RecordingTimer from './RecordingTimer';
 import StartRecordingUser from './StartRecordingUser';

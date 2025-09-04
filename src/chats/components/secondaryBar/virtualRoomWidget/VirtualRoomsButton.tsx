@@ -5,9 +5,9 @@
  */
 import React, { FC, useCallback, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import VirtualRoomsList from './VirtualRoomsList';
 import { getIfThereAreActiveVirtualRooms } from '../../../../store/selectors/MeetingSelectors';

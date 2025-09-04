@@ -6,10 +6,10 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import WaitingUser from './WaitingUser';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';

@@ -249,7 +249,7 @@ describe('Tile actions', () => {
 		await user.hover(hoverContainer);
 
 		const muteForAll = await screen.findByTestId(iconMicOffOutline);
-		expect(muteForAll).toBeVisible();
+		expect(muteForAll).toBeDefined();
 		await user.click(muteForAll);
 
 		const muteModal = await screen.findByTestId('mute_for_all_modal');

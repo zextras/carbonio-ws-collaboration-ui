@@ -6,8 +6,8 @@
 
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Text, Padding } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 type ConversationInfoDetailsElementProps = {
 	label: string | undefined;
