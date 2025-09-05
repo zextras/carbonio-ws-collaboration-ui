@@ -50,9 +50,8 @@ describe('VirtualRoomsModal', () => {
 	test('Try to create a room without a name', async () => {
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
@@ -71,9 +70,8 @@ describe('VirtualRoomsModal', () => {
 	test('Try to create a room without a name too long', async () => {
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
@@ -95,11 +93,10 @@ describe('VirtualRoomsModal', () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
-				onChangeVirtualRoom={() => {}}
+				onChangeVirtualRoom={noop}
 			/>
 		);
 
@@ -133,9 +130,8 @@ describe('VirtualRoomsModal', () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
@@ -168,9 +164,8 @@ describe('VirtualRoomsModal', () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
@@ -201,9 +196,8 @@ describe('VirtualRoomsModal', () => {
 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
@@ -221,9 +215,8 @@ describe('VirtualRoomsModal', () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
 		const { user } = setup(
 			<CreateVirtualRoomModal
-				toggleModal={noop}
-				showCreationModal
-				setShowCreationModal={noop}
+				open
+				onClose={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
