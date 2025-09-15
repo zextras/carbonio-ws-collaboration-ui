@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { Dispatch, FC, SetStateAction, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import {
 	CreateSnackbarFn,
@@ -27,17 +27,15 @@ import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
 import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type CreateVirtualRoomModalProps = {
-	toggleModal: () => void;
-	showCreationModal: boolean;
-	setShowCreationModal: Dispatch<SetStateAction<boolean>>;
+	open: boolean;
+	onClose: () => void;
 	createModalRef: React.RefObject<HTMLDivElement>;
 	onChangeVirtualRoom?: SingleSelectionOnChange<valueItem>;
 };
 
 const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
-	toggleModal,
-	showCreationModal,
-	setShowCreationModal,
+	open,
+	onClose,
 	createModalRef,
 	onChangeVirtualRoom
 }) => {
@@ -102,7 +100,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 				}
 				setContactsSelected([]);
 				setCanCreateVirtualRoom(false);
-				setShowCreationModal(false);
+				onClose();
 			})
 			.catch(() => {
 				createSnackbar({
@@ -112,7 +110,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 					hideButton: true
 				});
 			});
-	}, [contactsSelected, createSnackbar, errorSnackbar, onChangeVirtualRoom, setShowCreationModal]);
+	}, [contactsSelected, createSnackbar, errorSnackbar, onChangeVirtualRoom, onClose]);
 
 	const createVirtualRoomTooltip = useMemo(() => {
 		if (nameError) return invalidNameString;
@@ -136,13 +134,13 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 	}, []);
 
 	const handleCloseModal = useCallback(() => {
-		toggleModal();
 		setContactsSelected([]);
-	}, [toggleModal]);
+		onClose();
+	}, [onClose]);
 
 	return (
 		<Modal
-			open={showCreationModal}
+			open={open}
 			title={createTooltip}
 			confirmColor="primary"
 			onConfirm={handleCreateButtonClick}
