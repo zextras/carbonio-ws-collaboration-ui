@@ -164,15 +164,18 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		return undefined;
 	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
 
-	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if (isWritingLabel === undefined && lastMessageOfRoom) {
-			return setLastMessageRoomText;
-		}
+	const messageToDisplay = useMemo((): React.JSX.Element | string | undefined => {
 		if (isWritingLabel !== undefined) {
 			return isWritingLabel;
 		}
+		if (draftMessage) {
+			return draftMessage;
+		}
+		if (lastMessageOfRoom) {
+			return setLastMessageRoomText;
+		}
 		return undefined;
-	}, [isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
+	}, [draftMessage, isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
 
 	const UnreadCounter = useMemo(
 		() =>
