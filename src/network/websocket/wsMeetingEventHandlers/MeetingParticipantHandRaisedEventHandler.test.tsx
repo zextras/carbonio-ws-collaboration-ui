@@ -92,13 +92,13 @@ describe('MeetingParticipantClashedEventHandler tests', () => {
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual(['myUserId']);
 	});
 
-	test('audio feedback is sent when a user raised his hand', () => {
+	test('audio feedback is sent when a user raises his hand', () => {
 		useStore.getState().meetingConnection(meeting.id);
 		meetingParticipantHandRaisedHandler(raisedEvent);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
 
-	test('audio feedback is not sent a user lower his hand', () => {
+	test('audio feedback is not sent a user lowers his hand', () => {
 		useStore.getState().meetingConnection(meeting.id);
 		meetingParticipantHandRaisedHandler(lowerEvent);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
