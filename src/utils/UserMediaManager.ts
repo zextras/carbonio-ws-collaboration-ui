@@ -51,10 +51,14 @@ export const getAudioStream = (
 		};
 
 		const constraints: MediaStreamConstraints = {
-			audio: deviceId
-				? { ...baseAudioConstraints, deviceId: { exact: deviceId } }
-				: baseAudioConstraints
+			audio: {
+				noiseSuppression,
+				echoCancellation,
+				autoGainControl: true,
+				...(deviceId && { deviceId: { exact: deviceId } })
+			}
 		};
+
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
