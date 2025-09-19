@@ -165,7 +165,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
 
 	const messageToDisplay = useMemo((): React.JSX.Element | string | undefined => {
-		if (isWritingLabel !== undefined) {
+		if (isWritingLabel) {
 			return isWritingLabel;
 		}
 		if (draftMessage) {
@@ -221,7 +221,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
 					<Text size="small">{roomName}</Text>
 					<Container width="fill" height="1rem" orientation="horizontal" mainAlignment="flex-start">
-						{draftMessage && (
+						{draftMessage && !isWritingLabel && (
 							<Tooltip label={draftTooltip} maxWidth="12.5rem">
 								<Container width="fit" padding={{ right: 'extrasmall' }}>
 									<Icon size="small" icon="Edit2" color="gray" />
