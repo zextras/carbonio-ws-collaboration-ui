@@ -44,12 +44,6 @@ export const getAudioStream = (
 	deviceId?: string
 ): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		const baseAudioConstraints: MediaTrackConstraints = {
-			noiseSuppression,
-			echoCancellation,
-			autoGainControl: true
-		};
-
 		const constraints: MediaStreamConstraints = {
 			audio: {
 				noiseSuppression,
