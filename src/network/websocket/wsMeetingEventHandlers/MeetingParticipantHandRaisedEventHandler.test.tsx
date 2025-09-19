@@ -52,7 +52,7 @@ const meetingWith21Participants = createMockMeeting({
 });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
-const event: MeetingParticipantHandRaisedEvent = {
+const raisedEvent: MeetingParticipantHandRaisedEvent = {
 	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
 	sentDate: '2022-01-01T03:00:00.000Z',
 	meetingId: meeting.id,
@@ -61,7 +61,16 @@ const event: MeetingParticipantHandRaisedEvent = {
 	handRaisedAt: '2022-01-01T00:00:00.000Z'
 };
 
-const event2: MeetingParticipantHandRaisedEvent = {
+const lowerEvent: MeetingParticipantHandRaisedEvent = {
+	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
+	sentDate: '2022-01-01T03:00:00.000Z',
+	meetingId: meeting.id,
+	userId: 'myUserId',
+	raised: false,
+	handRaisedAt: '2023-01-01T00:00:00.000Z'
+};
+
+const raisedEvent2: MeetingParticipantHandRaisedEvent = {
 	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
 	sentDate: '2022-01-01T00:10:00.000Z',
 	meetingId: meetingWith21Participants.id,
@@ -79,19 +88,25 @@ beforeEach(() => {
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		meetingParticipantHandRaisedHandler(event);
+		meetingParticipantHandRaisedHandler(raisedEvent);
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual(['myUserId']);
 	});
 
-	test('audio feedback is  sent when users are less than 20', () => {
+	test('audio feedback is sent when a user raises his hand', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		meetingParticipantHandRaisedHandler(event);
+		meetingParticipantHandRaisedHandler(raisedEvent);
 		expect(mockPlayAudio).toHaveBeenCalled();
+	});
+
+	test('audio feedback is not sent a user lowers his hand', () => {
+		useStore.getState().meetingConnection(meeting.id);
+		meetingParticipantHandRaisedHandler(lowerEvent);
+		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('audio feedback is not sent when users are more than 20', () => {
 		useStore.getState().meetingConnection(meetingWith21Participants.id);
-		meetingParticipantHandRaisedHandler(event2);
+		meetingParticipantHandRaisedHandler(raisedEvent2);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 });
