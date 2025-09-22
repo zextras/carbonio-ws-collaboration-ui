@@ -338,5 +338,25 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			false,
 			'CHAT/INCREMENT_UNREAD'
 		);
+	},
+	setSearchResults: (roomId: string, results: TextMessage[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].searchResults = results;
+			}),
+			false,
+			'CHAT/SET_SEARCH_RESULTS'
+		);
+	},
+	clearSearchResults: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].searchResults = [];
+			}),
+			false,
+			'CHAT/CLEAR_SEARCH_RESULTS'
+		);
 	}
 });

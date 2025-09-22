@@ -52,7 +52,6 @@ const ConversationInfoPanel: FC<ConversationProps> = ({
 	return (
 		<CustomContainer
 			data-testid={`conversationInfoPanel${infoPanelOpen ? 'Open' : 'Collapsed'}`}
-			width={infoPanelOpen ? '100%' : '30%'}
 			mainAlignment="flex-start"
 		>
 			<ConversationInfoContainer>

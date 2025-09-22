@@ -25,7 +25,7 @@ class HistoryAccumulator {
 
 	private forwardedMessages: { [id: string]: Element };
 
-	private searchedMessages: { [id: string]: Message[] };
+	private searchedMessages: { [id: string]: TextMessage[] };
 
 	constructor() {
 		this.histories = {};
@@ -65,12 +65,12 @@ class HistoryAccumulator {
 		return message;
 	}
 
-	public addMessageToSearchedMessages(roomId: string, message: Message): void {
+	public addMessageToSearchedMessages(roomId: string, message: TextMessage): void {
 		if (!this.searchedMessages[roomId]) this.searchedMessages[roomId] = [];
 		this.searchedMessages[roomId].push(message);
 	}
 
-	public returnSearchedMessages(roomId: string): Message[] {
+	public returnSearchedMessages(roomId: string): TextMessage[] {
 		const searchedMessages = this.searchedMessages[roomId] || [];
 		delete this.searchedMessages[roomId];
 		return orderBy(searchedMessages, ['date'], ['asc']);

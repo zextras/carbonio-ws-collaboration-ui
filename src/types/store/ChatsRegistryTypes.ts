@@ -20,6 +20,8 @@ export type ChatsRegistryStoreSlice = {
 	addFastening: (fasteningMessage: MessageFastening) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
+	setSearchResults: (roomId: string, results: TextMessage[]) => void;
+	clearSearchResults: (roomId: string) => void;
 };
 
 export type ChatRegistry = {
@@ -27,7 +29,7 @@ export type ChatRegistry = {
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
 	unread: number;
-	searchResults: Message[];
+	searchResults: TextMessage[];
 };
 
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;

@@ -28,6 +28,7 @@ import useStore from '../../../store/Store';
 type ConversationHeaderProps = {
 	roomId: string;
 	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	toggleSearchPanel?: () => void;
 };
 
 const RoomInfoHeader = styled(Container)`
@@ -77,7 +78,8 @@ const CustomIsWritingText = styled(Text)<{ $isWritingIsVisible: boolean }>`
 
 const ConversationHeader = ({
 	roomId,
-	setInfoPanelOpen
+	setInfoPanelOpen,
+	toggleSearchPanel
 }: ConversationHeaderProps): ReactElement => {
 	const [t] = useTranslation();
 	const infoTooltip = t('conversationInfo.info', 'Info');
@@ -133,6 +135,18 @@ const ConversationHeader = ({
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 				{videoCallEnabled && !isPlaceholderRoom && (
 					<ConversationHeaderMeetingButton roomId={roomId} />
+				)}
+				{toggleSearchPanel && (
+					// TODO translation key
+					<Tooltip label={t('chats.search', 'Search')}>
+						<Button
+							type="ghost"
+							onClick={toggleSearchPanel}
+							color="secondary"
+							size="large"
+							icon="Search"
+						/>
+					</Tooltip>
 				)}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
@@ -16,6 +16,7 @@ import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
+import ConversationSearchPanel from '../searchPanel/ConversationSearchPanel';
 
 const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 	background-image: url('${({ $darkModeActive }): string =>
@@ -27,6 +28,11 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const { darkReaderStatus } = useDarkReader();
 
 	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
+	const [searchPanelOpen, setSearchPanelOpen] = useState(false);
+
+	const toggleSearchPanel = useCallback(() => {
+		setSearchPanelOpen((prevState) => !prevState);
+	}, []);
 
 	useEffect(() => {
 		if (isDesktopView) {
@@ -42,14 +48,24 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 			$darkModeActive={darkReaderStatus}
 		>
 			{(isDesktopView || !infoPanelOpen) && (
-				<Chat roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
-			)}
-			{(isDesktopView || infoPanelOpen) && (
-				<ConversationInfoPanel
+				<Chat
 					roomId={roomId}
 					setInfoPanelOpen={setInfoPanelOpen}
-					infoPanelOpen={infoPanelOpen}
+					toggleSearchPanel={toggleSearchPanel}
 				/>
+			)}
+			{(isDesktopView || infoPanelOpen || searchPanelOpen) && (
+				<Container width={infoPanelOpen || searchPanelOpen ? '100%' : '30%'} background="gray6">
+					{searchPanelOpen ? (
+						<ConversationSearchPanel roomId={roomId} />
+					) : (
+						<ConversationInfoPanel
+							roomId={roomId}
+							setInfoPanelOpen={setInfoPanelOpen}
+							infoPanelOpen={infoPanelOpen}
+						/>
+					)}
+				</Container>
 			)}
 		</ConversationWrapper>
 	);

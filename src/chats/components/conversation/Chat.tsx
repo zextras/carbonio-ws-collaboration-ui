@@ -41,9 +41,10 @@ const CustomContainer = styled(Container)`
 type ChatsProps = {
 	roomId: string;
 	setInfoPanelOpen?: Dispatch<SetStateAction<boolean>>;
+	toggleSearchPanel?: () => void;
 };
 
-const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
+const Chat = ({ roomId, setInfoPanelOpen, toggleSearchPanel }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
@@ -154,7 +155,11 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 				/>
 			)}
 			{!isInsideMeeting && setInfoPanelOpen && (
-				<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
+				<ConversationHeader
+					roomId={roomId}
+					setInfoPanelOpen={setInfoPanelOpen}
+					toggleSearchPanel={toggleSearchPanel}
+				/>
 			)}
 			<MessagesList roomId={roomId} />
 			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
