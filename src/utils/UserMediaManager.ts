@@ -44,22 +44,15 @@ export const getAudioStream = (
 	deviceId?: string
 ): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		const constraints = deviceId
-			? {
-					audio: {
-						deviceId: { exact: deviceId },
-						noiseSuppression,
-						echoCancellation,
-						autoGainControl: false
-					}
-				}
-			: {
-					audio: {
-						autoGainControl: false,
-						noiseSuppression,
-						echoCancellation
-					}
-				};
+		const constraints: MediaStreamConstraints = {
+			audio: {
+				noiseSuppression,
+				echoCancellation,
+				autoGainControl: true,
+				...(deviceId && { deviceId: { exact: deviceId } })
+			}
+		};
+
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
