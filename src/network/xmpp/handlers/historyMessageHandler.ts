@@ -26,7 +26,8 @@ export enum MamRequestType {
 	HISTORY = 'history',
 	REPLIED = 'replied',
 	FORWARDED = 'forwarded',
-	LOAD_FULL_HISTORY = 'load_full_history'
+	LOAD_FULL_HISTORY = 'load_full_history',
+	SEARCH = 'search'
 }
 
 export function onHistoryMessageStanza(message: Element): true {
@@ -70,6 +71,12 @@ export function onHistoryMessageStanza(message: Element): true {
 			case MamRequestType.LOAD_FULL_HISTORY: {
 				const chatExporter = useStore.getState().session.chatExporting?.exporter;
 				chatExporter?.addMessageToFullHistory(historyMessage);
+				break;
+			}
+			case MamRequestType.SEARCH: {
+				if (historyMessage.type === MessageType.TEXT_MSG) {
+					HistoryAccumulator.addMessageToSearchedMessages(historyMessage.roomId, historyMessage);
+				}
 				break;
 			}
 			default:

@@ -8,6 +8,7 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { fullTextSearchHandler } from './handlers/fullTextSearchHandler';
 import {
 	MamRequestType,
 	onLoadFullHistory,
@@ -352,6 +353,21 @@ class XMPPClient implements IXMPPClient {
 			type: XMPPRequestType.IQ,
 			elem: iq,
 			callback: onLoadFullHistory
+		});
+	}
+
+	// Retrieve all messages of a room with a particular text in the body
+	fullTextSearch(roomId: string, text: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.SEARCH })
+			.c('x', { xmlns: jabberData })
+			.c('field', { var: 'full-text-search' })
+			.c('value')
+			.t(text);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: fullTextSearchHandler
 		});
 	}
 

@@ -27,6 +27,7 @@ export type ChatRegistry = {
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
 	unread: number;
+	searchResults: Message[];
 };
 
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
