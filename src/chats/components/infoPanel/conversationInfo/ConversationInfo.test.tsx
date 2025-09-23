@@ -68,7 +68,7 @@ describe('Conversation Info', () => {
 			<ConversationInfo
 				roomId={oneToOneRoom.id}
 				roomType={RoomType.ONE_TO_ONE}
-				setInfoPanelOpen={jest.fn()}
+				toggleInfoPanel={jest.fn()}
 			/>
 		);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
@@ -76,14 +76,14 @@ describe('Conversation Info', () => {
 
 	test('group info should appear as expected', async () => {
 		setup(
-			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
+			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} toggleInfoPanel={jest.fn()} />
 		);
 		expect(screen.getByText(room.name!)).toBeInTheDocument();
 	});
 
 	test('infoPanel take all space', async () => {
 		setup(
-			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
+			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} toggleInfoPanel={jest.fn()} />
 		);
 		const messagesIcon = screen.getByTestId('icon: MessageCircleOutline');
 		expect(messagesIcon).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('Conversation Info', () => {
 	test('infoPanel does not take all space', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		setup(
-			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
+			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} toggleInfoPanel={jest.fn()} />
 		);
 		expect(screen.queryByTestId('icon: MessageCircleOutline')).toBeNull();
 	});

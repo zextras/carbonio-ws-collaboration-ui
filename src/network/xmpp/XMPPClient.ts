@@ -357,17 +357,23 @@ class XMPPClient implements IXMPPClient {
 	}
 
 	// Retrieve all messages of a room with a particular text in the body
-	fullTextSearch(roomId: string, text: string): void {
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.SEARCH })
-			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'full-text-search' })
-			.c('value')
-			.t(text);
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: fullTextSearchHandler
+	fullTextSearch(roomId: string, text: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.SEARCH })
+				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'full-text-search' })
+				.c('value')
+				.t(text);
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: (stanza) => {
+					fullTextSearchHandler(stanza);
+					resolve();
+				},
+				errorCallback: reject
+			});
 		});
 	}
 

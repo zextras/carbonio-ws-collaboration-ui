@@ -30,6 +30,10 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
 	const [searchPanelOpen, setSearchPanelOpen] = useState(false);
 
+	const toggleInfoPanel = useCallback(() => {
+		setInfoPanelOpen((prevState) => !prevState);
+	}, []);
+
 	const toggleSearchPanel = useCallback(() => {
 		setSearchPanelOpen((prevState) => !prevState);
 	}, []);
@@ -47,7 +51,7 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 			orientation="horizontal"
 			$darkModeActive={darkReaderStatus}
 		>
-			{(isDesktopView || !infoPanelOpen) && (
+			{(isDesktopView || (!infoPanelOpen && !searchPanelOpen)) && (
 				<Chat
 					roomId={roomId}
 					setInfoPanelOpen={setInfoPanelOpen}
@@ -57,13 +61,9 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 			{(isDesktopView || infoPanelOpen || searchPanelOpen) && (
 				<Container width={infoPanelOpen || searchPanelOpen ? '100%' : '30%'} background="gray6">
 					{searchPanelOpen ? (
-						<ConversationSearchPanel roomId={roomId} />
+						<ConversationSearchPanel roomId={roomId} toggleSearchPanel={toggleSearchPanel} />
 					) : (
-						<ConversationInfoPanel
-							roomId={roomId}
-							setInfoPanelOpen={setInfoPanelOpen}
-							infoPanelOpen={infoPanelOpen}
-						/>
+						<ConversationInfoPanel roomId={roomId} toggleInfoPanel={toggleInfoPanel} />
 					)}
 				</Container>
 			)}

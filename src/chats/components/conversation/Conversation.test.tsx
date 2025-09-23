@@ -77,8 +77,7 @@ describe('Conversation view', () => {
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
 		expect(infoPanelToggle).toBeInTheDocument();
 		await user.click(infoPanelToggle);
-		const conversationInfoPanelOpen = screen.getByTestId('conversationInfoPanelOpen');
-		expect(conversationInfoPanelOpen).toBeInTheDocument();
+		expect(screen.getByText('Info')).toBeInTheDocument();
 		const closeInfoPanel = screen.getByTestId('closeInfoPanel');
 		expect(closeInfoPanel).toBeInTheDocument();
 		await user.click(closeInfoPanel);
@@ -94,8 +93,7 @@ describe('Conversation view', () => {
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
 		expect(infoPanelToggle).toBeInTheDocument();
 		await user.click(infoPanelToggle);
-		const conversationInfoPanelOpen = await screen.findByTestId('conversationInfoPanelOpen');
-		expect(conversationInfoPanelOpen).toBeInTheDocument();
+		expect(screen.getByText('Info')).toBeInTheDocument();
 		const userName = screen.getByText(/User 2/i);
 		expect(userName).toBeInTheDocument();
 		const roomName = screen.getByText(/Name of the group/i);

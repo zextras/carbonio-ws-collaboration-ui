@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction } from 'react';
+import React, { FC } from 'react';
 
 import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
@@ -37,25 +37,17 @@ const AccordionsContainer = styled(Container)`
 
 type ConversationProps = {
 	roomId: string;
-	infoPanelOpen: boolean;
-	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	toggleInfoPanel: () => void;
 };
 
-const ConversationInfoPanel: FC<ConversationProps> = ({
-	roomId,
-	infoPanelOpen,
-	setInfoPanelOpen
-}) => {
+const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, toggleInfoPanel }) => {
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	return (
-		<CustomContainer
-			data-testid={`conversationInfoPanel${infoPanelOpen ? 'Open' : 'Collapsed'}`}
-			mainAlignment="flex-start"
-		>
+		<CustomContainer mainAlignment="flex-start">
 			<ConversationInfoContainer>
-				<ConversationInfo roomId={roomId} roomType={roomType} setInfoPanelOpen={setInfoPanelOpen} />
+				<ConversationInfo roomId={roomId} roomType={roomType} toggleInfoPanel={toggleInfoPanel} />
 			</ConversationInfoContainer>
 			<AccordionsContainer>
 				<ConversationInfoDetails roomId={roomId} roomType={roomType} />

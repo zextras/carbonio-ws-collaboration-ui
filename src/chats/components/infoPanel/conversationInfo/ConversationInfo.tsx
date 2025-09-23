@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Button, Text, Tooltip } from '@zextras/carbonio-design-system';
@@ -20,7 +20,7 @@ import { Member, RoomType } from '../../../../types/store/RoomTypes';
 type ConversationInfoProps = {
 	roomId: string;
 	roomType: string;
-	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	toggleInfoPanel: () => void;
 };
 
 const InfoHeader = styled(Container)`
@@ -30,7 +30,7 @@ const InfoHeader = styled(Container)`
 	user-select: none;
 `;
 
-const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfoPanelOpen }) => {
+const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, toggleInfoPanel }) => {
 	const [t] = useTranslation();
 	const messagesTooltip = t('conversationInfo.messages', 'Messages');
 	const infoLabel = t('conversationInfo.info', 'Info');
@@ -54,10 +54,6 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 		return <GroupRoomPictureHandler roomId={roomId} />;
 	}, [roomType, memberId, roomId]);
 
-	const toggleMessageList = useCallback(() => {
-		setInfoPanelOpen(false);
-	}, [setInfoPanelOpen]);
-
 	return (
 		<Container orientation="vertical">
 			<InfoHeader
@@ -75,7 +71,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 						<Button
 							type="ghost"
 							data-testid="closeInfoPanel"
-							onClick={toggleMessageList}
+							onClick={toggleInfoPanel}
 							color="secondary"
 							size="large"
 							icon="MessageCircleOutline"

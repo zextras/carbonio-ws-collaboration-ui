@@ -37,57 +37,19 @@ beforeEach(() => {
 });
 
 describe('Conversation info panel', () => {
-	test('Display info panel opened', async () => {
-		setup(
-			<ConversationInfoPanel roomId={groupRoom.id} infoPanelOpen setInfoPanelOpen={jest.fn()} />
-		);
-		const conversationInfoPanel = screen.getByTestId('conversationInfoPanelOpen');
-		expect(conversationInfoPanel).toBeInTheDocument();
-	});
-
-	test('Display info panel collapsed', async () => {
-		setup(
-			<ConversationInfoPanel
-				roomId={groupRoom.id}
-				infoPanelOpen={false}
-				setInfoPanelOpen={jest.fn()}
-			/>
-		);
-		const conversationInfoPanelCollapsed = screen.getByTestId('conversationInfoPanelCollapsed');
-		expect(conversationInfoPanelCollapsed).toBeInTheDocument();
-	});
-
 	test('Display list of participant accordion in a group room', async () => {
-		setup(
-			<ConversationInfoPanel
-				roomId={groupRoom.id}
-				infoPanelOpen={false}
-				setInfoPanelOpen={jest.fn()}
-			/>
-		);
+		setup(<ConversationInfoPanel roomId={groupRoom.id} toggleInfoPanel={jest.fn()} />);
 		const participantAccordion = screen.getByTestId('participantAccordion');
 		expect(participantAccordion).toBeInTheDocument();
 	});
 
 	test('Check that participant list is not present in the info panel of a one to one room', async () => {
-		setup(
-			<ConversationInfoPanel
-				roomId={oneToOneRoom.id}
-				infoPanelOpen={false}
-				setInfoPanelOpen={jest.fn()}
-			/>
-		);
+		setup(<ConversationInfoPanel roomId={oneToOneRoom.id} toggleInfoPanel={jest.fn()} />);
 		expect(screen.queryByTestId('participantAccordion')).not.toBeInTheDocument();
 	});
 
 	test('Hide action accordion when the room is a placeholder', async () => {
-		setup(
-			<ConversationInfoPanel
-				roomId={`placeholder-${user1.id}`}
-				infoPanelOpen={false}
-				setInfoPanelOpen={jest.fn()}
-			/>
-		);
+		setup(<ConversationInfoPanel roomId={`placeholder-${user1.id}`} toggleInfoPanel={jest.fn()} />);
 		expect(screen.queryByTestId('actionsAccordion')).not.toBeInTheDocument();
 	});
 });
