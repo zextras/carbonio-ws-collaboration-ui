@@ -117,7 +117,11 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				);
 			case RequestStatus.SUCCESS:
 				if (results && results.length > 0) {
-					return <Container mainAlignment="flex-start">{searchResults}</Container>;
+					return (
+						<Container mainAlignment="flex-start" gap="0.5rem">
+							{searchResults}
+						</Container>
+					);
 				}
 				return (
 					<>

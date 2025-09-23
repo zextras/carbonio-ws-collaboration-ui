@@ -59,7 +59,7 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 				/>
 			)}
 			{(isDesktopView || infoPanelOpen || searchPanelOpen) && (
-				<Container width={infoPanelOpen || searchPanelOpen ? '100%' : '30%'} background="gray6">
+				<Container width={isDesktopView ? '30%' : '100%'} background="gray6">
 					{searchPanelOpen ? (
 						<ConversationSearchPanel roomId={roomId} toggleSearchPanel={toggleSearchPanel} />
 					) : (
