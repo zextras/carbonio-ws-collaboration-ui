@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 
-import { Button, Container, Icon, Input, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
@@ -87,7 +87,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 					<>
 						<Container orientation="horizontal" height="fit" gap="0.5rem">
 							<Icon icon="Search" color="secondary" size="large" />
-							<Icon icon="WscOutline" color="secondary" size="large" />
+							<Icon icon="MessageCircleOutline" color="secondary" size="large" />
 						</Container>
 						<Text weight="bold" color="secondary" size="large">
 							{roomType === RoomType.ONE_TO_ONE ? searchMessagesWithLabel : searchMessagesInLabel}
@@ -125,7 +125,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				}
 				return (
 					<>
-						<Text color="secondary" size="large">
+						<Text color="secondary" size="large" lineHeight={1}>
 							{noResults1Label}
 						</Text>
 						<Text color="secondary" size="large">
@@ -152,7 +152,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 
 	const cancelIcon = useMemo(
 		() =>
-			function icon(): JSX.Element | undefined {
+			function icon(): React.JSX.Element | undefined {
 				if (searchText) {
 					return (
 						<Button
@@ -180,13 +180,16 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				padding={{ horizontal: 'medium', vertical: 'small' }}
 				gap="0.5rem"
 			>
-				<Button
-					type="ghost"
-					size="large"
-					color="secondary"
-					onClick={toggleSearchPanel}
-					icon="ArrowBack"
-				/>
+				{/* TODO: add key translation */}
+				<Tooltip label={t('', 'Close search')} placement={'top'}>
+					<Button
+						type="ghost"
+						size="large"
+						color="secondary"
+						onClick={toggleSearchPanel}
+						icon="ArrowBack"
+					/>
+				</Tooltip>
 				<Input
 					label={inputLabel}
 					value={searchText}
