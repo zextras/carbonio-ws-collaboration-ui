@@ -73,7 +73,7 @@ class HistoryAccumulator {
 	public returnSearchedMessages(roomId: string): TextMessage[] {
 		const searchedMessages = this.searchedMessages[roomId] || [];
 		delete this.searchedMessages[roomId];
-		return orderBy(searchedMessages, ['date'], ['asc']);
+		return orderBy(searchedMessages, ['date'], ['desc']);
 	}
 }
 

@@ -89,7 +89,13 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 							<Icon icon="Search" color="secondary" size="large" />
 							<Icon icon="MessageCircleOutline" color="secondary" size="large" />
 						</Container>
-						<Text weight="bold" color="secondary" size="large">
+						<Text
+							weight="bold"
+							color="secondary"
+							size="large"
+							overflow="break-word"
+							textAlign="center"
+						>
 							{roomType === RoomType.ONE_TO_ONE ? searchMessagesWithLabel : searchMessagesInLabel}
 						</Text>
 					</>
@@ -107,10 +113,22 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				return (
 					<>
 						<Icon icon="CloseCircleOutline" color="secondary" size="large" />
-						<Text weight="bold" color="secondary" size="large">
+						<Text
+							weight="bold"
+							color="secondary"
+							size="large"
+							overflow="break-word"
+							textAlign="center"
+						>
 							{error1Label}
 						</Text>
-						<Text weight="bold" color="secondary" size="large">
+						<Text
+							weight="bold"
+							color="secondary"
+							size="large"
+							overflow="break-word"
+							textAlign="center"
+						>
 							{error2Label}
 						</Text>
 					</>
@@ -125,10 +143,16 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				}
 				return (
 					<>
-						<Text color="secondary" size="large" lineHeight={1}>
+						<Text
+							color="secondary"
+							size="large"
+							lineHeight={1}
+							overflow="break-word"
+							textAlign="center"
+						>
 							{noResults1Label}
 						</Text>
-						<Text color="secondary" size="large">
+						<Text color="secondary" size="large" overflow="break-word" textAlign="center">
 							{noResults2Label}
 						</Text>
 					</>
@@ -205,7 +229,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 					disabled={!searchText || requestStatus === RequestStatus.LOADING}
 				/>
 			</Container>
-			<Container padding="small" gap="0.5rem" width="fill">
+			<Container padding="small" gap="0.5rem" width="fill" style={{ overflow: 'scroll' }}>
 				{resultsComponents}
 			</Container>
 		</Container>

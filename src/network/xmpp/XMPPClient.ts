@@ -50,6 +50,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
 		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
 		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
+		Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
 		Strophe.addNamespace('PING', 'urn:xmpp:ping');
 		Strophe.addNamespace('REPLY', 'urn:xmpp:reply:0');
@@ -261,7 +262,7 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.up()
 			.up()
-			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+			.c('set', { xmlns: Strophe.NS.RSM })
 			.c('max')
 			.t(quantity)
 			.up()
@@ -365,7 +366,12 @@ class XMPPClient implements IXMPPClient {
 				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'full-text-search' })
 				.c('value')
-				.t(text);
+				.t(text)
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: Strophe.NS.RSM })
+				.c('before');
 			this.xmppConnection.send({
 				type: XMPPRequestType.IQ,
 				elem: iq,
@@ -394,7 +400,7 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.up()
 			.up()
-			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+			.c('set', { xmlns: Strophe.NS.RSM })
 			.c('max')
 			.t(10);
 		this.xmppConnection.send({
