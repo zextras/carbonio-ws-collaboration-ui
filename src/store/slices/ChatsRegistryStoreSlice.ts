@@ -37,7 +37,8 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 			fastenings: {},
 			markers: {},
 			unread: 0,
-			searchResults: []
+			searchResults: [],
+			searchResultHistory: {}
 		};
 	}
 	return store.chatsRegistry[roomId];

@@ -40,6 +40,7 @@ interface IXMMPClient {
 	requestMessageToForward(roomId: string, messageId: string): Promise<Element>;
 	requestFullHistory(roomId: string, from?: number): void;
 	fullTextSearch(roomId: string, searchText: string): Promise<void>;
+	requestMessageResultHistory(roomId: string, searchedMessageDate: number): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

@@ -30,6 +30,7 @@ export type ChatRegistry = {
 	markers: { [userId: string]: Marker };
 	unread: number;
 	searchResults: TextMessage[];
+	searchResultHistory: { [searchedMessageId: string]: Message[] };
 };
 
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;

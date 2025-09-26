@@ -16,6 +16,7 @@ import {
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
+import { messageResultHistoryHandler } from './handlers/messageResultHistoryHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
@@ -246,7 +247,7 @@ class XMPPClient implements IXMPPClient {
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
-			.t('urn:xmpp:mam:2')
+			.t(Strophe.NS.MAM)
 			.up()
 			.up()
 			.c('field', { var: 'start' })
@@ -374,6 +375,32 @@ class XMPPClient implements IXMPPClient {
 				},
 				errorCallback: reject
 			});
+		});
+	}
+
+	requestMessageResultHistory(roomId: string, messageStanzaDate: number): void {
+		// Chiediamo 10 messaggi dopo il messaggio cercato
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: '' })
+			.c('x', { type: 'submit', xmlns: jabberData })
+			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+			.c('value')
+			.t('urn:xmpp:mam:2')
+			.up()
+			.up()
+			.c('field', { var: 'start' })
+			.c('value')
+			.t(dateToISODate(messageStanzaDate))
+			.up()
+			.up()
+			.up()
+			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+			.c('max')
+			.t(10);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: messageResultHistoryHandler
 		});
 	}
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Row, Text } from '@zextras/carbonio-design-system';
@@ -36,8 +36,20 @@ const SearchResultMessage = ({ message }: { message: TextMessage }): React.React
 
 	const { avatarColor } = useAvatarUtilities(message.from);
 
+	const onResultClick = useCallback(() => {
+		useStore
+			.getState()
+			.connections.xmppClient.requestMessageResultHistory(message.roomId, message.date);
+	}, [message.roomId, message.date]);
+
 	return (
-		<CustomContainer height="fit" crossAlignment="flex-start" padding="small" gap="0.5rem">
+		<CustomContainer
+			height="fit"
+			crossAlignment="flex-start"
+			padding="small"
+			gap="0.5rem"
+			onClick={onResultClick}
+		>
 			<Row width="fill">
 				<Row takeAvailableSpace mainAlignment="flex-start">
 					<Text color={avatarColor} weight="bold">
