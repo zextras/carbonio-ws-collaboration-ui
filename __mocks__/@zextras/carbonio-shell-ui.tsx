@@ -6,7 +6,6 @@
 import React from 'react';
 
 import * as Shell from '@zextras/carbonio-shell-ui';
-import { AnyFunction } from '@zextras/carbonio-shell-ui/lib/utils/typeUtils';
 
 import {
 	filesSelectFilesAction,
@@ -75,14 +74,14 @@ export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings h
 
 export const t = (key: string, value: string): string => value;
 
-export const useIntegratedFunction: typeof Shell.useIntegratedFunction<AnyFunction> = (id) => {
+export const useIntegratedFunction: typeof Shell.useIntegratedFunction = <T,>(id: string) => {
 	switch (id) {
 		case 'select-nodes':
-			return [filesSelectFilesAction, filesSelectFilesActionAvailable];
+			return [filesSelectFilesAction as T, filesSelectFilesActionAvailable];
 		case 'get-link':
-			return [getLink, functionCheck];
+			return [getLink as T, functionCheck];
 		default:
-			return [(): void => undefined, false];
+			return [((): void => undefined) as T, false];
 	}
 };
 

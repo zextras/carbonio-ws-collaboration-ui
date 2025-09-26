@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+import { AccountSettings } from '@zextras/carbonio-shell-ui';
 
 import { UserType } from './UserTypes';
 import { IChatExporter } from '../../settings/components/chatExporter/ChatExporter';
@@ -12,7 +12,7 @@ import { IChatExporter } from '../../settings/components/chatExporter/ChatExport
 export type SessionStoreSlice = {
 	session: Session;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
-	setAttributes: (attrs: AccountSettingsAttrs) => void;
+	setAttributes: (attrs: AccountSettings['attrs']) => void;
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string | false) => void;
