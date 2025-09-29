@@ -272,12 +272,14 @@ describe('Expanded sidebar list item', () => {
 			expect(screen.getByText(`${mockedTextMessageSentByOther.text}`)).toBeVisible();
 		});
 
-		test('While user is typing nothing else is display if last message is an attachment', async () => {
+		test('when another user is typing, "is typing" message is rendered without an attachment icon', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedAttachmentMessage);
 			store.setIsWriting(mockedOneToOne.id, user2Be.id, true);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			expect(screen.queryByTestId('icon: FileTextOutline')).not.toBeInTheDocument();
+			expect(screen.queryByText(mockedAttachmentMessage.attachment!.name)).not.toBeInTheDocument();
+			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
 		});
 	});
 
@@ -292,14 +294,12 @@ describe('Expanded sidebar list item', () => {
 			expect(screen.getByText(draftMessage)).toBeVisible();
 		});
 
-		test('when another user is typing, "is typing" message is rendered without an attachment icon', async () => {
+		test('should not render the attachment icon if there is a draft content and the last message is an attachment', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedAttachmentMessage);
-			store.setIsWriting(mockedGroup.id, user2Be.id, true);
+			store.setDraftMessage(mockedGroup.id, 'draft');
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(screen.queryByTestId('icon: FileTextOutline')).not.toBeInTheDocument();
-			expect(screen.queryByText(mockedAttachmentMessage.attachment!.name)).not.toBeInTheDocument();
-			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
 		});
 
 		test('when another user is typing and there is a draft, "is typing" message is rendered without an draft icon', async () => {

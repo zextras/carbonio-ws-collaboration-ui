@@ -166,29 +166,34 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const iconToDisplay = useMemo(() => {
 		if (isWritingLabel) return null;
 
-		return (
-			<>
-				{draftMessage && (
-					<Tooltip label={draftTooltip} maxWidth="12.5rem">
-						<Container width="fit" padding={{ right: 'extrasmall' }}>
-							<Icon size="small" icon="Edit2" color="gray" />
-						</Container>
-					</Tooltip>
-				)}
-				{!draftMessage && ackIcon && showMessageReads && (
-					<Tooltip label={dropdownTooltip}>
-						<Container width="fit" padding={{ right: 'extrasmall' }}>
-							{ackIcon}
-						</Container>
-					</Tooltip>
-				)}
-				{lastMessageOfRoom?.type === MessageType.TEXT_MSG && lastMessageOfRoom.attachment && (
+		if (draftMessage) {
+			return (
+				<Tooltip label={draftTooltip} maxWidth="12.5rem">
 					<Container width="fit" padding={{ right: 'extrasmall' }}>
-						<Icon size="small" icon="FileTextOutline" color="gray" />
+						<Icon size="small" icon="Edit2" color="gray" />
 					</Container>
-				)}
-			</>
-		);
+				</Tooltip>
+			);
+		}
+
+		if (ackIcon && showMessageReads) {
+			return (
+				<Tooltip label={dropdownTooltip}>
+					<Container width="fit" padding={{ right: 'extrasmall' }}>
+						{ackIcon}
+					</Container>
+				</Tooltip>
+			);
+		}
+
+		if (lastMessageOfRoom?.type === MessageType.TEXT_MSG && lastMessageOfRoom.attachment) {
+			return (
+				<Container width="fit" padding={{ right: 'extrasmall' }}>
+					<Icon size="small" icon="FileTextOutline" color="gray" />
+				</Container>
+			);
+		}
+		return null;
 	}, [
 		isWritingLabel,
 		draftMessage,
