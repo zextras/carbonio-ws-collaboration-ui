@@ -14,7 +14,7 @@ import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
 
 export interface IChatExporter {
-	addMessageToFullHistory(message: Message): void;
+	addMessagesToFullHistory(messages: Message[]): void;
 	continueExporting(): void;
 	exportHistory(): void;
 }
@@ -31,8 +31,8 @@ class ChatExporter implements IChatExporter {
 		this.xmppClient.requestFullHistory(this.roomId);
 	}
 
-	public addMessageToFullHistory(message: Message): void {
-		this.fullHistory.push(message);
+	public addMessagesToFullHistory(messages: Message[]): void {
+		this.fullHistory.push(...messages);
 	}
 
 	public continueExporting(): void {

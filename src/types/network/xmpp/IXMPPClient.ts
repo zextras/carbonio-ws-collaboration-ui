@@ -27,17 +27,17 @@ interface IXMMPClient {
 	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void;
 	sendChatMessageReaction(roomId: string, messageStanzaId: string, reaction: string): void;
 	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void;
-	requestHistoryBetweenTwoMessage(
-		roomId: string,
-		olderMessageId: string,
-		newerMessageId: string
-	): void;
+	// requestHistoryBetweenTwoMessage(
+	// 	roomId: string,
+	// 	olderMessageId: string,
+	// 	newerMessageId: string
+	// ): void;
 	requestMessageSubjectOfReply(
 		roomId: string,
 		messageSubjectOfReplyId: string,
 		replyMessageId: string
 	): void;
-	requestMessageToForward(roomId: string, messageId: string): Promise<Element>;
+	requestMessageToForward(roomId: string, messageId: string, queryId: string): Promise<Element>;
 	requestFullHistory(roomId: string, from?: number): void;
 	fullTextSearch(roomId: string, searchText: string): Promise<void>;
 	requestMessageResultHistory(roomId: string, searchedMessageDate: number): void;

@@ -5,16 +5,13 @@
  */
 
 import { filter, forEach, size, unionBy } from 'lodash';
-import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import { dateToTimestamp } from '../../../utils/dateUtils';
 import { xmppDebug } from '../../../utils/debug';
 import { getId } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
-import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 /**
@@ -22,66 +19,14 @@ import HistoryAccumulator from '../utility/HistoryAccumulator';
  * Documentation: https://xmpp.org/extensions/xep-0313.html
  */
 
-export enum MamRequestType {
-	HISTORY = 'history',
-	REPLIED = 'replied',
-	FORWARDED = 'forwarded',
-	LOAD_FULL_HISTORY = 'load_full_history',
-	SEARCH = 'search'
-}
-
 export function onHistoryMessageStanza(message: Element): true {
 	const result = getRequiredTagElement(message, 'result');
-	const id = getRequiredAttribute(result, 'id');
-	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
-	const insideMessage = getRequiredTagElement(result, 'message');
-	const historyMessage = decodeXMPPMessageStanza(insideMessage, {
-		date: dateToTimestamp(date),
-		stanzaId: id
-	});
 
-	if (historyMessage) {
-		// Check message request type
-		const queryId = getAttribute(result, 'queryid');
-		switch (queryId) {
-			case MamRequestType.HISTORY: {
-				HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
-				if (historyMessage.type === MessageType.FASTENING) {
-					useStore.getState().addFastening(historyMessage);
-				}
-				break;
-			}
-			case MamRequestType.REPLIED: {
-				if (historyMessage.type === MessageType.TEXT_MSG) {
-					HistoryAccumulator.addReferenceForRepliedMessage(historyMessage);
-				} else {
-					console.warn('Replied message type not supported', historyMessage);
-				}
-				break;
-			}
-			case MamRequestType.FORWARDED: {
-				if (historyMessage.type === MessageType.TEXT_MSG) {
-					HistoryAccumulator.addReferenceForForwardedMessage(
-						historyMessage.stanzaId,
-						insideMessage
-					);
-				}
-				break;
-			}
-			case MamRequestType.LOAD_FULL_HISTORY: {
-				const chatExporter = useStore.getState().session.chatExporting?.exporter;
-				chatExporter?.addMessageToFullHistory(historyMessage);
-				break;
-			}
-			case MamRequestType.SEARCH: {
-				if (historyMessage.type === MessageType.TEXT_MSG) {
-					HistoryAccumulator.addMessageToSearchedMessages(historyMessage.roomId, historyMessage);
-				}
-				break;
-			}
-			default:
-				xmppDebug('Unknown MAM request type');
-		}
+	const queryId = getAttribute(result, 'queryid');
+	if (!queryId) {
+		console.warn('MAM message without queryId, ignoring');
+	} else {
+		HistoryAccumulator.pushToCache(queryId, message);
 	}
 	return true;
 }
@@ -101,7 +46,7 @@ export function onHistoryMessageStanza(message: Element): true {
  * 6- Updates the last message read of all the members of a room
  *
  * */
-export function onRequestHistory(stanza: Element, unread?: number): void {
+export function onRequestHistory(stanza: Element, queryId: string, unread?: number): void {
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
 	const fin = getRequiredTagElement(stanza, 'fin');
@@ -109,7 +54,15 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	const store = useStore.getState();
 	const { xmppClient } = store.connections;
 
-	const historyMessages = HistoryAccumulator.returnHistory(roomId);
+	const historyMessages = HistoryAccumulator.getHistoryMessages(queryId);
+
+	const fasteningMessages = filter(
+		historyMessages,
+		(message) => message.type === MessageType.FASTENING
+	);
+
+	fasteningMessages.forEach((message) => useStore.getState().addFastening(message));
+
 	if (size(historyMessages) > 0) {
 		store.setLastMamMessage(historyMessages[0]);
 	}
@@ -119,10 +72,6 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 		historyMessages,
 		(message) =>
 			message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG
-	);
-	const fasteningMessages = filter(
-		historyMessages,
-		(message) => message.type === MessageType.FASTENING
 	);
 
 	// If there are only fastening messages in the history, request more messages
@@ -171,14 +120,15 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	xmppClient.lastMarkers(roomId);
 }
 
-export function onRequestSingleMessage(stanza: Element, messageWithResponseId: string): void {
-	const referenceMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
-	const referenceMessage = HistoryAccumulator.returnReferenceForRepliedMessage(referenceMessageId);
+export function onRequestSingleMessage(messageWithResponseId: string, queryId: string): void {
+	const referenceMessage = HistoryAccumulator.getRepliedMessage(queryId);
 	const store: RootStore = useStore.getState();
 	store.setRepliedMessage(referenceMessage.roomId, messageWithResponseId, referenceMessage);
 }
 
-export function onLoadFullHistory(stanza: Element): void {
+export function onLoadFullHistory(stanza: Element, queryId: string): void {
+	const messages = HistoryAccumulator.getFullHistoryMessages(queryId);
+	useStore.getState().session.chatExporting?.exporter?.addMessagesToFullHistory(messages);
 	xmppDebug('Request full history', stanza);
 	const roomId = getId(getRequiredAttribute(stanza, 'from'));
 	const { chatExporting } = useStore.getState().session;

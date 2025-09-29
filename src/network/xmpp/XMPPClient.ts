@@ -10,7 +10,6 @@ import { v4 as uuidGenerator } from 'uuid';
 
 import { fullTextSearchHandler } from './handlers/fullTextSearchHandler';
 import {
-	MamRequestType,
 	onLoadFullHistory,
 	onRequestHistory,
 	onRequestSingleMessage
@@ -21,6 +20,7 @@ import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
+import HistoryAccumulator from './utility/HistoryAccumulator';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
@@ -242,9 +242,10 @@ class XMPPClient implements IXMPPClient {
 		if (!useStore.getState().rooms[roomId]) return;
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
+		const queryId = HistoryAccumulator.getNextId();
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
@@ -270,33 +271,33 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onRequestHistory(stanza, unread)
+			callback: (stanza) => onRequestHistory(stanza, queryId, unread)
 		});
 	}
 
-	requestHistoryBetweenTwoMessage(
-		roomId: string,
-		olderMessageId: string,
-		newerMessageId: string
-	): void {
-		if (!useStore.getState().rooms[roomId]) return;
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM })
-			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'from_id' })
-			.c('value')
-			.t(olderMessageId)
-			.up()
-			.up()
-			.c('field', { var: 'to_id' })
-			.c('value')
-			.t(newerMessageId);
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onRequestHistory
-		});
-	}
+	// requestHistoryBetweenTwoMessage(
+	// 	roomId: string,
+	// 	olderMessageId: string,
+	// 	newerMessageId: string
+	// ): void {
+	// 	if (!useStore.getState().rooms[roomId]) return;
+	// 	const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+	// 		.c('query', { xmlns: Strophe.NS.MAM })
+	// 		.c('x', { xmlns: jabberData })
+	// 		.c('field', { var: 'from_id' })
+	// 		.c('value')
+	// 		.t(olderMessageId)
+	// 		.up()
+	// 		.up()
+	// 		.c('field', { var: 'to_id' })
+	// 		.c('value')
+	// 		.t(newerMessageId);
+	// 	this.xmppConnection.send({
+	// 		type: XMPPRequestType.IQ,
+	// 		elem: iq,
+	// 		callback: onRequestHistory
+	// 	});
+	// }
 
 	requestMessageSubjectOfReply(
 		roomId: string,
@@ -304,8 +305,9 @@ class XMPPClient implements IXMPPClient {
 		replyMessageId: string
 	): void {
 		if (!useStore.getState().rooms[roomId]) return;
+		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { xmlns: jabberData })
 			.c('field', { var: 'ids' })
 			.c('value')
@@ -313,14 +315,18 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onRequestSingleMessage(stanza, replyMessageId)
+			callback: () => onRequestSingleMessage(replyMessageId, queryId)
 		});
 	}
 
-	requestMessageToForward(roomId: string, messageToForwardStanzaId: string): Promise<Element> {
+	requestMessageToForward(
+		roomId: string,
+		messageToForwardStanzaId: string,
+		queryId: string
+	): Promise<Element> {
 		return new Promise((resolve, reject) => {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'ids' })
 				.c('value')
@@ -340,8 +346,9 @@ class XMPPClient implements IXMPPClient {
 		const clearedAt = room.userSettings?.clearedAt;
 		const startHistory = from ?? clearedAt ?? room.createdAt;
 
+		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.LOAD_FULL_HISTORY })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
@@ -354,15 +361,16 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onLoadFullHistory
+			callback: (stanza) => onLoadFullHistory(stanza, queryId)
 		});
 	}
 
 	// Retrieve all messages of a room with a particular text in the body
 	fullTextSearch(roomId: string, text: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
+			const queryId = HistoryAccumulator.getNextId();
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.SEARCH })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'full-text-search' })
 				.c('value')
@@ -376,7 +384,7 @@ class XMPPClient implements IXMPPClient {
 				type: XMPPRequestType.IQ,
 				elem: iq,
 				callback: (stanza) => {
-					fullTextSearchHandler(stanza);
+					fullTextSearchHandler(stanza, queryId);
 					resolve();
 				},
 				errorCallback: reject

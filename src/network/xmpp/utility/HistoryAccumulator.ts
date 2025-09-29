@@ -6,7 +6,10 @@
 
 import { orderBy } from 'lodash';
 
-import { Message, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { getRequiredAttribute, getRequiredTagElement } from './decodeStanza';
+import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
+import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 class HistoryAccumulator {
 	// Singleton design pattern
@@ -19,61 +22,138 @@ class HistoryAccumulator {
 		return HistoryAccumulator.instance;
 	}
 
-	private histories: { [id: string]: Message[] };
+	private cachedElements: { [queryId: string]: Element[] };
 
-	private repliedMessages: { [id: string]: Message };
-
-	private forwardedMessages: { [id: string]: Element };
-
-	private searchedMessages: { [id: string]: TextMessage[] };
+	private currentId: number = 0;
 
 	constructor() {
-		this.histories = {};
-		this.repliedMessages = {};
-		this.forwardedMessages = {};
-		this.searchedMessages = {};
+		this.cachedElements = {};
 	}
 
-	public addMessageToHistory(roomId: string, message: Message): void {
-		if (!this.histories[roomId]) this.histories[roomId] = [];
-		this.histories[roomId].push(message);
+	public getNextId(): string {
+		this.currentId += 1;
+		return this.currentId.toString();
 	}
 
-	public returnHistory(roomId: string): Message[] {
-		const history = this.histories[roomId] || [];
-		delete this.histories[roomId];
-		return orderBy(history, ['date'], ['asc']);
+	public pushToCache(queryId: string, element: Element): void {
+		if (!this.cachedElements[queryId]) this.cachedElements[queryId] = [];
+		this.cachedElements[queryId].push(element);
 	}
 
-	public addReferenceForRepliedMessage(message: TextMessage): void {
-		this.repliedMessages[message.stanzaId] = message;
+	public getCachedElements(queryId: string): Element[] {
+		const elements = this.cachedElements[queryId] || [];
+		delete this.cachedElements[queryId];
+		return elements;
 	}
 
-	public returnReferenceForRepliedMessage(messageId: string): TextMessage {
-		const message = this.repliedMessages[messageId];
-		delete this.repliedMessages[messageId];
-		return message as TextMessage;
+	public getForwardedMessage(queryId: string): Element {
+		const cachedElements = this.getCachedElements(queryId);
+		if (cachedElements.length !== 1) {
+			throw new Error('There should be exactly one cached element for forwarded messages');
+		}
+		const message = cachedElements[0];
+
+		const result = getRequiredTagElement(message, 'result');
+		const id = getRequiredAttribute(result, 'id');
+		const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+		const insideMessage = getRequiredTagElement(result, 'message');
+		const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+			date: dateToTimestamp(date),
+			stanzaId: id
+		});
+		if (!historyMessage || historyMessage.type !== MessageType.TEXT_MSG) {
+			throw new Error('Error decoding forwarded message');
+		}
+		return insideMessage;
 	}
 
-	public addReferenceForForwardedMessage(stanzaId: string, message: Element): void {
-		this.forwardedMessages[stanzaId] = message;
+	public getSearchedMessages(queryId: string): TextMessage[] {
+		const cachedElements = this.getCachedElements(queryId);
+
+		const messages = cachedElements.reduce<TextMessage[]>((accumulator, message) => {
+			const result = getRequiredTagElement(message, 'result');
+			const id = getRequiredAttribute(result, 'id');
+			const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+			const insideMessage = getRequiredTagElement(result, 'message');
+			const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+				date: dateToTimestamp(date),
+				stanzaId: id
+			});
+
+			if (historyMessage && historyMessage.type === MessageType.TEXT_MSG) {
+				accumulator.push(historyMessage);
+			}
+
+			return accumulator;
+		}, []);
+
+		return orderBy(messages, ['date'], ['desc']);
 	}
 
-	public returnReferenceForForwardedMessage(messageStanzaId: string): Element {
-		const message = this.forwardedMessages[messageStanzaId];
-		delete this.forwardedMessages[messageStanzaId];
-		return message;
+	public getRepliedMessage(queryId: string): TextMessage {
+		const cachedElements = this.getCachedElements(queryId);
+		if (cachedElements.length !== 1) {
+			throw new Error('There should be exactly one cached element for replied messages');
+		}
+		const message = cachedElements[0];
+
+		const result = getRequiredTagElement(message, 'result');
+		const id = getRequiredAttribute(result, 'id');
+		const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+		const insideMessage = getRequiredTagElement(result, 'message');
+		const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+			date: dateToTimestamp(date),
+			stanzaId: id
+		});
+		if (!historyMessage || historyMessage.type !== MessageType.TEXT_MSG) {
+			throw new Error('Error decoding forwarded message');
+		}
+		return historyMessage;
 	}
 
-	public addMessageToSearchedMessages(roomId: string, message: TextMessage): void {
-		if (!this.searchedMessages[roomId]) this.searchedMessages[roomId] = [];
-		this.searchedMessages[roomId].push(message);
+	public getHistoryMessages(queryId: string): Message[] {
+		const cachedElements = this.getCachedElements(queryId);
+
+		const messages = cachedElements.reduce<Message[]>((accumulator, message) => {
+			const result = getRequiredTagElement(message, 'result');
+			const id = getRequiredAttribute(result, 'id');
+			const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+			const insideMessage = getRequiredTagElement(result, 'message');
+			const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+				date: dateToTimestamp(date),
+				stanzaId: id
+			});
+
+			if (historyMessage) {
+				accumulator.push(historyMessage);
+			}
+
+			return accumulator;
+		}, []);
+
+		return orderBy(messages, ['date'], ['asc']);
 	}
 
-	public returnSearchedMessages(roomId: string): TextMessage[] {
-		const searchedMessages = this.searchedMessages[roomId] || [];
-		delete this.searchedMessages[roomId];
-		return orderBy(searchedMessages, ['date'], ['desc']);
+	// TODO manually test it
+	public getFullHistoryMessages(queryId: string): Message[] {
+		const cachedElements = this.getCachedElements(queryId);
+
+		return cachedElements.reduce<Message[]>((accumulator, message) => {
+			const result = getRequiredTagElement(message, 'result');
+			const id = getRequiredAttribute(result, 'id');
+			const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+			const insideMessage = getRequiredTagElement(result, 'message');
+			const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+				date: dateToTimestamp(date),
+				stanzaId: id
+			});
+
+			if (historyMessage) {
+				accumulator.push(historyMessage);
+			}
+
+			return accumulator;
+		}, []);
 	}
 }
 
