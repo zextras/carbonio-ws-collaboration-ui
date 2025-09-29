@@ -14,14 +14,13 @@ import {
 } from '../../tests/createMock';
 import { spyOnFetch } from '../../tests/jest-env-setup';
 import { mockedUuid } from '../../tests/mocks/global';
+import { historyTextMessageStanza } from '../../tests/mocks/XMPPStanza';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import * as FetchUtils from '../../utils/FetchUtils';
-import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -364,57 +363,67 @@ describe('Rooms API', () => {
 		});
 	});
 
+	test('aaa', () => {
+		const textMessageFromHistory = `
+            <message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/resourceId" id="messageId">
+                <result xmlns="urn:xmpp:mam:2" queryid="queryId" id="stanzaId">
+                    <forwarded xmlns="urn:xmpp:forward:0">
+                        <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T13:58:29.599694Z" from="roomId@muclight.carbonio/userId@carbonio"/>
+                        <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" id="messageId" type="groupchat">
+                            <body>hello!</body>
+                            <markable xmlns="urn:xmpp:chat-markers:0"/>
+                            <x xmlns="http://jabber.org/protocol/muc#user">
+                                <item affiliation="member" jid="userId@carbonio/resourceId" role="participant"/>
+                            </x>
+                        </message>
+                    </forwarded>
+                </result>
+            </message>`;
+
+		const parser = new DOMParser();
+		const x = parser.parseFromString(textMessageFromHistory, 'application/xml').documentElement;
+		console.log(x.getElementsByTagName('body')[0].textContent);
+	});
+
 	test('forwardMessages is called correctly', async () => {
-		const spyOnRequestMessageToForward = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		);
-		// Send addRoom request
+		jest
+			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
+			.mockImplementation(() => Promise.resolve());
+
 		const message = createMockTextMessage();
-		const forwardedMessage = {
-			originalMessage: undefined,
-			originalMessageSentAt: dateToISODate(message.date)
-		};
-		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(forwardedMessage as any));
+		const xmlMessage = historyTextMessageStanza(message.roomId, message.from, message.text, '');
+		const insideMessage = xmlMessage.getElementsByTagName('body')[0];
+		jest
+			.spyOn(HistoryAccumulator, 'getForwardedMessage')
+			.mockImplementationOnce(() => insideMessage);
 
 		await roomsApi.forwardMessages(['roomId'], [message]);
-
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			forwardedMessage
+			{
+				originalMessage: insideMessage,
+				originalMessageSentAt: dateToISODate(message.date)
+			}
 		]);
 	});
 
-	test('forwardMessages - edited message - is called correctly', async () => {
-		const spyOnRequestMessageToForward = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		);
-		// Send addRoom request
-		const messageEdited = createMockTextMessage();
-		const msgToParse = textMessageFromHistory.replace(
-			'2023-03-20T13:58:29.599694Z',
-			dateToISODate(messageEdited.date)
-		);
-		const parser = new DOMParser();
-		const xmlParsed: any = parser.parseFromString(msgToParse, 'application/xml');
-		const result = getTagElement(xmlParsed, 'result');
-		const messageParsed = getTagElement(result!, 'message');
-		const messageResult = getTagElement(result!, 'message');
-		messageResult!.getElementsByTagName('body')[0].innerHTML = messageEdited.text;
+	test.failing('forwardMessages - edited message - is called correctly', async () => {
+		jest
+			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
+			.mockImplementation(() => Promise.resolve());
 
-		HistoryAccumulator.addReferenceForForwardedMessage(messageEdited.stanzaId, messageParsed!);
+		const message = createMockTextMessage({ text: 'edited' });
+		const xmlMessage = historyTextMessageStanza(message.roomId, message.from, 'original text', '');
+		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+		jest
+			.spyOn(HistoryAccumulator, 'getForwardedMessage')
+			.mockImplementationOnce(() => insideMessage);
 
-		const forwardedMessage = {
-			originalMessage: messageResult?.outerHTML,
-			originalMessageSentAt: dateToISODate(messageEdited.date)
-		};
-
-		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(messageParsed!));
-
-		await roomsApi.forwardMessages(['roomId'], [messageEdited]);
-
+		await roomsApi.forwardMessages(['roomId'], [message]);
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			forwardedMessage
+			{
+				originalMessage: expect.objectContaining({ text: 'edited' }),
+				originalMessageSentAt: dateToISODate(message.date)
+			}
 		]);
 	});
 

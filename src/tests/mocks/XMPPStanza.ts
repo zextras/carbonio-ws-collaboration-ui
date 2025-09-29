@@ -60,7 +60,7 @@ export const historyTextMessageStanza = (
 ): Element => {
 	const messageToParse = textMessageFromHistory
 		.replace('roomId', roomId)
-		.replace('from', from)
+		.replace('userId', from)
 		.replace('body', body)
 		.replace('queryId', queryId);
 	return strStanzaToXml(messageToParse);

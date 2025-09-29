@@ -74,11 +74,10 @@ describe('XMPPClient', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
-		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
 		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
 		xmppClient.requestFullHistory(room.id);
 
-		expect(spyOnXmppSend).toHaveBeenCalledTimes(4);
+		expect(spyOnXmppSend).toHaveBeenCalledTimes(3);
 	});
 
 	test('requestHistory is not called for an unknown room', () => {
@@ -86,7 +85,6 @@ describe('XMPPClient', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
-		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
 		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
 		xmppClient.requestFullHistory(room.id);
 

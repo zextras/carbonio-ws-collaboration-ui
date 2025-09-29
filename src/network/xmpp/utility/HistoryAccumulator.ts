@@ -40,7 +40,7 @@ class HistoryAccumulator {
 		this.cachedElements[queryId].push(element);
 	}
 
-	public getCachedElements(queryId: string): Element[] {
+	private getCachedElements(queryId: string): Element[] {
 		const elements = this.cachedElements[queryId] || [];
 		delete this.cachedElements[queryId];
 		return elements;
@@ -134,7 +134,6 @@ class HistoryAccumulator {
 		return orderBy(messages, ['date'], ['asc']);
 	}
 
-	// TODO manually test it
 	public getFullHistoryMessages(queryId: string): Message[] {
 		const cachedElements = this.getCachedElements(queryId);
 

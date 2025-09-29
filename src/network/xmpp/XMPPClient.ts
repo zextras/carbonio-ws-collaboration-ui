@@ -275,30 +275,6 @@ class XMPPClient implements IXMPPClient {
 		});
 	}
 
-	// requestHistoryBetweenTwoMessage(
-	// 	roomId: string,
-	// 	olderMessageId: string,
-	// 	newerMessageId: string
-	// ): void {
-	// 	if (!useStore.getState().rooms[roomId]) return;
-	// 	const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-	// 		.c('query', { xmlns: Strophe.NS.MAM })
-	// 		.c('x', { xmlns: jabberData })
-	// 		.c('field', { var: 'from_id' })
-	// 		.c('value')
-	// 		.t(olderMessageId)
-	// 		.up()
-	// 		.up()
-	// 		.c('field', { var: 'to_id' })
-	// 		.c('value')
-	// 		.t(newerMessageId);
-	// 	this.xmppConnection.send({
-	// 		type: XMPPRequestType.IQ,
-	// 		elem: iq,
-	// 		callback: onRequestHistory
-	// 	});
-	// }
-
 	requestMessageSubjectOfReply(
 		roomId: string,
 		messageSubjectOfReplyId: string,
@@ -323,7 +299,7 @@ class XMPPClient implements IXMPPClient {
 		roomId: string,
 		messageToForwardStanzaId: string,
 		queryId: string
-	): Promise<Element> {
+	): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
@@ -334,7 +310,7 @@ class XMPPClient implements IXMPPClient {
 			this.xmppConnection.send({
 				type: XMPPRequestType.IQ,
 				elem: iq,
-				callback: resolve,
+				callback: () => resolve(),
 				errorCallback: reject
 			});
 		});
