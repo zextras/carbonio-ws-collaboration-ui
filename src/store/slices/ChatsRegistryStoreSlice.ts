@@ -361,22 +361,22 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		);
 	},
 
-	updateSearchResultHistory: (roomId: string, messageId: string, newMessages: Message[]): void => {
+	updateSearchResultHistory: (roomId: string, stanzaId: string, newMessages: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				const oldMessages =
-					initRoomChatsRegistry(draft, roomId).searchResultHistory[messageId] || [];
+					initRoomChatsRegistry(draft, roomId).searchResultHistory[stanzaId] || [];
 				if (oldMessages.length === 0) {
-					draft.chatsRegistry[roomId].searchResultHistory[messageId] = newMessages;
+					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = newMessages;
 					return;
 				}
 				if (oldMessages[0].date > newMessages[0].date) {
-					draft.chatsRegistry[roomId].searchResultHistory[messageId] = [
+					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = [
 						...newMessages,
 						...oldMessages
 					];
 				} else {
-					draft.chatsRegistry[roomId].searchResultHistory[messageId] = [
+					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = [
 						...oldMessages,
 						...newMessages
 					];

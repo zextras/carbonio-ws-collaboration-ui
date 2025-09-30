@@ -367,25 +367,61 @@ class XMPPClient implements IXMPPClient {
 		});
 	}
 
-	requestMessageResultHistory(roomId: string, messageStanzaDate: number, messageId: string): void {
+	requestMessageResultHistoryFromId(
+		roomId: string,
+		stanzaId: string,
+		withRequestedId: boolean = false
+	): void {
 		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
-			.t('urn:xmpp:mam:2')
+			.t(Strophe.NS.MAM)
 			.up()
 			.up()
-			.c('field', { var: 'start' })
+			.c('field', { var: withRequestedId ? 'from-id' : 'after-id' })
 			.c('value')
-			.t(dateToISODate(messageStanzaDate));
+			.t(stanzaId);
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
 			callback: () => {
 				const newMessages = HistoryAccumulator.getHistoryMessages(queryId);
-				useStore.getState().updateSearchResultHistory(roomId, messageId, newMessages);
+				useStore.getState().updateSearchResultHistory(roomId, stanzaId, newMessages);
+			}
+		});
+	}
+
+	requestMessageResultHistoryToId(
+		roomId: string,
+		stanzaId: string,
+		withRequestedId: boolean = false
+	): void {
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+			.c('x', { type: 'submit', xmlns: jabberData })
+			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+			.c('value')
+			.t(Strophe.NS.MAM)
+			.up()
+			.up()
+			.c('field', { var: withRequestedId ? 'to-id' : 'before-id' })
+			.c('value')
+			.t(stanzaId)
+			.up()
+			.up()
+			.up()
+			.c('set', { xmlns: Strophe.NS.RSM })
+			.c('before');
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: () => {
+				const newMessages = HistoryAccumulator.getHistoryMessages(queryId);
+				useStore.getState().updateSearchResultHistory(roomId, stanzaId, newMessages);
 			}
 		});
 	}

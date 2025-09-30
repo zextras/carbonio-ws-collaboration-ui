@@ -22,7 +22,7 @@ export type ChatsRegistryStoreSlice = {
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
-	updateSearchResultHistory: (roomId: string, messageId: string, newMessages: Message[]) => void;
+	updateSearchResultHistory: (roomId: string, stanzaId: string, newMessages: Message[]) => void;
 };
 
 export type ChatRegistry = {
@@ -37,12 +37,14 @@ export type ChatRegistry = {
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
 
 export type BasicMessage = {
+	// aka ARCHIVE-ID more external one
 	id: string;
 	roomId: string;
 	date: number;
 };
 
 export type TextMessage = BasicMessage & {
+	// aka the id inside <stanza-id> tag
 	stanzaId: string;
 	type: MessageType.TEXT_MSG;
 	from: string;

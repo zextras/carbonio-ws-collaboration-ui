@@ -37,10 +37,12 @@ const SearchResultMessage = ({ message }: { message: TextMessage }): React.React
 	const { avatarColor } = useAvatarUtilities(message.from);
 
 	const onResultClick = useCallback(() => {
-		useStore
-			.getState()
-			.connections.xmppClient.requestMessageResultHistory(message.roomId, message.date, message.id);
-	}, [message.roomId, message.date, message.id]);
+		const { xmppClient } = useStore.getState().connections;
+		// TODO avoid to make a request id data already available in the store
+		xmppClient.requestMessageResultHistoryFromId(message.roomId, message.stanzaId, true);
+		xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId);
+		// TODO scroll into view
+	}, [message.roomId, message.stanzaId]);
 
 	return (
 		<CustomContainer
