@@ -6,21 +6,22 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-/**
- * Presence stanzas
- */
-// Presence stanza received after a roster iq or when a user logs in
-export const onlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId"/>`;
+// TODO implement and use buildXmppStanza.ts
+// /**
+//  * Presence stanzas
+//  */
+// // Presence stanza received after a roster iq or when a user logs in
+// export const onlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId"/>`;
+//
+// // Presence stanza received when a user logs out
+// export const offlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId" type="unavailable"/>`;
 
-// Presence stanza received when a user logs out
-export const offlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId" type="unavailable"/>`;
-
-/**
- * Ping stanzas
- */
-export const pingIq = `<iq from='carbonio' to='userId@carbonio/resourceId' type='get' id='stanzaId' xmlns='jabber:client'><ping xmlns='urn:xmpp:ping'/></iq>`;
-
-export const pongIq = `<iq id="stanzaId" to="carbonio" type="result" xmlns="jabber:client"/>`;
+// /**
+//  * Ping stanzas
+//  */
+// export const pingIq = `<iq from='carbonio' to='userId@carbonio/resourceId' type='get' id='stanzaId' xmlns='jabber:client'><ping xmlns='urn:xmpp:ping'/></iq>`;
+//
+// export const pongIq = `<iq id="stanzaId" to="carbonio" type="result" xmlns="jabber:client"/>`;
 
 /**
  * Inbox stanzas: messages received after an inbox iq
@@ -244,15 +245,15 @@ export const displayMessageRealTime = `
     <displayed xmlns="urn:xmpp:chat-markers:0" id="messageId"/>
 </message>`;
 
-export const pauseWritingMessage = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
-    <paused xmlns="http://jabber.org/protocol/chatstates"/>
-</message>`;
-
-export const startWritingMessage = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
-    <composing xmlns="http://jabber.org/protocol/chatstates"/>
-</message>`;
+// export const pauseWritingMessage = `
+// <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
+//     <paused xmlns="http://jabber.org/protocol/chatstates"/>
+// </message>`;
+//
+// export const startWritingMessage = `
+// <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
+//     <composing xmlns="http://jabber.org/protocol/chatstates"/>
+// </message>`;
 
 export const retractedMessage = `
     <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" id="messageId" type="groupchat">

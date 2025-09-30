@@ -14,7 +14,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
+import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
 import {
 	DateMessage,
 	FasteningAction,
@@ -176,8 +176,14 @@ describe('XMPP newMessageHandler', () => {
 		store.newMessage(myMessage);
 		store.setInputHasFocus(room.id, true);
 
-		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
-		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		onNewMessageStanza.call(
+			store.connections.xmppClient,
+			buildReactionStanza({
+				roomId: room.id,
+				originalStanzaId: myMessage.stanzaId,
+				from: otherUser.id
+			})
+		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 		jest.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toBeUndefined();
@@ -199,8 +205,14 @@ describe('XMPP newMessageHandler', () => {
 		});
 		store.newMessage(myMessage);
 
-		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
-		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		onNewMessageStanza.call(
+			store.connections.xmppClient,
+			buildReactionStanza({
+				roomId: room.id,
+				originalStanzaId: myMessage.stanzaId,
+				from: otherUser.id
+			})
+		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 		jest.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);

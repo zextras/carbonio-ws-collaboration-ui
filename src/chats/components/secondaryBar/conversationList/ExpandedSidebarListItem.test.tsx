@@ -19,7 +19,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
+import { buildComposingStanza } from '../../../../tests/mocks/buildXmppStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import {
@@ -295,16 +295,25 @@ describe('Expanded sidebar list item', () => {
 			store.newMessage(mockedTextMessageSentByMeIntoGroup);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
-				const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
-				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
+				onComposingMessageStanza.call(
+					useStore.getState().connections.xmppClient,
+					buildComposingStanza({
+						roomId: mockedGroup.id,
+						from: user4Be.id,
+						isWriting: true
+					})
+				);
 			});
 			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
-				const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
 				onComposingMessageStanza.call(
 					useStore.getState().connections.xmppClient,
-					stopWritingMessage
+					buildComposingStanza({
+						roomId: mockedGroup.id,
+						from: user4Be.id,
+						isWriting: false
+					})
 				);
 			});
 			jest.advanceTimersByTime(7000);
@@ -371,16 +380,25 @@ describe('Expanded sidebar list item', () => {
 			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			act(() => {
-				const composingMessage = composingStanza(mockedOneToOne.id, user2Be.id);
-				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
+				onComposingMessageStanza.call(
+					useStore.getState().connections.xmppClient,
+					buildComposingStanza({
+						roomId: mockedOneToOne.id,
+						from: user2Be.id,
+						isWriting: true
+					})
+				);
 			});
 			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
-				const stopWritingMessage = pausedStanza(mockedOneToOne.id, user2Be.id);
 				onComposingMessageStanza.call(
 					useStore.getState().connections.xmppClient,
-					stopWritingMessage
+					buildComposingStanza({
+						roomId: mockedOneToOne.id,
+						from: user2Be.id,
+						isWriting: false
+					})
 				);
 			});
 			jest.advanceTimersByTime(7000);

@@ -10,8 +10,8 @@ import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import { createMockRoom } from '../../tests/createMock';
+import { buildPingStanza } from '../../tests/mocks/buildXmppStanza';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
-import { pingStanza } from '../../tests/mocks/XMPPStanza';
 import { dateToTimestamp } from '../../utils/dateUtils';
 
 describe('XMPPClient', () => {
@@ -48,7 +48,7 @@ describe('XMPPClient', () => {
 	test('sendPong should respond to a ping request', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.sendPong(pingStanza('stanzaId'));
+		xmppClient.sendPong(buildPingStanza({ pingId: 'id' }));
 
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,

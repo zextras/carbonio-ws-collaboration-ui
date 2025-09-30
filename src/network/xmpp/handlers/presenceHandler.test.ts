@@ -7,11 +7,7 @@
 import { onPingStanza, onPresenceStanza } from './presenceHandler';
 import useStore from '../../../store/Store';
 import { createMockUser } from '../../../tests/createMock';
-import {
-	offlinePresenceStanza,
-	onlinePresenceStanza,
-	pingStanza
-} from '../../../tests/mocks/XMPPStanza';
+import { buildPingStanza, buildPresenceStanza } from '../../../tests/mocks/buildXmppStanza';
 
 const loggedUser = createMockUser({ id: 'userId-logged', name: 'User Logged' });
 const mockUser = createMockUser({ id: 'userId-mock', name: 'User Mock' });
@@ -27,7 +23,7 @@ describe('XMPP presenceHandler', () => {
 		// A new online presence arrives
 		onPresenceStanza.call(
 			useStore.getState().connections.xmppClient,
-			onlinePresenceStanza(mockUser.id)
+			buildPresenceStanza({ from: mockUser.id, online: true })
 		);
 
 		// Check if information are stored correctly
@@ -39,11 +35,11 @@ describe('XMPP presenceHandler', () => {
 		// A new offline presence arrives
 		onPresenceStanza.call(
 			useStore.getState().connections.xmppClient,
-			onlinePresenceStanza(mockUser.id)
+			buildPresenceStanza({ from: mockUser.id, online: true })
 		);
 		onPresenceStanza.call(
 			useStore.getState().connections.xmppClient,
-			offlinePresenceStanza(mockUser.id)
+			buildPresenceStanza({ from: mockUser.id, online: false })
 		);
 
 		// Check if information are stored correctly
@@ -55,11 +51,11 @@ describe('XMPP presenceHandler', () => {
 		// A new offline presence arrives
 		onPresenceStanza.call(
 			useStore.getState().connections.xmppClient,
-			onlinePresenceStanza(loggedUser.id)
+			buildPresenceStanza({ from: loggedUser.id, online: true })
 		);
 		onPresenceStanza.call(
 			useStore.getState().connections.xmppClient,
-			offlinePresenceStanza(loggedUser.id)
+			buildPresenceStanza({ from: loggedUser.id, online: false })
 		);
 
 		// Check if information are stored correctly
@@ -71,7 +67,10 @@ describe('XMPP presenceHandler', () => {
 		const spyOnSendPong = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
 		// A new ping stanza arrives
 		const stanzaId = 'pingStanzaId';
-		onPingStanza.call(useStore.getState().connections.xmppClient, pingStanza(stanzaId));
+		onPingStanza.call(
+			useStore.getState().connections.xmppClient,
+			buildPingStanza({ pingId: stanzaId })
+		);
 
 		// Check if pong is sent
 		expect(spyOnSendPong).toHaveBeenCalled();

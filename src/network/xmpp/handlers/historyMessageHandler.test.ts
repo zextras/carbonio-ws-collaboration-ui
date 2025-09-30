@@ -28,6 +28,7 @@
 
 // TODO: add new implementation of HistoryAccumulator tests
 describe('onRequestHistory', () => {
+	test.todo('onRequestHistory tests');
 	// test('End request history stanza indicates MAM request is incomplete', () => {
 	// 	HistoryAccumulator.addMessageToHistory(room.id, textMessage);
 	// 	onRequestHistory(endRequestHistoryStanza(room.id, false));
