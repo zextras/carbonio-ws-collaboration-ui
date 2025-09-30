@@ -18,7 +18,7 @@ import { RoomType } from '../types/store/RoomTypes';
 
 export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage
-): JSX.Element | string | undefined => {
+): React.JSX.Element | string | undefined => {
 	const [t] = useTranslation();
 
 	const loggedUserId = useStore(getUserId);
@@ -176,7 +176,7 @@ export const ConfigurationMessageLabel = ({
 	message
 }: {
 	message: ConfigurationMessage;
-}): JSX.Element => {
+}): React.JSX.Element => {
 	const configurationMessageLabel = useConfigurationMessageLabel(message);
 	return <Fragment>{configurationMessageLabel}</Fragment>;
 };
