@@ -15,7 +15,6 @@ import {
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
-import { messageResultHistoryHandler } from './handlers/messageResultHistoryHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
@@ -368,10 +367,10 @@ class XMPPClient implements IXMPPClient {
 		});
 	}
 
-	requestMessageResultHistory(roomId: string, messageStanzaDate: number): void {
-		// Chiediamo 10 messaggi dopo il messaggio cercato
+	requestMessageResultHistory(roomId: string, messageStanzaDate: number, messageId: string): void {
+		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: '' })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
@@ -380,17 +379,14 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.c('field', { var: 'start' })
 			.c('value')
-			.t(dateToISODate(messageStanzaDate))
-			.up()
-			.up()
-			.up()
-			.c('set', { xmlns: Strophe.NS.RSM })
-			.c('max')
-			.t(10);
+			.t(dateToISODate(messageStanzaDate));
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: messageResultHistoryHandler
+			callback: () => {
+				const newMessages = HistoryAccumulator.getHistoryMessages(queryId);
+				useStore.getState().updateSearchResultHistory(roomId, messageId, newMessages);
+			}
 		});
 	}
 

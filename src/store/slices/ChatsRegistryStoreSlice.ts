@@ -359,5 +359,31 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			false,
 			'CHAT/CLEAR_SEARCH_RESULTS'
 		);
+	},
+
+	updateSearchResultHistory: (roomId: string, messageId: string, newMessages: Message[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				const oldMessages =
+					initRoomChatsRegistry(draft, roomId).searchResultHistory[messageId] || [];
+				if (oldMessages.length === 0) {
+					draft.chatsRegistry[roomId].searchResultHistory[messageId] = newMessages;
+					return;
+				}
+				if (oldMessages[0].date > newMessages[0].date) {
+					draft.chatsRegistry[roomId].searchResultHistory[messageId] = [
+						...newMessages,
+						...oldMessages
+					];
+				} else {
+					draft.chatsRegistry[roomId].searchResultHistory[messageId] = [
+						...oldMessages,
+						...newMessages
+					];
+				}
+			}),
+			false,
+			'CHAT/UPDATE_SEARCH_RESULT_HISTORY'
+		);
 	}
 });

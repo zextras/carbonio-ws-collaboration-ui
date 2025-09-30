@@ -21,7 +21,7 @@ const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
 	store.chatsRegistry[roomId]?.messages
-		? store.chatsRegistry[roomId]?.messages
+		? store.chatsRegistry[roomId].messages
 		: FALLBACK_MESSAGE_SELECTOR;
 
 const readableMessages: (TextMessage | ConfigurationMessage)[] = [];

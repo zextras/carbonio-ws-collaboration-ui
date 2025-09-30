@@ -22,6 +22,7 @@ export type ChatsRegistryStoreSlice = {
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
+	updateSearchResultHistory: (roomId: string, messageId: string, newMessages: Message[]) => void;
 };
 
 export type ChatRegistry = {

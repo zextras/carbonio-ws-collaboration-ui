@@ -39,8 +39,8 @@ const SearchResultMessage = ({ message }: { message: TextMessage }): React.React
 	const onResultClick = useCallback(() => {
 		useStore
 			.getState()
-			.connections.xmppClient.requestMessageResultHistory(message.roomId, message.date);
-	}, [message.roomId, message.date]);
+			.connections.xmppClient.requestMessageResultHistory(message.roomId, message.date, message.id);
+	}, [message.roomId, message.date, message.id]);
 
 	return (
 		<CustomContainer
