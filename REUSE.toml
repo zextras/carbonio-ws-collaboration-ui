@@ -4,7 +4,7 @@ SPDX-PackageSupplier = "Zextras <https://www.zextras.com>"
 
 [[annotations]]
 path = [".idea/**", ".vscode/**", ".husky/**", ".nvmrc", "package.json", "package-lock.json", "tsconfig.json", "CHANGELOG.md",
-".github/**", "THIRDPARTIES", "README.md", ".gitignore", ".prettierrc.js", "src/chats/assets/**", "src/meetings/assets/**",
+".github/**", "THIRDPARTIES", "README.md", ".gitignore", ".prettierrc.js", "src/chats/assets/**", "src/meetings/assets/**", "Dockerfile"
 "src/network/API_VERSIONING.md"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 Zextras <https://www.zextras.com>"
