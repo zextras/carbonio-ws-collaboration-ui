@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { Container, Row, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
@@ -27,7 +28,15 @@ const CustomContainer = styled(Container)`
 	}
 `;
 
-const SearchResultMessage = ({ message }: { message: TextMessage }): React.ReactElement => {
+interface SearchResultMessageProps {
+	message: TextMessage;
+	searchText: string;
+}
+
+const SearchResultMessage = ({
+	message,
+	searchText
+}: SearchResultMessageProps): React.ReactElement => {
 	const senderIsLoggedUser = useStore((store) => getIsLoggedUser(store, message.from));
 	const senderName = useStore((store) => getUserName(store, message.from));
 
@@ -63,7 +72,7 @@ const SearchResultMessage = ({ message }: { message: TextMessage }): React.React
 				</Text>
 			</Row>
 			<Row takeAvailableSpace>
-				<Text overflow="ellipsis">{message.text}</Text>
+				<HighlightedText text={message.text} searchText={searchText} />
 			</Row>
 		</CustomContainer>
 	);

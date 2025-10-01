@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { FC, useCallback, useState, useMemo } from 'react';
 
 import { Button, Container, Icon, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -48,12 +48,14 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 
 	const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.IDLE);
 	const [searchText, setSearchText] = useState<string>('');
+	const [activeSearchText, setActiveSearchText] = useState<string>('');
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
 
 	const search = useCallback(() => {
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
 		setRequestStatus(RequestStatus.LOADING);
+		setActiveSearchText(searchText);
 		const { xmppClient } = useStore.getState().connections;
 		xmppClient
 			.fullTextSearch(roomId, searchText)
@@ -65,19 +67,12 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 			});
 	}, [requestStatus, roomId, searchText]);
 
-	useEffect(() => {
-		const handleKeyPress = (event: KeyboardEvent): void => {
-			if (event.key === 'Enter') search();
-		};
-		window.addEventListener('keydown', handleKeyPress);
-		return (): void => {
-			window.removeEventListener('keydown', handleKeyPress);
-		};
-	}, [search]);
-
 	const searchResults = useMemo(
-		() => results?.map((message) => <SearchResultMessage key={message.id} message={message} />),
-		[results]
+		() =>
+			results?.map((message) => (
+				<SearchResultMessage key={message.id} message={message} searchText={activeSearchText} />
+			)),
+		[activeSearchText, results]
 	);
 
 	const resultsComponents = useMemo(() => {
@@ -195,6 +190,11 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 		[searchText]
 	);
 
+	const isSearchDisabled = useMemo(
+		() => !searchText.trim() || requestStatus === RequestStatus.LOADING,
+		[requestStatus, searchText]
+	);
+
 	return (
 		<Container>
 			<Container
@@ -219,6 +219,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 					value={searchText}
 					onChange={(e) => setSearchText(e.target.value)}
 					CustomIcon={cancelIcon}
+					onEnter={isSearchDisabled ? undefined : search}
 				/>
 				<Button
 					type="ghost"
@@ -226,7 +227,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 					color="secondary"
 					onClick={search}
 					icon="Search"
-					disabled={!searchText || requestStatus === RequestStatus.LOADING}
+					disabled={isSearchDisabled}
 				/>
 			</Container>
 			<Container padding="small" gap="0.5rem" width="fill" style={{ overflow: 'scroll' }}>
