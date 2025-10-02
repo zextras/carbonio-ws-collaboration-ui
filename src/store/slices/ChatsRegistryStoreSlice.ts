@@ -355,6 +355,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].searchResults = [];
+        draft.chatsRegistry[roomId].searchResultHistory = {};
+        draft.activeConversations[roomId].selectedSearchResult = undefined;
 			}),
 			false,
 			'CHAT/CLEAR_SEARCH_RESULTS'

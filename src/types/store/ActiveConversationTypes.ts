@@ -36,6 +36,7 @@ export type ActiveConversationsSlice = {
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
 	unsetNewReactions: (roomId: string) => void;
+  setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
 };
 
 export type ActiveConversation = {
@@ -51,6 +52,7 @@ export type ActiveConversation = {
 	filesToAttach?: FileToUpload[];
 	forwardMessageList?: TextMessage[];
 	newReactions?: NewReaction[];
+	selectedSearchResult?: string;
 };
 
 export type ActiveConversationsMap = {

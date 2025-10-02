@@ -46,6 +46,7 @@ const SearchResultMessage = ({
 	const { avatarColor } = useAvatarUtilities(message.from);
 
 	const onResultClick = useCallback(() => {
+		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		const { xmppClient } = useStore.getState().connections;
 		// TODO avoid to make a request id data already available in the store
 		xmppClient.requestMessageResultHistoryFromId(message.roomId, message.stanzaId, true);

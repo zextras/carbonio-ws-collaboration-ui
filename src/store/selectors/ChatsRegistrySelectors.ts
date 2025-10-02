@@ -17,7 +17,7 @@ import {
 } from '../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
+export const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
 	store.chatsRegistry[roomId]?.messages

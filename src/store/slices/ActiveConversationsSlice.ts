@@ -350,5 +350,15 @@ export const useActiveConversationsSlice: StateCreator<
 			false,
 			'AC/UNSET_NEW_REACTIONS'
 		);
+	},
+	setSelectedSearchResult(roomId: string, stanzaId: string | undefined): void {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.selectedSearchResult = stanzaId;
+			}),
+			false,
+			'AC/SET_SELECTED_SEARCH_RESULT'
+		);
 	}
 });
