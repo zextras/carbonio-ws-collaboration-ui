@@ -40,7 +40,7 @@ class HistoryAccumulator {
 		this.cachedElements[queryId].push(element);
 	}
 
-	private getCachedElements(queryId: string): Element[] {
+	public getCachedElements(queryId: string): Element[] {
 		const elements = this.cachedElements[queryId] || [];
 		delete this.cachedElements[queryId];
 		return elements;

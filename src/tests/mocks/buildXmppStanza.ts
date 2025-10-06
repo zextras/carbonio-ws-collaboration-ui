@@ -107,20 +107,20 @@ export const buildComposingStanza = ({
  */
 
 type HistoryParams = {
-	roomId: string;
-	from: string;
+	roomId?: string;
+	from?: string;
 	to?: string;
-	text: string;
+	text?: string;
 	queryId?: string;
 	messageId?: string;
 	stanzaId?: string;
 	timestamp?: string;
 };
 export const buildTextMessageFromHistory = ({
-	roomId,
-	from,
+	roomId = 'roomId',
+	from = 'userId',
 	to = 'userId',
-	text,
+	text = 'text message',
 	queryId = 'queryId',
 	messageId = 'messageId',
 	stanzaId = 'stanzaId',
@@ -141,3 +141,74 @@ export const buildTextMessageFromHistory = ({
         </forwarded>
     </result>
 </message>`);
+
+type ReactionHistoryParams = {
+	roomId?: string;
+	from?: string;
+	to?: string;
+	reaction?: string;
+	queryId?: string;
+	messageId?: string;
+	stanzaId?: string;
+	originalStanzaId?: string;
+	timestamp?: string;
+};
+export const buildReactionMessageFromHistory = ({
+	roomId = 'roomId',
+	from = 'userId',
+	to = 'userId',
+	reaction = '👍',
+	queryId = 'history',
+	messageId = 'messageId',
+	stanzaId = 'stanzaId',
+	originalStanzaId = 'originalStanzaId',
+	timestamp = '2023-03-23T08:22:36.533016Z'
+}: ReactionHistoryParams): Element =>
+	stringToXml(`
+<message xmlns="jabber:client" from="${roomId}@muclight.carbonio" to="${to}@carbonio/resourceId" id="${messageId}">
+    <result xmlns="urn:xmpp:mam:2" queryid="${queryId}" id="${stanzaId}">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay xmlns="urn:xmpp:delay" stamp="${timestamp}" from="${roomId}@muclight.carbonio/${from}@carbonio"/>
+            <message id="${messageId}" from="${roomId}@muclight.carbonio/${from}@carbonio" to="${to}@carbonio" type="groupchat" xmlns="jabber:client">
+                <apply-to id="${originalStanzaId}" xmlns="urn:xmpp:fasten:0">
+                    <reaction xmlns="zextras:xmpp:reaction:0"/>
+                    <external name="body"/>
+                </apply-to>
+                <body>${reaction}</body>
+            </message>
+        </forwarded>
+    </result>
+</message>`);
+
+type EndRequestHistoryParams = {
+	roomId?: string;
+	to?: string;
+	isComplete?: boolean;
+	iqId?: string;
+	firstIndex?: string;
+	firstId?: string;
+	lastId?: string;
+	count?: number;
+};
+export const buildEndRequestHistoryStanza = ({
+	roomId = 'roomId',
+	to = 'userId',
+	isComplete = true,
+	iqId = 'iqId',
+	firstIndex = '100',
+	firstId = 'firstStanzaId',
+	lastId = 'lastStanzaId',
+	count = 100
+}: EndRequestHistoryParams): Element => {
+	const completeParam = isComplete ? " complete='true'" : '';
+	return stringToXml(`
+<iq from='${roomId}@muclight.carbonio' to='${to}@carbonio/resourceId' id='${iqId}' type='result' xmlns='jabber:client'>
+    <fin xmlns='urn:xmpp:mam:2'${completeParam}>
+        <set xmlns='http://jabber.org/protocol/rsm'>
+            <first index='${firstIndex}'>${firstId}</first>
+            <last>${lastId}</last>
+            <count>${count}</count>
+        </set>
+    </fin>
+</iq>`);
+};
