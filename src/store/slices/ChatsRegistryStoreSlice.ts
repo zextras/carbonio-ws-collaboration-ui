@@ -12,6 +12,7 @@ import { StateCreator } from 'zustand';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
+	BackfillRequest,
 	ChatRegistry,
 	ChatsRegistryStoreSlice,
 	ConfigurationMessage,
@@ -20,6 +21,7 @@ import {
 	MarkerStatus,
 	Message,
 	MessageFastening,
+	MessageRange,
 	MessageType,
 	OperationType,
 	PlaceholderFields,
@@ -37,8 +39,7 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 			fastenings: {},
 			markers: {},
 			unread: 0,
-			searchResults: [],
-			searchResultHistory: {}
+			searchResults: []
 		};
 	}
 	return store.chatsRegistry[roomId];
@@ -56,12 +57,36 @@ const addDateMessage = (messages: Message[], messageDate: number, roomId: string
 	}
 };
 
+function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
+	if (ranges.length <= 1) return ranges;
+
+	const merged: MessageRange[] = [ranges[0]];
+
+	// eslint-disable-next-line no-plusplus
+	for (let i = 1; i < ranges.length; i++) {
+		const current = ranges[i];
+		const last = merged[merged.length - 1];
+
+		if (current.oldestTimestamp <= last.newestTimestamp) {
+			if (current.newestTimestamp > last.newestTimestamp) {
+				last.newestStanzaId = current.newestStanzaId;
+				last.newestTimestamp = current.newestTimestamp;
+			}
+			last.count += current.count;
+		} else {
+			merged.push(current);
+		}
+	}
+
+	return merged;
+}
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
 	[],
 	ChatsRegistryStoreSlice
-> = (set) => ({
+> = (set, get) => ({
 	chatsRegistry: {},
 	newMessage: (message: Message): void => {
 		set(
@@ -355,37 +380,150 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].searchResults = [];
-        draft.chatsRegistry[roomId].searchResultHistory = {};
-        draft.activeConversations[roomId].selectedSearchResult = undefined;
+				draft.activeConversations[roomId].selectedSearchResult = undefined;
 			}),
 			false,
 			'CHAT/CLEAR_SEARCH_RESULTS'
 		);
 	},
 
-	updateSearchResultHistory: (roomId: string, stanzaId: string, newMessages: Message[]): void => {
+	addMessageRange: (roomId: string, range: MessageRange): void => {
 		set(
 			produce((draft: RootStore) => {
-				const oldMessages =
-					initRoomChatsRegistry(draft, roomId).searchResultHistory[stanzaId] || [];
-				if (oldMessages.length === 0) {
-					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = newMessages;
-					return;
+				const registry = draft.chatsRegistry[roomId];
+				if (!registry) return;
+
+				if (!registry.messageRanges) {
+					registry.messageRanges = [];
 				}
-				if (oldMessages[0].date > newMessages[0].date) {
-					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = [
-						...newMessages,
-						...oldMessages
-					];
-				} else {
-					draft.chatsRegistry[roomId].searchResultHistory[stanzaId] = [
-						...oldMessages,
-						...newMessages
-					];
+
+				registry.messageRanges.push(range);
+				registry.messageRanges = orderBy(registry.messageRanges, ['oldestTimestamp'], ['asc']);
+
+				registry.messageRanges = mergeOverlappingRanges(registry.messageRanges);
+			}),
+			false,
+			'CHAT/ADD_MESSAGE_RANGE'
+		);
+	},
+
+	detectAndFillGaps: (roomId: string): void => {
+		const state = get();
+		const registry = state.chatsRegistry[roomId];
+
+		if (!registry?.messageRanges || registry.messageRanges.length < 2) return;
+
+		const gaps: BackfillRequest[] = [];
+
+		// eslint-disable-next-line no-plusplus
+		for (let i = 0; i < registry.messageRanges.length - 1; i++) {
+			const older = registry.messageRanges[i];
+			const newer = registry.messageRanges[i + 1];
+
+			if (newer.oldestTimestamp > older.newestTimestamp) {
+				gaps.push({
+					afterStanzaId: older.newestStanzaId,
+					beforeStanzaId: newer.oldestStanzaId
+				});
+			}
+		}
+
+		gaps.forEach((gap) => {
+			get().enqueueBackfill(roomId, gap);
+		});
+	},
+
+	enqueueBackfill: (roomId: string, request: BackfillRequest): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = draft.chatsRegistry[roomId];
+				if (!registry) return;
+
+				if (!registry.backfillQueue) {
+					registry.backfillQueue = [];
+				}
+
+				const exists = registry.backfillQueue.some(
+					(req) =>
+						req.afterStanzaId === request.afterStanzaId &&
+						req.beforeStanzaId === request.beforeStanzaId
+				);
+
+				if (!exists) {
+					registry.backfillQueue.push(request);
 				}
 			}),
 			false,
-			'CHAT/UPDATE_SEARCH_RESULT_HISTORY'
+			'CHAT/ENQUEUE_BACKFILL'
 		);
+	},
+
+	setBackfillInProgress: (roomId: string, inProgress: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = draft.chatsRegistry[roomId];
+				if (registry) {
+					registry.backfillInProgress = inProgress;
+				}
+			}),
+			false,
+			'CHAT/SET_BACKFILL_IN_PROGRESS'
+		);
+	},
+
+	processBackfillQueue: async (roomId: string): Promise<void> => {
+		const state = get();
+		const registry = state.chatsRegistry[roomId];
+
+		if (
+			!registry?.backfillQueue ||
+			registry.backfillQueue.length === 0 ||
+			registry.backfillInProgress
+		) {
+			return;
+		}
+
+		get().setBackfillInProgress(roomId, true);
+
+		const request = registry.backfillQueue[0];
+
+		try {
+			state.connections.xmppClient.requestHistoryBetweenTwoIds(
+				roomId,
+				request.afterStanzaId,
+				request.beforeStanzaId
+			);
+
+			set(
+				produce((draft: RootStore) => {
+					const reg = draft.chatsRegistry[roomId];
+					if (reg?.backfillQueue) {
+						reg.backfillQueue.shift();
+					}
+				}),
+				false,
+				'CHAT/BACKFILL_REQUEST_PROCESSED'
+			);
+		} catch (error) {
+			console.error(`[Backfill] Error: ${error}`);
+
+			set(
+				produce((draft: RootStore) => {
+					const reg = draft.chatsRegistry[roomId];
+					if (reg?.backfillQueue) {
+						reg.backfillQueue.shift();
+					}
+				}),
+				false,
+				'CHAT/BACKFILL_REQUEST_FAILED'
+			);
+		} finally {
+			get().setBackfillInProgress(roomId, false);
+
+			const updatedRegistry = get().chatsRegistry[roomId];
+			if (updatedRegistry?.backfillQueue && updatedRegistry.backfillQueue.length > 0) {
+				setTimeout(() => get().processBackfillQueue(roomId), 200);
+			}
+		}
 	}
 });

@@ -49,8 +49,7 @@ const SearchResultMessage = ({
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		const { xmppClient } = useStore.getState().connections;
 		// TODO avoid to make a request id data already available in the store
-		xmppClient.requestMessageResultHistoryFromId(message.roomId, message.stanzaId, true);
-		xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId);
+		xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId, true);
 		// TODO scroll into view
 	}, [message.roomId, message.stanzaId]);
 

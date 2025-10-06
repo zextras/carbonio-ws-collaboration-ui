@@ -22,7 +22,11 @@ export type ChatsRegistryStoreSlice = {
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
-	updateSearchResultHistory: (roomId: string, stanzaId: string, newMessages: Message[]) => void;
+	addMessageRange: (roomId: string, range: MessageRange) => void;
+	detectAndFillGaps: (roomId: string) => void;
+	enqueueBackfill: (roomId: string, request: BackfillRequest) => void;
+	setBackfillInProgress: (roomId: string, inProgress: boolean) => void;
+	processBackfillQueue: (roomId: string) => Promise<void>;
 };
 
 export type ChatRegistry = {
@@ -31,7 +35,9 @@ export type ChatRegistry = {
 	markers: { [userId: string]: Marker };
 	unread: number;
 	searchResults: TextMessage[];
-	searchResultHistory: { [searchedMessageId: string]: Message[] };
+	messageRanges?: MessageRange[];
+	backfillQueue?: BackfillRequest[];
+	backfillInProgress?: boolean;
 };
 
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
@@ -65,6 +71,19 @@ export type ConfigurationMessage = BasicMessage & {
 	from: string;
 	read: MarkerStatus;
 };
+
+export interface MessageRange {
+	oldestStanzaId: string;
+	newestStanzaId: string;
+	oldestTimestamp: number;
+	newestTimestamp: number;
+	count: number;
+}
+
+export interface BackfillRequest {
+	afterStanzaId: string;
+	beforeStanzaId: string;
+}
 
 export enum OperationType {
 	ROOM_NAME_CHANGED = 'roomNameChanged',

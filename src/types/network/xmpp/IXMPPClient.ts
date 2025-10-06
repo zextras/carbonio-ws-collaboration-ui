@@ -35,16 +35,12 @@ interface IXMMPClient {
 	requestMessageToForward(roomId: string, messageId: string, queryId: string): Promise<void>;
 	requestFullHistory(roomId: string, from?: number): void;
 	fullTextSearch(roomId: string, searchText: string): Promise<void>;
-	requestMessageResultHistoryFromId(
-		roomId: string,
-		stanzaId: string,
-		withRequestedId?: boolean
-	): void;
 	requestMessageResultHistoryToId(
 		roomId: string,
 		stanzaId: string,
 		withRequestedId?: boolean
 	): void;
+	requestHistoryBetweenTwoIds(roomId: string, afterStanzaId: string, beforeStanzaId: string): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

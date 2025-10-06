@@ -367,11 +367,16 @@ class XMPPClient implements IXMPPClient {
 		});
 	}
 
-	requestMessageResultHistoryFromId(
-		roomId: string,
-		stanzaId: string,
-		withRequestedId: boolean = false
-	): void {
+	/**
+	 * Request messages between two stanza IDs to fill gaps
+	 * @param roomId - Room identifier
+	 * @param afterStanzaId - Older message stanza ID (lower bound)
+	 * @param beforeStanzaId - Newer message stanza ID (upper bound)
+	 */
+	requestHistoryBetweenTwoIds(roomId: string, afterStanzaId: string, beforeStanzaId: string): void {
+		console.log('requestHistoryBetweenTwoIds', afterStanzaId, beforeStanzaId);
+		if (!useStore.getState().rooms[roomId]) return;
+
 		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
@@ -381,16 +386,19 @@ class XMPPClient implements IXMPPClient {
 			.t(Strophe.NS.MAM)
 			.up()
 			.up()
-			.c('field', { var: withRequestedId ? 'from-id' : 'after-id' })
+			.c('field', { var: 'from-id' })
 			.c('value')
-			.t(stanzaId);
+			.t(afterStanzaId)
+			.up()
+			.up()
+			.c('field', { var: 'to-id' })
+			.c('value')
+			.t(beforeStanzaId);
+
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: () => {
-				const newMessages = HistoryAccumulator.getHistoryMessages(queryId);
-				useStore.getState().updateSearchResultHistory(roomId, stanzaId, newMessages);
-			}
+			callback: (stanza) => onRequestHistory(stanza, queryId, undefined, true)
 		});
 	}
 
@@ -399,6 +407,7 @@ class XMPPClient implements IXMPPClient {
 		stanzaId: string,
 		withRequestedId: boolean = false
 	): void {
+		console.log('requestMessageResultHistoryToId', stanzaId, withRequestedId);
 		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
@@ -419,10 +428,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: () => {
-				const newMessages = HistoryAccumulator.getHistoryMessages(queryId);
-				useStore.getState().updateSearchResultHistory(roomId, stanzaId, newMessages);
-			}
+			callback: (stanza) => onRequestHistory(stanza, queryId, undefined, true)
 		});
 	}
 

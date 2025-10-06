@@ -7,7 +7,7 @@
 import { filter, forEach, size, unionBy } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { MessageRange, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { xmppDebug } from '../../../utils/debug';
 import { getId } from '../utility/decodeJid';
@@ -46,7 +46,12 @@ export function onHistoryMessageStanza(message: Element): true {
  * 6- Updates the last message read of all the members of a room
  *
  * */
-export function onRequestHistory(stanza: Element, queryId: string, unread?: number): void {
+export function onRequestHistory(
+	stanza: Element,
+	queryId: string,
+	unread?: number,
+	enableBackfill: boolean = false
+): void {
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
 	const fin = getRequiredTagElement(stanza, 'fin');
@@ -99,6 +104,31 @@ export function onRequestHistory(stanza: Element, queryId: string, unread?: numb
 	// Store history messages on store updating the history of the room
 	if (size(storeMessages) > 0) {
 		store.updateHistory(roomId, storeMessages);
+
+		const messagesWithStanzaId = storeMessages.filter(
+			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG && msg.stanzaId !== undefined
+		);
+		console.log(messagesWithStanzaId.map((msg) => msg.text));
+
+		if (messagesWithStanzaId.length > 0) {
+			const oldest = messagesWithStanzaId[0];
+			const newest = messagesWithStanzaId[messagesWithStanzaId.length - 1];
+
+			const rangeInfo: MessageRange = {
+				oldestStanzaId: oldest.stanzaId,
+				newestStanzaId: newest.stanzaId,
+				oldestTimestamp: oldest.date,
+				newestTimestamp: newest.date,
+				count: messagesWithStanzaId.length
+			};
+
+			store.addMessageRange(roomId, rangeInfo);
+
+			if (enableBackfill) {
+				store.detectAndFillGaps(roomId);
+				store.processBackfillQueue(roomId);
+			}
+		}
 	}
 
 	// Add message of creation room at the start of the history

@@ -27,18 +27,9 @@ const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 `;
 
 function useMessages(roomId: string): Message[] {
-	return useStore(({ chatsRegistry, activeConversations }) => {
-		console.log(chatsRegistry);
-		console.log(activeConversations);
-		const selectedSearchResult = activeConversations[roomId]?.selectedSearchResult;
-		if (selectedSearchResult === undefined) {
-			return chatsRegistry[roomId]?.messages || FALLBACK_MESSAGE_SELECTOR;
-		}
-
-		return (
-			chatsRegistry[roomId].searchResultHistory[selectedSearchResult] || FALLBACK_MESSAGE_SELECTOR
-		);
-	});
+	return useStore(
+		({ chatsRegistry }) => chatsRegistry[roomId]?.messages || FALLBACK_MESSAGE_SELECTOR
+	);
 }
 
 const Conversation = ({ roomId }: ConversationProps): ReactElement => {
