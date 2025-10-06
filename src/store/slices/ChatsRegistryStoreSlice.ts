@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign,no-plusplus */
 /*
  * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { concat, find, forEach, last, map, orderBy, remove, size, some, uniqBy } from 'lodash';
+import { find, forEach, last, map, orderBy, remove, size, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -30,7 +30,26 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore, isStrictlyBefore, now } from '../../utils/dateUtils';
+import { datesAreFromTheSameDay, isBefore } from '../../utils/dateUtils';
+
+function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
+	const result: T[] = [];
+	let i = 0;
+	let j = 0;
+
+	while (i < arr1.length && j < arr2.length) {
+		if (compareFn(arr1[i], arr2[j]) <= 0) {
+			result.push(arr1[i++]);
+		} else {
+			result.push(arr2[j++]);
+		}
+	}
+
+	while (i < arr1.length) result.push(arr1[i++]);
+	while (j < arr2.length) result.push(arr2[j++]);
+
+	return result;
+}
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
@@ -126,10 +145,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 
-				// Process only new messages in ascending order
-				const newMessages = orderBy(messageArray, ['date'], ['asc']).filter((msg) =>
-					isStrictlyBefore(msg.date, messages[0]?.date || now())
-				);
+				const newMessages = orderBy(messageArray, ['date'], ['asc']);
 
 				if (size(newMessages) > 0) {
 					// Add date between messages of different days
@@ -147,20 +163,21 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						return acc;
 					}, []);
 
-					// Remove old first date message if the last message of the new history has the same date
-					if (
-						messages[0]?.type === MessageType.DATE_MSG &&
-						datesAreFromTheSameDay(messages[0].date, last(newMessagesWithDates)?.date ?? 0)
-					) {
-						remove(messages, (message) => message.id === messages[0].id);
-					}
-
-					draft.chatsRegistry[roomId].messages = concat(
+					const merged = mergeSortedArrays(
 						newMessagesWithDates,
-						draft.chatsRegistry[roomId].messages
+						messages,
+						(a, b) => a.date - b.date
 					);
 
-					// Check for duplicates and remove them (inbox can contain duplicates for date differentiation)
+					draft.chatsRegistry[roomId].messages = merged.filter((msg, index, arr) => {
+						if (msg.type !== MessageType.DATE_MSG) return true;
+						if (index > 0 && arr[index - 1].type === MessageType.DATE_MSG) {
+							return !datesAreFromTheSameDay(msg.date, arr[index - 1].date);
+						}
+						return true;
+					});
+
+					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(draft.chatsRegistry[roomId].messages, 'id');
 				}
 			}),
