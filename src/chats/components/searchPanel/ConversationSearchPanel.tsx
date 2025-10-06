@@ -51,6 +51,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 	const [activeSearchText, setActiveSearchText] = useState<string>('');
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
+	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	const search = useCallback(() => {
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
@@ -210,7 +211,10 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 						type="ghost"
 						size="large"
 						color="secondary"
-						onClick={toggleSearchPanel}
+						onClick={() => {
+							toggleSearchPanel();
+							clearSearchResults(roomId);
+						}}
 						icon="ArrowBack"
 					/>
 				</Tooltip>

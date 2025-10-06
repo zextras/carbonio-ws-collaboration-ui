@@ -33,7 +33,6 @@ import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { Message } from '../../../types/store/ChatsRegistryTypes';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -43,15 +42,9 @@ type ChatsProps = {
 	roomId: string;
 	setInfoPanelOpen?: Dispatch<SetStateAction<boolean>>;
 	toggleSearchPanel?: () => void;
-	messages: Message[];
 };
 
-const Chat = ({
-	roomId,
-	setInfoPanelOpen,
-	toggleSearchPanel,
-	messages
-}: ChatsProps): ReactElement => {
+const Chat = ({ roomId, setInfoPanelOpen, toggleSearchPanel }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
@@ -168,7 +161,7 @@ const Chat = ({
 					toggleSearchPanel={toggleSearchPanel}
 				/>
 			)}
-			<MessagesList roomId={roomId} messages={messages} />
+			<MessagesList roomId={roomId} />
 			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
 		</CustomContainer>
 	);

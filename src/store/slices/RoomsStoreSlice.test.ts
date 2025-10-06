@@ -87,7 +87,6 @@ describe('RoomsStoreSlice tests', () => {
 						fastenings: {},
 						markers: {},
 						searchResults: [],
-						searchResultHistory: {},
 						unread: 0
 					}
 				}

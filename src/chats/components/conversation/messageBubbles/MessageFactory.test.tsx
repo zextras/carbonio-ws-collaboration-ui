@@ -30,8 +30,7 @@ describe('Message Factory', () => {
 		const message = createMockTextMessage();
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={message.roomId}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -49,8 +48,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -68,8 +66,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -89,8 +86,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -108,8 +104,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -129,8 +124,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -150,8 +144,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}

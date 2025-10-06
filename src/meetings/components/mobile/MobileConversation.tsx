@@ -10,7 +10,6 @@ import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import Chat from '../../../chats/components/conversation/Chat';
-import { getMessagesSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { WrapperMeetingChat } from '../sidebar/MeetingConversationAccordion/MeetingConversationAccordion';
@@ -20,7 +19,6 @@ const MobileConversation = ({ meetingId }: { meetingId: string }): ReactElement 
 	const chatLabel = t('chat', 'Chat');
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const messages = useStore((store) => getMessagesSelector(store, roomId!));
 
 	if (!roomId) return null;
 	return (
@@ -29,7 +27,7 @@ const MobileConversation = ({ meetingId }: { meetingId: string }): ReactElement 
 				<Text>{chatLabel}</Text>
 			</Padding>
 			<WrapperMeetingChat $darkModeActive>
-				<Chat roomId={roomId} messages={messages} />
+				<Chat roomId={roomId} />
 			</WrapperMeetingChat>
 		</Container>
 	);

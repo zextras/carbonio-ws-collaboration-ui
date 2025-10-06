@@ -12,9 +12,6 @@ import { Container } from '@zextras/carbonio-design-system';
 import Chat from './Chat';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { FALLBACK_MESSAGE_SELECTOR } from '../../../store/selectors/ChatsRegistrySelectors';
-import useStore from '../../../store/Store';
-import { Message } from '../../../types/store/ChatsRegistryTypes';
 import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
@@ -25,12 +22,6 @@ const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 	background-image: url('${({ $darkModeActive }): string =>
 		$darkModeActive ? papyrusDark : papyrus}');
 `;
-
-function useMessages(roomId: string): Message[] {
-	return useStore(
-		({ chatsRegistry }) => chatsRegistry[roomId]?.messages || FALLBACK_MESSAGE_SELECTOR
-	);
-}
 
 const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
@@ -53,8 +44,6 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 		}
 	}, [isDesktopView]);
 
-	const messages = useMessages(roomId);
-
 	return (
 		<ConversationWrapper
 			data-testid={`ConversationWrapper-${roomId}`}
@@ -67,7 +56,6 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 					roomId={roomId}
 					setInfoPanelOpen={setInfoPanelOpen}
 					toggleSearchPanel={toggleSearchPanel}
-					messages={messages}
 				/>
 			)}
 			{(isDesktopView || infoPanelOpen || searchPanelOpen) && (

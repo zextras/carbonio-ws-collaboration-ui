@@ -16,10 +16,7 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import useDarkReader from '../../../../hooks/useDarkReader';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
-import {
-	getMessagesSelector,
-	getRoomUnreadSelector
-} from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
 	getRoomTypeSelector
@@ -62,7 +59,6 @@ const CustomLargeButton = styled(Button)`
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const extendChatLabel = t('meeting.extendChat', 'Extend chat');
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
@@ -200,7 +196,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					height="fill"
 					$darkModeActive={darkReaderStatus}
 				>
-					<Chat roomId={roomId} messages={messages} />
+					<Chat roomId={roomId} />
 				</WrapperMeetingChat>
 			)}
 		</ChatContainer>

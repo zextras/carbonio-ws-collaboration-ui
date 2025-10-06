@@ -190,7 +190,6 @@ export const useRoomsStoreSlice: StateCreator<
 					fastenings: {},
 					markers: {},
 					searchResults: [],
-					searchResultHistory: {},
 					unread: 0
 				};
 			}),

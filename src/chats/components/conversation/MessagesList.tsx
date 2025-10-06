@@ -22,6 +22,7 @@ import {
 	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import {
+	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
@@ -47,12 +48,12 @@ const MessagesListWrapper = styled(Container)`
 
 type ConversationProps = {
 	roomId: string;
-	messages: Message[];
 };
 
-const MessagesList = ({ roomId, messages: roomMessages }: ConversationProps): ReactElement => {
+const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
+	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const setScrollPosition = useStore((store) => store.setScrollPosition);
