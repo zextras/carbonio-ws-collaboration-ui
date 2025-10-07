@@ -136,7 +136,7 @@ const ConversationHeader = ({
 						<Button
 							type="ghost"
 							onClick={() => setConversationView(ConversationView.SEARCH)}
-							color="secondary"
+							color="gray0"
 							size="large"
 							minWidth="large"
 							icon="Search"
@@ -150,7 +150,7 @@ const ConversationHeader = ({
 							onClick={() =>
 								setConversationView(isDesktopView ? ConversationView.CHAT : ConversationView.INFO)
 							}
-							color="secondary"
+							color="gray0"
 							size="large"
 							minWidth="large"
 							icon="InfoOutline"

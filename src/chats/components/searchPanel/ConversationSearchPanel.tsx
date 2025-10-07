@@ -199,7 +199,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 							size="large"
 							minWidth="large"
 							icon="BackspaceOutline"
-							color="secondary"
+							color="gray0"
 							onClick={() => {
 								setSearchText('');
 								setRequestStatus(RequestStatus.IDLE);
@@ -211,7 +211,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					type="ghost"
 					size="large"
 					minWidth="large"
-					color="secondary"
+					color="gray0"
 					onClick={search}
 					icon="Search"
 					disabled={isSearchDisabled}
@@ -221,7 +221,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 						<Button
 							type="ghost"
 							onClick={goToChatView}
-							color="secondary"
+							color="gray0"
 							size="large"
 							minWidth="large"
 							icon="MessageCircleOutline"

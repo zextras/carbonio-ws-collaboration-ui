@@ -71,7 +71,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, goToCha
 						<Button
 							type="ghost"
 							onClick={goToChatView}
-							color="secondary"
+							color="gray0"
 							size="large"
 							icon="MessageCircleOutline"
 						/>
