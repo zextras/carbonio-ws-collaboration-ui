@@ -85,8 +85,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			lastMessageOfRoom &&
 			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
 			!lastMessageOfRoom.deleted &&
-			lastMessageOfRoom.from === sessionId &&
-			!isWritingLabel
+			lastMessageOfRoom.from === sessionId
 		) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.READ:
@@ -102,7 +101,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			}
 		}
 		return undefined;
-	}, [lastMessageOfRoom, sessionId, isWritingLabel]);
+	}, [lastMessageOfRoom, sessionId]);
 
 	const dropdownTooltip = useMemo(() => {
 		if (
@@ -164,15 +163,59 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		return undefined;
 	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
 
-	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if (isWritingLabel === undefined && lastMessageOfRoom) {
-			return setLastMessageRoomText;
+	const iconToDisplay = useMemo(() => {
+		if (isWritingLabel) return null;
+
+		if (draftMessage) {
+			return (
+				<Tooltip label={draftTooltip} maxWidth="12.5rem">
+					<Container width="fit" padding={{ right: 'extrasmall' }}>
+						<Icon size="small" icon="Edit2" color="gray" />
+					</Container>
+				</Tooltip>
+			);
 		}
-		if (isWritingLabel !== undefined) {
+
+		if (ackIcon && showMessageReads) {
+			return (
+				<Tooltip label={dropdownTooltip}>
+					<Container width="fit" padding={{ right: 'extrasmall' }}>
+						{ackIcon}
+					</Container>
+				</Tooltip>
+			);
+		}
+
+		if (lastMessageOfRoom?.type === MessageType.TEXT_MSG && lastMessageOfRoom.attachment) {
+			return (
+				<Container width="fit" padding={{ right: 'extrasmall' }}>
+					<Icon size="small" icon="FileTextOutline" color="gray" />
+				</Container>
+			);
+		}
+		return null;
+	}, [
+		isWritingLabel,
+		draftMessage,
+		draftTooltip,
+		ackIcon,
+		showMessageReads,
+		dropdownTooltip,
+		lastMessageOfRoom
+	]);
+
+	const messageToDisplay = useMemo((): React.JSX.Element | string | undefined => {
+		if (isWritingLabel) {
 			return isWritingLabel;
 		}
+		if (draftMessage) {
+			return draftMessage;
+		}
+		if (lastMessageOfRoom) {
+			return setLastMessageRoomText;
+		}
 		return undefined;
-	}, [isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
+	}, [draftMessage, isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
 
 	const UnreadCounter = useMemo(
 		() =>
@@ -218,27 +261,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
 					<Text size="small">{roomName}</Text>
 					<Container width="fill" height="1rem" orientation="horizontal" mainAlignment="flex-start">
-						{draftMessage && (
-							<Tooltip label={draftTooltip} maxWidth="12.5rem">
-								<Container width="fit" padding={{ right: 'extrasmall' }}>
-									<Icon size="small" icon="Edit2" color="gray" />
-								</Container>
-							</Tooltip>
-						)}
-						{!draftMessage && ackIcon && showMessageReads && (
-							<Tooltip label={dropdownTooltip}>
-								<Container width="fit" padding={{ right: 'extrasmall' }}>
-									{ackIcon}
-								</Container>
-							</Tooltip>
-						)}
-						{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
-							lastMessageOfRoom.attachment &&
-							!isWritingLabel && (
-								<Container width="fit" padding={{ right: 'extrasmall' }}>
-									<Icon size="small" icon="FileTextOutline" color="gray" />
-								</Container>
-							)}
+						{iconToDisplay}
 						<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
 							{messageToDisplay}
 						</Text>

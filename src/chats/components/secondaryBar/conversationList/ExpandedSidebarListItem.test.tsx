@@ -67,13 +67,6 @@ const mockedOneToOne: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 });
 
-const mockedTextMessageSentByMeIntoOneToOne = createMockTextMessage({
-	id: 'idSimpleTextMessage',
-	roomId: mockedOneToOne.id,
-	read: MarkerStatus.READ,
-	from: user1Be.id
-});
-
 const mockedTextMessageSentByMeIntoGroup = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: mockedGroup.id,
@@ -160,104 +153,86 @@ beforeEach(() => {
 });
 
 describe('Expanded sidebar list item', () => {
+	describe('ACK status', () => {
+		describe('carbonioWscShowMessageReads = true', () => {
+			test('User is sending a message but it is in pending state', async () => {
+				const store: RootStore = useStore.getState();
+				store.setPlaceholderMessage({
+					roomId: mockedTextMessageUnread.roomId,
+					id: mockedTextMessageUnread.id,
+					text: mockedTextMessageUnread.text
+				});
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.getByTestId('icon: ClockOutline')).toBeVisible();
+				expect(screen.getByText(mockedTextMessageUnread.text)).toBeVisible();
+			});
+
+			test('User sent a message', async () => {
+				const store: RootStore = useStore.getState();
+				store.newMessage(mockedTextMessageUnread);
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.getByTestId('icon: Checkmark')).toBeVisible();
+				expect(screen.getByText(mockedTextMessageUnread.text)).toBeVisible();
+			});
+
+			test('User sent a message and someone read it', async () => {
+				const store: RootStore = useStore.getState();
+				store.newMessage(mockedTextMessageReadBySomeone);
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.getByTestId(iconDoneAll)).toBeVisible();
+				expect(screen.getByText(mockedTextMessageReadBySomeone.text)).toBeVisible();
+			});
+
+			test('User sent a message and everyone read it', async () => {
+				const store: RootStore = useStore.getState();
+				store.newMessage(mockedTextMessageRead);
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.getByTestId(iconDoneAll)).toBeVisible();
+				expect(screen.getByText(mockedTextMessageRead.text)).toBeVisible();
+			});
+		});
+
+		describe('carbonioWscShowMessageReads = false', () => {
+			test('User is sending a message but it is in pending state', async () => {
+				const store: RootStore = useStore.getState();
+				store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
+				store.setPlaceholderMessage({
+					roomId: mockedTextMessageUnread.roomId,
+					id: mockedTextMessageUnread.id,
+					text: mockedTextMessageUnread.text
+				});
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.getByTestId('icon: ClockOutline')).toBeVisible();
+				expect(screen.getByText(mockedTextMessageUnread.text)).toBeVisible();
+			});
+
+			test('User sent a message', async () => {
+				const store: RootStore = useStore.getState();
+				store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
+				store.newMessage(mockedTextMessageUnread);
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
+				expect(screen.getByText(mockedTextMessageUnread.text)).toBeInTheDocument();
+			});
+
+			test('User sent a message and someone read it', async () => {
+				const store: RootStore = useStore.getState();
+				store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
+				store.newMessage(mockedTextMessageReadBySomeone);
+				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+				expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
+				expect(screen.getByText(mockedTextMessageReadBySomeone.text)).toBeVisible();
+			});
+		});
+	});
+
 	describe('Group List Item', () => {
-		test('User cannot see message reads - I sent a message but it is in pending state', async () => {
-			const store: RootStore = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
-			store.setPlaceholderMessage({
-				roomId: mockedTextMessageUnread.roomId,
-				id: mockedTextMessageUnread.id,
-				text: mockedTextMessageUnread.text
-			});
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const ackIcon = screen.getByTestId('icon: ClockOutline');
-			const message = screen.getByText(mockedTextMessageUnread.text);
-			expect(ackIcon).toBeInTheDocument();
-			expect(message).toBeInTheDocument();
-		});
-
-		test('User cannot see message reads - I sent a message', async () => {
-			const store: RootStore = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
-			store.newMessage(mockedTextMessageUnread);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
-			const message = screen.getByText(mockedTextMessageUnread.text);
-			expect(message).toBeInTheDocument();
-		});
-
-		test('User cannot see message reads - I sent a message and someone read it', async () => {
-			const store: RootStore = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
-			store.newMessage(mockedTextMessageReadBySomeone);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
-			const message = screen.getByText(mockedTextMessageReadBySomeone.text);
-			expect(message).toBeInTheDocument();
-		});
-
-		test('I sent a message but it is in pending state', async () => {
-			const store: RootStore = useStore.getState();
-			store.setPlaceholderMessage({
-				roomId: mockedTextMessageUnread.roomId,
-				id: mockedTextMessageUnread.id,
-				text: mockedTextMessageUnread.text
-			});
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const ackIcon = screen.getByTestId('icon: ClockOutline');
-			const message = screen.getByText(mockedTextMessageUnread.text);
-			expect(ackIcon).toBeInTheDocument();
-			expect(message).toBeInTheDocument();
-		});
-
-		test('I sent a message', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageUnread);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const ackIcon = screen.getByTestId('icon: Checkmark');
-			const message = screen.getByText(mockedTextMessageUnread.text);
-			expect(ackIcon).toBeInTheDocument();
-			expect(message).toBeInTheDocument();
-		});
-
-		test('I sent a message and someone read it', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageReadBySomeone);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const ackIcon = screen.getByTestId(iconDoneAll);
-			const message = screen.getByText(mockedTextMessageReadBySomeone.text);
-			expect(ackIcon).toBeInTheDocument();
-			expect(message).toBeInTheDocument();
-		});
-
-		test('I sent a message and everyone read it', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageRead);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const ackIcon = screen.getByTestId(iconDoneAll);
-			const message = screen.getByText(mockedTextMessageRead.text);
-			expect(ackIcon).toBeInTheDocument();
-			expect(message).toBeInTheDocument();
-		});
-
-		test('user2 sent a message', async () => {
+		test('A user of a group sent a message', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageSentBySomeoneElse);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			const message = `${user2Be.name}: ${mockedTextMessageSentBySomeoneElse.text}`;
-			const messageDisplayed = screen.getByText(message);
-			expect(messageDisplayed).toBeInTheDocument();
-		});
-
-		test('Check if there is the draft message', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageRead);
-			store.setDraftMessage(mockedGroup.id, 'hi everyone!');
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const IconWithDraft = screen.getByTestId('icon: Edit2');
-			expect(IconWithDraft).toBeVisible();
-			const lastMessageOfConversation = screen.getByText(mockedTextMessageRead.text);
-			expect(lastMessageOfConversation).toBeVisible();
+			expect(screen.getByText(message)).toBeVisible();
 		});
 
 		test('Added a new member message', () => {
@@ -280,17 +255,60 @@ describe('Expanded sidebar list item', () => {
 				)
 			).toBeVisible();
 		});
+	});
 
-		test('While user is typing nothing else is display if last message is an attachment', async () => {
+	describe('One to One List Item', () => {
+		test('Other user sent a message', async () => {
 			const store: RootStore = useStore.getState();
-			store.newMessage(mockedAttachmentMessage);
-			store.setIsWriting(mockedGroup.id, user2Be.id, true);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			const imageIcon = screen.queryByTestId('icon: FileTextOutline');
-			expect(imageIcon).not.toBeInTheDocument();
+			store.newMessage(mockedTextMessageSentByOther);
+			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
+			expect(screen.getByText(`${mockedTextMessageSentByOther.text}`)).toBeVisible();
 		});
 
-		test('Last message sent by me, read by all and someone is typing -> after typing everything is display correct', async () => {
+		test('when another user is typing, "is typing" message is rendered without an attachment icon', async () => {
+			const store: RootStore = useStore.getState();
+			store.newMessage(mockedAttachmentMessage);
+			store.setIsWriting(mockedOneToOne.id, user2Be.id, true);
+			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
+			expect(screen.queryByTestId('icon: FileTextOutline')).not.toBeInTheDocument();
+			expect(screen.queryByText(mockedAttachmentMessage.attachment!.name)).not.toBeInTheDocument();
+			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
+		});
+	});
+
+	describe('Icon and message', () => {
+		test('draft message situation', async () => {
+			const store: RootStore = useStore.getState();
+			store.newMessage(mockedTextMessageRead);
+			const draftMessage = 'hi everyone!';
+			store.setDraftMessage(mockedGroup.id, draftMessage);
+			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+			expect(screen.getByTestId('icon: Edit2')).toBeVisible();
+			expect(screen.getByText(draftMessage)).toBeVisible();
+		});
+
+		test('should not render the attachment icon if there is a draft content and the last message is an attachment', async () => {
+			const store: RootStore = useStore.getState();
+			store.newMessage(mockedAttachmentMessage);
+			store.setDraftMessage(mockedGroup.id, 'draft');
+			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+			expect(screen.queryByTestId('icon: FileTextOutline')).not.toBeInTheDocument();
+		});
+
+		test('when another user is typing and there is a draft, "is typing" message is rendered without an draft icon', async () => {
+			const store: RootStore = useStore.getState();
+			store.newMessage(mockedTextMessageRead);
+			const draftMessage = 'hi everyone!';
+			store.setDraftMessage(mockedGroup.id, draftMessage);
+			store.setIsWriting(mockedGroup.id, user2Be.id, true);
+			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+
+			expect(screen.queryByTestId('icon: Edit2')).not.toBeInTheDocument();
+			expect(screen.queryByText(draftMessage)).not.toBeInTheDocument();
+			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
+		});
+
+		test('when another user stops typing, after 7 seconds the last message sent is rendered', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageSentByMeIntoGroup);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -304,7 +322,7 @@ describe('Expanded sidebar list item', () => {
 					})
 				);
 			});
-			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeInTheDocument();
+			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				onComposingMessageStanza.call(
@@ -317,97 +335,11 @@ describe('Expanded sidebar list item', () => {
 				);
 			});
 			jest.advanceTimersByTime(7000);
-			const ackIcon = screen.getByTestId(iconDoneAll);
-			expect(ackIcon).toBeInTheDocument();
+			expect(screen.getByTestId(iconDoneAll)).toBeVisible();
 			const messageContent = screen.getByText(
 				new RegExp(`${mockedTextMessageSentByMeIntoGroup.text}`, 'i')
 			);
-			expect(messageContent).toBeInTheDocument();
-		});
-	});
-
-	describe('One to One List Item', () => {
-		test('I sent a message', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMeIntoOneToOne.text}`);
-			const ackIcon = screen.getByTestId(iconDoneAll);
-			expect(ackIcon).toBeInTheDocument();
-			expect(messageDisplayed).toBeInTheDocument();
-		});
-
-		test('User cannot see message reads - I sent a message', async () => {
-			const store: RootStore = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
-			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMeIntoOneToOne.text}`);
-			expect(messageDisplayed).toBeInTheDocument();
-			expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
-		});
-
-		test('User2 sent a message', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageSentByOther);
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			const messageDisplayed = screen.getByText(`${mockedTextMessageSentByOther.text}`);
-			expect(messageDisplayed).toBeInTheDocument();
-		});
-
-		test('Check if there is the draft message', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageSentByOther);
-			store.setDraftMessage(mockedOneToOne.id, 'hi everyone!');
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			const IconWithDraft = screen.getByTestId('icon: Edit2');
-			expect(IconWithDraft).toBeVisible();
-			const lastMessageOfConversation = screen.getByText(mockedTextMessageSentByOther.text);
-			expect(lastMessageOfConversation).toBeVisible();
-		});
-
-		test('While user is typing nothing else is display if last message is an attachment', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedAttachmentMessage);
-			store.setIsWriting(mockedOneToOne.id, user2Be.id, true);
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			const imageIcon = screen.queryByTestId('icon: FileTextOutline');
-			expect(imageIcon).not.toBeInTheDocument();
-		});
-
-		test('Last message sent by me, read by all and someone is typing -> after typing everything is display correct', async () => {
-			const store: RootStore = useStore.getState();
-			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
-			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
-			act(() => {
-				onComposingMessageStanza.call(
-					useStore.getState().connections.xmppClient,
-					buildComposingStanza({
-						roomId: mockedOneToOne.id,
-						from: user2Be.id,
-						isWriting: true
-					})
-				);
-			});
-			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeInTheDocument();
-			jest.advanceTimersByTime(3000);
-			act(() => {
-				onComposingMessageStanza.call(
-					useStore.getState().connections.xmppClient,
-					buildComposingStanza({
-						roomId: mockedOneToOne.id,
-						from: user2Be.id,
-						isWriting: false
-					})
-				);
-			});
-			jest.advanceTimersByTime(7000);
-			const ackIcon = screen.getByTestId(iconDoneAll);
-			expect(ackIcon).toBeInTheDocument();
-			const messageContent = screen.getByText(
-				new RegExp(`${mockedTextMessageSentByMeIntoOneToOne.text}`, 'i')
-			);
-			expect(messageContent).toBeInTheDocument();
+			expect(messageContent).toBeVisible();
 		});
 	});
 });
