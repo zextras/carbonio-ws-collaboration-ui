@@ -6,7 +6,15 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { FC, useCallback, useState, useMemo } from 'react';
 
-import { Button, Container, Icon, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Icon,
+	Input,
+	Text,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
@@ -18,7 +26,6 @@ import { RoomType } from '../../../types/store/RoomTypes';
 enum RequestStatus {
 	IDLE = 'idle',
 	LOADING = 'loading',
-	ERROR = 'error',
 	SUCCESS = 'success'
 }
 
@@ -33,6 +40,8 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 
 	const isDesktopView = useMediaQueryCheck();
 
+	const createSnackbar = useSnackbar();
+
 	// TODO translation keys
 	const [t] = useTranslation();
 	const inputLabel = t('', 'Search messages');
@@ -41,12 +50,11 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 		personName: roomName
 	});
 	const searchingLabel = t('', 'Searching...');
-	const error1Label = t('', 'An error occurred while searching messages.');
-	const error2Label = t('', 'Please try again.');
 	const noResults1Label = t('', 'It looks like there are no results.');
 	const noResults2Label = t('', 'Keep searching!');
 	const messagesTooltip = t('conversationInfo.messages', 'Messages');
 	const clearSearchTooltip = t('', 'Clear search');
+	const errorSnackbarLabel = t('', 'Something went wrong with the search. Please try again.');
 
 	const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.IDLE);
 	const [searchText, setSearchText] = useState<string>('');
@@ -65,9 +73,14 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 				setRequestStatus(RequestStatus.SUCCESS);
 			})
 			.catch(() => {
-				setRequestStatus(RequestStatus.ERROR);
+				setRequestStatus(RequestStatus.IDLE);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: errorSnackbarLabel
+				});
 			});
-	}, [requestStatus, roomId, searchText]);
+	}, [createSnackbar, errorSnackbarLabel, requestStatus, roomId, searchText]);
 
 	const searchResults = useMemo(
 		() =>
@@ -106,30 +119,6 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 						</Text>
 					</>
 				);
-			case RequestStatus.ERROR:
-				return (
-					<>
-						<Icon icon="CloseCircleOutline" color="secondary" size="large" />
-						<Text
-							weight="bold"
-							color="secondary"
-							size="large"
-							overflow="break-word"
-							textAlign="center"
-						>
-							{error1Label}
-						</Text>
-						<Text
-							weight="bold"
-							color="secondary"
-							size="large"
-							overflow="break-word"
-							textAlign="center"
-						>
-							{error2Label}
-						</Text>
-					</>
-				);
 			case RequestStatus.SUCCESS:
 				if (results && results.length > 0) {
 					return (
@@ -158,8 +147,6 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 				return null;
 		}
 	}, [
-		error1Label,
-		error2Label,
 		noResults1Label,
 		noResults2Label,
 		requestStatus,
@@ -183,7 +170,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 				height="3rem"
 				orientation="horizontal"
 				padding={{ vertical: 'small', right: 'small' }}
-				gap="0.5rem"
+				gap="0.25rem"
 			>
 				<Input
 					label={inputLabel}

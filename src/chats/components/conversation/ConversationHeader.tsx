@@ -127,7 +127,7 @@ const ConversationHeader = ({
 					</CustomIsWritingText>
 				</Container>
 			</Row>
-			<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.5rem">
+			<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.25rem">
 				{videoCallEnabled && !isPlaceholderRoom && (
 					<ConversationHeaderMeetingButton roomId={roomId} />
 				)}
