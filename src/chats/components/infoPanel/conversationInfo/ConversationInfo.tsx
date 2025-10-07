@@ -20,17 +20,16 @@ import { Member, RoomType } from '../../../../types/store/RoomTypes';
 type ConversationInfoProps = {
 	roomId: string;
 	roomType: string;
-	toggleInfoPanel: () => void;
+	goToChatView: () => void;
 };
 
 const InfoHeader = styled(Container)`
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
-	height: 3rem;
 	-webkit-user-select: none;
 	user-select: none;
 `;
 
-const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, toggleInfoPanel }) => {
+const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, goToChatView }) => {
 	const [t] = useTranslation();
 	const messagesTooltip = t('conversationInfo.messages', 'Messages');
 	const infoLabel = t('conversationInfo.info', 'Info');
@@ -55,13 +54,14 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, toggleI
 	}, [roomType, memberId, roomId]);
 
 	return (
-		<Container orientation="vertical">
+		<Container orientation="vertical" height="fit">
 			<InfoHeader
-				background={'gray5'}
+				background="gray5"
+				height="3rem"
 				borderRadius="none"
 				orientation="horizontal"
 				mainAlignment="space-between"
-				padding={{ vertical: 'medium', horizontal: 'large' }}
+				padding={{ vertical: 'small', right: 'small', left: 'large' }}
 			>
 				<Text title={infoLabel} overflow="ellipsis">
 					{infoLabel}
@@ -70,8 +70,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, toggleI
 					<Tooltip label={messagesTooltip}>
 						<Button
 							type="ghost"
-							data-testid="closeInfoPanel"
-							onClick={toggleInfoPanel}
+							onClick={goToChatView}
 							color="secondary"
 							size="large"
 							icon="MessageCircleOutline"

@@ -3,13 +3,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
+/* eslint-disable jsx-a11y/no-autofocus */
 import React, { FC, useCallback, useState, useMemo } from 'react';
 
 import { Button, Container, Icon, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
+import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -23,15 +24,14 @@ enum RequestStatus {
 
 type ConversationSearchPanelProps = {
 	roomId: string;
-	toggleSearchPanel: () => void;
+	goToChatView: () => void;
 };
 
-const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
-	roomId,
-	toggleSearchPanel
-}) => {
+const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goToChatView }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
+
+	const isDesktopView = useMediaQueryCheck();
 
 	// TODO translation keys
 	const [t] = useTranslation();
@@ -45,13 +45,14 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 	const error2Label = t('', 'Please try again.');
 	const noResults1Label = t('', 'It looks like there are no results.');
 	const noResults2Label = t('', 'Keep searching!');
+	const messagesTooltip = t('conversationInfo.messages', 'Messages');
+	const clearSearchTooltip = t('', 'Clear search');
 
 	const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.IDLE);
 	const [searchText, setSearchText] = useState<string>('');
 	const [activeSearchText, setActiveSearchText] = useState<string>('');
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
-	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	const search = useCallback(() => {
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
@@ -170,27 +171,6 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 		searchingLabel
 	]);
 
-	const cancelIcon = useMemo(
-		() =>
-			function icon(): React.JSX.Element | undefined {
-				if (searchText) {
-					return (
-						<Button
-							type="ghost"
-							icon="Close"
-							color="secondary"
-							onClick={() => {
-								setSearchText('');
-								setRequestStatus(RequestStatus.IDLE);
-							}}
-						/>
-					);
-				}
-				return undefined;
-			},
-		[searchText]
-	);
-
 	const isSearchDisabled = useMemo(
 		() => !searchText.trim() || requestStatus === RequestStatus.LOADING,
 		[requestStatus, searchText]
@@ -202,39 +182,54 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({
 				background="gray5"
 				height="3rem"
 				orientation="horizontal"
-				padding={{ horizontal: 'medium', vertical: 'small' }}
+				padding={{ vertical: 'small', right: 'small' }}
 				gap="0.5rem"
 			>
-				{/* TODO: add key translation */}
-				<Tooltip label={t('', 'Close search')} placement={'top'}>
-					<Button
-						type="ghost"
-						size="large"
-						color="secondary"
-						onClick={() => {
-							toggleSearchPanel();
-							clearSearchResults(roomId);
-						}}
-						icon="ArrowBack"
-					/>
-				</Tooltip>
 				<Input
 					label={inputLabel}
 					value={searchText}
 					onChange={(e) => setSearchText(e.target.value)}
-					CustomIcon={cancelIcon}
 					onEnter={isSearchDisabled ? undefined : search}
+					autoFocus
 				/>
+				{searchText && (
+					<Tooltip label={clearSearchTooltip}>
+						<Button
+							type="ghost"
+							size="large"
+							minWidth="large"
+							icon="BackspaceOutline"
+							color="secondary"
+							onClick={() => {
+								setSearchText('');
+								setRequestStatus(RequestStatus.IDLE);
+							}}
+						/>
+					</Tooltip>
+				)}
 				<Button
 					type="ghost"
 					size="large"
+					minWidth="large"
 					color="secondary"
 					onClick={search}
 					icon="Search"
 					disabled={isSearchDisabled}
 				/>
+				{!isDesktopView && (
+					<Tooltip label={messagesTooltip}>
+						<Button
+							type="ghost"
+							onClick={goToChatView}
+							color="secondary"
+							size="large"
+							minWidth="large"
+							icon="MessageCircleOutline"
+						/>
+					</Tooltip>
+				)}
 			</Container>
-			<Container padding="small" gap="0.5rem" width="fill" style={{ overflow: 'scroll' }}>
+			<Container padding="small" gap="0.5rem" width="fill" style={{ overflowY: 'auto' }}>
 				{resultsComponents}
 			</Container>
 		</Container>

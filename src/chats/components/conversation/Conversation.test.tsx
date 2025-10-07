@@ -61,6 +61,8 @@ const user2Info: User = createMockUser({
 	name: 'User 2'
 });
 
+const InfoIconTestId = 'icon: InfoOutline';
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
@@ -70,29 +72,18 @@ beforeEach(() => {
 
 describe('Conversation view', () => {
 	test('Display conversation view on small screen and toggle info panel', async () => {
-		mockUseMediaQueryCheck.mockReturnValueOnce(true);
+		mockUseMediaQueryCheck.mockReturnValue(false);
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
-		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
-		expect(conversationCollapsedView).toBeInTheDocument();
-		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
-		expect(infoPanelToggle).toBeInTheDocument();
-		await user.click(infoPanelToggle);
+		await user.click(screen.getByTestId(InfoIconTestId));
 		expect(screen.getByText('Info')).toBeInTheDocument();
-		const closeInfoPanel = screen.getByTestId('closeInfoPanel');
-		expect(closeInfoPanel).toBeInTheDocument();
-		await user.click(closeInfoPanel);
-		const infoPanelToggleVisibleAgain = screen.getByTestId('infoPanelToggle');
-		expect(infoPanelToggleVisibleAgain).toBeInTheDocument();
+		await user.click(screen.getByTestId('icon: MessageCircleOutline'));
+		expect(screen.getByTestId(InfoIconTestId)).toBeInTheDocument();
 	});
 
 	test('Display info panel and check data are visible', async () => {
-		mockUseMediaQueryCheck.mockReturnValueOnce(true);
+		mockUseMediaQueryCheck.mockReturnValue(false);
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
-		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
-		expect(conversationCollapsedView).toBeInTheDocument();
-		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
-		expect(infoPanelToggle).toBeInTheDocument();
-		await user.click(infoPanelToggle);
+		await user.click(screen.getByTestId(InfoIconTestId));
 		expect(screen.getByText('Info')).toBeInTheDocument();
 		const userName = screen.getByText(/User 2/i);
 		expect(userName).toBeInTheDocument();

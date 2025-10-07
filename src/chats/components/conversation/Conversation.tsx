@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
@@ -23,25 +23,26 @@ const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 		$darkModeActive ? papyrusDark : papyrus}');
 `;
 
+const LeftPanelContainer = styled(Container)`
+	border-left: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
+`;
+
+export enum ConversationView {
+	CHAT = 'chat',
+	INFO = 'info',
+	SEARCH = 'search'
+}
+
 const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
 	const { darkReaderStatus } = useDarkReader();
 
-	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
-	const [searchPanelOpen, setSearchPanelOpen] = useState(false);
-
-	const toggleInfoPanel = useCallback(() => {
-		setInfoPanelOpen((prevState) => !prevState);
-	}, []);
-
-	const toggleSearchPanel = useCallback(() => {
-		setSearchPanelOpen((prevState) => !prevState);
-	}, []);
+	const [conversationView, setConversationView] = useState<ConversationView>(ConversationView.CHAT);
 
 	useEffect(() => {
-		if (isDesktopView) {
-			setInfoPanelOpen(false);
-		}
+		setConversationView((prevState) =>
+			prevState === ConversationView.SEARCH ? prevState : ConversationView.CHAT
+		);
 	}, [isDesktopView]);
 
 	return (
@@ -51,21 +52,27 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 			orientation="horizontal"
 			$darkModeActive={darkReaderStatus}
 		>
-			{(isDesktopView || (!infoPanelOpen && !searchPanelOpen)) && (
+			{(isDesktopView || conversationView === ConversationView.CHAT) && (
 				<Chat
 					roomId={roomId}
-					setInfoPanelOpen={setInfoPanelOpen}
-					toggleSearchPanel={toggleSearchPanel}
+					conversationView={conversationView}
+					setConversationView={setConversationView}
 				/>
 			)}
-			{(isDesktopView || infoPanelOpen || searchPanelOpen) && (
-				<Container width={isDesktopView ? '30%' : '100%'} background="gray6">
-					{searchPanelOpen ? (
-						<ConversationSearchPanel roomId={roomId} toggleSearchPanel={toggleSearchPanel} />
+			{(isDesktopView || conversationView !== ConversationView.CHAT) && (
+				<LeftPanelContainer width={isDesktopView ? '30%' : '100%'} background="gray6">
+					{conversationView === ConversationView.SEARCH ? (
+						<ConversationSearchPanel
+							roomId={roomId}
+							goToChatView={() => setConversationView(ConversationView.CHAT)}
+						/>
 					) : (
-						<ConversationInfoPanel roomId={roomId} toggleInfoPanel={toggleInfoPanel} />
+						<ConversationInfoPanel
+							roomId={roomId}
+							goToChatView={() => setConversationView(ConversationView.CHAT)}
+						/>
 					)}
-				</Container>
+				</LeftPanelContainer>
 			)}
 		</ConversationWrapper>
 	);
