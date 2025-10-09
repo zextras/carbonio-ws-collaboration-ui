@@ -12,6 +12,10 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
+import {
+	getIsMessageSelected,
+	getIsMessageSelectedAlreadyStored
+} from '../../../store/selectors/ActiveConversationsSelectors';
 import { getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -39,9 +43,12 @@ const SearchResultMessage = ({
 }: SearchResultMessageProps): React.ReactElement => {
 	const senderIsLoggedUser = useStore((store) => getIsLoggedUser(store, message.from));
 	const senderName = useStore((store) => getUserName(store, message.from));
-	const isMessageSelected =
-		useStore((state) => state.activeConversations[message.roomId]?.selectedSearchResult) ===
-		message.stanzaId;
+	const isMessageSelected = useStore((state) =>
+		getIsMessageSelected(state, message.roomId, message.stanzaId)
+	);
+	const isMessageSelectedAlreadyStored = useStore((state) =>
+		getIsMessageSelectedAlreadyStored(state, message.roomId, message.stanzaId)
+	);
 
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
@@ -49,14 +56,20 @@ const SearchResultMessage = ({
 	const { avatarColor } = useAvatarUtilities(message.from);
 
 	const onResultClick = useCallback(() => {
-		if (!isMessageSelected) {
-			useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
+		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
+		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
 			const { xmppClient } = useStore.getState().connections;
-			// TODO avoid to make a request id data already available in the store
-			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId, true);
+			xmppClient
+				.requestMessageResultHistoryToId(message.roomId, message.stanzaId, true)
+				.then(() => {
+					const msg = window.document.getElementById(`message-${message.id}`);
+					msg?.scrollIntoView({ block: 'center' });
+				});
+		} else {
+			const msg = window.document.getElementById(`message-${message.id}`);
+			msg?.scrollIntoView({ block: 'center' });
 		}
-		// TODO find it and scroll into view
-	}, [message.roomId, message.stanzaId, isMessageSelected]);
+	}, [isMessageSelected, isMessageSelectedAlreadyStored, message]);
 
 	return (
 		<CustomContainer

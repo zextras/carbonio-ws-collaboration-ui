@@ -39,7 +39,7 @@ interface IXMMPClient {
 		roomId: string,
 		stanzaId: string,
 		withRequestedId?: boolean
-	): void;
+	): Promise<void>;
 	requestHistoryBetweenTwoIds(roomId: string, afterStanzaId: string, beforeStanzaId: string): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;

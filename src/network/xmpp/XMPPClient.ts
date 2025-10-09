@@ -406,29 +406,35 @@ class XMPPClient implements IXMPPClient {
 		roomId: string,
 		stanzaId: string,
 		withRequestedId: boolean = false
-	): void {
-		console.log('requestMessageResultHistoryToId', stanzaId, withRequestedId);
-		const queryId = HistoryAccumulator.getNextId();
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
-			.c('x', { type: 'submit', xmlns: jabberData })
-			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
-			.c('value')
-			.t(Strophe.NS.MAM)
-			.up()
-			.up()
-			.c('field', { var: withRequestedId ? 'to-id' : 'before-id' })
-			.c('value')
-			.t(stanzaId)
-			.up()
-			.up()
-			.up()
-			.c('set', { xmlns: Strophe.NS.RSM })
-			.c('before');
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: (stanza) => onRequestHistory(stanza, queryId, undefined, true)
+	): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			console.log('requestMessageResultHistoryToId', stanzaId, withRequestedId);
+			const queryId = HistoryAccumulator.getNextId();
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { type: 'submit', xmlns: jabberData })
+				.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+				.c('value')
+				.t(Strophe.NS.MAM)
+				.up()
+				.up()
+				.c('field', { var: withRequestedId ? 'to-id' : 'before-id' })
+				.c('value')
+				.t(stanzaId)
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: Strophe.NS.RSM })
+				.c('before');
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: (stanza) => {
+					onRequestHistory(stanza, queryId, undefined, true);
+					resolve();
+				},
+				errorCallback: reject
+			});
 		});
 	}
 
