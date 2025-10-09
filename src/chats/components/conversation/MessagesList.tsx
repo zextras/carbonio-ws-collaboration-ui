@@ -271,16 +271,17 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);
 
-	useEffect(() => {
-		const handleImageLoad = (): void => {
-			scrollToEnd(MessagesListWrapperRef);
-		};
-
-		window.addEventListener('imageLoadedInChat', handleImageLoad);
-		return (): void => {
-			window.removeEventListener('imageLoadedInChat', handleImageLoad);
-		};
-	}, []);
+	// TODO to remove
+	// useEffect(() => {
+	// 	const handleImageLoad = (): void => {
+	// 		scrollToEnd(MessagesListWrapperRef);
+	// 	};
+	//
+	// 	window.addEventListener('imageLoadedInChat', handleImageLoad);
+	// 	return (): void => {
+	// 		window.removeEventListener('imageLoadedInChat', handleImageLoad);
+	// 	};
+	// }, []);
 
 	return (
 		<Messages

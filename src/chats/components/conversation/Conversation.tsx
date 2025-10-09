@@ -45,6 +45,10 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 		);
 	}, [isDesktopView]);
 
+	useEffect(() => {
+		setConversationView(ConversationView.CHAT);
+	}, [roomId]);
+
 	return (
 		<ConversationWrapper
 			data-testid={`ConversationWrapper-${roomId}`}

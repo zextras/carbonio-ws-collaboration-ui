@@ -178,6 +178,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					onChange={(e) => setSearchText(e.target.value)}
 					onEnter={isSearchDisabled ? undefined : search}
 					autoFocus
+					height="3rem"
 				/>
 				{searchText && (
 					<Tooltip label={clearSearchTooltip}>
