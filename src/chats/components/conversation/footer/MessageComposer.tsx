@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
+import { getUserSettings } from '@zextras/carbonio-shell-ui';
 import { debounce, find, forEach, map, size, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -375,9 +376,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		]
 	);
 
+	const useEnterToSend = useMemo(() => {
+		const carbonioLanguage = getUserSettings().prefs?.zimbraPrefLocale as string;
+		return !['zh_CN', 'ja', 'vi'].includes(carbonioLanguage);
+	}, []);
+
 	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
-			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
+			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey && useEnterToSend) {
 				e.preventDefault();
 				sendMessage();
 			} else {
@@ -385,7 +391,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				sendDebouncedPause();
 			}
 		},
-		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
+		[sendDisabled, useEnterToSend, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
 	const handleOnBlur = useCallback(() => {

@@ -53,6 +53,8 @@ export const useAuthenticated = jest.fn<
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
 
+export const getUserSettings: typeof Shell.getUserSettings = () => USER_SETTINGS;
+
 export const useCurrentRoute: typeof Shell.useCurrentRoute = () => ROUTE_SETTINGS;
 
 export const getUserAccount: typeof Shell.getUserAccount = () => ACCOUNT;
