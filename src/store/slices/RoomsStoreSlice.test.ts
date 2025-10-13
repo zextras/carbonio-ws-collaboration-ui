@@ -12,7 +12,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
-import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
@@ -199,7 +198,7 @@ describe('RoomsStoreSlice tests', () => {
 	});
 
 	describe('Placeholder room', () => {
-		test('Placeholder room and all necessary data are been stored correctly', () => {
+		test('Placeholder room is been stored correctly with historyFullyLoaded', () => {
 			useStore.getState().setPlaceholderRoom(user1.id);
 
 			const placeholderRoomId = `placeholder-${user1.id}`;
@@ -212,7 +211,6 @@ describe('RoomsStoreSlice tests', () => {
 				})
 			);
 			expect(store.activeConversations[placeholderRoomId].isHistoryFullyLoaded).toBeTruthy();
-			expect(store.chatsRegistry[placeholderRoomId].messages[0].type).toBe(MessageType.DATE_MSG);
 		});
 
 		test('Placeholder room and all relative data are been removed', () => {

@@ -97,8 +97,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const textMessage = store.chatsRegistry[info.roomId].messages[1] as TextMessage;
+		const textMessage = store.chatsRegistry[info.roomId].messages[0] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.id);
 		expect(textMessage.stanzaId).toBe(info.stanzaId);

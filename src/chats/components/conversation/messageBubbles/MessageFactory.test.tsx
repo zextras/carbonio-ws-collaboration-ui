@@ -26,22 +26,6 @@ beforeEach(() => {
 });
 
 describe('Message Factory', () => {
-	test("Message isn't in the store", () => {
-		const message = createMockTextMessage();
-		setup(
-			<MessageFactory
-				message={message}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef()}
-				isFirstNewMessage={false}
-				isPrevMessageDeleted
-			/>
-		);
-		const messageTypeNotHandled = screen.getByText('Message not handled');
-		expect(messageTypeNotHandled).toBeVisible();
-	});
-
 	test('Render TextMessage', () => {
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();

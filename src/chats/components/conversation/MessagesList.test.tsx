@@ -159,7 +159,7 @@ describe('render list of messages with history loader visible for first time ope
 			store.updateHistory(room.id, messages);
 			store.addCreateRoomMessage(room.id);
 		});
-		expect(useStore.getState().chatsRegistry[room.id].messages).toHaveLength(6);
+		expect(useStore.getState().chatsRegistry[room.id].messages).toHaveLength(messages.length + 1);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
 		expect(message).toBeVisible();
