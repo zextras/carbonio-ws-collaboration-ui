@@ -33,7 +33,7 @@ const LazyMeetingExternalAccessPage = lazy(() => {
 		);
 	}
 	return import(
-		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/externalAccess/MeetingExternalAccessPage'
 	);
 });
 
@@ -61,11 +61,7 @@ const MeetingRouter = (): ReactElement => {
 		[MEETINGS_ROUTES.INFO]: <LazyInfoPage />
 	};
 
-	return (
-		<Suspense fallback={<ShimmerEntryMeetingView />}>
-			{routes[route] ?? <div>missing route</div>}
-		</Suspense>
-	);
+	return <Suspense fallback={<ShimmerEntryMeetingView />}>{routes[route]}</Suspense>;
 };
 
 const MeetingMainView = (): ReactElement => {

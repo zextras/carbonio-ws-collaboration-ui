@@ -10,7 +10,7 @@ import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
-import ExternalGuestForm from '../../components/meetingAccessPoint/ExternalGuestForm';
+import ExternalGuestForm from '../../components/meetingAccessPoint/externalAccess/ExternalGuestForm';
 
 const CustomDescription = styled(Text)`
 	text-align: center;

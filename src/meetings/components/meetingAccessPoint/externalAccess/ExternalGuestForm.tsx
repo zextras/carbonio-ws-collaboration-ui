@@ -16,11 +16,11 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
-import useStore from '../../../store/Store';
-import { UserType } from '../../../types/store/UserTypes';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
+import useRouting from '../../../../hooks/useRouting';
+import { MeetingsApi } from '../../../../network';
+import useStore from '../../../../store/Store';
+import { UserType } from '../../../../types/store/UserTypes';
+import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 const CustomText = styled(Text)`
 	font-size: 2.625rem;

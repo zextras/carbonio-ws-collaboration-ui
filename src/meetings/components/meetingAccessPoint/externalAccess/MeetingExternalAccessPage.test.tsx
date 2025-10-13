@@ -9,11 +9,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
-import { mockReplace } from '../../../tests/mocks/global';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { mockGoToMeetingAccessPage } from '../../../tests/mocks/useRouting';
-import { setup } from '../../../tests/test-utils';
-import { CreateGuestAccountResponse } from '../../../types/network/responses/meetingsResponses';
+import { mockReplace } from '../../../../tests/mocks/global';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
+import { mockGoToMeetingAccessPage } from '../../../../tests/mocks/useRouting';
+import { setup } from '../../../../tests/test-utils';
+import { CreateGuestAccountResponse } from '../../../../types/network/responses/meetingsResponses';
 
 const guestAccountResp = {
 	id: 'userGuestId',
