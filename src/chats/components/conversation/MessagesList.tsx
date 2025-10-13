@@ -22,6 +22,7 @@ import {
 	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import {
+	enhanceWithDateMessages,
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
@@ -53,7 +54,8 @@ type ConversationProps = {
 const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
-	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
+	const messages = useStore((store) => getMessagesSelector(store, roomId));
+	const roomMessages = useMemo(() => enhanceWithDateMessages(messages), [messages]);
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const setScrollPosition = useStore((store) => store.setScrollPosition);

@@ -40,7 +40,9 @@ export type ChatRegistry = {
 	backfillInProgress?: boolean;
 };
 
-export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
+export type Message = TextMessage | ConfigurationMessage | MessageFastening;
+
+export type ExtendedMessage = Message | DateMessage;
 
 export type BasicMessage = {
 	// aka ARCHIVE-ID more external one

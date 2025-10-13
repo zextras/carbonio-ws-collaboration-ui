@@ -15,10 +15,10 @@ import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 import useMessage from '../../../../hooks/useMessage';
-import { Message, MessageType } from '../../../../types/store/ChatsRegistryTypes';
+import { ExtendedMessage, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 type MessageProps = {
-	message: Message;
+	message: ExtendedMessage;
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLDivElement>;
@@ -54,7 +54,7 @@ const MessageFactory = ({
 	const [t] = useTranslation();
 	const newMessagesLabel = t('conversation.newMessages', 'New messages');
 
-	const message = useMessage(msg.roomId, msg.id);
+	const message = useMessage(msg.roomId, msg.id) ?? msg;
 
 	const newMessagesComponent = useMemo(
 		() => (

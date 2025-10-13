@@ -140,8 +140,6 @@ describe('Message Factory', () => {
 
 	test('Render DateMessage', () => {
 		const message = createMockDateMessage({ roomId: room.id });
-		const store = useStore.getState();
-		store.newMessage(message);
 		setup(
 			<MessageFactory
 				message={message}

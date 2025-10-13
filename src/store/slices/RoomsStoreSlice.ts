@@ -10,7 +10,6 @@ import { filter, find, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
@@ -179,14 +178,7 @@ export const useRoomsStoreSlice: StateCreator<
 					isHistoryFullyLoaded: true
 				};
 				draft.chatsRegistry[roomId] = {
-					messages: [
-						{
-							type: MessageType.DATE_MSG,
-							date: now,
-							id: `date-${now}`,
-							roomId
-						}
-					],
+					messages: [],
 					fastenings: {},
 					markers: {},
 					searchResults: [],

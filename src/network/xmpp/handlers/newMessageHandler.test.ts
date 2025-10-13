@@ -16,7 +16,6 @@ import {
 } from '../../../tests/createMock';
 import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
 import {
-	DateMessage,
 	FasteningAction,
 	MessageFastening,
 	MessageType,
@@ -81,10 +80,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const dateMessage = store.chatsRegistry[message.roomId].messages[0] as DateMessage;
-		const textMessage = store.chatsRegistry[message.roomId].messages[1] as TextMessage;
-		expect(dateMessage).not.toBeNull();
+		const textMessage = store.chatsRegistry[message.roomId].messages[0] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(message.id);
 		expect(textMessage.stanzaId).toBe(message.stanzaId);

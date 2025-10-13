@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, forEach, last, map, orderBy, remove, size, some, uniqBy } from 'lodash';
+import { find, forEach, map, orderBy, remove, size, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -16,7 +16,6 @@ import {
 	ChatRegistry,
 	ChatsRegistryStoreSlice,
 	ConfigurationMessage,
-	DateMessage,
 	Marker,
 	MarkerStatus,
 	Message,
@@ -30,7 +29,7 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore } from '../../utils/dateUtils';
+import { isBefore } from '../../utils/dateUtils';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
 	const result: T[] = [];
@@ -62,18 +61,6 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 		};
 	}
 	return store.chatsRegistry[roomId];
-};
-
-const addDateMessage = (messages: Message[], messageDate: number, roomId: string): void => {
-	const lastDate = last(messages)?.date ?? 0;
-	if (!datesAreFromTheSameDay(lastDate, messageDate)) {
-		messages.push({
-			id: `dateMessage-${messageDate - 2}`,
-			roomId,
-			date: messageDate - 2,
-			type: MessageType.DATE_MSG
-		});
-	}
 };
 
 function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
@@ -116,7 +103,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				if (alreadyExists) {
 					Object.assign(alreadyExists, message);
 				} else {
-					addDateMessage(messages, message.date, message.roomId);
 					messages.push(message);
 				}
 			}),
@@ -132,7 +118,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
 				// Add message only if it doesn't already exist and the history is not cleared
 				if (!alreadyExists && (!clearedAt || isBefore(clearedAt, message.date))) {
-					addDateMessage(messages, message.date, message.roomId);
 					messages.push(message);
 				}
 			}),
@@ -144,41 +129,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
-
 				const newMessages = orderBy(messageArray, ['date'], ['asc']);
-
 				if (size(newMessages) > 0) {
-					// Add date between messages of different days
-					const newMessagesWithDates = newMessages.reduce<Message[]>((acc, message, index) => {
-						const prevDate = newMessages[index - 1]?.date ?? 0;
-						if (!datesAreFromTheSameDay(prevDate, message.date)) {
-							acc.push({
-								id: `dateMessage-${message.date - 2}`,
-								roomId,
-								date: message.date - 2,
-								type: MessageType.DATE_MSG
-							} as DateMessage);
-						}
-						acc.push(message);
-						return acc;
-					}, []);
-
-					const merged = mergeSortedArrays(
-						newMessagesWithDates,
-						messages,
-						(a, b) => a.date - b.date
-					);
-
-					draft.chatsRegistry[roomId].messages = merged.filter((msg, index, arr) => {
-						if (msg.type !== MessageType.DATE_MSG) return true;
-						if (index > 0 && arr[index - 1].type === MessageType.DATE_MSG) {
-							return !datesAreFromTheSameDay(msg.date, arr[index - 1].date);
-						}
-						return true;
-					});
-
+					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
 					// Check for duplicates and remove them
-					draft.chatsRegistry[roomId].messages = uniqBy(draft.chatsRegistry[roomId].messages, 'id');
+					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}
 			}),
 			false,
@@ -270,9 +225,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					forwarded
 				};
 
-				// Add date message if the new message has a different date than the previous one
-				addDateMessage(messages, placeholderMessage.date, roomId);
-
 				// If the placeholder message is a reply, find the message to reply to
 				if (placeholderMessage.replyTo) {
 					const messageSubjectOfReply = find(
@@ -300,9 +252,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				remove(messages, (message) => message.id === messageId);
-				if (last(messages)?.type === MessageType.DATE_MSG) {
-					draft.chatsRegistry[roomId].messages.pop();
-				}
 			}),
 			false,
 			'CHAT/REMOVE_PLACEHOLDER_MESSAGE'

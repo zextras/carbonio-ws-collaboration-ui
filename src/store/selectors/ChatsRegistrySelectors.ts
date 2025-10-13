@@ -8,6 +8,7 @@ import { filter, find, forEach, includes, last, map, reduce, size } from 'lodash
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
+	ExtendedMessage,
 	FasteningAction,
 	Marker,
 	Message,
@@ -16,8 +17,24 @@ import {
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { datesAreFromTheSameDay } from '../../utils/dateUtils';
 
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
+
+export const enhanceWithDateMessages = (messages: Message[]): ExtendedMessage[] =>
+	messages.reduce<ExtendedMessage[]>((acc, message, index) => {
+		const prevDate = messages[index - 1]?.date ?? 0;
+		if (!datesAreFromTheSameDay(prevDate, message.date)) {
+			acc.push({
+				id: `dateMessage-${message.date}`,
+				roomId: message.roomId,
+				date: message.date,
+				type: MessageType.DATE_MSG
+			});
+		}
+		acc.push(message);
+		return acc;
+	}, []);
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
 	store.chatsRegistry[roomId]?.messages
