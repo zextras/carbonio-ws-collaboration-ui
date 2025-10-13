@@ -14,6 +14,11 @@ interface HighlightedTextProps {
 	searchText: string;
 }
 
+const CustomText = styled(Text)`
+	white-space: pre-wrap;
+	word-break: break-word;
+`;
+
 const HighlightedTextCustom = styled.span`
 	color: ${({ theme }): string => theme.palette.primary.regular};
 	font-weight: ${({ theme }): number => theme.fonts.weight.bold};
@@ -30,7 +35,7 @@ const HighlightedText = ({ text, searchText }: HighlightedTextProps): React.JSX.
 	const parts = text.split(regex);
 
 	return (
-		<Text>
+		<CustomText>
 			{parts.map((part, i) =>
 				part && searchWords.some((word) => word.toLowerCase() === part.toLowerCase()) ? (
 					<HighlightedTextCustom key={i}>{part}</HighlightedTextCustom>
@@ -38,7 +43,7 @@ const HighlightedText = ({ text, searchText }: HighlightedTextProps): React.JSX.
 					part
 				)
 			)}
-		</Text>
+		</CustomText>
 	);
 };
 
