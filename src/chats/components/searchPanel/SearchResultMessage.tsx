@@ -21,6 +21,7 @@ import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate } from '../../../utils/dateUtils';
+import { scrollToMessage } from '../../../utils/scrollUtils';
 
 const CustomContainer = styled(Container)`
 	border-radius: 0.25rem;
@@ -62,12 +63,11 @@ const SearchResultMessage = ({
 			xmppClient
 				.requestMessageResultHistoryToId(message.roomId, message.stanzaId, true)
 				.then(() => {
-					const msg = window.document.getElementById(`message-${message.id}`);
-					msg?.scrollIntoView({ block: 'center' });
+					scrollToMessage(message.id);
+					useStore.getState().setScrollPosition(message.roomId, message.id);
 				});
 		} else {
-			const msg = window.document.getElementById(`message-${message.id}`);
-			msg?.scrollIntoView({ block: 'center' });
+			scrollToMessage(message.id);
 		}
 	}, [isMessageSelected, isMessageSelectedAlreadyStored, message]);
 
