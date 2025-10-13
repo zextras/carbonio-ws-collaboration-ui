@@ -95,7 +95,7 @@ interface IMeetingsApi {
 	): Promise<StopRecordingResponse>;
 	raiseHand(meetingId: string, value: boolean, userToModerate?: string): Promise<RaiseHandResponse>;
 	createGuestAccount(name: string): Promise<CreateGuestAccountResponse>;
-	authLogin(): Promise<LoginV3ConfigResponse>;
+	getLoginConfig(): Promise<LoginV3ConfigResponse>;
 }
 
 export default IMeetingsApi;

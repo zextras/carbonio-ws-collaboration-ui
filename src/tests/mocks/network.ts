@@ -53,7 +53,7 @@ export enum MeetingsApiToSpy {
 	START_RECORDING = 'startRecording',
 	STOP_RECORDING = 'stopRecording',
 	ACCEPT_WAITING_USER = 'acceptWaitingUser',
-	AUTH_LOGIN = 'authLogin',
+	LOGIN_CONFIG = 'getLoginConfig',
 	CREATE_GUEST_ACCOUNT = 'createGuestAccount',
 	RAISE_HAND = 'raiseHand'
 }
