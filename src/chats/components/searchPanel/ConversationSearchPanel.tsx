@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/no-autofocus */
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 
 import {
 	Button,
@@ -61,6 +61,14 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const [activeSearchText, setActiveSearchText] = useState<string>('');
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
+	const clearSearchResults = useStore((state) => state.clearSearchResults);
+
+	useEffect(
+		() => () => {
+			clearSearchResults(roomId);
+		},
+		[clearSearchResults, roomId]
+	);
 
 	const search = useCallback(() => {
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
@@ -191,6 +199,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 							onClick={() => {
 								setSearchText('');
 								setRequestStatus(RequestStatus.IDLE);
+								clearSearchResults(roomId);
 							}}
 						/>
 					</Tooltip>
