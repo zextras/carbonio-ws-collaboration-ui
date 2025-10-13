@@ -108,7 +108,6 @@ export function onRequestHistory(
 		const messagesWithStanzaId = storeMessages.filter(
 			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG && msg.stanzaId !== undefined
 		);
-		console.log(messagesWithStanzaId.map((msg) => msg.text));
 
 		if (messagesWithStanzaId.length > 0) {
 			const oldest = messagesWithStanzaId[0];

@@ -163,16 +163,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					!isHistoryCleared
 				) {
 					const creationMsg: ConfigurationMessage = {
-						id: `creationMessage-${firstMessageDate + 1}`,
+						id: `creationMessage-${firstMessageDate}`,
 						roomId,
-						date: firstMessageDate + 1,
+						date: firstMessageDate - 1,
 						type: MessageType.CONFIGURATION_MSG,
 						operation: OperationType.ROOM_CREATION,
 						value: '',
 						from: '',
 						read: MarkerStatus.READ
 					};
-					draft.chatsRegistry[roomId].messages.splice(1, 0, creationMsg);
+					draft.chatsRegistry[roomId].messages.splice(0, 0, creationMsg);
 				}
 			}),
 			false,

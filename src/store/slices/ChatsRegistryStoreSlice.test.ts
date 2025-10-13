@@ -195,7 +195,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 	});
 
 	describe('addCreateRoomMessage', () => {
-		test.skip('Add a create room message to a group', () => {
+		test('Add a create room message to a group', () => {
 			const room = createMockRoom({ type: RoomType.GROUP });
 			useStore.getState().addRooms([room]);
 
