@@ -33,7 +33,6 @@ describe('onRequestHistory', () => {
 			queryId
 		);
 		const store = useStore.getState();
-		expect(store.activeConversations[textMessage.roomId].lastMamMessage?.id).toBe(textMessage.id);
 		expect(store.activeConversations[textMessage.roomId].isHistoryFullyLoaded).toBeUndefined();
 	});
 

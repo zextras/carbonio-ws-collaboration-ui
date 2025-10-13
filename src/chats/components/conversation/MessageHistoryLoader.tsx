@@ -85,8 +85,7 @@ const MessageHistoryLoader = ({
 		debounce(() => {
 			const store = useStore.getState();
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
-			const lastMamMessage = store.activeConversations[roomId]?.lastMamMessage;
-			const date = lastMamMessage?.date ?? first(roomMessages)?.date ?? now();
+			const date = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
 				xmppClient.requestHistory(roomId, date, 50, store.chatsRegistry[roomId].unread);
 				setHistoryLoadDisabled(roomId, true);

@@ -68,10 +68,6 @@ export function onRequestHistory(
 
 	fasteningMessages.forEach((message) => useStore.getState().addFastening(message));
 
-	if (size(historyMessages) > 0) {
-		store.setLastMamMessage(historyMessages[0]);
-	}
-
 	// Filter messages by type
 	const storeMessages = filter(
 		historyMessages,

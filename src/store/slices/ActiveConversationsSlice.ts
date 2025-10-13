@@ -17,12 +17,10 @@ import {
 } from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
-	Message,
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtils';
 
 const initActiveConversation = (draft: RootStore, roomId: string): ActiveConversation => {
 	if (!draft.activeConversations[roomId]) {
@@ -131,19 +129,6 @@ export const useActiveConversationsSlice: StateCreator<
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'
-		);
-	},
-	setLastMamMessage: (message: Message): void => {
-		set(
-			produce((draft: RootStore) => {
-				const conversation = initActiveConversation(draft, message.roomId);
-				const lastMamDate = conversation.lastMamMessage?.date;
-				if (!lastMamDate || isBefore(message.date, lastMamDate)) {
-					conversation.lastMamMessage = message;
-				}
-			}),
-			false,
-			'AC/SET_LAST_MAM_MESSAGE'
 		);
 	},
 	setHistoryIsFullyLoaded: (roomId: string): void => {
