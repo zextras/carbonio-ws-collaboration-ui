@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { onRequestHistory } from './historyMessageHandler';
+import { requestHistoryCallback } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import {
@@ -21,14 +21,14 @@ beforeEach(() => {
 	useStore.getState().addRooms([room]);
 	useStore.getState().newMessage(createMockTextMessage({ id: 'messageId1', roomId: room.id }));
 });
-describe('onRequestHistory', () => {
+describe('requestHistoryCallback', () => {
 	test('End request history stanza indicates MAM request is incomplete', () => {
 		const queryId = HistoryAccumulator.getNextId();
 		HistoryAccumulator.pushToCache(
 			queryId,
 			buildTextMessageFromHistory({ messageId: textMessage.id, roomId: textMessage.roomId })
 		);
-		onRequestHistory(
+		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
 			queryId
 		);
@@ -42,7 +42,7 @@ describe('onRequestHistory', () => {
 			queryId,
 			buildTextMessageFromHistory({ messageId: textMessage.id, roomId: textMessage.roomId })
 		);
-		onRequestHistory(
+		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: true }),
 			queryId
 		);
@@ -52,7 +52,7 @@ describe('onRequestHistory', () => {
 
 	test('MAM request is incomplete but there are no history message', () => {
 		const queryId = HistoryAccumulator.getNextId();
-		onRequestHistory(
+		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
 			queryId
 		);
@@ -70,7 +70,7 @@ describe('onRequestHistory', () => {
 			queryId,
 			buildReactionMessageFromHistory({ messageId: textMessage.id, roomId: textMessage.roomId })
 		);
-		onRequestHistory(
+		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: true }),
 			queryId
 		);

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
-import { onGetRosterResponse } from './handlers/rosterHandler';
+import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
+import { rosterCallback } from './iqCallbacks/rosterCallback';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
@@ -30,7 +30,7 @@ describe('XMPPClient', () => {
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,
 			elem: expect.any(Object),
-			callback: onGetRosterResponse
+			callback: rosterCallback
 		});
 	});
 
@@ -64,7 +64,7 @@ describe('XMPPClient', () => {
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,
 			elem: expect.any(Object),
-			callback: onGetLastActivityResponse
+			callback: lastActivityCallback
 		});
 	});
 

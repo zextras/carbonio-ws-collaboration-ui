@@ -8,24 +8,20 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { fullTextSearchHandler } from './handlers/fullTextSearchHandler';
-import {
-	onLoadFullHistory,
-	onRequestHistory,
-	onRequestSingleMessage
-} from './handlers/historyMessageHandler';
-import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
-import { onGetRosterResponse } from './handlers/rosterHandler';
-import { onSmartMarkers } from './handlers/smartMarkersHandler';
+import { RoomsApi } from '../index';
+import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
+import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
+import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
+import { rosterCallback } from './iqCallbacks/rosterCallback';
+import { smartMarkersCallback } from './iqCallbacks/smartMarkersCallback';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import HistoryAccumulator from './utility/HistoryAccumulator';
+import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtils';
-import { RoomsApi } from '../index';
-import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 
 const jabberData = 'jabber:x:data';
 
@@ -80,7 +76,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onGetRosterResponse
+			callback: rosterCallback
 		});
 	}
 
@@ -102,7 +98,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onGetLastActivityResponse
+			callback: lastActivityCallback
 		});
 	}
 
@@ -270,7 +266,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onRequestHistory(stanza, queryId, unread)
+			callback: (stanza) => requestHistoryCallback(stanza, queryId, unread)
 		});
 	}
 
@@ -290,7 +286,11 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: () => onRequestSingleMessage(replyMessageId, queryId)
+			callback: () => {
+				const referenceMessage = HistoryAccumulator.getRepliedMessage(queryId);
+				const { setRepliedMessage } = useStore.getState();
+				setRepliedMessage(referenceMessage.roomId, replyMessageId, referenceMessage);
+			}
 		});
 	}
 
@@ -336,7 +336,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onLoadFullHistory(stanza, queryId)
+			callback: (stanza) => fullHistoryCallback(stanza, queryId)
 		});
 	}
 
@@ -358,8 +358,9 @@ class XMPPClient implements IXMPPClient {
 			this.xmppConnection.send({
 				type: XMPPRequestType.IQ,
 				elem: iq,
-				callback: (stanza) => {
-					fullTextSearchHandler(stanza, queryId);
+				callback: () => {
+					const searchedMessages = HistoryAccumulator.getSearchedMessages(queryId);
+					useStore.getState().setSearchResults(roomId, searchedMessages);
 					resolve();
 				},
 				errorCallback: reject
@@ -374,7 +375,6 @@ class XMPPClient implements IXMPPClient {
 	 * @param beforeStanzaId - Newer message stanza ID (upper bound)
 	 */
 	requestHistoryBetweenTwoIds(roomId: string, afterStanzaId: string, beforeStanzaId: string): void {
-		console.log('requestHistoryBetweenTwoIds', afterStanzaId, beforeStanzaId);
 		if (!useStore.getState().rooms[roomId]) return;
 
 		const queryId = HistoryAccumulator.getNextId();
@@ -398,7 +398,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onRequestHistory(stanza, queryId, undefined, true)
+			callback: (stanza) => requestHistoryCallback(stanza, queryId, undefined, true)
 		});
 	}
 
@@ -408,7 +408,6 @@ class XMPPClient implements IXMPPClient {
 		withRequestedId: boolean = false
 	): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
-			console.log('requestMessageResultHistoryToId', stanzaId, withRequestedId);
 			const queryId = HistoryAccumulator.getNextId();
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
@@ -430,7 +429,7 @@ class XMPPClient implements IXMPPClient {
 				type: XMPPRequestType.IQ,
 				elem: iq,
 				callback: (stanza) => {
-					onRequestHistory(stanza, queryId, undefined, true);
+					requestHistoryCallback(stanza, queryId, undefined, true);
 					resolve();
 				},
 				errorCallback: reject
@@ -491,7 +490,11 @@ class XMPPClient implements IXMPPClient {
 			xmlns: Strophe.NS.SMART_MARKERS,
 			peer: carbonizeMUC(roomId)
 		});
-		this.xmppConnection.send({ type: XMPPRequestType.IQ, elem: iq, callback: onSmartMarkers });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: smartMarkersCallback
+		});
 	}
 }
 

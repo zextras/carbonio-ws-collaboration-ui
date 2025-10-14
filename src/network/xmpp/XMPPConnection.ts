@@ -8,12 +8,12 @@ import { debounce, forEach, size } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
-import { onErrorStanza } from './handlers/errorHandler';
 import { onHistoryMessageStanza } from './handlers/historyMessageHandler';
 import { onInboxMessageStanza } from './handlers/inboxMessageHandler';
 import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPingStanza, onPresenceStanza } from './handlers/presenceHandler';
 import { onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
+import { errorCallback } from './iqCallbacks/errorCallback';
 import useStore from '../../store/Store';
 import { xmppDebug } from '../../utils/debug';
 
@@ -172,7 +172,7 @@ class XMPPConnection {
 					this.connection.sendIQ(
 						request.elem,
 						request.callback,
-						request.errorCallback ?? onErrorStanza
+						request.errorCallback ?? errorCallback
 					);
 					break;
 				default:
