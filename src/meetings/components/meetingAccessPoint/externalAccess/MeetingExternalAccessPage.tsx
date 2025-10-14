@@ -3,26 +3,47 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 
-import { Button, Container, Divider, Input, Text } from '@zextras/carbonio-design-system';
+import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import AudioAndVideoCard from './AudioAndVideoCard';
+import JoinAsGuestCard from './JoinAsGuestCard';
+import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
+import useStore from '../../../../store/Store';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
 import Logo from '../../Logo';
 
-const MeetingExternalAccessPage = (): ReactElement => {
-	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+export type MediaStatus = {
+	audio: {
+		enabled: boolean;
+		selectedDeviceId?: string;
+	};
+	video: {
+		enabled: boolean;
+		selectedDeviceId?: string;
+	};
+};
 
+const MeetingExternalAccessPage = (): ReactElement => {
 	const [meetingName, setMeetingName] = useState<string>('');
-	const [guestName, setGuestName] = useState<string>('');
+	const [mediaStatus, setMediaStatus] = useState<MediaStatus>({
+		audio: { enabled: false },
+		video: { enabled: false }
+	});
+
+	const queueId = useStore((state) => state.session.queueId);
+
+	const { handleWaitingRoom, userIsReady } = useAccessMeeting(mediaStatus);
 
 	const { goToInfoPage } = useRouting();
 
 	useEffect(() => {
+		const meetingId = document.location.pathname.split(MEETINGS_PATH)[1];
 		MeetingsApi.getScheduledMeetingName(meetingId)
 			.then((resp) => {
 				setMeetingName(resp.name);
@@ -30,33 +51,15 @@ const MeetingExternalAccessPage = (): ReactElement => {
 			.catch(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
 			});
-	}, [goToInfoPage, meetingId]);
+	}, [goToInfoPage]);
 
-	const [t] = useTranslation();
-	// TODO: translation keys
+	const [t] = useTranslation(); // TODO: translation keys
 	const titleLabel = t('', 'Welcome to "{{title}}" virtual room', { title: meetingName });
-	const subtitleLabel = t('', 'Join as guest');
-	const descriptionLabel = t('', 'Enter your name to join this meeting');
-	const inputLabel = t('', 'Enter your name');
-	const buttonLabel = t('', 'Ready to participate');
-	const alreadyHaveAccountLabel = t('', 'Already have an account? Access with your credentials.');
-	const loginPageButtonLabel = t('', 'Go to your login page');
 
-	const readyToParticipateDisabled = useMemo(() => guestName.trim().length === 0, [guestName]);
-
-	const readyToParticipate = useCallback(() => {
-		// TODO: implement ready to participate action
-	}, []);
-
-	const goToLoginPage = useCallback(() => {
-		const meetingUrl = window.location.href;
-		const domainUrl = /^(.*)\/carbonio/.exec(meetingUrl);
-		if (domainUrl) {
-			const urlUpdated = meetingUrl.replaceAll(/:/g, '%3A').replaceAll('/', '%2F');
-			const loginUrl = `${domainUrl[1]}/static/login/?destinationUrl=${urlUpdated}`;
-			window.location.replace(loginUrl);
-		}
-	}, []);
+	// Join waiting room automatically after guest login
+	useEffect(() => {
+		if (queueId) handleWaitingRoom();
+	}, [queueId, handleWaitingRoom]);
 
 	return (
 		<Container background={'gray0'} height="fill" width="fill" style={{ position: 'relative' }}>
@@ -73,48 +76,8 @@ const MeetingExternalAccessPage = (): ReactElement => {
 					</Text>
 				</Container>
 				<Container orientation="horizontal" gap="1rem">
-					<Container
-						background={'gray6'}
-						width="fit"
-						padding="extralarge"
-						style={{ borderRadius: '1rem' }}
-					>
-						video e controlli
-					</Container>
-					<Container
-						background={'gray6'}
-						width="fit"
-						padding="extralarge"
-						gap="1rem"
-						style={{ borderRadius: '1rem' }}
-					>
-						<Text size="extralarge" weight="bold">
-							{subtitleLabel}
-						</Text>
-						<Text>{descriptionLabel}</Text>
-						<Input
-							label={inputLabel}
-							onChange={(ev) => setGuestName(ev.target.value)}
-							value={guestName}
-						/>
-						<Button
-							width="fill"
-							label={buttonLabel}
-							color="success"
-							onClick={readyToParticipate}
-							disabled={readyToParticipateDisabled}
-						/>
-						<Container padding="medium" width="fill" height="fit">
-							<Divider />
-						</Container>
-						<Text size="small">{alreadyHaveAccountLabel}</Text>
-						<Button
-							width="fill"
-							label={loginPageButtonLabel}
-							onClick={goToLoginPage}
-							type="outlined"
-						/>
-					</Container>
+					<AudioAndVideoCard mediaStatus={mediaStatus} setMediaStatus={setMediaStatus} />
+					<JoinAsGuestCard userIsReady={userIsReady} handleWaitingRoom={handleWaitingRoom} />
 				</Container>
 			</Container>
 		</Container>
