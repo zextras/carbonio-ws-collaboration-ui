@@ -77,7 +77,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 				</Container>
 				<Container orientation="horizontal" gap="1rem">
 					<AudioAndVideoCard mediaStatus={mediaStatus} setMediaStatus={setMediaStatus} />
-					<JoinAsGuestCard userIsReady={userIsReady} handleWaitingRoom={handleWaitingRoom} />
+					<JoinAsGuestCard userIsReady={userIsReady} />
 				</Container>
 			</Container>
 		</Container>

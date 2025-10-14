@@ -23,12 +23,8 @@ import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 type JoinAsGuestCardProps = {
 	userIsReady: boolean;
-	handleWaitingRoom: () => void;
 };
-const JoinAsGuestCard = ({
-	userIsReady,
-	handleWaitingRoom
-}: JoinAsGuestCardProps): ReactElement => {
+const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement => {
 	const [t] = useTranslation(); // TODO: translation keys
 	const subtitleLabel = t('', 'Join as guest');
 	const descriptionLabel = t('', 'Enter your name to join this meeting');
@@ -115,7 +111,7 @@ const JoinAsGuestCard = ({
 					label={buttonLabel}
 					color="success"
 					onClick={readyToParticipate}
-					disabled={guestName.trim().length === 0}
+					disabled={guestName.trim().length === 0 || userIsReady}
 				/>
 			) : (
 				<Container height="fit" gap="0.5rem">
