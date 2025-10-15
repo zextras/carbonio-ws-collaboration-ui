@@ -77,7 +77,7 @@ const ConversationHeader = ({
 }: ConversationHeaderProps): ReactElement => {
 	const [t] = useTranslation();
 	const infoTooltip = t('conversationInfo.info', 'Info');
-	const searchTooltip = t('', 'Search'); // TODO translation key
+	const searchTooltip = t('conversationInfo.search', 'Search');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));

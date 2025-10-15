@@ -42,19 +42,29 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 
 	const createSnackbar = useSnackbar();
 
-	// TODO translation keys
 	const [t] = useTranslation();
-	const inputLabel = t('', 'Search messages');
-	const searchMessagesInLabel = t('', 'Search messages in {{roomName}}', { roomName });
-	const searchMessagesWithLabel = t('', 'Search messages with {{personName}}', {
-		personName: roomName
-	});
-	const searchingLabel = t('', 'Searching...');
-	const noResults1Label = t('', 'It looks like there are no results.');
-	const noResults2Label = t('', 'Keep searching!');
+	const inputLabel = t('searchPanel.inputPlaceholder', 'Search messages');
+	const searchMessagesInLabel = t(
+		'searchPanel.groupPlaceholder',
+		'Search messages in {{roomName}}',
+		{ roomName }
+	);
+	const searchMessagesWithLabel = t(
+		'searchPanel.singlePlaceholder',
+		'Search messages with {{personName}}',
+		{
+			personName: roomName
+		}
+	);
+	const searchingLabel = t('searchPanel.searching', 'Searching...');
+	const noResults1Label = t('searchPanel.noResults', 'It looks like there are no results.');
+	const noResults2Label = t('searchPanel.keepSearching', 'Keep searching!');
 	const messagesTooltip = t('conversationInfo.messages', 'Messages');
-	const clearSearchTooltip = t('', 'Clear search');
-	const errorSnackbarLabel = t('', 'Something went wrong with the search. Please try again.');
+	const clearSearchTooltip = t('searchPanel.clearTooltip', 'Clear search');
+	const errorSnackbarLabel = t(
+		'searchPanel.errorSnackbar',
+		'Something went wrong with the search. Please try again.'
+	);
 
 	const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.IDLE);
 	const [searchText, setSearchText] = useState<string>('');
