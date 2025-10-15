@@ -3,12 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef, useState } from 'react';
+/* eslint-disable jsx-a11y/media-has-caption */
+import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
 import AccessTile from '../mediaHandlers/AccessTile';
+import { useLocalAudioHandler } from '../mediaHandlers/useLocalAudioHandler';
+import { useLocalVideoHandler } from '../mediaHandlers/useLocalVideoHandler';
 
 type AudioAndVideoCardProps = {
 	mediaStatus: MediaStatus;
@@ -19,41 +22,47 @@ const AudioAndVideoCard = ({
 	mediaStatus,
 	setMediaStatus
 }: AudioAndVideoCardProps): ReactElement => {
-	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const audioStreamRef = useRef<HTMLAudioElement>(null);
+
+	const { videoStatus, videoDeviceId, VideoHandlerComponent } = useLocalVideoHandler({
+		initialStatus: mediaStatus.video.enabled,
+		streamRef: videoStreamRef
+	});
+
+	const { audioStatus, audioDeviceId, AudioHandlerComponent } = useLocalAudioHandler({
+		initialStatus: mediaStatus.audio.enabled,
+		streamRef: audioStreamRef
+	});
 
 	useEffect(() => {
-		if (videoStreamRef.current) {
-			if (mediaStatus.video.enabled) {
-				videoStreamRef.current.srcObject = streamTrack;
-			} else {
-				videoStreamRef.current.srcObject = null;
-			}
-		}
-	}, [streamTrack, mediaStatus.video.enabled]);
+		setMediaStatus({
+			audio: { enabled: audioStatus, selectedDeviceId: audioDeviceId },
+			video: { enabled: videoStatus, selectedDeviceId: videoDeviceId }
+		});
+	}, [audioDeviceId, audioStatus, setMediaStatus, videoDeviceId, videoStatus]);
 
 	return (
 		<Container
-			background={'gray6'}
+			background="gray6"
 			width="fit"
 			padding="extralarge"
+			gap="1rem"
 			style={{ borderRadius: '1rem' }}
 		>
 			<AccessTile
 				videoStreamRef={videoStreamRef}
 				videoPlayerTestMuted
 				mediaDevicesEnabled={{
-					audio: mediaStatus.audio.enabled,
-					video: mediaStatus.video.enabled
+					audio: audioStatus,
+					video: videoStatus
 				}}
 			/>
-			{/*<LocalMediaHandler*/}
-			{/*	streamTrack={streamTrack}*/}
-			{/*	setStreamTrack={setStreamTrack}*/}
-			{/*	setEnterButtonIsEnabled={() => {}}*/}
-			{/*	mediaStatus={mediaStatus}*/}
-			{/*	setMediaStatus={setMediaStatus}*/}
-			{/*/>*/}
+			<audio ref={audioStreamRef} autoPlay />
+			<Container gap="0.5rem">
+				{VideoHandlerComponent}
+				{AudioHandlerComponent}
+			</Container>
 		</Container>
 	);
 };
