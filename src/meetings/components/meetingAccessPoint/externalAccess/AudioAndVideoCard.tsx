@@ -4,9 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef } from 'react';
+import React, {
+	Dispatch,
+	ReactElement,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useRef,
+	useState
+} from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Button, Container } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
 import AccessTile from '../mediaHandlers/AccessTile';
@@ -22,6 +31,11 @@ const AudioAndVideoCard = ({
 	mediaStatus,
 	setMediaStatus
 }: AudioAndVideoCardProps): ReactElement => {
+	const [t] = useTranslation();
+	const startMicTestLabel = t('meeting.interactions.playMic', 'Start mic test');
+	const stopMicTestLabel = t('meeting.interactions.stopMic', 'Stop mic test');
+
+	const [micTest, setMicTest] = useState(false);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 	const audioStreamRef = useRef<HTMLAudioElement>(null);
 
@@ -42,6 +56,16 @@ const AudioAndVideoCard = ({
 		});
 	}, [audioDeviceId, audioStatus, setMediaStatus, videoDeviceId, videoStatus]);
 
+	useEffect(() => {
+		if (!audioStatus) {
+			setMicTest(false);
+		}
+	}, [audioStatus]);
+
+	const toggleMicTest = useCallback(() => {
+		setMicTest((prev) => !prev);
+	}, []);
+
 	return (
 		<Container
 			background="gray6"
@@ -58,11 +82,20 @@ const AudioAndVideoCard = ({
 					video: videoStatus
 				}}
 			/>
-			<audio ref={audioStreamRef} autoPlay />
+			<audio ref={audioStreamRef} autoPlay muted={!micTest || !audioStatus} />
 			<Container gap="0.5rem">
 				{VideoHandlerComponent}
 				{AudioHandlerComponent}
 			</Container>
+			<Button
+				width="fill"
+				label={!micTest ? startMicTestLabel : stopMicTestLabel}
+				type="outlined"
+				icon="Mic"
+				iconPlacement="right"
+				onClick={toggleMicTest}
+				disabled={!audioStatus}
+			/>
 		</Container>
 	);
 };
