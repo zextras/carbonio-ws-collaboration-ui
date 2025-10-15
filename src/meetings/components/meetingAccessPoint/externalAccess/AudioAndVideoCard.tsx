@@ -14,7 +14,7 @@ import React, {
 	useState
 } from 'react';
 
-import { Button, Container } from '@zextras/carbonio-design-system';
+import { Button, Container, Row } from "@zextras/carbonio-design-system";
 import { useTranslation } from 'react-i18next';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
@@ -67,9 +67,11 @@ const AudioAndVideoCard = ({
 	}, []);
 
 	return (
-		<Container
+		<Row
+			orientation="vertical"
 			background="gray6"
-			width="fit"
+			height="fill"
+			takeAvailableSpace
 			padding="extralarge"
 			gap="1rem"
 			style={{ borderRadius: '1rem' }}
@@ -83,7 +85,7 @@ const AudioAndVideoCard = ({
 				}}
 			/>
 			<audio ref={audioStreamRef} autoPlay muted={!micTest || !audioStatus} />
-			<Container gap="0.5rem">
+			<Container gap="0.5rem" height="fit">
 				{VideoHandlerComponent}
 				{AudioHandlerComponent}
 			</Container>
@@ -96,7 +98,7 @@ const AudioAndVideoCard = ({
 				onClick={toggleMicTest}
 				disabled={!audioStatus}
 			/>
-		</Container>
+		</Row>
 	);
 };
 

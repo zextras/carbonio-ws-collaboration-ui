@@ -11,6 +11,7 @@ import {
 	Divider,
 	Icon,
 	Input,
+	Row,
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -89,21 +90,26 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 	}, []);
 
 	return (
-		<Container
+		<Row
+			orientation="vertical"
 			background={'gray6'}
-			width="fit"
+			height="fill"
+			takeAvailableSpace
 			padding="extralarge"
 			gap="1rem"
 			style={{ borderRadius: '1rem' }}
 		>
-			<Text size="extralarge" weight="bold">
+			<Text weight="bold" style={{ fontSize: '24px' }}>
 				{subtitleLabel}
 			</Text>
-			<Text>{descriptionLabel}</Text>
+			<Text overflow="break-word" textAlign="center">
+				{descriptionLabel}
+			</Text>
 			<Input
 				label={inputLabel}
 				onChange={(ev) => setGuestName(ev.target.value)}
 				value={guestName}
+				disabled={userIsReady}
 			/>
 			{!userIsReady ? (
 				<Button
@@ -121,16 +127,20 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 							{readyLabel}
 						</Text>
 					</Container>
-					<Text size="small">{waitingForModeratorLabel}</Text>
+					<Text size="small" overflow="break-word" textAlign="center">
+						{waitingForModeratorLabel}
+					</Text>
 					<Icon icon="LoaderOutline" color="gray0" size="large" />
 				</Container>
 			)}
 			<Container padding="medium" width="fill" height="fit">
 				<Divider />
 			</Container>
-			<Text size="small">{alreadyHaveAccountLabel}</Text>
+			<Text size="small" overflow="break-word" textAlign="center">
+				{alreadyHaveAccountLabel}
+			</Text>
 			<Button width="fill" label={loginPageButtonLabel} onClick={goToLoginPage} type="outlined" />
-		</Container>
+		</Row>
 	);
 };
 

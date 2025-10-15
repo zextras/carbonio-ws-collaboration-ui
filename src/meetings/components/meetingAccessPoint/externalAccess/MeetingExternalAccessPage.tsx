@@ -64,18 +64,18 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	return (
 		<Container background={'gray0'} height="fill" width="fill" style={{ position: 'relative' }}>
 			<Logo />
-			<Container width="fit" height="fit" gap="1rem">
+			<Container width="65%" maxWidth="75rem" minWidth="35rem" height="fit" gap="1rem">
 				<Container
 					background={'gray6'}
 					padding="large"
 					width="fill"
 					style={{ borderRadius: '1rem' }}
 				>
-					<Text size="extralarge" weight="bold">
+					<Text weight="bold" style={{ fontSize: '24px' }}>
 						{titleLabel}
 					</Text>
 				</Container>
-				<Container orientation="horizontal" gap="1rem">
+				<Container orientation="horizontal" gap="1rem" width="fill">
 					<AudioAndVideoCard mediaStatus={mediaStatus} setMediaStatus={setMediaStatus} />
 					<JoinAsGuestCard userIsReady={userIsReady} />
 				</Container>

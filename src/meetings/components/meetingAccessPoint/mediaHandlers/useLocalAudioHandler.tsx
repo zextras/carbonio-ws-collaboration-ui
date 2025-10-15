@@ -6,7 +6,7 @@
 /* eslint-disable no-param-reassign */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Container, Select, Snackbar, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Row, Select, Snackbar, Tooltip } from '@zextras/carbonio-design-system';
 import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -126,29 +126,39 @@ export const useLocalAudioHandler = ({
 
 	const HandlerComponent = useMemo(
 		() => (
-			<Container height="fit" orientation={'horizontal'} gap="1rem" crossAlignment="flex-start">
-				<Tooltip placement="top" label={audioTooltip}>
-					<Button
-						icon={status ? 'Mic' : 'MicOff'}
-						size="extralarge"
-						minWidth="extralarge"
-						backgroundColor={'primary'}
-						onClick={() => toggleStream(!status, deviceId)}
-						data-testid={'turn_on_audio'}
+			<Container
+				height="fit"
+				width="fill"
+				orientation="horizontal"
+				gap="1rem"
+				crossAlignment="flex-start"
+			>
+				<Row>
+					<Tooltip placement="top" label={audioTooltip}>
+						<Button
+							icon={status ? 'Mic' : 'MicOff'}
+							size="extralarge"
+							minWidth="extralarge"
+							backgroundColor="primary"
+							onClick={() => toggleStream(!status, deviceId)}
+							data-testid={'turn_on_audio'}
+							disabled={permission !== 'granted' || noDevices}
+						/>
+					</Tooltip>
+				</Row>
+				<Row takeAvailableSpace>
+					<Select
+						label={noDevices ? noDevicesLabel : micDeviceLabel}
+						data-testid={'audio-select'}
+						items={mediaAudioList}
+						onChange={onChangeSource}
+						selection={audioSelected}
+						placement="bottom-end"
+						showCheckbox={false}
+						disablePortal
 						disabled={permission !== 'granted' || noDevices}
 					/>
-				</Tooltip>
-				<Select
-					label={noDevices ? noDevicesLabel : micDeviceLabel}
-					data-testid={'audio-select'}
-					items={mediaAudioList}
-					onChange={onChangeSource}
-					selection={audioSelected}
-					placement="bottom-end"
-					showCheckbox={false}
-					disablePortal
-					disabled={permission !== 'granted' || noDevices}
-				/>
+				</Row>
 				{permission === 'denied' && (
 					<Snackbar
 						open={permission === 'denied'}
