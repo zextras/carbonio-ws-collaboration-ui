@@ -344,9 +344,16 @@ class XMPPClient implements IXMPPClient {
 	fullTextSearch(roomId: string, text: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			const queryId = HistoryAccumulator.getNextId();
+			const room = useStore.getState().rooms[roomId];
+			const startSearch = room.userSettings?.clearedAt ?? room.createdAt;
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'start' })
+				.c('value')
+				.t(dateToISODate(startSearch))
+				.up()
+				.up()
 				.c('field', { var: 'full-text-search' })
 				.c('value')
 				.t(text)
