@@ -273,18 +273,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);
 
-	// TODO to remove
-	// useEffect(() => {
-	// 	const handleImageLoad = (): void => {
-	// 		scrollToEnd(MessagesListWrapperRef);
-	// 	};
-	//
-	// 	window.addEventListener('imageLoadedInChat', handleImageLoad);
-	// 	return (): void => {
-	// 		window.removeEventListener('imageLoadedInChat', handleImageLoad);
-	// 	};
-	// }, []);
-
 	return (
 		<Messages
 			key={`messagesBox-${roomId}`}

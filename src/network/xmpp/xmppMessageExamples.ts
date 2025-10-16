@@ -6,8 +6,6 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-// TODO implement and use buildXmppStanza.ts
-
 /**
  * Inbox stanzas: messages received after an inbox iq
  */

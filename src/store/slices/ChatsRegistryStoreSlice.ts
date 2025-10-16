@@ -359,9 +359,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const registry = draft.chatsRegistry[roomId];
 				if (!registry) return;
 
-				if (!registry.messageRanges) {
-					registry.messageRanges = [];
-				}
+				registry.messageRanges ??= [];
 
 				registry.messageRanges.push(range);
 				registry.messageRanges = orderBy(registry.messageRanges, ['oldestTimestamp'], ['asc']);
@@ -405,9 +403,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const registry = draft.chatsRegistry[roomId];
 				if (!registry) return;
 
-				if (!registry.backfillQueue) {
-					registry.backfillQueue = [];
-				}
+				registry.backfillQueue ??= [];
 
 				const exists = registry.backfillQueue.some(
 					(req) =>

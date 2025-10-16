@@ -38,7 +38,7 @@ const HighlightedText = ({ text, searchText }: HighlightedTextProps): React.JSX.
 		<CustomText>
 			{parts.map((part, i) =>
 				part && searchWords.some((word) => word.toLowerCase() === part.toLowerCase()) ? (
-					<HighlightedTextCustom key={i}>{part}</HighlightedTextCustom>
+					<HighlightedTextCustom key={`${i}-${part}`}>{part}</HighlightedTextCustom>
 				) : (
 					part
 				)

@@ -12,7 +12,6 @@ import { Container } from '@zextras/carbonio-design-system';
 import Chat from './Chat';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import useStore from '../../../store/Store';
 import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
@@ -39,8 +38,6 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const { darkReaderStatus } = useDarkReader();
 
 	const [conversationView, setConversationView] = useState<ConversationView>(ConversationView.CHAT);
-
-	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	useEffect(() => {
 		setConversationView((prevState) =>
