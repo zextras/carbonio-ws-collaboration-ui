@@ -7,7 +7,13 @@
 import { filter, forEach, size, unionBy } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { MessageRange, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import {
+	ConfigurationMessage,
+	MessageFastening,
+	MessageRange,
+	MessageType,
+	TextMessage
+} from '../../../types/store/ChatsRegistryTypes';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
@@ -39,20 +45,16 @@ export function requestHistoryCallback(
 	const { xmppClient } = store.connections;
 
 	const historyMessages = HistoryAccumulator.getHistoryMessages(queryId);
-
-	const fasteningMessages = filter(
-		historyMessages,
-		(message) => message.type === MessageType.FASTENING
-	);
-
-	fasteningMessages.forEach((message) => useStore.getState().addFastening(message));
-
-	// Filter messages by type
-	const storeMessages = filter(
-		historyMessages,
-		(message) =>
-			message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG
-	);
+	const storeMessages: (TextMessage | ConfigurationMessage)[] = [];
+	const fasteningMessages: MessageFastening[] = [];
+	historyMessages.forEach((message) => {
+		if (message.type === MessageType.FASTENING) {
+			fasteningMessages.push(message);
+			useStore.getState().addFastening(message);
+		} else {
+			storeMessages.push(message);
+		}
+	});
 
 	// If there are only fastening messages in the history, request more messages
 	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {

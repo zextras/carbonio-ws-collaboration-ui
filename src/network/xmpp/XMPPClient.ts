@@ -20,12 +20,11 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
 
-class XMPPClient implements IXMPPClient {
+class XMPPClient {
 	public xmppConnection: XMPPConnection;
 
 	constructor() {
