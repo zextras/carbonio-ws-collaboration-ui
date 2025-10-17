@@ -12,6 +12,7 @@ import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
+import useDarkReader from '../../hooks/useDarkReader';
 import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
@@ -20,8 +21,9 @@ import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { calcScaleDivisor } from '../../utils/styleUtils';
+import { MediaStatus } from '../components/meetingAccessPoint/externalAccess/MeetingExternalAccessPage';
+import useAccessMeeting from '../components/meetingAccessPoint/externalAccess/useAccessMeeting';
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
-import useAccessMeetingAction from '../components/meetingAccessPoint/useAccessMeetingAction';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
@@ -66,15 +68,22 @@ const MeetingAccessPage = (): ReactElement => {
 
 	const [meetingName, setMeetingName] = useState<string>('');
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
-	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 	const [pageWidth, setPageWidth] = useState(window.innerWidth);
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
+	const [mediaStatus, setMediaStatus] = useState<MediaStatus>({
+		audio: { enabled: false },
+		video: { enabled: false }
+	});
 
-	const { handleLeave, handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
-		!!hasUserDirectAccess,
-		userIsReady,
-		setUserIsReady
-	);
+	const { handleLeave, handleEnterMeeting, handleWaitingRoom, userIsReady } =
+		useAccessMeeting(mediaStatus);
+
+	const { enableDarkReader } = useDarkReader();
+
+	useEffect(() => {
+		enableDarkReader();
+	}, [enableDarkReader]);
+
 	const { goToInfoPage } = useRouting();
 
 	useEffect(() => {
@@ -188,6 +197,7 @@ const MeetingAccessPage = (): ReactElement => {
 							wrapperWidth={wrapperWidth}
 							handleEnterMeeting={handleEnterMeeting}
 							handleWaitingRoom={handleWaitingRoom}
+							setMediaStatus={setMediaStatus}
 						/>
 					</Container>
 					{leaveButton}

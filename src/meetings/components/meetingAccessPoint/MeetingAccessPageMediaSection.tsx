@@ -4,7 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+	Dispatch,
+	FC,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 
 import styled from '@emotion/styled';
 import {
@@ -18,11 +27,11 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import AccessTile from './mediaHandlers/AccessTile';
 import { useLocalAudioHandler } from './mediaHandlers/useLocalAudioHandler';
 import { useLocalVideoHandler } from './mediaHandlers/useLocalVideoHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
@@ -34,14 +43,9 @@ type AccessMeetingPageMediaSectionProps = {
 	userIsReady: boolean;
 	meetingName: string;
 	wrapperWidth: number;
-	handleEnterMeeting: (
-		mediaDevicesEnabled?: { audio: boolean; video: boolean },
-		selectedDevicesId?: { audio?: string; video?: string }
-	) => void;
-	handleWaitingRoom: (
-		mediaDevicesEnabled?: { audio: boolean; video: boolean },
-		selectedDevicesId?: { audio?: string; video?: string }
-	) => void;
+	handleEnterMeeting: () => void;
+	handleWaitingRoom: () => void;
+	setMediaStatus: Dispatch<SetStateAction<MediaStatus>>;
 };
 
 const ResizeWrapper = styled(Container)`
@@ -65,7 +69,8 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	meetingName,
 	wrapperWidth,
 	handleEnterMeeting,
-	handleWaitingRoom
+	handleWaitingRoom,
+	setMediaStatus
 }) => {
 	const [micTest, setMicTest] = useState(false);
 
@@ -126,7 +131,11 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 
 	useEffect(() => {
 		setMeetingStorage({ EnableCamera: videoStatus, EnableMicrophone: audioStatus });
-	}, [audioStatus, setMeetingStorage, videoStatus]);
+		setMediaStatus({
+			audio: { enabled: audioStatus, selectedDeviceId: audioDeviceId },
+			video: { enabled: videoStatus, selectedDeviceId: videoDeviceId }
+		});
+	}, [audioDeviceId, audioStatus, setMediaStatus, setMeetingStorage, videoDeviceId, videoStatus]);
 
 	useEffect(() => {
 		if (!audioStatus) {
@@ -163,25 +172,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		whenYouAreReadyLabel
 	]);
 
-	// handle waiting room flow and events
-	const waitingRoomHandler = useCallback(
-		() =>
-			handleWaitingRoom(
-				{ audio: audioStatus, video: videoStatus },
-				{ audio: audioDeviceId, video: videoDeviceId }
-			),
-		[audioDeviceId, audioStatus, handleWaitingRoom, videoDeviceId, videoStatus]
-	);
-
-	const enterMeeting = useCallback(
-		() =>
-			handleEnterMeeting(
-				{ audio: audioStatus, video: videoStatus },
-				{ audio: audioDeviceId, video: videoDeviceId }
-			),
-		[audioDeviceId, audioStatus, handleEnterMeeting, videoDeviceId, videoStatus]
-	);
-
 	const enterButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
 		if (hasUserDirectAccess)
@@ -191,7 +181,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						data-testid="enterMeetingButton"
 						width="fill"
 						label={enter}
-						onClick={enterMeeting}
+						onClick={handleEnterMeeting}
 						disabled={!areNetworksUp}
 					/>
 				</Tooltip>
@@ -203,7 +193,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 					label={readyToParticipateLabel}
 					icon="CheckmarkOutline"
 					iconPlacement="right"
-					onClick={waitingRoomHandler}
+					onClick={handleWaitingRoom}
 					width="fill"
 				/>
 			);
@@ -216,18 +206,16 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			</Container>
 		);
 	}, [
+		hasUserDirectAccess,
+		enterButtonDisabledTooltip,
 		areNetworksUp,
 		enter,
-		enterButtonDisabledTooltip,
-		enterMeeting,
-		hasUserDirectAccess,
-		waitingRoomHandler,
-		readyLabel,
+		handleEnterMeeting,
+		userIsReady,
 		readyToParticipateLabel,
-		userIsReady
+		handleWaitingRoom,
+		readyLabel
 	]);
-
-	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, waitingRoomHandler);
 
 	return (
 		<ResizeWrapper

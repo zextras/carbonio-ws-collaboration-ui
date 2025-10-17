@@ -79,6 +79,7 @@ describe('user not giving media permissions', () => {
 				wrapperWidth={100}
 				handleEnterMeeting={jest.fn()}
 				handleWaitingRoom={jest.fn()}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 
@@ -104,6 +105,7 @@ describe('user not giving media permissions', () => {
 				wrapperWidth={100}
 				handleEnterMeeting={jest.fn()}
 				handleWaitingRoom={jest.fn()}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 
@@ -126,6 +128,7 @@ describe('user not giving media permissions', () => {
 				wrapperWidth={100}
 				handleEnterMeeting={joinMeeting}
 				handleWaitingRoom={jest.fn()}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 		const enterButton = screen.getByRole('button', { name: 'Enter' });
@@ -144,6 +147,7 @@ describe('user not giving media permissions', () => {
 				wrapperWidth={100}
 				handleEnterMeeting={jest.fn()}
 				handleWaitingRoom={joinWaiting}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 		const readyButton = screen.getByRole('button', { name: 'Ready to participate' });
