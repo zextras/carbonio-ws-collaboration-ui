@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, forEach, size, unionBy } from 'lodash';
+import { forEach, size } from 'lodash';
 
 import useStore from '../../../store/Store';
 import {
@@ -15,7 +15,7 @@ import {
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
 import { getId } from '../utility/decodeJid';
-import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
+import { getRequiredAttribute } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 /**
@@ -31,11 +31,9 @@ import HistoryAccumulator from '../utility/HistoryAccumulator';
  * 5- Checks for replied messages and in case request the message in the history
  * 6- Updates the last message read of all the members of a room
  * */
-export function requestHistoryCallback(stanza: Element, queryId: string, unread?: number): void {
+export function requestHistoryWithBackfillCallback(stanza: Element, queryId: string): void {
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
-	const fin = getRequiredTagElement(stanza, 'fin');
-	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	const store = useStore.getState();
 	const { xmppClient } = store.connections;
 
@@ -51,34 +49,12 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 	});
 	useStore.getState().addFastening(fasteningMessages);
 
-	// If there are only fastening messages in the history, request more messages
-	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
-		xmppClient.requestHistory(roomId, fasteningMessages[0].date, 50);
-	}
-
-	// History is fully loaded if the response is marked as complete
-	// or if there are no messages in the response because the history has been cleared
-	if (isHistoryFullyLoaded || size(historyMessages) === 0) {
-		store.setHistoryIsFullyLoaded(roomId);
-	}
-
-	// If unread are more than loaded text messages, request history again
-	// Do this check here to load history only when user opens conversation
-	if (size(storeMessages) > 0 && unread && unread > 0) {
-		const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
-		const unreadNotLoaded = unread - size(textMessages);
-		if (unreadNotLoaded > 0) {
-			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
-			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
-		}
-	}
-
 	// Store history messages on store updating the history of the room
 	if (size(storeMessages) > 0) {
 		store.updateHistory(roomId, storeMessages);
 
 		const messagesWithStanzaId = storeMessages.filter(
-			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG && msg.stanzaId !== undefined
+			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG
 		);
 
 		if (messagesWithStanzaId.length > 0) {
@@ -94,17 +70,10 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 			};
 
 			store.addMessageRange(roomId, rangeInfo);
+			store.detectAndFillGaps(roomId);
+			store.processBackfillQueue(roomId);
 		}
 	}
-
-	// Add message of creation room at the start of the history
-	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
-	if (isHistoryFullyLoaded && !historyIsBeenCleared) {
-		store.addCreateRoomMessage(roomId);
-	}
-
-	// Set history loadable again
-	store.setHistoryLoadDisabled(roomId, false);
 
 	// Request message subject of reply
 	forEach(storeMessages, (message) => {
@@ -113,7 +82,4 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
-
-	// Update last marker
-	xmppClient.lastMarkers(roomId);
 }

@@ -44,7 +44,7 @@ export function onInboxMessageStanza(message: Element): true {
 				break;
 			}
 			case MessageType.FASTENING:
-				store.addFastening(inboxMessage);
+				store.addFastening([inboxMessage]);
 				// Last inboxMessage is a fastening, we need to request more messages to display the real last one
 				xmppClient.requestHistory(inboxMessage.roomId, now(), 3);
 				break;

@@ -52,7 +52,7 @@ export function onNewMessageStanza(message: Element): true {
 			break;
 		}
 		case MessageType.FASTENING: {
-			store.addFastening(newMessage);
+			store.addFastening([newMessage]);
 
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);

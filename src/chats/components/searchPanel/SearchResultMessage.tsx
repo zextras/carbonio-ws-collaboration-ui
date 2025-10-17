@@ -60,12 +60,10 @@ const SearchResultMessage = ({
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
 			const { xmppClient } = useStore.getState().connections;
-			xmppClient
-				.requestMessageResultHistoryToId(message.roomId, message.stanzaId, true)
-				.then(() => {
-					scrollToMessage(message.id);
-					useStore.getState().setScrollPosition(message.roomId, message.id);
-				});
+			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
+				scrollToMessage(message.id);
+				useStore.getState().setScrollPosition(message.roomId, message.id);
+			});
 		} else {
 			scrollToMessage(message.id);
 		}

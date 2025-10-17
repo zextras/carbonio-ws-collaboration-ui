@@ -220,7 +220,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Delete text message
-		act(() => result.current.addFastening(mockedDeletedMessage));
+		act(() => result.current.addFastening([mockedDeletedMessage]));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
 
@@ -243,7 +243,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Edit text message
-		act(() => result.current.addFastening(mockedEditedMessage));
+		act(() => result.current.addFastening([mockedEditedMessage]));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
 
@@ -298,7 +298,7 @@ describe('render list of messages with history loader visible for first time ope
 		// Reply to text message
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 		// Delete first text message
-		act(() => result.current.addFastening(mockedDeletedMessage));
+		act(() => result.current.addFastening([mockedDeletedMessage]));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
 
@@ -327,7 +327,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(mockedTextMessage));
 		// Edit text message
-		act(() => result.current.addFastening(mockedEditedMessage));
+		act(() => result.current.addFastening([mockedEditedMessage]));
 		// Reply to text message
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 

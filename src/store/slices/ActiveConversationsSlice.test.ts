@@ -271,7 +271,7 @@ describe('Active conversations slice', () => {
 			});
 			const store = useStore.getState();
 			store.newMessage(message);
-			store.addFastening(fastening);
+			store.addFastening([fastening]);
 			store.setNewReaction(
 				fastening.roomId,
 				fastening.originalStanzaId,

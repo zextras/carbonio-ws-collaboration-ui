@@ -257,19 +257,21 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	},
-	addFastening: (fastening: MessageFastening): void => {
+	addFastening: (newFastenings: MessageFastening[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { fastenings } = initRoomChatsRegistry(draft, fastening.roomId);
-				if (!fastenings[fastening.originalStanzaId]) {
-					fastenings[fastening.originalStanzaId] = [];
-				}
-				const messageFastening = fastenings[fastening.originalStanzaId];
-				const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-				// Add fastening to the array only if it doesn't already exist
-				if (!alreadyExists) {
-					messageFastening.push(fastening);
-					fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
+				if (newFastenings.length > 0) {
+					const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
+					forEach(newFastenings, (fastening) => {
+						fastenings[fastening.originalStanzaId] ??= [];
+						const messageFastening = fastenings[fastening.originalStanzaId];
+						const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
+						// Add fastening to the array only if it doesn't already exist
+						if (!alreadyExists) {
+							messageFastening.push(fastening);
+							fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
+						}
+					});
 				}
 			}),
 			false,

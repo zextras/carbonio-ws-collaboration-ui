@@ -344,8 +344,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				from: 'userA'
 			});
 
-			useStore.getState().addFastening(fastening);
-			useStore.getState().addFastening(fastening); // duplicate
+			useStore.getState().addFastening([fastening]);
+			useStore.getState().addFastening([fastening]); // duplicate
 
 			const fastenings =
 				useStore.getState().chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId];
@@ -367,8 +367,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				from: 'b',
 				action: FasteningAction.REACTION
 			});
-			useStore.getState().addFastening(f2);
-			useStore.getState().addFastening(f1);
+			useStore.getState().addFastening([f2]);
+			useStore.getState().addFastening([f1]);
 
 			const fastenings = useStore.getState().chatsRegistry[f1.roomId].fastenings.s1;
 			expect(fastenings[0].id).toBe('f1');

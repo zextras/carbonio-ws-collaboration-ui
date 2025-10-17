@@ -12,6 +12,7 @@ import { RoomsApi } from '../index';
 import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
+import { requestHistoryWithBackfillCallback } from './iqCallbacks/requestHistoryWithBackfillCallback';
 import { rosterCallback } from './iqCallbacks/rosterCallback';
 import { smartMarkersCallback } from './iqCallbacks/smartMarkersCallback';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
@@ -20,6 +21,7 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
@@ -275,22 +277,31 @@ class XMPPClient {
 		replyMessageId: string
 	): void {
 		if (!useStore.getState().rooms[roomId]) return;
-		const queryId = HistoryAccumulator.getNextId();
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
-			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'ids' })
-			.c('value')
-			.t(messageSubjectOfReplyId);
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: () => {
-				const referenceMessage = HistoryAccumulator.getRepliedMessage(queryId);
-				const { setRepliedMessage } = useStore.getState();
-				setRepliedMessage(referenceMessage.roomId, replyMessageId, referenceMessage);
-			}
-		});
+		const storeMessages = useStore.getState().chatsRegistry[roomId]?.messages;
+		const referenceMessage = find(
+			storeMessages,
+			(message) => message.id === messageSubjectOfReplyId && message.type === MessageType.TEXT_MSG
+		) as TextMessage;
+		if (referenceMessage) {
+			useStore.getState().setRepliedMessage(roomId, replyMessageId, referenceMessage);
+		} else {
+			const queryId = HistoryAccumulator.getNextId();
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'ids' })
+				.c('value')
+				.t(messageSubjectOfReplyId);
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: () => {
+					const referenceMessage = HistoryAccumulator.getRepliedMessage(queryId);
+					const { setRepliedMessage } = useStore.getState();
+					setRepliedMessage(referenceMessage.roomId, replyMessageId, referenceMessage);
+				}
+			});
+		}
 	}
 
 	requestMessageToForward(
@@ -404,15 +415,11 @@ class XMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => requestHistoryCallback(stanza, queryId, undefined, true)
+			callback: (stanza) => requestHistoryWithBackfillCallback(stanza, queryId)
 		});
 	}
 
-	requestMessageResultHistoryToId(
-		roomId: string,
-		stanzaId: string,
-		withRequestedId: boolean = false
-	): Promise<void> {
+	requestMessageResultHistoryToId(roomId: string, stanzaId: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			const queryId = HistoryAccumulator.getNextId();
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
@@ -423,7 +430,7 @@ class XMPPClient {
 				.t(Strophe.NS.MAM)
 				.up()
 				.up()
-				.c('field', { var: withRequestedId ? 'to-id' : 'before-id' })
+				.c('field', { var: 'to-id' })
 				.c('value')
 				.t(stanzaId)
 				.up()
@@ -435,7 +442,7 @@ class XMPPClient {
 				type: XMPPRequestType.IQ,
 				elem: iq,
 				callback: (stanza) => {
-					requestHistoryCallback(stanza, queryId, undefined, true);
+					requestHistoryWithBackfillCallback(stanza, queryId);
 					resolve();
 				},
 				errorCallback: reject
