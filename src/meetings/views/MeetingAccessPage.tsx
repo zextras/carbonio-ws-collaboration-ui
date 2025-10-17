@@ -30,7 +30,6 @@ const MeetingAccessPage = (): ReactElement => {
 	const leave = t('action.leave', 'Leave');
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 
-	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [pageWidth, setPageWidth] = useState(window.innerWidth);
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
 
@@ -45,7 +44,6 @@ const MeetingAccessPage = (): ReactElement => {
 
 	const { handleLeave, handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
 		hasUserDirectAccess,
-		streamTrack,
 		userIsReady,
 		setUserIsReady
 	);
@@ -105,8 +103,6 @@ const MeetingAccessPage = (): ReactElement => {
 						</Text>
 					</CustomTextContainer>
 					<MeetingAccessPageMediaSection
-						streamTrack={streamTrack}
-						setStreamTrack={setStreamTrack}
 						hasUserDirectAccess={hasUserDirectAccess}
 						userIsReady={userIsReady}
 						meetingName={meetingName}

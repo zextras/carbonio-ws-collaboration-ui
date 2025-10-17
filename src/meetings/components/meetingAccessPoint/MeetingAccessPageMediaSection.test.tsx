@@ -73,8 +73,6 @@ describe('user not giving media permissions', () => {
 
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
@@ -100,8 +98,6 @@ describe('user not giving media permissions', () => {
 
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
@@ -124,8 +120,6 @@ describe('user not giving media permissions', () => {
 		const joinMeeting = jest.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
@@ -144,8 +138,6 @@ describe('user not giving media permissions', () => {
 		const joinWaiting = jest.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess={false}
 				userIsReady={false}
 				meetingName={groupMeeting.name}

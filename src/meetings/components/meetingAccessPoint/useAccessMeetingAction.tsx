@@ -15,12 +15,10 @@ import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors'
 import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
-import { freeMediaResources } from '../../../utils/MeetingsUtils';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 const useAccessMeetingAction = (
 	hasUserDirectAccess: boolean,
-	streamTrack: MediaStream | null,
 	userIsReady: boolean,
 	setUserIsReady: Dispatch<SetStateAction<boolean>>
 ): {
@@ -55,9 +53,8 @@ const useAccessMeetingAction = (
 	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
 
 	const handleRejected = useCallback(() => {
-		freeMediaResources(streamTrack);
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
-	}, [goToInfoPage, streamTrack]);
+	}, [goToInfoPage]);
 
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_REJECTED, handleRejected);
 
@@ -68,14 +65,13 @@ const useAccessMeetingAction = (
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
 
 	const handleLeave = useCallback(() => {
-		freeMediaResources(streamTrack);
 		if (userIsReady) {
 			MeetingsApi.leaveWaitingRoom(meetingId);
 		} else if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
-	}, [goToInfoPage, isLoggedUserExternal, meetingId, streamTrack, userIsReady]);
+	}, [goToInfoPage, isLoggedUserExternal, meetingId, userIsReady]);
 
 	// Leave waiting list on window close
 	useEffect(() => {
@@ -103,12 +99,11 @@ const useAccessMeetingAction = (
 				}
 			)
 				.then((meetingId) => {
-					freeMediaResources(streamTrack);
 					goToMeetingPage(meetingId);
 				})
 				.catch((err) => console.error(err, 'Error on joinMeeting'));
 		},
-		[meetingId, streamTrack, goToMeetingPage]
+		[meetingId, goToMeetingPage]
 	);
 
 	const handleWaitingRoom = useCallback(
@@ -130,13 +125,12 @@ const useAccessMeetingAction = (
 				.then((resp) => {
 					if (resp.status === 'WAITING') setUserIsReady(true);
 					if (resp.status === 'ACCEPTED') {
-						freeMediaResources(streamTrack);
 						goToMeetingPage(meetingId);
 					}
 				})
 				.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
 		},
-		[goToMeetingPage, meetingId, setUserIsReady, streamTrack]
+		[goToMeetingPage, meetingId, setUserIsReady]
 	);
 
 	return {

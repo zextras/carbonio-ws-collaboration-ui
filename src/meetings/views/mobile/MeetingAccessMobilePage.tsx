@@ -52,7 +52,6 @@ const MeetingAccessMobilePage = (): ReactElement => {
 
 	const { handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
 		hasUserDirectAccess,
-		null,
 		userIsReady,
 		setUserIsReady
 	);
