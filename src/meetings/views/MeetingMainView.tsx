@@ -37,14 +37,9 @@ const LazyMeetingExternalAccessPage = lazy(() => {
 	);
 });
 
-const LazyMeetingAccessPage = lazy(() => {
-	if (BrowserUtils.isMobile()) {
-		return import(
-			/* webpackChunkName: "MeetingAccessMobilePageView" */ './mobile/MeetingAccessMobilePage'
-		);
-	}
-	return import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage');
-});
+const LazyMeetingAccessPage = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage')
+);
 
 const MeetingRouter = (): ReactElement => {
 	const { route } = useContext(RouterContext);
