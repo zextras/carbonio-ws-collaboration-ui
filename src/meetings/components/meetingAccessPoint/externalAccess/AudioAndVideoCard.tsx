@@ -14,7 +14,7 @@ import React, {
 	useState
 } from 'react';
 
-import { Button, Container, Row } from "@zextras/carbonio-design-system";
+import { Button, Container, Row } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { MediaStatus } from './MeetingExternalAccessPage';

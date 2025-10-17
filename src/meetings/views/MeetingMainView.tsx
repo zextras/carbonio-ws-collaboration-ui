@@ -7,6 +7,7 @@
 import React, { lazy, ReactElement, Suspense, useContext, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
+import useDarkReader from '../../hooks/useDarkReader';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
+import useDarkReader from '../../../../hooks/useDarkReader';
 import useEventListener, { EventName } from '../../../../hooks/useEventListener';
 import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
@@ -40,6 +41,8 @@ const useAccessMeeting = (
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
+	const { enableDarkReader } = useDarkReader();
+
 	const handleEnterMeeting = useCallback(() => {
 		const roomId = getRoomIdByMeetingId(useStore.getState(), meetingId) ?? '';
 		MeetingsApi.enterMeeting(
@@ -54,10 +57,11 @@ const useAccessMeeting = (
 			}
 		)
 			.then((meetingId) => {
+				enableDarkReader();
 				goToMeetingPage(meetingId);
 			})
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [meetingId, mediaStatus, goToMeetingPage]);
+	}, [meetingId, mediaStatus, enableDarkReader, goToMeetingPage]);
 
 	const handleWaitingRoom = useCallback(() => {
 		MeetingsApi.joinMeeting(
@@ -74,11 +78,12 @@ const useAccessMeeting = (
 			.then((resp) => {
 				if (resp.status === 'WAITING') setUserIsReady(true);
 				if (resp.status === 'ACCEPTED') {
+					enableDarkReader();
 					goToMeetingPage(meetingId);
 				}
 			})
 			.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
-	}, [goToMeetingPage, meetingId, setUserIsReady, mediaStatus]);
+	}, [meetingId, mediaStatus, enableDarkReader, goToMeetingPage]);
 
 	// User is accepted from waiting room
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, handleWaitingRoom);
