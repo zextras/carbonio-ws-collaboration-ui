@@ -8,12 +8,21 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useState } from '
 
 import styled from '@emotion/styled';
 import { Button, Container, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
+import useRouting from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
+import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
+import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { calcScaleDivisor } from '../../utils/styleUtils';
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
 import useAccessMeetingAction from '../components/meetingAccessPoint/useAccessMeetingAction';
-import useAccessMeetingInformation from '../components/meetingAccessPoint/useAccessMeetingInformation';
+import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
 	position: absolute;
@@ -26,29 +35,80 @@ const CustomTextContainer = styled(Container)`
 `;
 
 const MeetingAccessPage = (): ReactElement => {
+	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
+	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
+
 	const [t] = useTranslation();
 	const leave = t('action.leave', 'Leave');
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
+	const groupTitle = t(
+		'meeting.startModal.enterRoomMeetingTitle',
+		`Participate to ${conversationTitle} meeting`,
+		{ meetingTitle: conversationTitle }
+	);
+	const oneToOneTitle = t(
+		'meeting.startModal.enterOneToOneMeetingTitle',
+		`Start meeting with ${conversationTitle}`,
+		{ meetingTitle: conversationTitle }
+	);
+	const clickOnReadyLabel = t(
+		'meeting.waitingRoom.welcomeHint',
+		'Click on “READY TO PARTICIPATE” to enter the meeting'
+	);
+	const enterInAFewMomentsLabel = t(
+		'meeting.waitingRoom.readyHint',
+		'You will enter the meeting in a few moments'
+	);
 
+	const [meetingName, setMeetingName] = useState<string>('');
+	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
+	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 	const [pageWidth, setPageWidth] = useState(window.innerWidth);
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
 
-	const {
-		hasUserDirectAccess,
-		meetingName,
-		ShowMeetingAccessPage,
-		accessTitle,
-		userIsReady,
-		setUserIsReady
-	} = useAccessMeetingInformation();
-
 	const { handleLeave, handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
-		hasUserDirectAccess,
+		!!hasUserDirectAccess,
 		userIsReady,
 		setUserIsReady
 	);
+	const { goToInfoPage } = useRouting();
 
-	// resize handling
+	useEffect(() => {
+		if (chatsBeNetworkStatus) {
+			MeetingsApi.getMeetingByMeetingId(meetingId)
+				.then((meeting) => {
+					const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+					const iAmOwner = find(
+						room?.members,
+						(member) => member.userId === useStore.getState().session.id && member.owner
+					);
+					// Modal access for permanent meeting and scheduled owners
+					if (meeting.meetingType === MeetingType.PERMANENT || iAmOwner) {
+						setHasUserDirectAccess(true);
+					} else {
+						// Waiting room access for scheduled member
+						setHasUserDirectAccess(false);
+						setMeetingName(meeting.name);
+					}
+				})
+				.catch(() => {
+					// Waiting room access for external
+					MeetingsApi.getScheduledMeetingName(meetingId)
+						.then((resp) => {
+							setHasUserDirectAccess(false);
+							setMeetingName(resp.name);
+						})
+						.catch(() => {
+							goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
+						});
+				});
+		}
+	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
+
 	const handleResize = useCallback(() => {
 		setPageWidth(window.innerWidth);
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
@@ -56,7 +116,6 @@ const MeetingAccessPage = (): ReactElement => {
 
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
-
 		return (): void => window.removeEventListener('resize', handleResize);
 	}, [handleResize]);
 
@@ -64,6 +123,21 @@ const MeetingAccessPage = (): ReactElement => {
 		setPageWidth(window.innerWidth);
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
 	}, []);
+
+	const accessTitle = useMemo(() => {
+		const roomTypeTitle = roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle;
+		if (hasUserDirectAccess === undefined) return '';
+		if (hasUserDirectAccess) return roomTypeTitle;
+		return userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel;
+	}, [
+		roomType,
+		oneToOneTitle,
+		groupTitle,
+		hasUserDirectAccess,
+		userIsReady,
+		enterInAFewMomentsLabel,
+		clickOnReadyLabel
+	]);
 
 	const leaveButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
@@ -94,26 +168,32 @@ const MeetingAccessPage = (): ReactElement => {
 	}, [handleLeave, hasUserDirectAccess, leave, leaveMeetingLabel, pageWidth]);
 
 	return (
-		<ShowMeetingAccessPage>
-			<Container maxWidth="45%">
-				<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
-					<CustomTextContainer height="fit" width="fit">
-						<Text size="extralarge" weight="bold" overflow="break-word">
-							{accessTitle}
-						</Text>
-					</CustomTextContainer>
-					<MeetingAccessPageMediaSection
-						hasUserDirectAccess={hasUserDirectAccess}
-						userIsReady={userIsReady}
-						meetingName={meetingName}
-						wrapperWidth={wrapperWidth}
-						handleEnterMeeting={handleEnterMeeting}
-						handleWaitingRoom={handleWaitingRoom}
-					/>
+		<Container
+			background={'gray0'}
+			padding={{ vertical: '4.5rem', horizontal: '1rem' }}
+			data-testid="meeting_access_page_view"
+		>
+			{chatsBeNetworkStatus && hasUserDirectAccess !== undefined && (
+				<Container maxWidth="45%">
+					<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
+						<CustomTextContainer height="fit" width="fit">
+							<Text size="extralarge" weight="bold" overflow="break-word">
+								{accessTitle}
+							</Text>
+						</CustomTextContainer>
+						<MeetingAccessPageMediaSection
+							hasUserDirectAccess={hasUserDirectAccess}
+							userIsReady={userIsReady}
+							meetingName={meetingName}
+							wrapperWidth={wrapperWidth}
+							handleEnterMeeting={handleEnterMeeting}
+							handleWaitingRoom={handleWaitingRoom}
+						/>
+					</Container>
+					{leaveButton}
 				</Container>
-				{leaveButton}
-			</Container>
-		</ShowMeetingAccessPage>
+			)}
+		</Container>
 	);
 };
 
