@@ -260,19 +260,20 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	addFastening: (newFastenings: MessageFastening[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (newFastenings.length > 0) {
-					const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
-					forEach(newFastenings, (fastening) => {
-						fastenings[fastening.originalStanzaId] ??= [];
-						const messageFastening = fastenings[fastening.originalStanzaId];
-						const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-						// Add fastening to the array only if it doesn't already exist
-						if (!alreadyExists) {
-							messageFastening.push(fastening);
-							fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
-						}
-					});
+				if (newFastenings.length === 0) {
+					return;
 				}
+				const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
+				forEach(newFastenings, (fastening) => {
+					fastenings[fastening.originalStanzaId] ??= [];
+					const messageFastening = fastenings[fastening.originalStanzaId];
+					const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
+					// Add fastening to the array only if it doesn't already exist
+					if (!alreadyExists) {
+						messageFastening.push(fastening);
+						fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
+					}
+				});
 			}),
 			false,
 			'CHAT/ADD_FASTENING'
