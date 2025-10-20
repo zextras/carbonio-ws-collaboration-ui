@@ -84,17 +84,19 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 		}
 	});
 
-	const oldest = historyMessages[0];
-	const newest = historyMessages[historyMessages.length - 1];
+	if (historyMessages.length > 0) {
+		const oldest = historyMessages[0];
+		const newest = historyMessages[historyMessages.length - 1];
 
-	const rangeInfo: MessageRange = {
-		oldestId: oldest.id,
-		newestId: newest.id,
-		oldestTimestamp: oldest.date,
-		newestTimestamp: newest.date
-	};
+		const rangeInfo: MessageRange = {
+			oldestId: oldest.id,
+			newestId: newest.id,
+			oldestTimestamp: oldest.date,
+			newestTimestamp: newest.date
+		};
 
-	store.addMessageRange(roomId, rangeInfo);
+		store.addMessageRange(roomId, rangeInfo);
+	}
 
 	// Add message of creation room at the start of the history
 	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;

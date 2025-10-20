@@ -405,7 +405,7 @@ class XMPPClient {
 			.up()
 			.c('field', { var: 'end' })
 			.c('value')
-			.t(dateToISODate(beforeDate));
+			.t(dateToISODate(beforeDate + 1));
 
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
