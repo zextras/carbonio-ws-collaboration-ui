@@ -182,7 +182,8 @@ export const useRoomsStoreSlice: StateCreator<
 					fastenings: {},
 					markers: {},
 					searchResults: [],
-					unread: 0
+					unread: 0,
+					backfillQueue: []
 				};
 			}),
 			false,

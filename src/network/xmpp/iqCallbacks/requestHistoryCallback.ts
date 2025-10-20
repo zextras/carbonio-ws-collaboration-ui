@@ -74,28 +74,27 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 	}
 
 	// Store history messages on store updating the history of the room
-	if (size(storeMessages) > 0) {
-		store.updateHistory(roomId, storeMessages);
+	store.updateHistory(roomId, storeMessages);
 
-		const messagesWithStanzaId = storeMessages.filter(
-			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG && msg.stanzaId !== undefined
-		);
-
-		if (messagesWithStanzaId.length > 0) {
-			const oldest = messagesWithStanzaId[0];
-			const newest = messagesWithStanzaId[messagesWithStanzaId.length - 1];
-
-			const rangeInfo: MessageRange = {
-				oldestStanzaId: oldest.stanzaId,
-				newestStanzaId: newest.stanzaId,
-				oldestTimestamp: oldest.date,
-				newestTimestamp: newest.date,
-				count: messagesWithStanzaId.length
-			};
-
-			store.addMessageRange(roomId, rangeInfo);
+	// Request message subject of reply
+	forEach(storeMessages, (message) => {
+		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
-	}
+	});
+
+	const oldest = historyMessages[0];
+	const newest = historyMessages[historyMessages.length - 1];
+
+	const rangeInfo: MessageRange = {
+		oldestId: oldest.id,
+		newestId: newest.id,
+		oldestTimestamp: oldest.date,
+		newestTimestamp: newest.date
+	};
+
+	store.addMessageRange(roomId, rangeInfo);
 
 	// Add message of creation room at the start of the history
 	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
@@ -105,14 +104,6 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 
 	// Set history loadable again
 	store.setHistoryLoadDisabled(roomId, false);
-
-	// Request message subject of reply
-	forEach(storeMessages, (message) => {
-		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
-		if (messageSubjectOfReplyId) {
-			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
-		}
-	});
 
 	// Update last marker
 	xmppClient.lastMarkers(roomId);

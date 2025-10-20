@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, forEach, map, orderBy, remove, size, some, uniqBy } from 'lodash';
+import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -57,7 +57,8 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 			fastenings: {},
 			markers: {},
 			unread: 0,
-			searchResults: []
+			searchResults: [],
+			backfillQueue: []
 		};
 	}
 	return store.chatsRegistry[roomId];
@@ -74,11 +75,10 @@ function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
 		const last = merged[merged.length - 1];
 
 		if (current.oldestTimestamp <= last.newestTimestamp) {
-			if (current.newestTimestamp > last.newestTimestamp) {
-				last.newestStanzaId = current.newestStanzaId;
+			if (current.newestTimestamp >= last.newestTimestamp) {
+				last.newestId = current.newestId;
 				last.newestTimestamp = current.newestTimestamp;
 			}
-			last.count += current.count;
 		} else {
 			merged.push(current);
 		}
@@ -129,8 +129,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
-				const newMessages = orderBy(messageArray, ['date'], ['asc']);
-				if (size(newMessages) > 0) {
+				if (messageArray.length > 0) {
+					const newMessages = orderBy(messageArray, ['date'], ['asc']);
 					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
@@ -359,136 +359,44 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	addMessageRange: (roomId: string, range: MessageRange): void => {
 		set(
 			produce((draft: RootStore) => {
-				const registry = draft.chatsRegistry[roomId];
-				if (!registry) return;
-
-				registry.messageRanges ??= [];
-
-				registry.messageRanges.push(range);
-				registry.messageRanges = orderBy(registry.messageRanges, ['oldestTimestamp'], ['asc']);
-
-				registry.messageRanges = mergeOverlappingRanges(registry.messageRanges);
+				const registry = initRoomChatsRegistry(draft, roomId);
+				registry.messageRanges = mergeOverlappingRanges(
+					orderBy([...(registry.messageRanges ?? []), range], ['oldestTimestamp'], ['asc'])
+				);
+				console.log(registry.messageRanges);
 			}),
 			false,
 			'CHAT/ADD_MESSAGE_RANGE'
 		);
 	},
 
-	detectAndFillGaps: (roomId: string): void => {
-		const state = get();
-		const registry = state.chatsRegistry[roomId];
-
-		if (!registry?.messageRanges || registry.messageRanges.length < 2) return;
-
-		const gaps: BackfillRequest[] = [];
-
-		// eslint-disable-next-line no-plusplus
-		for (let i = 0; i < registry.messageRanges.length - 1; i++) {
-			const older = registry.messageRanges[i];
-			const newer = registry.messageRanges[i + 1];
-
-			if (newer.oldestTimestamp > older.newestTimestamp) {
-				gaps.push({
-					afterStanzaId: older.newestStanzaId,
-					beforeStanzaId: newer.oldestStanzaId
-				});
-			}
-		}
-
-		gaps.forEach((gap) => {
-			get().enqueueBackfill(roomId, gap);
-		});
-	},
-
-	enqueueBackfill: (roomId: string, request: BackfillRequest): void => {
+	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const registry = draft.chatsRegistry[roomId];
-				if (!registry) return;
+				const registry = initRoomChatsRegistry(draft, roomId);
 
-				registry.backfillQueue ??= [];
+				gaps.forEach((request) => {
+					const exists = registry.backfillQueue.some(
+						(req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate
+					);
 
-				const exists = registry.backfillQueue.some(
-					(req) =>
-						req.afterStanzaId === request.afterStanzaId &&
-						req.beforeStanzaId === request.beforeStanzaId
-				);
-
-				if (!exists) {
-					registry.backfillQueue.push(request);
-				}
+					if (!exists) {
+						registry.backfillQueue.push(request);
+					}
+				});
 			}),
 			false,
 			'CHAT/ENQUEUE_BACKFILL'
 		);
 	},
 
-	setBackfillInProgress: (roomId: string, inProgress: boolean): void => {
+	shiftBackfillQueue: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const registry = draft.chatsRegistry[roomId];
-				if (registry) {
-					registry.backfillInProgress = inProgress;
-				}
+				draft.chatsRegistry[roomId].backfillQueue.shift();
 			}),
 			false,
-			'CHAT/SET_BACKFILL_IN_PROGRESS'
+			'CHAT/BACKFILL_REQUEST_PROCESSED'
 		);
-	},
-
-	processBackfillQueue: async (roomId: string): Promise<void> => {
-		const state = get();
-		const registry = state.chatsRegistry[roomId];
-
-		if (
-			!registry?.backfillQueue ||
-			registry.backfillQueue.length === 0 ||
-			registry.backfillInProgress
-		) {
-			return;
-		}
-
-		get().setBackfillInProgress(roomId, true);
-
-		const request = registry.backfillQueue[0];
-
-		try {
-			state.connections.xmppClient.requestHistoryBetweenTwoIds(
-				roomId,
-				request.afterStanzaId,
-				request.beforeStanzaId
-			);
-
-			set(
-				produce((draft: RootStore) => {
-					const reg = draft.chatsRegistry[roomId];
-					if (reg?.backfillQueue) {
-						reg.backfillQueue.shift();
-					}
-				}),
-				false,
-				'CHAT/BACKFILL_REQUEST_PROCESSED'
-			);
-		} catch (error) {
-			console.error(`[Backfill] Error: ${error}`);
-
-			set(
-				produce((draft: RootStore) => {
-					const reg = draft.chatsRegistry[roomId];
-					if (reg?.backfillQueue) {
-						reg.backfillQueue.shift();
-					}
-				}),
-				false,
-				'CHAT/BACKFILL_REQUEST_FAILED'
-			);
-		} finally {
-			get().setBackfillInProgress(roomId, false);
-
-			const updatedRegistry = get().chatsRegistry[roomId];
-			if (updatedRegistry?.backfillQueue && updatedRegistry.backfillQueue.length > 0) {
-				setTimeout(() => get().processBackfillQueue(roomId), 200);
-			}
-		}
 	}
 });

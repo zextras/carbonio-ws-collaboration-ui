@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach, size } from 'lodash';
+import { forEach } from 'lodash';
 
 import useStore from '../../../store/Store';
 import {
+	BackfillRequest,
 	ConfigurationMessage,
 	MessageFastening,
 	MessageRange,
@@ -17,6 +18,26 @@ import {
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+
+function detectGaps(messageRanges: MessageRange[]): BackfillRequest[] {
+	if (messageRanges.length < 2) return [];
+
+	const gaps: BackfillRequest[] = [];
+
+	// eslint-disable-next-line no-plusplus
+	for (let i = 0; i < messageRanges.length - 1; i++) {
+		const older = messageRanges[i];
+		const newer = messageRanges[i + 1];
+
+		if (newer.oldestTimestamp > older.newestTimestamp) {
+			gaps.push({
+				afterDate: older.newestTimestamp,
+				beforeDate: newer.oldestTimestamp
+			});
+		}
+	}
+	return gaps;
+}
 
 /**
  * After we request the history, when the last message arrived(based on number of messages requested)
@@ -50,30 +71,7 @@ export function requestHistoryWithBackfillCallback(stanza: Element, queryId: str
 	useStore.getState().addFastening(fasteningMessages);
 
 	// Store history messages on store updating the history of the room
-	if (size(storeMessages) > 0) {
-		store.updateHistory(roomId, storeMessages);
-
-		const messagesWithStanzaId = storeMessages.filter(
-			(msg): msg is TextMessage => msg.type === MessageType.TEXT_MSG
-		);
-
-		if (messagesWithStanzaId.length > 0) {
-			const oldest = messagesWithStanzaId[0];
-			const newest = messagesWithStanzaId[messagesWithStanzaId.length - 1];
-
-			const rangeInfo: MessageRange = {
-				oldestStanzaId: oldest.stanzaId,
-				newestStanzaId: newest.stanzaId,
-				oldestTimestamp: oldest.date,
-				newestTimestamp: newest.date,
-				count: messagesWithStanzaId.length
-			};
-
-			store.addMessageRange(roomId, rangeInfo);
-			store.detectAndFillGaps(roomId);
-			store.processBackfillQueue(roomId);
-		}
-	}
+	store.updateHistory(roomId, storeMessages);
 
 	// Request message subject of reply
 	forEach(storeMessages, (message) => {
@@ -82,4 +80,25 @@ export function requestHistoryWithBackfillCallback(stanza: Element, queryId: str
 			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
+
+	const oldest = historyMessages[0];
+	const newest = historyMessages[historyMessages.length - 1];
+
+	const rangeInfo: MessageRange = {
+		oldestId: oldest.id,
+		newestId: newest.id,
+		oldestTimestamp: oldest.date,
+		newestTimestamp: newest.date
+	};
+
+	store.addMessageRange(roomId, rangeInfo);
+
+	const gaps = detectGaps(useStore.getState().chatsRegistry[roomId].messageRanges ?? []);
+	store.enqueueBackfill(roomId, gaps);
+
+	if (useStore.getState().chatsRegistry[roomId].backfillQueue.length > 0) {
+		const request = useStore.getState().chatsRegistry[roomId].backfillQueue[0];
+		store.shiftBackfillQueue(roomId);
+		xmppClient.requestHistoryBetweenTwoDates(roomId, request.afterDate, request.beforeDate);
+	}
 }

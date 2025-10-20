@@ -87,7 +87,7 @@ const MessageHistoryLoader = ({
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
 			const date = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, store.chatsRegistry[roomId].unread);
+				xmppClient.requestHistory(roomId, date, 50, store.chatsRegistry[roomId]?.unread);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),

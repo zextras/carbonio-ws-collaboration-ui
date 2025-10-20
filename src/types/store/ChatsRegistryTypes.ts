@@ -23,10 +23,8 @@ export type ChatsRegistryStoreSlice = {
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
-	detectAndFillGaps: (roomId: string) => void;
-	enqueueBackfill: (roomId: string, request: BackfillRequest) => void;
-	setBackfillInProgress: (roomId: string, inProgress: boolean) => void;
-	processBackfillQueue: (roomId: string) => Promise<void>;
+	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
+	shiftBackfillQueue: (roomId: string) => void;
 };
 
 export type ChatRegistry = {
@@ -36,8 +34,7 @@ export type ChatRegistry = {
 	unread: number;
 	searchResults: TextMessage[];
 	messageRanges?: MessageRange[];
-	backfillQueue?: BackfillRequest[];
-	backfillInProgress?: boolean;
+	backfillQueue: BackfillRequest[];
 };
 
 export type Message = TextMessage | ConfigurationMessage | MessageFastening;
@@ -75,16 +72,15 @@ export type ConfigurationMessage = BasicMessage & {
 };
 
 export interface MessageRange {
-	oldestStanzaId: string;
-	newestStanzaId: string;
+	oldestId: string;
+	newestId: string;
 	oldestTimestamp: number;
 	newestTimestamp: number;
-	count: number;
 }
 
 export interface BackfillRequest {
-	afterStanzaId: string;
-	beforeStanzaId: string;
+	afterDate: number;
+	beforeDate: number;
 }
 
 export enum OperationType {

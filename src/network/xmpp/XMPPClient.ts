@@ -385,13 +385,8 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * Request messages between two stanza IDs to fill gaps
-	 * @param roomId - Room identifier
-	 * @param afterStanzaId - Older message stanza ID (lower bound)
-	 * @param beforeStanzaId - Newer message stanza ID (upper bound)
-	 */
-	requestHistoryBetweenTwoIds(roomId: string, afterStanzaId: string, beforeStanzaId: string): void {
+	requestHistoryBetweenTwoDates(roomId: string, afterDate: number, beforeDate: number): void {
+		console.log('requestHistoryBetweenTwoDates', roomId, afterDate, beforeDate);
 		if (!useStore.getState().rooms[roomId]) return;
 
 		const queryId = HistoryAccumulator.getNextId();
@@ -403,14 +398,14 @@ class XMPPClient {
 			.t(Strophe.NS.MAM)
 			.up()
 			.up()
-			.c('field', { var: 'from-id' })
+			.c('field', { var: 'start' })
 			.c('value')
-			.t(afterStanzaId)
+			.t(dateToISODate(afterDate))
 			.up()
 			.up()
-			.c('field', { var: 'to-id' })
+			.c('field', { var: 'end' })
 			.c('value')
-			.t(beforeStanzaId);
+			.t(dateToISODate(beforeDate));
 
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
@@ -420,6 +415,7 @@ class XMPPClient {
 	}
 
 	requestMessageResultHistoryToId(roomId: string, stanzaId: string): Promise<void> {
+		console.log('requestMessageResultHistoryToId', roomId, stanzaId);
 		return new Promise<void>((resolve, reject) => {
 			const queryId = HistoryAccumulator.getNextId();
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
