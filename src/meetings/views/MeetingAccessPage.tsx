@@ -22,8 +22,8 @@ import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { calcScaleDivisor } from '../../utils/styleUtils';
 import { MediaStatus } from '../components/meetingAccessPoint/externalAccess/MeetingExternalAccessPage';
-import useAccessMeeting from '../components/meetingAccessPoint/externalAccess/useAccessMeeting';
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
+import useAccessMeeting from '../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
@@ -37,7 +37,7 @@ const CustomTextContainer = styled(Container)`
 `;
 
 const MeetingAccessPage = (): ReactElement => {
-	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);

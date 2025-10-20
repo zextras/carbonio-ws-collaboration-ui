@@ -74,7 +74,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 }) => {
 	const [micTest, setMicTest] = useState(false);
 
-	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);

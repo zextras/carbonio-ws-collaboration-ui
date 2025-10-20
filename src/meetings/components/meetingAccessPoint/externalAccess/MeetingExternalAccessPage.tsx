@@ -10,13 +10,13 @@ import { useTranslation } from 'react-i18next';
 
 import AudioAndVideoCard from './AudioAndVideoCard';
 import JoinAsGuestCard from './JoinAsGuestCard';
-import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
 import Logo from '../../Logo';
+import useAccessMeeting from '../useAccessMeeting';
 
 export type MediaStatus = {
 	audio: {
@@ -43,7 +43,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const { goToInfoPage } = useRouting();
 
 	useEffect(() => {
-		const meetingId = document.location.pathname.split(MEETINGS_PATH)[1];
+		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
 		MeetingsApi.getScheduledMeetingName(meetingId)
 			.then((resp) => {
 				setMeetingName(resp.name);

@@ -1,22 +1,22 @@
 /*
- * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { MediaStatus } from './MeetingExternalAccessPage';
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
-import useDarkReader from '../../../../hooks/useDarkReader';
-import useEventListener, { EventName } from '../../../../hooks/useEventListener';
-import useRouting from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import { getIsLoggedUserExternal } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
-import { BrowserUtils } from '../../../../utils/BrowserUtils';
-import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
+import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
+import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useDarkReader from '../../../hooks/useDarkReader';
+import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useRouting from '../../../hooks/useRouting';
+import { MeetingsApi } from '../../../network';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
+import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 const useAccessMeeting = (
 	mediaStatus: MediaStatus,
@@ -33,7 +33,7 @@ const useAccessMeeting = (
 	) => void;
 	userIsReady: boolean;
 } => {
-	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 
