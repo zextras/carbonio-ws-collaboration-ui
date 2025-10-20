@@ -64,7 +64,7 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 	return store.chatsRegistry[roomId];
 };
 
-function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
+export function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
 	if (ranges.length <= 1) return ranges;
 
 	const merged: MessageRange[] = [ranges[0]];
@@ -355,7 +355,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/CLEAR_SEARCH_RESULTS'
 		);
 	},
-
 	addMessageRange: (roomId: string, range: MessageRange): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -363,13 +362,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				registry.messageRanges = mergeOverlappingRanges(
 					orderBy([...(registry.messageRanges ?? []), range], ['oldestTimestamp'], ['asc'])
 				);
-				console.log(registry.messageRanges);
 			}),
 			false,
 			'CHAT/ADD_MESSAGE_RANGE'
 		);
 	},
-
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -389,7 +386,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/ENQUEUE_BACKFILL'
 		);
 	},
-
 	shiftBackfillQueue: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {

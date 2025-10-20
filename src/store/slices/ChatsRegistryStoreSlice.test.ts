@@ -15,9 +15,11 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import {
+	BackfillRequest,
 	ConfigurationMessage,
 	FasteningAction,
 	MarkerStatus,
+	MessageRange,
 	MessageType,
 	OperationType,
 	TextMessage
@@ -417,6 +419,110 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			const roomId = 'roomUnreadInit';
 			useStore.getState().incrementUnreadCount(roomId, 1);
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(1);
+		});
+	});
+
+	describe('Search messages', () => {
+		test('Store search messages', () => {
+			const roomId = 'searchRoom1';
+			const searchMessages = [
+				createMockTextMessage({ id: 'msgId1', roomId, text: 'Hello' }),
+				createMockTextMessage({ id: 'msgId2', roomId, text: 'World' })
+			];
+			useStore.getState().setSearchResults(roomId, searchMessages);
+			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(2);
+		});
+
+		test('Clear search messages', () => {
+			const roomId = 'searchRoom2';
+			const searchMessages = [
+				createMockTextMessage({ id: 'msgId3', roomId, text: 'Foo' }),
+				createMockTextMessage({ id: 'msgId4', roomId, text: 'Bar' })
+			];
+			const store = useStore.getState();
+			store.setSearchResults(roomId, searchMessages);
+			store.setSelectedSearchResult(roomId, searchMessages[0].stanzaId);
+			store.clearSearchResults(roomId);
+			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(0);
+			expect(useStore.getState().activeConversations[roomId]?.selectedSearchResult).toBeUndefined();
+		});
+	});
+
+	describe('addMessageRange', () => {
+		test('Adding two ranges with gap', () => {
+			const range1: MessageRange = {
+				oldestId: 'msg1',
+				oldestTimestamp: 1000,
+				newestId: 'msg10',
+				newestTimestamp: 2000
+			};
+			const range2: MessageRange = {
+				oldestId: 'msg8',
+				oldestTimestamp: 2500,
+				newestId: 'msg20',
+				newestTimestamp: 3000
+			};
+			useStore.getState().addMessageRange('roomId', range2);
+			useStore.getState().addMessageRange('roomId', range1);
+			const ranges = useStore.getState().chatsRegistry.roomId.messageRanges;
+			expect(ranges).toHaveLength(2);
+			expect(ranges?.[0]).toEqual(range1);
+			expect(ranges?.[1]).toEqual(range2);
+		});
+
+		test('Merge overlapping ranges', () => {
+			const range1: MessageRange = {
+				oldestId: 'msg1',
+				oldestTimestamp: 1000,
+				newestId: 'msg10',
+				newestTimestamp: 2000
+			};
+			const range2: MessageRange = {
+				oldestId: 'msg8',
+				oldestTimestamp: 1800,
+				newestId: 'msg20',
+				newestTimestamp: 3000
+			};
+			useStore.getState().addMessageRange('roomId', range2);
+			useStore.getState().addMessageRange('roomId', range1);
+			const ranges = useStore.getState().chatsRegistry.roomId.messageRanges;
+			expect(ranges).toHaveLength(1);
+			expect(ranges?.[0].newestTimestamp).toBe(range2.newestTimestamp);
+			expect(ranges?.[0].oldestTimestamp).toBe(range1.oldestTimestamp);
+		});
+	});
+
+	describe('Backfill queue', () => {
+		test('Do not add duplicate backfill requests', () => {
+			const roomId = 'room3';
+			const request: BackfillRequest = {
+				afterDate: date1,
+				beforeDate: date2
+			};
+			useStore.getState().enqueueBackfill(roomId, [request]);
+			useStore.getState().enqueueBackfill(roomId, [request]);
+
+			const { backfillQueue } = useStore.getState().chatsRegistry[roomId];
+			expect(backfillQueue).toHaveLength(1);
+		});
+
+		test('Remove first request from queue', () => {
+			const roomId = 'room4';
+			const request1: BackfillRequest = {
+				afterDate: date1,
+				beforeDate: date2
+			};
+			const request2: BackfillRequest = {
+				afterDate: date2,
+				beforeDate: date3
+			};
+
+			useStore.getState().enqueueBackfill(roomId, [request1, request2]);
+			useStore.getState().shiftBackfillQueue(roomId);
+
+			const { backfillQueue } = useStore.getState().chatsRegistry[roomId];
+			expect(backfillQueue).toHaveLength(1);
+			expect(backfillQueue[0]).toEqual(request2);
 		});
 	});
 });
