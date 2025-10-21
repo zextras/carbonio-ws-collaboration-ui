@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
+import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { debounce, find, forEach, map, size, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -29,7 +30,7 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
-import { MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
+import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
@@ -126,6 +127,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
 	const loadFiles = useLoadFiles(roomId);
+
+	const carbonioLanguage = useUserSettings().prefs?.zimbraPrefLocale;
 
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
@@ -377,7 +380,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
-			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
+			if (
+				!sendDisabled &&
+				e.key === 'Enter' &&
+				!e.shiftKey &&
+				(!carbonioLanguage || !IME_LANGUAGES.includes(carbonioLanguage))
+			) {
 				e.preventDefault();
 				sendMessage();
 			} else {
@@ -385,7 +393,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				sendDebouncedPause();
 			}
 		},
-		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
+		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
 	const handleOnBlur = useCallback(() => {

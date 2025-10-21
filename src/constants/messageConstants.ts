@@ -5,3 +5,5 @@
  */
 
 export const MESSAGE_CHAR_LIMIT = 4096;
+
+export const IME_LANGUAGES = ['zh_CN', 'ja', 'vi'];
