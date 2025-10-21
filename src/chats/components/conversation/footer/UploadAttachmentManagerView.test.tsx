@@ -185,7 +185,7 @@ describe('Upload attachment view', () => {
 		expect(composerText).toBeInTheDocument();
 	});
 	test('input has text in it and user decides to upload one file with drag&drop => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -422,7 +422,7 @@ describe('Upload attachment view', () => {
 		expect(filesToAttachUpdated?.length).toBeUndefined();
 	});
 	test('input has text in it and user decides to upload more file with drag&drop => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -456,7 +456,7 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add a new file with drag&drop => new file is added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
 			fileId: 'fileOne',
@@ -483,7 +483,7 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add more files with drag&drop => new files are added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
 			fileId: 'fileOne',

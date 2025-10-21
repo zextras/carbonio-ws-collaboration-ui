@@ -5,7 +5,7 @@
  */
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
+import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
 import {
 	MessageFastening,
 	MessageType,
@@ -73,7 +73,11 @@ describe('Test decode message function', () => {
 
 	test('Parse fastening message', async () => {
 		const messageParsed = decodeXMPPMessageStanza(
-			reactionMessageStanza('testRoomId', 'testOriginalStanzaId', 'testUserId')
+			buildReactionStanza({
+				roomId: 'testRoomId',
+				originalStanzaId: 'testOriginalStanzaId',
+				from: 'testUserId'
+			})
 		) as MessageFastening;
 		expect(messageParsed.type).toBe(MessageType.FASTENING);
 		expect(messageParsed.roomId).toBe('testRoomId');

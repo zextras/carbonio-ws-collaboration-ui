@@ -13,15 +13,14 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { spyOnFetch } from '../../tests/jest-env-setup';
+import { buildTextMessageFromHistory } from '../../tests/mocks/buildXmppStanza';
 import { mockedUuid } from '../../tests/mocks/global';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import * as FetchUtils from '../../utils/FetchUtils';
-import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -365,56 +364,52 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages is called correctly', async () => {
-		const spyOnRequestMessageToForward = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		);
-		// Send addRoom request
+		jest
+			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
+			.mockImplementation(() => Promise.resolve());
+
 		const message = createMockTextMessage();
-		const forwardedMessage = {
-			originalMessage: undefined,
-			originalMessageSentAt: dateToISODate(message.date)
-		};
-		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(forwardedMessage as any));
+		const xmlMessage = buildTextMessageFromHistory({
+			roomId: message.roomId,
+			from: message.from,
+			text: message.text
+		});
+		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+		jest
+			.spyOn(HistoryAccumulator, 'getForwardedMessage')
+			.mockImplementationOnce(() => insideMessage);
 
 		await roomsApi.forwardMessages(['roomId'], [message]);
-
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			forwardedMessage
+			{
+				originalMessage: insideMessage.outerHTML,
+				originalMessageSentAt: dateToISODate(message.date)
+			}
 		]);
 	});
 
 	test('forwardMessages - edited message - is called correctly', async () => {
-		const spyOnRequestMessageToForward = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		);
-		// Send addRoom request
-		const messageEdited = createMockTextMessage();
-		const msgToParse = textMessageFromHistory.replace(
-			'2023-03-20T13:58:29.599694Z',
-			dateToISODate(messageEdited.date)
-		);
-		const parser = new DOMParser();
-		const xmlParsed: any = parser.parseFromString(msgToParse, 'application/xml');
-		const result = getTagElement(xmlParsed, 'result');
-		const messageParsed = getTagElement(result!, 'message');
-		const messageResult = getTagElement(result!, 'message');
-		messageResult!.getElementsByTagName('body')[0].innerHTML = messageEdited.text;
+		jest
+			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
+			.mockImplementation(() => Promise.resolve());
 
-		HistoryAccumulator.addReferenceForForwardedMessage(messageEdited.stanzaId, messageParsed!);
+		const message = createMockTextMessage({ text: 'edited' });
+		const xmlMessage = buildTextMessageFromHistory({
+			roomId: message.roomId,
+			from: message.from,
+			text: 'originalMessage'
+		});
+		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+		jest
+			.spyOn(HistoryAccumulator, 'getForwardedMessage')
+			.mockImplementationOnce(() => insideMessage);
 
-		const forwardedMessage = {
-			originalMessage: messageResult?.outerHTML,
-			originalMessageSentAt: dateToISODate(messageEdited.date)
-		};
-
-		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(messageParsed!));
-
-		await roomsApi.forwardMessages(['roomId'], [messageEdited]);
-
+		await roomsApi.forwardMessages(['roomId'], [message]);
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			forwardedMessage
+			{
+				originalMessage: expect.stringContaining(message.text),
+				originalMessageSentAt: dateToISODate(message.date)
+			}
 		]);
 	});
 

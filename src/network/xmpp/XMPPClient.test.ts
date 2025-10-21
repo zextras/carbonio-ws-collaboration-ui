@@ -4,16 +4,34 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
-import { onGetRosterResponse } from './handlers/rosterHandler';
+import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
+import { rosterCallback } from './iqCallbacks/rosterCallback';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { createMockRoom } from '../../tests/createMock';
+import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import { buildPingStanza } from '../../tests/mocks/buildXmppStanza';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
-import { pingStanza } from '../../tests/mocks/XMPPStanza';
-import { dateToTimestamp } from '../../utils/dateUtils';
+import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 
+const getStanzaFromSpy = (spy: jest.SpyInstance, callIndex = 0): Element =>
+	spy.mock.calls[callIndex][0].elem.tree();
+
+const findFieldValue = (stanza: Element, fieldVar: string): string | null => {
+	const field = Array.from(stanza.querySelectorAll('field')).find(
+		(f) => f.getAttribute('var') === fieldVar
+	);
+	return field?.querySelector('value')?.textContent || null;
+};
+
+const room = createMockRoom({
+	id: 'room-test',
+	createdAt: dateToISODate(100)
+});
+
+beforeEach(() => {
+	useStore.getState().addRooms([room]);
+});
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {
 		const xmppClient = new XMPPClient();
@@ -30,7 +48,7 @@ describe('XMPPClient', () => {
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,
 			elem: expect.any(Object),
-			callback: onGetRosterResponse
+			callback: rosterCallback
 		});
 	});
 
@@ -48,7 +66,7 @@ describe('XMPPClient', () => {
 	test('sendPong should respond to a ping request', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.sendPong(pingStanza('stanzaId'));
+		xmppClient.sendPong(buildPingStanza({ pingId: 'id' }));
 
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,
@@ -64,39 +82,14 @@ describe('XMPPClient', () => {
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.IQ,
 			elem: expect.any(Object),
-			callback: onGetLastActivityResponse
+			callback: lastActivityCallback
 		});
-	});
-
-	test('requestHistory is called for a known room', () => {
-		const room = createMockRoom({ id: 'room-test' });
-		useStore.getState().addRooms([createMockRoom({ id: room.id })]);
-		const xmppClient = new XMPPClient();
-		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
-		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
-		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
-		xmppClient.requestFullHistory(room.id);
-
-		expect(spyOnXmppSend).toHaveBeenCalledTimes(4);
-	});
-
-	test('requestHistory is not called for an unknown room', () => {
-		const room = createMockRoom({ id: 'room-test' });
-		const xmppClient = new XMPPClient();
-		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
-		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
-		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
-		xmppClient.requestFullHistory(room.id);
-
-		expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
 	});
 
 	test('sendChatMessage should send a message', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.sendChatMessage('roomId123', 'Hello, world!');
+		xmppClient.sendChatMessage(room.id, 'Hello, world!');
 
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.MESSAGE,
@@ -115,10 +108,81 @@ describe('XMPPClient', () => {
 	test('sendChatMessageReaction', () => {
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.sendChatMessageReaction('room-test', 'stanzaId-test', '\uD83D\uDC4D');
+		xmppClient.sendChatMessageReaction(room.id, 'stanzaId-test', '\uD83D\uDC4D');
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.MESSAGE,
 			elem: expect.any(Object)
+		});
+	});
+
+	describe('History methods', () => {
+		test('history requests are not called for a unknown room', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			xmppClient.requestHistory('unknownId', dateToTimestamp('2024-03-12'), 10);
+			xmppClient.requestMessageSubjectOfReply('unknownId', 'messageId1', 'messageId2');
+			xmppClient.requestFullHistory('unknownId');
+			xmppClient.requestHistoryBetweenTwoDates('unknownId', 100, 200);
+			expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
+		});
+
+		test('requestHistory should start retrieve history from creation date', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			xmppClient.requestHistory(room.id, 300, 50);
+			const stanza = getStanzaFromSpy(spyOnXmppSend);
+			expect(findFieldValue(stanza, 'start')).toBe(room.createdAt);
+			expect(findFieldValue(stanza, 'end')).toBe(dateToISODate(300));
+		});
+
+		test('requestHistory should start retrieve history from cleared history date', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			useStore.getState().clearConversation(room.id, dateToISODate(200));
+			xmppClient.requestHistory(room.id, 300, 50);
+
+			const clearedAt = useStore.getState().rooms[room.id].userSettings?.clearedAt;
+			const stanza = getStanzaFromSpy(spyOnXmppSend);
+			expect(findFieldValue(stanza, 'start')).toBe(clearedAt);
+			expect(findFieldValue(stanza, 'end')).toBe(dateToISODate(300));
+		});
+
+		test('avoid requesting message subject of reply when message is already into store', () => {
+			const message = createMockTextMessage({ roomId: room.id });
+			useStore.getState().newMessage(message);
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+
+			xmppClient.requestMessageSubjectOfReply(room.id, message.id, 'messageId2');
+			expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
+		});
+
+		test('fullTextSearch should have correct attributes', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			xmppClient.fullTextSearch(room.id, 'test');
+			const stanza = getStanzaFromSpy(spyOnXmppSend);
+
+			expect(findFieldValue(stanza, 'full-text-search')).toBe('test');
+		});
+
+		test('requestHistoryBetweenTwoDates should have correct attributes', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			xmppClient.requestHistoryBetweenTwoDates(room.id, 200, 300);
+			const stanza = getStanzaFromSpy(spyOnXmppSend);
+
+			expect(findFieldValue(stanza, 'start')).toBe(dateToISODate(200));
+			expect(findFieldValue(stanza, 'end')).toBe(dateToISODate(300 + 1));
+		});
+
+		test('requestMessageResultHistoryToId should have correct attributes', () => {
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+			xmppClient.requestMessageResultHistoryToId(room.id, 'stanzaId-1');
+			const stanza = getStanzaFromSpy(spyOnXmppSend);
+
+			expect(findFieldValue(stanza, 'to-id')).toBe('stanzaId-1');
 		});
 	});
 });

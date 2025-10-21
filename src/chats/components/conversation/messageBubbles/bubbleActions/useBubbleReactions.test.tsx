@@ -98,7 +98,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			'sendChatMessageReaction'
 		);
 
-		store.addFastening(reactionToSimpleTextMessage);
+		store.addFastening([reactionToSimpleTextMessage]);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});

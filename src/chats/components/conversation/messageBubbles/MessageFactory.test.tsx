@@ -26,31 +26,13 @@ beforeEach(() => {
 });
 
 describe('Message Factory', () => {
-	test("Message isn't in the store", () => {
-		const message = createMockTextMessage();
-		setup(
-			<MessageFactory
-				messageId={message.id}
-				messageRoomId={message.roomId}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef()}
-				isFirstNewMessage={false}
-				isPrevMessageDeleted
-			/>
-		);
-		const messageTypeNotHandled = screen.getByText('Message not handled');
-		expect(messageTypeNotHandled).toBeVisible();
-	});
-
 	test('Render TextMessage', () => {
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -68,8 +50,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -89,8 +70,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -108,8 +88,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -129,8 +108,7 @@ describe('Message Factory', () => {
 		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
@@ -146,12 +124,9 @@ describe('Message Factory', () => {
 
 	test('Render DateMessage', () => {
 		const message = createMockDateMessage({ roomId: room.id });
-		const store = useStore.getState();
-		store.newMessage(message);
 		setup(
 			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
+				message={message}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}

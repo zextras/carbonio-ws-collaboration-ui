@@ -13,7 +13,6 @@ import {
 } from '../../tests/createMock';
 import { messageActionType } from '../../types/store/ActiveConversationTypes';
 import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
-import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName' });
@@ -170,54 +169,6 @@ describe('Active conversations slice', () => {
 		});
 	});
 
-	describe('lastMamMessage', () => {
-		test('Set last received MAM message when it is the first message', () => {
-			const message = createMockTextMessage({
-				id: 'message0',
-				roomId: mockedRoom.id,
-				date: dateToTimestamp('2022-01-01T00:00:00Z')
-			});
-			useStore.getState().setLastMamMessage(message);
-			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toBe(message);
-		});
-
-		test('Replace last received MAM message', () => {
-			const message0 = createMockTextMessage({
-				id: 'message0',
-				roomId: mockedRoom.id,
-				date: dateToTimestamp('2022-01-01T10:00:00Z')
-			});
-			const message1 = createMockTextMessage({
-				id: 'message1',
-				roomId: mockedRoom.id,
-				date: dateToTimestamp('2022-01-01T11:00:01Z')
-			});
-			useStore.getState().setLastMamMessage(message1);
-			useStore.getState().setLastMamMessage(message0);
-			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
-				message0
-			);
-		});
-
-		test('Last received MAM message is not replaced when it is older', () => {
-			const message0 = createMockTextMessage({
-				id: 'message0',
-				roomId: mockedRoom.id,
-				date: dateToTimestamp('2022-01-01T10:00:00Z')
-			});
-			const message1 = createMockTextMessage({
-				id: 'message1',
-				roomId: mockedRoom.id,
-				date: dateToTimestamp('2022-01-02T10:00:01Z')
-			});
-			useStore.getState().setLastMamMessage(message0);
-			useStore.getState().setLastMamMessage(message1);
-			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
-				message0
-			);
-		});
-	});
-
 	describe('infoPanelStatus', () => {
 		test('Set actions accordion status to true', () => {
 			useStore.getState().setActionsAccordionStatus(mockedRoom.id, true);
@@ -320,7 +271,7 @@ describe('Active conversations slice', () => {
 			});
 			const store = useStore.getState();
 			store.newMessage(message);
-			store.addFastening(fastening);
+			store.addFastening([fastening]);
 			store.setNewReaction(
 				fastening.roomId,
 				fastening.originalStanzaId,
