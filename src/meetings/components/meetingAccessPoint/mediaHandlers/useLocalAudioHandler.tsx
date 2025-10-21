@@ -16,7 +16,7 @@ import { getAudioStream } from '../../../../utils/UserMediaManager';
 
 type UseLocalMediaHandlerParams = {
 	initialStatus: boolean;
-	streamRef: React.RefObject<HTMLAudioElement>;
+	streamRef?: React.RefObject<HTMLAudioElement>;
 };
 
 type UseLocalMediaHandlerReturn = {

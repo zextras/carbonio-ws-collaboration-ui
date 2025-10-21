@@ -6,49 +6,41 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Icon, Input, Text, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
+import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
+import defaultLogo from '../../assets/Logo.png';
 import AccessTile from '../../components/meetingAccessPoint/mediaHandlers/AccessTile';
-import { useLocalAudioHandler } from '../../components/meetingAccessPoint/mediaHandlers/useLocalAudioHandler';
-import { useLocalVideoHandler } from '../../components/meetingAccessPoint/mediaHandlers/useLocalVideoHandler';
 import useAccessMeeting from '../../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
+
+const LogoApp = styled.img`
+	width: 12rem;
+	height: auto;
+	object-fit: contain;
+`;
 
 const MeetingExternalAccessMobilePage = (): ReactElement => {
 	const [meetingName, setMeetingName] = useState<string>('');
 	const [guestName, setGuestName] = useState<string>('');
+	const [audioStatus, setAudioStatus] = useState<boolean>(false);
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
-	const audioStreamRef = useRef<HTMLAudioElement>(null);
 
-	const { videoStatus, videoDeviceId, VideoHandlerComponent } = useLocalVideoHandler({
-		initialStatus: false,
-		streamRef: videoStreamRef
-	});
-
-	const { audioStatus, audioDeviceId, AudioHandlerComponent } = useLocalAudioHandler({
-		initialStatus: false,
-		streamRef: audioStreamRef
-	});
-
+	const customLogo = useStore(getCustomLogo);
 	const queueId = useStore((state) => state.session.queueId);
 
 	const { handleWaitingRoom, userIsReady } = useAccessMeeting({
-		audio: {
-			enabled: audioStatus,
-			selectedDeviceId: audioDeviceId
-		},
-		video: {
-			enabled: videoStatus,
-			selectedDeviceId: videoDeviceId
-		}
+		audio: { enabled: audioStatus },
+		video: { enabled: false }
 	});
 
 	const { goToInfoPage } = useRouting();
@@ -121,7 +113,7 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 
 	return (
 		<Container background="gray0" height="fill" width="fill" padding="large" gap="1rem">
-			{/* <Logo /> TODO */}
+			<LogoApp src={customLogo || defaultLogo} />
 			<Container
 				background={'gray6'}
 				padding="large"
@@ -159,20 +151,26 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 					videoPlayerTestMuted
 					mediaDevicesEnabled={{
 						audio: audioStatus,
-						video: videoStatus
+						video: false
 					}}
 				/>
-				<audio ref={audioStreamRef} autoPlay muted={!audioStatus} />
-				{VideoHandlerComponent}
-				{AudioHandlerComponent}
 				{!userIsReady ? (
-					<Button
-						width="fill"
-						label={buttonLabel}
-						color="success"
-						onClick={readyToParticipate}
-						disabled={guestName.trim().length === 0 || userIsReady}
-					/>
+					<Container orientation="horizontal" gap="1rem" height="fit">
+						<Button
+							onClick={() => setAudioStatus((prev) => !prev)}
+							color="primary"
+							size="large"
+							minWidth="large"
+							icon={audioStatus ? 'Mic' : 'MicOff'}
+						/>
+						<Button
+							width="fill"
+							label={buttonLabel}
+							color="success"
+							onClick={readyToParticipate}
+							disabled={guestName.trim().length === 0 || userIsReady}
+						/>
+					</Container>
 				) : (
 					<Container height="fit" gap="0.5rem">
 						<Container orientation="horizontal" gap="0.5rem" height="fit">

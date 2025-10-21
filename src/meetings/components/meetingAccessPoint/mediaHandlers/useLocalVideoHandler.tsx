@@ -16,7 +16,7 @@ import { getVideoStream } from '../../../../utils/UserMediaManager';
 
 type UseLocalMediaHandlerParams = {
 	initialStatus: boolean;
-	streamRef: React.RefObject<HTMLVideoElement>;
+	streamRef?: React.RefObject<HTMLVideoElement>;
 };
 
 type UseLocalMediaHandlerReturn = {

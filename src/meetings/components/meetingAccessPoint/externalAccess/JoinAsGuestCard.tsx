@@ -110,6 +110,7 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 				onChange={(ev) => setGuestName(ev.target.value)}
 				value={guestName}
 				disabled={userIsReady}
+				onEnter={readyToParticipate}
 			/>
 			{!userIsReady ? (
 				<Button
