@@ -168,4 +168,19 @@ describe('ConversationSearchPanel', () => {
 		expect(screen.getByRoleWithIcon('button', { icon: searchedIcon })).toBeDisabled();
 		expect(screen.queryByRoleWithIcon('button', { icon: clearSearchIcon })).not.toBeInTheDocument();
 	});
+
+	test('should show error snackbar when search fails', async () => {
+		const goToChatViewFn = jest.fn();
+		const { xmppClient } = useStore.getState().connections;
+		jest.spyOn(xmppClient, 'fullTextSearch').mockRejectedValue(new Error('Search failed'));
+		const { user } = setup(
+			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
+		);
+
+		await user.type(screen.getByRole('textbox', { name: /search messages/i }), 'test');
+		await user.click(screen.getByRoleWithIcon('button', { icon: searchedIcon }));
+		expect(
+			screen.getByText(/Something went wrong with the search. Please try again./i)
+		).toBeVisible();
+	});
 });
