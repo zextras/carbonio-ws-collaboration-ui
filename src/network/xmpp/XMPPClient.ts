@@ -386,7 +386,6 @@ class XMPPClient {
 	}
 
 	requestHistoryBetweenTwoDates(roomId: string, afterDate: number, beforeDate: number): void {
-		console.log('requestHistoryBetweenTwoDates', roomId, afterDate, beforeDate);
 		if (!useStore.getState().rooms[roomId]) return;
 
 		const queryId = HistoryAccumulator.getNextId();
@@ -415,7 +414,6 @@ class XMPPClient {
 	}
 
 	requestMessageResultHistoryToId(roomId: string, stanzaId: string): Promise<void> {
-		console.log('requestMessageResultHistoryToId', roomId, stanzaId);
 		return new Promise<void>((resolve, reject) => {
 			const queryId = HistoryAccumulator.getNextId();
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
