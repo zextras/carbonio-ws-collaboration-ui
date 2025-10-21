@@ -107,6 +107,16 @@ const addFasteningToMessage = (
 	existingFastenings[originalStanzaId] = orderBy(messageFastening, ['date']);
 };
 
+const isBackfillRequestExists = (queue: BackfillRequest[], request: BackfillRequest): boolean =>
+	queue.some((req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate);
+
+const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRequest): void => {
+	if (isBackfillRequestExists(queue, request)) {
+		return;
+	}
+	queue.push(request);
+};
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -382,16 +392,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
-
-				gaps.forEach((request) => {
-					const exists = registry.backfillQueue.some(
-						(req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate
-					);
-
-					if (!exists) {
-						registry.backfillQueue.push(request);
-					}
-				});
+				gaps.forEach((request) => addBackfillRequestToQueue(registry.backfillQueue, request));
 			}),
 			false,
 			'CHAT/ENQUEUE_BACKFILL'
