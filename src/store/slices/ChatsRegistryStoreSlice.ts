@@ -87,6 +87,36 @@ export function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
 	return merged;
 }
 
+const isFasteningAlreadyExists = (messageFastenings: MessageFastening[], id: string): boolean =>
+	!!find(messageFastenings, (f) => f.id === id);
+
+const addFasteningToMessage = (
+	existingFastenings: Record<string, MessageFastening[]>,
+	newFastening: MessageFastening
+): void => {
+	const { originalStanzaId, id } = newFastening;
+	existingFastenings[originalStanzaId] ??= [];
+
+	const messageFastening = existingFastenings[originalStanzaId];
+
+	if (isFasteningAlreadyExists(messageFastening, id)) {
+		return;
+	}
+
+	messageFastening.push(newFastening);
+	existingFastenings[originalStanzaId] = orderBy(messageFastening, ['date']);
+};
+
+const isBackfillRequestExists = (queue: BackfillRequest[], request: BackfillRequest): boolean =>
+	queue.some((req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate);
+
+const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRequest): void => {
+	if (isBackfillRequestExists(queue, request)) {
+		return;
+	}
+	queue.push(request);
+};
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -258,22 +288,13 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		);
 	},
 	addFastening: (newFastenings: MessageFastening[]): void => {
+		if (newFastenings.length === 0) {
+			return;
+		}
 		set(
 			produce((draft: RootStore) => {
-				if (newFastenings.length === 0) {
-					return;
-				}
 				const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
-				forEach(newFastenings, (fastening) => {
-					fastenings[fastening.originalStanzaId] ??= [];
-					const messageFastening = fastenings[fastening.originalStanzaId];
-					const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-					// Add fastening to the array only if it doesn't already exist
-					if (!alreadyExists) {
-						messageFastening.push(fastening);
-						fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
-					}
-				});
+				forEach(newFastenings, (newFastening) => addFasteningToMessage(fastenings, newFastening));
 			}),
 			false,
 			'CHAT/ADD_FASTENING'
@@ -373,16 +394,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
-
-				gaps.forEach((request) => {
-					const exists = registry.backfillQueue.some(
-						(req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate
-					);
-
-					if (!exists) {
-						registry.backfillQueue.push(request);
-					}
-				});
+				gaps.forEach((request) => addBackfillRequestToQueue(registry.backfillQueue, request));
 			}),
 			false,
 			'CHAT/ENQUEUE_BACKFILL'
