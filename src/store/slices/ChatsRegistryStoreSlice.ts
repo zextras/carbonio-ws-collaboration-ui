@@ -87,6 +87,26 @@ export function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
 	return merged;
 }
 
+const isFasteningAlreadyExists = (messageFastenings: MessageFastening[], id: string): boolean =>
+	!!find(messageFastenings, (f) => f.id === id);
+
+const addFasteningToMessage = (
+	existingFastenings: Record<string, MessageFastening[]>,
+	newFastening: MessageFastening
+): void => {
+	const { originalStanzaId, id } = newFastening;
+	existingFastenings[originalStanzaId] ??= [];
+
+	const messageFastening = existingFastenings[originalStanzaId];
+
+	if (isFasteningAlreadyExists(messageFastening, id)) {
+		return;
+	}
+
+	messageFastening.push(newFastening);
+	existingFastenings[originalStanzaId] = orderBy(messageFastening, ['date']);
+};
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -258,22 +278,13 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		);
 	},
 	addFastening: (newFastenings: MessageFastening[]): void => {
+		if (newFastenings.length === 0) {
+			return;
+		}
 		set(
 			produce((draft: RootStore) => {
-				if (newFastenings.length === 0) {
-					return;
-				}
 				const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
-				forEach(newFastenings, (fastening) => {
-					fastenings[fastening.originalStanzaId] ??= [];
-					const messageFastening = fastenings[fastening.originalStanzaId];
-					const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-					if (alreadyExists) {
-						return;
-					}
-					messageFastening.push(fastening);
-					fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
-				});
+				forEach(newFastenings, (newFastening) => addFasteningToMessage(fastenings, newFastening));
 			}),
 			false,
 			'CHAT/ADD_FASTENING'
