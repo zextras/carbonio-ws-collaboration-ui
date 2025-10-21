@@ -4,20 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach } from 'lodash';
-
+import { handleHistory } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
-import {
-	BackfillRequest,
-	ConfigurationMessage,
-	MessageFastening,
-	MessageRange,
-	MessageType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
+import { BackfillRequest, MessageRange } from '../../../types/store/ChatsRegistryTypes';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
-import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 function detectGaps(messageRanges: MessageRange[]): BackfillRequest[] {
 	if (messageRanges.length < 2) return [];
@@ -58,42 +49,7 @@ export function requestHistoryWithBackfillCallback(stanza: Element, queryId: str
 	const store = useStore.getState();
 	const { xmppClient } = store.connections;
 
-	const historyMessages = HistoryAccumulator.getHistoryMessages(queryId);
-	const storeMessages: (TextMessage | ConfigurationMessage)[] = [];
-	const fasteningMessages: MessageFastening[] = [];
-	historyMessages.forEach((message) => {
-		if (message.type === MessageType.FASTENING) {
-			fasteningMessages.push(message);
-		} else {
-			storeMessages.push(message);
-		}
-	});
-	useStore.getState().addFastening(fasteningMessages);
-
-	// Store history messages on store updating the history of the room
-	store.updateHistory(roomId, storeMessages);
-
-	// Request message subject of reply
-	forEach(storeMessages, (message) => {
-		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
-		if (messageSubjectOfReplyId) {
-			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
-		}
-	});
-
-	if (historyMessages.length > 0) {
-		const oldest = historyMessages[0];
-		const newest = historyMessages[historyMessages.length - 1];
-
-		const rangeInfo: MessageRange = {
-			oldestId: oldest.id,
-			newestId: newest.id,
-			oldestTimestamp: oldest.date,
-			newestTimestamp: newest.date
-		};
-
-		store.addMessageRange(roomId, rangeInfo);
-	}
+	handleHistory(queryId, roomId);
 
 	const gaps = detectGaps(useStore.getState().chatsRegistry[roomId].messageRanges ?? []);
 	store.enqueueBackfill(roomId, gaps);

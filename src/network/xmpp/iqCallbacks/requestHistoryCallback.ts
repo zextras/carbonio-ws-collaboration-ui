@@ -18,6 +18,60 @@ import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
+export function handleHistory(
+	queryId: string,
+	roomId: string
+): {
+	historyMessages: (TextMessage | ConfigurationMessage | MessageFastening)[];
+	storeMessages: (TextMessage | ConfigurationMessage)[];
+	fasteningMessages: MessageFastening[];
+} {
+	const historyMessages = HistoryAccumulator.getHistoryMessages(queryId);
+	const storeMessages: (TextMessage | ConfigurationMessage)[] = [];
+	const fasteningMessages: MessageFastening[] = [];
+	historyMessages.forEach((message) => {
+		if (message.type === MessageType.FASTENING) {
+			fasteningMessages.push(message);
+		} else {
+			storeMessages.push(message);
+		}
+	});
+	useStore.getState().addFastening(fasteningMessages);
+
+	// Store history messages on store updating the history of the room
+	useStore.getState().updateHistory(roomId, storeMessages);
+
+	// Request message subject of reply
+	forEach(storeMessages, (message) => {
+		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			useStore
+				.getState()
+				.connections.xmppClient.requestMessageSubjectOfReply(
+					message.roomId,
+					messageSubjectOfReplyId,
+					message.id
+				);
+		}
+	});
+
+	if (historyMessages.length > 0) {
+		const oldest = historyMessages[0];
+		const newest = historyMessages[historyMessages.length - 1];
+
+		const rangeInfo: MessageRange = {
+			oldestId: oldest.id,
+			newestId: newest.id,
+			oldestTimestamp: oldest.date,
+			newestTimestamp: newest.date
+		};
+
+		useStore.getState().addMessageRange(roomId, rangeInfo);
+	}
+
+	return { historyMessages, storeMessages, fasteningMessages };
+}
+
 /**
  * After we request the history, when the last message arrived(based on number of messages requested)
  * When there are no more messages to load the server return an IQ with <fin> set as completed="true"
@@ -39,17 +93,7 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 	const store = useStore.getState();
 	const { xmppClient } = store.connections;
 
-	const historyMessages = HistoryAccumulator.getHistoryMessages(queryId);
-	const storeMessages: (TextMessage | ConfigurationMessage)[] = [];
-	const fasteningMessages: MessageFastening[] = [];
-	historyMessages.forEach((message) => {
-		if (message.type === MessageType.FASTENING) {
-			fasteningMessages.push(message);
-		} else {
-			storeMessages.push(message);
-		}
-	});
-	useStore.getState().addFastening(fasteningMessages);
+	const { historyMessages, storeMessages, fasteningMessages } = handleHistory(queryId, roomId);
 
 	// If there are only fastening messages in the history, request more messages
 	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
@@ -71,31 +115,6 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
 			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
 		}
-	}
-
-	// Store history messages on store updating the history of the room
-	store.updateHistory(roomId, storeMessages);
-
-	// Request message subject of reply
-	forEach(storeMessages, (message) => {
-		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
-		if (messageSubjectOfReplyId) {
-			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
-		}
-	});
-
-	if (historyMessages.length > 0) {
-		const oldest = historyMessages[0];
-		const newest = historyMessages[historyMessages.length - 1];
-
-		const rangeInfo: MessageRange = {
-			oldestId: oldest.id,
-			newestId: newest.id,
-			oldestTimestamp: oldest.date,
-			newestTimestamp: newest.date
-		};
-
-		store.addMessageRange(roomId, rangeInfo);
 	}
 
 	// Add message of creation room at the start of the history
