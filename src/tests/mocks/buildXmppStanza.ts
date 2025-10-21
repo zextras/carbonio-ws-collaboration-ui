@@ -115,6 +115,7 @@ type HistoryParams = {
 	messageId?: string;
 	stanzaId?: string;
 	timestamp?: string;
+	replyTo?: string;
 };
 export const buildTextMessageFromHistory = ({
 	roomId = 'roomId',
@@ -124,9 +125,13 @@ export const buildTextMessageFromHistory = ({
 	queryId = 'queryId',
 	messageId = 'messageId',
 	stanzaId = 'stanzaId',
-	timestamp = new Date().toISOString()
-}: HistoryParams): Element =>
-	stringToXml(`
+	timestamp = new Date().toISOString(),
+	replyTo
+}: HistoryParams): Element => {
+	const replyToTag = replyTo
+		? `<reply xmlns="urn:xmpp:reply:0" id="${replyTo}" to="${to}@carbonio/${roomId}@muclight.carbonio"/>`
+		: '';
+	return stringToXml(`
 <message xmlns="jabber:client" from="${roomId}@muclight.carbonio" to="${to}@carbonio/resourceId" id="${messageId}">
     <result xmlns="urn:xmpp:mam:2" queryid="${queryId}" id="${stanzaId}">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -134,6 +139,7 @@ export const buildTextMessageFromHistory = ({
             <message xmlns="jabber:client" from="${roomId}@muclight.carbonio/${from}@carbonio" id="${messageId}" type="groupchat">
                 <body>${text}</body>
                 <markable xmlns="urn:xmpp:chat-markers:0"/>
+                ${replyToTag}
                 <x xmlns="http://jabber.org/protocol/muc#user">
                     <item affiliation="member" jid="${from}@carbonio/resourceId" role="participant"/>
                 </x>
@@ -141,6 +147,7 @@ export const buildTextMessageFromHistory = ({
         </forwarded>
     </result>
 </message>`);
+};
 
 type ReactionHistoryParams = {
 	roomId?: string;

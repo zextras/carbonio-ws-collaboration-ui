@@ -78,4 +78,42 @@ describe('requestHistoryCallback', () => {
 		expect(store.activeConversations[textMessage.roomId].isHistoryFullyLoaded).toBeTruthy();
 		expect(spyOnRequestHistory).toHaveBeenCalled();
 	});
+
+	test('Fastenings are added to fastening store', () => {
+		const queryId = HistoryAccumulator.getNextId();
+		HistoryAccumulator.pushToCache(
+			queryId,
+			buildReactionMessageFromHistory({
+				roomId: textMessage.roomId,
+				originalStanzaId: textMessage.stanzaId,
+				reaction: '😀'
+			})
+		);
+		requestHistoryCallback(
+			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
+			queryId
+		);
+		const { fastenings } = useStore.getState().chatsRegistry[textMessage.roomId];
+		expect(fastenings[textMessage.stanzaId][0].value).toBe('😀');
+	});
+
+	test('Retrieve original message for replied messages', () => {
+		const queryId = HistoryAccumulator.getNextId();
+		HistoryAccumulator.pushToCache(
+			queryId,
+			buildTextMessageFromHistory({
+				roomId: textMessage.roomId,
+				replyTo: 'stanzaId'
+			})
+		);
+		const spyOnRequestMessage = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestMessageSubjectOfReply'
+		);
+		requestHistoryCallback(
+			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
+			queryId
+		);
+		expect(spyOnRequestMessage).toHaveBeenCalledTimes(1);
+	});
 });

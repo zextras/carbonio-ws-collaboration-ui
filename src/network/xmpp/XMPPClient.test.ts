@@ -9,7 +9,7 @@ import { rosterCallback } from './iqCallbacks/rosterCallback';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { createMockRoom } from '../../tests/createMock';
+import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { buildPingStanza } from '../../tests/mocks/buildXmppStanza';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
@@ -145,6 +145,16 @@ describe('XMPPClient', () => {
 			const stanza = getStanzaFromSpy(spyOnXmppSend);
 			expect(findFieldValue(stanza, 'start')).toBe(clearedAt);
 			expect(findFieldValue(stanza, 'end')).toBe(dateToISODate(300));
+		});
+
+		test('avoid requesting message subject of reply when message is already into store', () => {
+			const message = createMockTextMessage({ roomId: room.id });
+			useStore.getState().newMessage(message);
+			const xmppClient = new XMPPClient();
+			const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+
+			xmppClient.requestMessageSubjectOfReply(room.id, message.id, 'messageId2');
+			expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
 		});
 
 		test('fullTextSearch should have correct attributes', () => {
