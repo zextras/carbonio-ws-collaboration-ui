@@ -3,44 +3,192 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement } from 'react';
+/* eslint-disable jsx-a11y/media-has-caption */
+import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 
-import styled from '@emotion/styled';
-import { Container, Padding, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Input, Text, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
-
-const CustomDescription = styled(Text)`
-	text-align: center;
-`;
-
-const BackgroundContainer = styled(Container)`
-	background-image: url(${ExternalAccessBackground});
-	background-size: cover;
-	aspect-ratio: 1/1;
-	background-position: center;
-`;
+import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useRouting from '../../../hooks/useRouting';
+import { MeetingsApi } from '../../../network';
+import useStore from '../../../store/Store';
+import { UserType } from '../../../types/store/UserTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
+import AccessTile from '../../components/meetingAccessPoint/mediaHandlers/AccessTile';
+import { useLocalAudioHandler } from '../../components/meetingAccessPoint/mediaHandlers/useLocalAudioHandler';
+import { useLocalVideoHandler } from '../../components/meetingAccessPoint/mediaHandlers/useLocalVideoHandler';
+import useAccessMeeting from '../../components/meetingAccessPoint/useAccessMeeting';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 const MeetingExternalAccessMobilePage = (): ReactElement => {
-	const [t] = useTranslation();
-	const enterMeetingDescription = t(
-		'welcomePage.journeyDescription',
-		'You will be redirected to the waiting room where a moderator will approve your access.'
+	const [meetingName, setMeetingName] = useState<string>('');
+	const [guestName, setGuestName] = useState<string>('');
+
+	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const audioStreamRef = useRef<HTMLAudioElement>(null);
+
+	const { videoStatus, videoDeviceId, VideoHandlerComponent } = useLocalVideoHandler({
+		initialStatus: false,
+		streamRef: videoStreamRef
+	});
+
+	const { audioStatus, audioDeviceId, AudioHandlerComponent } = useLocalAudioHandler({
+		initialStatus: false,
+		streamRef: audioStreamRef
+	});
+
+	const queueId = useStore((state) => state.session.queueId);
+
+	const { handleWaitingRoom, userIsReady } = useAccessMeeting({
+		audio: {
+			enabled: audioStatus,
+			selectedDeviceId: audioDeviceId
+		},
+		video: {
+			enabled: videoStatus,
+			selectedDeviceId: videoDeviceId
+		}
+	});
+
+	const { goToInfoPage } = useRouting();
+
+	const createSnackbar = useSnackbar();
+
+	useEffect(() => {
+		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
+		MeetingsApi.getScheduledMeetingName(meetingId)
+			.then((resp) => {
+				setMeetingName(resp.name);
+			})
+			.catch(() => {
+				goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
+			});
+	}, [goToInfoPage]);
+
+	const [t] = useTranslation(); // TODO: translation keys
+	const titleLabel = t('', 'Welcome to "{{title}}" virtual room', { title: meetingName });
+	const subtitleLabel = t('', 'Join as guest');
+	const descriptionLabel = t('', 'Enter your name to join this meeting');
+	const inputLabel = t('', 'Enter your name');
+	const buttonLabel = t('', 'Ready to participate');
+	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
+	const waitingForModeratorLabel = t(
+		'',
+		'A moderator will let you into the meeting in a few moments.'
+	);
+	const generalErrorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went Wrong. Please Retry'
 	);
 
+	const readyToParticipate = useCallback(() => {
+		const { setLoginInfo, setChatsBeStatus, setAttributes } = useStore.getState();
+		MeetingsApi.createGuestAccount(guestName)
+			.then((res) => {
+				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
+				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
+				setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
+
+				setChatsBeStatus(true);
+				const { xmppClient, wsClient } = useStore.getState().connections;
+				xmppClient.connect(res.zmToken);
+				wsClient.connect();
+
+				setAttributes({
+					carbonioWscShowMessageReads: 'TRUE',
+					carbonioWscMessageDeleteTimeLimit: '10m',
+					carbonioWscMessageEditTimeLimit: '10m'
+				});
+			})
+			.catch(() => {
+				BrowserUtils.clearAuthCookies();
+				setChatsBeStatus(false);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: generalErrorSnackbar,
+					hideButton: true,
+					autoHideTimeout: 5000
+				});
+			});
+	}, [createSnackbar, generalErrorSnackbar, guestName]);
+
+	// Join waiting room automatically after guest login
+	useEffect(() => {
+		if (queueId) handleWaitingRoom();
+	}, [queueId, handleWaitingRoom]);
+
 	return (
-		<BackgroundContainer padding="2rem">
+		<Container background="gray0" height="fill" width="fill" padding="large" gap="1rem">
+			{/* <Logo /> TODO */}
 			<Container
-				height="fit"
 				background={'gray6'}
-				padding={{ vertical: '4rem', horizontal: '2rem' }}
-				crossAlignment="center"
+				padding="large"
+				height="fit"
+				width="fill"
+				style={{ borderRadius: '1rem' }}
 			>
-				<Padding bottom="2rem" />
-				<CustomDescription overflow="break-word">{enterMeetingDescription}</CustomDescription>
+				<Text weight="bold" style={{ fontSize: '24px' }} overflow="break-word" textAlign="center">
+					{titleLabel}
+				</Text>
 			</Container>
-		</BackgroundContainer>
+			<Container
+				orientation="vertical"
+				background="gray6"
+				padding="large"
+				gap="1rem"
+				width="fill"
+				height="fit"
+				style={{ borderRadius: '1rem' }}
+			>
+				<Text weight="bold" style={{ fontSize: '24px' }}>
+					{subtitleLabel}
+				</Text>
+				<Text overflow="break-word" textAlign="center">
+					{descriptionLabel}
+				</Text>
+				<Input
+					label={inputLabel}
+					onChange={(ev) => setGuestName(ev.target.value)}
+					value={guestName}
+					disabled={userIsReady}
+				/>
+				<AccessTile
+					videoStreamRef={videoStreamRef}
+					videoPlayerTestMuted
+					mediaDevicesEnabled={{
+						audio: audioStatus,
+						video: videoStatus
+					}}
+				/>
+				<audio ref={audioStreamRef} autoPlay muted={!audioStatus} />
+				{VideoHandlerComponent}
+				{AudioHandlerComponent}
+				{!userIsReady ? (
+					<Button
+						width="fill"
+						label={buttonLabel}
+						color="success"
+						onClick={readyToParticipate}
+						disabled={guestName.trim().length === 0 || userIsReady}
+					/>
+				) : (
+					<Container height="fit" gap="0.5rem">
+						<Container orientation="horizontal" gap="0.5rem" height="fit">
+							<Icon icon="CheckmarkCircle2" color="success" size="large" />
+							<Text size="large" weight="bold">
+								{readyLabel}
+							</Text>
+						</Container>
+						<Text size="small" overflow="break-word" textAlign="center">
+							{waitingForModeratorLabel}
+						</Text>
+						<Icon icon="LoaderOutline" color="gray0" size="large" />
+					</Container>
+				)}
+			</Container>
+		</Container>
 	);
 };
 

@@ -26,7 +26,6 @@ import {
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -63,8 +62,6 @@ const CustomTile = styled(Container)<{
 			opacity: ${({ $isHovering, $isPip }): number => (!$isPip && $isHovering ? 1 : 0)};
 		}
 	}
-
-	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
 const CustomShimmer = styled(Shimmer.Logo)`
@@ -86,8 +83,6 @@ const VideoEl = styled.video<{
 	width: inherit;
 	border-radius: 0.5rem;
 	z-index: ${Z_INDEX_RANK.TILE_VIDEO};
-
-	${BrowserUtils.isMobile() && 'border-radius: 0;'}
 `;
 
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
