@@ -268,11 +268,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					fastenings[fastening.originalStanzaId] ??= [];
 					const messageFastening = fastenings[fastening.originalStanzaId];
 					const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-					// Add fastening to the array only if it doesn't already exist
-					if (!alreadyExists) {
-						messageFastening.push(fastening);
-						fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
+					if (alreadyExists) {
+						return;
 					}
+					messageFastening.push(fastening);
+					fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
 				});
 			}),
 			false,
