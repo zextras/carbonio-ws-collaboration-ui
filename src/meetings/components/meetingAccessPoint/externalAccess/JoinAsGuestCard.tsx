@@ -24,18 +24,21 @@ const JoinAsGuestCard = ({
 	userIsReady,
 	createGuestAccount
 }: JoinAsGuestCardProps): ReactElement => {
-	const [t] = useTranslation(); // TODO: translation keys
-	const subtitleLabel = t('', 'Join as guest');
-	const descriptionLabel = t('', 'Enter your name to join this meeting');
-	const inputLabel = t('', 'Enter your name');
-	const buttonLabel = t('', 'Ready to participate');
+	const [t] = useTranslation();
+	const subtitleLabel = t('welcomePage.joinAsGuest', 'Join as guest');
+	const descriptionLabel = t('welcomePage.description', 'Enter your name to join this meeting');
+	const inputLabel = t('welcomePage.inputPlaceholder', 'Enter your name');
+	const buttonLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
 	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
 	const waitingForModeratorLabel = t(
-		'',
+		'welcomePage.waitingForModerator',
 		'A moderator will let you into the meeting in a few moments.'
 	);
-	const alreadyHaveAccountLabel = t('', 'Already have an account? Access with your credentials.');
-	const loginPageButtonLabel = t('', 'Go to your login page');
+	const alreadyHaveAccountLabel = t(
+		'welcomePage.alreadyHaveAccount',
+		'Already have an account? Access with your credentials.'
+	);
+	const loginPageButtonLabel = t('welcomePage.loginButton', 'Go to your login page');
 
 	const [guestName, setGuestName] = useState<string>('');
 

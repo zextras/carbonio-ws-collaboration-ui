@@ -38,15 +38,17 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 	});
 	const { meetingName, createGuestAccount } = useExternalAccess();
 
-	const [t] = useTranslation(); // TODO: translation keys
-	const titleLabel = t('', 'Welcome to "{{title}}" virtual room', { title: meetingName });
-	const subtitleLabel = t('', 'Join as guest');
-	const descriptionLabel = t('', 'Enter your name to join this meeting');
-	const inputLabel = t('', 'Enter your name');
-	const buttonLabel = t('', 'Ready to participate');
+	const [t] = useTranslation();
+	const titleLabel = t('welcomePage.title', 'Welcome to "{{title}}" virtual room', {
+		title: meetingName
+	});
+	const subtitleLabel = t('welcomePage.joinAsGuest', 'Join as guest');
+	const descriptionLabel = t('welcomePage.description', 'Enter your name to join this meeting');
+	const inputLabel = t('welcomePage.inputPlaceholder', 'Enter your name');
+	const buttonLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
 	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
 	const waitingForModeratorLabel = t(
-		'',
+		'welcomePage.waitingForModerator',
 		'A moderator will let you into the meeting in a few moments.'
 	);
 

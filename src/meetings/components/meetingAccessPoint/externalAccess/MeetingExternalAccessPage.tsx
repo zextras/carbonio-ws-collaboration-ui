@@ -37,8 +37,10 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const { handleWaitingRoom, userIsReady } = useAccessMeeting(mediaStatus);
 	const { meetingName, createGuestAccount } = useExternalAccess();
 
-	const [t] = useTranslation(); // TODO: translation keys
-	const titleLabel = t('', 'Welcome to "{{title}}" virtual room', { title: meetingName });
+	const [t] = useTranslation();
+	const titleLabel = t('welcomePage.title', 'Welcome to "{{title}}" virtual room', {
+		title: meetingName
+	});
 
 	// Join waiting room automatically after guest login
 	useEffect(() => {
