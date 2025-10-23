@@ -10,13 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 import AudioAndVideoCard from './AudioAndVideoCard';
 import JoinAsGuestCard from './JoinAsGuestCard';
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
-import useRouting from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
-import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
 import Logo from '../../Logo';
 import useAccessMeeting from '../useAccessMeeting';
+import useExternalAccess from './useExternalAccess';
 
 export type MediaStatus = {
 	audio: {
@@ -30,7 +27,6 @@ export type MediaStatus = {
 };
 
 const MeetingExternalAccessPage = (): ReactElement => {
-	const [meetingName, setMeetingName] = useState<string>('');
 	const [mediaStatus, setMediaStatus] = useState<MediaStatus>({
 		audio: { enabled: false },
 		video: { enabled: false }
@@ -39,19 +35,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const queueId = useStore((state) => state.session.queueId);
 
 	const { handleWaitingRoom, userIsReady } = useAccessMeeting(mediaStatus);
-
-	const { goToInfoPage } = useRouting();
-
-	useEffect(() => {
-		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
-		MeetingsApi.getScheduledMeetingName(meetingId)
-			.then((resp) => {
-				setMeetingName(resp.name);
-			})
-			.catch(() => {
-				goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
-			});
-	}, [goToInfoPage]);
+	const { meetingName, createGuestAccount } = useExternalAccess();
 
 	const [t] = useTranslation(); // TODO: translation keys
 	const titleLabel = t('', 'Welcome to "{{title}}" virtual room', { title: meetingName });
@@ -77,7 +61,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 				</Container>
 				<Container orientation="horizontal" gap="1rem" width="fill">
 					<AudioAndVideoCard mediaStatus={mediaStatus} setMediaStatus={setMediaStatus} />
-					<JoinAsGuestCard userIsReady={userIsReady} />
+					<JoinAsGuestCard userIsReady={userIsReady} createGuestAccount={createGuestAccount} />
 				</Container>
 			</Container>
 		</Container>

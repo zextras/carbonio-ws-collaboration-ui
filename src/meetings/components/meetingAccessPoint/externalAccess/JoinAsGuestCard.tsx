@@ -12,19 +12,18 @@ import {
 	Icon,
 	Input,
 	Row,
-	Text,
-	useSnackbar
+	Text
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MeetingsApi } from '../../../../network';
-import useStore from '../../../../store/Store';
-import { UserType } from '../../../../types/store/UserTypes';
-
 type JoinAsGuestCardProps = {
 	userIsReady: boolean;
+	createGuestAccount: (guestName: string) => void;
 };
-const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement => {
+const JoinAsGuestCard = ({
+	userIsReady,
+	createGuestAccount
+}: JoinAsGuestCardProps): ReactElement => {
 	const [t] = useTranslation(); // TODO: translation keys
 	const subtitleLabel = t('', 'Join as guest');
 	const descriptionLabel = t('', 'Enter your name to join this meeting');
@@ -37,45 +36,8 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 	);
 	const alreadyHaveAccountLabel = t('', 'Already have an account? Access with your credentials.');
 	const loginPageButtonLabel = t('', 'Go to your login page');
-	const generalErrorSnackbar = t(
-		'settings.profile.errorGenericResponse',
-		'Something went Wrong. Please Retry'
-	);
 
 	const [guestName, setGuestName] = useState<string>('');
-
-	const createSnackbar = useSnackbar();
-
-	const readyToParticipate = useCallback(() => {
-		const { setLoginInfo, setChatsBeStatus, setAttributes } = useStore.getState();
-		MeetingsApi.createGuestAccount(guestName)
-			.then((res) => {
-				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
-				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-				setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
-
-				setChatsBeStatus(true);
-				const { xmppClient, wsClient } = useStore.getState().connections;
-				xmppClient.connect(res.zmToken);
-				wsClient.connect();
-
-				setAttributes({
-					carbonioWscShowMessageReads: 'TRUE',
-					carbonioWscMessageDeleteTimeLimit: '10m',
-					carbonioWscMessageEditTimeLimit: '10m'
-				});
-			})
-			.catch(() => {
-				setChatsBeStatus(false);
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					severity: 'error',
-					label: generalErrorSnackbar,
-					hideButton: true,
-					autoHideTimeout: 5000
-				});
-			});
-	}, [createSnackbar, generalErrorSnackbar, guestName]);
 
 	const goToLoginPage = useCallback(() => {
 		const meetingUrl = window.location.href;
@@ -86,6 +48,10 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 			window.location.replace(loginUrl);
 		}
 	}, []);
+
+	const readyToParticipate = useCallback(() => {
+		createGuestAccount(guestName);
+	}, [createGuestAccount, guestName]);
 
 	return (
 		<Row
