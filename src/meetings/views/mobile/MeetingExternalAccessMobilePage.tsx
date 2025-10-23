@@ -16,7 +16,6 @@ import { MeetingsApi } from '../../../network';
 import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
 import defaultLogo from '../../assets/Logo.png';
 import AccessTile from '../../components/meetingAccessPoint/AccessTile';
 import useAccessMeeting from '../../components/meetingAccessPoint/useAccessMeeting';
@@ -94,7 +93,6 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 				});
 			})
 			.catch(() => {
-				BrowserUtils.clearAuthCookies();
 				setChatsBeStatus(false);
 				createSnackbar({
 					key: new Date().toLocaleString(),

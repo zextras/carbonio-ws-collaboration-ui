@@ -20,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import { MeetingsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
-import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 type JoinAsGuestCardProps = {
 	userIsReady: boolean;
@@ -67,7 +66,6 @@ const JoinAsGuestCard = ({ userIsReady }: JoinAsGuestCardProps): ReactElement =>
 				});
 			})
 			.catch(() => {
-				BrowserUtils.clearAuthCookies();
 				setChatsBeStatus(false);
 				createSnackbar({
 					key: new Date().toLocaleString(),

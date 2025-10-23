@@ -108,7 +108,8 @@ const useAccessMeeting = (
 	const handleLeave = useCallback(() => {
 		if (userIsReady) {
 			MeetingsApi.leaveWaitingRoom(meetingId);
-		} else if (isLoggedUserExternal) {
+		}
+		if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
