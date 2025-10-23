@@ -80,7 +80,7 @@ const PictureInPictureView = (): ReactElement => {
 		(event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
 			if (!audioStatus) {
-				getAudioStream(true, true, selectedAudioDeviceId)
+				getAudioStream(selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
 							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);

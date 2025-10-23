@@ -32,7 +32,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
-			getAudioStream(true, true).then((stream) => {
+			getAudioStream().then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
 					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 				});

@@ -18,7 +18,7 @@ import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import defaultLogo from '../../assets/Logo.png';
-import AccessTile from '../../components/meetingAccessPoint/mediaHandlers/AccessTile';
+import AccessTile from '../../components/meetingAccessPoint/AccessTile';
 import useAccessMeeting from '../../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 

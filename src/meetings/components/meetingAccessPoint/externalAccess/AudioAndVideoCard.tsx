@@ -18,9 +18,8 @@ import { Button, Container, Row } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
-import AccessTile from '../mediaHandlers/AccessTile';
-import { useLocalAudioHandler } from '../mediaHandlers/useLocalAudioHandler';
-import { useLocalVideoHandler } from '../mediaHandlers/useLocalVideoHandler';
+import AccessTile from '../AccessTile';
+import { useLocalMediaHandler } from '../useLocalMediaHandler';
 
 type AudioAndVideoCardProps = {
 	mediaStatus: MediaStatus;
@@ -39,12 +38,22 @@ const AudioAndVideoCard = ({
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 	const audioStreamRef = useRef<HTMLAudioElement>(null);
 
-	const { videoStatus, videoDeviceId, VideoHandlerComponent } = useLocalVideoHandler({
+	const {
+		status: videoStatus,
+		deviceId: videoDeviceId,
+		HandlerComponent: VideoHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'video',
 		initialStatus: mediaStatus.video.enabled,
 		streamRef: videoStreamRef
 	});
 
-	const { audioStatus, audioDeviceId, AudioHandlerComponent } = useLocalAudioHandler({
+	const {
+		status: audioStatus,
+		deviceId: audioDeviceId,
+		HandlerComponent: AudioHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'audio',
 		initialStatus: mediaStatus.audio.enabled,
 		streamRef: audioStreamRef
 	});

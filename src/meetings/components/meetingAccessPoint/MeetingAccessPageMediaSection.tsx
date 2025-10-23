@@ -27,10 +27,9 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import AccessTile from './AccessTile';
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
-import AccessTile from './mediaHandlers/AccessTile';
-import { useLocalAudioHandler } from './mediaHandlers/useLocalAudioHandler';
-import { useLocalVideoHandler } from './mediaHandlers/useLocalVideoHandler';
+import { useLocalMediaHandler } from './useLocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
@@ -119,12 +118,22 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 	const audioStreamRef = useRef<HTMLAudioElement>(null);
 
-	const { videoStatus, videoDeviceId, VideoHandlerComponent } = useLocalVideoHandler({
+	const {
+		status: videoStatus,
+		deviceId: videoDeviceId,
+		HandlerComponent: VideoHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'video',
 		initialStatus: meetingStorage.EnableCamera,
 		streamRef: videoStreamRef
 	});
 
-	const { audioStatus, audioDeviceId, AudioHandlerComponent } = useLocalAudioHandler({
+	const {
+		status: audioStatus,
+		deviceId: audioDeviceId,
+		HandlerComponent: AudioHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'audio',
 		initialStatus: meetingStorage.EnableMicrophone,
 		streamRef: audioStreamRef
 	});

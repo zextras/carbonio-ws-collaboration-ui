@@ -66,7 +66,7 @@ const MicrophoneButton = ({
 	const onClickAudioItem = useCallback(
 		(audioItem: MediaDeviceInfo) => {
 			if (audioStatus) {
-				getAudioStream(true, true, audioItem.deviceId).then((stream) => {
+				getAudioStream(audioItem.deviceId).then((stream) => {
 					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
 					setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
 				});
@@ -93,7 +93,7 @@ const MicrophoneButton = ({
 		(event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
 			if (!audioStatus) {
-				getAudioStream(true, true, selectedAudioDeviceId)
+				getAudioStream(selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
 							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
