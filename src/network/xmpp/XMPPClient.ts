@@ -8,27 +8,25 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import {
-	MamRequestType,
-	onLoadFullHistory,
-	onRequestHistory,
-	onRequestSingleMessage
-} from './handlers/historyMessageHandler';
-import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
-import { onGetRosterResponse } from './handlers/rosterHandler';
-import { onSmartMarkers } from './handlers/smartMarkersHandler';
+import { RoomsApi } from '../index';
+import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
+import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
+import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
+import { requestHistoryWithBackfillCallback } from './iqCallbacks/requestHistoryWithBackfillCallback';
+import { rosterCallback } from './iqCallbacks/rosterCallback';
+import { smartMarkersCallback } from './iqCallbacks/smartMarkersCallback';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
+import HistoryAccumulator from './utility/HistoryAccumulator';
+import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { RoomsApi } from '../index';
-import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 
 const jabberData = 'jabber:x:data';
 
-class XMPPClient implements IXMPPClient {
+class XMPPClient {
 	public xmppConnection: XMPPConnection;
 
 	constructor() {
@@ -48,6 +46,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
 		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
 		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
+		Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
 		Strophe.addNamespace('PING', 'urn:xmpp:ping');
 		Strophe.addNamespace('REPLY', 'urn:xmpp:reply:0');
@@ -78,7 +77,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onGetRosterResponse
+			callback: rosterCallback
 		});
 	}
 
@@ -100,7 +99,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onGetLastActivityResponse
+			callback: lastActivityCallback
 		});
 	}
 
@@ -239,13 +238,14 @@ class XMPPClient implements IXMPPClient {
 		if (!useStore.getState().rooms[roomId]) return;
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
+		const queryId = HistoryAccumulator.getNextId();
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
-			.t('urn:xmpp:mam:2')
+			.t(Strophe.NS.MAM)
 			.up()
 			.up()
 			.c('field', { var: 'start' })
@@ -259,7 +259,7 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.up()
 			.up()
-			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+			.c('set', { xmlns: Strophe.NS.RSM })
 			.c('max')
 			.t(quantity)
 			.up()
@@ -267,31 +267,7 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => onRequestHistory(stanza, unread)
-		});
-	}
-
-	requestHistoryBetweenTwoMessage(
-		roomId: string,
-		olderMessageId: string,
-		newerMessageId: string
-	): void {
-		if (!useStore.getState().rooms[roomId]) return;
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM })
-			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'from_id' })
-			.c('value')
-			.t(olderMessageId)
-			.up()
-			.up()
-			.c('field', { var: 'to_id' })
-			.c('value')
-			.t(newerMessageId);
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: onRequestHistory
+			callback: (stanza) => requestHistoryCallback(stanza, queryId, unread)
 		});
 	}
 
@@ -301,23 +277,41 @@ class XMPPClient implements IXMPPClient {
 		replyMessageId: string
 	): void {
 		if (!useStore.getState().rooms[roomId]) return;
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
-			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'ids' })
-			.c('value')
-			.t(messageSubjectOfReplyId);
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq,
-			callback: (stanza) => onRequestSingleMessage(stanza, replyMessageId)
-		});
+		const storeMessages = useStore.getState().chatsRegistry[roomId]?.messages;
+		const referenceMessage = find(
+			storeMessages,
+			(message) => message.id === messageSubjectOfReplyId && message.type === MessageType.TEXT_MSG
+		) as TextMessage;
+		if (referenceMessage) {
+			useStore.getState().setRepliedMessage(roomId, replyMessageId, referenceMessage);
+		} else {
+			const queryId = HistoryAccumulator.getNextId();
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'ids' })
+				.c('value')
+				.t(messageSubjectOfReplyId);
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: () => {
+					const referenceMessage = HistoryAccumulator.getRepliedMessage(queryId);
+					const { setRepliedMessage } = useStore.getState();
+					setRepliedMessage(referenceMessage.roomId, replyMessageId, referenceMessage);
+				}
+			});
+		}
 	}
 
-	requestMessageToForward(roomId: string, messageToForwardStanzaId: string): Promise<Element> {
+	requestMessageToForward(
+		roomId: string,
+		messageToForwardStanzaId: string,
+		queryId: string
+	): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'ids' })
 				.c('value')
@@ -325,7 +319,7 @@ class XMPPClient implements IXMPPClient {
 			this.xmppConnection.send({
 				type: XMPPRequestType.IQ,
 				elem: iq,
-				callback: resolve,
+				callback: () => resolve(),
 				errorCallback: reject
 			});
 		});
@@ -337,8 +331,9 @@ class XMPPClient implements IXMPPClient {
 		const clearedAt = room.userSettings?.clearedAt;
 		const startHistory = from ?? clearedAt ?? room.createdAt;
 
+		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.LOAD_FULL_HISTORY })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
@@ -351,7 +346,101 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: onLoadFullHistory
+			callback: (stanza) => fullHistoryCallback(stanza, queryId)
+		});
+	}
+
+	// Retrieve all messages of a room with a particular text in the body
+	fullTextSearch(roomId: string, text: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			const queryId = HistoryAccumulator.getNextId();
+			const room = useStore.getState().rooms[roomId];
+			const startSearch = room.userSettings?.clearedAt ?? room.createdAt;
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'start' })
+				.c('value')
+				.t(dateToISODate(startSearch))
+				.up()
+				.up()
+				.c('field', { var: 'full-text-search' })
+				.c('value')
+				.t(text)
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: Strophe.NS.RSM })
+				.c('before');
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: () => {
+					const searchedMessages = HistoryAccumulator.getSearchedMessages(queryId);
+					useStore.getState().setSearchResults(roomId, searchedMessages);
+					resolve();
+				},
+				errorCallback: reject
+			});
+		});
+	}
+
+	requestHistoryBetweenTwoDates(roomId: string, afterDate: number, beforeDate: number): void {
+		if (!useStore.getState().rooms[roomId]) return;
+
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+			.c('x', { type: 'submit', xmlns: jabberData })
+			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+			.c('value')
+			.t(Strophe.NS.MAM)
+			.up()
+			.up()
+			.c('field', { var: 'start' })
+			.c('value')
+			.t(dateToISODate(afterDate))
+			.up()
+			.up()
+			.c('field', { var: 'end' })
+			.c('value')
+			.t(dateToISODate(beforeDate + 1));
+
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza) => requestHistoryWithBackfillCallback(stanza, queryId)
+		});
+	}
+
+	requestMessageResultHistoryToId(roomId: string, stanzaId: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			const queryId = HistoryAccumulator.getNextId();
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { type: 'submit', xmlns: jabberData })
+				.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+				.c('value')
+				.t(Strophe.NS.MAM)
+				.up()
+				.up()
+				.c('field', { var: 'to-id' })
+				.c('value')
+				.t(stanzaId)
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: Strophe.NS.RSM })
+				.c('before');
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: (stanza) => {
+					requestHistoryWithBackfillCallback(stanza, queryId);
+					resolve();
+				},
+				errorCallback: reject
+			});
 		});
 	}
 
@@ -408,7 +497,11 @@ class XMPPClient implements IXMPPClient {
 			xmlns: Strophe.NS.SMART_MARKERS,
 			peer: carbonizeMUC(roomId)
 		});
-		this.xmppConnection.send({ type: XMPPRequestType.IQ, elem: iq, callback: onSmartMarkers });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: smartMarkersCallback
+		});
 	}
 }
 

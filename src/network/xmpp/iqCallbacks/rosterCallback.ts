@@ -14,11 +14,10 @@ import { getRequiredAttribute } from '../utility/decodeStanza';
  * Documentation: https://xmpp.org/extensions/xep-0162.html
  */
 
-export function onGetRosterResponse(stanza: Element): boolean {
+export function rosterCallback(stanza: Element): void {
 	const contacts = stanza.getElementsByTagName('item');
 	forEach(contacts, (contact) => {
 		const jid = getRequiredAttribute(contact, 'jid');
 		useStore.getState().connections.xmppClient.getLastActivity(jid);
 	});
-	return true;
 }

@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign,no-plusplus */
 /*
  * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
@@ -6,20 +6,21 @@
  */
 
 import { produce } from 'immer';
-import { concat, find, forEach, last, map, orderBy, remove, size, some, uniqBy } from 'lodash';
+import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
+	BackfillRequest,
 	ChatRegistry,
 	ChatsRegistryStoreSlice,
 	ConfigurationMessage,
-	DateMessage,
 	Marker,
 	MarkerStatus,
 	Message,
 	MessageFastening,
+	MessageRange,
 	MessageType,
 	OperationType,
 	PlaceholderFields,
@@ -28,7 +29,26 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore, isStrictlyBefore, now } from '../../utils/dateUtils';
+import { isBefore } from '../../utils/dateUtils';
+
+function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
+	const result: T[] = [];
+	let i = 0;
+	let j = 0;
+
+	while (i < arr1.length && j < arr2.length) {
+		if (compareFn(arr1[i], arr2[j]) <= 0) {
+			result.push(arr1[i++]);
+		} else {
+			result.push(arr2[j++]);
+		}
+	}
+
+	while (i < arr1.length) result.push(arr1[i++]);
+	while (j < arr2.length) result.push(arr2[j++]);
+
+	return result;
+}
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
@@ -36,22 +56,65 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 			messages: [],
 			fastenings: {},
 			markers: {},
-			unread: 0
+			unread: 0,
+			searchResults: [],
+			backfillQueue: []
 		};
 	}
 	return store.chatsRegistry[roomId];
 };
 
-const addDateMessage = (messages: Message[], messageDate: number, roomId: string): void => {
-	const lastDate = last(messages)?.date ?? 0;
-	if (!datesAreFromTheSameDay(lastDate, messageDate)) {
-		messages.push({
-			id: `dateMessage-${messageDate - 2}`,
-			roomId,
-			date: messageDate - 2,
-			type: MessageType.DATE_MSG
-		});
+export function mergeOverlappingRanges(ranges: MessageRange[]): MessageRange[] {
+	if (ranges.length <= 1) return ranges;
+
+	const merged: MessageRange[] = [ranges[0]];
+
+	// eslint-disable-next-line no-plusplus
+	for (let i = 1; i < ranges.length; i++) {
+		const current = ranges[i];
+		const last = merged[merged.length - 1];
+
+		if (current.oldestTimestamp <= last.newestTimestamp) {
+			if (current.newestTimestamp >= last.newestTimestamp) {
+				last.newestId = current.newestId;
+				last.newestTimestamp = current.newestTimestamp;
+			}
+		} else {
+			merged.push(current);
+		}
 	}
+
+	return merged;
+}
+
+const isFasteningAlreadyExists = (messageFastenings: MessageFastening[], id: string): boolean =>
+	!!find(messageFastenings, (f) => f.id === id);
+
+const addFasteningToMessage = (
+	existingFastenings: Record<string, MessageFastening[]>,
+	newFastening: MessageFastening
+): void => {
+	const { originalStanzaId, id } = newFastening;
+	existingFastenings[originalStanzaId] ??= [];
+
+	const messageFastening = existingFastenings[originalStanzaId];
+
+	if (isFasteningAlreadyExists(messageFastening, id)) {
+		return;
+	}
+
+	messageFastening.push(newFastening);
+	existingFastenings[originalStanzaId] = orderBy(messageFastening, ['date']);
+};
+
+const isBackfillRequestExists = (queue: BackfillRequest[], request: BackfillRequest): boolean =>
+	queue.some((req) => req.afterDate === request.afterDate && req.beforeDate === request.beforeDate);
+
+const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRequest): void => {
+	if (isBackfillRequestExists(queue, request)) {
+		return;
+	}
+	queue.push(request);
 };
 
 export const useChatsRegistryStoreSlice: StateCreator<
@@ -59,7 +122,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	[['zustand/devtools', never]],
 	[],
 	ChatsRegistryStoreSlice
-> = (set) => ({
+> = (set, get) => ({
 	chatsRegistry: {},
 	newMessage: (message: Message): void => {
 		set(
@@ -70,7 +133,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				if (alreadyExists) {
 					Object.assign(alreadyExists, message);
 				} else {
-					addDateMessage(messages, message.date, message.roomId);
 					messages.push(message);
 				}
 			}),
@@ -86,7 +148,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
 				// Add message only if it doesn't already exist and the history is not cleared
 				if (!alreadyExists && (!clearedAt || isBefore(clearedAt, message.date))) {
-					addDateMessage(messages, message.date, message.roomId);
 					messages.push(message);
 				}
 			}),
@@ -98,43 +159,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
-
-				// Process only new messages in ascending order
-				const newMessages = orderBy(messageArray, ['date'], ['asc']).filter((msg) =>
-					isStrictlyBefore(msg.date, messages[0]?.date || now())
-				);
-
-				if (size(newMessages) > 0) {
-					// Add date between messages of different days
-					const newMessagesWithDates = newMessages.reduce<Message[]>((acc, message, index) => {
-						const prevDate = newMessages[index - 1]?.date ?? 0;
-						if (!datesAreFromTheSameDay(prevDate, message.date)) {
-							acc.push({
-								id: `dateMessage-${message.date - 2}`,
-								roomId,
-								date: message.date - 2,
-								type: MessageType.DATE_MSG
-							} as DateMessage);
-						}
-						acc.push(message);
-						return acc;
-					}, []);
-
-					// Remove old first date message if the last message of the new history has the same date
-					if (
-						messages[0]?.type === MessageType.DATE_MSG &&
-						datesAreFromTheSameDay(messages[0].date, last(newMessagesWithDates)?.date ?? 0)
-					) {
-						remove(messages, (message) => message.id === messages[0].id);
-					}
-
-					draft.chatsRegistry[roomId].messages = concat(
-						newMessagesWithDates,
-						draft.chatsRegistry[roomId].messages
-					);
-
-					// Check for duplicates and remove them (inbox can contain duplicates for date differentiation)
-					draft.chatsRegistry[roomId].messages = uniqBy(draft.chatsRegistry[roomId].messages, 'id');
+				if (messageArray.length > 0) {
+					const newMessages = orderBy(messageArray, ['date'], ['asc']);
+					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
+					// Check for duplicates and remove them
+					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}
 			}),
 			false,
@@ -164,16 +193,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					!isHistoryCleared
 				) {
 					const creationMsg: ConfigurationMessage = {
-						id: `creationMessage-${firstMessageDate + 1}`,
+						id: `creationMessage-${firstMessageDate}`,
 						roomId,
-						date: firstMessageDate + 1,
+						date: firstMessageDate - 1,
 						type: MessageType.CONFIGURATION_MSG,
 						operation: OperationType.ROOM_CREATION,
 						value: '',
 						from: '',
 						read: MarkerStatus.READ
 					};
-					draft.chatsRegistry[roomId].messages.splice(1, 0, creationMsg);
+					draft.chatsRegistry[roomId].messages.splice(0, 0, creationMsg);
 				}
 			}),
 			false,
@@ -226,9 +255,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					forwarded
 				};
 
-				// Add date message if the new message has a different date than the previous one
-				addDateMessage(messages, placeholderMessage.date, roomId);
-
 				// If the placeholder message is a reply, find the message to reply to
 				if (placeholderMessage.replyTo) {
 					const messageSubjectOfReply = find(
@@ -256,28 +282,19 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				remove(messages, (message) => message.id === messageId);
-				if (last(messages)?.type === MessageType.DATE_MSG) {
-					draft.chatsRegistry[roomId].messages.pop();
-				}
 			}),
 			false,
 			'CHAT/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	},
-	addFastening: (fastening: MessageFastening): void => {
+	addFastening: (newFastenings: MessageFastening[]): void => {
+		if (newFastenings.length === 0) {
+			return;
+		}
 		set(
 			produce((draft: RootStore) => {
-				const { fastenings } = initRoomChatsRegistry(draft, fastening.roomId);
-				if (!fastenings[fastening.originalStanzaId]) {
-					fastenings[fastening.originalStanzaId] = [];
-				}
-				const messageFastening = fastenings[fastening.originalStanzaId];
-				const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
-				// Add fastening to the array only if it doesn't already exist
-				if (!alreadyExists) {
-					messageFastening.push(fastening);
-					fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
-				}
+				const { fastenings } = initRoomChatsRegistry(draft, newFastenings[0].roomId);
+				forEach(newFastenings, (newFastening) => addFasteningToMessage(fastenings, newFastening));
 			}),
 			false,
 			'CHAT/ADD_FASTENING'
@@ -336,6 +353,60 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			}),
 			false,
 			'CHAT/INCREMENT_UNREAD'
+		);
+	},
+	setSearchResults: (roomId: string, results: TextMessage[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].searchResults = results;
+			}),
+			false,
+			'CHAT/SET_SEARCH_RESULTS'
+		);
+	},
+	clearSearchResults: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].searchResults = [];
+				if (draft.activeConversations[roomId]) {
+					draft.activeConversations[roomId].selectedSearchResult = undefined;
+				}
+			}),
+			false,
+			'CHAT/CLEAR_SEARCH_RESULTS'
+		);
+	},
+	addMessageRange: (roomId: string, range: MessageRange): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = initRoomChatsRegistry(draft, roomId);
+				registry.messageRanges = mergeOverlappingRanges(
+					orderBy([...(registry.messageRanges ?? []), range], ['oldestTimestamp'], ['asc'])
+				);
+			}),
+			false,
+			'CHAT/ADD_MESSAGE_RANGE'
+		);
+	},
+	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = initRoomChatsRegistry(draft, roomId);
+				gaps.forEach((request) => addBackfillRequestToQueue(registry.backfillQueue, request));
+			}),
+			false,
+			'CHAT/ENQUEUE_BACKFILL'
+		);
+	},
+	shiftBackfillQueue: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.chatsRegistry[roomId].backfillQueue.shift();
+			}),
+			false,
+			'CHAT/BACKFILL_REQUEST_PROCESSED'
 		);
 	}
 });

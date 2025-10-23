@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction } from 'react';
+import React, { FC } from 'react';
 
-import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 
 import { ActionsAccordion } from './conversationActionsAccordion/ActionsAccordion';
@@ -17,53 +16,24 @@ import { getRoomTypeSelector, getIsPlaceholderRoom } from '../../../store/select
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-const ConversationInfoContainer = styled(Container)`
-	height: fit-content;
-	position: sticky;
-	top: 0;
-	z-index: 1;
-`;
-
-const CustomContainer = styled(Container)`
-	border-left: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
-	position: relative;
-	overflow-y: auto;
-	background-color: white;
-`;
-
-const AccordionsContainer = styled(Container)`
-	height: fit-content;
-`;
-
 type ConversationProps = {
 	roomId: string;
-	infoPanelOpen: boolean;
-	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	goToChatView: () => void;
 };
 
-const ConversationInfoPanel: FC<ConversationProps> = ({
-	roomId,
-	infoPanelOpen,
-	setInfoPanelOpen
-}) => {
+const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) => {
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	return (
-		<CustomContainer
-			data-testid={`conversationInfoPanel${infoPanelOpen ? 'Open' : 'Collapsed'}`}
-			width={infoPanelOpen ? '100%' : '30%'}
-			mainAlignment="flex-start"
-		>
-			<ConversationInfoContainer>
-				<ConversationInfo roomId={roomId} roomType={roomType} setInfoPanelOpen={setInfoPanelOpen} />
-			</ConversationInfoContainer>
-			<AccordionsContainer>
+		<Container>
+			<ConversationInfo roomId={roomId} roomType={roomType} goToChatView={goToChatView} />
+			<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
 				<ConversationInfoDetails roomId={roomId} roomType={roomType} />
 				{!isPlaceholderRoom && <ActionsAccordion roomId={roomId} />}
 				{roomType !== RoomType.ONE_TO_ONE && <MemberAccordion roomId={roomId} />}
-			</AccordionsContainer>
-		</CustomContainer>
+			</Container>
+		</Container>
 	);
 };
 

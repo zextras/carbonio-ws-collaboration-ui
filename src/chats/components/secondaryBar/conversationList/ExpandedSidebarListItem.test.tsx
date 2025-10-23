@@ -19,7 +19,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
+import { buildComposingStanza } from '../../../../tests/mocks/buildXmppStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import {
@@ -65,13 +65,6 @@ const mockedOneToOne: RoomBe = createMockRoom({
 	id: 'oneToOneId',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
-});
-
-const mockedTextMessageSentByMeIntoOneToOne = createMockTextMessage({
-	id: 'idSimpleTextMessage',
-	roomId: mockedOneToOne.id,
-	read: MarkerStatus.READ,
-	from: user1Be.id
 });
 
 const mockedTextMessageSentByMeIntoGroup = createMockTextMessage({
@@ -320,16 +313,25 @@ describe('Expanded sidebar list item', () => {
 			store.newMessage(mockedTextMessageSentByMeIntoGroup);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
-				const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
-				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
+				onComposingMessageStanza.call(
+					useStore.getState().connections.xmppClient,
+					buildComposingStanza({
+						roomId: mockedGroup.id,
+						from: user4Be.id,
+						isWriting: true
+					})
+				);
 			});
 			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
 			jest.advanceTimersByTime(3000);
 			act(() => {
-				const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
 				onComposingMessageStanza.call(
 					useStore.getState().connections.xmppClient,
-					stopWritingMessage
+					buildComposingStanza({
+						roomId: mockedGroup.id,
+						from: user4Be.id,
+						isWriting: false
+					})
 				);
 			});
 			jest.advanceTimersByTime(7000);

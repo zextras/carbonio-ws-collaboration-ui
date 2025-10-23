@@ -8,13 +8,12 @@ import { forEach, last } from 'lodash';
 
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
 
 export interface IChatExporter {
-	addMessageToFullHistory(message: Message): void;
+	addMessagesToFullHistory(messages: Message[]): void;
 	continueExporting(): void;
 	exportHistory(): void;
 }
@@ -24,15 +23,15 @@ class ChatExporter implements IChatExporter {
 
 	readonly fullHistory: Message[] = [];
 
-	readonly xmppClient: IXMPPClient = useStore.getState().connections.xmppClient;
+	readonly xmppClient = useStore.getState().connections.xmppClient;
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
 		this.xmppClient.requestFullHistory(this.roomId);
 	}
 
-	public addMessageToFullHistory(message: Message): void {
-		this.fullHistory.push(message);
+	public addMessagesToFullHistory(messages: Message[]): void {
+		this.fullHistory.push(...messages);
 	}
 
 	public continueExporting(): void {

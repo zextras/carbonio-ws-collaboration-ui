@@ -46,7 +46,7 @@ describe('Test useMessage custom hook', () => {
 			originalStanzaId: message.stanzaId,
 			action: FasteningAction.DELETE
 		});
-		act(() => store.addFastening(fastening));
+		act(() => store.addFastening([fastening]));
 		const messageResult = result.current as TextMessage;
 		expect(messageResult.deleted).toBeTruthy();
 		expect(messageResult.text).toBe('');
@@ -66,7 +66,7 @@ describe('Test useMessage custom hook', () => {
 			action: FasteningAction.EDIT,
 			value: 'Edited message'
 		});
-		act(() => store.addFastening(fastening));
+		act(() => store.addFastening([fastening]));
 		const messageResult = result.current as TextMessage;
 		expect(messageResult.edited).toBeTruthy();
 		expect(messageResult.text).toBe('Edited message');

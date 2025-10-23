@@ -7,22 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 /**
- * Presence stanzas
- */
-// Presence stanza received after a roster iq or when a user logs in
-export const onlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId"/>`;
-
-// Presence stanza received when a user logs out
-export const offlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId" type="unavailable"/>`;
-
-/**
- * Ping stanzas
- */
-export const pingIq = `<iq from='carbonio' to='userId@carbonio/resourceId' type='get' id='stanzaId' xmlns='jabber:client'><ping xmlns='urn:xmpp:ping'/></iq>`;
-
-export const pongIq = `<iq id="stanzaId" to="carbonio" type="result" xmlns="jabber:client"/>`;
-
-/**
  * Inbox stanzas: messages received after an inbox iq
  */
 
@@ -158,32 +142,6 @@ export const forwardedTextMessageFromHistory = `
     </result>
 </message>`;
 
-export const reactionMessageStanzaFromHistory = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/resourceId" id="messageId">
-    <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
-        <forwarded xmlns="urn:xmpp:forward:0">
-            <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.533016Z" from="roomId@muclight.carbonio/userId@carbonio"/>
-                <message id="messageId" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" type="groupchat" xmlns="jabber:client">
-                    <apply-to id="originalStanzaId" xmlns="urn:xmpp:fasten:0"><reaction xmlns="zextras:xmpp:reaction:0"/>
-                        <external name="body"/>
-                    </apply-to>
-                    <body>👍</body>
-                </message>
-        </forwarded>
-    </result>
-</message>`;
-
-export const endRequestHistoryIq = `
-    <iq from='roomId@muclight.carbonio' to='userId@carbonio/resourceId' id='iqId' type='result' xmlns='jabber:client'>
-        <fin xmlns='urn:xmpp:mam:2' complete='true'>
-            <set xmlns='http://jabber.org/protocol/rsm'>
-                <first index='258'>C808PJQD9V81</first>
-                <last>C809FC6JH8O1</last>
-                <count>308</count>
-            </set>
-        </fin>
-    </iq>`;
-
 /**
  * Realtime messages
  */
@@ -242,16 +200,6 @@ export const messageWithAttachment = `
 export const displayMessageRealTime = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <displayed xmlns="urn:xmpp:chat-markers:0" id="messageId"/>
-</message>`;
-
-export const pauseWritingMessage = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
-    <paused xmlns="http://jabber.org/protocol/chatstates"/>
-</message>`;
-
-export const startWritingMessage = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
-    <composing xmlns="http://jabber.org/protocol/chatstates"/>
 </message>`;
 
 export const retractedMessage = `

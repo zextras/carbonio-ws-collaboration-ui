@@ -131,7 +131,7 @@ const MeetingSidebar = (): ReactElement => {
 						</AccordionContainer>
 					)}
 				</Container>
-				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId!} />
+				<MeetingConversationAccordion roomId={roomId ?? ''} />
 			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip

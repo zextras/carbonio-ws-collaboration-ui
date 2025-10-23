@@ -38,7 +38,7 @@ describe('ChatExporter tests', () => {
 		const chatExporter = new ChatExporter(roomId);
 		const message = createMockTextMessage({ date: Date.now() });
 
-		chatExporter.addMessageToFullHistory(message);
+		chatExporter.addMessagesToFullHistory([message]);
 		chatExporter.continueExporting();
 
 		expect(spyOnRequestFullHistory).toHaveBeenCalledWith(roomId, message.date);
@@ -47,13 +47,13 @@ describe('ChatExporter tests', () => {
 	test('Export history when history is complete', () => {
 		const chatExporter = new ChatExporter(roomId);
 		const message = createMockTextMessage();
-		chatExporter.addMessageToFullHistory(message);
+		chatExporter.addMessagesToFullHistory([message]);
 		const message2 = createMockTextMessage({
 			attachment: { id: 'file', name: 'File.txt', mimeType: 'txt', size: 2300 }
 		});
-		chatExporter.addMessageToFullHistory(message2);
+		chatExporter.addMessagesToFullHistory([message2]);
 		const message3 = createMockTextMessage({ deleted: true });
-		chatExporter.addMessageToFullHistory(message3);
+		chatExporter.addMessagesToFullHistory([message3]);
 
 		document.body.appendChild = jest.fn();
 		document.body.removeChild = jest.fn();

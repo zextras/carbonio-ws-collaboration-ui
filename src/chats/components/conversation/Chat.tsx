@@ -9,7 +9,6 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
-	useEffect,
 	useMemo,
 	useState
 } from 'react';
@@ -18,6 +17,7 @@ import styled from '@emotion/styled';
 import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { ConversationView } from './Conversation';
 import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
@@ -40,10 +40,11 @@ const CustomContainer = styled(Container)`
 
 type ChatsProps = {
 	roomId: string;
-	setInfoPanelOpen?: Dispatch<SetStateAction<boolean>>;
+	conversationView?: ConversationView;
+	setConversationView?: Dispatch<SetStateAction<ConversationView>>;
 };
 
-const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
+const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
@@ -54,12 +55,6 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
-
-	useEffect(() => {
-		if (isDesktopView && setInfoPanelOpen) {
-			setInfoPanelOpen(false);
-		}
-	}, [isDesktopView, setInfoPanelOpen]);
 
 	const loadFiles = useLoadFiles(roomId);
 
@@ -153,8 +148,12 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 					onDragLeaveEvent={handleOnDragLeave}
 				/>
 			)}
-			{!isInsideMeeting && setInfoPanelOpen && (
-				<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
+			{!isInsideMeeting && conversationView && setConversationView && (
+				<ConversationHeader
+					roomId={roomId}
+					conversationView={conversationView}
+					setConversationView={setConversationView}
+				/>
 			)}
 			<MessagesList roomId={roomId} />
 			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />

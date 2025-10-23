@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import XMPPClient from '../../network/xmpp/XMPPClient';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getXmppClient = (store: RootStore): IXMPPClient => store.connections.xmppClient;
+export const getXmppClient = (store: RootStore): XMPPClient => store.connections.xmppClient;
 
 export const getWsClient = (store: RootStore): IWebSocketClient => store.connections.wsClient;

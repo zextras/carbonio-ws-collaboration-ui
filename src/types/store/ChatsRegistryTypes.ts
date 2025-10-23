@@ -17,9 +17,14 @@ export type ChatsRegistryStoreSlice = {
 	) => void;
 	setPlaceholderMessage: (fields: PlaceholderFields) => void;
 	removePlaceholderMessage: (roomId: string, messageId: string) => void;
-	addFastening: (fasteningMessage: MessageFastening) => void;
+	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
+	setSearchResults: (roomId: string, results: TextMessage[]) => void;
+	clearSearchResults: (roomId: string) => void;
+	addMessageRange: (roomId: string, range: MessageRange) => void;
+	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
+	shiftBackfillQueue: (roomId: string) => void;
 };
 
 export type ChatRegistry = {
@@ -27,17 +32,24 @@ export type ChatRegistry = {
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
 	unread: number;
+	searchResults: TextMessage[];
+	messageRanges?: MessageRange[];
+	backfillQueue: BackfillRequest[];
 };
 
-export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
+export type Message = TextMessage | ConfigurationMessage | MessageFastening;
+
+export type ExtendedMessage = Message | DateMessage;
 
 export type BasicMessage = {
+	// aka ARCHIVE-ID more external one
 	id: string;
 	roomId: string;
 	date: number;
 };
 
 export type TextMessage = BasicMessage & {
+	// aka the id inside <stanza-id> tag
 	stanzaId: string;
 	type: MessageType.TEXT_MSG;
 	from: string;
@@ -58,6 +70,18 @@ export type ConfigurationMessage = BasicMessage & {
 	from: string;
 	read: MarkerStatus;
 };
+
+export interface MessageRange {
+	oldestId: string;
+	newestId: string;
+	oldestTimestamp: number;
+	newestTimestamp: number;
+}
+
+export interface BackfillRequest {
+	afterDate: number;
+	beforeDate: number;
+}
 
 export enum OperationType {
 	ROOM_NAME_CHANGED = 'roomNameChanged',

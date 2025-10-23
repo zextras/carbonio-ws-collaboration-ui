@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
  * Utility functions for date manipulation.
  * Accepted date formats:
  * - Date (native JS Date object)
- * - ISO Date ("YYYY-MM-DDTHH:mm:ss.sssZ")
+ * - ISO Date ("YYYY-MM-DDTHH:mm:ss.ssssssZ")
  * - Unix timestamp (milliseconds)
  */
 
@@ -32,7 +32,7 @@ export const dateToTimestamp = (date: DateType): number => moment(date).valueOf(
 
 // Transform generic date format into ISO Date (format accept from XMPP)
 export const dateToISODate = (date: DateType): string =>
-	formatDate(date, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
+	formatDate(date, 'YYYY-MM-DDTHH:mm:ss.SSSSSSZ');
 
 export const isBefore = (previousDate: DateType, nextDate: DateType): boolean =>
 	moment(previousDate).isSameOrBefore(nextDate);

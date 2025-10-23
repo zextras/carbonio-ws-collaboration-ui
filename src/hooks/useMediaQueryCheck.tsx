@@ -7,8 +7,8 @@
 import { useState, useEffect } from 'react';
 
 const useMediaQueryCheck = (): boolean => {
-	const [matches, setMatches] = useState(false);
-	const mediaQuery = '(min-width: 64rem)';
+	const [matches, setMatches] = useState(true);
+	const mediaQuery = '(min-width: 60rem)';
 
 	useEffect(() => {
 		const media = window.matchMedia(mediaQuery);

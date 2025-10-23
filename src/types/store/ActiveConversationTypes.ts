@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttachmentMessageType, Message, TextMessage } from './ChatsRegistryTypes';
+import { AttachmentMessageType, TextMessage } from './ChatsRegistryTypes';
 
 export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
@@ -23,7 +23,6 @@ export type ActiveConversationsSlice = {
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;
 	setDraftMessage: (roomId: string, message?: string) => void;
-	setLastMamMessage: (message: Message) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
@@ -36,12 +35,12 @@ export type ActiveConversationsSlice = {
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
 	unsetNewReactions: (roomId: string) => void;
+	setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
 };
 
 export type ActiveConversation = {
 	draftMessage?: string;
 	scrollPositionMessageId?: string;
-	lastMamMessage?: Message;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;
 	inputHasFocus?: boolean;
@@ -51,6 +50,7 @@ export type ActiveConversation = {
 	filesToAttach?: FileToUpload[];
 	forwardMessageList?: TextMessage[];
 	newReactions?: NewReaction[];
+	selectedSearchResult?: string;
 };
 
 export type ActiveConversationsMap = {

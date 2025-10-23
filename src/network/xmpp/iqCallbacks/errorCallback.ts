@@ -8,7 +8,7 @@ import { Strophe } from 'strophe.js';
 
 import { xmppDebug } from '../../../utils/debug';
 
-export function onErrorStanza(stanza: Element): true {
+export function errorCallback(stanza: Element): void {
 	const query = stanza.getElementsByTagName('query')[0];
 	if (query) {
 		const xmlns = query.getAttribute('xmlns');
@@ -20,5 +20,4 @@ export function onErrorStanza(stanza: Element): true {
 	} else {
 		xmppDebug(`<--- Error`, stanza);
 	}
-	return true;
 }
