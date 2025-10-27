@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import useAccessMeeting from './useAccessMeeting';
@@ -13,7 +13,7 @@ import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { mockGoToInfoPage } from '../../../tests/mocks/useRouting';
+import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../tests/mocks/useRouting';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
 
@@ -82,5 +82,36 @@ describe('useAccessMeeting tests', () => {
 			}
 		});
 		expect(mockGoToInfoPage).toHaveBeenCalled();
+	});
+
+	test('handleLeave handle leaving the waiting room', async () => {
+		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
+		spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING).mockResolvedValueOnce({ status: 'WAITING' });
+		const spyOnLeaveWaitingRoom = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_WAITING_ROOM);
+		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
+		result.current.handleWaitingRoom();
+		await waitFor(() => {
+			expect(result.current.userIsReady).toEqual(true);
+		});
+		await result.current.handleLeave();
+		expect(spyOnLeaveWaitingRoom).toHaveBeenCalled();
+	});
+
+	test('Accepted user in waiting room is redirected to meeting', async () => {
+		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
+		spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING).mockResolvedValueOnce({ status: 'ACCEPTED' });
+		renderHook(() => useAccessMeeting(mediaStatus));
+		sendCustomEvent({
+			name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,
+			data: {
+				meetingId: room.meetingId!,
+				sentDate: dateToISODate(now()),
+				type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED,
+				userId: 'test-user-id'
+			}
+		});
+		await waitFor(() => {
+			expect(mockGoToMeetingPage).toHaveBeenCalledWith(room.meetingId);
+		});
 	});
 });
