@@ -6,8 +6,8 @@
 
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { dateToTimestamp, now } from '../../../utils/dateUtils';
-import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
+import { dateToTimestamp } from '../../../utils/dateUtils';
+import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 
 /**
@@ -25,6 +25,18 @@ export function onInboxMessageStanza(message: Element): true {
 		const store = useStore.getState();
 		const { xmppClient } = store.connections;
 		xmppClient.lastMarkers(inboxMessage.roomId);
+
+		// Request history to count the real number of unread messages
+		const unreadMessages = getAttribute(result, 'unread');
+		if (unreadMessages) {
+			const unreadCount = parseInt(unreadMessages, 10);
+			xmppClient.requestHistory(
+				inboxMessage.roomId,
+				inboxMessage.date,
+				unreadCount + 1,
+				unreadCount
+			);
+		}
 
 		switch (inboxMessage.type) {
 			case MessageType.TEXT_MSG:
@@ -46,7 +58,7 @@ export function onInboxMessageStanza(message: Element): true {
 			case MessageType.FASTENING:
 				store.addFastening([inboxMessage]);
 				// Last inboxMessage is a fastening, we need to request more messages to display the real last one
-				xmppClient.requestHistory(inboxMessage.roomId, now(), 3);
+				xmppClient.requestHistory(inboxMessage.roomId, inboxMessage.date, 3);
 				break;
 			default:
 				break;

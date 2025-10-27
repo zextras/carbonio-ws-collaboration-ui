@@ -85,7 +85,7 @@ export function handleHistory(
  * 5- Checks for replied messages and in case request the message in the history
  * 6- Updates the last message read of all the members of a room
  * */
-export function requestHistoryCallback(stanza: Element, queryId: string, unread?: number): void {
+export function requestHistoryCallback(stanza: Element, queryId: string, unread = 0): void {
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
 	const fin = getRequiredTagElement(stanza, 'fin');
@@ -97,7 +97,7 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 
 	// If there are only fastening messages in the history, request more messages
 	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
-		xmppClient.requestHistory(roomId, fasteningMessages[0].date, 50);
+		xmppClient.requestHistory(roomId, fasteningMessages[0].date);
 	}
 
 	// History is fully loaded if the response is marked as complete
@@ -108,12 +108,17 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread?
 
 	// If unread are more than loaded text messages, request history again
 	// Do this check here to load history only when user opens conversation
-	if (size(storeMessages) > 0 && unread && unread > 0) {
+	console.log('Unread count:', unread);
+	if (size(storeMessages) > 0 && unread > 0) {
 		const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
-			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
-			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
+			xmppClient.requestHistory(
+				roomId,
+				historyMessages[0].date,
+				unreadNotLoaded + 1,
+				unreadNotLoaded
+			);
 		}
 	}
 

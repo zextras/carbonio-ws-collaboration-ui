@@ -234,7 +234,7 @@ class XMPPClient {
 	}
 
 	// Request n messages before end date but not before start date
-	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void {
+	requestHistory(roomId: string, endHistory: number, quantity = 50, unread = 0): void {
 		if (!useStore.getState().rooms[roomId]) return;
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
