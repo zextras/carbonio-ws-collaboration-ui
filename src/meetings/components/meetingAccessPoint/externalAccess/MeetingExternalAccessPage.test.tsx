@@ -33,4 +33,12 @@ describe('MeetingExternalAccessPage tests', () => {
 		await user.click(readyButton);
 		expect(spyCreateGuest).toHaveBeenCalled();
 	});
+
+	test('Redirect to login page', async () => {
+		window.location.pathname = 'https://localhost/carbonio/meetings/meeting-id';
+		const { user } = setup(<MeetingExternalAccessPage />);
+		const loginButton = await screen.findByText('Go to your login page');
+		await user.click(loginButton);
+		expect(window.location.replace).toBeCalled();
+	});
 });
