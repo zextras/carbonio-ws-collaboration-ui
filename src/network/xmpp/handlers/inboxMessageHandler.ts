@@ -28,7 +28,7 @@ export function onInboxMessageStanza(message: Element): true {
 
 		// Request history to count the real number of unread messages
 		const unreadMessages = getAttribute(result, 'unread');
-		if (unreadMessages) {
+		if (unreadMessages && parseInt(unreadMessages, 10) > 0) {
 			const unreadCount = parseInt(unreadMessages, 10);
 			xmppClient.requestHistory(
 				inboxMessage.roomId,

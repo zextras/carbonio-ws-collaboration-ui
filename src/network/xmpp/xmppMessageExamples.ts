@@ -5,68 +5,6 @@
  */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
-/**
- * Inbox stanzas: messages received after an inbox iq
- */
-
-export const textMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
-    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
-        <forwarded xmlns="urn:xmpp:forward:0">
-            <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T13:58:29.624130Z"/>
-            <message to="userId@carbonio" id="messageId" type="groupchat" from="roomId@muclight.carbonio/userId@carbonio">
-                <body>hello!</body>
-                <markable xmlns="urn:xmpp:chat-markers:0"/>
-                <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
-            </message>
-        </forwarded>
-        <box>inbox</box>
-        <archive>false</archive>
-        <mute>0</mute>
-    </result>
-</message>`;
-
-export const replyMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
-    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
-        <forwarded xmlns="urn:xmpp:forward:0">
-            <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T14:41:28.291032Z"/>
-            <message to="userId@carbonio" id="messageId" type="groupchat" from="roomId@muclight.carbonio/userId@carbonio">
-                <body>bene!</body>
-                <markable xmlns="urn:xmpp:chat-markers:0"/>
-                <reply xmlns="urn:xmpp:reply:0" id="stanzaId" to="userId@carbonio/roomId@muclight.carbonio}"/>
-                <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
-            </message>
-        </forwarded>
-        <box>inbox</box>
-        <archive>false</archive>
-        <mute>0</mute>
-    </result>
-</message>`;
-
-export const forwardedTextMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
-    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
-        <forwarded xmlns="urn:xmpp:forward:0">
-            <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.564202Z"/>
-            <message to="userId@carbonio" id="messageId" type="groupchat" from="roomId@muclight.carbonio/userId@carbonio">
-                <body/>
-                <forwarded xmlns="urn:xmpp:forward:0">
-                    <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:24.457Z"/>
-                    <message from="roomId@muclight.carbonio/userId@carbonio" id="messageId" to="roomId@muclight.carbonio" type="groupchat">
-                        <body>Hello!</body>
-                    </message>
-                </forwarded>
-                <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
-            </message>
-        </forwarded>
-        <box>inbox</box>
-        <archive>false</archive>
-        <mute>0</mute>
-    </result>
-</message>`;
-
 /**
  * History stanzas
  */
