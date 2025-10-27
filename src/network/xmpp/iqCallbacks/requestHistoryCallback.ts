@@ -108,7 +108,6 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread 
 
 	// If unread are more than loaded text messages, request history again
 	// Do this check here to load history only when user opens conversation
-	console.log('Unread count:', unread);
 	if (size(storeMessages) > 0 && unread > 0) {
 		const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
 		const unreadNotLoaded = unread - size(textMessages);
