@@ -5,6 +5,8 @@
  */
 import React, { ReactElement, useCallback, useState } from 'react';
 
+import { keyframes } from '@emotion/react';
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -15,6 +17,19 @@ import {
 	Text
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+
+const rotateKeyframes = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const SpinnedIcon = styled(Icon)`
+	animation: ${rotateKeyframes} 2s linear infinite;
+`;
 
 type JoinAsGuestCardProps = {
 	userIsReady: boolean;
@@ -88,20 +103,22 @@ const JoinAsGuestCard = ({
 					disabled={guestName.trim().length === 0 || userIsReady}
 				/>
 			) : (
-				<Container height="fit" gap="0.5rem">
-					<Container orientation="horizontal" gap="0.5rem" height="fit">
-						<Icon icon="CheckmarkCircle2" color="success" size="large" />
-						<Text size="large" weight="bold">
-							{readyLabel}
+				<Container height="fit" gap="1rem">
+					<Container height="fit" gap="0.5rem">
+						<Container orientation="horizontal" gap="0.5rem" height="fit">
+							<Icon icon="CheckmarkCircle2" color="success" size="large" />
+							<Text size="large" weight="bold">
+								{readyLabel}
+							</Text>
+						</Container>
+						<Text size="small" overflow="break-word" textAlign="center">
+							{waitingForModeratorLabel}
 						</Text>
 					</Container>
-					<Text size="small" overflow="break-word" textAlign="center">
-						{waitingForModeratorLabel}
-					</Text>
-					<Icon icon="LoaderOutline" color="gray0" size="large" />
+					<SpinnedIcon icon="LoaderOutline" color="gray0" size="large" />
 				</Container>
 			)}
-			<Container padding="medium" width="fill" height="fit">
+			<Container padding={{ horizontal: 'medium' }} width="fill" height="fit">
 				<Divider />
 			</Container>
 			<Text size="small" overflow="break-word" textAlign="center">
