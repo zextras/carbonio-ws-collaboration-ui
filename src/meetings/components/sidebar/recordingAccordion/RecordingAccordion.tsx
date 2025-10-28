@@ -29,6 +29,7 @@ import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveM
 import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
+import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -58,7 +59,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		'The recording will be saved in the Files space of the moderator who stopped it.'
 	);
 	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start Recording');
-	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'StopRecording');
+	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'Stop Recording');
 	const successSnackbarLabel = t(
 		'meeting.recordingStart.successSnackbar.starter',
 		'You have started the registration of this meeting'
@@ -76,6 +77,8 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const accordionStatus = useStore(getRecordingAccordionStatus);
 	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 
+	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [isStopRecordingModalOpen, setIsStopRecordingModalOpen] = useState(false);
@@ -90,7 +93,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 
 	const startRecording = useCallback(() => {
-		MeetingsApi.startRecording(meetingId)
+		MeetingsApi.startRecording(meetingId, folder.id)
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
@@ -107,7 +110,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 					hideButton: true
 				});
 			});
-	}, [createSnackbar, errorSnackbarLabel, meetingId, successSnackbarLabel]);
+	}, [createSnackbar, errorSnackbarLabel, folder.id, meetingId, successSnackbarLabel]);
 
 	const RecordingContainer: ReactElement = useMemo(
 		() => (

@@ -434,7 +434,7 @@ describe('Meetings API', () => {
 	});
 
 	test('startRecording is called correctly', async () => {
-		await meetingsApi.startRecording(meetingMock.id);
+		await meetingsApi.startRecording(meetingMock.id, 'folderId');
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/startRecording`,
@@ -443,7 +443,7 @@ describe('Meetings API', () => {
 	});
 
 	test('stopRecording is called correctly', async () => {
-		await meetingsApi.stopRecording(meetingMock.id, 'recordingName', 'folderId');
+		await meetingsApi.stopRecording(meetingMock.id, 'recordingName');
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/stopRecording`,

@@ -5,20 +5,12 @@
  */
 import React, { Dispatch, FC, ReactElement, SetStateAction, useCallback, useMemo } from 'react';
 
-import styled from '@emotion/styled';
 import { Button, Container, Input, Padding } from '@zextras/carbonio-design-system';
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import SettingsCard from './SettingsCard';
 import { MeetingRecordingType } from '../../utils/localStorageUtils';
-
-const CustomInput = styled(Input)`
-	cursor: default;
-	pointer-events: none;
-`;
-
-const noop = (): void => undefined;
 
 type RecordingSettingsProps = {
 	recordingDefaults: MeetingRecordingType;
@@ -98,12 +90,11 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 					data-testid="recording_settings_container"
 				>
 					<Container width="15.625rem">
-						<CustomInput
+						<Input
 							background={'gray5'}
 							value={isDefaultRoot ? homeFolderLabel : recordingDefaults.name}
 							label={destinationFolderLabel}
-							// TODO: remove when the carbonio-design-system is updated to accept readonly prop
-							onChange={noop}
+							readOnly
 						/>
 					</Container>
 					<Padding left="medium" />

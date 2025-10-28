@@ -5,6 +5,7 @@
  */
 
 import { chain, find } from 'lodash';
+import { lt } from 'semver';
 
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
@@ -279,18 +280,20 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	startRecording(meetingId: string): Promise<StartRecordingResponse> {
-		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
+	startRecording(meetingId: string, folderId: string): Promise<StartRecordingResponse> {
+		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST, {
+			folderId
+		});
 	}
 
-	public stopRecording(
-		meetingId: string,
-		recordingName: string,
-		folderId: string
-	): Promise<StopRecordingResponse> {
+	public stopRecording(meetingId: string, recordingName: string): Promise<StopRecordingResponse> {
+		const version = useStore.getState().session?.apiVersion;
+		// DEPRECATED: This check exists for backward compatibility with previous versions.
+		//  * Remove once support for v1.6.2 is officially dropped.
+		const folderId = version && lt(version, '1.6.3') ? 'LOCAL_ROOT' : undefined;
 		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
 			name: recordingName,
-			folderId
+			...(folderId && { folderId })
 		});
 	}
 
