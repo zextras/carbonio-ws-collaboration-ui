@@ -14,6 +14,7 @@ import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import defaultLogo from '../../assets/Logo.png';
 import AccessTile from '../../components/meetingAccessPoint/AccessTile';
+import { SpinningIcon } from '../../components/meetingAccessPoint/externalAccess/JoinAsGuestCard';
 import useExternalAccess from '../../components/meetingAccessPoint/externalAccess/useExternalAccess';
 import useAccessMeeting from '../../components/meetingAccessPoint/useAccessMeeting';
 
@@ -128,7 +129,7 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 						<Text size="small" overflow="break-word" textAlign="center">
 							{waitingForModeratorLabel}
 						</Text>
-						<Icon icon="LoaderOutline" color="gray0" size="large" />
+						<SpinningIcon icon="LoaderOutline" color="gray0" size="large" />
 					</Container>
 				)}
 			</Container>

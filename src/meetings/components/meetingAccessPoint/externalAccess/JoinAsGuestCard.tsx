@@ -27,7 +27,7 @@ const rotateKeyframes = keyframes`
   }
 `;
 
-const SpinnedIcon = styled(Icon)`
+export const SpinningIcon = styled(Icon)`
 	animation: ${rotateKeyframes} 2s linear infinite;
 `;
 
@@ -115,7 +115,7 @@ const JoinAsGuestCard = ({
 							{waitingForModeratorLabel}
 						</Text>
 					</Container>
-					<SpinnedIcon icon="LoaderOutline" color="gray0" size="large" />
+					<SpinningIcon icon="LoaderOutline" color="gray0" size="large" />
 				</Container>
 			)}
 			<Container padding={{ horizontal: 'medium' }} width="fill" height="fit">
