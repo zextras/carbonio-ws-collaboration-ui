@@ -43,7 +43,7 @@ import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes'
 import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
-import { dateToTimestamp } from '../../utils/dateUtils';
+import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { fetchAPI } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
@@ -286,15 +286,18 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	public stopRecording(meetingId: string, recordingName: string): Promise<StopRecordingResponse> {
+	public stopRecording(meetingId: string): Promise<StopRecordingResponse> {
 		const version = useStore.getState().session?.apiVersion;
 		// DEPRECATED: This check exists for backward compatibility with previous versions.
-		//  * Remove once support for v1.6.2 is officially dropped.
-		const folderId = version && lt(version, '1.6.3') ? 'LOCAL_ROOT' : undefined;
-		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
-			name: recordingName,
-			...(folderId && { folderId })
-		});
+		//  * Remove once support for v1.6.3 is officially dropped.
+		const params =
+			!version || lt(version, '1.6.4')
+				? {
+						name: `Rec_${formatDate(new Date(), 'YYYY-MM-DD HHmm')}`,
+						folderId: 'LOCAL_ROOT'
+					}
+				: undefined;
+		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, params);
 	}
 
 	public raiseHand(

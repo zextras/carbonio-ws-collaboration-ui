@@ -50,6 +50,7 @@ const sdpOffer = 'spdOfferMock';
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
+	store.setApiVersion('1.6.4');
 	store.setLoginInfo(userId, 'User');
 	store.setQueueId('queueId');
 	store.addRooms([roomMock]);
@@ -438,20 +439,20 @@ describe('Meetings API', () => {
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/startRecording`,
-			RequestType.POST
+			RequestType.POST,
+			{
+				folderId: 'folderId'
+			}
 		);
 	});
 
 	test('stopRecording is called correctly', async () => {
-		await meetingsApi.stopRecording(meetingMock.id, 'recordingName');
+		await meetingsApi.stopRecording(meetingMock.id);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/stopRecording`,
 			RequestType.POST,
-			{
-				name: 'recordingName',
-				folderId: 'folderId'
-			}
+			undefined
 		);
 	});
 

@@ -56,7 +56,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const accordionTitle = t('meeting.sidebar.recording.title', 'Recording');
 	const accordionDescription = t(
 		'meeting.sidebar.recording.description',
-		'The recording will be saved in the Files space of the moderator who stopped it.'
+		'The recording will be saved in the Files space of the moderator who started it.'
 	);
 	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start Recording');
 	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'Stop Recording');

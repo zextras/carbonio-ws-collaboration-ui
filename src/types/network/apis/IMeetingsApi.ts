@@ -88,7 +88,7 @@ interface IMeetingsApi {
 		accept: boolean
 	): Promise<AcceptWaitingUserResponse>;
 	startRecording(meetingId: string, folderId: string): Promise<StartRecordingResponse>;
-	stopRecording(meetingId: string, recordingName: string): Promise<StopRecordingResponse>;
+	stopRecording(meetingId: string): Promise<StopRecordingResponse>;
 	raiseHand(meetingId: string, value: boolean, userToModerate?: string): Promise<RaiseHandResponse>;
 	createGuestAccount(name: string): Promise<CreateGuestAccountResponse>;
 	authLogin(): Promise<LoginV3ConfigResponse>;

@@ -36,7 +36,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 	const recordingSectionLabel = t('settings.recording.title', 'Recording');
 	const recordingDescription = t(
 		'settings.recording.description',
-		'Set a custom folder where to save the recordings of the meetings you stop.'
+		'Set a custom folder where to save the recordings of the meetings you start.'
 	);
 	const destinationFolderLabel = t('settings.recording.inputLabel', 'Destination folder');
 	const browseLabel = t('settings.recording.browseAction', 'Browse');
@@ -94,7 +94,8 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 							background={'gray5'}
 							value={isDefaultRoot ? homeFolderLabel : recordingDefaults.name}
 							label={destinationFolderLabel}
-							readOnly
+							// readOnly TODO
+							onChange={() => {}}
 						/>
 					</Container>
 					<Padding left="medium" />

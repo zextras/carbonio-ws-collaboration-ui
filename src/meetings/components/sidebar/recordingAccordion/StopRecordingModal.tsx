@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 
 import {
 	Container,
@@ -16,10 +16,9 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../../../../network';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { formatDate } from '../../../../utils/dateUtils';
+import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
 
 type StopRecordingModalProps = {
 	isOpen: boolean;
@@ -32,13 +31,11 @@ const StopRecordingModal = ({
 	closeModal,
 	meetingId
 }: StopRecordingModalProps): ReactElement => {
-	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
-	const roomName = useStore((state) => getRoomNameSelector(state, roomId ?? ''));
+	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
 
-	const defaultRecordingName = useMemo(
-		() => `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${roomName}`.replaceAll(' ', '_'),
-		[roomName]
-	);
+	const loggedUserId = useStore(getUserId);
+	const recStartedBy = useStore((state) => state.meetings[meetingId].recUserId);
+
 	const [t] = useTranslation();
 	const title: string = t('meeting.recordingModal.title', 'Stop recording');
 	const descriptionLabel: string = t(
@@ -46,16 +43,24 @@ const StopRecordingModal = ({
 		'You are going to stop the recording. You can start a new one at any time.'
 	);
 	const recordingCaption: string = t(
-		'meeting.recordingModal.caption'
-		// `The recording will be saved in "${folder.name}" folder on Files. Go to Settings > Chats > Recording to change the destination folder.`,
-		// { folderName: folder.name }
+		'meeting.recordingModal.caption',
+		`The recording will be saved in "${folder.name}" folder on Files. Go to Settings > Chats > Recording to change the destination folder.`,
+		{ folderName: folder.name }
+	);
+	const recordingCaptionGeneral = t(
+		'meeting.sidebar.recording.description',
+		'The recording will be saved in the Files space of the moderator who started it.'
 	);
 	const stopButtonLabel = t('meeting.recordingModal.confirmationAction', 'Stop');
 	const closeLabel = t('action.close', 'Close');
 	const recordingStopped = t(
-		'meeting.recordingStop.successSnackbar.stopper'
-		// `You will find ${recordingName} in ${folder.name} as soon as it is available`,
-		// { recordingName, folderName: folder.name }
+		'meeting.recordingStop.successSnackbar.stopper',
+		`You will find the recording in ${folder.name} as soon as it is available`,
+		{ folderName: folder.name }
+	);
+	const recordingGeneral = t(
+		'meeting.recordingStop.successSnackbar.general',
+		'Recording stopped successfully'
 	);
 	const errorSnackbarLabel = t(
 		'meeting.recordingStop.failureSnackbar',
@@ -65,12 +70,13 @@ const StopRecordingModal = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId, defaultRecordingName)
+		MeetingsApi.stopRecording(meetingId)
 			.then(() => {
+				const snackbarLabel = loggedUserId === recStartedBy ? recordingGeneral : recordingStopped;
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'info',
-					label: recordingStopped,
+					label: snackbarLabel,
 					hideButton: true
 				});
 			})
@@ -88,9 +94,11 @@ const StopRecordingModal = ({
 	}, [
 		closeModal,
 		createSnackbar,
-		defaultRecordingName,
 		errorSnackbarLabel,
+		loggedUserId,
 		meetingId,
+		recStartedBy,
+		recordingGeneral,
 		recordingStopped
 	]);
 
@@ -108,8 +116,8 @@ const StopRecordingModal = ({
 		>
 			<Container crossAlignment="flex-start">
 				<Text overflow="break-word">{descriptionLabel}</Text>
-				<Text color="gray1" size="small" overflow="break-word">
-					{recordingCaption}
+				<Text color="gray1" overflow="break-word">
+					{loggedUserId === recStartedBy ? recordingCaption : recordingCaptionGeneral}
 				</Text>
 			</Container>
 		</Modal>

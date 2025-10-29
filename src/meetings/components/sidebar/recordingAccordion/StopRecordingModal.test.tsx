@@ -21,7 +21,6 @@ import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { formatDate } from '../../../../utils/dateUtils';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 
@@ -43,41 +42,7 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id);
 });
 describe('StopRecordingModal tests', () => {
-	test('Stop recording without modifying the recording name', async () => {
-		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
-		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
-		);
-		await user.click(screen.getByText('Stop'));
-
-		const defaultRecordingName = `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${
-			room.name
-		}`.replaceAll(' ', '_');
-		const snackbar = await screen.findByText(
-			`You will find ${defaultRecordingName} in Home as soon as it is available`
-		);
-		expect(snackbar).toBeVisible();
-		expect(spyOnStopRecording).toHaveBeenCalled();
-	});
-
-	test('Stop recording with a modified recording name', async () => {
-		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
-		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
-		);
-		const newName = 'NewRecordingName';
-		await user.clear(screen.getByRole('textbox'));
-		await user.type(screen.getByRole('textbox'), newName);
-		await user.click(screen.getByText('Stop'));
-
-		const snackbar = await screen.findByText(
-			`You will find ${newName} in Home as soon as it is available`
-		);
-		expect(snackbar).toBeVisible();
-		expect(spyOnStopRecording).toHaveBeenCalled();
-	});
-
-	test('SHow a snackbar when the stop recording request fails', async () => {
+	test('Show a snackbar when the stop recording request fails', async () => {
 		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
 		spyOnStopRecording.mockRejectedValue(false);
 		const { user } = setup(
