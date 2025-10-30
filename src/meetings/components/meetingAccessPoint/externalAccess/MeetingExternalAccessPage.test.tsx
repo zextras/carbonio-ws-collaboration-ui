@@ -39,6 +39,6 @@ describe('MeetingExternalAccessPage tests', () => {
 		const { user } = setup(<MeetingExternalAccessPage />);
 		const loginButton = await screen.findByText('Go to your login page');
 		await user.click(loginButton);
-		expect(window.location.replace).toBeCalled();
+		expect(window.location.replace).toHaveBeenCalled();
 	});
 });
