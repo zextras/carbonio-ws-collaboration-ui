@@ -32,6 +32,7 @@ beforeEach(() => {
 		),
 		configurable: true
 	});
+	useStore.getState().setSupportedVersions(['1.6.0']);
 });
 
 describe('FetchUtils', () => {
@@ -120,10 +121,11 @@ describe('FetchUtils', () => {
 	});
 
 	test('Stop retrying after max retries on persistent version mismatch', async () => {
-		useStore.getState().setApiVersion('2.0.0');
+		useStore
+			.getState()
+			.setSupportedVersions(['2.0.0', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
 		spyOnFetch.mockRestore();
 
-		// Create a counter to return different versions on each call to simulate persistent mismatch
 		let callCount = 0;
 		const mockErrResp = (
 			count: number
@@ -136,20 +138,30 @@ describe('FetchUtils', () => {
 			status: 422,
 			headers: {
 				get: (header: string): string | undefined =>
-					// Return different versions each time to ensure persistent mismatch
-					header === wscApiVersionHeader ? `1.${count}.0` : undefined
+					header === wscApiVersionHeader ? `1.6.${count}` : undefined
 			}
 		});
-
-		// Mock fetch to always return version mismatch error with different versions
 		(global.fetch as jest.Mock).mockImplementation(() => {
 			callCount += 1;
 			return Promise.resolve(mockErrResp(callCount));
 		});
-
-		// Should reject after max retries (initial call + 3 retries = 4 total calls)
 		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
 		expect(global.fetch).toHaveBeenCalledTimes(4);
+	});
+
+	test('Return error if version choose by the server is not supported by the client', async () => {
+		useStore.getState().setSupportedVersions(['2.0.0']);
+		spyOnFetch.mockRestore();
+		const mockErrResp = {
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
 	test('sendFileFetchApi is called correctly', async () => {

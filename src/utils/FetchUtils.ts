@@ -15,6 +15,7 @@ import { Version } from '../types/store/SessionTypes';
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
+
 const MAX_VERSION_MISMATCH_RETRIES = 3;
 
 const buildHeaders = (): Headers => {
@@ -29,9 +30,13 @@ const handleResponse = async (response: Response): Promise<any> => {
 	if (!response.ok) {
 		if (response.status === 422) {
 			const { session, setApiVersion } = useStore.getState();
-			const serverApiVersion = response.headers.get(wscApiVersionHeader);
+			const serverApiVersion = response.headers.get(wscApiVersionHeader) as Version;
 			const clientApiVersion = session.apiVersion;
-			if (!!serverApiVersion && serverApiVersion !== clientApiVersion) {
+			if (
+				!!serverApiVersion &&
+				serverApiVersion !== clientApiVersion &&
+				session.supportedVersions?.includes(serverApiVersion)
+			) {
 				setApiVersion(serverApiVersion as Version);
 				return Promise.reject(new Error('version_mismatch'));
 			}
