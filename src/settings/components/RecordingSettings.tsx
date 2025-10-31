@@ -5,12 +5,18 @@
  */
 import React, { Dispatch, FC, ReactElement, SetStateAction, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Input, Padding } from '@zextras/carbonio-design-system';
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import SettingsCard from './SettingsCard';
 import { MeetingRecordingType } from '../../utils/localStorageUtils';
+
+const CustomInput = styled(Input)`
+	cursor: default;
+	pointer-events: none;
+`;
 
 type RecordingSettingsProps = {
 	recordingDefaults: MeetingRecordingType;
@@ -90,12 +96,11 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 					data-testid="recording_settings_container"
 				>
 					<Container width="15.625rem">
-						<Input
+						<CustomInput
 							background={'gray5'}
 							value={isDefaultRoot ? homeFolderLabel : recordingDefaults.name}
 							label={destinationFolderLabel}
-							// readOnly TODO
-							onChange={() => {}}
+							readOnly
 						/>
 					</Container>
 					<Padding left="medium" />
