@@ -92,7 +92,7 @@ export const useLocalMediaHandler = ({
 
 	// Initially open the stream with default device if no device is selected
 	useEffect(() => {
-		if (deviceId === undefined && mediaDeviceList[0]) {
+		if (!deviceId && mediaDeviceList[0]) {
 			const defaultDevice = find(mediaDeviceList, ['value', 'default']) ?? mediaDeviceList[0];
 			toggleStream(status, defaultDevice.value);
 		}
