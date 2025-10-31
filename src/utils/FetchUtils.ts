@@ -15,6 +15,7 @@ import { Version } from '../types/store/SessionTypes';
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
+const MAX_VERSION_MISMATCH_RETRIES = 3;
 
 const buildHeaders = (): Headers => {
 	const headers = new Headers();
@@ -47,7 +48,8 @@ const handleResponse = async (response: Response): Promise<any> => {
 export const fetchAPI = (
 	endpoint: string,
 	method: RequestType,
-	data?: Record<string, unknown> | Array<Record<string, unknown>>
+	data?: Record<string, unknown> | Array<Record<string, unknown>>,
+	retryCount = 0
 ): Promise<any> => {
 	const headers = buildHeaders();
 	headers.append(contentTypeHeader, 'application/json');
@@ -58,8 +60,8 @@ export const fetchAPI = (
 	})
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error): Promise<any> => {
-			if (err.message === 'version_mismatch') {
-				return fetchAPI(endpoint, method, data);
+			if (err.message === 'version_mismatch' && retryCount < MAX_VERSION_MISMATCH_RETRIES) {
+				return fetchAPI(endpoint, method, data, retryCount + 1);
 			}
 			return Promise.reject(err);
 		});

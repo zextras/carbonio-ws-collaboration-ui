@@ -119,6 +119,39 @@ describe('FetchUtils', () => {
 		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
 
+	test('Stop retrying after max retries on persistent version mismatch', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		spyOnFetch.mockRestore();
+
+		// Create a counter to return different versions on each call to simulate persistent mismatch
+		let callCount = 0;
+		const mockErrResp = (
+			count: number
+		): {
+			ok: boolean;
+			status: number;
+			headers: { get: (header: string) => string | undefined };
+		} => ({
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					// Return different versions each time to ensure persistent mismatch
+					header === wscApiVersionHeader ? `1.${count}.0` : undefined
+			}
+		});
+
+		// Mock fetch to always return version mismatch error with different versions
+		(global.fetch as jest.Mock).mockImplementation(() => {
+			callCount += 1;
+			return Promise.resolve(mockErrResp(callCount));
+		});
+
+		// Should reject after max retries (initial call + 3 retries = 4 total calls)
+		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
+		expect(global.fetch).toHaveBeenCalledTimes(4);
+	});
+
 	test('sendFileFetchApi is called correctly', async () => {
 		spyOnFetch.mockRestore();
 		act(() => {
