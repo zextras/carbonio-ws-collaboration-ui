@@ -77,8 +77,10 @@ const CustomContainer = styled(Container)`
 
 const VideoEl = styled.video<{
 	$isScreenShare: boolean;
+	$isPortrait: boolean;
 }>`
-	${({ $isScreenShare }): string | false => !$isScreenShare && 'object-fit: cover;'}
+	${({ $isScreenShare, $isPortrait }): string | false =>
+		!$isScreenShare && !$isPortrait && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
@@ -101,6 +103,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isStreamLoading, setIsStreamLoading] = useState<boolean>(true);
+	const [isPortraitVideo, setIsPortraitVideo] = useState<boolean>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const hoverRef = useRef<HTMLDivElement>(null);
@@ -162,6 +165,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		};
 	}, [handleHoverMouseMove]);
 
+	const handleLoadedData = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+		const video = e.currentTarget;
+		if (video.videoHeight && video.videoWidth) {
+			setIsPortraitVideo(video.videoHeight / video.videoWidth > 1.3);
+		}
+		setIsStreamLoading(false);
+	}, []);
+
 	useEffect(
 		() => (): void => {
 			timeout.current && clearTimeout(timeout.current);
@@ -203,7 +214,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
 				$isScreenShare={!!isScreenShare}
-				onLoadedData={() => setIsStreamLoading(false)}
+				$isPortrait={isPortraitVideo}
+				onLoadedData={handleLoadedData}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box" height="fit">
