@@ -57,7 +57,12 @@ export const fetchAPI = (
 		body: JSON.stringify(data)
 	})
 		.then((resp: Response) => handleResponse(resp))
-		.catch((err: Error) => Promise.reject(err));
+		.catch((err: Error): Promise<any> => {
+			if (err.message === 'version_mismatch') {
+				return fetchAPI(endpoint, method, data);
+			}
+			return Promise.reject(err);
+		});
 };
 
 export const sendFileFetchAPI = (
