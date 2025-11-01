@@ -54,7 +54,7 @@
 		"jest-fail-on-console": "^3.3.1",
 		"jest-junit": "^16.0.0",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.6.3"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@emoji-mart/data": "1.2.1",
