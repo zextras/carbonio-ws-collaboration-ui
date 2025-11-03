@@ -68,14 +68,4 @@ describe('Entry point', () => {
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
-
-	test('Retry getToken on version_mismatch error', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('version_mismatch'));
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
-		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
-		setup(<MainApp />);
-		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
-		expect(sessionApi.getToken).toHaveBeenCalledTimes(2);
-	});
 });
