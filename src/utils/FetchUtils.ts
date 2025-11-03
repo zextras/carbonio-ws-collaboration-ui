@@ -16,6 +16,8 @@ export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
 
+const MAX_VERSION_MISMATCH_RETRIES = 3;
+
 const buildHeaders = (): Headers => {
 	const headers = new Headers();
 	const { queueId, apiVersion } = useStore.getState().session;
@@ -28,9 +30,13 @@ const handleResponse = async (response: Response): Promise<any> => {
 	if (!response.ok) {
 		if (response.status === 422) {
 			const { session, setApiVersion } = useStore.getState();
-			const serverApiVersion = response.headers.get(wscApiVersionHeader);
+			const serverApiVersion = response.headers.get(wscApiVersionHeader) as Version;
 			const clientApiVersion = session.apiVersion;
-			if (!!serverApiVersion && serverApiVersion !== clientApiVersion) {
+			if (
+				!!serverApiVersion &&
+				serverApiVersion !== clientApiVersion &&
+				session.supportedVersions?.includes(serverApiVersion)
+			) {
 				setApiVersion(serverApiVersion as Version);
 				return Promise.reject(new Error('version_mismatch'));
 			}
@@ -47,7 +53,8 @@ const handleResponse = async (response: Response): Promise<any> => {
 export const fetchAPI = (
 	endpoint: string,
 	method: RequestType,
-	data?: Record<string, unknown> | Array<Record<string, unknown>>
+	data?: Record<string, unknown> | Array<Record<string, unknown>>,
+	retryCount = 0
 ): Promise<any> => {
 	const headers = buildHeaders();
 	headers.append(contentTypeHeader, 'application/json');
@@ -57,7 +64,12 @@ export const fetchAPI = (
 		body: JSON.stringify(data)
 	})
 		.then((resp: Response) => handleResponse(resp))
-		.catch((err: Error) => Promise.reject(err));
+		.catch((err: Error): Promise<any> => {
+			if (err.message === 'version_mismatch' && retryCount < MAX_VERSION_MISMATCH_RETRIES) {
+				return fetchAPI(endpoint, method, data, retryCount + 1);
+			}
+			return Promise.reject(err);
+		});
 };
 
 export const sendFileFetchAPI = (

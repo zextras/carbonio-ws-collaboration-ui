@@ -32,7 +32,7 @@ export default function MainApp(): React.JSX.Element {
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setSupportedVersions(['1.6.2', '1.6.1', '1.6.0']);
+		setSupportedVersions(['1.6.3', '1.6.2', '1.6.1', '1.6.0']);
 	}, [setSupportedVersions]);
 
 	// STORE: init with user session main infos
@@ -63,11 +63,8 @@ export default function MainApp(): React.JSX.Element {
 					})
 					.catch(() => setChatsBeStatus(false));
 			})
-			.catch((error) => {
+			.catch(() => {
 				setChatsBeStatus(false);
-				if (error.message === 'version_mismatch') {
-					connect();
-				}
 			});
 	}, [setChatsBeStatus]);
 
