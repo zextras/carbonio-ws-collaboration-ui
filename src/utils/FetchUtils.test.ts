@@ -32,6 +32,7 @@ beforeEach(() => {
 		),
 		configurable: true
 	});
+	useStore.getState().setSupportedVersions(['1.6.0']);
 });
 
 describe('FetchUtils', () => {
@@ -80,10 +81,87 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValue(mockErrResp);
-
-		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		const mockValidResp = {
+			ok: true,
+			status: 200,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockValidResp);
+		await fetchAPI('test', RequestType.GET);
 		expect(useStore.getState().session.apiVersion).toBe('1.6.0');
+	});
+
+	test('Recall fetch after a version mismatch error', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		spyOnFetch.mockRestore();
+		const mockErrResp = {
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		const mockValidResp = {
+			ok: true,
+			status: 200,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockValidResp);
+		await fetchAPI('test', RequestType.GET);
+		expect(global.fetch).toHaveBeenCalledTimes(2);
+	});
+
+	test('Stop retrying after max retries on persistent version mismatch', async () => {
+		useStore
+			.getState()
+			.setSupportedVersions(['2.0.0', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
+		spyOnFetch.mockRestore();
+
+		let callCount = 0;
+		const mockErrResp = (
+			count: number
+		): {
+			ok: boolean;
+			status: number;
+			headers: { get: (header: string) => string | undefined };
+		} => ({
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? `1.6.${count}` : undefined
+			}
+		});
+		(global.fetch as jest.Mock).mockImplementation(() => {
+			callCount += 1;
+			return Promise.resolve(mockErrResp(callCount));
+		});
+		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
+		expect(global.fetch).toHaveBeenCalledTimes(4);
+	});
+
+	test('Return error if version choose by the server is not supported by the client', async () => {
+		useStore.getState().setSupportedVersions(['2.0.0']);
+		spyOnFetch.mockRestore();
+		const mockErrResp = {
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? '1.6.0' : undefined
+			}
+		};
+		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
 	test('sendFileFetchApi is called correctly', async () => {
