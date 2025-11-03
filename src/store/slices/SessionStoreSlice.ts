@@ -92,7 +92,7 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_SELECTED_ROOM'
 		);
 	},
-	setCustomLogo: (logo: string | false): void => {
+	setCustomLogo: (logo: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.session.customLogo = logo;

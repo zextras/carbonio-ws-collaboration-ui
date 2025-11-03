@@ -486,11 +486,11 @@ describe('Meetings API', () => {
 	});
 
 	test('authLogin is called correctly', async () => {
-		const spyOnAuthLogin = spyOnMeetingsApi(MeetingsApiToSpy.AUTH_LOGIN).mockImplementation(() =>
+		const spyOnAuthLogin = spyOnMeetingsApi(MeetingsApiToSpy.LOGIN_CONFIG).mockImplementation(() =>
 			Promise.resolve(true)
 		);
 		spyOnAuthLogin.mockReturnValue(true);
-		await meetingsApi.authLogin();
+		await meetingsApi.getLoginConfig();
 
 		expect(spyOnAuthLogin).toHaveBeenCalled();
 	});

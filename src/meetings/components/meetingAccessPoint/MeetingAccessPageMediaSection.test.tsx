@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import * as ReactRouter from 'react-router';
 
 import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
@@ -22,9 +22,6 @@ import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-
-const iconVideoOff = 'icon: VideoOff';
-const iconMicOff = 'icon: MicOff';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -65,73 +62,35 @@ beforeEach(() => {
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 });
 
-describe('user not giving media permissions', () => {
-	test('user gives not the media permissions and tries to open webcam', async () => {
+describe('MeetingAccessPageMediaSection tests', () => {
+	test('User does not give the media permissions', async () => {
 		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
-
-		const err = jest.spyOn(console, 'error').mockImplementation();
-
-		const { user } = setup(
+		setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
 				handleEnterMeeting={jest.fn()}
 				handleWaitingRoom={jest.fn()}
+				setMediaStatus={jest.fn()}
 			/>
 		);
-
-		const videoOff = screen.getByTestId(iconVideoOff);
-		await act(() => user.click(videoOff));
-
-		const snackbar = await screen.findByText('Grant browser permissions to enable resources');
-
-		expect(snackbar).toBeInTheDocument();
-		expect(err).toHaveBeenCalled();
-	});
-
-	test('user gives not the media permissions and tries to open microphone', async () => {
-		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
-
-		const err = jest.spyOn(console, 'error').mockImplementation();
-
-		const { user } = setup(
-			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
-				hasUserDirectAccess
-				userIsReady
-				meetingName={groupMeeting.name}
-				wrapperWidth={100}
-				handleEnterMeeting={jest.fn()}
-				handleWaitingRoom={jest.fn()}
-			/>
-		);
-
-		const micOff = screen.getByTestId(iconMicOff);
-		await act(() => user.click(micOff));
-
-		const snackbar = await screen.findByText('Grant browser permissions to enable resources');
-
-		expect(snackbar).toBeInTheDocument();
-		expect(err).toHaveBeenCalled();
+		const snackbars = await screen.findAllByText('Grant browser permissions to enable resources');
+		expect(snackbars[0]).toBeInTheDocument();
 	});
 
 	test('Internal user joins meeting', async () => {
 		const joinMeeting = jest.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
 				handleEnterMeeting={joinMeeting}
 				handleWaitingRoom={jest.fn()}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 		const enterButton = screen.getByRole('button', { name: 'Enter' });
@@ -144,14 +103,13 @@ describe('user not giving media permissions', () => {
 		const joinWaiting = jest.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
-				streamTrack={null}
-				setStreamTrack={jest.fn()}
 				hasUserDirectAccess={false}
 				userIsReady={false}
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
 				handleEnterMeeting={jest.fn()}
 				handleWaitingRoom={joinWaiting}
+				setMediaStatus={jest.fn()}
 			/>
 		);
 		const readyButton = screen.getByRole('button', { name: 'Ready to participate' });

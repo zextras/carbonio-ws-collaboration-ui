@@ -313,7 +313,7 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	public authLogin(): Promise<LoginV3ConfigResponse> {
+	public getLoginConfig(): Promise<LoginV3ConfigResponse> {
 		return fetch('/zx/login/v3/config', { method: RequestType.GET })
 			.then((resp) => {
 				if (resp.ok) return resp;
