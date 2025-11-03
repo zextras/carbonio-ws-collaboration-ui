@@ -18,5 +18,7 @@ export const MEETINGS_ROUTE = 'meetings';
 export const MEETINGS_PATH = `focus-mode/${MEETINGS_ROUTE}/`;
 
 export const TRACKER_EVENT = {
-	meetingEvaluation: 'Meeting evaluation'
+	meetingEvaluation: 'Meeting evaluation',
+	conversationSearch: 'Conversation search performed',
+	conversationSearchError: 'Conversation search error'
 };
