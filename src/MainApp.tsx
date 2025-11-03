@@ -63,11 +63,8 @@ export default function MainApp(): React.JSX.Element {
 					})
 					.catch(() => setChatsBeStatus(false));
 			})
-			.catch((error) => {
+			.catch(() => {
 				setChatsBeStatus(false);
-				if (error.message === 'version_mismatch') {
-					connect();
-				}
 			});
 	}, [setChatsBeStatus]);
 

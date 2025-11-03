@@ -5,7 +5,7 @@
  */
 
 import { chain, find } from 'lodash';
-import { lt } from 'semver';
+import { lte } from 'semver';
 
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
@@ -168,8 +168,15 @@ class MeetingsApi implements IMeetingsApi {
 			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 
+				// DEPRECATED: This function exists for backward compatibility with previous versions.
+				//  * Remove once support for v1.6.2 is officially dropped.
 				// Leave temporary room when a member leaves the scheduled meeting
-				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
+				const version = useStore.getState().session.apiVersion;
+				if (
+					(!version || lte(version, '1.6.2')) &&
+					room?.type === RoomType.TEMPORARY &&
+					iAmNotOwner
+				) {
 					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 				}
 				if (isExternal) {
@@ -291,7 +298,7 @@ class MeetingsApi implements IMeetingsApi {
 		// DEPRECATED: This check exists for backward compatibility with previous versions.
 		//  * Remove once support for v1.6.3 is officially dropped.
 		const params =
-			!version || lt(version, '1.6.4')
+			!version || lte(version, '1.6.3')
 				? {
 						name: `Rec_${formatDate(new Date(), 'YYYY-MM-DD HHmm')}`,
 						folderId: 'LOCAL_ROOT'
