@@ -54,7 +54,6 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	background-size: cover;
 	background-position: center;
 	aspect-ratio: 1/1;
-	z-index: 2;
 	cursor: pointer;
 
 	&:after {
