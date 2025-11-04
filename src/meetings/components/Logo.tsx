@@ -6,30 +6,21 @@
 import React from 'react';
 
 import styled from '@emotion/styled';
-import { Container } from '@zextras/carbonio-design-system';
 
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import defaultLogo from '../assets/Logo.png';
 
-const LogoApp = styled(Container)<{
-	$customLogo: string | false | undefined;
-	$top: string | undefined;
-	$left: string | undefined;
-}>`
+const LogoApp = styled.img`
 	position: absolute;
-	top: ${({ $top }): string => $top ?? '1rem'};
-	left: ${({ $left }): string => $left ?? '1rem'};
-	background-size: contain;
-	height: 1.3125rem;
 	width: 9.625rem;
-	background-repeat: no-repeat;
-	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
+	height: auto;
+	object-fit: contain;
 `;
 
-const Logo = ({ top, left }: { top?: string; left?: string }): JSX.Element => {
+const Logo = ({ top = '1rem', left = '1rem' }: { top?: string; left?: string }): JSX.Element => {
 	const customLogo = useStore(getCustomLogo);
-	return <LogoApp $customLogo={customLogo} $top={top} $left={left} />;
+	return <LogoApp src={customLogo || defaultLogo} style={{ top, left }} />;
 };
 
 export default Logo;

@@ -15,7 +15,7 @@ export type SessionStoreSlice = {
 	setAttributes: (attrs: AccountSettings['attrs']) => void;
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
-	setCustomLogo: (logo: string | false) => void;
+	setCustomLogo: (logo: string) => void;
 	setChatExporting: (roomId?: string) => void;
 	setChatExportStatus: (status: ExportStatus) => void;
 	setApiVersion: (apiVersion: Version) => void;
@@ -33,7 +33,7 @@ export type Session = {
 	userType?: UserType;
 	attributes?: AttributesList;
 	selectedRoom?: string;
-	customLogo?: string | false;
+	customLogo?: string;
 	chatExporting?: {
 		roomId: string;
 		exporter: IChatExporter;

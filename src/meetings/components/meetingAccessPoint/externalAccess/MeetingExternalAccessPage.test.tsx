@@ -7,32 +7,38 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
-import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { setup } from '../../../tests/test-utils';
+import MeetingExternalAccessPage from './MeetingExternalAccessPage';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
+import { setup } from '../../../../tests/test-utils';
 
-describe('MeetingExternalAccessMobilePage tests', () => {
+describe('MeetingExternalAccessPage tests', () => {
 	test('Meeting name is displayed correctly', async () => {
 		spyOnMeetingsApi(MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME).mockResolvedValue({
 			name: 'Test Meeting'
 		});
-		setup(<MeetingExternalAccessMobilePage />);
+		setup(<MeetingExternalAccessPage />);
 
 		expect(await screen.findByText('Welcome to "Test Meeting" virtual room')).toBeInTheDocument();
 	});
 
-	test('Create new guest from mobile', async () => {
+	test('Create new guest', async () => {
 		const spyCreateGuest = spyOnMeetingsApi(
 			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
-		).mockResolvedValueOnce({
-			id: 'user123'
-		});
+		).mockResolvedValueOnce({});
 
-		const { user } = setup(<MeetingExternalAccessMobilePage />);
+		const { user } = setup(<MeetingExternalAccessPage />);
 		const nameInput = await screen.findByPlaceholderText('Enter your name');
 		await user.type(nameInput, 'Guest User');
 		const readyButton = await screen.findByText('Ready to participate');
 		await user.click(readyButton);
 		expect(spyCreateGuest).toHaveBeenCalled();
+	});
+
+	test('Redirect to login page', async () => {
+		window.location.pathname = 'https://localhost/carbonio/meetings/meeting-id';
+		const { user } = setup(<MeetingExternalAccessPage />);
+		const loginButton = await screen.findByText('Go to your login page');
+		await user.click(loginButton);
+		expect(window.location.replace).toHaveBeenCalled();
 	});
 });

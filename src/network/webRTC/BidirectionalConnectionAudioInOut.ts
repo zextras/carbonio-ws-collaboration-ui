@@ -52,7 +52,7 @@ export default class BidirectionalConnectionAudioInOut
 		this.updateRemoteStreamAudio();
 		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
 			if (audioStreamEnabled) {
-				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
+				getAudioStream(selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
 					useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
 				});
