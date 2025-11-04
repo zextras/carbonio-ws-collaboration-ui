@@ -8,8 +8,8 @@ import { createContext, useCallback, useState } from 'react';
 export enum MEETINGS_ROUTES {
 	MAIN = '/',
 	MEETING = '/meeting/:meetingId',
-	EXTERNAL_LOGIN = '/externalLogin',
 	MEETING_ACCESS_PAGE = '/meetingAccessPage',
+	EXTERNAL_ACCESS_PAGE = '/externalAccessPage',
 	INFO = '/infoPage/:infoType'
 }
 

@@ -50,6 +50,7 @@ const sdpOffer = 'spdOfferMock';
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
+	store.setApiVersion('1.6.4');
 	store.setLoginInfo(userId, 'User');
 	store.setQueueId('queueId');
 	store.addRooms([roomMock]);
@@ -278,13 +279,14 @@ describe('Meetings API', () => {
 		expect(document.cookie).toBe('');
 	});
 
-	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
+	test('When a member leaves a scheduled meeting, he is also removed from temporary room in version < 1.6.3', async () => {
 		const temporaryRoom = createMockRoom({
 			meetingId: meetingMock.id,
 			type: RoomType.TEMPORARY,
 			members: [createMockMember({ userId })]
 		});
 		const store = useStore.getState();
+		store.setSupportedVersions(['1.6.2']);
 		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);
@@ -434,24 +436,24 @@ describe('Meetings API', () => {
 	});
 
 	test('startRecording is called correctly', async () => {
-		await meetingsApi.startRecording(meetingMock.id);
+		await meetingsApi.startRecording(meetingMock.id, 'folderId');
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/startRecording`,
-			RequestType.POST
+			RequestType.POST,
+			{
+				folderId: 'folderId'
+			}
 		);
 	});
 
 	test('stopRecording is called correctly', async () => {
-		await meetingsApi.stopRecording(meetingMock.id, 'recordingName', 'folderId');
+		await meetingsApi.stopRecording(meetingMock.id);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/stopRecording`,
 			RequestType.POST,
-			{
-				name: 'recordingName',
-				folderId: 'folderId'
-			}
+			undefined
 		);
 	});
 
@@ -486,11 +488,11 @@ describe('Meetings API', () => {
 	});
 
 	test('authLogin is called correctly', async () => {
-		const spyOnAuthLogin = spyOnMeetingsApi(MeetingsApiToSpy.AUTH_LOGIN).mockImplementation(() =>
+		const spyOnAuthLogin = spyOnMeetingsApi(MeetingsApiToSpy.LOGIN_CONFIG).mockImplementation(() =>
 			Promise.resolve(true)
 		);
 		spyOnAuthLogin.mockReturnValue(true);
-		await meetingsApi.authLogin();
+		await meetingsApi.getLoginConfig();
 
 		expect(spyOnAuthLogin).toHaveBeenCalled();
 	});

@@ -25,8 +25,7 @@ const AccessPage = (): ReactElement => {
 				.then(() => {
 					goToExternalLoginPage();
 				})
-				.catch((err) => {
-					console.error(err);
+				.catch(() => {
 					goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
 				});
 		} else {

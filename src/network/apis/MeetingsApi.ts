@@ -5,6 +5,7 @@
  */
 
 import { chain, find } from 'lodash';
+import { lte } from 'semver';
 
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
@@ -42,7 +43,7 @@ import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes'
 import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
-import { dateToTimestamp } from '../../utils/dateUtils';
+import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { fetchAPI } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
@@ -167,8 +168,15 @@ class MeetingsApi implements IMeetingsApi {
 			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 
+				// DEPRECATED: This function exists for backward compatibility with previous versions.
+				//  * Remove once support for v1.6.2 is officially dropped.
 				// Leave temporary room when a member leaves the scheduled meeting
-				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
+				const version = useStore.getState().session.apiVersion;
+				if (
+					(!version || lte(version, '1.6.2')) &&
+					room?.type === RoomType.TEMPORARY &&
+					iAmNotOwner
+				) {
 					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 				}
 				if (isExternal) {
@@ -279,19 +287,24 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	startRecording(meetingId: string): Promise<StartRecordingResponse> {
-		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
-	}
-
-	public stopRecording(
-		meetingId: string,
-		recordingName: string,
-		folderId: string
-	): Promise<StopRecordingResponse> {
-		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
-			name: recordingName,
+	startRecording(meetingId: string, folderId: string): Promise<StartRecordingResponse> {
+		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST, {
 			folderId
 		});
+	}
+
+	public stopRecording(meetingId: string): Promise<StopRecordingResponse> {
+		const version = useStore.getState().session?.apiVersion;
+		// DEPRECATED: This check exists for backward compatibility with previous versions.
+		//  * Remove once support for v1.6.3 is officially dropped.
+		const params =
+			!version || lte(version, '1.6.3')
+				? {
+						name: `Rec_${formatDate(new Date(), 'YYYY-MM-DD HHmm')}`,
+						folderId: 'LOCAL_ROOT'
+					}
+				: undefined;
+		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, params);
 	}
 
 	public raiseHand(
@@ -305,7 +318,7 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	public authLogin(): Promise<LoginV3ConfigResponse> {
+	public getLoginConfig(): Promise<LoginV3ConfigResponse> {
 		return fetch('/zx/login/v3/config', { method: RequestType.GET })
 			.then((resp) => {
 				if (resp.ok) return resp;

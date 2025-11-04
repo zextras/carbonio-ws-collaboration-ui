@@ -15,9 +15,11 @@ import {
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
+import { useTracker } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
+import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
@@ -37,7 +39,7 @@ type ConversationSearchPanelProps = {
 const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goToChatView }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
-
+	const { capture } = useTracker();
 	const isDesktopView = useMediaQueryCheck();
 
 	const createSnackbar = useSnackbar();
@@ -84,6 +86,11 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
 		setRequestStatus(RequestStatus.LOADING);
 		setActiveSearchText(searchText);
+		capture(TRACKER_EVENT.conversationSearch, {
+			app: CHATS_APP_ID,
+			roomType,
+			searchTextLength: searchText.length
+		});
 		const { xmppClient } = useStore.getState().connections;
 		xmppClient
 			.fullTextSearch(roomId, searchText)
@@ -92,13 +99,18 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 			})
 			.catch(() => {
 				setRequestStatus(RequestStatus.IDLE);
+				capture(TRACKER_EVENT.conversationSearchError, {
+					app: CHATS_APP_ID,
+					roomType,
+					success: false
+				});
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'error',
 					label: errorSnackbarLabel
 				});
 			});
-	}, [createSnackbar, errorSnackbarLabel, requestStatus, roomId, searchText]);
+	}, [capture, createSnackbar, errorSnackbarLabel, requestStatus, roomId, roomType, searchText]);
 
 	const searchResults = useMemo(
 		() =>

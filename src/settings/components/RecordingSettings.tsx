@@ -18,8 +18,6 @@ const CustomInput = styled(Input)`
 	pointer-events: none;
 `;
 
-const noop = (): void => undefined;
-
 type RecordingSettingsProps = {
 	recordingDefaults: MeetingRecordingType;
 	setRecordingDefaults: Dispatch<SetStateAction<MeetingRecordingType>>;
@@ -44,7 +42,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 	const recordingSectionLabel = t('settings.recording.title', 'Recording');
 	const recordingDescription = t(
 		'settings.recording.description',
-		'Set a custom folder where to save the recordings of the meetings you stop.'
+		'Set a custom folder where to save the recordings of the meetings you start.'
 	);
 	const destinationFolderLabel = t('settings.recording.inputLabel', 'Destination folder');
 	const browseLabel = t('settings.recording.browseAction', 'Browse');
@@ -102,8 +100,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 							background={'gray5'}
 							value={isDefaultRoot ? homeFolderLabel : recordingDefaults.name}
 							label={destinationFolderLabel}
-							// TODO: remove when the carbonio-design-system is updated to accept readonly prop
-							onChange={noop}
+							readOnly
 						/>
 					</Container>
 					<Padding left="medium" />

@@ -103,6 +103,139 @@ export const buildComposingStanza = ({
 };
 
 /**
+ * INBOX MESSAGES
+ */
+
+type InboxParams = {
+	from?: string;
+	to?: string;
+	resourceId?: string;
+	messageId?: string;
+	queryId?: string;
+	unread?: number;
+	timestamp?: string;
+	roomId?: string;
+	senderId?: string;
+	stanzaId?: string;
+	box?: string;
+	archive?: boolean;
+	mute?: number;
+};
+
+export const buildTextMessageFromInbox = ({
+	from = 'userId',
+	to = 'userId',
+	resourceId = 'resourceId',
+	messageId = 'messageId',
+	queryId = 'queryId',
+	unread = 0,
+	timestamp = '2023-03-20T13:58:29.624130Z',
+	roomId = 'roomId',
+	senderId = 'userId',
+	stanzaId = 'stanzaId',
+	box = 'inbox',
+	archive = false,
+	mute = 0
+}: InboxParams = {}): Element =>
+	stringToXml(`
+<message xmlns="jabber:client" from="${from}@carbonio" to="${to}@carbonio/${resourceId}" id="${messageId}">
+    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="${unread}" queryid="${queryId}">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay xmlns="urn:xmpp:delay" stamp="${timestamp}"/>
+            <message to="${to}@carbonio" id="${messageId}" type="groupchat" from="${roomId}@muclight.carbonio/${senderId}@carbonio">
+                <body>hello!</body>
+                <markable xmlns="urn:xmpp:chat-markers:0"/>
+                <stanza-id xmlns="urn:xmpp:sid:0" by="${roomId}@muclight.carbonio" id="${stanzaId}"/>
+            </message>
+        </forwarded>
+        <box>${box}</box>
+        <archive>${archive}</archive>
+        <mute>${mute}</mute>
+    </result>
+</message>`);
+
+type ReplyInboxParams = InboxParams & {
+	replyToStanzaId?: string;
+	text?: string;
+};
+export const buildReplyMessageFromInbox = ({
+	from = 'userId',
+	to = 'userId',
+	resourceId = 'resourceId',
+	messageId = 'messageId',
+	queryId = 'queryId',
+	unread = 0,
+	timestamp = '2023-03-20T14:41:28.291032Z',
+	roomId = 'roomId',
+	senderId = 'userId',
+	stanzaId = 'stanzaId',
+	box = 'inbox',
+	archive = false,
+	mute = 0,
+	replyToStanzaId = 'stanzaId',
+	text = 'bene!'
+}: ReplyInboxParams = {}): Element =>
+	stringToXml(`
+<message xmlns="jabber:client" from="${from}@carbonio" to="${to}@carbonio/${resourceId}" id="${messageId}">
+    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="${unread}" queryid="${queryId}">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay xmlns="urn:xmpp:delay" stamp="${timestamp}"/>
+            <message to="${to}@carbonio" id="${messageId}" type="groupchat" from="${roomId}@muclight.carbonio/${senderId}@carbonio">
+                <body>${text}</body>
+                <markable xmlns="urn:xmpp:chat-markers:0"/>
+                <reply xmlns="urn:xmpp:reply:0" id="${replyToStanzaId}" to="${to}@carbonio/${roomId}@muclight.carbonio}"/>
+                <stanza-id xmlns="urn:xmpp:sid:0" by="${roomId}@muclight.carbonio" id="${stanzaId}"/>
+            </message>
+        </forwarded>
+        <box>${box}</box>
+        <archive>${archive}</archive>
+        <mute>${mute}</mute>
+    </result>
+</message>`);
+
+type ReactionInboxParams = InboxParams & {
+	originalStanzaId?: string;
+	reaction?: string;
+};
+export const buildReactionMessageFromInbox = ({
+	from = 'userId',
+	to = 'userId',
+	resourceId = 'resourceId',
+	messageId = 'messageId',
+	queryId = 'queryId',
+	unread = 1,
+	timestamp = '2025-10-27T11:35:34.506313Z',
+	roomId = 'roomId',
+	senderId = 'userId',
+	stanzaId = 'stanzaId',
+	box = 'inbox',
+	archive = false,
+	mute = 0,
+	originalStanzaId = 'originalStanzaId',
+	reaction = '👍'
+}: ReactionInboxParams = {}): Element =>
+	stringToXml(`
+<message from="${from}@carbonio" id="${messageId}" to="${to}@carbonio/${resourceId}" xmlns="jabber:client">
+    <result queryid="${queryId}" unread="${unread}" xmlns="erlang-solutions.com:xmpp:inbox:0">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay stamp="${timestamp}" xmlns="urn:xmpp:delay"/>
+            <message from="${roomId}@muclight.carbonio/${senderId}@carbonio" id="${messageId}" to="${to}@carbonio" type="groupchat">
+                <apply-to id="${originalStanzaId}" xmlns="urn:xmpp:fasten:0">
+                    <reaction xmlns="zextras:xmpp:reaction:0"/>
+                    <external name="body"/>
+                </apply-to>
+                <body>${reaction}</body>
+                <stanza-id by="${roomId}@muclight.carbonio" id="${stanzaId}" xmlns="urn:xmpp:sid:0"/>
+            </message>
+        </forwarded>
+        <read>false</read>
+        <box>${box}</box>
+        <archive>${archive}</archive>
+        <mute>${mute}</mute>
+    </result>
+</message>`);
+
+/**
  * HISTORY MESSAGES
  */
 

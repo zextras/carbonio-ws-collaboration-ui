@@ -4,25 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 
 import {
 	Container,
 	CreateSnackbarFn,
-	Input,
 	Modal,
-	Padding,
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../../../../network';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { formatDate } from '../../../../utils/dateUtils';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
 
 type StopRecordingModalProps = {
@@ -36,15 +31,10 @@ const StopRecordingModal = ({
 	closeModal,
 	meetingId
 }: StopRecordingModalProps): ReactElement => {
-	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
-	const roomName = useStore((state) => getRoomNameSelector(state, roomId ?? ''));
-
-	const defaultRecordingName = useMemo(
-		() => `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${roomName}`.replaceAll(' ', '_'),
-		[roomName]
-	);
-	const [recordingName, setRecordingName] = useState(defaultRecordingName);
 	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
+
+	const loggedUserId = useStore(getUserId);
+	const recStartedBy = useStore((state) => state.meetings[meetingId].recUserId);
 
 	const [t] = useTranslation();
 	const title: string = t('meeting.recordingModal.title', 'Stop recording');
@@ -52,26 +42,25 @@ const StopRecordingModal = ({
 		'meeting.recordingModal.description',
 		'You are going to stop the recording. You can start a new one at any time.'
 	);
-	const recordingInputLabel: string = t('meeting.recordingModal.inputLabel', 'Recording Name');
-	const filenameIsRequiredLabel = t(
-		'meeting.recordingModal.requiredNameError',
-		'The recording file name is required'
-	);
-	const filenameIsTooLongLabel = t(
-		'meeting.recordingModal.exceededCharsError',
-		'The recording file name must not exceed 128 characters'
-	);
 	const recordingCaption: string = t(
 		'meeting.recordingModal.caption',
 		`The recording will be saved in "${folder.name}" folder on Files. Go to Settings > Chats > Recording to change the destination folder.`,
 		{ folderName: folder.name }
 	);
+	const recordingCaptionGeneral = t(
+		'meeting.sidebar.recording.description',
+		'The recording will be saved in the Files space of the moderator who started it.'
+	);
 	const stopButtonLabel = t('meeting.recordingModal.confirmationAction', 'Stop');
 	const closeLabel = t('action.close', 'Close');
 	const recordingStopped = t(
 		'meeting.recordingStop.successSnackbar.stopper',
-		`You will find ${recordingName} in ${folder.name} as soon as it is available`,
-		{ recordingName, folderName: folder.name }
+		`You will find the recording in ${folder.name} as soon as it is available`,
+		{ folderName: folder.name }
+	);
+	const recordingGeneral = t(
+		'meeting.recordingStop.successSnackbar.general',
+		'Recording stopped successfully'
 	);
 	const errorSnackbarLabel = t(
 		'meeting.recordingStop.failureSnackbar',
@@ -80,25 +69,16 @@ const StopRecordingModal = ({
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const onNameChange = useCallback((e: { target: { value: string } }) => {
-		if (e.target.value.length < 129) setRecordingName(e.target.value);
-	}, []);
-
-	const onCloseModal = useCallback(() => {
-		closeModal();
-		setRecordingName(defaultRecordingName);
-	}, [closeModal, defaultRecordingName]);
-
 	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId, recordingName, folder.id)
+		MeetingsApi.stopRecording(meetingId)
 			.then(() => {
+				const snackbarLabel = loggedUserId === recStartedBy ? recordingGeneral : recordingStopped;
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'info',
-					label: recordingStopped,
+					label: snackbarLabel,
 					hideButton: true
 				});
-				onCloseModal();
 			})
 			.catch(() => {
 				createSnackbar({
@@ -107,29 +87,20 @@ const StopRecordingModal = ({
 					label: errorSnackbarLabel,
 					hideButton: true
 				});
-				onCloseModal();
+			})
+			.finally(() => {
+				closeModal();
 			});
 	}, [
+		closeModal,
 		createSnackbar,
 		errorSnackbarLabel,
-		folder.id,
+		loggedUserId,
 		meetingId,
-		onCloseModal,
-		recordingName,
+		recStartedBy,
+		recordingGeneral,
 		recordingStopped
 	]);
-
-	const inputDescription = useMemo(() => {
-		if (recordingName === '') return filenameIsRequiredLabel;
-		if (recordingName.length >= 128) return filenameIsTooLongLabel;
-		return undefined;
-	}, [filenameIsTooLongLabel, filenameIsRequiredLabel, recordingName]);
-
-	const tooltipLabel = useMemo(() => {
-		if (recordingName === '') return filenameIsRequiredLabel;
-		if (recordingName.length >= 128) return filenameIsTooLongLabel;
-		return '';
-	}, [filenameIsRequiredLabel, filenameIsTooLongLabel, recordingName]);
 
 	return (
 		<Modal
@@ -139,26 +110,14 @@ const StopRecordingModal = ({
 			onConfirm={stopRecording}
 			confirmColor="error"
 			confirmLabel={stopButtonLabel}
-			confirmDisabled={recordingName === '' || size(recordingName) >= 128}
-			confirmTooltip={tooltipLabel}
 			showCloseIcon
-			onClose={onCloseModal}
+			onClose={closeModal}
 			closeIconTooltip={closeLabel}
 		>
-			<Container crossAlignment="flex-start">
+			<Container crossAlignment="flex-start" gap="1rem">
 				<Text overflow="break-word">{descriptionLabel}</Text>
-				<Padding top="large" />
-				<Input
-					label={`${recordingInputLabel}*`}
-					value={recordingName}
-					onChange={onNameChange}
-					backgroundColor="gray5"
-					hasError={recordingName === '' || recordingName.length >= 128}
-					description={inputDescription}
-				/>
-				<Padding top="small" />
-				<Text color="gray1" size="small" overflow="break-word">
-					{recordingCaption}
+				<Text overflow="break-word">
+					{loggedUserId === recStartedBy ? recordingCaption : recordingCaptionGeneral}
 				</Text>
 			</Container>
 		</Modal>

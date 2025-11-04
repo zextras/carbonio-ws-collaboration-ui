@@ -51,7 +51,7 @@ const useRouting = (): UseRoutingHook => {
 	);
 
 	const goToExternalLoginPage = useCallback(
-		(): void => contextNavigate({ route: MEETINGS_ROUTES.EXTERNAL_LOGIN }),
+		(): void => contextNavigate({ route: MEETINGS_ROUTES.EXTERNAL_ACCESS_PAGE }),
 		[contextNavigate]
 	);
 

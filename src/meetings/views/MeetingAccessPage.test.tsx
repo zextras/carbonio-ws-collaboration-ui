@@ -9,16 +9,35 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingAccessPage from './MeetingAccessPage';
+import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
 import useStore from '../../store/Store';
+import { createMockMeeting } from '../../tests/createMock';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 
 describe('MeetingAccessPage', () => {
-	test('Leave button for guest user', async () => {
-		const store = useStore.getState();
-		store.setChatsBeStatus(true);
-
+	test('Enable the DarkReader on first render', async () => {
 		setup(<MeetingAccessPage />);
-		const icon = await screen.findByTestId('icon: LogOut');
-		expect(icon).toBeVisible();
+		expect(mockDarkReaderEnable).toHaveBeenCalled();
+	});
+	test('Internal user has userHasDirectAccess to permanent meeting', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() => Promise.resolve(createMockMeeting()));
+		useStore.getState().setChatsBeStatus(true);
+		setup(<MeetingAccessPage />);
+		expect(await screen.findByText(/Participate to.*meeting/i)).toBeVisible();
+	});
+
+	test('Internal user has not userHasDirectAccess to scheduled meeting', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve(createMockMeeting({ meetingType: MeetingType.SCHEDULED }))
+		);
+		useStore.getState().setChatsBeStatus(true);
+		setup(<MeetingAccessPage />);
+		expect(
+			await screen.findByText('Click on “READY TO PARTICIPATE” to enter the meeting')
+		).toBeVisible();
 	});
 });
