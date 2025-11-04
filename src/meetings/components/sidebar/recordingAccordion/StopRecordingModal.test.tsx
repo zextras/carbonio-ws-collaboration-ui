@@ -42,6 +42,19 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id);
 });
 describe('StopRecordingModal tests', () => {
+	test('Show a snackbar when the stop recording request completes successfully', async () => {
+		spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING).mockResolvedValueOnce({});
+		const { user } = setup(
+			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+		);
+		await user.click(screen.getByText('Stop'));
+
+		const snackbar = await screen.findByText(
+			'You will find the recording in Home as soon as it is available'
+		);
+		expect(snackbar).toBeVisible();
+	});
+
 	test('Show a snackbar when the stop recording request fails', async () => {
 		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
 		spyOnStopRecording.mockRejectedValue(false);
