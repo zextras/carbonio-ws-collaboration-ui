@@ -114,9 +114,9 @@ const StopRecordingModal = ({
 			onClose={closeModal}
 			closeIconTooltip={closeLabel}
 		>
-			<Container crossAlignment="flex-start">
+			<Container crossAlignment="flex-start" gap="1rem">
 				<Text overflow="break-word">{descriptionLabel}</Text>
-				<Text color="gray1" overflow="break-word">
+				<Text overflow="break-word">
 					{loggedUserId === recStartedBy ? recordingCaption : recordingCaptionGeneral}
 				</Text>
 			</Container>
