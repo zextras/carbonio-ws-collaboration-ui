@@ -119,6 +119,7 @@ describe('Actions Accordion', () => {
 		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
 	});
 
+	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
 	test.skip('Set open/close accordion status', async () => {
 		const room: RoomBe = createMockRoom();
 		const store = useStore.getState();
