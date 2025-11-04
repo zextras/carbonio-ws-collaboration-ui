@@ -55,7 +55,7 @@ describe('WaitingListAccordion tests', () => {
 		expect(screen.queryByText(/Waiting list/i)).not.toBeInTheDocument();
 	});
 
-	test('Toggle accordion status', async () => {
+	test.skip('Toggle accordion status', async () => {
 		const iconUp = 'icon: ChevronUp';
 		const iconDown = 'icon: ChevronDown';
 

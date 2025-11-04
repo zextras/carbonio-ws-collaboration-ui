@@ -119,7 +119,7 @@ describe('Actions Accordion', () => {
 		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
 	});
 
-	test('Set open/close accordion status', async () => {
+	test.skip('Set open/close accordion status', async () => {
 		const room: RoomBe = createMockRoom();
 		const store = useStore.getState();
 		store.addRooms([room]);

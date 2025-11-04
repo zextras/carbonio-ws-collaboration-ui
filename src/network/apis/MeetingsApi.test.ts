@@ -279,13 +279,14 @@ describe('Meetings API', () => {
 		expect(document.cookie).toBe('');
 	});
 
-	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
+	test('When a member leaves a scheduled meeting, he is also removed from temporary room in version < 1.6.3', async () => {
 		const temporaryRoom = createMockRoom({
 			meetingId: meetingMock.id,
 			type: RoomType.TEMPORARY,
 			members: [createMockMember({ userId })]
 		});
 		const store = useStore.getState();
+		store.setSupportedVersions(['1.6.2']);
 		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);

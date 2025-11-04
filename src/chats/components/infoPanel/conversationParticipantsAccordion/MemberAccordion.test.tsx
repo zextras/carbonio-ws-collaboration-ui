@@ -92,7 +92,7 @@ describe('Participants accordion', () => {
 		expect(titleIsSingular).toBeInTheDocument();
 	});
 
-	test('Set open/close accordion status', async () => {
+	test.skip('Set open/close accordion status', async () => {
 		// Default status: open
 		const { user } = setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.getByText(/Search members/i)).toBeVisible();

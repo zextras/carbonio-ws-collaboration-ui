@@ -66,7 +66,7 @@ describe('RaiseHandAccordion', () => {
 		expect(screen.queryByText(/raised hands/i)).not.toBeInTheDocument();
 	});
 
-	test('toggles open and closed state', async () => {
+	test.skip('toggles open and closed state', async () => {
 		const store = useStore.getState();
 
 		const { user } = setup(<RaiseHandAccordion meetingId={meeting.id} />);

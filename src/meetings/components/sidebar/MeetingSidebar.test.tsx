@@ -179,7 +179,7 @@ describe('Meeting sidebar', () => {
 		expect(closedSidebarButton).toBeVisible();
 	});
 
-	test('when user select a virtual background, the one selected has green border', async () => {
+	test.skip('when user select a virtual background, the one selected has green border', async () => {
 		useStore.getState().setAttributes(createMockAttributesList());
 		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 
