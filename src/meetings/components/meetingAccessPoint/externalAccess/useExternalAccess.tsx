@@ -20,7 +20,7 @@ const useExternalAccess = (): {
 	meetingName: string;
 	createGuestAccount: (guestName: string) => void;
 } => {
-	const [t] = useTranslation();
+	const { t, i18n } = useTranslation();
 	const generalErrorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
@@ -30,6 +30,11 @@ const useExternalAccess = (): {
 
 	const { goToInfoPage } = useRouting();
 	const createSnackbar = useSnackbar();
+
+	useEffect(() => {
+		const browserLanguage = (navigator.languages?.[0] || navigator.language).split('-')[0];
+		i18n.changeLanguage(browserLanguage);
+	}, [i18n]);
 
 	useEffect(() => {
 		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
