@@ -148,7 +148,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 				crossAlignment="flex-start"
 				mainAlignment="flex-end"
 				padding={{ left: 'large', bottom: 'large', right: 'large' }}
-				width="fit"
+				width="fill"
 				height="fit"
 				onClick={stopPropagation}
 			>
