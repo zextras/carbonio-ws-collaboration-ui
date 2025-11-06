@@ -14,6 +14,7 @@ import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
+import { setDateDefault } from '../../../../utils/dateUtils';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
 
 const useExternalAccess = (): {
@@ -32,8 +33,12 @@ const useExternalAccess = (): {
 	const createSnackbar = useSnackbar();
 
 	useEffect(() => {
-		const browserLanguage = (navigator.languages?.[0] || navigator.language).split('-')[0];
-		i18n.changeLanguage(browserLanguage);
+		const browserLanguage = navigator.languages?.[0] || navigator.language;
+		const selectedLanguage = ['zh', 'zh-CN', 'zh-HK', 'zh-TW'].includes(browserLanguage)
+			? 'zh_CN'
+			: browserLanguage.split('-')[0];
+		i18n.changeLanguage(selectedLanguage);
+		setDateDefault(selectedLanguage);
 	}, [i18n]);
 
 	useEffect(() => {
