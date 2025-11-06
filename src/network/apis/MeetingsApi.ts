@@ -287,7 +287,7 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	startRecording(meetingId: string, folderId: string): Promise<StartRecordingResponse> {
+	public startRecording(meetingId: string, folderId: string): Promise<StartRecordingResponse> {
 		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST, {
 			folderId
 		});
@@ -329,19 +329,27 @@ class MeetingsApi implements IMeetingsApi {
 	}
 
 	public createGuestAccount(name: string): Promise<CreateGuestAccountResponse> {
-		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
-		return fetch(`/zx/auth/v3/guests?name=${name}`, {
-			method: RequestType.POST,
-			headers
-		})
-			.then((resp) => {
-				if (resp.ok) return resp;
-				return Promise.reject(new Error(`${resp.status}`));
+		// DEPRECATED: This check exists for backward compatibility with previous versions.
+		//  * Remove once support for v1.6.4 is officially dropped.
+		const version = useStore.getState().session?.apiVersion;
+		if (!version || lte(version, '1.6.4')) {
+			const headers = new Headers();
+			headers.append('Content-Type', 'application/json');
+			return fetch(`/zx/auth/v3/guests?name=${name}`, {
+				method: RequestType.POST,
+				headers
 			})
-			.then((res) => res.text())
-			.then((res) => JSON.parse(res))
-			.catch((err: Error) => Promise.reject(err));
+				.then((resp) => {
+					if (resp.ok) return resp;
+					return Promise.reject(new Error(`${resp.status}`));
+				})
+				.then((res) => res.text())
+				.then((res) => JSON.parse(res))
+				.catch((err: Error) => Promise.reject(err));
+		}
+		return fetchAPI(`guests`, RequestType.POST, {
+			name
+		});
 	}
 }
 
