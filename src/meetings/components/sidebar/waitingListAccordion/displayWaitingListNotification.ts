@@ -48,8 +48,8 @@ const displayWaitingListNotification = (meetingId: string): void => {
 	if (
 		ChatsNotificationsSettings.WaitingRoomAccessNotifications &&
 		ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds &&
-		meeting?.participants &&
-		Object.keys(meeting?.participants).length < 20
+		meeting?.waitingList &&
+		meeting.waitingList.length <= 3
 	) {
 		sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 	}
