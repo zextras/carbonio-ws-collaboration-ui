@@ -24,29 +24,22 @@ export enum MeetingSoundFeedback {
 	NEW_HAND_RAISED = 'newHandRaised'
 }
 
+const SOUND_MAP: Record<MeetingSoundFeedback, string> = {
+	[MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION]: meetingIn,
+	[MeetingSoundFeedback.MEETING_AUDIO_ON]: audioOn,
+	[MeetingSoundFeedback.MEETING_AUDIO_OFF]: audioOff,
+	[MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION]: screenshareOn,
+	[MeetingSoundFeedback.NEW_WAITING_USER]: waitingUserSound,
+	[MeetingSoundFeedback.NEW_HAND_RAISED]: raiseHandSound
+};
+
 export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | undefined => {
-	switch (type) {
-		case MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION: {
-			return new Audio(meetingIn).play();
-		}
-		case MeetingSoundFeedback.MEETING_AUDIO_ON: {
-			return new Audio(audioOn).play();
-		}
-		case MeetingSoundFeedback.MEETING_AUDIO_OFF: {
-			return new Audio(audioOff).play();
-		}
-		case MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION: {
-			return new Audio(screenshareOn).play();
-		}
-		case MeetingSoundFeedback.NEW_WAITING_USER: {
-			return new Audio(waitingUserSound).play();
-		}
-		case MeetingSoundFeedback.NEW_HAND_RAISED: {
-			return new Audio(raiseHandSound).play();
-		}
-		default:
-			return undefined;
-	}
+	const soundSrc = SOUND_MAP[type];
+	if (!soundSrc) return undefined;
+
+	const audio = new Audio(soundSrc);
+	audio.volume = 0.5;
+	return audio.play();
 };
 
 export const maximiseRowsAndColumns = (dimensions: Dimensions, tileWidth: number): Grid => {
