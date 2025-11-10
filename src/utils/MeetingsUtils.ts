@@ -10,7 +10,6 @@ import { CARBONIO_PATH, MEETINGS_PATH } from '../constants/appConstants';
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
-import meetingOut from '../meetings/assets/MeetingOUT.mp3';
 import raiseHandSound from '../meetings/assets/raiseHand.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
@@ -18,7 +17,6 @@ import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',
-	MEETING_LEAVE_NOTIFICATION = 'meetingLeaveNotification',
 	MEETING_SCREENSHARE_NOTIFICATION = 'meetingScreenshareNotification',
 	MEETING_AUDIO_ON = 'meetingAudioOn',
 	MEETING_AUDIO_OFF = 'meetingAudioOff',
@@ -30,9 +28,6 @@ export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | u
 	switch (type) {
 		case MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION: {
 			return new Audio(meetingIn).play();
-		}
-		case MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION: {
-			return new Audio(meetingOut).play();
 		}
 		case MeetingSoundFeedback.MEETING_AUDIO_ON: {
 			return new Audio(audioOn).play();
