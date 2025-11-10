@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { find } from 'lodash';
+import { find, throttle } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
@@ -12,6 +12,12 @@ import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
+
+const playJoinNotification = throttle(
+	() => sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),
+	5000,
+	{ leading: true, trailing: false }
+);
 
 export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	const state = useStore.getState();
@@ -34,12 +40,7 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	}
 
 	// Send audio feedback to other participants session user join
-	if (
-		isMeetingActive(event.meetingId) &&
-		!isMyId(event.userId) &&
-		meeting?.participants &&
-		Object.keys(meeting?.participants).length < 9
-	) {
-		sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
+	if (isMeetingActive(event.meetingId) && !isMyId(event.userId)) {
+		playJoinNotification();
 	}
 };
