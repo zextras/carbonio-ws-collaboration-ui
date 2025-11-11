@@ -39,7 +39,7 @@ export type ActiveConversationsSlice = {
 };
 
 export type ActiveConversation = {
-	draftMessage?: string;
+	draftMessage?: { text: string; date: number };
 	scrollPositionMessageId?: string;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;

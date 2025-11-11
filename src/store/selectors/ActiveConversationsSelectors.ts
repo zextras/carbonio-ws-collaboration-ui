@@ -43,7 +43,7 @@ export const getParticipantsAccordionStatus = (store: RootStore, roomId: string)
 };
 
 export const getDraftMessage = (store: RootStore, roomId: string): string | undefined =>
-	store.activeConversations[roomId] ? store.activeConversations[roomId]?.draftMessage : '';
+	store.activeConversations[roomId] ? store.activeConversations[roomId]?.draftMessage?.text : '';
 
 export const getFilesToUploadArray = (
 	store: RootStore,

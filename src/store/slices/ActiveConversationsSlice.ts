@@ -124,8 +124,13 @@ export const useActiveConversationsSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
-				if (message) conversation.draftMessage = message;
-				else delete conversation.draftMessage;
+				if (!message) delete conversation.draftMessage;
+				else if (message !== conversation.draftMessage?.text) {
+					conversation.draftMessage = {
+						text: message,
+						date: Date.now()
+					};
+				}
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'
@@ -204,7 +209,10 @@ export const useActiveConversationsSlice: StateCreator<
 					if (nextFile) {
 						nextFile.hasFocus = true;
 						if (nextFile.description) {
-							conversation.draftMessage = nextFile.description;
+							conversation.draftMessage = {
+								text: nextFile.description,
+								date: Date.now()
+							};
 						}
 					} else {
 						delete conversation.draftMessage;

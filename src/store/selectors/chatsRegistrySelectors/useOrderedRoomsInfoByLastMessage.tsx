@@ -10,7 +10,7 @@ import { RoomType } from '../../../types/store/RoomTypes';
 import useStore from '../../Store';
 
 export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
-	const { rooms, chatsRegistry } = useStore((store) => store);
+	const { rooms, chatsRegistry, activeConversations } = useStore((store) => store);
 	const filteredRooms = filter(
 		rooms,
 		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
@@ -18,12 +18,13 @@ export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
 	const listOfConvLastMessage: FilteredConversation[] = [];
 	forEach(filteredRooms, (room) => {
 		const messages = chatsRegistry[room.id]?.messages;
-		const lastMessage = messages && messages[messages.length - 1];
+		const lastMessageDate = messages?.[messages.length - 1]?.date ?? 0;
+		const draftMessageDate = activeConversations[room.id]?.draftMessage?.date ?? 0;
 		listOfConvLastMessage.push({
 			roomId: room.id,
 			name: room.name ?? '',
 			roomType: room.type,
-			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
+			lastMessageTimestamp: draftMessageDate > lastMessageDate ? draftMessageDate : lastMessageDate,
 			members: room.members ?? []
 		});
 	});
