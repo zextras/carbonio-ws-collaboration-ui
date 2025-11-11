@@ -32,7 +32,7 @@
 		"@emotion/babel-plugin": "^11.13.5",
 		"@emotion/jest": "^11.13.0",
 		"@testing-library/dom": "^10.4.1",
-		"@testing-library/jest-dom": "^6.9.0",
+		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.0",
 		"@testing-library/user-event": "^14.6.1",
 		"@types/core-js": "^2.5.8",
@@ -54,7 +54,7 @@
 		"jest-fail-on-console": "^3.3.1",
 		"jest-junit": "^16.0.0",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.6.3"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@emoji-mart/data": "1.2.1",
