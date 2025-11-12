@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
@@ -16,7 +17,10 @@ export const meetingParticipantHandRaisedHandler = (
 	if (activeMeeting) {
 		setUserWithHandRaised(event.userId, event.raised);
 		sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_RAISE_HAND, data: event });
-		if (event.raised && activeMeeting.usersWithHandRaised.length < 3) {
+		if (
+			event.raised &&
+			activeMeeting.usersWithHandRaised.length < SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD
+		) {
 			sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);
 		}
 	}

@@ -5,6 +5,7 @@
  */
 import { find, throttle } from 'lodash';
 
+import { LARGE_MEETING_THRESHOLD } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
@@ -43,7 +44,7 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	if (
 		isMeetingActive(event.meetingId) &&
 		!isMyId(event.userId) &&
-		Object.keys(meeting?.participants || {}).length < 15
+		Object.keys(meeting?.participants || {}).length < LARGE_MEETING_THRESHOLD
 	) {
 		playJoinNotification();
 	}
