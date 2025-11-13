@@ -33,6 +33,8 @@ import { User } from '../../../../types/store/UserTypes';
 
 const iconDoneAll = 'icon: DoneAll';
 
+const iconEdit2 = 'icon: Edit2';
+
 const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
@@ -283,8 +285,16 @@ describe('Expanded sidebar list item', () => {
 			const draftMessage = 'hi everyone!';
 			store.setDraftMessage(mockedGroup.id, draftMessage);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			expect(screen.getByTestId('icon: Edit2')).toBeVisible();
+			expect(screen.getByTestId(iconEdit2)).toBeVisible();
 			expect(screen.getByText(draftMessage)).toBeVisible();
+		});
+
+		test('draft message and unread messages', async () => {
+			const store: RootStore = useStore.getState();
+			store.setDraftMessage(mockedGroup.id, 'Hi!');
+			store.incrementUnreadCount(mockedGroup.id, 1);
+			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+			expect(screen.queryByTestId(iconEdit2)).not.toBeInTheDocument();
 		});
 
 		test('should not render the attachment icon if there is a draft content and the last message is an attachment', async () => {
@@ -303,7 +313,7 @@ describe('Expanded sidebar list item', () => {
 			store.setIsWriting(mockedGroup.id, user2Be.id, true);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 
-			expect(screen.queryByTestId('icon: Edit2')).not.toBeInTheDocument();
+			expect(screen.queryByTestId(iconEdit2)).not.toBeInTheDocument();
 			expect(screen.queryByText(draftMessage)).not.toBeInTheDocument();
 			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
 		});
