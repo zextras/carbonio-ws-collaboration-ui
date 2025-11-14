@@ -37,7 +37,7 @@ const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId, isInsid
 		>
 			<ReferenceMessageView roomId={roomId} />
 			<UploadAttachmentManagerView roomId={roomId} />
-			<MessageComposer roomId={roomId} />
+			<MessageComposer roomId={roomId} key={roomId} />
 		</ConversationFooterWrapper>
 	) : (
 		<ForwardFooter roomId={roomId} />

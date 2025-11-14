@@ -25,7 +25,6 @@ const setupMessageArea = (text?: string): { rerender: (ui: React.ReactElement) =
 			composerIsFull={false}
 			handleKeyDownTextarea={jest.fn()}
 			handleKeyUpTextarea={jest.fn()}
-			handleOnBlur={jest.fn()}
 			handleOnPaste={jest.fn}
 			isDisabled={false}
 		/>
@@ -52,7 +51,6 @@ describe('MessageArea', () => {
 				composerIsFull={false}
 				handleKeyDownTextarea={jest.fn()}
 				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
 				handleOnPaste={jest.fn}
 				isDisabled={false}
 			/>
@@ -66,7 +64,6 @@ describe('MessageArea', () => {
 				composerIsFull={false}
 				handleKeyDownTextarea={jest.fn()}
 				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
 				handleOnPaste={jest.fn}
 				isDisabled={false}
 			/>
@@ -94,7 +91,6 @@ describe('MessageArea', () => {
 				composerIsFull={false}
 				handleKeyDownTextarea={jest.fn()}
 				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
 				handleOnPaste={jest.fn}
 				isDisabled={false}
 			/>
@@ -114,7 +110,6 @@ describe('MessageArea', () => {
 				composerIsFull={false}
 				handleKeyDownTextarea={jest.fn()}
 				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
 				handleOnPaste={jest.fn}
 				isDisabled={false}
 			/>
@@ -133,7 +128,6 @@ describe('MessageArea', () => {
 				composerIsFull={false}
 				handleKeyDownTextarea={jest.fn()}
 				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
 				handleOnPaste={jest.fn}
 				isDisabled={false}
 			/>

@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { debounce, find, forEach, map, size, throttle } from 'lodash';
+import { debounce, find, forEach, map, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -94,7 +94,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
-	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
@@ -396,14 +395,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
-	const handleOnBlur = useCallback(() => {
-		if (size(textMessage) > 0) {
-			setDraftMessage(roomId, textMessage);
-		} else {
-			setDraftMessage(roomId);
-		}
-		setInputHasFocus(roomId, false);
-	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
+	useEffect(() => {
+		const ref = messageInputRef.current;
+		return () => {
+			const draft = ref?.value ?? '';
+			setDraftMessage(roomId, draft.trim() || undefined);
+		};
+	}, [roomId, setDraftMessage, messageInputRef]);
 
 	const handlePaste = useCallback(
 		(ev: ClipboardEvent) => {
@@ -510,7 +508,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				composerIsFull={noMoreCharsOnInputComposer}
 				handleKeyDownTextarea={handleKeyDown}
 				handleKeyUpTextarea={handleKeyUp}
-				handleOnBlur={handleOnBlur}
 				handleOnPaste={handlePaste}
 				isDisabled={isDisabledWhileAttachingFile}
 			/>
