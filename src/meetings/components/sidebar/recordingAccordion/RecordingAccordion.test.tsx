@@ -47,8 +47,7 @@ beforeEach(() => {
 });
 
 describe('RecordingAccordion tests', () => {
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip('Toggle accordion status', async () => {
+	test('Toggle accordion status', async () => {
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 		expect(screen.getByTestId(iconDown)).toBeVisible();
 
@@ -59,22 +58,24 @@ describe('RecordingAccordion tests', () => {
 		expect(screen.getByTestId(iconDown)).toBeVisible();
 	});
 
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip("User can only start the recording if it isn't already active", async () => {
-		setup(<RecordingAccordion meetingId={meeting.id} />);
+	test("User can only start the recording if it isn't already active", async () => {
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
+
+		const icon = await screen.findByTestId(iconDown);
+		await user.click(icon);
 		const startButton = await screen.findByTestId('startRecordingButton');
 
 		expect(startButton).toBeEnabled();
 	});
 
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip("User can only stop the recording if it's already active", async () => {
-		setup(<RecordingAccordion meetingId={meeting.id} />);
+	test("User can only stop the recording if it's already active", async () => {
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		act(() => {
 			useStore.getState().startRecording(meeting.id, '32423423', 'user1');
 		});
-
+		const icon = await screen.findByTestId(iconDown);
+		await user.click(icon);
 		const stopButton = await screen.findByTestId('stopRecordingButton');
 
 		expect(stopButton).toBeEnabled();
@@ -92,8 +93,7 @@ describe('RecordingAccordion tests', () => {
 		expect(spyOnStartRecording).toHaveBeenCalled();
 	});
 
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip('Show a snackbar when the start recording request fails', async () => {
+	test('Show a snackbar when the start recording request fails', async () => {
 		const spyOnStartRecording = spyOnMeetingsApi(MeetingsApiToSpy.START_RECORDING);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
