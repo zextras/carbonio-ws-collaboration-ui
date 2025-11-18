@@ -33,82 +33,42 @@ const LazyMeetingExternalAccessPage = lazy(() => {
 		);
 	}
 	return import(
-		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/externalAccess/MeetingExternalAccessPage'
 	);
 });
 
-const LazyMeetingAccessPage = lazy(() => {
-	if (BrowserUtils.isMobile()) {
-		return import(
-			/* webpackChunkName: "MeetingAccessMobilePageView" */ './mobile/MeetingAccessMobilePage'
-		);
-	}
-	return import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage');
-});
-
-const AccessPageView = (): ReactElement => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyAccessPageView />
-	</Suspense>
-);
-
-const MeetingSkeleton = (): ReactElement => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<PiPProvider>
-			<LazyMeetingSkeleton />
-		</PiPProvider>
-	</Suspense>
-);
-
-const InfoPage = (): ReactElement => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyInfoPage />
-	</Suspense>
-);
-
-const MeetingExternalAccessPage = (): ReactElement => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingExternalAccessPage />
-	</Suspense>
-);
-
-const MeetingAccessPageView = (): ReactElement => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingAccessPage />
-	</Suspense>
+const LazyMeetingAccessPage = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage')
 );
 
 const MeetingRouter = (): ReactElement => {
 	const { route } = useContext(RouterContext);
-	switch (route) {
-		case MEETINGS_ROUTES.MEETING:
-			return <MeetingSkeleton />;
-		case MEETINGS_ROUTES.INFO:
-			return <InfoPage />;
-		case MEETINGS_ROUTES.EXTERNAL_LOGIN:
-			return <MeetingExternalAccessPage />;
-		case MEETINGS_ROUTES.MEETING_ACCESS_PAGE:
-			return <MeetingAccessPageView />;
-		case MEETINGS_ROUTES.MAIN:
-			return <AccessPageView />;
-		default:
-			return <div> missing route</div>;
-	}
+
+	const routes: Record<string, ReactElement> = {
+		[MEETINGS_ROUTES.MAIN]: <LazyAccessPageView />,
+		[MEETINGS_ROUTES.MEETING_ACCESS_PAGE]: <LazyMeetingAccessPage />,
+		[MEETINGS_ROUTES.EXTERNAL_ACCESS_PAGE]: <LazyMeetingExternalAccessPage />,
+		[MEETINGS_ROUTES.MEETING]: (
+			<PiPProvider>
+				<LazyMeetingSkeleton />
+			</PiPProvider>
+		),
+		[MEETINGS_ROUTES.INFO]: <LazyInfoPage />
+	};
+
+	return <Suspense fallback={<ShimmerEntryMeetingView />}>{routes[route]}</Suspense>;
 };
 
 const MeetingMainView = (): ReactElement => {
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
 	useEffect(() => {
-		MeetingsApi.authLogin()
-			.then((data) => {
-				const clientLogo = data.carbonioWebUiAppLogo ?? false;
+		MeetingsApi.getLoginConfig().then((data) => {
+			const clientLogo = data.carbonioWebUiAppLogo || undefined;
+			if (clientLogo) {
 				setCustomLogo(clientLogo);
-			})
-			.catch((reason) => {
-				setCustomLogo(false);
-				console.log(reason);
-			});
+			}
+		});
 	}, [setCustomLogo]);
 
 	const routerContextSetup = useRouterContextSetup();

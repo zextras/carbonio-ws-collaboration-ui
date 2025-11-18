@@ -5,10 +5,10 @@
  */
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach, map, values } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import SearchUserAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/SearchUserAction';
 import { getMeetingParticipants } from '../../../../store/selectors/MeetingSelectors';

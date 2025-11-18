@@ -6,9 +6,9 @@
 
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';

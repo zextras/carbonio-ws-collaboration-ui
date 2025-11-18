@@ -6,10 +6,10 @@
 
 import React, { FC, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Padding, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MessageReactionsList from './MessageReactionsList';
 import ReadByPopoverList from './readByPopoverList/ReadByPopoverList';

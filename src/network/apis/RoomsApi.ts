@@ -279,17 +279,18 @@ class RoomsApi implements IRoomsApi {
 
 		// Get the XML messages to forward from history
 		// We need to pass the text of actual message because if it is edited we won't pass the old text content
-		const promises = messages.map((message) =>
-			xmppClient.requestMessageToForward(message.roomId, message.stanzaId).then(() => {
-				const historyMessage = HistoryAccumulator.returnReferenceForForwardedMessage(
-					message.stanzaId
-				);
-				if (historyMessage) {
-					historyMessage.getElementsByTagName('body')[0].textContent = message.text;
-					listOfMessages[message.stanzaId] = historyMessage.outerHTML;
-				}
-			})
-		);
+		const promises = messages.map((message) => {
+			const queryId = HistoryAccumulator.getNextId();
+			return xmppClient
+				.requestMessageToForward(message.roomId, message.stanzaId, queryId)
+				.then(() => {
+					const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
+					if (historyMessage) {
+						historyMessage.getElementsByTagName('body')[0].textContent = message.text;
+						listOfMessages[message.stanzaId] = historyMessage.outerHTML;
+					}
+				});
+		});
 
 		return Promise.all(promises).then(() => {
 			const messagesToForward = messages.map((message) => ({

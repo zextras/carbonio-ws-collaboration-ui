@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+import { AccountSettings } from '@zextras/carbonio-shell-ui';
 import { produce } from 'immer';
 import { maxSatisfying } from 'semver';
 import { StateCreator } from 'zustand';
@@ -42,7 +42,7 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/LOGIN_INFO'
 		);
 	},
-	setAttributes: (attrs: AccountSettingsAttrs): void => {
+	setAttributes: (attrs: AccountSettings['attrs']): void => {
 		set(
 			produce((draft: RootStore) => {
 				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
@@ -92,7 +92,7 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_SELECTED_ROOM'
 		);
 	},
-	setCustomLogo: (logo: string | false): void => {
+	setCustomLogo: (logo: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.session.customLogo = logo;

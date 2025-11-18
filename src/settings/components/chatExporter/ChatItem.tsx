@@ -57,7 +57,6 @@ const ChatItem: React.FC<ChatItemProps> = ({ roomId, onClick }: ChatItemProps) =
 			}
 			case MessageType.CONFIGURATION_MSG:
 				return <ConfigurationMessageLabel message={lastMessageOfRoom} />;
-			case MessageType.DATE_MSG:
 			default:
 				return '';
 		}

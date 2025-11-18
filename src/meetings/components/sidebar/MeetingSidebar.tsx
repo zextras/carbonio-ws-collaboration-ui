@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useCallback, useContext, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
@@ -131,7 +131,7 @@ const MeetingSidebar = (): ReactElement => {
 						</AccordionContainer>
 					)}
 				</Container>
-				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId!} />
+				<MeetingConversationAccordion roomId={roomId ?? ''} />
 			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip

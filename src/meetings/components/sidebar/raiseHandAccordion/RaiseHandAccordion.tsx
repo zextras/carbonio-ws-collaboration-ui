@@ -6,6 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Accordion,
 	AccordionItemType,
@@ -17,7 +18,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import RaiseHandUser from './RaiseHandUser';
 import useEventListener, {

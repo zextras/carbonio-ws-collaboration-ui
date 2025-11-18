@@ -14,10 +14,10 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Text } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import VirtualRoomCard from './virtualRoomCard/VirtualRoomCard';
@@ -117,9 +117,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" gap="0.5rem" ref={popupRef}>
 			<Button label={createVirtualRoom} color="primary" width="fill" onClick={toggleModal} />
 			<CreateVirtualRoomModal
-				toggleModal={toggleModal}
-				showCreationModal={showCreationModal}
-				setShowCreationModal={setShowCreationModal}
+				open={showCreationModal}
+				onClose={() => setShowCreationModal(false)}
 				createModalRef={createModalRef}
 			/>
 			<ListContainer gap="0.5rem" mainAlignment="flex-start">

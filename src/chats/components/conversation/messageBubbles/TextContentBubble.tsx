@@ -6,9 +6,9 @@
 
 import React, { FC, ReactElement, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { filter, join, size } from 'lodash';
-import styled from 'styled-components';
 
 const MessageText = styled(Container)`
 	white-space: pre-wrap;

@@ -14,7 +14,7 @@ import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeSt
  * Documentation: https://xmpp.org/extensions/xep-0012.html
  */
 
-export function onGetLastActivityResponse(stanza: Element): true {
+export function lastActivityCallback(stanza: Element): true {
 	const from: string = Strophe.getNodeFromJid(stanza.getAttribute('from'));
 	const queryElement: Element = getRequiredTagElement(stanza, 'query');
 	const seconds: number = parseInt(getRequiredAttribute(queryElement, 'seconds'), 10);

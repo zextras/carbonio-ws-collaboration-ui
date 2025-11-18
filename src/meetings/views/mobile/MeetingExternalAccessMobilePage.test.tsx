@@ -1,9 +1,8 @@
 /*
- * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -12,50 +11,28 @@ import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 
-const typeHereLabel = 'Type here your name';
-const joinLabel = 'Join the meeting';
-
-describe('MeetingExternalAccessMobilePage test', () => {
-	test('Component rendered correctly', async () => {
+describe('MeetingExternalAccessMobilePage tests', () => {
+	test('Meeting name is displayed correctly', async () => {
+		spyOnMeetingsApi(MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME).mockResolvedValue({
+			name: 'Test Meeting'
+		});
 		setup(<MeetingExternalAccessMobilePage />);
 
-		const welcomeTitle = screen.getByText(/Hey stranger!/i);
-		const welcomeDesc = screen.getByText(/How would you like to introduce yourself?/i);
-		const afterActionDesc = screen.getByText(
-			/You will be redirected to the waiting room where a moderator will approve your access./i
-		);
-		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
-		const joinButton = screen.getByRole('button', { name: joinLabel });
-
-		expect(welcomeTitle).toBeVisible();
-		expect(welcomeDesc).toBeVisible();
-		expect(afterActionDesc).toBeVisible();
-		expect(nameInput).toBeVisible();
-		expect(nameInput).toBeEnabled();
-		expect(joinButton).toBeVisible();
-		expect(joinButton).toBeDisabled();
+		expect(await screen.findByText('Welcome to "Test Meeting" virtual room')).toBeInTheDocument();
 	});
 
-	test('Create external user', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+	test('Create new guest from mobile', async () => {
+		const spyCreateGuest = spyOnMeetingsApi(
 			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
-		).mockImplementation(() => Promise.resolve());
-		const { user } = setup(<MeetingExternalAccessMobilePage />);
-		const inputName = await screen.findByText(/Type here your name/i);
-		await user.type(inputName, 'John Doe');
-		const joinButton = await screen.findByRole('button', { name: /Join the meeting/i });
-		expect(joinButton).toBeVisible();
-		await user.click(joinButton);
-		expect(spyOnCreateGuestAccount).toHaveBeenCalled();
-	});
+		).mockResolvedValueOnce({
+			id: 'user123'
+		});
 
-	test('Create external user with enter key', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(
-			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
-		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
-		const inputName = await screen.findByText(/Type here your name/i);
-		await user.type(inputName, 'John Doe {enter}');
-		expect(spyOnCreateGuestAccount).toHaveBeenCalled();
+		const nameInput = await screen.findByPlaceholderText('Enter your name');
+		await user.type(nameInput, 'Guest User');
+		const readyButton = await screen.findByText('Ready to participate');
+		await user.click(readyButton);
+		expect(spyCreateGuest).toHaveBeenCalled();
 	});
 });

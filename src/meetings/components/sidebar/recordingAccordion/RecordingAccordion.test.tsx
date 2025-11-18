@@ -20,6 +20,7 @@ import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/netw
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
@@ -58,19 +59,23 @@ describe('RecordingAccordion tests', () => {
 	});
 
 	test("User can only start the recording if it isn't already active", async () => {
-		setup(<RecordingAccordion meetingId={meeting.id} />);
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
+
+		const icon = await screen.findByTestId(iconDown);
+		await user.click(icon);
 		const startButton = await screen.findByTestId('startRecordingButton');
 
 		expect(startButton).toBeEnabled();
 	});
 
 	test("User can only stop the recording if it's already active", async () => {
-		setup(<RecordingAccordion meetingId={meeting.id} />);
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		act(() => {
 			useStore.getState().startRecording(meeting.id, '32423423', 'user1');
 		});
-
+		const icon = await screen.findByTestId(iconDown);
+		await user.click(icon);
 		const stopButton = await screen.findByTestId('stopRecordingButton');
 
 		expect(stopButton).toBeEnabled();
@@ -78,10 +83,8 @@ describe('RecordingAccordion tests', () => {
 
 	test('When user clicks on the start button the recording starts', async () => {
 		const spyOnStartRecording = spyOnMeetingsApi(MeetingsApiToSpy.START_RECORDING);
+		useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RECORDING, true);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
-
-		const chevron = screen.getByTestId(iconDown);
-		await user.click(chevron);
 
 		const startButton = await screen.findByTestId('startRecordingButton');
 		jest.advanceTimersByTime(1000);

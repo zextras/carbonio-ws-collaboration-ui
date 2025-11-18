@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+import { AccountSettings } from '@zextras/carbonio-shell-ui';
 
 import {
 	MeetingBe,
@@ -111,8 +111,8 @@ export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 });
 
 export const createMockAttributesList = (
-	fields?: Partial<AccountSettingsAttrs>
-): AccountSettingsAttrs => ({
+	fields?: Partial<AccountSettings['attrs']>
+): AccountSettings['attrs'] => ({
 	carbonioWscAttachmentUpload: 'TRUE',
 	carbonioWscGroupChatCreation: 'TRUE',
 	carbonioWscMaxAttachmentSize: '2',

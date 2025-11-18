@@ -6,10 +6,11 @@
 
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { Container, Padding, Text, useTheme } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
-import styled, { css } from 'styled-components';
 
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
@@ -53,7 +54,6 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	background-size: cover;
 	background-position: center;
 	aspect-ratio: 1/1;
-	z-index: 2;
 	cursor: pointer;
 
 	&:after {
@@ -148,7 +148,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 				crossAlignment="flex-start"
 				mainAlignment="flex-end"
 				padding={{ left: 'large', bottom: 'large', right: 'large' }}
-				width="fit"
+				width="fill"
 				height="fit"
 				onClick={stopPropagation}
 			>

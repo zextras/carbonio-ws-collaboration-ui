@@ -33,33 +33,20 @@ export const enumerateDevices = (): void => {
 
 /**
  * Request the audio stream for the session with optional params
- * @param noiseSuppression https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSettings/noiseSuppression
- * @param echoCancellation https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSettings/echoCancellation
  * @param deviceId Id of media to request if available
  * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
  */
-export const getAudioStream = (
-	noiseSuppression?: boolean,
-	echoCancellation?: boolean,
-	deviceId?: string
-): Promise<MediaStream> =>
+export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		const constraints = deviceId
-			? {
-					audio: {
-						deviceId: { exact: deviceId },
-						noiseSuppression,
-						echoCancellation,
-						autoGainControl: false
-					}
-				}
-			: {
-					audio: {
-						autoGainControl: false,
-						noiseSuppression,
-						echoCancellation
-					}
-				};
+		const constraints: MediaStreamConstraints = {
+			audio: {
+				noiseSuppression: true,
+				echoCancellation: true,
+				autoGainControl: true,
+				...(deviceId && { deviceId: { exact: deviceId } })
+			}
+		};
+
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {

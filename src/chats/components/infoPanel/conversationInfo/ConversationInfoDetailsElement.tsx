@@ -6,8 +6,8 @@
 
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Icon, Text, Padding } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 type ConversationInfoDetailsElementProps = {
 	label: string | undefined;
@@ -24,7 +24,7 @@ const ConversationInfoDetailsElement: FC<ConversationInfoDetailsElementProps> = 
 	icon,
 	type
 }) => (
-	<Container orientation="horizontal" crossAlignment="flex-start">
+	<Container orientation="horizontal" crossAlignment="flex-start" height="fit">
 		<Container width="fit-content" height="fit-content">
 			<Icon icon={icon} size="medium" />
 		</Container>

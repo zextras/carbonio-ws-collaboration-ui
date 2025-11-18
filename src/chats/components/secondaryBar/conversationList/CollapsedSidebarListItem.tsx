@@ -6,8 +6,8 @@
 
 import React, { useCallback } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Tooltip } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';

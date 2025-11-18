@@ -6,11 +6,11 @@
 
 import React, { useCallback, useContext, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { forEach, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useUploadFile from '../../../../hooks/useLoadFiles';
 import {

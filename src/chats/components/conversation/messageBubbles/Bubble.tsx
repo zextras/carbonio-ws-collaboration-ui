@@ -6,6 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Checkbox,
 	Container,
@@ -14,7 +15,6 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';
 import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActions';
@@ -134,6 +134,10 @@ const Bubble: FC<BubbleProps> = ({
 	const extension = getAttachmentExtension(messageAttachment?.mimeType);
 	const size = getAttachmentSize(messageAttachment?.size);
 
+	const isSelectedSearchItem = useStore(
+		(store) => store.activeConversations[message.roomId]?.selectedSearchResult === message.stanzaId
+	);
+
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {
 			unsetForwardMessageList(message.roomId, message);
@@ -203,7 +207,7 @@ const Bubble: FC<BubbleProps> = ({
 			height="fit"
 			mainAlignment="space-between"
 			ref={forwardContainerRef}
-			$forwardIsActive={forwardIsActive}
+			$forwardIsActive={forwardIsActive || isSelectedSearchItem}
 			$hoverIsActive={hoverIsActive}
 			data-testid="forward_bubble_container"
 		>

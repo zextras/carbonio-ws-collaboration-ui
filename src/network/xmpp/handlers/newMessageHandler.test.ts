@@ -14,9 +14,8 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
+import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
 import {
-	DateMessage,
 	FasteningAction,
 	MessageFastening,
 	MessageType,
@@ -81,10 +80,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const dateMessage = store.chatsRegistry[message.roomId].messages[0] as DateMessage;
-		const textMessage = store.chatsRegistry[message.roomId].messages[1] as TextMessage;
-		expect(dateMessage).not.toBeNull();
+		const textMessage = store.chatsRegistry[message.roomId].messages[0] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(message.id);
 		expect(textMessage.stanzaId).toBe(message.stanzaId);
@@ -101,8 +97,7 @@ describe('XMPP newMessageHandler', () => {
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
-		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const textMessage = store.chatsRegistry[info.roomId].messages[1] as TextMessage;
+		const textMessage = store.chatsRegistry[info.roomId].messages[0] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.id);
 		expect(textMessage.stanzaId).toBe(info.stanzaId);
@@ -176,8 +171,14 @@ describe('XMPP newMessageHandler', () => {
 		store.newMessage(myMessage);
 		store.setInputHasFocus(room.id, true);
 
-		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
-		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		onNewMessageStanza.call(
+			store.connections.xmppClient,
+			buildReactionStanza({
+				roomId: room.id,
+				originalStanzaId: myMessage.stanzaId,
+				from: otherUser.id
+			})
+		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 		jest.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toBeUndefined();
@@ -199,8 +200,14 @@ describe('XMPP newMessageHandler', () => {
 		});
 		store.newMessage(myMessage);
 
-		const reactionXMPP = reactionMessageStanza(room.id, myMessage.stanzaId, otherUser.id);
-		onNewMessageStanza.call(store.connections.xmppClient, reactionXMPP);
+		onNewMessageStanza.call(
+			store.connections.xmppClient,
+			buildReactionStanza({
+				roomId: room.id,
+				originalStanzaId: myMessage.stanzaId,
+				from: otherUser.id
+			})
+		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 		jest.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);

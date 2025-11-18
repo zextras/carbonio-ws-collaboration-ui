@@ -6,9 +6,9 @@
 
 import React, { useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Avatar, Container, Badge, Shimmer } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';

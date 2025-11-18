@@ -6,6 +6,7 @@
 
 import React, { MouseEventHandler, ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Avatar,
 	Button,
@@ -17,7 +18,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';

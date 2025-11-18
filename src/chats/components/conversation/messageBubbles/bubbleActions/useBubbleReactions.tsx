@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Popover, Tooltip } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import CustomReactionPicker from './CustomReactionPicker';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';

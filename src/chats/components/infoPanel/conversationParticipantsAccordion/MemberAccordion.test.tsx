@@ -123,7 +123,7 @@ describe('Participants accordion', () => {
 		store.setParticipantsAccordionStatus(room.id, false);
 
 		setup(<MemberAccordion roomId={room.id} />);
-		expect(screen.queryByText(/Search members/i)).not.toBeVisible();
+		expect(screen.queryByText(/Search members/i)).not.toBeInTheDocument();
 		expect(screen.getByTestId('icon: ChevronDown')).toBeInTheDocument();
 	});
 });

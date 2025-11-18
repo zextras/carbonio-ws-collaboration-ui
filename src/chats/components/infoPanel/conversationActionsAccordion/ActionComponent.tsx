@@ -6,6 +6,7 @@
 
 import React, { FC } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Container,
 	Padding,
@@ -14,9 +15,9 @@ import {
 	Row,
 	Tooltip,
 	PaddingObj,
-	Button
+	Button,
+	Theme
 } from '@zextras/carbonio-design-system';
-import styled, { DefaultTheme } from 'styled-components';
 
 const CustomText = styled(Text)``;
 
@@ -27,7 +28,7 @@ const CustomIcon = styled(Icon)`
 `;
 
 const ActionContainer = styled(Container)<{
-	$actionColor: keyof DefaultTheme['palette'];
+	$actionColor: keyof Theme['palette'];
 	$disabled?: boolean;
 }>`
 	border-radius: 0.5rem;
@@ -69,7 +70,7 @@ const CustomActionContainer = styled(Container)`
 
 type ActionProps = {
 	icon: string;
-	actionColor: keyof DefaultTheme['palette'];
+	actionColor: keyof Theme['palette'];
 	label: string;
 	padding: PaddingObj;
 	withArrow?: boolean;

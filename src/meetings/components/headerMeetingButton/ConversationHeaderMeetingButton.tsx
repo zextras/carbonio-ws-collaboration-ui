@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ActiveMeetingParticipantsDropdown from './ActiveMeetingParticipantsDropdown';
 import useRoomMeeting from '../../../hooks/useRoomMeeting';
@@ -37,7 +37,7 @@ const ActiveMeetingDot = styled.div`
 	border: 0.0625rem solid ${(props): string => props.theme.palette.error.regular};
 	border-radius: 50%;
 	left: 0;
-	top: 0.188rem;
+	top: 0.4rem;
 	animation: blink 1.5s linear infinite;
 
 	@keyframes blink {
@@ -162,7 +162,7 @@ const ConversationHeaderMeetingButton = ({
 				<Container orientation="horizontal" width="fit" gap="0.5rem" padding={{ left: '1rem' }}>
 					<Tooltip label={activeMeetingTooltip} placement="top">
 						<CustomActiveMeetingContainer width="fit">
-							<Icon color="secondary" icon="VideoOutline" size="large" data-testid="video_button" />
+							<Icon color="gray0" icon="VideoOutline" size="large" data-testid="video_button" />
 							<ActiveMeetingDot />
 						</CustomActiveMeetingContainer>
 					</Tooltip>
@@ -176,7 +176,7 @@ const ConversationHeaderMeetingButton = ({
 							<CustomButtonIcon
 								icon={isDropdownOpen ? 'ChevronUp' : 'ChevronDown'}
 								type="ghost"
-								color="secondary"
+								color="gray0"
 								onClick={toggleDropdown}
 								data-testid="participant_list_button"
 							/>

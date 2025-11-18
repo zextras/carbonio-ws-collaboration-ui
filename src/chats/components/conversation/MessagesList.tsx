@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, last, map, size } from 'lodash';
-import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
@@ -22,6 +22,7 @@ import {
 	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import {
+	enhanceWithDateMessages,
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
@@ -53,7 +54,8 @@ type ConversationProps = {
 const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
-	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
+	const messages = useStore((store) => getMessagesSelector(store, roomId));
+	const roomMessages = useMemo(() => enhanceWithDateMessages(messages), [messages]);
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const setScrollPosition = useStore((store) => store.setScrollPosition);
@@ -220,8 +222,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				return (
 					<MessageFactory
 						key={`factory-${message.id}`}
-						messageId={message.id}
-						messageRoomId={message.roomId}
+						message={message}
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 						messageRef={messageRef}
@@ -271,17 +272,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);
-
-	useEffect(() => {
-		const handleImageLoad = (): void => {
-			scrollToEnd(MessagesListWrapperRef);
-		};
-
-		window.addEventListener('imageLoadedInChat', handleImageLoad);
-		return (): void => {
-			window.removeEventListener('imageLoadedInChat', handleImageLoad);
-		};
-	}, []);
 
 	return (
 		<Messages

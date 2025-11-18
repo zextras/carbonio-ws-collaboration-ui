@@ -6,9 +6,17 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import styled from '@emotion/styled';
+import {
+	Button,
+	Container,
+	Icon,
+	Row,
+	Text,
+	Theme,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
@@ -112,7 +120,7 @@ const TextContainer = styled(Container)`
 `;
 
 const FileContainer = styled(Container)<{
-	$userBorderColor?: keyof DefaultTheme['avatarColors'];
+	$userBorderColor?: keyof Theme['avatarColors'];
 }>`
 	border-left: ${({ $userBorderColor, theme }): string | undefined =>
 		$userBorderColor && `0.25rem solid ${theme.avatarColors[$userBorderColor]}`};

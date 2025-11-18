@@ -6,9 +6,9 @@
 
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Badge, Button, Container, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
@@ -28,7 +28,6 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
-	meetingId: string;
 };
 const ChatContainer = styled(Container)``;
 
@@ -58,10 +57,7 @@ const CustomLargeButton = styled(Button)`
 	}
 `;
 
-const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
-	roomId,
-	meetingId
-}) => {
+const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const extendChatLabel = t('meeting.extendChat', 'Extend chat');
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');

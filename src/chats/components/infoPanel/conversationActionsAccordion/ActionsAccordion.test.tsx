@@ -159,7 +159,7 @@ describe('Actions Accordion', () => {
 		store.setActionsAccordionStatus(room.id, false);
 
 		setup(<ActionsAccordion roomId={room.id} />);
-		expect(screen.queryByText(/Mute notifications/i)).not.toBeVisible();
+		expect(screen.queryByText(/Mute notifications/i)).not.toBeInTheDocument();
 		expect(screen.getByTestId(iconChevronDown)).toBeInTheDocument();
 	});
 

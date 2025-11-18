@@ -6,8 +6,9 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
+import { ConversationView } from './Conversation';
 import ConversationHeader from './ConversationHeader';
 import useStore from '../../../store/Store';
 import {
@@ -71,30 +72,54 @@ beforeEach(() => {
 	store.setPlaceholderRoom(mockPaoloUser.id);
 });
 describe('Conversation header test', () => {
-	test('Width of the screen is smaller than 1024 px', async () => {
+	test('Width of the screen is smaller than 600rem', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(false);
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 		const infoIcon = screen.getByTestId('icon: InfoOutline');
 		expect(infoIcon).toBeInTheDocument();
 	});
 
-	test('Width of the screen is bigger than 1024 px', async () => {
+	test('Width of the screen is bigger than 60rem', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 		expect(screen.queryByTestId('icon: InfoOutline')).toBeNull();
 	});
 
 	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
 		const store: RootStore = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
 	});
 
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
 		const store: RootStore = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
 
@@ -102,7 +127,11 @@ describe('Conversation header test', () => {
 		const store: RootStore = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(
-			<ConversationHeader roomId={`placeholder-${mockPaoloUser.id}`} setInfoPanelOpen={jest.fn()} />
+			<ConversationHeader
+				roomId={`placeholder-${mockPaoloUser.id}`}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
 		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
@@ -118,7 +147,13 @@ describe('isWriting functionality', () => {
 	test('is writing appears when someone is writing and disappear if not', async () => {
 		useStore.getState().setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
 
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 
 		const isWriting = await screen.findByTestId('is_writing_text');
 		expect(isWriting).toBeInTheDocument();
@@ -138,7 +173,13 @@ describe('isWriting functionality', () => {
 		store.setIsWriting(mockedRoom.id, mockLucaUser.id, true);
 		store.setIsWriting(mockedRoom.id, mockQuintoUser.id, true);
 
-		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationHeader
+				roomId={mockedRoom.id}
+				conversationView={ConversationView.CHAT}
+				setConversationView={jest.fn()}
+			/>
+		);
 
 		const isWriting = await screen.findByText(`${mockRobertoUser.name} and 3 others are typing...`);
 		expect(isWriting).toBeInTheDocument();

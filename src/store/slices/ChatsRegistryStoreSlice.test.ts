@@ -15,9 +15,11 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import {
+	BackfillRequest,
 	ConfigurationMessage,
 	FasteningAction,
 	MarkerStatus,
+	MessageRange,
 	MessageType,
 	OperationType,
 	TextMessage
@@ -51,54 +53,27 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().newMessage(newTextMessage);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			expect(messages).not.toBeNull();
-			expect(messages).toHaveLength(2);
-
-			// Messages list: [DATE, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(newTextMessage);
+			expect(messages).toHaveLength(1);
+			expect(messages[0]).toBe(newTextMessage);
 		});
 
-		test('Arrive a text message in a conversation already full of messages of the same day', () => {
+		test('Arrive a text message in a conversation already full of messages', () => {
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
 			useStore.getState().newMessage(newTextMessage);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(textMessage0);
-			expect(messages[2]).toBe(textMessage1);
-			expect(messages[3]).toBe(newTextMessage);
-		});
-
-		test('Arrive a text message in a conversation already full of messages of the another day', () => {
-			const newMessage = createMockTextMessage({
-				id: 'newMessage',
-				date: dateToTimestamp('2024-05-02 10:00')
-			});
-
-			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
-			useStore.getState().newMessage(newMessage);
-
-			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1, DATE, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(textMessage0);
-			expect(messages[2]).toBe(textMessage1);
-			expect(messages[3].type).toBe(MessageType.DATE_MSG);
-			expect(messages[4]).toBe(newMessage);
+			// Messages list: [MESSAGE0, MESSAGE1, NEW MESSAGE]
+			expect(messages[0]).toBe(textMessage0);
+			expect(messages[1]).toBe(textMessage1);
+			expect(messages[2]).toBe(newTextMessage);
 		});
 
 		test('Arrive an configuration message as first', () => {
 			const newMessage = createMockConfigurationMessage({ operation: OperationType.MEMBER_ADDED });
 			useStore.getState().newMessage(newMessage);
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			expect(messages).not.toBeNull();
-			expect(messages).toHaveLength(2);
-
-			// Messages list: [DATE, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(newMessage);
+			expect(messages).toHaveLength(1);
+			expect(messages[0]).toBe(newMessage);
 		});
 	});
 
@@ -108,15 +83,11 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().newInboxMessage(inboxMessage);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			expect(messages).not.toBeNull();
-			expect(messages).toHaveLength(2);
-
-			// Messages list: [DATE, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(inboxMessage);
+			expect(messages).toHaveLength(1);
+			expect(messages[0]).toBe(inboxMessage);
 		});
 
-		test('Arrive an inbox text message after a history request (also with different date)', () => {
+		test('Arrive an inbox text message after a history request', () => {
 			const inboxMessage = createMockTextMessage({
 				id: textMessage1.id,
 				date: dateToTimestamp('2024-05-01 13:01:05')
@@ -125,11 +96,10 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().newInboxMessage(inboxMessage);
 
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1]]
-			expect(messages).toHaveLength(3);
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(textMessage0);
-			expect(messages[2]).toBe(textMessage1);
+			// Messages list: [MESSAGE0, MESSAGE1]]
+			expect(messages).toHaveLength(2);
+			expect(messages[0]).toBe(textMessage0);
+			expect(messages[1]).toBe(textMessage1);
 		});
 
 		test('Arrive an inbox message of a room in which history is been cleared before message date', () => {
@@ -148,7 +118,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 
 			// Messages list: [DATE, INBOX MESSAGE]
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
-			expect(messages[1]).toStrictEqual(inboxMessage);
+			expect(messages[0]).toStrictEqual(inboxMessage);
 		});
 
 		test('Arrive an inbox message of a room in which history is been cleared after message date', () => {
@@ -172,32 +142,16 @@ describe('ChatsRegistryStoreSlice tests', () => {
 	});
 
 	describe('updateHistory', () => {
-		test('First update history after an inbox message (same day)', () => {
+		test('First update history after an inbox message', () => {
 			useStore.getState().newInboxMessage(newTextMessage);
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1, INBOX MESSAGE]
-			expect(messages).toHaveLength(4);
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toBe(textMessage0);
-			expect(messages[2]).toBe(textMessage1);
-			expect(messages[3]).toBe(newTextMessage);
-		});
-
-		test('First update history after an inbox message (different day)', () => {
-			const inboxMessage = createMockTextMessage({
-				id: 'newMessage',
-				date: dateToTimestamp('2024-05-02 10:00')
-			});
-			useStore.getState().newInboxMessage(inboxMessage);
-			useStore.getState().updateHistory(inboxMessage.roomId, [textMessage0, textMessage1]);
-
-			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1, DATE, INBOX MESSAGE]
-			expect(messages).toHaveLength(5);
-			expect(messages[3].type).toBe(MessageType.DATE_MSG);
-			expect(messages[4]).toBe(inboxMessage);
+			// Messages list: [MESSAGE0, MESSAGE1, INBOX MESSAGE]
+			expect(messages).toHaveLength(3);
+			expect(messages[0]).toBe(textMessage0);
+			expect(messages[1]).toBe(textMessage1);
+			expect(messages[2]).toBe(newTextMessage);
 		});
 
 		test('Last message of history is the inbox message', () => {
@@ -209,39 +163,9 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().updateHistory(inboxMessage.roomId, [textMessage0, inboxMessage]);
 
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, INBOX MESSAGE]
-			expect(messages).toHaveLength(3);
-			expect(messages[2]).toBe(inboxMessage);
-		});
-
-		test('Last message of history is the inbox message (different timestamps)', () => {
-			const msg1 = createMockTextMessage({
-				id: 'message1',
-				date: dateToTimestamp('2024-05-01 14:04:00')
-			});
-			const inboxMessage = createMockTextMessage({
-				id: 'message1',
-				date: dateToTimestamp('2024-05-01 14:04:01')
-			});
-			useStore.getState().newInboxMessage(inboxMessage);
-			useStore.getState().updateHistory(inboxMessage.roomId, [textMessage0, msg1]);
-
-			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1]
-			expect(messages).toHaveLength(3);
-		});
-
-		test('In the history response there are messages from different dates', () => {
-			const msg1 = createMockTextMessage({ id: 'msg1', date: dateToTimestamp('2024-05-03 09:01') });
-			const msg2 = createMockTextMessage({ id: 'msg2', date: dateToTimestamp('2024-05-05 20:02') });
-
-			useStore.getState().updateHistory(textMessage0.roomId, [textMessage0, msg1, msg2]);
-
-			const { messages } = useStore.getState().chatsRegistry[textMessage0.roomId];
-			// Messages list: [DATE, MESSAGE0, DATE, MESSAGE1, DATE, MESSAGE2]
-			expect(messages).toHaveLength(6);
-			expect(messages[2].type).toBe(MessageType.DATE_MSG);
-			expect(messages[4].type).toBe(MessageType.DATE_MSG);
+			// Messages list: [MESSAGE0, INBOX MESSAGE]
+			expect(messages).toHaveLength(2);
+			expect(messages[1]).toBe(inboxMessage);
 		});
 
 		test('Load a history after another history', () => {
@@ -258,8 +182,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().updateHistory(textMessage0.roomId, [msg2, msg3]);
 
 			const { messages } = useStore.getState().chatsRegistry[textMessage0.roomId];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1, DATE, MESSAGE2, MESSAGE3]
-			expect(messages).toHaveLength(6);
+			// Messages list: [MESSAGE0, MESSAGE1, MESSAGE2, MESSAGE3]
+			expect(messages).toHaveLength(4);
 		});
 
 		test('Arrive an history already loaded', () => {
@@ -268,7 +192,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().updateHistory(textMessage0.roomId, [textMessage1]);
 
 			const { messages } = useStore.getState().chatsRegistry[textMessage0.roomId];
-			expect(messages).toHaveLength(3);
+			expect(messages).toHaveLength(2);
 		});
 	});
 
@@ -281,10 +205,10 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().addCreateRoomMessage(room.id);
 
 			const { messages } = useStore.getState().chatsRegistry[room.id];
-			// Messages list: [DATE, CREATE ROOM, MESSAGE0, MESSAGE1]
-			expect(messages).toHaveLength(4);
-			expect(messages[1].type).toBe(MessageType.CONFIGURATION_MSG);
-			expect((messages[1] as ConfigurationMessage).operation).toBe(OperationType.ROOM_CREATION);
+			// Messages list: [CREATE ROOM, MESSAGE0, MESSAGE1]
+			expect(messages).toHaveLength(3);
+			expect(messages[0].type).toBe(MessageType.CONFIGURATION_MSG);
+			expect((messages[0] as ConfigurationMessage).operation).toBe(OperationType.ROOM_CREATION);
 		});
 
 		test('Add a create room message to a single conversation', () => {
@@ -295,9 +219,9 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().addCreateRoomMessage(room.id);
 
 			const { messages } = useStore.getState().chatsRegistry[room.id];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1]
-			expect(messages).toHaveLength(3);
-			expect(messages[1]).toBe(textMessage0);
+			// Messages list: [MESSAGE0, MESSAGE1]
+			expect(messages).toHaveLength(2);
+			expect(messages[0]).toBe(textMessage0);
 		});
 
 		test('Add a create room message to a group with cleared history', () => {
@@ -311,9 +235,9 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().addCreateRoomMessage(room.id);
 
 			const { messages } = useStore.getState().chatsRegistry[room.id];
-			// Messages list: [DATE, MESSAGE0, MESSAGE1]
-			expect(messages).toHaveLength(3);
-			expect(messages[1]).toBe(textMessage0);
+			// Messages list: [MESSAGE0, MESSAGE1]
+			expect(messages).toHaveLength(2);
+			expect(messages[0]).toBe(textMessage0);
 		});
 	});
 
@@ -331,7 +255,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().setRepliedMessage(message.roomId, messageReplyToMessage.id, message);
 
 			const { messages } = useStore.getState().chatsRegistry[message.roomId];
-			const replied = messages[2] as TextMessage;
+			const replied = messages[1] as TextMessage;
 			expect(replied.repliedMessage).toBe(message);
 		});
 
@@ -340,7 +264,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().setRepliedMessage(message.roomId, messageReplyToMessage.id, message);
 
 			const { messages } = useStore.getState().chatsRegistry[message.roomId];
-			const replied = messages[1] as TextMessage;
+			const replied = messages[0] as TextMessage;
 			expect(replied.repliedMessage).toBe(message);
 		});
 	});
@@ -373,15 +297,12 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(find(messages, { id: placeholderMessageFields.id })).toBeUndefined();
 		});
 
-		test('Add placeholder message and check that date message is present', () => {
+		test('Add placeholder message', () => {
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
 			useStore.getState().setPlaceholderMessage(placeholderMessageFields);
 
 			const { messages } = useStore.getState().chatsRegistry[placeholderMessageFields.roomId];
-			const dateMessage = messages[messages.length - 2];
 			const placeholder = messages[messages.length - 1] as TextMessage;
-
-			expect(dateMessage.type).toBe(MessageType.DATE_MSG);
 			expect(placeholder.id).toBe('placeholderMessageId');
 			expect(placeholder.text).toBe('placeholderMessageText');
 			expect(placeholder.replyTo).toBe('replyToMessageId');
@@ -410,9 +331,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().newMessage(newTextMessage);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
-			// Messages list: [DATE, NEW MESSAGE]
-			expect(messages[0].type).toBe(MessageType.DATE_MSG);
-			expect(messages[1]).toStrictEqual(newTextMessage);
+			expect(messages[0]).toStrictEqual(newTextMessage);
 		});
 	});
 
@@ -427,8 +346,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				from: 'userA'
 			});
 
-			useStore.getState().addFastening(fastening);
-			useStore.getState().addFastening(fastening); // duplicate
+			useStore.getState().addFastening([fastening]);
+			useStore.getState().addFastening([fastening]); // duplicate
 
 			const fastenings =
 				useStore.getState().chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId];
@@ -450,8 +369,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				from: 'b',
 				action: FasteningAction.REACTION
 			});
-			useStore.getState().addFastening(f2);
-			useStore.getState().addFastening(f1);
+			useStore.getState().addFastening([f2]);
+			useStore.getState().addFastening([f1]);
 
 			const fastenings = useStore.getState().chatsRegistry[f1.roomId].fastenings.s1;
 			expect(fastenings[0].id).toBe('f1');
@@ -482,7 +401,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 
 			const { messages, markers } = useStore.getState().chatsRegistry[msg.roomId];
 			expect(markers[marker.from]).toStrictEqual(marker);
-			expect((messages[1] as TextMessage).read).not.toBe(MarkerStatus.UNREAD);
+			expect((messages[0] as TextMessage).read).not.toBe(MarkerStatus.UNREAD);
 		});
 	});
 
@@ -500,6 +419,110 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			const roomId = 'roomUnreadInit';
 			useStore.getState().incrementUnreadCount(roomId, 1);
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(1);
+		});
+	});
+
+	describe('Search messages', () => {
+		test('Store search messages', () => {
+			const roomId = 'searchRoom1';
+			const searchMessages = [
+				createMockTextMessage({ id: 'msgId1', roomId, text: 'Hello' }),
+				createMockTextMessage({ id: 'msgId2', roomId, text: 'World' })
+			];
+			useStore.getState().setSearchResults(roomId, searchMessages);
+			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(2);
+		});
+
+		test('Clear search messages', () => {
+			const roomId = 'searchRoom2';
+			const searchMessages = [
+				createMockTextMessage({ id: 'msgId3', roomId, text: 'Foo' }),
+				createMockTextMessage({ id: 'msgId4', roomId, text: 'Bar' })
+			];
+			const store = useStore.getState();
+			store.setSearchResults(roomId, searchMessages);
+			store.setSelectedSearchResult(roomId, searchMessages[0].stanzaId);
+			store.clearSearchResults(roomId);
+			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(0);
+			expect(useStore.getState().activeConversations[roomId]?.selectedSearchResult).toBeUndefined();
+		});
+	});
+
+	describe('addMessageRange', () => {
+		test('Adding two ranges with gap', () => {
+			const range1: MessageRange = {
+				oldestId: 'msg1',
+				oldestTimestamp: 1000,
+				newestId: 'msg10',
+				newestTimestamp: 2000
+			};
+			const range2: MessageRange = {
+				oldestId: 'msg8',
+				oldestTimestamp: 2500,
+				newestId: 'msg20',
+				newestTimestamp: 3000
+			};
+			useStore.getState().addMessageRange('roomId', range2);
+			useStore.getState().addMessageRange('roomId', range1);
+			const ranges = useStore.getState().chatsRegistry.roomId.messageRanges;
+			expect(ranges).toHaveLength(2);
+			expect(ranges?.[0]).toEqual(range1);
+			expect(ranges?.[1]).toEqual(range2);
+		});
+
+		test('Merge overlapping ranges', () => {
+			const range1: MessageRange = {
+				oldestId: 'msg1',
+				oldestTimestamp: 1000,
+				newestId: 'msg10',
+				newestTimestamp: 2000
+			};
+			const range2: MessageRange = {
+				oldestId: 'msg8',
+				oldestTimestamp: 1800,
+				newestId: 'msg20',
+				newestTimestamp: 3000
+			};
+			useStore.getState().addMessageRange('roomId', range2);
+			useStore.getState().addMessageRange('roomId', range1);
+			const ranges = useStore.getState().chatsRegistry.roomId.messageRanges;
+			expect(ranges).toHaveLength(1);
+			expect(ranges?.[0].newestTimestamp).toBe(range2.newestTimestamp);
+			expect(ranges?.[0].oldestTimestamp).toBe(range1.oldestTimestamp);
+		});
+	});
+
+	describe('Backfill queue', () => {
+		test('Do not add duplicate backfill requests', () => {
+			const roomId = 'room3';
+			const request: BackfillRequest = {
+				afterDate: date1,
+				beforeDate: date2
+			};
+			useStore.getState().enqueueBackfill(roomId, [request]);
+			useStore.getState().enqueueBackfill(roomId, [request]);
+
+			const { backfillQueue } = useStore.getState().chatsRegistry[roomId];
+			expect(backfillQueue).toHaveLength(1);
+		});
+
+		test('Remove first request from queue', () => {
+			const roomId = 'room4';
+			const request1: BackfillRequest = {
+				afterDate: date1,
+				beforeDate: date2
+			};
+			const request2: BackfillRequest = {
+				afterDate: date2,
+				beforeDate: date3
+			};
+
+			useStore.getState().enqueueBackfill(roomId, [request1, request2]);
+			useStore.getState().shiftBackfillQueue(roomId);
+
+			const { backfillQueue } = useStore.getState().chatsRegistry[roomId];
+			expect(backfillQueue).toHaveLength(1);
+			expect(backfillQueue[0]).toEqual(request2);
 		});
 	});
 });

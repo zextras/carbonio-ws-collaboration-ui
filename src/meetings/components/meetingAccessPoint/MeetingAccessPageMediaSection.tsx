@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint-disable jsx-a11y/media-has-caption */
 import React, {
 	Dispatch,
 	FC,
@@ -14,6 +15,7 @@ import React, {
 	useState
 } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -24,12 +26,11 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
-import AccessTile from './mediaHandlers/AccessTile';
-import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
+import AccessTile from './AccessTile';
+import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
+import { useLocalMediaHandler } from './useLocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
@@ -37,20 +38,13 @@ import useStore from '../../../store/Store';
 import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../utils/localStorageUtils';
 
 type AccessMeetingPageMediaSectionProps = {
-	streamTrack: MediaStream | null;
-	setStreamTrack: Dispatch<SetStateAction<MediaStream | null>>;
 	hasUserDirectAccess: boolean | undefined;
 	userIsReady: boolean;
 	meetingName: string;
 	wrapperWidth: number;
-	handleEnterMeeting: (
-		mediaDevicesEnabled?: { audio: boolean; video: boolean },
-		selectedDevicesId?: { audio?: string; video?: string }
-	) => void;
-	handleWaitingRoom: (
-		mediaDevicesEnabled?: { audio: boolean; video: boolean },
-		selectedDevicesId?: { audio?: string; video?: string }
-	) => void;
+	handleEnterMeeting: () => void;
+	handleWaitingRoom: () => void;
+	setMediaStatus: Dispatch<SetStateAction<MediaStatus>>;
 };
 
 const ResizeWrapper = styled(Container)`
@@ -69,20 +63,23 @@ const AlignWrapper = styled(Container)`
 `;
 
 const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
-	streamTrack,
-	setStreamTrack,
 	hasUserDirectAccess,
 	userIsReady,
 	meetingName,
 	wrapperWidth,
 	handleEnterMeeting,
-	handleWaitingRoom
+	handleWaitingRoom,
+	setMediaStatus
 }) => {
-	const [t] = useTranslation();
-	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const [micTest, setMicTest] = useState(false);
+
+	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
+	const [t] = useTranslation();
 	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop mic test');
 	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
@@ -118,21 +115,46 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		LOCAL_STORAGE_NAMES.MEETINGS
 	);
 
-	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
-
-	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
-	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
-	const [selectedDevicesId, setSelectedDevicesId] = useState<{
-		audio: string | undefined;
-		video: string | undefined;
-	}>({ audio: undefined, video: undefined });
-	const [mediaDevicesEnabled, setMediaDevicesEnabled] = useState<{
-		audio: boolean;
-		video: boolean;
-	}>({ audio: meetingStorage.EnableMicrophone, video: meetingStorage.EnableCamera });
-
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const audioStreamRef = useRef<HTMLAudioElement>(null);
+
+	const {
+		status: videoStatus,
+		deviceId: videoDeviceId,
+		HandlerComponent: VideoHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'video',
+		initialStatus: meetingStorage.EnableCamera,
+		streamRef: videoStreamRef
+	});
+
+	const {
+		status: audioStatus,
+		deviceId: audioDeviceId,
+		HandlerComponent: AudioHandlerComponent
+	} = useLocalMediaHandler({
+		mediaType: 'audio',
+		initialStatus: meetingStorage.EnableMicrophone,
+		streamRef: audioStreamRef
+	});
+
+	useEffect(() => {
+		setMeetingStorage({ EnableCamera: videoStatus, EnableMicrophone: audioStatus });
+		setMediaStatus({
+			audio: { enabled: audioStatus, selectedDeviceId: audioDeviceId },
+			video: { enabled: videoStatus, selectedDeviceId: videoDeviceId }
+		});
+	}, [audioDeviceId, audioStatus, setMediaStatus, setMeetingStorage, videoDeviceId, videoStatus]);
+
+	useEffect(() => {
+		if (!audioStatus) {
+			setMicTest(false);
+		}
+	}, [audioStatus]);
+
+	const toggleMicTest = useCallback(() => {
+		setMicTest((prev) => !prev);
+	}, []);
 
 	const areNetworksUp = useMemo(() => {
 		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
@@ -159,35 +181,17 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		whenYouAreReadyLabel
 	]);
 
-	const onToggleAudioTest = useCallback(() => {
-		setVideoPlayerTestMuted((prevState) => !prevState);
-	}, [setVideoPlayerTestMuted]);
-
-	// handle waiting room flow and events
-	const waitingRoomHandler = useCallback(
-		() => handleWaitingRoom(mediaDevicesEnabled, selectedDevicesId),
-		[handleWaitingRoom, mediaDevicesEnabled, selectedDevicesId]
-	);
-
-	const enterMeeting = useCallback(
-		() => handleEnterMeeting(mediaDevicesEnabled, selectedDevicesId),
-		[handleEnterMeeting, mediaDevicesEnabled, selectedDevicesId]
-	);
-
 	const enterButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
 		if (hasUserDirectAccess)
 			return (
-				<Tooltip
-					label={enterButtonDisabledTooltip}
-					disabled={areNetworksUp && enterButtonIsEnabled}
-				>
+				<Tooltip label={enterButtonDisabledTooltip} disabled={areNetworksUp}>
 					<Button
 						data-testid="enterMeetingButton"
 						width="fill"
 						label={enter}
-						onClick={enterMeeting}
-						disabled={!(areNetworksUp && enterButtonIsEnabled)}
+						onClick={handleEnterMeeting}
+						disabled={!areNetworksUp}
 					/>
 				</Tooltip>
 			);
@@ -198,9 +202,8 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 					label={readyToParticipateLabel}
 					icon="CheckmarkOutline"
 					iconPlacement="right"
-					onClick={waitingRoomHandler}
+					onClick={handleWaitingRoom}
 					width="fill"
-					disabled={!enterButtonIsEnabled}
 				/>
 			);
 		return (
@@ -212,62 +215,16 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			</Container>
 		);
 	}, [
+		hasUserDirectAccess,
+		enterButtonDisabledTooltip,
 		areNetworksUp,
 		enter,
-		enterButtonDisabledTooltip,
-		enterButtonIsEnabled,
-		enterMeeting,
-		hasUserDirectAccess,
-		waitingRoomHandler,
-		readyLabel,
+		handleEnterMeeting,
+		userIsReady,
 		readyToParticipateLabel,
-		userIsReady
+		handleWaitingRoom,
+		readyLabel
 	]);
-
-	const buttonsWrapper = useMemo(
-		() => (
-			<Container height="fit" orientation="horizontal" gap="1rem" mainAlignment="flex-start">
-				<Row width={`50%`} minWidth="14rem">
-					<Button
-						width="fill"
-						type="outlined"
-						backgroundColor="text"
-						icon="Mic"
-						iconPlacement="right"
-						label={videoPlayerTestMuted ? playMicLabel : stopMicLabel}
-						onClick={onToggleAudioTest}
-						disabled={!mediaDevicesEnabled.audio}
-					/>
-				</Row>
-				<Row width={`50%`} minWidth="14rem">
-					{enterButton}
-				</Row>
-			</Container>
-		),
-		[
-			enterButton,
-			mediaDevicesEnabled.audio,
-			onToggleAudioTest,
-			playMicLabel,
-			stopMicLabel,
-			videoPlayerTestMuted
-		]
-	);
-
-	// handle change of video stream
-	useEffect(() => {
-		if (videoStreamRef.current) {
-			if (mediaDevicesEnabled.video) {
-				videoStreamRef.current.srcObject = streamTrack;
-				setEnterButtonIsEnabled(true);
-			} else {
-				videoStreamRef.current.srcObject = null;
-				setEnterButtonIsEnabled(true);
-			}
-		}
-	}, [streamTrack, mediaDevicesEnabled, setEnterButtonIsEnabled]);
-
-	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, waitingRoomHandler);
 
 	return (
 		<ResizeWrapper
@@ -280,9 +237,13 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			<Container height="fit" width={`${wrapperWidth}rem`} minWidth="35rem">
 				<AccessTile
 					videoStreamRef={videoStreamRef}
-					videoPlayerTestMuted={videoPlayerTestMuted}
-					mediaDevicesEnabled={mediaDevicesEnabled}
+					videoPlayerTestMuted
+					mediaDevicesEnabled={{
+						audio: audioStatus,
+						video: videoStatus
+					}}
 				/>
+				<audio ref={audioStreamRef} autoPlay muted={!micTest || !audioStatus} />
 			</Container>
 			<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
 				<Container mainAlignment="center" crossAlignment="center" gap="2rem">
@@ -293,17 +254,27 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						<Padding bottom="0.25rem" />
 						<Text>{setInputDevicesLabel}</Text>
 					</AlignWrapper>
-					<LocalMediaHandler
-						streamTrack={streamTrack}
-						setStreamTrack={setStreamTrack}
-						setEnterButtonIsEnabled={setEnterButtonIsEnabled}
-						selectedDevicesId={selectedDevicesId}
-						setSelectedDevicesId={setSelectedDevicesId}
-						mediaDevicesEnabled={mediaDevicesEnabled}
-						setMediaDevicesEnabled={setMediaDevicesEnabled}
-						setMeetingStorage={setMeetingStorage}
-					/>
-					{buttonsWrapper}
+					<Container gap="0.5rem" height="fit">
+						{VideoHandlerComponent}
+						{AudioHandlerComponent}
+					</Container>
+					<Container height="fit" orientation="horizontal" gap="1rem" mainAlignment="flex-start">
+						<Row width={`50%`} minWidth="14rem">
+							<Button
+								width="fill"
+								type="outlined"
+								backgroundColor="text"
+								icon="Mic"
+								iconPlacement="right"
+								label={!micTest ? playMicLabel : stopMicLabel}
+								onClick={toggleMicTest}
+								disabled={!audioStatus}
+							/>
+						</Row>
+						<Row width={`50%`} minWidth="14rem">
+							{enterButton}
+						</Row>
+					</Container>
 				</Container>
 				{waitingRoomLabels}
 			</Container>

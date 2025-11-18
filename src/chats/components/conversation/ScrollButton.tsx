@@ -6,10 +6,10 @@
 
 import React, { ReactElement, useCallback, useState, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Badge, Button, Container, Padding } from '@zextras/carbonio-design-system';
 import { debounce } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySelectors';

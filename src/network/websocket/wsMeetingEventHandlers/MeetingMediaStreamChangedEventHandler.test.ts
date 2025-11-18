@@ -53,10 +53,17 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 		expect(activeMeeting?.pinnedTile).toHaveProperty('type', event.mediaType);
 	});
 
-	test('Audio feedback is sent when screen sharing', () => {
+	test('Audio feedback is sent when screen sharing started', () => {
 		event.mediaType = STREAM_TYPE.SCREEN;
 		meetingMediaStreamChangedEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
+	});
+
+	test('Audio feedback is not sent when screen sharing stopped', () => {
+		event.mediaType = STREAM_TYPE.SCREEN;
+		event.active = false;
+		meetingMediaStreamChangedEventHandler(event);
+		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent for new screen sharing outside active meeting', () => {

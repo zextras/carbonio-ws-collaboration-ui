@@ -6,8 +6,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Shimmer } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import TileAvatarComponent from './TileAvatarComponent';
 import TileHoverContainer, { HoverContainer } from './TileHoverContainer';
@@ -26,7 +26,6 @@ import {
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -63,8 +62,6 @@ const CustomTile = styled(Container)<{
 			opacity: ${({ $isHovering, $isPip }): number => (!$isPip && $isHovering ? 1 : 0)};
 		}
 	}
-
-	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
 const CustomShimmer = styled(Shimmer.Logo)`
@@ -80,14 +77,14 @@ const CustomContainer = styled(Container)`
 
 const VideoEl = styled.video<{
 	$isScreenShare: boolean;
+	$isPortrait: boolean;
 }>`
-	${({ $isScreenShare }): string | false => !$isScreenShare && 'object-fit: cover;'}
+	${({ $isScreenShare, $isPortrait }): string | false =>
+		!$isScreenShare && !$isPortrait && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
 	z-index: ${Z_INDEX_RANK.TILE_VIDEO};
-
-	${BrowserUtils.isMobile() && 'border-radius: 0;'}
 `;
 
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
@@ -106,6 +103,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isStreamLoading, setIsStreamLoading] = useState<boolean>(true);
+	const [isPortraitVideo, setIsPortraitVideo] = useState<boolean>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const hoverRef = useRef<HTMLDivElement>(null);
@@ -167,6 +165,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		};
 	}, [handleHoverMouseMove]);
 
+	const handleLoadedData = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+		const video = e.currentTarget;
+		if (video.videoHeight && video.videoWidth) {
+			setIsPortraitVideo(video.videoHeight / video.videoWidth > 1.3);
+		}
+		setIsStreamLoading(false);
+	}, []);
+
 	useEffect(
 		() => (): void => {
 			timeout.current && clearTimeout(timeout.current);
@@ -208,7 +214,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
 				$isScreenShare={!!isScreenShare}
-				onLoadedData={() => setIsStreamLoading(false)}
+				$isPortrait={isPortraitVideo}
+				onLoadedData={handleLoadedData}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box" height="fit">

@@ -4,19 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, {
-	Dispatch,
-	ReactElement,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useState
-} from 'react';
+import React, { Dispatch, ReactElement, SetStateAction, useEffect, useState } from 'react';
 
-import { Container, Row, Text, Tooltip, Button } from '@zextras/carbonio-design-system';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { Button, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { css } from 'styled-components';
 
+import { ConversationView } from './Conversation';
 import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
@@ -26,7 +21,8 @@ import useStore from '../../../store/Store';
 
 type ConversationHeaderProps = {
 	roomId: string;
-	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	conversationView: ConversationView;
+	setConversationView: Dispatch<SetStateAction<ConversationView>>;
 };
 
 const RoomInfoHeader = styled(Container)`
@@ -76,10 +72,12 @@ const CustomIsWritingText = styled(Text)<{ $isWritingIsVisible: boolean }>`
 
 const ConversationHeader = ({
 	roomId,
-	setInfoPanelOpen
+	conversationView,
+	setConversationView
 }: ConversationHeaderProps): ReactElement => {
 	const [t] = useTranslation();
 	const infoTooltip = t('conversationInfo.info', 'Info');
+	const searchTooltip = t('conversationInfo.search', 'Search');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
@@ -100,22 +98,22 @@ const ConversationHeader = ({
 
 	const isDesktopView = useMediaQueryCheck();
 
-	const toggleInfoPanel = useCallback(() => {
-		setInfoPanelOpen(true);
-	}, [setInfoPanelOpen]);
-
 	return (
 		<RoomInfoHeader
 			height="3rem"
 			minHeight="3rem"
 			background="gray5"
-			borderRadius="none"
 			orientation="horizontal"
 			mainAlignment="space-between"
-			padding={{ vertical: 'medium', horizontal: 'large' }}
+			padding="small"
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<Container orientation="vertical" height="fit" crossAlignment="flex-start">
+				<Container
+					orientation="vertical"
+					height="fit"
+					crossAlignment="flex-start"
+					padding={{ horizontal: 'small' }}
+				>
 					<Tooltip label={roomName} overflow="ellipsis" overflowTooltip>
 						<CustomText $isWritingIsVisible={isWritingIsDefined}>{roomName}</CustomText>
 					</Tooltip>
@@ -129,18 +127,32 @@ const ConversationHeader = ({
 					</CustomIsWritingText>
 				</Container>
 			</Row>
-			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
+			<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.25rem">
 				{videoCallEnabled && !isPlaceholderRoom && (
 					<ConversationHeaderMeetingButton roomId={roomId} />
 				)}
-				{!isDesktopView && (
+				{conversationView !== ConversationView.SEARCH && (
+					<Tooltip label={searchTooltip}>
+						<Button
+							type="ghost"
+							onClick={() => setConversationView(ConversationView.SEARCH)}
+							color="gray0"
+							size="large"
+							minWidth="large"
+							icon="Search"
+						/>
+					</Tooltip>
+				)}
+				{(!isDesktopView || conversationView === ConversationView.SEARCH) && (
 					<Tooltip label={infoTooltip}>
 						<Button
-							data-testid="infoPanelToggle"
 							type="ghost"
-							onClick={toggleInfoPanel}
-							color="secondary"
+							onClick={() =>
+								setConversationView(isDesktopView ? ConversationView.CHAT : ConversationView.INFO)
+							}
+							color="gray0"
 							size="large"
+							minWidth="large"
 							icon="InfoOutline"
 						/>
 					</Tooltip>

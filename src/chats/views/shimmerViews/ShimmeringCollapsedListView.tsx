@@ -6,8 +6,8 @@
 
 import React, { ReactElement } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Shimmer } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 const CustomContainer = styled(Container)`
 	background-color: ${({ theme }): string => theme.palette.gray4.regular};

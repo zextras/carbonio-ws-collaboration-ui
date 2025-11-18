@@ -6,10 +6,10 @@
 
 import React, { useMemo, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Container, Tooltip, Text } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import useFilteredConversationList from './conversationList/useFilteredConversationList';
 import ConversationsFilter from './ConversationsFilter';

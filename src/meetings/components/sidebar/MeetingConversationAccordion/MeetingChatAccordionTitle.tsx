@@ -5,9 +5,9 @@
  */
 import React, { FC, useEffect, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Row, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';

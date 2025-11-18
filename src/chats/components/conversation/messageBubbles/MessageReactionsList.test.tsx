@@ -84,17 +84,20 @@ describe('MessageReactionsList', () => {
 	});
 
 	test('Message has 3 different reactions', () => {
-		useStore.getState().addFastening(reaction1ToSimpleTextMessage);
-		useStore.getState().addFastening(reaction2ToSimpleTextMessage);
-		useStore.getState().addFastening(reaction3ToSimpleTextMessage);
+		useStore
+			.getState()
+			.addFastening([
+				reaction1ToSimpleTextMessage,
+				reaction2ToSimpleTextMessage,
+				reaction3ToSimpleTextMessage
+			]);
 		setup(<MessageReactionsList roomId={room.id} stanzaId={simpleTextMessage.stanzaId} />);
 		const reactionChip = screen.queryAllByTestId(reactionChipTestId);
 		expect(reactionChip).toHaveLength(3);
 	});
 
 	test('The same reaction is sent by 2 user', () => {
-		useStore.getState().addFastening(reaction1ToSimpleTextMessage);
-		useStore.getState().addFastening(reaction4ToSimpleTextMessage);
+		useStore.getState().addFastening([reaction1ToSimpleTextMessage, reaction4ToSimpleTextMessage]);
 		setup(<MessageReactionsList roomId={room.id} stanzaId={simpleTextMessage.stanzaId} />);
 		const reactionChip = screen.queryAllByTestId(reactionChipTestId);
 		expect(reactionChip).toHaveLength(1);

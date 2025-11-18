@@ -28,8 +28,8 @@ export const meetingMediaStreamChangedEventHandler = (
 
 	state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 
-	// Send audio feedback of session user screen sharing
-	if (isMeetingActive(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
+	// Send audio feedback when a new screen share started
+	if (isMeetingActive(event.meetingId) && mediaType === STREAM_TYPE.SCREEN && event.active) {
 		sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 	}
 

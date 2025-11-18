@@ -6,9 +6,9 @@
 
 import React, { FC, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import ConversationInfoDetailsElement from './ConversationInfoDetailsElement';
 import {
@@ -57,29 +57,23 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	if (roomType === RoomType.ONE_TO_ONE)
 		return (
 			<CustomContainer
+				height="fit"
 				crossAlignment="flex-start"
 				mainAlignment="flex-start"
 				padding={{ all: 'large' }}
 				gap="0.5rem"
 			>
-				{roomType === RoomType.ONE_TO_ONE && (
-					<>
-						{userEmail && (
-							<ConversationInfoDetailsElement
-								label={userEmail}
-								icon="EmailOutline"
-								type={emailLabel}
-							/>
-						)}
-						<ConversationInfoDetailsElement label={memberName} icon="AtOutline" type={nameLabel} />
-					</>
+				{userEmail && (
+					<ConversationInfoDetailsElement label={userEmail} icon="EmailOutline" type={emailLabel} />
 				)}
+				<ConversationInfoDetailsElement label={memberName} icon="AtOutline" type={nameLabel} />
 			</CustomContainer>
 		);
 
 	if (roomType === RoomType.GROUP && roomTopic)
 		return (
 			<CustomContainer
+				height="fit"
 				crossAlignment="flex-start"
 				mainAlignment="flex-start"
 				padding={{ all: 'large' }}

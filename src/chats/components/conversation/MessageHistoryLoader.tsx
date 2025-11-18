@@ -6,9 +6,9 @@
 
 import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
+import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
-import styled from 'styled-components';
 
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
@@ -85,10 +85,9 @@ const MessageHistoryLoader = ({
 		debounce(() => {
 			const store = useStore.getState();
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
-			const lastMamMessage = store.activeConversations[roomId]?.lastMamMessage;
-			const date = lastMamMessage?.date ?? first(roomMessages)?.date ?? now();
+			const date = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, store.chatsRegistry[roomId].unread);
+				xmppClient.requestHistory(roomId, date);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),

@@ -112,12 +112,6 @@ const contactUser1: ContactInfo = {
 	email: user1Be.email
 };
 
-const contactUser2: ContactInfo = {
-	id: user2Be.id,
-	displayName: user2Be.name,
-	email: user2Be.email
-};
-
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setChatsBeStatus(true);

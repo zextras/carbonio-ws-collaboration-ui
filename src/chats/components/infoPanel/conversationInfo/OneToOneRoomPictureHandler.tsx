@@ -6,9 +6,9 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Container, Padding, Text } from '@zextras/carbonio-design-system';
+import styled from '@emotion/styled';
+import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
@@ -31,7 +31,6 @@ const Presence = styled.div`
 	background-color: ${({ theme }): string => theme.palette.success.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.gray5.regular};
 	border-radius: 50%;
-	margin-right: 0.1875rem;
 `;
 
 const CustomText = styled(Text)<{ $hasPicture: boolean }>`
@@ -70,9 +69,14 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 	const description = useMemo(() => {
 		if (showUsersPresence) {
 			return (
-				<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
+				<Container
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					height="fit"
+					width="fill"
+					gap={'0.25rem'}
+				>
 					{memberOnline && <Presence data-testid="user_presence_dot" />}
-					{memberOnline && <Padding right={'0.25rem'} />}
 					<CustomText size="small" color="gray6" $hasPicture={!!avatarPicture}>
 						{presenceLabel}
 					</CustomText>

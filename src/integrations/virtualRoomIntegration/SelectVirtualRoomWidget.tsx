@@ -5,6 +5,7 @@
  */
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Container,
 	Select,
@@ -17,7 +18,6 @@ import {
 } from '@zextras/carbonio-design-system';
 import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
 import { MeetingsApi } from '../../network';
@@ -251,9 +251,8 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			)}
 			{showCreationModal && (
 				<CreateVirtualRoomModal
-					toggleModal={toggleModal}
-					showCreationModal={showCreationModal}
-					setShowCreationModal={setShowCreationModal}
+					open={showCreationModal}
+					onClose={() => setShowCreationModal(false)}
 					createModalRef={createModalRef}
 					onChangeVirtualRoom={onChangeVirtualRoom}
 				/>

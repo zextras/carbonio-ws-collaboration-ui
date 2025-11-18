@@ -46,7 +46,6 @@ export type RaiseHandResponse = Response;
 
 export type CreateGuestAccountResponse = Response & {
 	id: string;
-	tokenId: string;
 	zmToken: string;
 	zxToken: string;
 };
