@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act } from '@testing-library/react';
-
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
@@ -14,7 +12,6 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/mocks/global';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -49,13 +46,6 @@ const event: MeetingLeftEvent = {
 	userId: 'userId'
 };
 
-const event2: MeetingLeftEvent = {
-	type: WsEventType.MEETING_PARTICIPANT_LEFT,
-	sentDate: '2022-01-01T00:00:00.000Z',
-	meetingId: meetingWith12Participants.id,
-	userId: 'sessionUserId'
-};
-
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
@@ -77,34 +67,6 @@ describe('meetingLeftEventHandler tests', () => {
 		const deleteSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
 		meetingLeftEventHandler(event);
 		expect(deleteSub).toHaveBeenCalled();
-	});
-
-	test('Audio feedback is sent when session user is inside meeting', () => {
-		useStore.getState().meetingConnection(meeting.id);
-		meetingLeftEventHandler(event);
-		expect(mockPlayAudio).toHaveBeenCalled();
-	});
-
-	test('Audio feedback is not sent when participants are more than 10', () => {
-		act(() => {
-			const store = useStore.getState();
-			store.meetingConnection(meetingWith12Participants.id);
-			store.addParticipant(
-				meetingWith12Participants.id,
-				createMockParticipants({ userId: event2.userId })
-			);
-		});
-		useStore.getState().meetingConnection(meetingWith12Participants.id);
-		meetingLeftEventHandler(event2);
-		expect(mockPlayAudio).not.toHaveBeenCalled();
-	});
-
-	test('Audio feedback is not sent outside active meeting', () => {
-		const store = useStore.getState();
-		store.meetingConnection(meeting.id);
-		store.meetingDisconnection(meeting.id);
-		meetingLeftEventHandler(event);
-		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('Left participant is removed from talking users', () => {

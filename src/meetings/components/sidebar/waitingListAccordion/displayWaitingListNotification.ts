@@ -6,6 +6,7 @@
 import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
+import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../../constants/appConstants';
 import useStore from '../../../../store/Store';
 import {
 	getLocalStorageItem,
@@ -48,8 +49,8 @@ const displayWaitingListNotification = (meetingId: string): void => {
 	if (
 		ChatsNotificationsSettings.WaitingRoomAccessNotifications &&
 		ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds &&
-		meeting?.participants &&
-		Object.keys(meeting?.participants).length < 20
+		meeting?.waitingList &&
+		meeting.waitingList.length <= SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD
 	) {
 		sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 	}
