@@ -26,10 +26,9 @@ describe('MeetingsUtils', () => {
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
 			sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 
-			expect(mockPlayAudio).toHaveBeenCalledTimes(6);
+			expect(mockPlayAudio).toHaveBeenCalledTimes(5);
 		});
 	});
 

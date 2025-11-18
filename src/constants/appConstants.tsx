@@ -17,6 +17,9 @@ export const MEETINGS_NAME = 'Meetings';
 export const MEETINGS_ROUTE = 'meetings';
 export const MEETINGS_PATH = `focus-mode/${MEETINGS_ROUTE}/`;
 
+export const SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD = 3;
+export const LARGE_MEETING_THRESHOLD = 15;
+
 export const TRACKER_EVENT = {
 	meetingEvaluation: 'Meeting evaluation',
 	conversationSearch: 'Conversation search performed',
