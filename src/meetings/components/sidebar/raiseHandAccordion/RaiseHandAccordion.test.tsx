@@ -66,8 +66,7 @@ describe('RaiseHandAccordion', () => {
 		expect(screen.queryByText(/raised hands/i)).not.toBeInTheDocument();
 	});
 
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip('toggles open and closed state', async () => {
+	test('toggles open and closed state', async () => {
 		const store = useStore.getState();
 
 		const { user } = setup(<RaiseHandAccordion meetingId={meeting.id} />);

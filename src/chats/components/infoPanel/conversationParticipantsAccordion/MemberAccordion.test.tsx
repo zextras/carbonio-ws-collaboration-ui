@@ -92,8 +92,7 @@ describe('Participants accordion', () => {
 		expect(titleIsSingular).toBeInTheDocument();
 	});
 
-	// Skipped: Design system upgrade to 11.0.0-devel.5 introduced setState during Accordion rendering phase, causing React warnings
-	test.skip('Set open/close accordion status', async () => {
+	test('Set open/close accordion status', async () => {
 		// Default status: open
 		const { user } = setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.getByText(/Search members/i)).toBeVisible();

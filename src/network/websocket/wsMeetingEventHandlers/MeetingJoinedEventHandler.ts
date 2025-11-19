@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { find } from 'lodash';
+import { find, throttle } from 'lodash';
 
+import { LARGE_MEETING_THRESHOLD } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
@@ -12,6 +13,12 @@ import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
+
+const playJoinNotification = throttle(
+	() => sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),
+	5000,
+	{ leading: true, trailing: false }
+);
 
 export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	const state = useStore.getState();
@@ -37,9 +44,8 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	if (
 		isMeetingActive(event.meetingId) &&
 		!isMyId(event.userId) &&
-		meeting?.participants &&
-		Object.keys(meeting?.participants).length < 9
+		Object.keys(meeting?.participants || {}).length < LARGE_MEETING_THRESHOLD
 	) {
-		sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
+		playJoinNotification();
 	}
 };

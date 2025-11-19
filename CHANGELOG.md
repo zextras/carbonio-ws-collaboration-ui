@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.18](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.17...v0.9.18) (2025-11-18)
+
+
+### Features
+
+* add tracking on search ([df18614](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/df18614d75387cb245cc3a00916f3d7ed0a36518)), closes [#621](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/621)
+* adjust video tile scaling for vertical mobile videos [CO-2711] ([#611](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/611)) ([bca1a1a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bca1a1a2a3f617dc1e421fed3ec59b41742d74bb))
+* avoid sending audio feedback when a user lowers his hand [CO-2419 ]([#598](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/598)) ([85fb8c3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/85fb8c308b5df5cd7f7a8f1105dd0c30aa9ebc61))
+* disable send message with ENTER key for Chinese, Japanese and Vietnamese [CO-2424] ([#607](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/607)) ([1860198](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1860198ce538dd99fe92d276ded5b2e292224c7a))
+* improve access page for external users [CO-2430] ([#609](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/609)) ([06baed0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/06baed0881269ff7be0ed6eeef8ba4f3efb89d0a))
+* let the user press the ESC key to close modals ([#590](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/590)) ([dfa066c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/dfa066c1b23898e05cc05a91a10c98af90525710))
+* message search [CO-2428] ([#608](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/608)) ([21451e1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/21451e17a48bc165ca5e9d834d8431f4355dce6e))
+* reduce impact of meeting actions sounds [CO-2412] ([#626](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/626)) ([5f9396a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5f9396a2614c1b4fbbb9e2de8dcb7a2220266dcc))
+* set autoGainControl to true ([#597](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/597)) ([ea3b711](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ea3b7110eb85a3b9ee50e9c6c308212628a04ed9))
+* show draft content when the message is on draft ([33bf239](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/33bf239afbd050a7819be9a282e468381328bc81)), closes [#596](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/596)
+
+
+### Bug Fixes
+
+* avoid to call leaveConversation after leaveMeeting in virtual meeting [CO-2661] ([#612](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/612)) ([b0cdea4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b0cdea48ed8a5b54fe191e21c144cac343f8fe35))
+* recording modal shows wrong message about where it ll be saved [CO-2601] ([#613](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/613)) ([098cbae](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/098cbae7a7bba443a3d5c8b5771c347070c054b5))
+* retry fetch when a version_mismatch error occurs [CO-2742] ([#614](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/614)) ([8c7edc5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8c7edc522014e341930da674e8bd9e1e5bab0d44))
+* some tests are failing after a design system update [CO-2759] ([#630](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/630)) ([70d1e54](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/70d1e541cbee5cb082b17831e4ae8a4682292783))
+* spacing and alignment infoPanel issues [CO-2777] ([#627](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/627)) ([c160219](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c160219bf43a61119b509ad11b76763c450db79c))
+* unread messages badge shows wrong number on login [CO-2689] ([#610](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/610)) ([153441c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/153441cdd07c998326d5213fd9d454f6368cef95))
+* use browser language for external guest [CO-2766] ([#623](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/623)) ([0b0d670](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0b0d6703ef7651bcb4d13c70501609286c14117c))
+
 ### [0.9.17](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.16...v0.9.17) (2025-08-22)
 
 
