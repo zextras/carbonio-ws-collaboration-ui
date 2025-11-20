@@ -503,7 +503,6 @@ describe('Meetings API', () => {
 		).mockReturnValue(() =>
 			Promise.resolve({
 				id: 'string',
-				tokenId: 'string',
 				zmToken: 'string',
 				zxToken: 'string'
 			})

@@ -14,13 +14,14 @@ import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
+import { setDateDefault } from '../../../../utils/dateUtils';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
 
 const useExternalAccess = (): {
 	meetingName: string;
 	createGuestAccount: (guestName: string) => void;
 } => {
-	const [t] = useTranslation();
+	const { t, i18n } = useTranslation();
 	const generalErrorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
@@ -30,6 +31,15 @@ const useExternalAccess = (): {
 
 	const { goToInfoPage } = useRouting();
 	const createSnackbar = useSnackbar();
+
+	useEffect(() => {
+		const browserLanguage = navigator.languages?.[0] || navigator.language;
+		const selectedLanguage = ['zh', 'zh-CN', 'zh-HK', 'zh-TW'].includes(browserLanguage)
+			? 'zh_CN'
+			: browserLanguage.split('-')[0];
+		i18n.changeLanguage(selectedLanguage);
+		setDateDefault(selectedLanguage);
+	}, [i18n]);
 
 	useEffect(() => {
 		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
