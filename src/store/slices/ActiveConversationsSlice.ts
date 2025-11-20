@@ -208,14 +208,6 @@ export const useActiveConversationsSlice: StateCreator<
 						conversation.filesToAttach[indexFileToRemove - 1];
 					if (nextFile) {
 						nextFile.hasFocus = true;
-						if (nextFile.description) {
-							conversation.draftMessage = {
-								text: nextFile.description,
-								date: Date.now()
-							};
-						}
-					} else {
-						delete conversation.draftMessage;
 					}
 				}
 				remove(conversation.filesToAttach, (file) => file.fileId === fileId);
@@ -246,7 +238,6 @@ export const useActiveConversationsSlice: StateCreator<
 					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileId);
 					if (fileToAttach) {
 						fileToAttach.description = description ?? '';
-						fileToAttach.hasFocus = false;
 					}
 				}
 			}),

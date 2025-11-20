@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
@@ -13,7 +13,11 @@ import ForwardFooter from './ForwardFooter';
 import MessageComposer from './MessageComposer';
 import ReferenceMessageView from './ReferenceMessageView';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
-import { getForwardList } from '../../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getDraftMessage,
+	getFilesToUploadArray,
+	getForwardList
+} from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 
 const ConversationFooterWrapper = styled(Container)`
@@ -28,19 +32,37 @@ type ConversationFooterProps = {
 
 const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId, isInsideMeeting }) => {
 	const forwardMessageList = useStore((store) => getForwardList(store, roomId));
+	const filesToUpload = useStore((store) => getFilesToUploadArray(store, roomId));
+	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 
-	return forwardMessageList === undefined ? (
+	const [textMessage, setTextMessage] = useState(draftMessage ?? '');
+
+	useEffect(() => {
+		setTextMessage(draftMessage ?? '');
+	}, [draftMessage, roomId]);
+
+	if (forwardMessageList) return <ForwardFooter roomId={roomId} />;
+	return (
 		<ConversationFooterWrapper
 			height="fit"
 			background={isInsideMeeting ? 'gray0' : 'gray6'}
 			borderRadius="none"
 		>
 			<ReferenceMessageView roomId={roomId} />
-			<UploadAttachmentManagerView roomId={roomId} />
-			<MessageComposer roomId={roomId} key={roomId} />
+			{filesToUpload && filesToUpload.length > 0 && (
+				<UploadAttachmentManagerView
+					roomId={roomId}
+					textMessage={textMessage}
+					setTextMessage={setTextMessage}
+				/>
+			)}
+			<MessageComposer
+				roomId={roomId}
+				textMessage={textMessage}
+				setTextMessage={setTextMessage}
+				key={roomId}
+			/>
 		</ConversationFooterWrapper>
-	) : (
-		<ForwardFooter roomId={roomId} />
 	);
 };
 

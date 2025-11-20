@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 
 import styled from '@emotion/styled';
 import { Button, Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
-import { forEach, map } from 'lodash';
+import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useUploadFile from '../../../../hooks/useLoadFiles';
 import {
-	getDraftMessage,
-	getFilesToUploadArray
+	getFilesToUploadArray,
+	getFocusedFile
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
@@ -29,6 +29,8 @@ import {
 
 type UploadAttachmentManagerViewProps = {
 	roomId: string;
+	textMessage: string;
+	setTextMessage: (message: string) => void;
 };
 
 const AttachmentsPreview = styled(Container)`
@@ -104,7 +106,11 @@ const CustomIcon = styled(Icon)<{ title?: string }>`
 	width: 2.625rem;
 `;
 
-const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = ({ roomId }) => {
+const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = ({
+	roomId,
+	textMessage,
+	setTextMessage
+}) => {
 	const [t] = useTranslation();
 	const closeTooltip = t('tooltip.close', 'Close');
 	const addAttachmentLabel = t('action.addAttachment', 'Add attachment');
@@ -112,71 +118,51 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	const removeActionLabel = t('action.removeUser', 'Remove');
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-	const setDraftMessage = useStore((store) => store.setDraftMessage);
+	const focusedFile = useStore((store) => getFocusedFile(store, roomId));
 	const setFileFocus = useStore((store) => store.setFileFocus);
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
-	const setFileDescription = useStore((store) => store.setFileDescription);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+	const setFileDescription = useStore((store) => store.setFileDescription);
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 	const { createPreview } = useContext(PreviewsManagerContext);
 
-	const editFileDescription = useCallback(
-		(fileId: string, description: string | undefined) => {
-			// save the description of the file currently focused
-			// and then change the file to edit
-			let fileIdActuallyFocused;
-			forEach(filesToUploadArray, (file) => {
-				if (file.hasFocus) {
-					fileIdActuallyFocused = file.fileId;
-					setFileDescription(roomId, file.fileId, draftMessage);
-				}
-			});
-			if (fileIdActuallyFocused !== fileId) {
-				setDraftMessage(roomId, description);
+	const setDescriptionAsTextMessage = useCallback(
+		(fileId: string | undefined) => {
+			const fileSelected = find(filesToUploadArray, (file) => file.fileId === fileId);
+			if (fileSelected) {
+				setTextMessage(fileSelected.description);
 			}
+		},
+		[filesToUploadArray, setTextMessage]
+	);
+
+	useEffect(
+		() => () => {
+			setTextMessage('');
+		},
+		[setTextMessage]
+	);
+
+	useEffect(() => {
+		setDescriptionAsTextMessage(focusedFile);
+	}, [focusedFile, setDescriptionAsTextMessage]);
+
+	const focusFile = useCallback(
+		(fileId: string) => {
 			setFileFocus(roomId, fileId, true);
 			setInputHasFocus(roomId, true);
 		},
-		[
-			roomId,
-			setFileFocus,
-			setDraftMessage,
-			setInputHasFocus,
-			setFileDescription,
-			draftMessage,
-			filesToUploadArray
-		]
+		[roomId, setFileFocus, setInputHasFocus]
 	);
 
 	const removeFile = useCallback(
 		(ev: { stopPropagation: () => void }, fileId: string) => {
 			ev.stopPropagation();
-			if (filesToUploadArray && filesToUploadArray.length === 1) {
-				removeFilesToAttach(roomId);
-				setDraftMessage(roomId);
-			} else {
-				// if the file I'm removing is the selected one with text on input, clean the input and remove the file
-				if (draftMessage) {
-					forEach(filesToUploadArray, (file) => {
-						if (file.hasFocus && file.fileId === fileId) {
-							setDraftMessage(roomId);
-						}
-					});
-				}
-				removeFilesToAttach(roomId, fileId);
-				setInputHasFocus(roomId, true);
-			}
+			removeFilesToAttach(roomId, fileId);
+			setInputHasFocus(roomId, true);
 		},
-		[
-			roomId,
-			setDraftMessage,
-			removeFilesToAttach,
-			filesToUploadArray,
-			draftMessage,
-			setInputHasFocus
-		]
+		[roomId, removeFilesToAttach, setInputHasFocus]
 	);
 
 	const previewClick = useCallback(
@@ -215,7 +201,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
 						height="6.25rem"
 						width="6.25rem"
-						onClick={(): void => editFileDescription(file.fileId, file.description)}
+						onClick={(): void => focusFile(file.fileId)}
 					>
 						<HoverActions>
 							<Tooltip label={removeActionLabel} placement="top">
@@ -280,18 +266,17 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		});
 		return filePreviews;
 	}, [
-		editFileDescription,
 		filesToUploadArray,
-		previewActionLabel,
-		previewClick,
 		removeActionLabel,
-		removeFile
+		previewActionLabel,
+		focusFile,
+		removeFile,
+		previewClick
 	]);
 
 	const closeUploadAttachmentManagerView = useCallback(() => {
 		removeFilesToAttach(roomId);
-		setDraftMessage(roomId);
-	}, [roomId, removeFilesToAttach, setDraftMessage]);
+	}, [roomId, removeFilesToAttach]);
 
 	const loadFiles = useUploadFile(roomId);
 
@@ -314,61 +299,58 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		});
 	}, [filesToUploadArray, t]);
 
-	if (filesToUploadArray) {
-		return (
-			<AttachmentsPreview
-				background={'gray5'}
-				padding={{ all: 'small' }}
-				data-testid="upload_attachment_manager"
-			>
-				<Container orientation="horizontal" mainAlignment="space-between">
-					<Text color="secondary">{titleLabel}</Text>
-					<Tooltip label={closeTooltip} placement="top">
-						<Button
-							data-testid="closeFilesManager"
-							type="ghost"
-							icon="Close"
-							color="secondary"
-							size="medium"
-							onClick={closeUploadAttachmentManagerView}
-						/>
-					</Tooltip>
-				</Container>
-				<Container orientation="horizontal" padding={{ all: 'small' }}>
-					<FileListContainer
-						orientation="horizontal"
-						padding={{ horizontal: 'extrasmall' }}
-						width="fit"
-						mainAlignment="flex-start"
-						height="7.1875rem"
-						maxWidth="calc(100% - 2.5rem)"
-					>
-						{filesWithPreview}
-					</FileListContainer>
-					<Tooltip label={addAttachmentLabel} placement="top">
-						<Button
-							data-testid="addMoreFilesFromManager"
-							size="large"
-							icon="Plus"
-							labelColor="gray1"
-							type="outlined"
-							backgroundColor="transparent"
-							onClick={addMoreFiles}
-						/>
-					</Tooltip>
-				</Container>
-				<input
-					data-testid="addMoreFilesInput"
-					onChange={selectFiles}
-					type="file"
-					multiple
-					hidden
-					ref={fileSelectorInputRef}
-				/>
-			</AttachmentsPreview>
-		);
-	}
-	return null;
+	return (
+		<AttachmentsPreview
+			background={'gray5'}
+			padding={{ all: 'small' }}
+			data-testid="upload_attachment_manager"
+		>
+			<Container orientation="horizontal" mainAlignment="space-between">
+				<Text color="secondary">{titleLabel}</Text>
+				<Tooltip label={closeTooltip} placement="top">
+					<Button
+						data-testid="closeFilesManager"
+						type="ghost"
+						icon="Close"
+						color="secondary"
+						size="medium"
+						onClick={closeUploadAttachmentManagerView}
+					/>
+				</Tooltip>
+			</Container>
+			<Container orientation="horizontal" padding={{ all: 'small' }}>
+				<FileListContainer
+					orientation="horizontal"
+					padding={{ horizontal: 'extrasmall' }}
+					width="fit"
+					mainAlignment="flex-start"
+					height="7.1875rem"
+					maxWidth="calc(100% - 2.5rem)"
+				>
+					{filesWithPreview}
+				</FileListContainer>
+				<Tooltip label={addAttachmentLabel} placement="top">
+					<Button
+						data-testid="addMoreFilesFromManager"
+						size="large"
+						icon="Plus"
+						labelColor="gray1"
+						type="outlined"
+						backgroundColor="transparent"
+						onClick={addMoreFiles}
+					/>
+				</Tooltip>
+			</Container>
+			<input
+				data-testid="addMoreFilesInput"
+				onChange={selectFiles}
+				type="file"
+				multiple
+				hidden
+				ref={fileSelectorInputRef}
+			/>
+		</AttachmentsPreview>
+	);
 };
 
 export default UploadAttachmentManagerView;
