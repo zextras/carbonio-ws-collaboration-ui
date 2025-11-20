@@ -230,11 +230,15 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/SET_FILE_FOCUS'
 		);
 	},
-	setFileDescription: (roomId: string, fileId: string, description?: string): void => {
+	setFileDescription: (roomId: string, fileId: string | undefined, description?: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const { filesToAttach } = initActiveConversation(draft, roomId);
 				if (filesToAttach) {
+					if (!fileId && filesToAttach.length > 0) {
+						filesToAttach[0].description = description ?? '';
+						return;
+					}
 					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileId);
 					if (fileToAttach) {
 						fileToAttach.description = description ?? '';

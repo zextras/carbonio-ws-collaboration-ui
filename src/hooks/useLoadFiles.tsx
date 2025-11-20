@@ -20,14 +20,11 @@ const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
 
 	return useCallback(
 		(files: FileList) => {
-			const textArea = document.querySelector(
-				'textarea[data-testid="textAreaComposer"]'
-			) as HTMLTextAreaElement;
 			const listOfFiles: FileToUpload[] = map(files, (file, index) => ({
 				file,
 				fileId: uid(),
 				hasFocus: index === 0 && !filesToUploadArray,
-				description: index === 0 && !filesToUploadArray && textArea?.value ? textArea.value : '',
+				description: '',
 				localUrl: URL.createObjectURL(file)
 			}));
 			addFilesToAttach(roomId, listOfFiles);

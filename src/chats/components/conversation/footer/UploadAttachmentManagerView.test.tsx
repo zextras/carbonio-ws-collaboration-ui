@@ -363,20 +363,20 @@ describe('Upload attachment view', () => {
 	});
 	test('there is a file selected with description and other files in the attachmentViewManager and user removes the selected one with preview action => the file selected will be removed, the input will be cleared and set selected the one at the left and if present set the description of that file in the input', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ description: 'file one description' });
+		const fileOne = createMockFileToUpload({ fileId: 'fileOne', hasFocus: true });
 		const fileTwo = createMockFileToUpload({
-			hasFocus: true,
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), 'file one description');
+
 		const file = await screen.findByTestId(
 			`previewFileUpload-${fileTwo.file.name}-${fileTwo.fileId}`
 		);
 		expect(file).toBeVisible();
+		await user.click(file);
+		await user.type(screen.getByRole('textbox'), 'file two description');
 		await user.hover(file);
 		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileTwo.fileId}`);
 		await user.click(removeFileButton);

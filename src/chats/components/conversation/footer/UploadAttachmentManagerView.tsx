@@ -137,12 +137,14 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		[filesToUploadArray, setTextMessage]
 	);
 
-	useEffect(
-		() => () => {
+	// Set inputTest as description of the first file and clear it on unmount
+	useEffect(() => {
+		setFileDescription(roomId, undefined, textMessage);
+		return () => {
 			setTextMessage('');
-		},
-		[setTextMessage]
-	);
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [setTextMessage]);
 
 	useEffect(() => {
 		setDescriptionAsTextMessage(focusedFile);
