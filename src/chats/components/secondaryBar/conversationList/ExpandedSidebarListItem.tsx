@@ -164,7 +164,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const iconToDisplay = useMemo(() => {
 		if (isWritingLabel) return null;
 
-		if (draftMessage) {
+		if (draftMessage && unreadMessagesCount === 0) {
 			return (
 				<Tooltip label={draftTooltip} maxWidth="12.5rem">
 					<Container width="fit" padding={{ right: 'extrasmall' }}>
@@ -195,25 +195,32 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [
 		isWritingLabel,
 		draftMessage,
-		draftTooltip,
+		unreadMessagesCount,
 		ackIcon,
 		showMessageReads,
-		dropdownTooltip,
-		lastMessageOfRoom
+		lastMessageOfRoom,
+		draftTooltip,
+		dropdownTooltip
 	]);
 
 	const messageToDisplay = useMemo((): React.JSX.Element | string | undefined => {
 		if (isWritingLabel) {
 			return isWritingLabel;
 		}
-		if (draftMessage) {
+		if (draftMessage && unreadMessagesCount === 0) {
 			return draftMessage;
 		}
 		if (lastMessageOfRoom) {
 			return setLastMessageRoomText;
 		}
 		return undefined;
-	}, [draftMessage, isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
+	}, [
+		draftMessage,
+		isWritingLabel,
+		lastMessageOfRoom,
+		setLastMessageRoomText,
+		unreadMessagesCount
+	]);
 
 	const UnreadCounter = useMemo(
 		() =>

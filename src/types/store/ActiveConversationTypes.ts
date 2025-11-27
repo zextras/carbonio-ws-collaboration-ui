@@ -30,7 +30,7 @@ export type ActiveConversationsSlice = {
 	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
 	removeFilesToAttach: (roomId: string, fileId?: string) => void;
 	setFileFocus: (roomId: string, fileId: string, active: boolean) => void;
-	setFileDescription: (roomId: string, fileId: string, description?: string) => void;
+	setFileDescription: (roomId: string, fileId: string | undefined, description?: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
@@ -39,7 +39,7 @@ export type ActiveConversationsSlice = {
 };
 
 export type ActiveConversation = {
-	draftMessage?: string;
+	draftMessage?: { text: string; date: number };
 	scrollPositionMessageId?: string;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;

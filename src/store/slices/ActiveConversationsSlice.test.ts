@@ -158,7 +158,9 @@ describe('Active conversations slice', () => {
 		test('Set draft message', () => {
 			const message = 'Draft message';
 			useStore.getState().setDraftMessage(mockedRoom.id, message);
-			expect(useStore.getState().activeConversations[mockedRoom.id].draftMessage).toBe(message);
+			expect(useStore.getState().activeConversations[mockedRoom.id].draftMessage?.text).toBe(
+				message
+			);
 		});
 
 		test('Unset draft message', () => {

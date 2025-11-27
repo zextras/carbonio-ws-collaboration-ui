@@ -9,8 +9,6 @@ import React from 'react';
 import { act, fireEvent, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
-import MessageComposer from './MessageComposer';
-import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../../store/Store';
 import {
 	createMockFile,
@@ -26,6 +24,7 @@ import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import Chat from '../Chat';
+import ConversationFooter from './ConversationFooter';
 
 const add1Attachment = 'Add 1 attachment';
 const add2Attachments = 'Add 2 attachments';
@@ -52,18 +51,13 @@ const pdfToUpload: FileToUpload = createMockFileToUpload({
 const storeSetupBasic = (file: FileToUpload): UserEvent => {
 	const store = useStore.getState();
 	store.addFilesToAttach(mockedRoom.id, [file]);
-	const { user } = setup(<UploadAttachmentManagerView roomId={mockedRoom.id} />);
+	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return user;
 };
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	const { user } = setup(
-		<>
-			<UploadAttachmentManagerView roomId={mockedRoom.id} />
-			<MessageComposer roomId={mockedRoom.id} />
-		</>
-	);
+	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return { user, store };
 };
 
@@ -314,7 +308,7 @@ describe('Upload attachment view', () => {
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBeUndefined();
+		expect(filesToAttachUpdated?.length).toBe(0);
 	});
 	test('there is a file with description in the attachmentViewManager and user close the widget => the widget will become closed and the input get cleared and the file removed', async () => {
 		const { user, store } = storeSetupAdvanced();
@@ -369,20 +363,20 @@ describe('Upload attachment view', () => {
 	});
 	test('there is a file selected with description and other files in the attachmentViewManager and user removes the selected one with preview action => the file selected will be removed, the input will be cleared and set selected the one at the left and if present set the description of that file in the input', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ description: 'file one description' });
+		const fileOne = createMockFileToUpload({ fileId: 'fileOne', hasFocus: true });
 		const fileTwo = createMockFileToUpload({
-			hasFocus: true,
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), 'file one description');
+
 		const file = await screen.findByTestId(
 			`previewFileUpload-${fileTwo.file.name}-${fileTwo.fileId}`
 		);
 		expect(file).toBeVisible();
+		await user.click(file);
+		await user.type(screen.getByRole('textbox'), 'file two description');
 		await user.hover(file);
 		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileTwo.fileId}`);
 		await user.click(removeFileButton);
@@ -562,7 +556,7 @@ describe('Upload attachment view', () => {
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
 		expect(filesToAttachUpdated?.length).toBe(2);
-		expect((filesToAttachUpdated as FileToUpload[])[0].description).toBe('');
+		expect((filesToAttachUpdated as FileToUpload[])[0].description).toBe(inputText);
 		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
 		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
 		const fileOld = await screen.findByTestId(
@@ -608,7 +602,6 @@ describe('Upload attachment view', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 	});
-
 	test('Focused file does not change when user clicks on "Show preview"', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({
