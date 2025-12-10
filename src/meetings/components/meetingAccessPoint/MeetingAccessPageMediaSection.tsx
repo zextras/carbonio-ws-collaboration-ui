@@ -16,19 +16,12 @@ import React, {
 } from 'react';
 
 import styled from '@emotion/styled';
-import {
-	Button,
-	Container,
-	Icon,
-	Padding,
-	Row,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import AccessTile from './AccessTile';
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
+import { MicTestButton } from './MicTestButton';
 import { useLocalMediaHandler } from './useLocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useLocalStorage from '../../../hooks/useLocalStorage';
@@ -131,7 +124,8 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const {
 		status: audioStatus,
 		deviceId: audioDeviceId,
-		HandlerComponent: AudioHandlerComponent
+		HandlerComponent: AudioHandlerComponent,
+		streamTrack: audioStreamTrack
 	} = useLocalMediaHandler({
 		mediaType: 'audio',
 		initialStatus: meetingStorage.EnableMicrophone,
@@ -187,6 +181,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			return (
 				<Tooltip label={enterButtonDisabledTooltip} disabled={areNetworksUp}>
 					<Button
+						minWidth={'14rem'}
 						data-testid="enterMeetingButton"
 						width="fill"
 						label={enter}
@@ -258,22 +253,9 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						{VideoHandlerComponent}
 						{AudioHandlerComponent}
 					</Container>
-					<Container height="fit" orientation="horizontal" gap="1rem" mainAlignment="flex-start">
-						<Row width={`50%`} minWidth="14rem">
-							<Button
-								width="fill"
-								type="outlined"
-								backgroundColor="text"
-								icon="Mic"
-								iconPlacement="right"
-								label={!micTest ? playMicLabel : stopMicLabel}
-								onClick={toggleMicTest}
-								disabled={!audioStatus}
-							/>
-						</Row>
-						<Row width={`50%`} minWidth="14rem">
-							{enterButton}
-						</Row>
+					<Container height="fit" gap="1rem" mainAlignment="flex-start">
+						<MicTestButton disabled={!audioStatus} stream={audioStreamTrack} />
+						{enterButton}
 					</Container>
 				</Container>
 				{waitingRoomLabels}

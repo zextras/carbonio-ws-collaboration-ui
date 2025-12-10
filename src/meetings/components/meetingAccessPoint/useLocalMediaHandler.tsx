@@ -24,6 +24,7 @@ type UseLocalMediaHandlerReturn = {
 	HandlerComponent: React.ReactElement;
 	status: boolean;
 	deviceId: string | undefined;
+	streamTrack: MediaStream | null;
 };
 
 export const useLocalMediaHandler = ({
@@ -219,6 +220,7 @@ export const useLocalMediaHandler = ({
 	return {
 		HandlerComponent,
 		status,
-		deviceId
+		deviceId,
+		streamTrack
 	};
 };
