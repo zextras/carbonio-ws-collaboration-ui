@@ -7,11 +7,10 @@ import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 
 import { Button, ButtonProps, Dropdown, DropdownProps } from '@zextras/carbonio-design-system';
 
-interface ActionButtonProps
-	extends Omit<
-		ButtonProps,
-		'secondaryAction' | 'size' | 'type' | 'color' | 'backgroundColor' | 'labelColor'
-	> {
+interface ActionButtonProps extends Omit<
+	ButtonProps,
+	'secondaryAction' | 'size' | 'type' | 'color' | 'backgroundColor' | 'labelColor'
+> {
 	showItems: boolean;
 	setShowItems: Dispatch<SetStateAction<boolean>>;
 	items: DropdownProps['items'];
