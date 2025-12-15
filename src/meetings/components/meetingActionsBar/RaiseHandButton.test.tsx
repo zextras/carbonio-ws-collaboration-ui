@@ -7,7 +7,7 @@ import React from 'react';
 
 import { act, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import RaiseHandButton from './RaiseHandButton';
 import useStore from '../../../store/Store';

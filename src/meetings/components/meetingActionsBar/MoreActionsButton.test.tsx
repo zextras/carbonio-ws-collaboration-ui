@@ -7,7 +7,7 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import MoreActionsButton from './MoreActionsButton';
 import useStore from '../../../store/Store';

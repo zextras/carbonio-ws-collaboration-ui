@@ -7,7 +7,7 @@ import React from 'react';
 
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import BubblesWrapper from './BubblesWrapper';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';

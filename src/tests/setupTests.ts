@@ -51,6 +51,7 @@ beforeAll(() => {
 
 export const mockIntersectionObserverObserve = vi.fn();
 export const mockIntersectionObserverDisconnect = vi.fn();
+export const mockPlayAudio = vi.fn();
 beforeEach(() => {
 	vi.clearAllMocks();
 
@@ -212,6 +213,15 @@ beforeEach(() => {
 	Object.defineProperty(document.documentElement, 'requestFullscreen', {
 		writable: true,
 		value: vi.fn()
+	});
+
+	Object.defineProperty(global, 'Audio', {
+		writable: true,
+		value: vi.fn(function AudioMock() {
+			return {
+				play: mockPlayAudio
+			};
+		})
 	});
 
 	// Object.defineProperty(window, 'ResizeObserver', {

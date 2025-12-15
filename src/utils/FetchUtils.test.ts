@@ -5,20 +5,20 @@
  */
 
 import { act } from '@testing-library/react';
+import { Mock } from 'vitest';
 
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI, wscApiVersionHeader } from './FetchUtils';
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { spyOnFetch } from '../tests/jest-env-setup';
 import { RequestType } from '../types/network/apis/IBaseAPI';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 const defPath = '/services/chats/test';
 
-const fetchResponse: jest.Mock = vi.fn(() => ({}));
-const fetchBlobResponse: jest.Mock = vi.fn(() => ({}));
-const getHeaders: jest.Mock = vi.fn(() => 'application/json');
+const fetchResponse = vi.fn(() => ({}));
+const fetchBlobResponse = vi.fn(() => ({}));
+const getHeaders = vi.fn(() => 'application/json');
 
 beforeEach(() => {
 	Object.defineProperty(global, 'fetch', {
@@ -37,7 +37,6 @@ beforeEach(() => {
 
 describe('FetchUtils', () => {
 	test('fetchApi is called correctly', async () => {
-		spyOnFetch.mockRestore();
 		act(() => {
 			useStore.getState().setQueueId('idUser1');
 			useStore.getState().setApiVersion('1.0.0');
@@ -60,19 +59,17 @@ describe('FetchUtils', () => {
 	});
 
 	test('fetchApi reject for response status not ok', async () => {
-		spyOnFetch.mockRestore();
 		const mockErrResp = {
 			ok: false,
 			status: 400
 		};
-		(global.fetch as jest.Mock).mockResolvedValue(mockErrResp);
+		(global.fetch as Mock).mockResolvedValue(mockErrResp);
 
 		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
 	test('Set correct version after version mismatch error', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		spyOnFetch.mockRestore();
 		const mockErrResp = {
 			ok: false,
 			status: 422,
@@ -81,7 +78,7 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		(global.fetch as Mock).mockResolvedValueOnce(mockErrResp);
 		const mockValidResp = {
 			ok: true,
 			status: 200,
@@ -90,14 +87,13 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(mockValidResp);
+		(global.fetch as Mock).mockResolvedValueOnce(mockValidResp);
 		await fetchAPI('test', RequestType.GET);
 		expect(useStore.getState().session.apiVersion).toBe('1.6.0');
 	});
 
 	test('Recall fetch after a version mismatch error', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		spyOnFetch.mockRestore();
 		const mockErrResp = {
 			ok: false,
 			status: 422,
@@ -106,7 +102,7 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		(global.fetch as Mock).mockResolvedValueOnce(mockErrResp);
 		const mockValidResp = {
 			ok: true,
 			status: 200,
@@ -115,7 +111,7 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(mockValidResp);
+		(global.fetch as Mock).mockResolvedValueOnce(mockValidResp);
 		await fetchAPI('test', RequestType.GET);
 		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});
@@ -124,7 +120,6 @@ describe('FetchUtils', () => {
 		useStore
 			.getState()
 			.setSupportedVersions(['2.0.0', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
-		spyOnFetch.mockRestore();
 
 		let callCount = 0;
 		const mockErrResp = (
@@ -141,7 +136,7 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? `1.6.${count}` : undefined
 			}
 		});
-		(global.fetch as jest.Mock).mockImplementation(() => {
+		(global.fetch as Mock).mockImplementation(() => {
 			callCount += 1;
 			return Promise.resolve(mockErrResp(callCount));
 		});
@@ -151,7 +146,6 @@ describe('FetchUtils', () => {
 
 	test('Return error if version choose by the server is not supported by the client', async () => {
 		useStore.getState().setSupportedVersions(['2.0.0']);
-		spyOnFetch.mockRestore();
 		const mockErrResp = {
 			ok: false,
 			status: 422,
@@ -160,12 +154,11 @@ describe('FetchUtils', () => {
 					header === wscApiVersionHeader ? '1.6.0' : undefined
 			}
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(mockErrResp);
+		(global.fetch as Mock).mockResolvedValueOnce(mockErrResp);
 		expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
 	test('sendFileFetchApi is called correctly', async () => {
-		spyOnFetch.mockRestore();
 		act(() => {
 			useStore.getState().setQueueId('idUser1');
 			useStore.getState().setApiVersion('1.6.1');
@@ -251,7 +244,7 @@ describe('FetchUtils', () => {
 			ok: false,
 			status: 400
 		};
-		(global.fetch as jest.Mock).mockResolvedValue(mockErrResp);
+		(global.fetch as Mock).mockResolvedValue(mockErrResp);
 
 		await expect(uploadFileFetchAPI(defPath, RequestType.POST, testImageFile)).rejects.toThrow();
 	});

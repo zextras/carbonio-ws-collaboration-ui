@@ -8,7 +8,7 @@ import React from 'react';
 
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import FaceToFaceMode from './FaceToFaceMode';
 import useStore from '../../../store/Store';

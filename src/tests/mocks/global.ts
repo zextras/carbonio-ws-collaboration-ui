@@ -53,8 +53,6 @@ export const requestFullscreen = vi.fn();
 // 	value: vi.fn()
 // });
 //
-// export const mockPlayAudio = vi.fn();
-//
 // export const mockReplace = vi.fn();
 //
 // // web worker mock

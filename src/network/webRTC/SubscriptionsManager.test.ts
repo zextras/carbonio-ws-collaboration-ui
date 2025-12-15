@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { spyOnFetch } from '../../tests/jest-env-setup';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -23,6 +22,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
+import * as FetchUtils from '../../utils/FetchUtils';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info: User = createMockUser({
@@ -96,6 +96,7 @@ beforeEach(() => {
 
 describe('Test SubscriptionsManager', () => {
 	test('Request all streams subscriptions', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 		subscriptionsManager.updateSubscription([
 			{ userId: 'user1', type: STREAM_TYPE.VIDEO },
@@ -119,6 +120,7 @@ describe('Test SubscriptionsManager', () => {
 	});
 
 	test('Subscribe only to some streams', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 		subscriptionsManager.updateSubscription([
 			{ userId: 'user1', type: STREAM_TYPE.VIDEO },
@@ -137,6 +139,7 @@ describe('Test SubscriptionsManager', () => {
 	});
 
 	test('Add and remove subscriptions', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 		subscriptionsManager.subscriptions = [
 			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
@@ -160,6 +163,7 @@ describe('Test SubscriptionsManager', () => {
 	});
 
 	test('Subscribed stream sets video off', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 
 		subscriptionsManager.subscriptions = [
@@ -177,6 +181,7 @@ describe('Test SubscriptionsManager', () => {
 	});
 
 	test('Only one video subscribed sets video off', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 
 		subscriptionsManager.subscriptions = [{ userId: 'user2', type: STREAM_TYPE.VIDEO }];
@@ -190,6 +195,7 @@ describe('Test SubscriptionsManager', () => {
 	});
 
 	test('Not subscribed stream sets video on', async () => {
+		const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 
 		subscriptionsManager.subscriptions = [

@@ -12,7 +12,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/mocks/global';
+import { mockPlayAudio } from '../../../tests/setupTests';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';

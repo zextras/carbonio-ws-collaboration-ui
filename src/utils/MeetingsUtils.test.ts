@@ -14,7 +14,7 @@ import {
 	orderSpeakingTiles,
 	sendAudioFeedback
 } from './MeetingsUtils';
-import { mockPlayAudio } from '../tests/mocks/global';
+import { mockPlayAudio } from '../tests/setupTests';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 describe('MeetingsUtils', () => {

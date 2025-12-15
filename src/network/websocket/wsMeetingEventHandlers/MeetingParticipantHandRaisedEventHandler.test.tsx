@@ -7,7 +7,7 @@
 import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/mocks/global';
+import { mockPlayAudio } from '../../../tests/setupTests';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';

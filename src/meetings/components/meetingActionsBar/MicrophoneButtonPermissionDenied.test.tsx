@@ -7,7 +7,7 @@ import React from 'react';
 
 import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import MicrophoneButton from './MicrophoneButton';
 import useStore from '../../../store/Store';
@@ -69,7 +69,7 @@ describe('Microphone button - permission denied', () => {
 		useStore.getState().setWebsocketStatus(true);
 		vi.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
-		const err = vi.spyOn(console, 'error').mockImplementation();
+		const err = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		const { user } = defaultSetup();
 

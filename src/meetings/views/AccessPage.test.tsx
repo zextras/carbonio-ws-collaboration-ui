@@ -9,7 +9,7 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as Shell from '@zextras/carbonio-shell-ui';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import AccessPage from './AccessPage';
 import useStore from '../../store/Store';

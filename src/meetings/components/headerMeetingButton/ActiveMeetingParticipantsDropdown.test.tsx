@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useStore from '../../../store/Store';
