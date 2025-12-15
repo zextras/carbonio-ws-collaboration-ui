@@ -26,7 +26,7 @@ failOnConsole({
 		/Controlled error/gi.test(errorMessage)
 });
 
-// TODO setup mocks in the tests that need them
+// TODO setup mocks in the tests that need them ?
 vi.mock('@zextras/carbonio-files-ui');
 vi.mock('@zextras/carbonio-shell-ui');
 vi.mock('@zextras/carbonio-ui-preview');
@@ -53,6 +53,7 @@ export const mockIntersectionObserverObserve = vi.fn();
 export const mockIntersectionObserverDisconnect = vi.fn();
 beforeEach(() => {
 	vi.clearAllMocks();
+
 	Object.defineProperty(window, 'IntersectionObserver', {
 		writable: true,
 		value: vi.fn(function intersectionObserverMock(
@@ -79,82 +80,129 @@ beforeEach(() => {
 		}))
 	});
 
-	// const mockedDevicesList = vi.fn(() => [
-	// 	{
-	// 		deviceId: 'audioDefault',
-	// 		kind: 'audioinput',
-	// 		label: 'Audio Default',
-	// 		groupId: 'default'
-	// 	},
-	// 	{
-	// 		deviceId: 'audioDevice1',
-	// 		kind: 'audioinput',
-	// 		label: 'Audio Device 1',
-	// 		groupId: 'device1'
-	// 	},
-	// 	{
-	// 		deviceId: 'audioDevice2',
-	// 		kind: 'audioinput',
-	// 		label: 'Audio Device 2',
-	// 		groupId: 'device2'
-	// 	},
-	// 	{
-	// 		deviceId: 'videoDefault',
-	// 		kind: 'videoinput',
-	// 		label: 'Video Default',
-	// 		groupId: 'default'
-	// 	},
-	// 	{
-	// 		deviceId: 'videoDevice 1',
-	// 		kind: 'videoinput',
-	// 		label: 'Video Device 1',
-	// 		groupId: 'device1'
-	// 	},
-	// 	{
-	// 		deviceId: 'videoDevice 2',
-	// 		kind: 'videoinput',
-	// 		label: 'Video Device 2',
-	// 		groupId: 'device2'
-	// 	}
-	// ]);
-	//
-	// Object.defineProperty(window, 'RTCPeerConnection', {
-	// 	writable: true,
-	// 	value: vi.fn(() => ({
-	// 		addTrack: vi.fn(),
-	// 		createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
-	// 		setRemoteDescription: vi.fn(() => Promise.resolve()),
-	// 		setLocalDescription: vi.fn(() => Promise.resolve())
-	// 	}))
-	// });
-	//
-	//
-	// const connectMockFn = (): {
-	// 	stream: {
-	// 		getAudioTracks: () => {
-	// 			prototype: MediaStream;
-	// 			new (): MediaStream;
-	// 			new (stream: MediaStream): MediaStream;
-	// 			new (tracks: MediaStreamTrack[]): MediaStream;
-	// 		}[];
-	// 	};
-	// } => ({
-	// 	stream: {
-	// 		getAudioTracks: () => [MediaStream]
-	// 	}
-	// });
-	//
-	// Object.defineProperty(window, 'AudioContext', {
-	// 	writable: true,
-	// 	value: vi.fn(() => ({
-	// 		createOscillator: (): any => ({
-	// 			connect: connectMockFn,
-	// 			start: vi.fn()
-	// 		}),
-	// 		createMediaStreamDestination: vi.fn()
-	// 	}))
-	// });
-	//
+	Object.defineProperty(window, 'RTCPeerConnection', {
+		writable: true,
+		value: vi.fn(function xRTCPeerConnectionMock() {
+			return {
+				addTrack: vi.fn(),
+				createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+				setRemoteDescription: vi.fn(() => Promise.resolve()),
+				setLocalDescription: vi.fn(() => Promise.resolve())
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'RTCSessionDescription', {
+		writable: true,
+		value: vi.fn(function RTCPeerSessionDescriptionMock() {
+			return {
+				sdp: 'sdp',
+				type: 'offer'
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'AudioContext', {
+		writable: true,
+		value: vi.fn(function AudioContextMock() {
+			return {
+				createOscillator: (): any => ({
+					connect: (): {
+						stream: {
+							getAudioTracks: () => {
+								prototype: MediaStream;
+								new (): MediaStream;
+								new (stream: MediaStream): MediaStream;
+								new (tracks: MediaStreamTrack[]): MediaStream;
+							}[];
+						};
+					} => ({
+						stream: {
+							getAudioTracks: () => [MediaStream]
+						}
+					}),
+					start: vi.fn()
+				}),
+				createMediaStreamDestination: vi.fn()
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'MediaStream', {
+		writable: true,
+		value: vi.fn(function MediaStreamMock() {
+			return {
+				stream: (): any => ({
+					getAudioTracks: vi.fn(),
+					getVideoTracks: vi.fn(),
+					addTrack: vi.fn()
+				}),
+				getAudioTracks: (): any[] => [MediaStream],
+				getVideoTracks: (): any[] => [MediaStream],
+				addTrack: vi.fn()
+			};
+		})
+	});
+
+	const mockedDevicesList = vi.fn(() => [
+		{
+			deviceId: 'audioDefault',
+			kind: 'audioinput',
+			label: 'Audio Default',
+			groupId: 'default'
+		},
+		{
+			deviceId: 'audioDevice1',
+			kind: 'audioinput',
+			label: 'Audio Device 1',
+			groupId: 'device1'
+		},
+		{
+			deviceId: 'audioDevice2',
+			kind: 'audioinput',
+			label: 'Audio Device 2',
+			groupId: 'device2'
+		},
+		{
+			deviceId: 'videoDefault',
+			kind: 'videoinput',
+			label: 'Video Default',
+			groupId: 'default'
+		},
+		{
+			deviceId: 'videoDevice 1',
+			kind: 'videoinput',
+			label: 'Video Device 1',
+			groupId: 'device1'
+		},
+		{
+			deviceId: 'videoDevice 2',
+			kind: 'videoinput',
+			label: 'Video Device 2',
+			groupId: 'device2'
+		}
+	]);
+	Object.defineProperty(navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: () =>
+				Promise.resolve({
+					getTracks: vi.fn(() => ({ forEach: vi.fn() })),
+					getAudioTracks: vi.fn(() => ({ forEach: vi.fn() })),
+					getVideoTracks: vi.fn(() => ({ forEach: vi.fn() })),
+					addTrack: vi.fn()
+				}),
+			enumerateDevices: () => Promise.resolve(mockedDevicesList()),
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn()
+		},
+		writable: true
+	});
+
+	Object.defineProperty(document.documentElement, 'requestFullscreen', {
+		writable: true,
+		value: vi.fn()
+	});
+
 	// Object.defineProperty(window, 'ResizeObserver', {
 	// 	writable: true,
 	// 	value: vi.fn().mockImplementation(() => ({
@@ -167,50 +215,6 @@ beforeEach(() => {
 	// global.Audio = vi.fn().mockImplementation(() => ({
 	// 	play: mockPlayAudio
 	// }));
-	//
-	// Object.defineProperty(window, 'MediaStream', {
-	// 	writable: true,
-	// 	value: vi.fn(() => ({
-	// 		stream: (): any => ({
-	// 			getAudioTracks: vi.fn(),
-	// 			getVideoTracks: vi.fn(),
-	// 			addTrack: vi.fn()
-	// 		}),
-	// 		getAudioTracks: (): any[] => [MediaStream],
-	// 		getVideoTracks: (): any[] => [MediaStream],
-	// 		addTrack: vi.fn()
-	// 	}))
-	// });
-	//
-	// Object.defineProperty(navigator, 'mediaDevices', {
-	// 	value: {
-	// 		getUserMedia: () =>
-	// 			Promise.resolve({
-	// 				getTracks: vi.fn(() => ({ forEach: vi.fn() })),
-	// 				getAudioTracks: vi.fn(() => ({ forEach: vi.fn() })),
-	// 				getVideoTracks: vi.fn(() => ({ forEach: vi.fn() })),
-	// 				addTrack: vi.fn()
-	// 			}),
-	// 		enumerateDevices: () => Promise.resolve(mockedDevicesList()),
-	// 		addEventListener: vi.fn(),
-	// 		removeEventListener: vi.fn()
-	// 	},
-	// 	writable: true
-	// });
-	//
-	// Object.defineProperty(window, 'matchMedia', {
-	// 	writable: true,
-	// 	value: vi.fn().mockImplementation((query) => ({
-	// 		matches: false,
-	// 		media: query,
-	// 		onchange: null,
-	// 		addListener: vi.fn(), // Deprecated
-	// 		removeListener: vi.fn(), // Deprecated
-	// 		addEventListener: vi.fn(),
-	// 		removeEventListener: vi.fn(),
-	// 		dispatchEvent: vi.fn()
-	// 	}))
-	// });
 	//
 	// Object.defineProperty(window.crypto, 'randomUUID', {
 	// 	writable: true,

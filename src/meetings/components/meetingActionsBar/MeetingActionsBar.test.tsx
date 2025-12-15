@@ -49,7 +49,7 @@ const meeting: MeetingBe = createMockMeeting({
 const streamRef = React.createRef<HTMLDivElement>();
 
 const mockUseContainerDimensions = vi.fn();
-jest.mock('../../../hooks/useContainerDimensions', () => ({
+vi.mock('../../../hooks/useContainerDimensions', () => ({
 	__esModule: true,
 	default: (): { width: number } => mockUseContainerDimensions()
 }));
@@ -106,12 +106,12 @@ describe('Meeting action bar', () => {
 		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
-		jest
-			.spyOn(mainActionsWrapper, 'getBoundingClientRect')
-			.mockImplementation(() => ({ width: 30 }) as DOMRect);
-		jest
-			.spyOn(secondActionsWrapper, 'getBoundingClientRect')
-			.mockImplementation(() => ({ width: 20 }) as DOMRect);
+		vi.spyOn(mainActionsWrapper, 'getBoundingClientRect').mockImplementation(
+			() => ({ width: 30 }) as DOMRect
+		);
+		vi.spyOn(secondActionsWrapper, 'getBoundingClientRect').mockImplementation(
+			() => ({ width: 20 }) as DOMRect
+		);
 		mockUseContainerDimensions.mockReturnValueOnce({ width: 99 });
 		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 
@@ -125,12 +125,12 @@ describe('Meeting action bar', () => {
 		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
-		jest
-			.spyOn(mainActionsWrapper, 'getBoundingClientRect')
-			.mockImplementation(() => ({ width: 30 }) as DOMRect);
-		jest
-			.spyOn(secondActionsWrapper, 'getBoundingClientRect')
-			.mockImplementation(() => ({ width: 20 }) as DOMRect);
+		vi.spyOn(mainActionsWrapper, 'getBoundingClientRect').mockImplementation(
+			() => ({ width: 30 }) as DOMRect
+		);
+		vi.spyOn(secondActionsWrapper, 'getBoundingClientRect').mockImplementation(
+			() => ({ width: 20 }) as DOMRect
+		);
 		mockUseContainerDimensions.mockReturnValueOnce({ width: 49 });
 		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 

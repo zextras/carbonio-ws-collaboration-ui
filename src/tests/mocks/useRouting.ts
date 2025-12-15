@@ -6,22 +6,24 @@
 
 import type * as useRoutingModule from '../../hooks/useRouting';
 
-export const mockGoToRoomPage: jest.Mock = vi.fn();
-export const mockGoToMainPage: jest.Mock = vi.fn();
-export const mockGoToMeetingPage: jest.Mock = vi.fn();
-export const mockGoToInfoPage: jest.Mock = vi.fn();
-export const mockGoToMeetingAccessPage: jest.Mock = vi.fn();
-export const mockGoToExternalLoginPage: jest.Mock = vi.fn();
+export const mockGoToRoomPage = vi.fn();
+export const mockGoToMainPage = vi.fn();
+export const mockGoToMeetingPage = vi.fn();
+export const mockGoToInfoPage = vi.fn();
+export const mockGoToMeetingAccessPage = vi.fn();
+export const mockGoToExternalLoginPage = vi.fn();
 
-jest.mock<typeof useRoutingModule>('../../hooks/useRouting', () => ({
-	__esModule: true,
-	...jest.requireActual('../../hooks/useRouting'),
-	default: (): ReturnType<(typeof useRoutingModule)['default']> => ({
-		goToMainPage: mockGoToMainPage,
-		goToRoomPage: mockGoToRoomPage,
-		goToMeetingPage: mockGoToMeetingPage,
-		goToInfoPage: mockGoToInfoPage,
-		goToMeetingAccessPage: mockGoToMeetingAccessPage,
-		goToExternalLoginPage: mockGoToExternalLoginPage
-	})
-}));
+vi.mock('../../hooks/useRouting', async () => {
+	const actual = await vi.importActual<typeof useRoutingModule>('../../hooks/useRouting');
+	return {
+		...actual,
+		default: (): ReturnType<(typeof useRoutingModule)['default']> => ({
+			goToMainPage: mockGoToMainPage,
+			goToRoomPage: mockGoToRoomPage,
+			goToMeetingPage: mockGoToMeetingPage,
+			goToInfoPage: mockGoToInfoPage,
+			goToMeetingAccessPage: mockGoToMeetingAccessPage,
+			goToExternalLoginPage: mockGoToExternalLoginPage
+		})
+	};
+});

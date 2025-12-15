@@ -5,7 +5,8 @@
  */
 export const mockedScrollToEnd = vi.fn();
 export const mockedScrollToMessage = vi.fn();
-jest.mock('../../utils/scrollUtils', () => ({
+
+vi.mock('../../utils/scrollUtils', () => ({
 	scrollToEnd: mockedScrollToEnd,
 	scrollToMessage: mockedScrollToMessage
 }));

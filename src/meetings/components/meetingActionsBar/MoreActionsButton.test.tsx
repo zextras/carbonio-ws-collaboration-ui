@@ -133,7 +133,7 @@ const moreActionsTestId = 'more-actions';
 
 describe('Meeting action bar - More actions button interactions', () => {
 	test('Check full screen mode is set correctly', async () => {
-		const mockRequestFullscreen = jest
+		const mockRequestFullscreen = vi
 			.spyOn(document.documentElement, 'requestFullscreen')
 			.mockImplementation(requestFullscreen);
 		const { user } = storeSetupGroupMeeting();

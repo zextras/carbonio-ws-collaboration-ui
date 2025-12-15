@@ -8,8 +8,6 @@ import { searchUsersByFeatureRequest } from './SearchUsersByFeatureRequest';
 import { mockSoapFetchV2 } from '../../../__mocks__/@zextras/carbonio-ui-soap-lib';
 import useStore from '../../store/Store';
 
-jest.unmock('./SearchUsersByFeatureRequest');
-
 const contact1Match = {
 	a: [
 		{ n: 'displayName', _content: 'Contact 1' },

@@ -18,7 +18,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -341,7 +340,7 @@ describe('Actions', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		vi.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
+		vi.spyOn(document.body, 'appendChild').mockReturnValue(document.createElement('a'));
 
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -375,7 +374,7 @@ describe('Actions', () => {
 		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		const spySendChatMessageDeletion = jest
+		const spySendChatMessageDeletion = vi
 			.spyOn(useStore.getState().connections.xmppClient, 'sendChatMessageDeletion')
 			.mockImplementation(() => 'deleted');
 

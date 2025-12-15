@@ -5,6 +5,7 @@
  */
 
 import mockLodash from 'lodash';
+import { type Mock } from 'vitest';
 
 import { isMyId as mockIsMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
@@ -12,9 +13,9 @@ import {
 	SearchUsersByFeatureSoapResponse
 } from '../../types/network/soap/searchUsersByFeatureRequest';
 
-export const mockSearchUsersByFeatureRequest: jest.Mock = vi.fn();
+export const mockSearchUsersByFeatureRequest: Mock = vi.fn();
 
-jest.mock('../../network/soap/SearchUsersByFeatureRequest', () => ({
+vi.mock('../../network/soap/SearchUsersByFeatureRequest', () => ({
 	searchUsersByFeatureRequest: (): Promise<SearchUsersByFeatureSoapResponse> =>
 		new Promise((resolve, reject) => {
 			const result = mockSearchUsersByFeatureRequest();

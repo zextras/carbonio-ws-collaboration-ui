@@ -75,7 +75,7 @@ describe('Camera button - permission denied', () => {
 	test('User clicks on the button', async () => {
 		vi.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
-		const err = vi.spyOn(console, 'error').mockImplementation();
+		const err = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		const { user } = defaultSetup();
 

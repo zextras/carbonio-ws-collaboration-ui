@@ -57,7 +57,7 @@ describe('Test display message browser notification', () => {
 	});
 
 	test('Avoid sending desktop notification on meeting tab', async () => {
-		jest.mocked(shell).IS_FOCUS_MODE = true;
+		vi.mocked(shell).IS_FOCUS_MODE = true;
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
 		await displayMessageBrowserNotification(newMessage);
 

@@ -160,7 +160,7 @@ describe('isWriting functionality', () => {
 
 		act(() => {
 			useStore.getState().setIsWriting(mockedRoom.id, mockRobertoUser.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(isWriting).not.toBeVisible();

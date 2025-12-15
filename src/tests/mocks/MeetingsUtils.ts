@@ -5,8 +5,8 @@
  */
 
 // this mocks ONLY getWorkerUrl
-jest.mock('../../utils/MeetingsUtils', () => {
-	const actualUtils = jest.requireActual('../../utils/MeetingsUtils');
+vi.mock('../../utils/MeetingsUtils', async () => {
+	const actualUtils = await vi.importActual('../../utils/MeetingsUtils');
 	return {
 		...actualUtils,
 		getWorkerUrl: vi.fn()
