@@ -87,7 +87,7 @@ describe('RecordingAccordion tests', () => {
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const startButton = await screen.findByTestId('startRecordingButton');
-		jest.advanceTimersByTime(1000);
+		vi.advanceTimersByTime(1000);
 		await user.click(startButton);
 
 		expect(spyOnStartRecording).toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe('RecordingAccordion tests', () => {
 		await user.click(chevron);
 
 		const startButton = await screen.findByTestId('startRecordingButton');
-		jest.advanceTimersByTime(1000);
+		vi.advanceTimersByTime(1000);
 		await user.click(startButton);
 
 		expect(spyOnStartRecording).rejects;

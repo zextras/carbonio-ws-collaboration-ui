@@ -91,7 +91,7 @@ describe('BubblesWrapper', () => {
 		expect(messageBubble).toBeVisible();
 
 		act(() => {
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		await waitFor(() =>

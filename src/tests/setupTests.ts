@@ -54,6 +54,17 @@ export const mockIntersectionObserverDisconnect = vi.fn();
 beforeEach(() => {
 	vi.clearAllMocks();
 
+	Object.defineProperty(window, 'location', {
+		value: {
+			href: 'https://localhost/carbonio/chats',
+			pathname: 'https://localhost/carbonio/chats',
+			replace: vi.fn(),
+			includes: vi.fn(),
+			assign: vi.fn()
+		},
+		writable: true
+	});
+
 	Object.defineProperty(window, 'IntersectionObserver', {
 		writable: true,
 		value: vi.fn(function intersectionObserverMock(

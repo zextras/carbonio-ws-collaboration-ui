@@ -155,7 +155,6 @@ describe('XMPP newMessageHandler', () => {
 	});
 
 	test('New reaction removed when input has focus', () => {
-		jest.useFakeTimers();
 		const sessionUser = createMockUser({ id: 'sessionUser' });
 		const otherUser = createMockUser({ id: 'otherUser' });
 		const room = createMockRoom({ id: 'roomId' });
@@ -180,12 +179,11 @@ describe('XMPP newMessageHandler', () => {
 			})
 		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
-		jest.runAllTimers();
+		vi.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toBeUndefined();
 	});
 
 	test('New reaction is kept when input is not focused', () => {
-		jest.useFakeTimers();
 		const sessionUser = createMockUser({ id: 'sessionUser2' });
 		const otherUser = createMockUser({ id: 'otherUser2' });
 		const room = createMockRoom({ id: 'roomId2' });
@@ -209,7 +207,7 @@ describe('XMPP newMessageHandler', () => {
 			})
 		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
-		jest.runAllTimers();
+		vi.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 	});
 });

@@ -56,16 +56,6 @@ export const requestFullscreen = vi.fn();
 // export const mockPlayAudio = vi.fn();
 //
 // export const mockReplace = vi.fn();
-// Object.defineProperty(window, 'location', {
-// 	value: {
-// 		href: 'https://localhost/carbonio/chats',
-// 		pathname: 'https://localhost/carbonio/chats',
-// 		replace: mockReplace,
-// 		includes: vi.fn(),
-// 		assign: vi.fn()
-// 	},
-// 	writable: true
-// });
 //
 // // web worker mock
 // class Worker {

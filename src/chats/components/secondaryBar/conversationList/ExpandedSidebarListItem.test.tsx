@@ -333,7 +333,7 @@ describe('Expanded sidebar list item', () => {
 				);
 			});
 			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
-			jest.advanceTimersByTime(3000);
+			vi.advanceTimersByTime(3000);
 			act(() => {
 				onComposingMessageStanza.call(
 					useStore.getState().connections.xmppClient,
@@ -344,7 +344,7 @@ describe('Expanded sidebar list item', () => {
 					})
 				);
 			});
-			jest.advanceTimersByTime(7000);
+			vi.advanceTimersByTime(7000);
 			expect(screen.getByTestId(iconDoneAll)).toBeVisible();
 			const messageContent = screen.getByText(
 				new RegExp(`${mockedTextMessageSentByMeIntoGroup.text}`, 'i')

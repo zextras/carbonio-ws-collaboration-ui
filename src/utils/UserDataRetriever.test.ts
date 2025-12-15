@@ -7,7 +7,6 @@ import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
 import useStore from '../store/Store';
-import { spyOnFetch } from '../tests/jest-env-setup';
 import { spyOnUsersApi, UsersApiToSpy } from '../tests/mocks/network';
 import { UserType } from '../types/store/UserTypes';
 
@@ -24,9 +23,9 @@ describe('UserDataRetriever tests', () => {
 		UserDataRetriever.getDebouncedUser(uuid.v6());
 		UserDataRetriever.getDebouncedUser(uuid.v6());
 		// Finish debounced function
-		jest.runAllTimers();
+		vi.runAllTimers();
 
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
+		expect(fetch()).toHaveBeenCalledTimes(1);
 	});
 
 	test('getDebouncedUser is correctly used with a lot of users', async () => {
@@ -45,7 +44,7 @@ describe('UserDataRetriever tests', () => {
 		UserDataRetriever.getDebouncedUser(uuid.v6());
 
 		// Finish debounced function
-		jest.runAllTimers();
+		vi.runAllTimers();
 
 		expect(spyOnFetch).toHaveBeenCalledTimes(2);
 	});
@@ -64,7 +63,7 @@ describe('UserDataRetriever tests', () => {
 		UserDataRetriever.getDebouncedUser(uuid.v6());
 		UserDataRetriever.getDebouncedUser(duplicateUuid); // Duplicated id
 		// Finish debounced function
-		jest.runAllTimers();
+		vi.runAllTimers();
 
 		expect(spyOnFetch).toHaveBeenCalledTimes(1);
 	});

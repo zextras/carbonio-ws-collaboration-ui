@@ -135,7 +135,7 @@ describe('Meeting sidebar', () => {
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/User is typing.../i)).not.toBeInTheDocument();
@@ -154,7 +154,7 @@ describe('Meeting sidebar', () => {
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
 			store.setIsWriting(groupRoom.id, mockUser3.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/2 people are typing.../i)).not.toBeInTheDocument();

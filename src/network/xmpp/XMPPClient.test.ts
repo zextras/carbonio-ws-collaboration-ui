@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { Mock } from 'vitest';
+
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { rosterCallback } from './iqCallbacks/rosterCallback';
 import XMPPClient from './XMPPClient';
@@ -14,7 +16,7 @@ import { buildPingStanza } from '../../tests/mocks/buildXmppStanza';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 
-const getStanzaFromSpy = (spy: jest.SpyInstance, callIndex = 0): Element =>
+const getStanzaFromSpy = (spy: Mock, callIndex = 0): Element =>
 	spy.mock.calls[callIndex][0].elem.tree();
 
 const findFieldValue = (stanza: Element, fieldVar: string): string | null => {
