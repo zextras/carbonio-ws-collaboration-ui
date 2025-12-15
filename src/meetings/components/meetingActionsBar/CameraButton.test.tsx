@@ -48,10 +48,10 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant]
 });
 
-const mockSetIsVideoListOpen = jest.fn();
+const mockSetIsVideoListOpen = vi.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	const refList = React.createRef<HTMLDivElement>();
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(

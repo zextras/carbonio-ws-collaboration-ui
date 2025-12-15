@@ -47,7 +47,7 @@ describe('Entry point', () => {
 
 	test('Connection is established on app load', async () => {
 		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
 		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
 		setup(<MainApp />);
@@ -56,14 +56,14 @@ describe('Entry point', () => {
 
 	test('Connection is not established on app load if getToken do not respond', async () => {
 		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('Token error'));
+		vi.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('Token error'));
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
 	test('Connection is not established on app load if listRooms do not respond', async () => {
 		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));

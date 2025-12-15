@@ -29,9 +29,9 @@ describe('WebSocketClient', () => {
 	});
 
 	test('Send message if WebSocket is open', () => {
-		const mockWebSocketSend = jest.fn();
+		const mockWebSocketSend = vi.fn();
 		Object.defineProperty(global, 'WebSocket', {
-			value: jest.fn(() => ({
+			value: vi.fn(() => ({
 				readyState: 1,
 				send: mockWebSocketSend
 			}))
@@ -61,7 +61,7 @@ describe('WebSocketClient', () => {
 
 	test('onmessage event is handled with PONG', () => {
 		const wsClient = new WebSocketClient();
-		const cancelDebounce = jest.spyOn(wsClient._disconnectionCheckFunction, 'cancel');
+		const cancelDebounce = vi.spyOn(wsClient._disconnectionCheckFunction, 'cancel');
 		wsClient.connect();
 		const message = { type: WsEventType.PONG };
 		wsClient._onMessage({ data: JSON.stringify(message) } as MessageEvent);

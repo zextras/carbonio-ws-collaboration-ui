@@ -40,7 +40,7 @@ beforeEach(() => {
 describe('MeetingWaitingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the session user is the waiting page', () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingWaitingParticipantClashedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, { detail: event })
@@ -49,7 +49,7 @@ describe('MeetingWaitingParticipantClashedEventHandler tests', () => {
 
 	test('A custom event is not sent if the session user is the chat page', () => {
 		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingWaitingParticipantClashedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});

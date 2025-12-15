@@ -3,5 +3,5 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export const useParams = jest.fn();
-export const useNavigate = jest.fn();
+export const useParams = vi.fn();
+export const useNavigate = vi.fn();

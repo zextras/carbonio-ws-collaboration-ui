@@ -75,7 +75,7 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
@@ -92,7 +92,7 @@ const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
@@ -106,7 +106,7 @@ const setupAccessPageNotAuthenticated = (): { user: UserEvent; store: RootStore 
 
 describe('Meeting access page', () => {
 	test('Authenticated user -> access the meeting -> redirect to the waiting room', async () => {
-		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		setupAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});
@@ -115,7 +115,7 @@ describe('Meeting access page', () => {
 		const spyOnGetScheduledMeetingName = spyOnMeetingsApi(
 			MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME
 		);
-		const mockUseAuthenticated = jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
+		const mockUseAuthenticated = vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
 		spyOnGetScheduledMeetingName.mockImplementation(() => Promise.resolve('name'));
 		setupAccessPageNotAuthenticated();
 
@@ -125,7 +125,7 @@ describe('Meeting access page', () => {
 	});
 
 	test('Authenticated user -> joins group meeting -> redirect to the waiting room', async () => {
-		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		setupGroupForAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});

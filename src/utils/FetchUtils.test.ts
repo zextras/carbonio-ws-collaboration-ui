@@ -16,13 +16,13 @@ const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 const defPath = '/services/chats/test';
 
-const fetchResponse: jest.Mock = jest.fn(() => ({}));
-const fetchBlobResponse: jest.Mock = jest.fn(() => ({}));
-const getHeaders: jest.Mock = jest.fn(() => 'application/json');
+const fetchResponse: jest.Mock = vi.fn(() => ({}));
+const fetchBlobResponse: jest.Mock = vi.fn(() => ({}));
+const getHeaders: jest.Mock = vi.fn(() => 'application/json');
 
 beforeEach(() => {
 	Object.defineProperty(global, 'fetch', {
-		value: jest.fn(() =>
+		value: vi.fn(() =>
 			Promise.resolve({
 				json: () => fetchResponse(),
 				blob: () => fetchBlobResponse(),

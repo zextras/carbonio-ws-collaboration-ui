@@ -341,7 +341,7 @@ describe('Actions', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		jest.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
+		vi.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
 
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);

@@ -26,6 +26,15 @@ failOnConsole({
 		/Controlled error/gi.test(errorMessage)
 });
 
+// TODO setup mocks in the tests that need them
+vi.mock('@zextras/carbonio-files-ui');
+vi.mock('@zextras/carbonio-shell-ui');
+vi.mock('@zextras/carbonio-ui-preview');
+vi.mock('@zextras/carbonio-ui-soap-lib');
+vi.mock('darkreader');
+vi.mock('react-router-dom');
+vi.mock('zustand');
+
 beforeAll(() => {
 	vi.useFakeTimers({
 		shouldAdvanceTime: true
@@ -36,8 +45,40 @@ afterAll(() => {
 	vi.useRealTimers();
 });
 
-beforeAll(() => {});
+beforeAll(() => {
+	vi.mock('@zextras/carbonio-shell-ui');
+});
+
+export const mockIntersectionObserverObserve = vi.fn();
+export const mockIntersectionObserverDisconnect = vi.fn();
 beforeEach(() => {
+	vi.clearAllMocks();
+	Object.defineProperty(window, 'IntersectionObserver', {
+		writable: true,
+		value: vi.fn(function intersectionObserverMock(
+			callback: IntersectionObserverCallback,
+			options: IntersectionObserverInit
+		) {
+			return {
+				thresholds: options.threshold,
+				root: options.root,
+				rootMargin: options.rootMargin,
+				observe: mockIntersectionObserverObserve,
+				unobserve: (): undefined => undefined,
+				disconnect: mockIntersectionObserverDisconnect
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'matchMedia', {
+		writable: true,
+		value: vi.fn().mockImplementation((query) => ({
+			matches: false,
+			media: query,
+			onchange: null
+		}))
+	});
+
 	// const mockedDevicesList = vi.fn(() => [
 	// 	{
 	// 		deviceId: 'audioDefault',
@@ -87,17 +128,6 @@ beforeEach(() => {
 	// 	}))
 	// });
 	//
-	// Object.defineProperty(window, 'IntersectionObserver', {
-	// 	writable: true,
-	// 	value: vi.fn().mockImplementation((callback, options) => ({
-	// 		thresholds: options.threshold,
-	// 		root: options.root,
-	// 		rootMargin: options.rootMargin,
-	// 		observe: intersectionObserverMockObserve,
-	// 		unobserve: vi.fn(),
-	// 		disconnect: intersectionObserverMockDisconnect
-	// 	}))
-	// });
 	//
 	// const connectMockFn = (): {
 	// 	stream: {

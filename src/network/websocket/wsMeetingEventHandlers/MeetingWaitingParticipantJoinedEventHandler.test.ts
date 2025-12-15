@@ -41,7 +41,7 @@ beforeEach(() => {
 });
 describe('MeetingWaitingParticipantJoinedEventHandler tests', () => {
 	test('When a new user joins the waiting room and he is added to waiting list and a custom event is sent', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingWaitingParticipantJoinedEventHandler(event);
 		expect(useStore.getState().meetings[meeting.id].waitingList).toContain(event.userId);
 		expect(dispatchEvent).toHaveBeenCalledWith(

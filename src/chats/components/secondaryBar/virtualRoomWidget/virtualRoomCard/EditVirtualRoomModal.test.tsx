@@ -56,7 +56,7 @@ describe('EditVirtualRoomModal test', () => {
 		setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -74,7 +74,7 @@ describe('EditVirtualRoomModal test', () => {
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -90,7 +90,7 @@ describe('EditVirtualRoomModal test', () => {
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -108,7 +108,7 @@ describe('EditVirtualRoomModal test', () => {
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -129,7 +129,7 @@ describe('EditVirtualRoomModal test', () => {
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>

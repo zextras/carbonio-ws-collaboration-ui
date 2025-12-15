@@ -50,7 +50,7 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeetings([groupMeeting]);
 		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
 	const { user } = setup(<FaceToFaceMode />);

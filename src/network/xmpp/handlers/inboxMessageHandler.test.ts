@@ -34,7 +34,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Conversation has some unread', () => {
-		const spyOnRequestHistory = jest.spyOn(
+		const spyOnRequestHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestHistory'
 		);
@@ -50,7 +50,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Inbox message is a replied one', () => {
-		const spyOnRequestRepliedMessage = jest.spyOn(
+		const spyOnRequestRepliedMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);

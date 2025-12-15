@@ -199,7 +199,7 @@ describe('Virtual Background setup', () => {
 			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
 			.mockImplementation(() => Promise.resolve());
 
-		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
+		HTMLCanvasElement.prototype.captureStream = vi.fn().mockReturnValue(new MediaStream());
 
 		const { store } = storeSetupGroupMeetingSkeleton();
 		expect(store.activeMeeting).not.toBeDefined();

@@ -30,41 +30,41 @@ beforeEach(() => {
 
 describe('CounterBadgeUpdater tests', () => {
 	test('No conversations have unread messages', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: false, count: 0, showCount: true }, 'chats');
 	});
 
 	test('One-to-one conversation has unread messages', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		useStore.getState().incrementUnreadCount(singleRoom.id, 1);
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: true, count: 1, showCount: true }, 'chats');
 	});
 
 	test('Group conversation has unread messages', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		useStore.getState().incrementUnreadCount(groupRoom.id, 1);
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: true, count: 1, showCount: true }, 'chats');
 	});
 
 	test('Temporary conversation has unread messages and it is not shown', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		useStore.getState().incrementUnreadCount(temporaryRoom.id, 1);
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: false, count: 0, showCount: true }, 'chats');
 	});
 
 	test('Muted conversation has unread messages and it is not shown', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		useStore.getState().incrementUnreadCount(roomMuted.id, 1);
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: false, count: 0, showCount: true }, 'chats');
 	});
 
 	test('Multiple conversations have unread messages', async () => {
-		const updatePrimaryBadge = jest.spyOn(Shell, 'updatePrimaryBadge');
+		const updatePrimaryBadge = vi.spyOn(Shell, 'updatePrimaryBadge');
 		const store = useStore.getState();
 		store.incrementUnreadCount(singleRoom.id, 2);
 		store.incrementUnreadCount(groupRoom.id, 3);

@@ -7,11 +7,11 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
-export const requestFullscreen = jest.fn();
+export const requestFullscreen = vi.fn();
 
 Object.defineProperty(global, 'URL', {
 	value: {
-		createObjectURL: jest.fn()
+		createObjectURL: vi.fn()
 	}
 });
 
@@ -20,18 +20,18 @@ Object.defineProperty(global.navigator, 'userAgent', {
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-	set: jest.fn()
+	set: vi.fn()
 });
 
 Object.defineProperty(window, 'RTCSessionDescription', {
-	value: jest.fn(() => ({
+	value: vi.fn(() => ({
 		sdp: 'sdp',
 		type: 'offer'
 	}))
 });
 
 Object.defineProperty(window, 'open', {
-	value: jest.fn()
+	value: vi.fn()
 });
 
 // This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
@@ -46,9 +46,6 @@ Object.defineProperty(window, 'crypto', {
 	}
 });
 
-export const intersectionObserverMockObserve = jest.fn();
-export const intersectionObserverMockDisconnect = jest.fn();
-
 window.resizeTo = function resizeTo(width: number, height: number): void {
 	Object.assign(this, {
 		innerWidth: width,
@@ -59,19 +56,19 @@ window.resizeTo = function resizeTo(width: number, height: number): void {
 };
 
 Object.defineProperty(document.documentElement, 'requestFullscreen', {
-	value: jest.fn()
+	value: vi.fn()
 });
 
-export const mockPlayAudio = jest.fn();
+export const mockPlayAudio = vi.fn();
 
-export const mockReplace = jest.fn();
+export const mockReplace = vi.fn();
 Object.defineProperty(window, 'location', {
 	value: {
 		href: 'https://localhost/carbonio/chats',
 		pathname: 'https://localhost/carbonio/chats',
 		replace: mockReplace,
-		includes: jest.fn(),
-		assign: jest.fn()
+		includes: vi.fn(),
+		assign: vi.fn()
 	},
 	writable: true
 });
@@ -110,4 +107,4 @@ Object.defineProperty(window, 'Worker', {
 	value: Worker
 });
 
-HTMLCanvasElement.prototype.getContext = jest.fn();
+HTMLCanvasElement.prototype.getContext = vi.fn();

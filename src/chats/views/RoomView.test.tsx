@@ -21,28 +21,28 @@ beforeEach(() => {
 });
 describe('RoomView', () => {
 	test('roomId param correspond to a room stored in the store', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ roomId: room.id });
 		setup(<RoomView />);
 		expect(screen.getByTestId(`ConversationWrapper-${room.id}`)).toBeInTheDocument();
 	});
 
 	test('roomId param does not correspond to any stored room', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ roomId: 'roomId' });
 		setup(<RoomView />);
 		expect(screen.queryByTestId('ConversationWrapper-roomId')).not.toBeInTheDocument();
 	});
 
 	test('roomId param is not setted', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ roomId: undefined });
 		setup(<RoomView />);
 		expect(screen.queryByTestId('ConversationWrapper-roomId')).not.toBeInTheDocument();
 	});
 
 	test('roomId param is set as selectedRoomId', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ roomId: room.id });
 		setup(<RoomView />);
 		expect(useStore.getState().session.selectedRoom).toBe(room.id);

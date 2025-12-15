@@ -6,6 +6,7 @@
 import React from 'react';
 
 import * as Shell from '@zextras/carbonio-shell-ui';
+import { type Mock } from 'vitest';
 
 import {
 	filesSelectFilesAction,
@@ -35,22 +36,18 @@ export const ACCOUNT: Shell.Account = {
 	rights: { targets: [] }
 };
 
-export const mockNotify: jest.Mock = jest.fn();
+export const mockNotify: Mock = vi.fn();
 
 export const NOTIFICATION_MANAGER = {
-	showPopup: jest.fn(),
+	showPopup: vi.fn(),
 	notify: mockNotify,
-	multipleNotify: jest.fn(),
-	playSound: jest.fn()
+	multipleNotify: vi.fn(),
+	playSound: vi.fn()
 };
 
 export const IS_FOCUS_MODE = false;
 
-export const useAuthenticated = jest.fn<
-	ReturnType<typeof Shell.useAuthenticated>,
-	Parameters<typeof Shell.useAuthenticated>
->(() => true);
-
+export const useAuthenticated: typeof Shell.useAuthenticated = () => true;
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
 
 export const useCurrentRoute: typeof Shell.useCurrentRoute = () => ROUTE_SETTINGS;
@@ -88,7 +85,7 @@ export const useIntegratedFunction: typeof Shell.useIntegratedFunction = <T,>(id
 export const updatePrimaryBadge: typeof Shell.updatePrimaryBadge = () => undefined;
 
 export const useTracker: typeof Shell.useTracker = () => ({
-	capture: jest.fn(),
-	enableTracker: jest.fn(),
-	reset: jest.fn()
+	capture: vi.fn(),
+	enableTracker: vi.fn(),
+	reset: vi.fn()
 });

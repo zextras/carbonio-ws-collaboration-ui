@@ -6,12 +6,12 @@
 
 import type * as useRoutingModule from '../../hooks/useRouting';
 
-export const mockGoToRoomPage: jest.Mock = jest.fn();
-export const mockGoToMainPage: jest.Mock = jest.fn();
-export const mockGoToMeetingPage: jest.Mock = jest.fn();
-export const mockGoToInfoPage: jest.Mock = jest.fn();
-export const mockGoToMeetingAccessPage: jest.Mock = jest.fn();
-export const mockGoToExternalLoginPage: jest.Mock = jest.fn();
+export const mockGoToRoomPage: jest.Mock = vi.fn();
+export const mockGoToMainPage: jest.Mock = vi.fn();
+export const mockGoToMeetingPage: jest.Mock = vi.fn();
+export const mockGoToInfoPage: jest.Mock = vi.fn();
+export const mockGoToMeetingAccessPage: jest.Mock = vi.fn();
+export const mockGoToExternalLoginPage: jest.Mock = vi.fn();
 
 jest.mock<typeof useRoutingModule>('../../hooks/useRouting', () => ({
 	__esModule: true,

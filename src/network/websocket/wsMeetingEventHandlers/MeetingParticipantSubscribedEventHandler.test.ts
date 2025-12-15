@@ -33,7 +33,7 @@ describe('meetingParticipantSubscribedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const videoScreenIn = useStore.getState().activeMeeting?.videoScreenIn;
-		const handleParticipantsSubscribed = jest.spyOn(
+		const handleParticipantsSubscribed = vi.spyOn(
 			videoScreenIn as IVideoScreenInConnection,
 			'handleParticipantsSubscribed'
 		);

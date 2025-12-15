@@ -55,7 +55,7 @@ beforeEach(() => {
 	store.addMeetings([meeting]);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 });
 

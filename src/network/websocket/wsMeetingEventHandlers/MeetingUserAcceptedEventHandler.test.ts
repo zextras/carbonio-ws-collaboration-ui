@@ -39,7 +39,7 @@ describe('MeetingUserAcceptedEventHandler tests', () => {
 
 	test('Do not send user accepted custom event if another user is accepted', () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
@@ -47,7 +47,7 @@ describe('MeetingUserAcceptedEventHandler tests', () => {
 	test('Send user accepted custom event only if the accepted user is session user session', () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
 		event.userId = 'myUserId';
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, { detail: event })
@@ -57,7 +57,7 @@ describe('MeetingUserAcceptedEventHandler tests', () => {
 	test('Do not send user accepted custom event if user is in the chat page', () => {
 		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
 		event.userId = 'myUserId';
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalledWith();
 	});

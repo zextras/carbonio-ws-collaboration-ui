@@ -34,7 +34,7 @@ beforeEach(() => {
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingParticipantClashedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_PARTICIPANT_CLASHED, { detail: event })
@@ -42,7 +42,7 @@ describe('MeetingParticipantClashedEventHandler tests', () => {
 	});
 
 	test('A custom event is not sent if the user is not inside meeting', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingParticipantClashedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});

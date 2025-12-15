@@ -20,7 +20,7 @@ const mockMeeting: MeetingBe = createMockMeeting();
 
 describe('MobileActionBar test', () => {
 	test('Set participants view', async () => {
-		const setView = jest.fn();
+		const setView = vi.fn();
 		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
@@ -37,7 +37,7 @@ describe('MobileActionBar test', () => {
 	});
 
 	test('Set conversation view', async () => {
-		const setView = jest.fn();
+		const setView = vi.fn();
 		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
@@ -59,7 +59,7 @@ describe('MobileActionBar test', () => {
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
-				setView={jest.fn()}
+				setView={vi.fn()}
 			/>,
 			{ meetingId: mockMeeting.id }
 		);
@@ -87,7 +87,7 @@ describe('MobileActionBar test', () => {
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
-				setView={jest.fn()}
+				setView={vi.fn()}
 			/>,
 			{ meetingId: mockMeeting.id }
 		);

@@ -45,7 +45,7 @@ describe('StopRecordingModal tests', () => {
 	test('Show a snackbar when the stop recording request completes successfully', async () => {
 		spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING).mockResolvedValueOnce({});
 		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+			<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />
 		);
 		await user.click(screen.getByText('Stop'));
 
@@ -59,7 +59,7 @@ describe('StopRecordingModal tests', () => {
 		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
 		spyOnStopRecording.mockRejectedValue(false);
 		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+			<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />
 		);
 		await user.click(screen.getByText('Stop'));
 

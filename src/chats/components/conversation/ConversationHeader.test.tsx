@@ -78,7 +78,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		const infoIcon = screen.getByTestId('icon: InfoOutline');
@@ -91,7 +91,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('icon: InfoOutline')).toBeNull();
@@ -104,7 +104,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
@@ -130,7 +130,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={`placeholder-${mockPaoloUser.id}`}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
@@ -151,7 +151,7 @@ describe('isWriting functionality', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 
@@ -177,7 +177,7 @@ describe('isWriting functionality', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 

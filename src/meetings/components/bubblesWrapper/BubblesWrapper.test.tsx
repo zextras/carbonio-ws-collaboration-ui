@@ -72,7 +72,7 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
 	store.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<BubblesWrapper />, { meetingId: meeting.id });
 

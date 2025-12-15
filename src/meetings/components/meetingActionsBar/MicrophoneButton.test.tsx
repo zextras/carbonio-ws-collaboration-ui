@@ -48,11 +48,11 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant]
 });
 
-const mockSetIsAudioListOpen = jest.fn();
+const mockSetIsAudioListOpen = vi.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 
 	const { user } = setup(

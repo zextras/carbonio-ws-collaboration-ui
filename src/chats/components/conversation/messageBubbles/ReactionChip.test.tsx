@@ -87,7 +87,7 @@ describe('ReactionChip', () => {
 	});
 
 	test('Clicking on the chip sends a reaction if session user does not previous send id', async () => {
-		const spyOnSendChatMessageReaction = jest.spyOn(
+		const spyOnSendChatMessageReaction = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'sendChatMessageReaction'
 		);
@@ -105,7 +105,7 @@ describe('ReactionChip', () => {
 	});
 
 	test('Clicking on the chip that the user sent remove it', async () => {
-		const spyOnSendChatMessageReaction = jest.spyOn(
+		const spyOnSendChatMessageReaction = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'sendChatMessageReaction'
 		);

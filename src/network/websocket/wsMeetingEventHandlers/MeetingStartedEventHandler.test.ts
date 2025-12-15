@@ -41,7 +41,7 @@ describe('MeetingStartedEventHandler tests', () => {
 	});
 
 	test('Incoming meeting notification is sent if the meeting is from one-to-one room and started by the other user', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStartedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.INCOMING_MEETING, { detail: event })
@@ -50,7 +50,7 @@ describe('MeetingStartedEventHandler tests', () => {
 
 	test('Incoming meeting notification is not sent if the meeting is started by me', () => {
 		useStore.getState().setLoginInfo(event.starterUser, 'myusername');
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStartedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
@@ -58,7 +58,7 @@ describe('MeetingStartedEventHandler tests', () => {
 	test('Incoming meeting notification is not sent if the room is not one-to-one', () => {
 		event.meetingId = groupMeeting.id;
 		meetingStartedEventHandler(event);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
 });

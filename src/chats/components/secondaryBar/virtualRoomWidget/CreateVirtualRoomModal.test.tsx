@@ -192,7 +192,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('Search user fails ', async () => {
-		jest.spyOn(console, 'error').mockImplementation();
+		vi.spyOn(console, 'error').mockImplementation();
 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal

@@ -71,7 +71,7 @@ describe('meetingJoinedEventHandler tests', () => {
 
 	test('A custom event is sent if the joined user is the session user and the room is a one-to-one', () => {
 		event.userId = 'sessionUserId';
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.REMOVED_MEETING_NOTIFICATION, { detail: event })
@@ -80,7 +80,7 @@ describe('meetingJoinedEventHandler tests', () => {
 
 	test('A custom event is not sent if the joined user is different from the session user', () => {
 		event.userId = 'anotherUserId';
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
@@ -88,7 +88,7 @@ describe('meetingJoinedEventHandler tests', () => {
 	test('A custom event is not sent if it is from a group meeting', () => {
 		event.meetingId = groupMeeting.id;
 		event.userId = 'sessionUserId';
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});

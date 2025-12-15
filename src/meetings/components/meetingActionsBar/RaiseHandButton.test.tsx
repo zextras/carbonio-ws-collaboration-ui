@@ -62,7 +62,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<RaiseHandButton />, { meetingId: meeting.id });
 

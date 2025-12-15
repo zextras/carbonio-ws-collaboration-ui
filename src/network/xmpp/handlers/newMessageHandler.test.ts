@@ -147,7 +147,7 @@ describe('XMPP newMessageHandler', () => {
 
 	test('readMessage is not called for my own text messages', () => {
 		const { xmppClient } = useStore.getState().connections;
-		const spyOnReadMessage = jest.spyOn(xmppClient, 'readMessage');
+		const spyOnReadMessage = vi.spyOn(xmppClient, 'readMessage');
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
 		onNewMessageStanza.call(xmppClient, messageXMPP);

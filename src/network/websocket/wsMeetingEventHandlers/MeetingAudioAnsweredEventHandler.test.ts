@@ -34,7 +34,7 @@ describe('meetingAudioAnsweredEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
-		const handleRemoteAnswer = jest.spyOn(
+		const handleRemoteAnswer = vi.spyOn(
 			bidirectionalAudioConn as IBidirectionalConnectionAudioInOut,
 			'handleRemoteAnswer'
 		);

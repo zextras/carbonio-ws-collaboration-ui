@@ -46,7 +46,7 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
-		const handleRemoteAnswer = jest.spyOn(
+		const handleRemoteAnswer = vi.spyOn(
 			videoOutConn as IVideoOutConnection,
 			'handleRemoteAnswer'
 		);
@@ -59,7 +59,7 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const screenOutConn = useStore.getState().activeMeeting?.screenOutConn;
-		const handleRemoteAnswer = jest.spyOn(
+		const handleRemoteAnswer = vi.spyOn(
 			screenOutConn as IScreenOutConnection,
 			'handleRemoteAnswer'
 		);

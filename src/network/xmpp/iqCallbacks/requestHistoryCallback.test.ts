@@ -61,7 +61,7 @@ describe('requestHistoryCallback', () => {
 	});
 
 	test('Request history again if there are only fastenings', () => {
-		const spyOnRequestHistory = jest.spyOn(
+		const spyOnRequestHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestHistory'
 		);
@@ -106,7 +106,7 @@ describe('requestHistoryCallback', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = jest.spyOn(
+		const spyOnRequestMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);

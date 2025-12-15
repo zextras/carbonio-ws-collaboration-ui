@@ -13,19 +13,19 @@ import { setup } from '../../../tests/test-utils';
 import { PiPContextType } from '../../../types/pipTypes';
 
 const mockPipWindow = {
-	close: jest.fn(),
-	addEventListener: jest.fn(),
-	removeEventListener: jest.fn(),
+	close: vi.fn(),
+	addEventListener: vi.fn(),
+	removeEventListener: vi.fn(),
 	document: {
 		head: {
-			appendChild: jest.fn()
+			appendChild: vi.fn()
 		}
 	}
 };
 
 describe('PiPContext', () => {
 	test('pipWindow request', async () => {
-		const requestWindowMock = jest.fn(() => Promise.resolve(mockPipWindow));
+		const requestWindowMock = vi.fn(() => Promise.resolve(mockPipWindow));
 		(window as any).documentPictureInPicture = {
 			requestWindow: requestWindowMock
 		};
@@ -69,7 +69,7 @@ describe('PiPContext', () => {
 		delete (window as any).documentPictureInPicture;
 
 		(window as any).documentPictureInPicture = {
-			requestWindow: jest.fn(() => Promise.resolve(null))
+			requestWindow: vi.fn(() => Promise.resolve(null))
 		};
 
 		let contextValue: PiPContextType | undefined;
@@ -95,7 +95,7 @@ describe('PiPWindow', () => {
 			document: {
 				body: fakeBody,
 				head: {
-					appendChild: jest.fn()
+					appendChild: vi.fn()
 				}
 			}
 		} as unknown as Window;

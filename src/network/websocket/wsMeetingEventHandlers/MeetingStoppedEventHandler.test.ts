@@ -39,7 +39,7 @@ describe('MeetingStoppedEventHandler tests', () => {
 	});
 
 	test('Removed meeting notification is sent if the meeting is from one-to-one room', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.REMOVED_MEETING_NOTIFICATION, { detail: event })
@@ -49,14 +49,14 @@ describe('MeetingStoppedEventHandler tests', () => {
 	test('Removed meeting notification is not sent if the room is not one-to-one', () => {
 		event.meetingId = groupMeeting.id;
 		meetingStoppedEventHandler(event);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
 
 	test('Meeting stopped notification is sent if the meeting is active', () => {
 		useStore.getState().meetingConnection(groupMeeting.id);
 		event.meetingId = groupMeeting.id;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_STOPPED, { detail: event })

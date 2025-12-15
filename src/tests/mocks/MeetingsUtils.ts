@@ -9,6 +9,6 @@ jest.mock('../../utils/MeetingsUtils', () => {
 	const actualUtils = jest.requireActual('../../utils/MeetingsUtils');
 	return {
 		...actualUtils,
-		getWorkerUrl: jest.fn()
+		getWorkerUrl: vi.fn()
 	};
 });

@@ -46,28 +46,28 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_STARTED event is handled', () => {
 		const event = { type: WsEventType.MEETING_STARTED };
-		const handler = jest.spyOn(MeetingStartedEventHandler, 'meetingStartedEventHandler');
+		const handler = vi.spyOn(MeetingStartedEventHandler, 'meetingStartedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_PARTICIPANT_JOINED event is handled', () => {
 		const event = { type: WsEventType.MEETING_PARTICIPANT_JOINED };
-		const handler = jest.spyOn(MeetingJoinedEventHandler, 'meetingJoinedEventHandler');
+		const handler = vi.spyOn(MeetingJoinedEventHandler, 'meetingJoinedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_PARTICIPANT_LEFT event is handled', () => {
 		const event = { type: WsEventType.MEETING_PARTICIPANT_LEFT };
-		const handler = jest.spyOn(MeetingLeftEventHandler, 'meetingLeftEventHandler');
+		const handler = vi.spyOn(MeetingLeftEventHandler, 'meetingLeftEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_STOPPED event is handled', () => {
 		const event = { type: WsEventType.MEETING_STOPPED };
-		const handler = jest.spyOn(MeetingStoppedEventHandler, 'meetingStoppedEventHandler');
+		const handler = vi.spyOn(MeetingStoppedEventHandler, 'meetingStoppedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
@@ -87,7 +87,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_AUDIO_STREAM_CHANGED event is handled', () => {
 		const event = { type: WsEventType.MEETING_AUDIO_STREAM_CHANGED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingAudioStreamChangedEventHandler,
 			'meetingAudioStreamChangedEventHandler'
 		);
@@ -97,7 +97,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_MEDIA_STREAM_CHANGED event is handled', () => {
 		const event = { type: WsEventType.MEETING_MEDIA_STREAM_CHANGED, mediaType: STREAM_TYPE.SCREEN };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingMediaStreamChangedEventHandler,
 			'meetingMediaStreamChangedEventHandler'
 		);
@@ -107,7 +107,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_AUDIO_ANSWERED event is handled', () => {
 		const event = { type: WsEventType.MEETING_AUDIO_ANSWERED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingAudioAnsweredEventHandler,
 			'meetingAudioAnsweredEventHandler'
 		);
@@ -117,21 +117,21 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_SDP_ANSWERED event is handled', () => {
 		const event = { type: WsEventType.MEETING_SDP_ANSWERED, mediaType: STREAM_TYPE.SCREEN };
-		const handler = jest.spyOn(MeetingSDPAnsweredEventHandler, 'meetingSDPAnsweredEventHandler');
+		const handler = vi.spyOn(MeetingSDPAnsweredEventHandler, 'meetingSDPAnsweredEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_SDP_OFFERED event is handled', () => {
 		const event = { type: WsEventType.MEETING_SDP_OFFERED };
-		const handler = jest.spyOn(MeetingSDPOfferedEventHandler, 'meetingSDPOfferedEventHandler');
+		const handler = vi.spyOn(MeetingSDPOfferedEventHandler, 'meetingSDPOfferedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_PARTICIPANT_SUBSCRIBED event is handled', () => {
 		const event = { type: WsEventType.MEETING_PARTICIPANT_SUBSCRIBED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingParticipantSubscribedEventHandler,
 			'meetingParticipantSubscribedEventHandler'
 		);
@@ -141,7 +141,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_PARTICIPANT_TALKING event is handled', () => {
 		const event = { type: WsEventType.MEETING_PARTICIPANT_TALKING };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingParticipantTalkingHandler,
 			'meetingParticipantTalkingEventHandler'
 		);
@@ -151,7 +151,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_PARTICIPANT_CLASHED event is handled', () => {
 		const event = { type: WsEventType.MEETING_PARTICIPANT_CLASHED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingParticipantClashedEventHandler,
 			'meetingParticipantClashedEventHandler'
 		);
@@ -161,7 +161,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_WAITING_PARTICIPANT_JOINED event is handled', () => {
 		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingWaitingParticipantJoinedEventHandler,
 			'meetingWaitingParticipantJoinedEventHandler'
 		);
@@ -171,21 +171,21 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_WAITING_PARTICIPANT_ACCEPTED event is handled', () => {
 		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED };
-		const handler = jest.spyOn(MeetingUserAcceptedEventHandler, 'meetingUserAcceptedEventHandler');
+		const handler = vi.spyOn(MeetingUserAcceptedEventHandler, 'meetingUserAcceptedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_WAITING_PARTICIPANT_REJECTED event is handled', () => {
 		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED };
-		const handler = jest.spyOn(MeetingUserRejectedEventHandler, 'meetingUserRejectedEventHandler');
+		const handler = vi.spyOn(MeetingUserRejectedEventHandler, 'meetingUserRejectedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});
 
 	test('MEETING_WAITING_PARTICIPANT_CLASHED event is handled', () => {
 		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingWaitingParticipantClashedEventHandler,
 			'meetingWaitingParticipantClashedEventHandler'
 		);
@@ -195,7 +195,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_RECORDING_STARTED event is handled', () => {
 		const event = { type: WsEventType.MEETING_RECORDING_STARTED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingRecordingStartedEventHandler,
 			'meetingRecordingStartedEventHandler'
 		);
@@ -205,7 +205,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_RECORDING_STOPPED event is handled', () => {
 		const event = { type: WsEventType.MEETING_RECORDING_STOPPED };
-		const handler = jest.spyOn(
+		const handler = vi.spyOn(
 			MeetingRecordingStoppedEventHandler,
 			'meetingRecordingStoppedEventHandler'
 		);
@@ -214,7 +214,7 @@ describe('wsMeetingEventsHandler', () => {
 	});
 
 	test('Log an error for unhandled event types', () => {
-		console.error = jest.fn();
+		console.error = vi.fn();
 		const event = { type: 'UNHANDLED_EVENT_TYPE' };
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(console.error).toHaveBeenCalledWith(`Unhandled meeting event type: ${event.type}`);

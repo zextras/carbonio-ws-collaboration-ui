@@ -63,18 +63,11 @@ export enum UsersApiToSpy {
 	GET_USER = 'getUser'
 }
 
-export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
-	apiToSpy: AttachmentsApiToSpy
-) => jest.spyOn(attachmentsApi, apiToSpy);
+export const spyOnAttachmentsApi = (apiToSpy: AttachmentsApiToSpy) =>
+	vi.spyOn(attachmentsApi, apiToSpy);
 
-export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => jest.SpyInstance = (
-	apiToSpy: RoomsApiToSpy
-) => jest.spyOn(roomsApi, apiToSpy);
+export const spyOnRoomsApi = (apiToSpy: RoomsApiToSpy) => vi.spyOn(roomsApi, apiToSpy);
 
-export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance = (
-	apiToSpy: MeetingsApiToSpy
-) => jest.spyOn(meetingsApi, apiToSpy);
+export const spyOnMeetingsApi = (apiToSpy: MeetingsApiToSpy) => vi.spyOn(meetingsApi, apiToSpy);
 
-export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
-	apiToSpy: UsersApiToSpy
-) => jest.spyOn(usersApi, apiToSpy);
+export const spyOnUsersApi = (apiToSpy: UsersApiToSpy) => vi.spyOn(usersApi, apiToSpy);

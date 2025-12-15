@@ -176,7 +176,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting', async () => {
-		const meetingOpen = jest.spyOn(window, 'open');
+		const meetingOpen = vi.spyOn(window, 'open');
 		const store = useStore.getState();
 		store.addMeetings([groupMeeting]);
 		store.removeParticipant(groupMeeting.id, user1.id);

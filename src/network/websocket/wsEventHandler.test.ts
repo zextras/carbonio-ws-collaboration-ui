@@ -12,14 +12,14 @@ import { WsEvent } from '../../types/network/websocket/wsEvents';
 
 describe('wsEventHandler tests', () => {
 	test.each(conversationEvents)('should handle %s', (event) => {
-		const handler = jest.spyOn(WsConversationEventsHandler, 'wsConversationEventsHandler');
+		const handler = vi.spyOn(WsConversationEventsHandler, 'wsConversationEventsHandler');
 		const wsEvent = { type: event } as WsEvent;
 		wsEventsHandler(wsEvent);
 		expect(handler).toHaveBeenCalledWith(wsEvent);
 	});
 
 	test.each(meetingEvents)('should handle %s', (event) => {
-		const handler = jest.spyOn(WsMeetingEventsHandler, 'wsMeetingEventsHandler');
+		const handler = vi.spyOn(WsMeetingEventsHandler, 'wsMeetingEventsHandler');
 		const wsEvent = { type: event } as WsEvent;
 		wsEventsHandler(wsEvent);
 		expect(handler).toHaveBeenCalledWith(wsEvent);

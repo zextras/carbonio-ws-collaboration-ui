@@ -3,6 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export const mockUseMediaQueryCheck = jest.fn();
+export const mockUseMediaQueryCheck = vi.fn();
 
 jest.mock('../../hooks/useMediaQueryCheck', () => mockUseMediaQueryCheck);

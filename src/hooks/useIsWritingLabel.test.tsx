@@ -14,6 +14,8 @@ import { UserBe } from '../types/network/models/userBeTypes';
 import { RootStore } from '../types/store/StoreTypes';
 import { User } from '../types/store/UserTypes';
 
+vi.mock('react-i18next');
+
 const user1Info: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
@@ -54,12 +56,6 @@ const testRoom: RoomBe = createMockRoom({
 		createMockMember({ userId: user5Info.id })
 	]
 });
-
-jest.mock('react-i18next', () => ({
-	useTranslation: (): { t: (str: string) => string } => ({
-		t: (str: string): string => str
-	})
-}));
 
 beforeEach(() => {
 	const store = useStore.getState();

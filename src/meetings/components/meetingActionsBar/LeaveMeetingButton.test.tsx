@@ -19,7 +19,7 @@ const mockMeeting: MeetingBe = createMockMeeting();
 const leaveMeetingButtonText = 'Leave Meeting?';
 
 beforeEach(() => {
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
 });
 

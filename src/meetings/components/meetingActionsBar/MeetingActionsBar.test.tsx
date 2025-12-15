@@ -48,7 +48,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
-const mockUseContainerDimensions = jest.fn();
+const mockUseContainerDimensions = vi.fn();
 jest.mock('../../../hooks/useContainerDimensions', () => ({
 	__esModule: true,
 	default: (): { width: number } => mockUseContainerDimensions()

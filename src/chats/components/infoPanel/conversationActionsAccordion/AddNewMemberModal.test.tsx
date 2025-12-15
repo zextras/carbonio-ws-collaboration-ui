@@ -41,8 +41,8 @@ describe('Add new Member Modal', () => {
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
-				addNewMember={jest.fn()}
-				closeModal={jest.fn()}
+				addNewMember={vi.fn()}
+				closeModal={vi.fn()}
 				members={[
 					{
 						userId: 'user2',
@@ -52,9 +52,9 @@ describe('Add new Member Modal', () => {
 					}
 				]}
 				contactsSelected={[]}
-				setContactsSelected={jest.fn()}
+				setContactsSelected={vi.fn()}
 				showHistory
-				setShowHistory={jest.fn()}
+				setShowHistory={vi.fn()}
 				label={testRoom.name!}
 			/>
 		);
@@ -77,8 +77,8 @@ describe('Add new Member Modal', () => {
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
-				addNewMember={jest.fn()}
-				closeModal={jest.fn()}
+				addNewMember={vi.fn()}
+				closeModal={vi.fn()}
 				members={[
 					{
 						userId: 'user2',
@@ -88,9 +88,9 @@ describe('Add new Member Modal', () => {
 					}
 				]}
 				contactsSelected={[]}
-				setContactsSelected={jest.fn()}
+				setContactsSelected={vi.fn()}
 				showHistory={false}
-				setShowHistory={jest.fn()}
+				setShowHistory={vi.fn()}
 				label={testRoom.name!}
 			/>
 		);

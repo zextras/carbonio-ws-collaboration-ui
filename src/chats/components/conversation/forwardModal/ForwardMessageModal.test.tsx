@@ -52,7 +52,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -73,7 +73,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -89,7 +89,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -106,7 +106,7 @@ describe('Forward Message Modal', () => {
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -132,7 +132,7 @@ describe('Forward Message Modal', () => {
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -158,7 +158,7 @@ describe('Forward Message Modal', () => {
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
@@ -184,7 +184,7 @@ describe('Forward Message Modal', () => {
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -212,7 +212,7 @@ describe('Forward Message Modal', () => {
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
@@ -239,7 +239,7 @@ describe('Forward Message Modal', () => {
 		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -263,7 +263,7 @@ describe('Forward Message Modal', () => {
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -287,7 +287,7 @@ describe('Forward Message Modal', () => {
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open

@@ -12,7 +12,7 @@ import {
 	SearchUsersByFeatureSoapResponse
 } from '../../types/network/soap/searchUsersByFeatureRequest';
 
-export const mockSearchUsersByFeatureRequest: jest.Mock = jest.fn();
+export const mockSearchUsersByFeatureRequest: jest.Mock = vi.fn();
 
 jest.mock('../../network/soap/SearchUsersByFeatureRequest', () => ({
 	searchUsersByFeatureRequest: (): Promise<SearchUsersByFeatureSoapResponse> =>

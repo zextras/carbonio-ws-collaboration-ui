@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export const mockedScrollToEnd = jest.fn();
-export const mockedScrollToMessage = jest.fn();
+export const mockedScrollToEnd = vi.fn();
+export const mockedScrollToMessage = vi.fn();
 jest.mock('../../utils/scrollUtils', () => ({
 	scrollToEnd: mockedScrollToEnd,
 	scrollToMessage: mockedScrollToMessage

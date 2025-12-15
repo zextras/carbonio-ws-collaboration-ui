@@ -77,7 +77,7 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
-		const closeRtpSender = jest.spyOn(
+		const closeRtpSender = vi.spyOn(
 			activeMeeting!.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,
 			'closeRtpSenderTrack'
 		);

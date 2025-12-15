@@ -64,7 +64,7 @@ describe('meetingLeftEventHandler tests', () => {
 	test('Left participant video subscription is been removed', () => {
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
-		const deleteSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
+		const deleteSub = vi.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
 		meetingLeftEventHandler(event);
 		expect(deleteSub).toHaveBeenCalled();
 	});

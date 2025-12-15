@@ -47,7 +47,7 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant]
 });
 
-const mockSetIsVideoListOpen = jest.fn();
+const mockSetIsVideoListOpen = vi.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
@@ -73,9 +73,9 @@ beforeEach(() => {
 });
 describe('Camera button - permission denied', () => {
 	test('User clicks on the button', async () => {
-		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
+		vi.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
-		const err = jest.spyOn(console, 'error').mockImplementation();
+		const err = vi.spyOn(console, 'error').mockImplementation();
 
 		const { user } = defaultSetup();
 

@@ -64,7 +64,7 @@ describe('XMPP presenceHandler', () => {
 	});
 
 	test('Send pong when a ping stanza arrives', () => {
-		const spyOnSendPong = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
+		const spyOnSendPong = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
 		// A new ping stanza arrives
 		const stanzaId = 'pingStanzaId';
 		onPingStanza.call(

@@ -49,7 +49,7 @@ describe('requestHistoryWithBackfillCallback tests', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = jest.spyOn(
+		const spyOnRequestMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);
