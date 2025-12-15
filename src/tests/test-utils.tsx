@@ -18,6 +18,7 @@ import {
 import { userEvent } from '@testing-library/user-event';
 import { ModalManager, SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
 import { I18nextProvider } from 'react-i18next';
+import { type Mock } from 'vitest';
 
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
@@ -63,7 +64,7 @@ export function setup(
 	...args: Parameters<typeof customRender>
 ): { user: ReturnType<(typeof userEvent)['setup']> } & ReturnType<typeof customRender> {
 	return {
-		user: userEvent.setup({ advanceTimers: jest.advanceTimersByTime }),
+		user: userEvent.setup({ advanceTimers: vi.advanceTimersByTime }),
 		...customRender(...args)
 	};
 }
@@ -79,7 +80,7 @@ const customScreen: Screen<typeof extendedQueries> = { ...screen, ...customWithi
 export { customWithin as within, customScreen as screen };
 
 export async function triggerObserver(observedElement: HTMLElement): Promise<void> {
-	const { calls } = (window.IntersectionObserver as jest.Mock<IntersectionObserver>).mock;
+	const { calls } = (window.IntersectionObserver as Mock).mock;
 	const [onChange] = calls[calls.length - 1];
 	// trigger the intersection on the observed element
 	await waitFor(() =>
@@ -110,7 +111,7 @@ export const routerContextSetup = (
 				route,
 				meetingId,
 				infoType,
-				navigate: jest.fn()
+				navigate: vi.fn()
 			}}
 		>
 			<ProvidersWrapper>{children}</ProvidersWrapper>
