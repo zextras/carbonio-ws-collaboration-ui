@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { mockUseMediaQueryCheck } from '@mocks/useMediaQueryCheck';
+import { mockGoToMainPage } from '@mocks/useRouting';
 import { act } from '@testing-library/react';
 
 import Conversation from './Conversation';
@@ -14,8 +16,6 @@ import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
-import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
-import { mockGoToMainPage } from '../../../tests/mocks/useRouting';
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import {

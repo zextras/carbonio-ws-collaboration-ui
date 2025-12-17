@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockGoToRoomPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/store/RoomTypes';
 

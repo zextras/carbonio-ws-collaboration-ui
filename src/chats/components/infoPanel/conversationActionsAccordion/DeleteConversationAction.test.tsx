@@ -5,12 +5,12 @@
  */
 import React from 'react';
 
+import { mockGoToMainPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';

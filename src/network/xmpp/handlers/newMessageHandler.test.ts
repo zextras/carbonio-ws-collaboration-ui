@@ -14,7 +14,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
+import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
 	FasteningAction,
 	MessageFastening,

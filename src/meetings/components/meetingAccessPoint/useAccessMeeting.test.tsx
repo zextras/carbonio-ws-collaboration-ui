@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { mockGoToInfoPage, mockGoToMeetingPage } from '@mocks/useRouting';
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
@@ -13,7 +14,6 @@ import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../tests/mocks/useRouting';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
 

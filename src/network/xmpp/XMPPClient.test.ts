@@ -12,7 +12,7 @@ import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
-import { buildPingStanza } from '../../tests/mocks/buildXmppStanza';
+import { buildPingStanza } from '../../tests/buildXmppStanza';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 

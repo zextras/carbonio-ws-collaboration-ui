@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockUseMediaQueryCheck } from '@mocks/useMediaQueryCheck';
 import { act, screen } from '@testing-library/react';
 
 import { ConversationView } from './Conversation';
@@ -17,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';

@@ -5,6 +5,7 @@
  */
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 const retry = process.env.TEST_RETRY_TIMES ? parseInt(process.env.TEST_RETRY_TIMES, 10) : 2;
 const isCI = process.env.CI === 'true';
@@ -26,7 +27,7 @@ export default defineConfig({
 		retry,
 		environment: 'jsdom',
 		setupFiles: ['./src/tests/setupTests.ts'],
-		restoreMocks: true,
+		restoreMocks: true, // or clearMocks: true ?
 		maxWorkers: isCI ? 2 : undefined,
 		coverage: {
 			enabled: true,
@@ -53,5 +54,10 @@ export default defineConfig({
 		},
 		globals: true,
 		testTimeout: 60000
+	},
+	resolve: {
+		alias: {
+			'@mocks': path.resolve(__dirname, './src/tests/mocks')
+		}
 	}
 });

@@ -11,7 +11,7 @@ import {
 	buildEndRequestHistoryStanza,
 	buildReactionMessageFromHistory,
 	buildTextMessageFromHistory
-} from '../../../tests/mocks/buildXmppStanza';
+} from '../../../tests/buildXmppStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 const room = createMockRoom({ id: 'mockRoomId' });

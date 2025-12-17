@@ -5,6 +5,7 @@
  */
 import React from 'react';
 
+import { mockGoToInfoPage } from '@mocks/useRouting';
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
@@ -18,7 +19,6 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';

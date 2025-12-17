@@ -13,7 +13,7 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { spyOnFetch } from '../../tests/jest-env-setup';
-import { buildTextMessageFromHistory } from '../../tests/mocks/buildXmppStanza';
+import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import { mockedUuid } from '../../tests/mocks/global';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';

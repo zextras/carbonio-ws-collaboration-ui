@@ -6,10 +6,10 @@
 
 import React, { useState } from 'react';
 
+import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
-import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 

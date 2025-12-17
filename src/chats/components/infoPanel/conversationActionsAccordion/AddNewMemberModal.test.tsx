@@ -6,12 +6,12 @@
 
 import React from 'react';
 
+import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, within } from '@testing-library/react';
 
 import AddNewMemberModal from './AddNewMemberModal';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';

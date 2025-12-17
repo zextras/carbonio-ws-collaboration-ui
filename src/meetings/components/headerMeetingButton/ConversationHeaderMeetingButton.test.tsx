@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockGoToRoomPage } from '@mocks/useRouting';
 import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
@@ -19,7 +20,6 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { mockGoToRoomPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';

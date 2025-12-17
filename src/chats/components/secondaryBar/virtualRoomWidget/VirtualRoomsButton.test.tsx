@@ -5,6 +5,7 @@
  */
 import React from 'react';
 
+import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
@@ -15,7 +16,6 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingType } from '../../../../types/network/models/meetingBeTypes';
 

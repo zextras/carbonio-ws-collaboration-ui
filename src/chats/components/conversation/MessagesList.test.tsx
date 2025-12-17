@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockedScrollToEnd, mockedScrollToMessage } from '@mocks/scrollUtils';
 import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
@@ -18,7 +19,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import {

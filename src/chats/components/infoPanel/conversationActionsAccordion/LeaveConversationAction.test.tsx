@@ -6,13 +6,13 @@
 
 import React from 'react';
 
+import { mockGoToMainPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';

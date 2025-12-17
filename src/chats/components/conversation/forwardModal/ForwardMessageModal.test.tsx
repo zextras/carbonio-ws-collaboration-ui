@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockGoToRoomPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
@@ -17,7 +18,6 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';

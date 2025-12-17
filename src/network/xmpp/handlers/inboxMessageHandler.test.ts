@@ -11,7 +11,7 @@ import {
 	buildReactionMessageFromInbox,
 	buildReplyMessageFromInbox,
 	buildTextMessageFromInbox
-} from '../../../tests/mocks/buildXmppStanza';
+} from '../../../tests/buildXmppStanza';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 describe('XMPP inboxMessageHandler tests', () => {

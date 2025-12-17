@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '@mocks/useRouting';
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as Shell from '@zextras/carbonio-shell-ui';
@@ -20,7 +21,6 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';

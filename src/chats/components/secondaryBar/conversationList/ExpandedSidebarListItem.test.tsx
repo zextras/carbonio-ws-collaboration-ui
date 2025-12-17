@@ -19,7 +19,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { buildComposingStanza } from '../../../../tests/mocks/buildXmppStanza';
+import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import {
