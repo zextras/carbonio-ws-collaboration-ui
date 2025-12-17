@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { MediaStatus } from './MeetingExternalAccessPage';
 import AccessTile from '../AccessTile';
 import { useLocalMediaHandler } from '../useLocalMediaHandler';
+import {MicTestButton} from "../MicTestButton";
 
 type AudioAndVideoCardProps = {
 	mediaStatus: MediaStatus;
@@ -51,7 +52,8 @@ const AudioAndVideoCard = ({
 	const {
 		status: audioStatus,
 		deviceId: audioDeviceId,
-		HandlerComponent: AudioHandlerComponent
+		HandlerComponent: AudioHandlerComponent,
+		streamTrack: audioStreamTrack
 	} = useLocalMediaHandler({
 		mediaType: 'audio',
 		initialStatus: mediaStatus.audio.enabled,
@@ -98,15 +100,9 @@ const AudioAndVideoCard = ({
 				{VideoHandlerComponent}
 				{AudioHandlerComponent}
 			</Container>
-			<Button
-				width="fill"
-				label={!micTest ? startMicTestLabel : stopMicTestLabel}
-				type="outlined"
-				icon="Mic"
-				iconPlacement="right"
-				onClick={toggleMicTest}
-				disabled={!audioStatus}
-			/>
+			<Container height="fit">
+				<MicTestButton disabled={!audioStatus} stream={audioStreamTrack} />
+			</Container>
 		</Row>
 	);
 };
