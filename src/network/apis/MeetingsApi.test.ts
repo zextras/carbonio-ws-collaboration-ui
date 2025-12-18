@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
@@ -496,31 +495,31 @@ describe('Meetings API', () => {
 	});
 
 	test('authLogin is called correctly', async () => {
-		const spyOnAuthLogin = spyOnMeetingsApi(MeetingsApiToSpy.LOGIN_CONFIG).mockImplementation(() =>
-			Promise.resolve([])
-		);
+		const spyOnAuthLogin = vi
+			.spyOn(meetingsApi, 'getLoginConfig')
+			.mockImplementation(() => Promise.resolve([]));
 		await meetingsApi.getLoginConfig();
 
 		expect(spyOnAuthLogin).toHaveBeenCalled();
 	});
 
 	test('createGuestAccount is called correctly', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(
-			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
-		).mockImplementation(() =>
-			Promise.resolve({
-				id: 'string',
-				zmToken: 'string',
-				zxToken: 'string'
-			})
-		);
+		const spyOnCreateGuestAccount = vi
+			.spyOn(meetingsApi, 'createGuestAccount')
+			.mockImplementation(() =>
+				Promise.resolve({
+					id: 'string',
+					zmToken: 'string',
+					zxToken: 'string'
+				})
+			);
 		await meetingsApi.createGuestAccount('userName');
 
 		expect(spyOnCreateGuestAccount).toHaveBeenCalledWith('userName');
 	});
 
 	test('user raise hand', async () => {
-		const spyOnRaiseHand = spyOnMeetingsApi(MeetingsApiToSpy.RAISE_HAND);
+		const spyOnRaiseHand = vi.spyOn(meetingsApi, 'raiseHand');
 		ongoingMeetingSetup();
 
 		await meetingsApi.raiseHand(meetingMock.id, true);

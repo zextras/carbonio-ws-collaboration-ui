@@ -8,13 +8,13 @@ import { size } from 'lodash';
 
 import { onNewMessageStanza } from './newMessageHandler';
 import useStore from '../../../store/Store';
+import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
 	createMockMessageFastening,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
 	FasteningAction,
 	MessageFastening,

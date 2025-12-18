@@ -8,9 +8,9 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import MobileActionBar from './MobileActionBar';
+import meetingsApi from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -54,7 +54,7 @@ describe('MobileActionBar test', () => {
 	});
 
 	test('Leave meeting button', async () => {
-		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
+		const spyOnLeaveMeeting = vi.spyOn(meetingsApi, 'leaveMeeting');
 		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
@@ -71,9 +71,7 @@ describe('MobileActionBar test', () => {
 	});
 
 	test('Toggle audio stream', async () => {
-		const spyOnUpdateAudioStreamStatus = spyOnMeetingsApi(
-			MeetingsApiToSpy.UPDATE_AUDIO_STREAM_STATUS
-		);
+		const spyOnUpdateAudioStreamStatus = vi.spyOn(meetingsApi, 'updateAudioStreamStatus');
 		const store = useStore.getState();
 		store.setLoginInfo('userId', 'User');
 		store.addMeetings([mockMeeting]);

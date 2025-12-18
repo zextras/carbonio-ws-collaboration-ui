@@ -107,10 +107,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_AUDIO_ANSWERED event is handled', () => {
 		const event = { type: WsEventType.MEETING_AUDIO_ANSWERED };
-		const handler = vi.spyOn(
-			MeetingAudioAnsweredEventHandler,
-			'meetingAudioAnsweredEventHandler'
-		);
+		const handler = vi.spyOn(MeetingAudioAnsweredEventHandler, 'meetingAudioAnsweredEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});

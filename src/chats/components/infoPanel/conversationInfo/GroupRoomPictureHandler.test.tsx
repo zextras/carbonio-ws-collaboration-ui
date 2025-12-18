@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -90,7 +90,7 @@ describe('Room Picture Handler - groups', () => {
 		expect(deleteButton).toBeInTheDocument();
 	});
 	test('upload an image', async () => {
-		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
+		const spyOnUpdateRoomPicture = vi.spyOn(roomsApi, 'updateRoomPicture');
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
@@ -111,7 +111,7 @@ describe('Room Picture Handler - groups', () => {
 	});
 
 	test('update an image fails', async () => {
-		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
+		const spyOnUpdateRoomPicture = vi.spyOn(roomsApi, 'updateRoomPicture');
 		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
 		const store: RootStore = useStore.getState();
@@ -131,7 +131,7 @@ describe('Room Picture Handler - groups', () => {
 	});
 
 	test('delete an image', async () => {
-		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
+		const spyOnDeleteRoomPicture = vi.spyOn(roomsApi, 'deleteRoomPicture');
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
@@ -152,7 +152,7 @@ describe('Room Picture Handler - groups', () => {
 	});
 
 	test('delete an image fails ', async () => {
-		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
+		const spyOnDeleteRoomPicture = vi.spyOn(roomsApi, 'deleteRoomPicture');
 		spyOnDeleteRoomPicture.mockRejectedValue(false);
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);

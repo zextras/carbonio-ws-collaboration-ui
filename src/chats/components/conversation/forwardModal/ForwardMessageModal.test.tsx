@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
 import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMember,
@@ -17,7 +18,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -104,7 +104,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a 1-to-1 room', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -130,7 +130,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a group', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -156,7 +156,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to a group', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -182,7 +182,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to multiple conversations', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -210,7 +210,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to multiple conversations', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -238,7 +238,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
 
 		const onClose = vi.fn();
@@ -260,7 +260,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
@@ -284,7 +284,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('forwarding to one room redirect to tht room', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
 		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });

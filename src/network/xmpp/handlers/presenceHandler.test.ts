@@ -6,8 +6,8 @@
 
 import { onPingStanza, onPresenceStanza } from './presenceHandler';
 import useStore from '../../../store/Store';
-import { createMockUser } from '../../../tests/createMock';
 import { buildPingStanza, buildPresenceStanza } from '../../../tests/buildXmppStanza';
+import { createMockUser } from '../../../tests/createMock';
 
 const loggedUser = createMockUser({ id: 'userId-logged', name: 'User Logged' });
 const mockUser = createMockUser({ id: 'userId-mock', name: 'User Mock' });

@@ -11,6 +11,7 @@ import { act, screen } from '@testing-library/react';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
 import useStore from '../../../../store/Store';
+import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
 	createMockConfigurationMessage,
@@ -19,7 +20,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import {

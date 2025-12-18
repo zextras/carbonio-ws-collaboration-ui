@@ -9,6 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
+import roomsApi from '../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
@@ -16,7 +17,6 @@ import {
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
@@ -102,7 +102,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Create a group', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
@@ -135,7 +135,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on creating a group displaying a snackbar', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);

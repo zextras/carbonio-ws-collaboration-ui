@@ -7,7 +7,7 @@
 import AttachmentsApi from './AttachmentsApi';
 import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
-import { mockFetchAPI } from "../../utils/__mocks__/FetchUtils";
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';

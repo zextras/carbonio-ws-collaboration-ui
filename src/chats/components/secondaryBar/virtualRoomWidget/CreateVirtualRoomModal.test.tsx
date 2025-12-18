@@ -10,10 +10,10 @@ import { screen } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
@@ -91,7 +91,7 @@ describe('VirtualRoomsModal', () => {
 	test('create virtual room with 2 moderators', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open
@@ -128,7 +128,7 @@ describe('VirtualRoomsModal', () => {
 	test('create virtual room by selecting and removing one moderator', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open
@@ -162,7 +162,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('create virtual room by typing one moderator name', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open

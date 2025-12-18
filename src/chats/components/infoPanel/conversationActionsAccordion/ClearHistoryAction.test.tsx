@@ -9,13 +9,13 @@ import React from 'react';
 import { act, renderHook, screen } from '@testing-library/react';
 
 import ClearHistoryAction from './ClearHistoryAction';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
@@ -47,7 +47,7 @@ const message = createMockTextMessage({ roomId: mockedRoom.id });
 
 describe('clear history action', () => {
 	test('clear history', async () => {
-		const spyOnClearRoomHistory = spyOnRoomsApi(RoomsApiToSpy.CLEAR_ROOM_HISTORY);
+		const spyOnClearRoomHistory = vi.spyOn(roomsApi, 'clearRoomHistory');
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRooms([mockedRoom]);

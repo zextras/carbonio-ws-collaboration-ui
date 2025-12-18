@@ -10,13 +10,9 @@ import * as shell from '@zextras/carbonio-shell-ui';
 
 import MainApp from './MainApp';
 import sessionApi from './network/apis/InfoApi';
+import meetingsApi from './network/apis/MeetingsApi';
+import roomsApi from './network/apis/RoomsApi';
 import useStore from './store/Store';
-import {
-	MeetingsApiToSpy,
-	RoomsApiToSpy,
-	spyOnMeetingsApi,
-	spyOnRoomsApi
-} from './tests/mocks/network';
 import { setup } from './tests/test-utils';
 
 describe('Entry point', () => {
@@ -48,8 +44,8 @@ describe('Entry point', () => {
 	test('Connection is established on app load', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
-		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
+		vi.spyOn(roomsApi, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(meetingsApi, 'listMeetings').mockResolvedValueOnce([]);
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 	});
@@ -64,7 +60,7 @@ describe('Entry point', () => {
 	test('Connection is not established on app load if listRooms do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockRejectedValueOnce(new Error());
+		vi.spyOn(roomsApi, 'listRooms').mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});

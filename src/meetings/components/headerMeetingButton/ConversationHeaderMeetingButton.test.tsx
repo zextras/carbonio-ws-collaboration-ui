@@ -19,10 +19,10 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import meetingsApi from "../../../network/apis/MeetingsApi";
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 
@@ -107,7 +107,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting for the first time', async () => {
-		const spyOnCreateMeeting = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_MEETING);
+		const spyOnCreateMeeting = vi.spyOn(meetingsApi, 'createMeeting');
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');

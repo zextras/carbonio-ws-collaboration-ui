@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
+import attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -18,7 +19,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
@@ -353,7 +353,7 @@ describe('Actions', () => {
 		);
 	});
 	test('Delete a message with attachment', async () => {
-		const spyOnDeleteAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.DELETE_ATTACHMENT);
+		const spyOnDeleteAttachment = vi.spyOn(attachmentsApi, 'deleteAttachment');
 		const store: RootStore = useStore.getState();
 		store.newMessage(mockedAttachmentMessageGb);
 		const { user } = setup(

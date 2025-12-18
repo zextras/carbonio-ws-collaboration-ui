@@ -6,12 +6,12 @@
 
 import { requestHistoryWithBackfillCallback } from './requestHistoryWithBackfillCallback';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import {
 	buildEndRequestHistoryStanza,
 	buildReactionMessageFromHistory,
 	buildTextMessageFromHistory
 } from '../../../tests/buildXmppStanza';
+import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 const room = createMockRoom({ id: 'mockRoomId' });

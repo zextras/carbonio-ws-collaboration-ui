@@ -12,13 +12,13 @@ import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import { mockGoToMainPage, mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
@@ -155,7 +155,7 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
-		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+		const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner={false}
@@ -190,7 +190,7 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('delete_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
-		const spyOnDeleteRoom = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM);
+		const spyOnDeleteRoom = vi.spyOn(roomsApi, 'deleteRoom');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner
@@ -211,7 +211,7 @@ describe('participants actions - leave/delete conversation', () => {
 
 describe('participants actions - promote/demote member', () => {
 	test('Promote member', async () => {
-		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
+		const spyOnPromoteRoomMember = vi.spyOn(roomsApi, 'promoteRoomMember');
 		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -225,7 +225,7 @@ describe('participants actions - promote/demote member', () => {
 	});
 
 	test('Demote member', async () => {
-		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
+		const spyOnDemoteRoomMember = vi.spyOn(roomsApi, 'demotesRoomMember');
 		const { user } = setup(
 			<MemberComponentInfo
 				roomId={mockedRoom.id}
@@ -262,7 +262,7 @@ describe('participants actions - delete user', () => {
 	});
 
 	test('delete user', async () => {
-		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+		const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);

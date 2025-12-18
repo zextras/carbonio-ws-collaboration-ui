@@ -10,6 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router-dom';
 
 import RaiseHandButton from './RaiseHandButton';
+import meetingsApi from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -17,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -71,7 +71,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 
 describe('Raise hand button', () => {
 	test('User Raise Hand', async () => {
-		const spyOnRaiseHand = spyOnMeetingsApi(MeetingsApiToSpy.RAISE_HAND);
+		const spyOnRaiseHand = vi.spyOn(meetingsApi, 'raiseHand');
 
 		const { user } = storeSetupGroupMeeting();
 

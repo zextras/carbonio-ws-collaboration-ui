@@ -6,12 +6,12 @@
 
 import { onInboxMessageStanza } from './inboxMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockTextMessage } from '../../../tests/createMock';
 import {
 	buildReactionMessageFromInbox,
 	buildReplyMessageFromInbox,
 	buildTextMessageFromInbox
 } from '../../../tests/buildXmppStanza';
+import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 describe('XMPP inboxMessageHandler tests', () => {

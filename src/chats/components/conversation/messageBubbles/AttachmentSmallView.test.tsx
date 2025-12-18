@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
+import attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 describe('Attachment Small view', () => {
 	test('Download generic file', async () => {
-		const spyOnGetURLAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.GET_URL_ATTACHMENT);
+		const spyOnGetURLAttachment = vi.spyOn(attachmentsApi, 'getURLAttachment');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',
@@ -37,9 +37,7 @@ describe('Attachment Small view', () => {
 	});
 
 	test('Preview image file', async () => {
-		const spyOnGetImageThumbnailURL = spyOnAttachmentsApi(
-			AttachmentsApiToSpy.GET_IMAGE_THUMBNAIL_URL
-		);
+		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentsApi, 'getImageThumbnailURL');
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',

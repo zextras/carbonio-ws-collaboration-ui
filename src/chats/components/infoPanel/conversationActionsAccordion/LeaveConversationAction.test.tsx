@@ -10,9 +10,9 @@ import { screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
@@ -54,7 +54,7 @@ describe('Leave conversation Action', () => {
 	});
 
 	test('leave conversation', async () => {
-		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+		const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
 		const { user } = setup(
 			<LeaveConversationAction
 				type={mockedRoom.type}

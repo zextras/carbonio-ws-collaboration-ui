@@ -8,6 +8,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
@@ -15,7 +16,6 @@ import {
 	createMockMeeting,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingType } from '../../../../types/network/models/meetingBeTypes';
 
@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('VirtualRoomsButton', () => {
 	test('create virtual modal', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 
 		const { user } = setup(<VirtualRoomsButton expanded />);
 

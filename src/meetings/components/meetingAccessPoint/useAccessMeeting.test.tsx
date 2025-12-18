@@ -11,9 +11,9 @@ import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/useRouting';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import meetingsApi from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
 
@@ -34,7 +34,7 @@ beforeAll(() => {
 describe('useAccessMeeting tests', () => {
 	test('handleEnterMeeting redirect to meeting', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		const spyOnEnterMeeting = spyOnMeetingsApi(MeetingsApiToSpy.ENTER_MEETING);
+		const spyOnEnterMeeting = vi.spyOn(meetingsApi, 'enterMeeting');
 		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
 		result.current.handleEnterMeeting();
 		expect(spyOnEnterMeeting).toHaveBeenCalledWith(
@@ -49,7 +49,7 @@ describe('useAccessMeeting tests', () => {
 
 	test('handleWaitingRoom use mediaStatus', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		const spyOnJoinMeeting = spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING);
+		const spyOnJoinMeeting = vi.spyOn(meetingsApi, 'joinMeeting');
 		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
 		result.current.handleWaitingRoom();
 		expect(spyOnJoinMeeting).toHaveBeenCalledWith(
@@ -88,8 +88,8 @@ describe('useAccessMeeting tests', () => {
 
 	test('handleLeave handle leaving the waiting room', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING).mockResolvedValueOnce({ status: 'WAITING' });
-		const spyOnLeaveWaitingRoom = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_WAITING_ROOM);
+		vi.spyOn(meetingsApi, 'joinMeeting').mockResolvedValueOnce({ status: 'WAITING' });
+		const spyOnLeaveWaitingRoom = vi.spyOn(meetingsApi, 'leaveWaitingRoom');
 		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
 		result.current.handleWaitingRoom();
 		await waitFor(() => {
@@ -101,7 +101,7 @@ describe('useAccessMeeting tests', () => {
 
 	test('Accepted user in waiting room is redirected to meeting', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING).mockResolvedValueOnce({ status: 'ACCEPTED' });
+		vi.spyOn(meetingsApi, 'joinMeeting').mockResolvedValueOnce({ status: 'ACCEPTED' });
 		renderHook(() => useAccessMeeting(mediaStatus));
 		sendCustomEvent({
 			name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,

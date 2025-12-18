@@ -46,10 +46,7 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
-		const handleRemoteAnswer = vi.spyOn(
-			videoOutConn as IVideoOutConnection,
-			'handleRemoteAnswer'
-		);
+		const handleRemoteAnswer = vi.spyOn(videoOutConn as IVideoOutConnection, 'handleRemoteAnswer');
 		meetingSDPAnsweredEventHandler(event);
 		expect(handleRemoteAnswer).toHaveBeenCalled();
 	});

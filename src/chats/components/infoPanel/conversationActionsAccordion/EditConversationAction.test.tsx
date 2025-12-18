@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
@@ -68,7 +68,7 @@ describe('Edit conversation action', () => {
 	});
 
 	test('edit conversation', async () => {
-		const spyOnUpdateRoom = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM);
+		const spyOnUpdateRoom = vi.spyOn(roomsApi, 'updateRoom');
 		spyOnUpdateRoom.mockRejectedValueOnce('Not edited');
 
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);

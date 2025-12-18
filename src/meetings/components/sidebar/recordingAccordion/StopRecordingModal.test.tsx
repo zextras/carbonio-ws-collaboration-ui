@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import StopRecordingModal from './StopRecordingModal';
+import meetingsApi from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -43,10 +43,8 @@ beforeEach(() => {
 });
 describe('StopRecordingModal tests', () => {
 	test('Show a snackbar when the stop recording request completes successfully', async () => {
-		spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING).mockResolvedValueOnce({});
-		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />
-		);
+		vi.spyOn(meetingsApi, 'stopRecording').mockResolvedValueOnce({});
+		const { user } = setup(<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />);
 		await user.click(screen.getByText('Stop'));
 
 		const snackbar = await screen.findByText(
@@ -56,11 +54,9 @@ describe('StopRecordingModal tests', () => {
 	});
 
 	test('Show a snackbar when the stop recording request fails', async () => {
-		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
+		const spyOnStopRecording = vi.spyOn(meetingsApi, 'stopRecording');
 		spyOnStopRecording.mockRejectedValue(false);
-		const { user } = setup(
-			<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />
-		);
+		const { user } = setup(<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />);
 		await user.click(screen.getByText('Stop'));
 
 		const snackbar = await screen.findByText(

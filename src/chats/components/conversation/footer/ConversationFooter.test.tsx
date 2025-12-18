@@ -11,6 +11,8 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
+import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,12 +22,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import {
-	AttachmentsApiToSpy,
-	RoomsApiToSpy,
-	spyOnAttachmentsApi,
-	spyOnRoomsApi
-} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -410,8 +406,8 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
-		const spyOnGetImageSize = spyOnAttachmentsApi(AttachmentsApiToSpy.GET_IMAGE_SIZE);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnGetImageSize = vi.spyOn(attachmentsApi, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -432,7 +428,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -450,7 +446,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 

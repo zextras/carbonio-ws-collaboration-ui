@@ -10,11 +10,12 @@ import { act } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
+import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
+import roomsApi from '../../../network/apis/RoomsApi';
 import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
-import { mockUseMediaQueryCheck } from "../../../hooks/__mocks__/useMediaQueryCheck";
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -127,7 +127,7 @@ describe('Conversation view', () => {
 		});
 
 		test('Leave a group and check everything is shown correctly', async () => {
-			const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+			const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
 			mockUseMediaQueryCheck.mockReturnValue(true);
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();

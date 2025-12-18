@@ -40,10 +40,6 @@ afterAll(() => {
 	vi.useRealTimers();
 });
 
-beforeAll(() => {
-	vi.mock('@zextras/carbonio-shell-ui');
-});
-
 export const mockIntersectionObserverObserve = vi.fn();
 export const mockIntersectionObserverDisconnect = vi.fn();
 export const mockPlayAudio = vi.fn();
@@ -239,7 +235,7 @@ beforeEach(() => {
 
 	Object.defineProperty(window, 'ResizeObserver', {
 		writable: true,
-		value: vi.fn(function REsizeObserverMock() {
+		value: vi.fn(function ResizeObserverMock() {
 			return {
 				observe: vi.fn(),
 				unobserve: vi.fn(),
@@ -247,6 +243,18 @@ beforeEach(() => {
 			};
 		})
 	});
+
+	// Object.defineProperty(window, 'localStorage', {
+	// 	value: vi.fn(function localStorageMock() {
+	// 		const store: { [key: string]: string } = {};
+	// 		return {
+	// 			getItem: (key: string): string | null => store[key] || null,
+	// 			setItem: (key: string, value: any): void => {
+	// 				store[key] = value.toString();
+	// 			}
+	// 		};
+	// 	})
+	// });
 
 	// global.Audio = vi.fn().mockImplementation(() => ({
 	// 	play: mockPlayAudio
@@ -331,7 +339,6 @@ beforeEach(() => {
 	// HTMLCanvasElement.prototype.getContext = vi.fn();
 });
 
-afterAll(() => {});
 afterEach(() => {
 	// act(() => {
 	// 	window.resizeTo(1024, 768);
