@@ -29,7 +29,6 @@ vi.mock('@zextras/carbonio-ui-soap-lib');
 vi.mock('darkreader');
 vi.mock('react-router-dom');
 vi.mock('zustand');
-import '@mocks/FetchUtils';
 
 beforeAll(() => {
 	vi.useFakeTimers({
@@ -50,6 +49,18 @@ export const mockIntersectionObserverDisconnect = vi.fn();
 export const mockPlayAudio = vi.fn();
 beforeEach(() => {
 	vi.clearAllMocks();
+
+	Object.defineProperty(global, 'fetch', {
+		value: vi.fn(() =>
+			Promise.resolve({
+				json: vi.fn(),
+				blob: vi.fn(),
+				ok: true,
+				headers: { get: vi.fn() }
+			})
+		),
+		configurable: true
+	});
 
 	Object.defineProperty(window, 'location', {
 		value: {
@@ -219,22 +230,24 @@ beforeEach(() => {
 			};
 		})
 	});
-	
+
 	Object.defineProperty(global.URL, 'createObjectURL', {
 		writable: true,
 		configurable: true,
 		value: vi.fn()
 	});
 
-	// Object.defineProperty(window, 'ResizeObserver', {
-	// 	writable: true,
-	// 	value: vi.fn().mockImplementation(() => ({
-	// 		observe: vi.fn(),
-	// 		unobserve: vi.fn(),
-	// 		disconnect: vi.fn()
-	// 	}))
-	// });
-	//
+	Object.defineProperty(window, 'ResizeObserver', {
+		writable: true,
+		value: vi.fn(function REsizeObserverMock() {
+			return {
+				observe: vi.fn(),
+				unobserve: vi.fn(),
+				disconnect: vi.fn()
+			};
+		})
+	});
+
 	// global.Audio = vi.fn().mockImplementation(() => ({
 	// 	play: mockPlayAudio
 	// }));
