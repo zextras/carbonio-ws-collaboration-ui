@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockFetchAPI } from '@mocks/FetchUtils';
-
 import infoApi from './InfoApi';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
+
+vi.mock('../../utils/FetchUtils');
 
 describe('Session API', () => {
 	test('getLicense is called correctly', async () => {

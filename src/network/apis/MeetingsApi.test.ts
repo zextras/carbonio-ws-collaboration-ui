@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockFetchAPI } from '@mocks/FetchUtils';
 import { size } from 'lodash';
 
 import meetingsApi from './MeetingsApi';
@@ -23,6 +22,7 @@ import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User, UserType } from '../../types/store/UserTypes';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const meetingMock = createMockMeeting();
@@ -47,6 +47,8 @@ const ongoingMeetingSetup = (): void => {
 };
 
 const sdpOffer = 'spdOfferMock';
+
+vi.mock('../../utils/FetchUtils');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

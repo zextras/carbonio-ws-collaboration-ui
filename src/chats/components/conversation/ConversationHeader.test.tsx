@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { mockUseMediaQueryCheck } from '@mocks/useMediaQueryCheck';
 import { act, screen } from '@testing-library/react';
 
 import { ConversationView } from './Conversation';
 import ConversationHeader from './ConversationHeader';
+import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -65,6 +65,8 @@ const mockedRoom: RoomBe = createMockRoom({
 		createMockMember({ userId: mockQuintoUser.id })
 	]
 });
+
+vi.mock('../../../hooks/useMediaQueryCheck');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

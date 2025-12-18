@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, waitFor } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -46,6 +46,9 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
+beforeAll(() => {
+	vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+});
 beforeEach(() => {
 	useStore.getState().setAttributes(
 		createMockAttributesList({
@@ -317,8 +320,3 @@ describe('Chat Creation Modal', () => {
 		expect(crownOutlineButtonsUpdated).toHaveLength(4);
 	});
 });
-
-// Useful debug functions for test
-// screen.logTestingPlaygroundURL()
-// console.log(prettyDOM(element))
-// screen.debug()

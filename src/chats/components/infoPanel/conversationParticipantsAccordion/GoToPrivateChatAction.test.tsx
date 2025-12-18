@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockGoToRoomPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
+import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -27,6 +27,8 @@ const room = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id })]
 });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();

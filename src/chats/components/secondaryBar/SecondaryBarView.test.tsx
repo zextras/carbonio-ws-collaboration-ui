@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -111,6 +111,8 @@ const contactUser1: ContactInfo = {
 	displayName: user1Be.name,
 	email: user1Be.email
 };
+
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

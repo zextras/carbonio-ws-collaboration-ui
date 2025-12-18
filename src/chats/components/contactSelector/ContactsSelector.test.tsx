@@ -6,10 +6,10 @@
 
 import React, { useState } from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
@@ -32,6 +32,9 @@ const MockComponent = ({ owner }: { owner?: boolean }): React.ReactElement => {
 	);
 };
 
+beforeAll(() => {
+	vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+});
 describe('ContactsSelector', () => {
 	test('Initial request has a result', async () => {
 		mockSearchUsersByFeatureRequest.mockResolvedValueOnce({ contacts: [user1] });

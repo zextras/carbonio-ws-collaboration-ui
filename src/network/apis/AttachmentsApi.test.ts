@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockFetchAPI } from '@mocks/FetchUtils';
-
 import AttachmentsApi from './AttachmentsApi';
 import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
+import { mockFetchAPI } from "../../utils/__mocks__/FetchUtils";
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -30,6 +29,8 @@ const pdfPreviewURLCases: Array<[string, Array<number | undefined>, string]> = [
 	['first only', [2, undefined], '?first_page=2'],
 	['last only', [undefined, 5], '?last_page=5']
 ];
+
+vi.mock('../../utils/FetchUtils');
 
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {

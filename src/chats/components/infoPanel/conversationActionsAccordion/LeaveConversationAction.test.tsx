@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockGoToMainPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
+import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
@@ -30,12 +30,13 @@ const mockedRoom = createMockRoom({
 	]
 });
 
+vi.mock('../../../../hooks/useRouting');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user2Info.id, user2Info.name);
 	store.addRooms([mockedRoom]);
 });
-
 describe('Leave conversation Action', () => {
 	test('leave conversation - open and close modal', async () => {
 		const { user } = setup(
@@ -54,7 +55,6 @@ describe('Leave conversation Action', () => {
 
 	test('leave conversation', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationAction
 				type={mockedRoom.type}

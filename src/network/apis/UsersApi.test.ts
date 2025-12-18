@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { mockFetchAPI } from '@mocks/FetchUtils';
+
 import { size } from 'lodash';
 import * as uuid from 'uuid';
 
@@ -12,9 +12,12 @@ import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { UserBe } from '../../types/network/models/userBeTypes';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 
 const user: UserBe = createMockUser({ id: uuid.v6() });
 const user2: UserBe = createMockUser({ id: uuid.v6() });
+
+vi.mock('../../utils/FetchUtils');
 
 describe('Users API', () => {
 	test('getUser is called correctly', async () => {

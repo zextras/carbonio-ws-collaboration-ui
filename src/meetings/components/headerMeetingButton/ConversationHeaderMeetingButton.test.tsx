@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockGoToRoomPage } from '@mocks/useRouting';
 import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
+import { mockGoToRoomPage } from '../../../hooks/__mocks__/useRouting';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -67,6 +67,8 @@ const groupMeeting = createMockMeeting({
 		createMockParticipants({ userId: user3.id })
 	]
 });
+
+vi.mock('../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();

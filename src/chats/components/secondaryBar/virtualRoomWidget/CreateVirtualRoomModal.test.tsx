@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
@@ -39,13 +39,14 @@ const contactUser2: ContactInfo = {
 	id: 'user2-id'
 };
 
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo([user1, user2]);
 	store.setAttributes(createMockAttributesList());
 });
-
 describe('VirtualRoomsModal', () => {
 	test('Try to create a room without a name', async () => {
 		const { user } = setup(
@@ -192,7 +193,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('Search user fails ', async () => {
-		vi.spyOn(console, 'error').mockImplementation();
+		vi.spyOn(console, 'error').mockImplementation(() => {});
 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal

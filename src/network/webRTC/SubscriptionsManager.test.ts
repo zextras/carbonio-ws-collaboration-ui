@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockFetchAPI } from '@mocks/FetchUtils';
 import { act } from '@testing-library/react';
 
 import SubscriptionsManager from './SubscriptionsManager';
@@ -23,6 +22,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info: User = createMockUser({
@@ -83,6 +83,8 @@ const groupMeeting: MeetingBe = createMockMeeting({
 });
 
 const subscribeUrl = 'meetings/meetingId/media/subscribe';
+
+vi.mock('../../utils/FetchUtils');
 
 beforeEach(() => {
 	act(() => {

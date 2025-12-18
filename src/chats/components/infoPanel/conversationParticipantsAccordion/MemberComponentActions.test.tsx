@@ -5,13 +5,13 @@
  */
 import React from 'react';
 
-import { mockGoToRoomPage, mockGoToMainPage } from '@mocks/useRouting';
 import { screen, waitFor } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
+import { mockGoToMainPage, mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -107,6 +107,8 @@ const mockedRoom2 = createMockRoom({
 		}
 	]
 });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();

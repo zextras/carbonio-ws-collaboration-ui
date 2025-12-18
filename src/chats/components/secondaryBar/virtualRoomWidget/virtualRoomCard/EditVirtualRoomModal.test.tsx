@@ -5,10 +5,10 @@
  */
 import React, { createRef } from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, within } from '@testing-library/react';
 
 import EditVirtualRoomModal from './EditVirtualRoomModal';
+import { mockSearchUsersByFeatureRequest } from '../../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMeeting,
@@ -43,6 +43,8 @@ const virtualRoom = createMockRoom({
 });
 
 const meeting = createMockMeeting({ roomId: virtualRoom.id });
+
+vi.mock('../../../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store = useStore.getState();

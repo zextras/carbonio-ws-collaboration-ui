@@ -5,10 +5,10 @@
  */
 import React from 'react';
 
-import { mockGoToMainPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
+import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -60,6 +60,8 @@ const testRoom2: RoomBe = createMockRoom({
 		}
 	]
 });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

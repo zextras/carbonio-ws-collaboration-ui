@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockGoToInfoPage, mockGoToMeetingPage } from '@mocks/useRouting';
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
+import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/useRouting';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
@@ -24,6 +24,8 @@ const mediaStatus: MediaStatus = {
 
 const room = createMockRoom({ id: 'test-roomId', meetingId: 'test-meeting-id' });
 const meeting = createMockMeeting({ id: room.meetingId, roomId: room.id });
+
+vi.mock('../../../hooks/useRouting');
 
 beforeAll(() => {
 	useStore.getState().addRooms([room]);

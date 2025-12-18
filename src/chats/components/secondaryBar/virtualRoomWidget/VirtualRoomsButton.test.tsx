@@ -5,10 +5,10 @@
  */
 import React from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -25,6 +25,8 @@ const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 
 const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 
+vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -32,7 +34,6 @@ beforeEach(() => {
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 	store.addMeetings([virtualRoom]);
 });
-
 describe('VirtualRoomsButton', () => {
 	test('create virtual modal', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });

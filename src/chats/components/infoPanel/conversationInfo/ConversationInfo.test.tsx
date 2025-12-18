@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { mockUseMediaQueryCheck } from '@mocks/useMediaQueryCheck';
 import { act, screen } from '@testing-library/react';
 
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
+import { mockUseMediaQueryCheck } from '../../../../hooks/__mocks__/useMediaQueryCheck';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -40,6 +40,8 @@ const oneToOneRoom: RoomBe = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id, owner: true })]
 });
+
+vi.mock('../../../../hooks/useMediaQueryCheck');
 
 beforeEach(() => {
 	const store = useStore.getState();

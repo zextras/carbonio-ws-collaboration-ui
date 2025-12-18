@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vitest/config';
 import path from 'path';
+import { defineConfig } from 'vitest/config';
 
 const retry = process.env.TEST_RETRY_TIMES ? parseInt(process.env.TEST_RETRY_TIMES, 10) : 2;
 const isCI = process.env.CI === 'true';
@@ -54,10 +54,5 @@ export default defineConfig({
 		},
 		globals: true,
 		testTimeout: 60000
-	},
-	resolve: {
-		alias: {
-			'@mocks': path.resolve(__dirname, './src/tests/mocks')
-		}
 	}
 });

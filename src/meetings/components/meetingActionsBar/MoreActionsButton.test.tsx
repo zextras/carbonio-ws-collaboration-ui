@@ -18,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { requestFullscreen } from '../../../tests/mocks/global';
 import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -133,9 +132,7 @@ const moreActionsTestId = 'more-actions';
 
 describe('Meeting action bar - More actions button interactions', () => {
 	test('Check full screen mode is set correctly', async () => {
-		const mockRequestFullscreen = vi
-			.spyOn(document.documentElement, 'requestFullscreen')
-			.mockImplementation(requestFullscreen);
+		const mockRequestFullscreen = vi.spyOn(document.documentElement, 'requestFullscreen');
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);

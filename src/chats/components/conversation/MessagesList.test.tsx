@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { mockedScrollToEnd, mockedScrollToMessage } from '@mocks/scrollUtils';
 import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
@@ -31,6 +30,7 @@ import {
 } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+import { scrollToEnd, scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
 
 const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
 const helloString = 'Hello guys!';
@@ -141,6 +141,8 @@ const messages = generateListMessage([
 	{ from: fromId },
 	{ from: fromId }
 ]);
+
+vi.mock('../../../utils/scrollUtils');
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -403,7 +405,7 @@ beforeEach(() => {
 describe('Scroll position', () => {
 	test('Opening a conversation for the first time sets scroll to the bottom', () => {
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toHaveBeenCalled();
+		expect(scrollToEnd).toHaveBeenCalled();
 	});
 
 	test('Opening an already opened conversation sets scroll to the previous position', () => {
@@ -411,8 +413,8 @@ describe('Scroll position', () => {
 		store.updateHistory(room.id, messages);
 		store.setScrollPosition(room.id, messages[0].id);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToMessage).toHaveBeenCalled();
-		expect(mockedScrollToMessage).toHaveBeenCalledWith(messages[0].id);
+		expect(scrollToMessage).toHaveBeenCalled();
+		expect(scrollToMessage).toHaveBeenCalledWith(messages[0].id);
 	});
 
 	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
@@ -421,7 +423,7 @@ describe('Scroll position', () => {
 		store.setScrollPosition(room.id, messages[0].id);
 		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toHaveBeenCalled();
+		expect(scrollToEnd).toHaveBeenCalled();
 	});
 });
 

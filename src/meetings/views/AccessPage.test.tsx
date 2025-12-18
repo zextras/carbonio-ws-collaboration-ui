@@ -6,13 +6,16 @@
 
 import React from 'react';
 
-import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '@mocks/useRouting';
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as Shell from '@zextras/carbonio-shell-ui';
 import * as ReactRouter from 'react-router-dom';
 
 import AccessPage from './AccessPage';
+import {
+	mockGoToExternalLoginPage,
+	mockGoToMeetingAccessPage
+} from '../../hooks/__mocks__/useRouting';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -103,6 +106,8 @@ const setupAccessPageNotAuthenticated = (): { user: UserEvent; store: RootStore 
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
 };
+
+vi.mock('../../hooks/useRouting');
 
 describe('Meeting access page', () => {
 	test('Authenticated user -> access the meeting -> redirect to the waiting room', async () => {

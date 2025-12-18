@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockGoToRoomPage } from '@mocks/useRouting';
 import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
+import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import {
 	createMockMember,
@@ -39,6 +39,8 @@ const chat: RoomBe = createMockRoom({
 });
 const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2', type: RoomType.GROUP });
 const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomType.TEMPORARY });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
@@ -302,6 +304,6 @@ describe('Forward Message Modal', () => {
 		await user.click(await screen.findByText(chat2.name!));
 		await user.click(await screen.findByRole('button', { name: /Forward/i }));
 
-		mockGoToRoomPage.mockReturnValue(`room of ${chat2.name}`);
+		expect(mockGoToRoomPage).toHaveBeenCalled();
 	});
 });

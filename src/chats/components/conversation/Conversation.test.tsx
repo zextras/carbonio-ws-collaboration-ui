@@ -6,12 +6,11 @@
 
 import React from 'react';
 
-import { mockUseMediaQueryCheck } from '@mocks/useMediaQueryCheck';
-import { mockGoToMainPage } from '@mocks/useRouting';
 import { act } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
+import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
 import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
@@ -24,6 +23,7 @@ import {
 } from '../../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
+import { mockUseMediaQueryCheck } from "../../../hooks/__mocks__/useMediaQueryCheck";
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -64,13 +64,15 @@ const user2Info: User = createMockUser({
 const InfoIconTestId = 'icon: InfoOutline';
 const MessageCircleIcon = 'icon: MessageCircleOutline';
 
+vi.mock('../../../hooks/useRouting');
+vi.mock('../../../hooks/useRoom');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 	store.setUserInfo([user2Info]);
 	store.addRooms([testRoom, testRoom2]);
 });
-
 describe('Conversation view', () => {
 	describe('Small view screen', () => {
 		test('Display conversation view on small screen and toggle info panel', async () => {
@@ -127,7 +129,6 @@ describe('Conversation view', () => {
 		test('Leave a group and check everything is shown correctly', async () => {
 			const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 			mockUseMediaQueryCheck.mockReturnValue(true);
-			mockGoToMainPage.mockReturnValueOnce('main page');
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
 			await user.click(screen.getByText(/Leave Group/i));

@@ -5,11 +5,11 @@
  */
 import React from 'react';
 
-import { mockGoToInfoPage } from '@mocks/useRouting';
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
+import { mockGoToInfoPage } from '../../hooks/__mocks__/useRouting';
 import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
@@ -78,6 +78,8 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 
 	return { user, store };
 };
+
+vi.mock('../../hooks/useRouting');
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
@@ -195,7 +197,7 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
-		const mockInitialize = jest
+		const mockInitialize = vi
 			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
 			.mockImplementation(() => Promise.resolve());
 

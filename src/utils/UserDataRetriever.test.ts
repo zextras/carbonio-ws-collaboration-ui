@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { mockFetchAPI } from '@mocks/FetchUtils';
 import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
 import useStore from '../store/Store';
+import { mockFetchAPI } from './__mocks__/FetchUtils';
 import { spyOnUsersApi, UsersApiToSpy } from '../tests/mocks/network';
 import { UserType } from '../types/store/UserTypes';
 
@@ -17,6 +17,8 @@ const user1 = {
 	name: 'User Uno',
 	type: UserType.INTERNAL
 };
+
+vi.mock('./FetchUtils');
 
 describe('UserDataRetriever tests', () => {
 	test('getDebouncedUser is correctly used with few users', async () => {

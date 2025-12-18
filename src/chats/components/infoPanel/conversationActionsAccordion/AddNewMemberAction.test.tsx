@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { mockSearchUsersByFeatureRequest } from '@mocks/SearchUsersByFeature';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -50,6 +50,8 @@ const mockedRoom = createMockRoom({
 		}
 	]
 });
+
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store = useStore.getState();

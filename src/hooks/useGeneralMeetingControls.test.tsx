@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockGoToInfoPage } from '@mocks/useRouting';
 import { act, renderHook, waitFor, screen } from '@testing-library/react';
 
 import useGeneralMeetingControls from './useGeneralMeetingControls';
@@ -13,8 +12,11 @@ import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../tests/mocks/network';
 import { ProvidersWrapper } from '../tests/test-utils';
+import { mockGoToInfoPage } from './__mocks__/useRouting';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
+
+vi.mock('../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();

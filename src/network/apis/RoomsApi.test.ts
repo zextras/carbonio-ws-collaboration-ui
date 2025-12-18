@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { mockFetchAPI, mockSendFileFetchAPI, mockUploadFileFetchAPI } from '@mocks/FetchUtils';
-
 import roomsApi from './RoomsApi';
 import useStore from '../../store/Store';
 import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
@@ -18,6 +16,11 @@ import {
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import {
+	mockFetchAPI,
+	mockSendFileFetchAPI,
+	mockUploadFileFetchAPI
+} from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
@@ -25,6 +28,8 @@ const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 const applicationPdf = 'application/pdf';
 const roomId = 'roomId';
+
+vi.mock('../../utils/FetchUtils');
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
