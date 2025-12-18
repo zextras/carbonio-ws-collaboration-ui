@@ -9,12 +9,6 @@
 
 export const requestFullscreen = vi.fn();
 
-// Object.defineProperty(global, 'URL', {
-// 	value: {
-// 		createObjectURL: vi.fn()
-// 	}
-// });
-//
 // Object.defineProperty(global.navigator, 'userAgent', {
 // 	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 // });

@@ -154,7 +154,6 @@ describe('participants actions - leave/delete conversation', () => {
 	});
 	test('leave conversation', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner={false}
@@ -190,7 +189,6 @@ describe('participants actions - leave/delete conversation', () => {
 	});
 	test('delete conversation', async () => {
 		const spyOnDeleteRoom = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM);
-		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner

@@ -5,4 +5,6 @@
  */
 export const mockUseMediaQueryCheck = vi.fn();
 
-vi.mock('../../hooks/useMediaQueryCheck', () => mockUseMediaQueryCheck);
+vi.mock('../../hooks/useMediaQueryCheck', () => ({
+	default: mockUseMediaQueryCheck
+}));

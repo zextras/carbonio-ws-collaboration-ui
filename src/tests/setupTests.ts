@@ -7,11 +7,6 @@ import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
 import failOnConsole from 'vitest-fail-on-console';
 
-// import * as FetchUtils from './utils/FetchUtils';
-//
-// export const spyOnFetch = vi.spyOn(FetchUtils, 'fetchAPI');
-// spyOnFetch.mockImplementation(() => Promise.resolve(true));
-
 configure({
 	asyncUtilTimeout: 2000
 });
@@ -34,6 +29,7 @@ vi.mock('@zextras/carbonio-ui-soap-lib');
 vi.mock('darkreader');
 vi.mock('react-router-dom');
 vi.mock('zustand');
+import '@mocks/FetchUtils';
 
 beforeAll(() => {
 	vi.useFakeTimers({
@@ -222,6 +218,12 @@ beforeEach(() => {
 				play: mockPlayAudio
 			};
 		})
+	});
+	
+	Object.defineProperty(global.URL, 'createObjectURL', {
+		writable: true,
+		configurable: true,
+		value: vi.fn()
 	});
 
 	// Object.defineProperty(window, 'ResizeObserver', {

@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { mockFetchAPI } from '@mocks/FetchUtils';
 import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
@@ -25,7 +26,7 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		vi.runAllTimers();
 
-		expect(fetch()).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
 	});
 
 	test('getDebouncedUser is correctly used with a lot of users', async () => {
@@ -46,7 +47,7 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		vi.runAllTimers();
 
-		expect(spyOnFetch).toHaveBeenCalledTimes(2);
+		expect(mockFetchAPI).toHaveBeenCalledTimes(2);
 	});
 
 	test('getDebouncedUser is correctly used with a duplicated userId', async () => {
@@ -65,7 +66,7 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		vi.runAllTimers();
 
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
 	});
 
 	test('If the name is in the store, getAsyncUsername return it', async () => {
