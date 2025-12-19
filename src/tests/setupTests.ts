@@ -30,6 +30,18 @@ vi.mock('darkreader');
 vi.mock('react-router-dom');
 vi.mock('zustand');
 
+// This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
+// export const mockedUuid = '00000000-0000-4000-8000-000000000000';
+// Object.defineProperty(window, 'crypto', {
+// 	value: {
+// 		getRandomValues: (arr: string[]) => {
+// 			const byteValues = new Uint8Array(arr.length);
+// 			byteValues.fill(0);
+// 			return byteValues;
+// 		}
+// 	}
+// });
+
 beforeAll(() => {
 	vi.useFakeTimers({
 		shouldAdvanceTime: true

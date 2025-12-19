@@ -28,6 +28,7 @@ const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 const applicationPdf = 'application/pdf';
 const roomId = 'roomId';
+const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
 vi.mock('../../utils/FetchUtils');
 
@@ -151,7 +152,9 @@ describe('Rooms API', () => {
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 * 3 });
 
-		expect(roomsApi.updateRoomPicture(roomId, testFile)).rejects.toThrowError('File too large');
+		await expect(roomsApi.updateRoomPicture(roomId, testFile)).rejects.toThrowError(
+			'File too large'
+		);
 		expect(mockFetchAPI).not.toHaveBeenCalled();
 	});
 
@@ -260,7 +263,6 @@ describe('Rooms API', () => {
 		test('addRoomAttachment is called correctly', async () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			mockUploadFileFetchAPI.mockImplementation(() => Promise.resolve());
 			// Send addRoomAttachments request
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
@@ -272,7 +274,7 @@ describe('Rooms API', () => {
 				RequestType.POST,
 				testFile,
 				signal,
-				{ area, messageId: 'uuid' }
+				{ area, messageId: expect.stringMatching(UUID_REGEX) }
 			);
 		});
 
@@ -294,7 +296,12 @@ describe('Rooms API', () => {
 				RequestType.POST,
 				testFile,
 				signal,
-				{ description: 'description', replyId: 'stanzaId', area, messageId: 'uuid' }
+				{
+					description: 'description',
+					replyId: 'stanzaId',
+					area,
+					messageId: expect.stringMatching(UUID_REGEX)
+				}
 			);
 		});
 
@@ -329,7 +336,7 @@ describe('Rooms API', () => {
 				RequestType.PUT,
 				testFile,
 				signal,
-				{ area, messageId: 'uuid' }
+				{ area, messageId: expect.stringMatching(UUID_REGEX) }
 			);
 		});
 
@@ -352,7 +359,12 @@ describe('Rooms API', () => {
 				RequestType.PUT,
 				testFile,
 				signal,
-				{ description: 'description', replyId: 'stanzaId', area, messageId: 'uuid' }
+				{
+					description: 'description',
+					replyId: 'stanzaId',
+					area,
+					messageId: expect.stringMatching(UUID_REGEX)
+				}
 			);
 		});
 	});

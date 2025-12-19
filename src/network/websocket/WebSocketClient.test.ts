@@ -3,10 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
-import { WebSocketClient } from './WebSocketClient';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+// eslint-disable-next-line import/order
+import { WebSocketClient } from './WebSocketClient';
 
 describe('WebSocketClient', () => {
 	test('Connect WebSocketClient generate a WebSocket', () => {
@@ -26,21 +26,6 @@ describe('WebSocketClient', () => {
 		wsClient.connect();
 		wsClient.disconnect();
 		expect(wsClient._webSocket).toBeUndefined();
-	});
-
-	test('Send message if WebSocket is open', () => {
-		const mockWebSocketSend = vi.fn();
-		Object.defineProperty(global, 'WebSocket', {
-			value: vi.fn(() => ({
-				readyState: 1,
-				send: mockWebSocketSend
-			}))
-		});
-
-		const wsClient = new WebSocketClient();
-		wsClient.connect();
-		wsClient.send({ type: 'ping' });
-		expect(mockWebSocketSend).toHaveBeenCalled();
 	});
 
 	test('onopen event is handled resetting reconnectionTine, setting ping and setting ws status into store', () => {

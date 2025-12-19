@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import react from '@vitejs/plugin-react';
-import path from 'path';
 import { defineConfig } from 'vitest/config';
 
 const retry = process.env.TEST_RETRY_TIMES ? parseInt(process.env.TEST_RETRY_TIMES, 10) : 2;
@@ -26,6 +25,11 @@ export default defineConfig({
 		},
 		retry,
 		environment: 'jsdom',
+		environmentOptions: {
+			jsdom: {
+				url: 'http://localhost/'
+			}
+		},
 		setupFiles: ['./src/tests/setupTests.ts'],
 		restoreMocks: true, // or clearMocks: true ?
 		maxWorkers: isCI ? 2 : undefined,

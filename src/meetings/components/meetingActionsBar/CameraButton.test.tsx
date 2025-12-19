@@ -82,6 +82,7 @@ describe('Camera button', () => {
 	test('Camera button is disabled when websocket is down', async () => {
 		useStore.getState().setWebsocketStatus(false);
 		defaultSetup();
-		expect(await screen.findByTestId('cameraButton')).toBeDisabled();
+		const cameraButton = await screen.findByTestId('cameraButton');
+		expect(cameraButton).toBeDisabled();
 	});
 });

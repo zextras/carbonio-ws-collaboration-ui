@@ -113,13 +113,17 @@ describe('Meeting sidebar', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus.png')`
+		);
 	});
 	test('Display meeting chat with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus-dark.png')`
+		);
 	});
 
 	test('title of the accordion changes when a user is writing', async () => {

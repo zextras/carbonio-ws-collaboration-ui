@@ -27,7 +27,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import SelfieSegmentationManager from '../components/virtualBackground/SelfieSegmentationManager';
+import { mockInitialize } from '../components/virtualBackground/__mocks__/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
@@ -80,6 +80,8 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 };
 
 vi.mock('../../hooks/useRouting');
+vi.mock('../components/virtualBackground/SelfieSegmentationManager');
+vi.mock('../../utils/MeetingsUtils');
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
@@ -197,10 +199,6 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
-		const mockInitialize = vi
-			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
-			.mockImplementation(() => Promise.resolve());
-
 		HTMLCanvasElement.prototype.captureStream = vi.fn().mockReturnValue(new MediaStream());
 
 		const { store } = storeSetupGroupMeetingSkeleton();

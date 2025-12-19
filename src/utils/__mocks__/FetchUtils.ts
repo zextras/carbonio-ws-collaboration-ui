@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 export const mockFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
-export const mockSendFileFetchAPI = vi.fn();
-export const mockUploadFileFetchAPI = vi.fn();
+export const mockSendFileFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
+export const mockUploadFileFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
 
 export const fetchAPI = mockFetchAPI;
 
