@@ -32,9 +32,8 @@ const MockComponent = ({ owner }: { owner?: boolean }): React.ReactElement => {
 	);
 };
 
-beforeAll(() => {
-	vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
-});
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+
 describe('ContactsSelector', () => {
 	test('Initial request has a result', async () => {
 		mockSearchUsersByFeatureRequest.mockResolvedValueOnce({ contacts: [user1] });

@@ -119,7 +119,7 @@ describe('Meeting access page', () => {
 	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
 		const spyOnGetScheduledMeetingName = vi.spyOn(meetingsApi, 'getScheduledMeetingName');
 		const mockUseAuthenticated = vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
-		spyOnGetScheduledMeetingName.mockImplementation(() => Promise.resolve('name'));
+		spyOnGetScheduledMeetingName.mockResolvedValueOnce(() => Promise.resolve('name'));
 		setupAccessPageNotAuthenticated();
 
 		expect(mockUseAuthenticated).toHaveBeenCalled();

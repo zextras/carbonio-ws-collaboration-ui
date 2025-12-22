@@ -30,9 +30,8 @@ const user1: ContactInfo = {
 	id: 'user1-id'
 };
 
-beforeAll(() => {
-	vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
-});
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([testRoom]);

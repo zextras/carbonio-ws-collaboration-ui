@@ -17,6 +17,10 @@ import {
 } from '../../tests/createMock';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
+import {
+	CreateGuestAccountResponse,
+	LoginV3ConfigResponse
+} from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -497,7 +501,7 @@ describe('Meetings API', () => {
 	test('authLogin is called correctly', async () => {
 		const spyOnAuthLogin = vi
 			.spyOn(meetingsApi, 'getLoginConfig')
-			.mockImplementation(() => Promise.resolve([]));
+			.mockImplementation(() => Promise.resolve({} as LoginV3ConfigResponse));
 		await meetingsApi.getLoginConfig();
 
 		expect(spyOnAuthLogin).toHaveBeenCalled();
@@ -506,13 +510,7 @@ describe('Meetings API', () => {
 	test('createGuestAccount is called correctly', async () => {
 		const spyOnCreateGuestAccount = vi
 			.spyOn(meetingsApi, 'createGuestAccount')
-			.mockImplementation(() =>
-				Promise.resolve({
-					id: 'string',
-					zmToken: 'string',
-					zxToken: 'string'
-				})
-			);
+			.mockImplementation(() => Promise.resolve({} as CreateGuestAccountResponse));
 		await meetingsApi.createGuestAccount('userName');
 
 		expect(spyOnCreateGuestAccount).toHaveBeenCalledWith('userName');

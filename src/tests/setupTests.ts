@@ -89,7 +89,9 @@ beforeEach(() => {
 		value: vi.fn().mockImplementation((query) => ({
 			matches: false,
 			media: query,
-			onchange: null
+			onchange: null,
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn()
 		}))
 	});
 

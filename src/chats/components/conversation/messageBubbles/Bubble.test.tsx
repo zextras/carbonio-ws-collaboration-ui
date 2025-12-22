@@ -340,7 +340,8 @@ describe('Actions', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		vi.spyOn(document.body, 'appendChild').mockReturnValue(document.createElement('a'));
+		const spyOnAppendChild = vi.spyOn(document.body, 'appendChild');
+		spyOnAppendChild.mockReturnValue(document.createElement('a'));
 
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -348,14 +349,13 @@ describe('Actions', () => {
 		const downloadAction = await screen.findByText(/Download/i);
 		await user.click(downloadAction);
 
-		expect(document.body.appendChild).toHaveBeenCalledWith(
+		expect(spyOnAppendChild).toHaveBeenCalledWith(
 			expect.objectContaining({ download: 'image.jpeg' })
 		);
 	});
 	test('Delete a message with attachment', async () => {
 		const spyOnDeleteAttachment = vi.spyOn(attachmentsApi, 'deleteAttachment');
-		const store: RootStore = useStore.getState();
-		store.newMessage(mockedAttachmentMessageGb);
+		useStore.getState().newMessage(mockedAttachmentMessageGb);
 		const { user } = setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
@@ -374,12 +374,12 @@ describe('Actions', () => {
 		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		const spySendChatMessageDeletion = vi
-			.spyOn(useStore.getState().connections.xmppClient, 'sendChatMessageDeletion')
-			.mockImplementation(() => 'deleted');
+		const spySendChatMessageDeletion = vi.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageDeletion'
+		);
 
-		const store: RootStore = useStore.getState();
-		store.newMessage(mockedTextMessageSentByMe);
+		useStore.getState().newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}

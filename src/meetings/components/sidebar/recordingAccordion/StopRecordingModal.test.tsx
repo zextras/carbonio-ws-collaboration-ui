@@ -43,7 +43,7 @@ beforeEach(() => {
 });
 describe('StopRecordingModal tests', () => {
 	test('Show a snackbar when the stop recording request completes successfully', async () => {
-		vi.spyOn(meetingsApi, 'stopRecording').mockResolvedValueOnce({});
+		vi.spyOn(meetingsApi, 'stopRecording');
 		const { user } = setup(<StopRecordingModal isOpen closeModal={vi.fn} meetingId={meeting.id} />);
 		await user.click(screen.getByText('Stop'));
 

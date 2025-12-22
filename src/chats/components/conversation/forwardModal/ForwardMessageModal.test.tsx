@@ -238,8 +238,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(roomsApi, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
 		const onClose = vi.fn();
 		const { user } = setup(
@@ -260,8 +259,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(roomsApi, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
@@ -284,8 +282,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('forwarding to one room redirect to tht room', async () => {
-		const spyOnForwardMessage = vi.spyOn(roomsApi, 'forwardMessages');
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(roomsApi, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 

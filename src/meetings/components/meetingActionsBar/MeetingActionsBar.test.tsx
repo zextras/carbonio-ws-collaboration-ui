@@ -6,9 +6,10 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import MeetingActionsBar from './MeetingActionsBar';
+import * as useContainerDimensionsModule from '../../../hooks/useContainerDimensions';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -48,15 +49,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
-const mockUseContainerDimensions = vi.fn();
-vi.mock('../../../hooks/useContainerDimensions', () => ({
-	__esModule: true,
-	default: (): { width: number } => mockUseContainerDimensions()
-}));
-
 beforeEach(() => {
-	mockUseContainerDimensions.mockReset();
-	mockUseContainerDimensions.mockReturnValue({ width: 100 });
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo([user1, user2, user3]);
@@ -101,26 +94,25 @@ describe('Meeting action bar', () => {
 	});
 
 	test('Leave meeting button and ActionsWrapper are different component when window is large', async () => {
-		mockUseContainerDimensions.mockReturnValue({ width: 100 });
+		const mockUseContainerDimensions = vi
+			.spyOn(useContainerDimensionsModule, 'default')
+			.mockReturnValue({ width: 100, height: 0 });
 		const { rerender } = setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
-		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
-		vi.spyOn(mainActionsWrapper, 'getBoundingClientRect').mockImplementation(
-			() => ({ width: 30 }) as DOMRect
-		);
-		vi.spyOn(secondActionsWrapper, 'getBoundingClientRect').mockImplementation(
-			() => ({ width: 20 }) as DOMRect
-		);
-		mockUseContainerDimensions.mockReturnValueOnce({ width: 99 });
-		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 
+		mockUseContainerDimensions.mockReturnValueOnce({ width: 99, height: 0 });
+		await act(async () => {
+			rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		});
 		const secondActionsWrapper2 = screen.getByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper2).toBeVisible();
 	});
 
 	test('Leave meeting button is merged into ActionsWrapper when window is tight', async () => {
-		mockUseContainerDimensions.mockReturnValue({ width: 50 });
+		const mockUseContainerDimensions = vi
+			.spyOn(useContainerDimensionsModule, 'default')
+			.mockReturnValue({ width: 5, height: 0 });
 		const { rerender } = setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
@@ -131,8 +123,10 @@ describe('Meeting action bar', () => {
 		vi.spyOn(secondActionsWrapper, 'getBoundingClientRect').mockImplementation(
 			() => ({ width: 20 }) as DOMRect
 		);
-		mockUseContainerDimensions.mockReturnValueOnce({ width: 49 });
-		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		mockUseContainerDimensions.mockReturnValueOnce({ width: 49, height: 0 });
+		await act(async () => {
+			rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		});
 
 		const secondActionsWrapper2 = screen.getByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper2).not.toBeVisible();

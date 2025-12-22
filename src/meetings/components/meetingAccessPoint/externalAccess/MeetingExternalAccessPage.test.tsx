@@ -22,7 +22,7 @@ describe('MeetingExternalAccessPage tests', () => {
 	});
 
 	test('Create new guest', async () => {
-		const spyCreateGuest = vi.spyOn(meetingsApi, 'createGuestAccount').mockResolvedValueOnce({});
+		const spyCreateGuest = vi.spyOn(meetingsApi, 'createGuestAccount');
 
 		const { user } = setup(<MeetingExternalAccessPage />);
 		const nameInput = await screen.findByPlaceholderText('Enter your name');

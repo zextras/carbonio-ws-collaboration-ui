@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import roomsApi from '../../../../network/apis/RoomsApi';
@@ -104,7 +104,9 @@ describe('Room Picture Handler - groups', () => {
 		expect(input).not.toBeNull();
 		expect(input.files).toHaveLength(0);
 
-		await user.upload(input, testImageFile);
+		await act(async () => {
+			await user.upload(input, testImageFile);
+		});
 		expect(input.files).toHaveLength(1);
 
 		expect(spyOnUpdateRoomPicture).toHaveBeenCalled();
@@ -125,9 +127,11 @@ describe('Room Picture Handler - groups', () => {
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 		expect(input).not.toBeNull();
-		await user.upload(input, testImageFile);
 
-		expect(spyOnUpdateRoomPicture).rejects.toThrowError();
+		await act(async () => {
+			await user.upload(input, testImageFile);
+		});
+		await expect(spyOnUpdateRoomPicture).rejects.toThrowError();
 	});
 
 	test('delete an image', async () => {

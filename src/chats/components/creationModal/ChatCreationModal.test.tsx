@@ -46,9 +46,8 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
-beforeAll(() => {
-	vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
-});
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	useStore.getState().setAttributes(
 		createMockAttributesList({

@@ -27,7 +27,7 @@ const meeting = createMockMeeting({ id: room.meetingId, roomId: room.id });
 
 vi.mock('../../../hooks/useRouting');
 
-beforeAll(() => {
+beforeEach(() => {
 	useStore.getState().addRooms([room]);
 	useStore.getState().addMeetings([meeting]);
 });

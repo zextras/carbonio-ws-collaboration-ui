@@ -22,12 +22,7 @@ describe('MeetingExternalAccessMobilePage tests', () => {
 	});
 
 	test('Create new guest from mobile', async () => {
-		const spyCreateGuest = vi.spyOn(meetingsApi, 'createGuestAccount').mockResolvedValueOnce({
-			id: 'user123',
-			zmToken: 'zmToken',
-			zxToken: 'zxToken'
-		});
-
+		const spyCreateGuest = vi.spyOn(meetingsApi, 'createGuestAccount');
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const nameInput = await screen.findByPlaceholderText('Enter your name');
 		await user.type(nameInput, 'Guest User');
