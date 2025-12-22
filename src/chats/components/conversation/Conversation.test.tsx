@@ -65,7 +65,7 @@ const InfoIconTestId = 'icon: InfoOutline';
 const MessageCircleIcon = 'icon: MessageCircleOutline';
 
 vi.mock('../../../hooks/useRouting');
-vi.mock('../../../hooks/useRoom');
+vi.mock('../../../hooks/useMediaQueryCheck');
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -144,14 +144,18 @@ describe('Conversation view', () => {
 			mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 			setup(<Conversation roomId={testRoom.id} />);
 			const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
-			expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
+			expect(ConversationWrapper).toHaveStyle(
+				`background-image: url("/src/chats/assets/papyrus.png")`
+			);
 		});
 
 		test('Display conversation view with darkMode enabled', async () => {
 			mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 			setup(<Conversation roomId={testRoom.id} />);
 			const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
-			expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+			expect(ConversationWrapper).toHaveStyle(
+				`background-image: url("/src/chats/assets/papyrus-dark.png")`
+			);
 		});
 
 		test('Add moderator and check everything is shown correctly', async () => {

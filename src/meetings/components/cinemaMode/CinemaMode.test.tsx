@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import CinemaMode from './CinemaMode';
 import useStore from '../../../store/Store';
@@ -50,20 +50,17 @@ const groupMeeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant, user3Participant, user4Participant]
 });
 
-const setupBasicGroupMeeting = (): void => {
-	const store: RootStore = useStore.getState();
-	act(() => {
+describe('CinemaMode', () => {
+	test('It should display the CinemaMode component', async () => {
+		const store: RootStore = useStore.getState();
 		store.addRooms([groupRoom]);
 		store.addMeetings([groupMeeting]);
 		store.meetingConnection(groupMeeting.id);
-	});
-	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
-	routerContextSetup(<CinemaMode />, { meetingId: groupMeeting.id });
-};
-
-describe('CinemaMode', () => {
-	test('It should display the CinemaMode component', async () => {
-		setupBasicGroupMeeting();
+		localStorage.setItem(
+			'settings',
+			JSON.stringify({ 'settings.appearance_setting.scaling': 100 })
+		);
+		routerContextSetup(<CinemaMode />, { meetingId: groupMeeting.id });
 		const cinemaModeView = await screen.findByTestId('cinemaModeView');
 		expect(cinemaModeView).toBeInTheDocument();
 	});

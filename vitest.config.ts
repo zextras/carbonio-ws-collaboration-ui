@@ -31,7 +31,7 @@ export default defineConfig({
 			}
 		},
 		setupFiles: ['./src/tests/setupTests.ts'],
-		restoreMocks: true, // or clearMocks: true ?
+		clearMocks: true,
 		maxWorkers: isCI ? 2 : undefined,
 		coverage: {
 			enabled: true,
