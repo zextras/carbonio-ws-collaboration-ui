@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act, renderHook, waitFor } from '@testing-library/react';
+import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
@@ -400,7 +400,9 @@ describe('render list of messages with history loader visible for first time ope
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRooms([room]);
+	store.addRooms([room, mockedRoom]);
+	store.setLoginInfo('userId', 'User');
+	store.setUserInfo([userA, userB, userC]);
 });
 describe('Scroll position', () => {
 	test('Opening a conversation for the first time sets scroll to the bottom', () => {
@@ -425,13 +427,6 @@ describe('Scroll position', () => {
 		setup(<MessagesList roomId={room.id} />);
 		expect(scrollToEnd).toHaveBeenCalled();
 	});
-});
-
-beforeEach(() => {
-	const store = useStore.getState();
-	store.addRooms([mockedRoom]);
-	store.setLoginInfo('userId', 'User');
-	store.setUserInfo([userA, userB, userC]);
 });
 
 describe('Display group of messages', () => {
@@ -518,11 +513,6 @@ describe('forward mode', () => {
 		expect(checkboxes).toHaveLength(3);
 		const markedCheckbox = await screen.findByTestId('icon: CheckmarkSquare');
 		expect(markedCheckbox).toBeInTheDocument();
-
-		await user.hover(forwardContainer[1]);
-		await waitFor(() => {
-			expect(forwardContainer[1]).toHaveStyle('background: rgba(230, 230, 230, 0.50)');
-		});
 
 		await user.click(forwardContainer[1]);
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');

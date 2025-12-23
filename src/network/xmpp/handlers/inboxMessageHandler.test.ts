@@ -77,7 +77,6 @@ describe('XMPP inboxMessageHandler tests', () => {
 
 		const fastenings =
 			useStore.getState().chatsRegistry[message.roomId].fastenings[message.stanzaId];
-		console.log(fastenings);
 		expect(fastenings[0].type).toBe(MessageType.FASTENING);
 		expect(fastenings[0].value).toBe('👍');
 	});

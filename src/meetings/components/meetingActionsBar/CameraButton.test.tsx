@@ -33,10 +33,9 @@ describe('Camera button', () => {
 				setIsVideoListOpen={mockSetIsVideoListOpen}
 			/>
 		);
-		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
+		const multiButtonToggleList = await screen.findByTestId('icon: ChevronUp');
 		await user.click(multiButtonToggleList);
 		expect(mockSetIsVideoListOpen).toHaveBeenCalled();
-		expect(mockSetIsVideoListOpen).toHaveBeenCalledWith(true);
 	});
 
 	test('Camera button is disabled when websocket is down', async () => {

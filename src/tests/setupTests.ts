@@ -36,6 +36,10 @@ beforeAll(() => {
 	});
 });
 
+afterEach(() => {
+	vi.clearAllTimers();
+});
+
 afterAll(() => {
 	vi.useRealTimers();
 });
@@ -273,9 +277,9 @@ beforeEach(() => {
 	// 	set: vi.fn()
 	// });
 
-	// Object.defineProperty(window, 'open', {
-	// 	value: vi.fn()
-	// });
+	Object.defineProperty(window, 'open', {
+		value: vi.fn()
+	});
 
 	// // This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
 	// export const mockedUuid = '00000000-0000-4000-8000-000000000000';

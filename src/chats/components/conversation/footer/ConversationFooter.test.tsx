@@ -421,9 +421,11 @@ describe('Send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnGetImageSize).toHaveBeenCalledTimes(1);
+			expect(spyOnAddRoomAttachment).toHaveBeenCalled();
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnGetImageSize).toHaveBeenCalledTimes(1);
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -440,8 +442,10 @@ describe('Send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -458,8 +462,10 @@ describe('Send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 

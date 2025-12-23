@@ -164,7 +164,10 @@ const mockedTextMessagePending = createMockTextMessage({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRooms([mockedRoom]);
+	store.addRooms([mockedRoom, mockedTempRoom]);
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setUserInfo([guestUser, user1Be]);
+	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 });
 
 describe('Message bubble component visualization', () => {
@@ -290,12 +293,6 @@ describe('Attachment footer', () => {
 	});
 });
 
-beforeEach(() => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setUserInfo([guestUser, user1Be]);
-});
-
 describe('Message header', () => {
 	test('Sender is guest user', async () => {
 		setup(
@@ -323,13 +320,6 @@ describe('Message header', () => {
 	});
 });
 
-beforeEach(() => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
-	store.addRooms([mockedTempRoom]);
-	store.setUserInfo([user1Be]);
-});
 describe('Actions', () => {
 	test('Download an attachment', async () => {
 		const { user } = setup(

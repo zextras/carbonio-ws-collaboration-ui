@@ -33,7 +33,7 @@ describe('Microphone button', () => {
 				setIsAudioListOpen={mockSetIsAudioListOpen}
 			/>
 		);
-		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
+		const multiButtonToggleList = await screen.findByTestId('icon: ChevronUp');
 		await user.click(multiButtonToggleList);
 		expect(mockSetIsAudioListOpen).toHaveBeenCalled();
 	});
