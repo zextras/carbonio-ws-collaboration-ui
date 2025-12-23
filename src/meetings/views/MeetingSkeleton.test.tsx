@@ -85,6 +85,7 @@ vi.mock('../../utils/MeetingsUtils');
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
+		document.documentElement.requestFullscreen = vi.fn(() => Promise.resolve());
 		const { user } = storeSetupGroupMeetingSkeleton();
 		await waitFor(() => user.hover(screen.getByTestId(meetingActionBarLabel)));
 		const moreActions = await screen.findByTestId('more-actions');

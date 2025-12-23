@@ -8,13 +8,6 @@ import React from 'react';
 import * as Shell from '@zextras/carbonio-shell-ui';
 import { type Mock } from 'vitest';
 
-import {
-	filesSelectFilesAction,
-	filesSelectFilesActionAvailable,
-	functionCheck,
-	getLink
-} from './carbonio-files-ui';
-
 export const USER_SETTINGS: Shell.AccountSettings = {
 	attrs: {},
 	props: [],
@@ -75,9 +68,9 @@ export const t = (key: string, value: string): string => value;
 export const useIntegratedFunction: typeof Shell.useIntegratedFunction = <T,>(id: string) => {
 	switch (id) {
 		case 'select-nodes':
-			return [filesSelectFilesAction as T, filesSelectFilesActionAvailable];
+			return [vi.fn() as T, true];
 		case 'get-link':
-			return [getLink as T, functionCheck];
+			return [vi.fn() as T, true];
 		default:
 			return [((): void => undefined) as T, false];
 	}

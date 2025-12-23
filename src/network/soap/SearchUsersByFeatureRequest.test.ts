@@ -53,6 +53,8 @@ const contact3Info = {
 	email: contact3Match.a[1]._content
 };
 
+vi.mock('@zextras/carbonio-ui-soap-lib');
+
 describe('SearchUsersByFeatureRequest', () => {
 	test('Contact info wll be formatted as ContactInfo type', async () => {
 		mockSoapFetchV2.mockReturnValueOnce({

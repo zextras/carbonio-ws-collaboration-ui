@@ -132,7 +132,7 @@ const moreActionsTestId = 'more-actions';
 
 describe('Meeting action bar - More actions button interactions', () => {
 	test('Check full screen mode is set correctly', async () => {
-		const mockRequestFullscreen = vi.spyOn(document.documentElement, 'requestFullscreen');
+		document.documentElement.requestFullscreen = vi.fn(() => Promise.resolve());
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
@@ -140,7 +140,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		expect(mockRequestFullscreen).toHaveBeenCalledTimes(1);
+		expect(document.documentElement.requestFullscreen).toHaveBeenCalledTimes(1);
 	});
 
 	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
