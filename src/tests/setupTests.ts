@@ -57,10 +57,6 @@ Object.defineProperty(window, 'Worker', {
 	})
 });
 
-Object.defineProperty(window, 'open', {
-	value: vi.fn()
-});
-
 Object.defineProperty(window, 'ResizeObserver', {
 	value: vi.fn(function ResizeObserverMock() {
 		return {
@@ -81,13 +77,6 @@ Object.defineProperty(window, 'matchMedia', {
 			removeEventListener: vi.fn()
 		};
 	})
-	// value: vi.fn().mockImplementation((query) => ({
-	// 	matches: false,
-	// 	media: query,
-	// 	onchange: null,
-	// 	addEventListener: vi.fn(),
-	// 	removeEventListener: vi.fn()
-	// }))
 });
 
 Object.defineProperty(window, 'location', {
@@ -103,7 +92,7 @@ Object.defineProperty(window, 'location', {
 Object.defineProperty(window, 'AudioContext', {
 	value: vi.fn(function AudioContextMock() {
 		return {
-			createOscillator: (): any => ({
+			createOscillator: vi.fn(() => ({
 				connect: (): {
 					stream: {
 						getAudioTracks: () => {
@@ -119,7 +108,7 @@ Object.defineProperty(window, 'AudioContext', {
 					}
 				}),
 				start: vi.fn()
-			}),
+			})),
 			createMediaStreamDestination: vi.fn()
 		};
 	})
@@ -133,8 +122,8 @@ Object.defineProperty(window, 'MediaStream', {
 				getVideoTracks: vi.fn(),
 				addTrack: vi.fn()
 			})),
-			getAudioTracks: (): any[] => [MediaStream],
-			getVideoTracks: (): any[] => [MediaStream],
+			getAudioTracks: vi.fn(() => [MediaStream]),
+			getVideoTracks: vi.fn(() => [MediaStream]),
 			addTrack: vi.fn()
 		};
 	})
@@ -188,7 +177,8 @@ beforeAll(() => {
 
 export const mockIntersectionObserverObserve = vi.fn();
 export const mockIntersectionObserverDisconnect = vi.fn();
-export const mockPlayAudio = vi.fn();
+
+export const mockPlayAudio = vi.fn(() => Promise.resolve());
 
 beforeEach(() => {
 	Object.defineProperty(window, 'IntersectionObserver', {

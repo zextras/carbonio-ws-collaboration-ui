@@ -23,7 +23,7 @@ export const create =
 		});
 		return store;
 	};
-// Reset all stores after each test run
+
 beforeEach(() => {
 	act(() => {
 		storeResetFns.forEach((resetFn) => resetFn());
