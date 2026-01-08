@@ -1,14 +1,14 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 /*
  * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, {useState, useRef, useCallback, useEffect, SVGProps, ComponentType} from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import {Button, Container, Text} from '@zextras/carbonio-design-system';
-
+import { Button, Container, Text, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 
 const StyledText = styled(Text)`
 	user-select: none;
@@ -45,7 +45,6 @@ const miniWave = keyframes`
 	}
 `;
 
-
 const fillProgress = keyframes`
   from {
     width: 0%;
@@ -71,17 +70,17 @@ const ButtonWrapper = styled(Container)<{ duration: number }>`
 		border-radius: 4px;
 		pointer-events: none;
 		z-index: 0;
-		animation: ${fillProgress} ${({ duration }) => duration}ms linear forwards;
+		animation: ${fillProgress} ${({ duration }): number => duration}ms linear forwards;
 	}
 `;
 
 const Dot = styled.div`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
 	background-color: #ffffff;
-  animation: ${pulse} 1s ease-in-out infinite;
-  will-change: transform, opacity;
+	animation: ${pulse} 1s ease-in-out infinite;
+	will-change: transform, opacity;
 `;
 
 const WaveformContainer = styled.span`
@@ -92,20 +91,41 @@ const WaveformContainer = styled.span`
 `;
 
 const WaveBar = styled.span<{ delay: number; height: number }>`
- display: inline-block;
- width: 3px;
- height: ${({ height }) => height}px;
- border-radius: 1px;
- background-color: #ffffff;
- animation: ${miniWave} 0.8s ease-in-out infinite;
- animation-delay: ${({ delay }) => delay}s;
+	display: inline-block;
+	width: 3px;
+	height: ${({ height }): number => height}px;
+	border-radius: 1px;
+	background-color: #ffffff;
+	animation: ${miniWave} 0.8s ease-in-out infinite;
+	animation-delay: ${({ delay }): number => delay}s;
 `;
+
+const analyzeAudioBlob = async (blob: Blob): Promise<boolean> => {
+	try {
+		const audioContext = new AudioContext();
+		const arrayBuffer = await blob.arrayBuffer();
+		const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+		const channelData = audioBuffer.getChannelData(0);
+
+		let sum = 0;
+		// eslint-disable-next-line no-plusplus
+		for (let i = 0; i < channelData.length; i++) {
+			sum += channelData[i] * channelData[i];
+		}
+		const rms = Math.sqrt(sum / channelData.length);
+		await audioContext.close();
+		return rms > 0.01;
+	} catch (error) {
+		return false;
+	}
+};
 
 export const MicTestButton = ({
 	stream,
 	recordingDuration = 4000,
 	disabled = false
 }: MicrophoneTestButtonProps): React.ReactElement => {
+	const createSnackbar = useSnackbar();
 	const [state, setState] = useState<ButtonState>('ready');
 	const [hasCompletedTest, setHasCompletedTest] = useState(false);
 
@@ -184,6 +204,21 @@ export const MicTestButton = ({
 
 			mediaRecorder.onstop = (): void => {
 				playRecording();
+				analyzeAudioBlob(new Blob(chunksRef.current, { type: 'audio/webm' })).then((result) => {
+					if (result) {
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							severity: 'success',
+							label: 'Microphone is working correctly'
+						});
+					} else {
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							severity: 'error',
+							label: 'No sound detected. Speak during recording or check your microphone'
+						});
+					}
+				});
 			};
 
 			mediaRecorder.start();
@@ -199,12 +234,11 @@ export const MicTestButton = ({
 					stopRecording();
 				}
 			}, 100);
-
 		} catch (error) {
 			console.error('Failed to start recording:', error);
 			setState('ready');
 		}
-	}, [stream, state, disabled, playRecording, recordingDuration, stopRecording]);
+	}, [stream, state, disabled, playRecording, createSnackbar, recordingDuration, stopRecording]);
 
 	const handleClick = useCallback(() => {
 		if (state === 'ready') {
@@ -214,26 +248,51 @@ export const MicTestButton = ({
 
 	return (
 		<>
-			{state === 'ready' && <Button
-				type={'outlined'}
-				backgroundColor={'gray6'}
-				labelColor={'primary'}
-				width={'fill'}
-				label={hasCompletedTest ? 'START MICROPHONE TEST AGAIN' : 'START MICROPHONE TEST'}
-				icon={'Mic'}
-				iconPlacement="right"
-				onClick={handleClick}
-				disabled={disabled}
-			/>}
-			{state === 'recording' &&
-				<ButtonWrapper gap={'0.5rem'} key={state} orientation={'horizontal'} background={'error'} width={'fill'} duration={recordingDuration}>
-					<StyledText size={'medium'} color={'gray6'} >{'RECORDING...'}</StyledText>
-					<Dot className={'force-white-bg'}/>
+			{state === 'ready' && (
+				<Tooltip
+					label={'Turn on your microphone to test it'}
+					disabled={!disabled}
+					placement={'top'}
+				>
+					<Button
+						type={'outlined'}
+						backgroundColor={'text'}
+						width={'fill'}
+						label={hasCompletedTest ? 'START MICROPHONE TEST AGAIN' : 'START MICROPHONE TEST'}
+						icon={'Mic'}
+						iconPlacement="right"
+						onClick={handleClick}
+						disabled={disabled}
+					/>
+				</Tooltip>
+			)}
+			{state === 'recording' && (
+				<ButtonWrapper
+					gap={'0.5rem'}
+					key={state}
+					orientation={'horizontal'}
+					background={'error'}
+					width={'fill'}
+					duration={recordingDuration}
+				>
+					<StyledText size={'medium'} color={'gray6'}>
+						{'RECORDING...'}
+					</StyledText>
+					<Dot className={'force-white-bg'} />
 				</ButtonWrapper>
-			}
-			{state === 'playing' &&
-				<ButtonWrapper gap={'0.5rem'} key={state} orientation={'horizontal'} background={'primary'} width={'fill'} duration={recordingDuration}>
-					<StyledText size={'medium'} color={'gray6'} >{'PLAYING RECORDING...'}</StyledText>
+			)}
+			{state === 'playing' && (
+				<ButtonWrapper
+					gap={'0.5rem'}
+					key={state}
+					orientation={'horizontal'}
+					background={'primary'}
+					width={'fill'}
+					duration={recordingDuration}
+				>
+					<StyledText size={'medium'} color={'gray6'}>
+						{'PLAYING RECORDING...'}
+					</StyledText>
 					<WaveformContainer>
 						<WaveBar className={'force-white-bg'} delay={0} height={8} />
 						<WaveBar className={'force-white-bg'} delay={0.1} height={12} />
@@ -242,7 +301,7 @@ export const MicTestButton = ({
 						<WaveBar className={'force-white-bg'} delay={0.4} height={8} />
 					</WaveformContainer>
 				</ButtonWrapper>
-			}
+			)}
 		</>
 	);
 };
