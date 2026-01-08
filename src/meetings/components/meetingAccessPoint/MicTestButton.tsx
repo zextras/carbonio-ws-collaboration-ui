@@ -114,6 +114,7 @@ const analyzeAudioBlob = async (blob: Blob): Promise<number> => {
 		await audioContext.close();
 		return rms;
 	} catch (error) {
+		console.error('Error analyzing audio blob:', error);
 		return 0;
 	}
 };

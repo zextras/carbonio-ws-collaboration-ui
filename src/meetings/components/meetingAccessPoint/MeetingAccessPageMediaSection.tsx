@@ -4,16 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {
-	Dispatch,
-	FC,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Button, Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
@@ -73,8 +64,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [t] = useTranslation();
-	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');
-	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop mic test');
 	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
 	const enter = t('action.enter', 'Enter');
 	const howToJoinMeeting = t(
@@ -145,10 +134,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			setMicTest(false);
 		}
 	}, [audioStatus]);
-
-	const toggleMicTest = useCallback(() => {
-		setMicTest((prev) => !prev);
-	}, []);
 
 	const areNetworksUp = useMemo(() => {
 		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
