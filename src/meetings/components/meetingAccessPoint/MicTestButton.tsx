@@ -9,6 +9,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Container, Text, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 
 const StyledText = styled(Text)`
 	user-select: none;
@@ -125,6 +126,7 @@ export const MicTestButton = ({
 	disabled = false
 }: MicrophoneTestButtonProps): React.ReactElement => {
 	const createSnackbar = useSnackbar();
+	const [t] = useTranslation();
 	const [state, setState] = useState<ButtonState>('ready');
 	const [hasCompletedTest, setHasCompletedTest] = useState(false);
 
@@ -149,21 +151,31 @@ export const MicTestButton = ({
 		[stream]
 	);
 
+	const microphoneWorkingLabel = t(
+		'meeting.micTest.microphoneWorking',
+		'Microphone is working correctly'
+	);
+
 	const showMicrophoneSuccess = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			severity: 'success',
-			label: 'Microphone is working correctly'
+			label: microphoneWorkingLabel
 		});
-	}, [createSnackbar]);
+	}, [createSnackbar, microphoneWorkingLabel]);
+
+	const noSoundDetectedLabel = t(
+		'meeting.micTest.noSoundDetected',
+		'No sound detected. Speak during recording or check your microphone'
+	);
 
 	const showMicrophoneError = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			severity: 'error',
-			label: 'No sound detected. Speak during recording or check your microphone'
+			label: noSoundDetectedLabel
 		});
-	}, [createSnackbar]);
+	}, [createSnackbar, noSoundDetectedLabel]);
 
 	const playRecording = useCallback(() => {
 		const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
@@ -256,6 +268,22 @@ export const MicTestButton = ({
 		showMicrophoneError
 	]);
 
+	const turnOnMicrophoneLabel = t(
+		'meeting.micTest.turnOnMicrophone',
+		'Turn on your microphone to test it'
+	);
+
+	const startMicTestAgainLabel = t(
+		'meeting.micTest.startMicTestAgain',
+		'Start microphone test again'
+	);
+
+	const startMicTestLabel = t('meeting.micTest.startMicTest', 'Start microphone test');
+
+	const recordingLabel = t('meeting.micTest.recording', 'Recording...');
+
+	const playingRecordingLabel = t('meeting.micTest.playingRecording', 'Playing recording...');
+
 	const handleClick = useCallback(() => {
 		if (state === 'ready') {
 			startRecording();
@@ -265,16 +293,12 @@ export const MicTestButton = ({
 	return (
 		<>
 			{state === 'ready' && (
-				<Tooltip
-					label={'Turn on your microphone to test it'}
-					disabled={!disabled}
-					placement={'top'}
-				>
+				<Tooltip label={turnOnMicrophoneLabel} disabled={!disabled} placement={'top'}>
 					<Button
 						type={'outlined'}
 						backgroundColor={'text'}
 						width={'fill'}
-						label={hasCompletedTest ? 'START MICROPHONE TEST AGAIN' : 'START MICROPHONE TEST'}
+						label={hasCompletedTest ? startMicTestAgainLabel : startMicTestLabel}
 						icon={'Mic'}
 						iconPlacement="right"
 						onClick={handleClick}
@@ -292,7 +316,7 @@ export const MicTestButton = ({
 					duration={recordingDuration}
 				>
 					<StyledText size={'medium'} color={'gray6'}>
-						{'RECORDING...'}
+						{recordingLabel}
 					</StyledText>
 					<Dot className={'force-white-bg'} />
 				</ButtonWrapper>
@@ -307,7 +331,7 @@ export const MicTestButton = ({
 					duration={recordingDuration}
 				>
 					<StyledText size={'medium'} color={'gray6'}>
-						{'PLAYING RECORDING...'}
+						{playingRecordingLabel}
 					</StyledText>
 					<WaveformContainer>
 						<WaveBar className={'force-white-bg'} delay={0} height={8} />

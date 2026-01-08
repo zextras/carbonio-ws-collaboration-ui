@@ -141,7 +141,7 @@ describe('MicTestButton', () => {
 			const mockStream = createMockStream();
 			setup(<MicTestButton stream={mockStream} />);
 
-			expect(screen.getByRole('button', { name: 'START MICROPHONE TEST' })).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: 'Start microphone test' })).toBeInTheDocument();
 		});
 
 		test('should render disabled button when disabled prop is true', () => {
@@ -172,7 +172,7 @@ describe('MicTestButton', () => {
 			const button = screen.getByRole('button', { name: /start microphone test/i });
 			await user.click(button);
 
-			expect(screen.getByText('RECORDING...')).toBeInTheDocument();
+			expect(screen.getByText('Recording...')).toBeInTheDocument();
 		});
 
 		test('should not start recording when disabled', async () => {
@@ -226,7 +226,7 @@ describe('MicTestButton', () => {
 			});
 
 			await waitFor(() => {
-				expect(screen.getByText('PLAYING RECORDING...')).toBeInTheDocument();
+				expect(screen.getByText('Playing recording...')).toBeInTheDocument();
 			});
 		});
 
@@ -258,7 +258,7 @@ describe('MicTestButton', () => {
 			});
 
 			expect(
-				screen.getByRole('button', { name: 'START MICROPHONE TEST AGAIN' })
+				screen.getByRole('button', { name: 'Start microphone test again' })
 			).toBeInTheDocument();
 		});
 	});
