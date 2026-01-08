@@ -23,6 +23,8 @@ interface MicrophoneTestButtonProps {
 	disabled?: boolean;
 }
 
+const RMS_THRESHOLD = 0.01;
+
 const pulse = keyframes`
 	0%, 100% {
 		transform: scale(1);
@@ -100,23 +102,19 @@ const WaveBar = styled.span<{ delay: number; height: number }>`
 	animation-delay: ${({ delay }): number => delay}s;
 `;
 
-const analyzeAudioBlob = async (blob: Blob): Promise<boolean> => {
+const analyzeAudioBlob = async (blob: Blob): Promise<number> => {
 	try {
 		const audioContext = new AudioContext();
 		const arrayBuffer = await blob.arrayBuffer();
 		const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 		const channelData = audioBuffer.getChannelData(0);
 
-		let sum = 0;
-		// eslint-disable-next-line no-plusplus
-		for (let i = 0; i < channelData.length; i++) {
-			sum += channelData[i] * channelData[i];
-		}
+		const sum = Array.from(channelData).reduce((acc, sample) => acc + sample * sample, 0);
 		const rms = Math.sqrt(sum / channelData.length);
 		await audioContext.close();
-		return rms > 0.01;
+		return rms;
 	} catch (error) {
-		return false;
+		return 0;
 	}
 };
 
@@ -149,6 +147,22 @@ export const MicTestButton = ({
 		},
 		[stream]
 	);
+
+	const showMicrophoneSuccess = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			severity: 'success',
+			label: 'Microphone is working correctly'
+		});
+	}, [createSnackbar]);
+
+	const showMicrophoneError = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			severity: 'error',
+			label: 'No sound detected. Speak during recording or check your microphone'
+		});
+	}, [createSnackbar]);
 
 	const playRecording = useCallback(() => {
 		const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
@@ -204,19 +218,11 @@ export const MicTestButton = ({
 
 			mediaRecorder.onstop = (): void => {
 				playRecording();
-				analyzeAudioBlob(new Blob(chunksRef.current, { type: 'audio/webm' })).then((result) => {
-					if (result) {
-						createSnackbar({
-							key: new Date().toLocaleString(),
-							severity: 'success',
-							label: 'Microphone is working correctly'
-						});
+				analyzeAudioBlob(new Blob(chunksRef.current, { type: 'audio/webm' })).then((rms) => {
+					if (rms > RMS_THRESHOLD) {
+						showMicrophoneSuccess();
 					} else {
-						createSnackbar({
-							key: new Date().toLocaleString(),
-							severity: 'error',
-							label: 'No sound detected. Speak during recording or check your microphone'
-						});
+						showMicrophoneError();
 					}
 				});
 			};
@@ -238,7 +244,16 @@ export const MicTestButton = ({
 			console.error('Failed to start recording:', error);
 			setState('ready');
 		}
-	}, [stream, state, disabled, playRecording, createSnackbar, recordingDuration, stopRecording]);
+	}, [
+		stream,
+		state,
+		disabled,
+		playRecording,
+		recordingDuration,
+		stopRecording,
+		showMicrophoneSuccess,
+		showMicrophoneError
+	]);
 
 	const handleClick = useCallback(() => {
 		if (state === 'ready') {
