@@ -239,7 +239,11 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						{AudioHandlerComponent}
 					</Container>
 					<Container height="fit" gap="1rem" mainAlignment="flex-start">
-						<MicTestButton disabled={!audioStatus} stream={audioStreamTrack} />
+						<MicTestButton
+							disabled={!audioStatus}
+							stream={audioStreamTrack}
+							backgroundColor={'text'}
+						/>
 						{enterButton}
 					</Container>
 				</Container>

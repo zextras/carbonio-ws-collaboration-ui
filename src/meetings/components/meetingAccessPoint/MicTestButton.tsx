@@ -8,7 +8,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button, Container, Text, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	ButtonProps,
+	Container,
+	Text,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 const StyledText = styled(Text)`
@@ -18,11 +25,11 @@ const StyledText = styled(Text)`
 
 type ButtonState = 'ready' | 'recording' | 'playing';
 
-interface MicrophoneTestButtonProps {
+type MicrophoneTestButtonProps = Pick<ButtonProps, 'backgroundColor'> & {
 	stream: MediaStream | null;
 	recordingDuration?: number;
 	disabled?: boolean;
-}
+};
 
 const RMS_THRESHOLD = 0.01;
 
@@ -123,7 +130,8 @@ const analyzeAudioBlob = async (blob: Blob): Promise<number> => {
 export const MicTestButton = ({
 	stream,
 	recordingDuration = 4000,
-	disabled = false
+	disabled = false,
+	backgroundColor
 }: MicrophoneTestButtonProps): React.ReactElement => {
 	const createSnackbar = useSnackbar();
 	const [t] = useTranslation();
@@ -296,7 +304,7 @@ export const MicTestButton = ({
 				<Tooltip label={turnOnMicrophoneLabel} disabled={!disabled} placement={'top'}>
 					<Button
 						type={'outlined'}
-						backgroundColor={'text'}
+						backgroundColor={backgroundColor}
 						width={'fill'}
 						label={hasCompletedTest ? startMicTestAgainLabel : startMicTestLabel}
 						icon={'Mic'}
