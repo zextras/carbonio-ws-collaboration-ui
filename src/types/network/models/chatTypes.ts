@@ -83,6 +83,7 @@ export type TimelineItem = TimelineMessageItem | TimelineSystemEventItem;
 
 export type TimelineResponse = {
 	items: TimelineItem[];
+	markers?: ReadMarker[];
 	hasMore: boolean;
 	cursor?: string;
 };

@@ -155,15 +155,43 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/NEW_INBOX_MESSAGE'
 		);
 	},
-	updateHistory: (roomId: string, messageArray: Message[]): void => {
+	updateHistory: (roomId: string, messageArray: Message[], markers?: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = initRoomChatsRegistry(draft, roomId);
+				const { messages, markers: existingMarkers } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
 					const newMessages = orderBy(messageArray, ['date'], ['asc']);
 					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
+				}
+
+				// If markers provided, update them and recalculate read status atomically
+				if (markers && markers.length > 0) {
+					// Update markers
+					forEach(markers, (marker) => {
+						const existing = existingMarkers[marker.from];
+						if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
+							draft.chatsRegistry[roomId].markers[marker.from] = marker;
+						}
+					});
+
+					// Recalculate read status for all messages
+					const updatedMarkers = draft.chatsRegistry[roomId].markers;
+					draft.chatsRegistry[roomId].messages = map(
+						draft.chatsRegistry[roomId].messages,
+						(msg) => {
+							if (
+								(msg.type === MessageType.TEXT_MSG ||
+									msg.type === MessageType.CONFIGURATION_MSG) &&
+								(msg.read === MarkerStatus.UNREAD ||
+									msg.read === MarkerStatus.READ_BY_SOMEONE)
+							) {
+								msg.read = calcReads(msg.date, roomId, updatedMarkers);
+							}
+							return msg;
+						}
+					);
 				}
 			}),
 			false,

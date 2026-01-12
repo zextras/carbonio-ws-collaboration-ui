@@ -6,6 +6,7 @@
 
 import {
 	ChatMessage,
+	ReadMarker,
 	ReactionGroup,
 	TimelineItem,
 	SystemEvent,
@@ -19,7 +20,8 @@ import {
 	MarkerStatus,
 	MessageFastening,
 	OperationType,
-	FasteningAction
+	FasteningAction,
+	Marker
 } from '../../../types/store/ChatsRegistryTypes';
 
 /**
@@ -29,9 +31,10 @@ export function mapChatMessageToTextMessage(
 	chatMessage: ChatMessage,
 	currentUserId: string
 ): TextMessage {
-	// Determine read status - own messages are always read
-	const isOwnMessage = chatMessage.senderId === currentUserId;
-	const readStatus = isOwnMessage ? MarkerStatus.READ : MarkerStatus.UNREAD;
+	// All messages start as UNREAD - updateReadStatus will calculate the correct status
+	// based on markers. Own messages will show grey checkmarks initially, then blue
+	// when all other members have read them.
+	const readStatus = MarkerStatus.UNREAD;
 
 	return {
 		id: chatMessage.id,
@@ -166,4 +169,23 @@ export function mapTimelineItemsToMessages(
 	currentUserId: string
 ): Message[] {
 	return items.map((item) => mapTimelineItemToMessage(item, roomId, currentUserId));
+}
+
+/**
+ * Maps ReadMarker from the REST API to Marker for the store.
+ */
+export function mapReadMarkerToMarker(readMarker: ReadMarker): Marker {
+	return {
+		from: readMarker.userId,
+		messageId: readMarker.messageId,
+		markerDate: new Date(readMarker.readAt).getTime(),
+		type: 'displayed'
+	};
+}
+
+/**
+ * Maps an array of ReadMarkers from the REST API to Markers for the store.
+ */
+export function mapReadMarkersToMarkers(readMarkers: ReadMarker[]): Marker[] {
+	return readMarkers.map(mapReadMarkerToMarker);
 }

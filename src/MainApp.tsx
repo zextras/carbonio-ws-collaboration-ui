@@ -112,7 +112,7 @@ export default function MainApp(): React.JSX.Element {
 									type: MessageType.TEXT_MSG,
 									from: msg.senderId,
 									text: msg.text || msg.attachment?.name || '',
-									read: MarkerStatus.READ,
+									read: MarkerStatus.UNREAD,
 									edited: msg.edited,
 									deleted: msg.deleted,
 									attachment: msg.attachment
@@ -135,7 +135,7 @@ export default function MainApp(): React.JSX.Element {
 									operation: mapEventTypeToOperation(evt.type),
 									value: (evt.content?.memberId as string) || '',
 									from: (evt.content?.actorId as string) || '',
-									read: MarkerStatus.READ
+									read: MarkerStatus.UNREAD
 								};
 								newInboxMessage(configMessage);
 							}

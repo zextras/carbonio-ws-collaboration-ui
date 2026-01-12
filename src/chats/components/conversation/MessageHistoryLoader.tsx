@@ -11,7 +11,10 @@ import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
 
 import ChatApi from '../../../network/apis/ChatApi';
-import { mapTimelineItemsToMessages } from '../../../network/sse/utilities/messageMapper';
+import {
+	mapReadMarkersToMarkers,
+	mapTimelineItemsToMessages
+} from '../../../network/sse/utilities/messageMapper';
 import {
 	getHistoryIsLoadedDisabled,
 	getIsInitialTimelineLoaded
@@ -84,7 +87,7 @@ const MessageHistoryLoader = ({
 	const isInitialTimelineLoaded = useStore((store) => getIsInitialTimelineLoaded(store, roomId));
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInitialTimelineLoaded = useStore((store) => store.setInitialTimelineLoaded);
-	const addMessages = useStore((store) => store.newMessage);
+	const updateHistory = useStore((store) => store.updateHistory);
 	const currentUserId = useStore(getUserId);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,15 +111,23 @@ const MessageHistoryLoader = ({
 				setHistoryLoadDisabled(roomId, true);
 				ChatApi.getTimeline(roomId, beforeDate, 50)
 					.then((response) => {
+						// Convert markers first (needed for atomic update)
+						const markers =
+							response.markers && response.markers.length > 0
+								? mapReadMarkersToMarkers(response.markers)
+								: undefined;
+
 						if (response.items.length > 0) {
 							const messages = mapTimelineItemsToMessages(
 								response.items,
 								roomId,
 								currentUserId || ''
 							);
-							messages.forEach((message) => {
-								addMessages(message);
-							});
+							// Use updateHistory with markers for atomic update (messages + read status)
+							updateHistory(roomId, messages, markers);
+						} else if (markers) {
+							// Even if no new items, update markers if present
+							updateHistory(roomId, [], markers);
 						}
 
 						// Mark initial timeline as loaded after first successful load
