@@ -6,7 +6,7 @@
 
 import useStore from '../../../store/Store';
 import { ReactionAddedEvent } from '../../../types/network/models/chatTypes';
-import { MessageFastening, MessageType } from '../../../types/store/ChatsRegistryTypes';
+import { FasteningAction, MessageFastening, MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 /**
  * Handles reaction added events from SSE.
@@ -22,12 +22,12 @@ export function handleReactionAdded(event: ReactionAddedEvent): void {
 		type: MessageType.FASTENING,
 		date: Date.now(),
 		originalStanzaId: messageId,
-		action: 'apply',
+		action: FasteningAction.REACTION,
 		value: reaction,
 		from: userId
 	};
 
-	addFastening(fastening);
+	addFastening([fastening]);
 
 	console.log('[handleReactionAdded] Reaction added:', reaction, 'to message:', messageId);
 }

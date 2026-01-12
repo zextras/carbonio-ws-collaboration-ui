@@ -24,6 +24,7 @@ import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ChatApi from '../../../network/apis/ChatApi';
 import { mapChatMessageToTextMessage } from '../../../network/sse/utilities/messageMapper';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 
@@ -41,6 +42,7 @@ type ConversationSearchPanelProps = {
 const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goToChatView }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
+	const currentUserId = useStore(getUserId);
 	const { capture } = useTracker();
 	const isDesktopView = useMediaQueryCheck();
 
@@ -97,7 +99,9 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 		});
 		ChatApi.searchMessages(roomId, searchText)
 			.then((response) => {
-				const textMessages = response.messages.map(mapChatMessageToTextMessage);
+				const textMessages = response.messages.map((msg) =>
+					mapChatMessageToTextMessage(msg, currentUserId || '')
+				);
 				setSearchResults(roomId, textMessages);
 				setRequestStatus(RequestStatus.SUCCESS);
 			})
@@ -114,7 +118,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					label: errorSnackbarLabel
 				});
 			});
-	}, [capture, createSnackbar, errorSnackbarLabel, requestStatus, roomId, roomType, searchText, setSearchResults]);
+	}, [capture, createSnackbar, currentUserId, errorSnackbarLabel, requestStatus, roomId, roomType, searchText, setSearchResults]);
 
 	const searchResults = useMemo(
 		() =>

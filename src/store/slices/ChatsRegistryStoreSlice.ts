@@ -300,6 +300,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/ADD_FASTENING'
 		);
 	},
+	removeFastening: (roomId: string, messageId: string, fasteningId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = draft.chatsRegistry[roomId];
+				if (registry && registry.fastenings[messageId]) {
+					remove(registry.fastenings[messageId], (f) => f.id === fasteningId);
+				}
+			}),
+			false,
+			'CHAT/REMOVE_FASTENING'
+		);
+	},
 	updateReadStatus: (roomId: string, newMarkers: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {

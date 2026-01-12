@@ -21,7 +21,14 @@ import ChatSseClient from './network/sse/ChatSseClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
-import { MessageType, MarkerStatus, TextMessage } from './types/store/ChatsRegistryTypes';
+import {
+	MessageType,
+	MarkerStatus,
+	TextMessage,
+	ConfigurationMessage,
+	OperationType
+} from './types/store/ChatsRegistryTypes';
+import { SystemEventType } from './types/network/models/chatTypes';
 import { UserType } from './types/store/UserTypes';
 import { setDateDefault, dateToTimestamp } from './utils/dateUtils';
 
@@ -65,13 +72,37 @@ export default function MainApp(): React.JSX.Element {
 						const rooms = inboxResponse.conversations.map((conv) => conv.room);
 						addRooms(rooms);
 
-						// Process last messages and unread counts
+						// Helper to map SystemEventType to OperationType
+						const mapEventTypeToOperation = (
+							eventType: SystemEventType
+						): OperationType => {
+							switch (eventType) {
+								case 'ROOM_CREATED':
+									return OperationType.ROOM_CREATION;
+								case 'MEMBER_ADDED':
+									return OperationType.MEMBER_ADDED;
+								case 'MEMBER_REMOVED':
+									return OperationType.MEMBER_REMOVED;
+								default:
+									return OperationType.ROOM_CREATION;
+							}
+						};
+
+						// Process last messages/events and unread counts
 						inboxResponse.conversations.forEach((conv) => {
 							// Set unread count for each room
 							setUnreadCount(conv.roomId, conv.unreadCount);
 
-							// Add lastMessage to chat registry if present
-							if (conv.lastMessage) {
+							// Determine which is more recent: lastMessage or lastEvent
+							const msgDate = conv.lastMessage
+								? dateToTimestamp(conv.lastMessage.createdAt)
+								: 0;
+							const eventDate = conv.lastEvent
+								? dateToTimestamp(conv.lastEvent.createdAt)
+								: 0;
+
+							// Add the most recent item (message or event) to chat registry
+							if (msgDate >= eventDate && conv.lastMessage) {
 								const msg = conv.lastMessage;
 								const textMessage: TextMessage = {
 									id: msg.id,
@@ -94,6 +125,19 @@ export default function MainApp(): React.JSX.Element {
 										: undefined
 								};
 								newInboxMessage(textMessage);
+							} else if (conv.lastEvent) {
+								const evt = conv.lastEvent;
+								const configMessage: ConfigurationMessage = {
+									id: evt.id,
+									roomId: conv.roomId,
+									date: dateToTimestamp(evt.createdAt),
+									type: MessageType.CONFIGURATION_MSG,
+									operation: mapEventTypeToOperation(evt.type),
+									value: (evt.content?.memberId as string) || '',
+									from: (evt.content?.actorId as string) || '',
+									read: MarkerStatus.READ
+								};
+								newInboxMessage(configMessage);
 							}
 						});
 

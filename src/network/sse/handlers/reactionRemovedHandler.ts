@@ -6,29 +6,19 @@
 
 import useStore from '../../../store/Store';
 import { ReactionRemovedEvent } from '../../../types/network/models/chatTypes';
-import { MessageFastening, MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 /**
  * Handles reaction removed events from SSE.
  * Removes the reaction fastening from the message.
  */
 export function handleReactionRemoved(event: ReactionRemovedEvent): void {
-	const { addFastening } = useStore.getState();
+	const { removeFastening } = useStore.getState();
 	const { roomId, messageId, userId, reaction } = event;
 
-	// Use 'retract' action to remove the reaction
-	const fastening: MessageFastening = {
-		id: `${messageId}-${userId}-${reaction}-retract`,
-		roomId,
-		type: MessageType.FASTENING,
-		date: Date.now(),
-		originalStanzaId: messageId,
-		action: 'retract',
-		value: reaction,
-		from: userId
-	};
+	// The fastening ID matches the format used when adding reactions
+	const fasteningId = `${messageId}-${userId}-${reaction}`;
 
-	addFastening(fastening);
+	removeFastening(roomId, messageId, fasteningId);
 
 	console.log('[handleReactionRemoved] Reaction removed:', reaction, 'from message:', messageId);
 }

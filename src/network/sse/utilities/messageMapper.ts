@@ -4,12 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { ChatMessage, ReactionGroup } from '../../../types/network/models/chatTypes';
+import {
+	ChatMessage,
+	ReactionGroup,
+	TimelineItem,
+	SystemEvent,
+	SystemEventType
+} from '../../../types/network/models/chatTypes';
 import {
 	TextMessage,
+	ConfigurationMessage,
+	Message,
 	MessageType,
 	MarkerStatus,
-	MessageFastening
+	MessageFastening,
+	OperationType,
+	FasteningAction
 } from '../../../types/store/ChatsRegistryTypes';
 
 /**
@@ -77,7 +87,7 @@ export function mapReactionsToFastenings(
 				type: MessageType.FASTENING,
 				date: Date.now(),
 				originalStanzaId: messageId,
-				action: 'apply',
+				action: FasteningAction.REACTION,
 				value: group.reaction,
 				from: userId
 			});
@@ -85,4 +95,75 @@ export function mapReactionsToFastenings(
 	});
 
 	return fastenings;
+}
+
+/**
+ * Maps SystemEventType from the REST API to OperationType for the store.
+ */
+function mapSystemEventTypeToOperation(eventType: SystemEventType): OperationType {
+	switch (eventType) {
+		case 'ROOM_CREATED':
+			return OperationType.ROOM_CREATION;
+		case 'MEMBER_ADDED':
+			return OperationType.MEMBER_ADDED;
+		case 'MEMBER_REMOVED':
+			return OperationType.MEMBER_REMOVED;
+		default:
+			return OperationType.ROOM_CREATION;
+	}
+}
+
+/**
+ * Maps a SystemEvent from the REST API to a ConfigurationMessage for the store.
+ */
+export function mapSystemEventToConfigurationMessage(
+	systemEvent: SystemEvent,
+	roomId: string
+): ConfigurationMessage {
+	// Extract the actor from content (who performed the action)
+	const actorId = (systemEvent.content?.actorId as string) || '';
+
+	// For MEMBER_ADDED/REMOVED, the value is the affected member ID
+	// For ROOM_CREATED, we can use the actor or leave empty
+	let value = '';
+	if (systemEvent.type === 'MEMBER_ADDED' || systemEvent.type === 'MEMBER_REMOVED') {
+		value = (systemEvent.content?.memberId as string) || '';
+	}
+
+	return {
+		id: systemEvent.id,
+		roomId,
+		type: MessageType.CONFIGURATION_MSG,
+		date: new Date(systemEvent.createdAt).getTime(),
+		operation: mapSystemEventTypeToOperation(systemEvent.type),
+		value,
+		from: actorId,
+		read: MarkerStatus.READ // System events don't have read status
+	};
+}
+
+/**
+ * Maps a TimelineItem from the REST API to a Message for the store.
+ */
+export function mapTimelineItemToMessage(
+	item: TimelineItem,
+	roomId: string,
+	currentUserId: string
+): Message {
+	if (item.itemType === 'message') {
+		return mapChatMessageToTextMessage(item.message, currentUserId);
+	} else {
+		return mapSystemEventToConfigurationMessage(item.systemEvent, roomId);
+	}
+}
+
+/**
+ * Maps an array of TimelineItems to Messages for the store.
+ */
+export function mapTimelineItemsToMessages(
+	items: TimelineItem[],
+	roomId: string,
+	currentUserId: string
+): Message[] {
+	return items.map((item) => mapTimelineItemToMessage(item, roomId, currentUserId));
 }

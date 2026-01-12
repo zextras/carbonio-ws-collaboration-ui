@@ -11,8 +11,9 @@ import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
 
 import ChatApi from '../../../network/apis/ChatApi';
-import { mapChatMessageToTextMessage } from '../../../network/sse/utilities/messageMapper';
+import { mapTimelineItemsToMessages } from '../../../network/sse/utilities/messageMapper';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { now } from '../../../utils/dateUtils';
 
@@ -80,6 +81,7 @@ const MessageHistoryLoader = ({
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const addMessages = useStore((store) => store.newMessage);
+	const currentUserId = useStore(getUserId);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleHistoryLoader = useCallback(
@@ -87,28 +89,35 @@ const MessageHistoryLoader = ({
 			const store = useStore.getState();
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
 			const oldestMessageDate = first(roomMessages)?.date ?? now();
+			// Convert timestamp to ISO 8601 format for the API
+			const beforeDate = new Date(oldestMessageDate).toISOString();
 			if (!historyLoadedDisabled) {
 				setHistoryLoadDisabled(roomId, true);
-				ChatApi.getMessageHistory(roomId, oldestMessageDate, 50)
+				ChatApi.getTimeline(roomId, beforeDate, 50)
 					.then((response) => {
-						if (response.messages.length > 0) {
-							response.messages.forEach((chatMessage) => {
-								const textMessage = mapChatMessageToTextMessage(chatMessage);
-								addMessages(roomId, textMessage);
+						if (response.items.length > 0) {
+							const messages = mapTimelineItemsToMessages(
+								response.items,
+								roomId,
+								currentUserId || ''
+							);
+							messages.forEach((message) => {
+								addMessages(message);
 							});
-							// Enable loading more history if we got a full page
-							if (response.messages.length === 50) {
-								setHistoryLoadDisabled(roomId, false);
-							}
+						}
+						// Only enable loading more if there are more items
+						// Otherwise keep it disabled (already set to true above)
+						if (response.hasMore) {
+							setHistoryLoadDisabled(roomId, false);
 						}
 					})
 					.catch((err) => {
-						console.error('[MessageHistoryLoader] Failed to load history:', err);
+						console.error('[MessageHistoryLoader] Failed to load timeline:', err);
 						setHistoryLoadDisabled(roomId, false);
 					});
 			}
 		}, 500),
-		[roomId, historyLoadedDisabled]
+		[roomId, historyLoadedDisabled, currentUserId]
 	);
 
 	useEffect(() => {
@@ -130,6 +139,11 @@ const MessageHistoryLoader = ({
 		}
 		return (): void => intersectionObserverRef.current?.disconnect();
 	}, [handleHistoryLoader, messageHistoryLoaderRef, messageListRef]);
+
+	// Hide the loader when history is fully loaded (no more items to fetch)
+	if (historyLoadedDisabled) {
+		return null;
+	}
 
 	return (
 		<VisibilityContainer data-testid={'messageHistoryLoader'} ref={messageHistoryLoaderRef}>

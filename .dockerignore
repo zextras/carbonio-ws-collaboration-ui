@@ -1,0 +1,9 @@
+node_modules
+.git
+*.md
+*.log
+coverage
+.idea
+.vscode
+src
+__tests__

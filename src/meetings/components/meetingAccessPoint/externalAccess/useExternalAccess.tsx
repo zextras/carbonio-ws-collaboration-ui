@@ -62,8 +62,7 @@ const useExternalAccess = (): {
 					setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
 
 					setChatsBeStatus(true);
-					const { xmppClient, wsClient } = useStore.getState().connections;
-					xmppClient.connect(res.zmToken);
+					const { wsClient } = useStore.getState().connections;
 					wsClient.connect();
 
 					setAttributes({

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttachmentType } from './attachmentTypes';
+import { Attachment } from './attachmentTypes';
 import { RoomBe } from './roomBeTypes';
 
 // ==================== MESSAGE TYPES ====================
@@ -21,7 +21,7 @@ export type ChatMessage = {
 	deleted: boolean;
 	deletedAt?: string;
 	reactions?: ReactionGroup[];
-	attachment?: AttachmentType;
+	attachment?: Attachment;
 	createdAt: string;
 	updatedAt?: string;
 };
@@ -106,6 +106,7 @@ export type InboxConversation = {
 	roomId: string;
 	room: RoomBe;
 	lastMessage?: ChatMessage;
+	lastEvent?: SystemEvent;
 	unreadCount: number;
 	muted: boolean;
 };

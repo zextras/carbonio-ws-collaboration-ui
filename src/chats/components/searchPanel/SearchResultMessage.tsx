@@ -12,11 +12,13 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
+import ChatApi from '../../../network/apis/ChatApi';
+import { mapTimelineItemsToMessages } from '../../../network/sse/utilities/messageMapper';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
 } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
+import { getIsLoggedUser, getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
@@ -59,11 +61,28 @@ const SearchResultMessage = ({
 	const onResultClick = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
-			const { xmppClient } = useStore.getState().connections;
-			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
-				scrollToMessage(message.id);
-				useStore.getState().setScrollPosition(message.roomId, message.id);
-			});
+			// Load timeline around this message using REST API
+			// Use a time slightly after the message date as the "before" parameter
+			const beforeDate = new Date(message.date + 1000).toISOString();
+			const currentUserId = getUserId(useStore.getState()) || '';
+
+			ChatApi.getTimeline(message.roomId, beforeDate, 50)
+				.then((response) => {
+					if (response.items.length > 0) {
+						const messages = mapTimelineItemsToMessages(
+							response.items,
+							message.roomId,
+							currentUserId
+						);
+						messages.forEach((msg) => useStore.getState().newMessage(msg));
+					}
+					scrollToMessage(message.id);
+					useStore.getState().setScrollPosition(message.roomId, message.id);
+				})
+				.catch((err) => {
+					console.error('[SearchResultMessage] Failed to load timeline:', err);
+					scrollToMessage(message.id);
+				});
 		} else {
 			scrollToMessage(message.id);
 		}
