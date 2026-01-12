@@ -143,14 +143,10 @@ export default function MainApp(): React.JSX.Element {
 
 						setChatsBeStatus(true);
 						// Init SSE client and webSocket after inbox request to avoid missing data
+						// Note: Presence is automatically set online when SSE connection is established
 						const { wsClient } = useStore.getState().connections;
 						ChatSseClient.connect();
 						wsClient.connect();
-
-						// Set user presence as online via REST API
-						ChatApi.setPresence(true).catch((err) => {
-							console.error('[MainApp] Failed to set presence online:', err);
-						});
 					})
 					.catch(() => setChatsBeStatus(false));
 			})
@@ -164,13 +160,9 @@ export default function MainApp(): React.JSX.Element {
 			connect();
 		}
 
-		// Cleanup: disconnect SSE and set presence offline when leaving
+		// Cleanup: disconnect SSE when leaving
+		// Note: Presence is automatically set offline when SSE connection is closed
 		const handleBeforeUnload = (): void => {
-			// Use sendBeacon for reliable presence update on page close
-			navigator.sendBeacon(
-				'/services/chats/presence',
-				JSON.stringify({ online: false })
-			);
 			ChatSseClient.disconnect();
 		};
 
@@ -179,9 +171,6 @@ export default function MainApp(): React.JSX.Element {
 		return (): void => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 			if (authenticated) {
-				ChatApi.setPresence(false).catch(() => {
-					// Ignore errors on cleanup
-				});
 				ChatSseClient.disconnect();
 			}
 		};

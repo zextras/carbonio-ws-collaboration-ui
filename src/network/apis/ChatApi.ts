@@ -142,10 +142,6 @@ class ChatApi implements IChatApi {
 
 	// ==================== PRESENCE ====================
 
-	public setPresence(online: boolean): Promise<void> {
-		return fetchAPI('presence', RequestType.PUT, { online });
-	}
-
 	public getPresenceBatch(userIds: string[]): Promise<PresenceBatchResponse> {
 		return fetchAPI('presence/batch', RequestType.POST, { userIds });
 	}

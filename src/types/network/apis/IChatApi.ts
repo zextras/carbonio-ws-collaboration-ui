@@ -12,7 +12,6 @@ import {
 	InboxResponse,
 	PresenceBatchResponse,
 	ContactsResponse,
-	PresenceStatus,
 	TimelineResponse
 } from '../models/chatTypes';
 
@@ -116,11 +115,6 @@ export interface IChatApi {
 	getInbox(): Promise<InboxResponse>;
 
 	// ==================== PRESENCE ====================
-
-	/**
-	 * Sets current user presence status
-	 */
-	setPresence(online: boolean): Promise<void>;
 
 	/**
 	 * Gets presence status for multiple users
