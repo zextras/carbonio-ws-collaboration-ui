@@ -288,9 +288,9 @@ export const MicTestButton = ({
 
 	const startMicTestLabel = t('meeting.micTest.startMicTest', 'Start microphone test');
 
-	const recordingLabel = t('meeting.micTest.recording', 'Recording...');
+	const recordingLabel = t('meeting.micTest.recordingYourVoice', 'Recording your voice');
 
-	const playingRecordingLabel = t('meeting.micTest.playingRecording', 'Playing recording...');
+	const playingRecordingLabel = t('meeting.micTest.playingBack', 'Playing back...');
 
 	const handleClick = useCallback(() => {
 		if (state === 'ready') {

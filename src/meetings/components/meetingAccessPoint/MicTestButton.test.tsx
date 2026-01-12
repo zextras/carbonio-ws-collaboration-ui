@@ -172,7 +172,7 @@ describe('MicTestButton', () => {
 			const button = screen.getByRole('button', { name: /start microphone test/i });
 			await user.click(button);
 
-			expect(screen.getByText('Recording...')).toBeInTheDocument();
+			expect(screen.getByText('Recording your voice')).toBeInTheDocument();
 		});
 
 		test('should not start recording when disabled', async () => {
@@ -226,7 +226,7 @@ describe('MicTestButton', () => {
 			});
 
 			await waitFor(() => {
-				expect(screen.getByText('Playing recording...')).toBeInTheDocument();
+				expect(screen.getByText('Playing back...')).toBeInTheDocument();
 			});
 		});
 
