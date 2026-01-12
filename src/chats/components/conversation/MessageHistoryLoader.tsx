@@ -12,10 +12,12 @@ import { debounce, first } from 'lodash';
 
 import ChatApi from '../../../network/apis/ChatApi';
 import { mapTimelineItemsToMessages } from '../../../network/sse/utilities/messageMapper';
-import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getHistoryIsLoadedDisabled,
+	getIsInitialTimelineLoaded
+} from '../../../store/selectors/ActiveConversationsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { now } from '../../../utils/dateUtils';
 
 type MessageHistoryLoaderProps = {
 	roomId: string;
@@ -79,7 +81,9 @@ const MessageHistoryLoader = ({
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
+	const isInitialTimelineLoaded = useStore((store) => getIsInitialTimelineLoaded(store, roomId));
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
+	const setInitialTimelineLoaded = useStore((store) => store.setInitialTimelineLoaded);
 	const addMessages = useStore((store) => store.newMessage);
 	const currentUserId = useStore(getUserId);
 
@@ -88,9 +92,18 @@ const MessageHistoryLoader = ({
 		debounce(() => {
 			const store = useStore.getState();
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
-			const oldestMessageDate = first(roomMessages)?.date ?? now();
-			// Convert timestamp to ISO 8601 format for the API
-			const beforeDate = new Date(oldestMessageDate).toISOString();
+			const initialLoaded = store.activeConversations[roomId]?.isInitialTimelineLoaded;
+
+			// For initial load, don't pass 'before' to get most recent messages
+			// For subsequent loads (scrolling up), use oldest message date
+			let beforeDate: string | undefined;
+			if (initialLoaded && roomMessages && roomMessages.length > 0) {
+				const oldestMessageDate = first(roomMessages)?.date;
+				if (oldestMessageDate) {
+					beforeDate = new Date(oldestMessageDate).toISOString();
+				}
+			}
+
 			if (!historyLoadedDisabled) {
 				setHistoryLoadDisabled(roomId, true);
 				ChatApi.getTimeline(roomId, beforeDate, 50)
@@ -105,6 +118,12 @@ const MessageHistoryLoader = ({
 								addMessages(message);
 							});
 						}
+
+						// Mark initial timeline as loaded after first successful load
+						if (!initialLoaded) {
+							setInitialTimelineLoaded(roomId);
+						}
+
 						// Only enable loading more if there are more items
 						// Otherwise keep it disabled (already set to true above)
 						if (response.hasMore) {

@@ -14,7 +14,6 @@ import {
 	MessageHistoryResponse,
 	MessageSearchResponse,
 	PresenceBatchResponse,
-	ReadMarker,
 	RoomReadMarkers,
 	TimelineResponse
 } from '../../types/network/models/chatTypes';
@@ -120,8 +119,9 @@ class ChatApi implements IChatApi {
 
 	// ==================== READ MARKERS ====================
 
-	public setReadMarker(roomId: string, messageId: string): Promise<ReadMarker> {
-		return fetchAPI(`rooms/${roomId}/read`, RequestType.PUT, { messageId });
+	public setReadMarker(roomId: string): Promise<void> {
+		// Always marks all messages in the room as read (no body needed)
+		return fetchAPI(`rooms/${roomId}/read`, RequestType.PUT);
 	}
 
 	public getRoomReadMarkers(roomId: string): Promise<RoomReadMarkers> {

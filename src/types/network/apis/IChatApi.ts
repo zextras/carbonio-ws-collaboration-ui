@@ -8,7 +8,6 @@ import {
 	ChatMessage,
 	MessageHistoryResponse,
 	MessageSearchResponse,
-	ReadMarker,
 	RoomReadMarkers,
 	InboxResponse,
 	PresenceBatchResponse,
@@ -91,9 +90,11 @@ export interface IChatApi {
 	// ==================== READ MARKERS ====================
 
 	/**
-	 * Sets read marker for the current user in a room
+	 * Marks all messages in the room as read for the current user.
+	 * Only messages received by the user (not sent by the user) are processed.
+	 * In group chats, a message shows as "read" only when all members have read it.
 	 */
-	setReadMarker(roomId: string, messageId: string): Promise<ReadMarker>;
+	setReadMarker(roomId: string): Promise<void>;
 
 	/**
 	 * Gets all read markers for a room

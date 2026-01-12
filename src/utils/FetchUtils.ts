@@ -57,11 +57,15 @@ export const fetchAPI = (
 	retryCount = 0
 ): Promise<any> => {
 	const headers = buildHeaders();
-	headers.append(contentTypeHeader, 'application/json');
+	// Only set Content-Type and body if data is provided
+	const hasBody = data !== undefined;
+	if (hasBody) {
+		headers.append(contentTypeHeader, 'application/json');
+	}
 	return fetch(BASE_PATH + endpoint, {
 		method,
 		headers,
-		body: JSON.stringify(data)
+		body: hasBody ? JSON.stringify(data) : undefined
 	})
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error): Promise<any> => {

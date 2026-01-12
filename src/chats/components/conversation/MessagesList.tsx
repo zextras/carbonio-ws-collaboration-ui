@@ -8,7 +8,7 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 
 import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, groupBy, last, map, size } from 'lodash';
+import { debounce, groupBy, last, map, size } from 'lodash';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
@@ -30,7 +30,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { formatDate, isBefore } from '../../../utils/dateUtils';
+import { formatDate } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
@@ -71,30 +71,33 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
+	// Track if we've already marked this room as read in this session
+	const hasMarkedAsReadRef = useRef(false);
+
+	// Mark all messages in the room as read (single API call)
+	const markRoomAsRead = useCallback(() => {
+		if (hasMarkedAsReadRef.current) return;
+
+		// Check if there are unread messages in the room
+		const unreadCount = useStore.getState().chatsRegistry[roomId]?.unread ?? 0;
+		if (unreadCount > 0 || !myLastMarker) {
+			hasMarkedAsReadRef.current = true;
+			ChatApi.setReadMarker(roomId).catch((err) => {
+				console.error('[MessagesList] Failed to mark room as read:', err);
+				hasMarkedAsReadRef.current = false; // Allow retry on error
+			});
+		}
+	}, [roomId, myLastMarker]);
+
+	// Legacy readMessage for scroll position tracking (no longer marks as read per-message)
 	const readMessage = useCallback(
 		(refId: string) => {
-			const selectedMessage = find(roomMessages, (message) => refId === message.id);
-			const isReadable =
-				(selectedMessage?.type === MessageType.TEXT_MSG && selectedMessage.from !== myUserId) ||
-				selectedMessage?.type === MessageType.CONFIGURATION_MSG;
-			if (inputHasFocus && isReadable) {
-				// Mark as read when:
-				// - there isn't a marker because it's means I never saw a message of that conversation
-				// - marked message isn't in the list of messages in the store (marker is older than the oldest message)
-				// - marked message is older than the message that is on the screen
-				const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker?.messageId);
-				const canMessageBeMarkedAsRead =
-					!!markedMsg &&
-					markedMsg.date !== selectedMessage.date &&
-					isBefore(markedMsg.date, selectedMessage.date);
-				if (!myLastMarker || !markedMsg || canMessageBeMarkedAsRead) {
-					ChatApi.setReadMarker(selectedMessage.roomId, selectedMessage.id).catch((err) => {
-						console.error('[MessagesList] Failed to set read marker:', err);
-					});
-				}
+			// Mark all as read when focused (simplified approach)
+			if (inputHasFocus) {
+				markRoomAsRead();
 			}
 		},
-		[roomMessages, myLastMarker, inputHasFocus, myUserId]
+		[inputHasFocus, markRoomAsRead]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,15 +156,17 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		return (): void => messageScrollPositionObserver.current?.disconnect();
 	}, [observerInit]);
 
-	// Read last message when user opens the conversation for the first time
+	// Mark all messages as read when user opens/focuses the conversation
 	useEffect(() => {
-		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
-			const lastMessage = last(roomMessages);
-			if (lastMessage) {
-				readMessage(lastMessage.id);
-			}
+		if (inputHasFocus && size(roomMessages) > 0) {
+			markRoomAsRead();
 		}
-	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
+	}, [inputHasFocus, roomMessages, markRoomAsRead]);
+
+	// Reset the hasMarkedAsRead flag when room changes
+	useEffect(() => {
+		hasMarkedAsReadRef.current = false;
+	}, [roomId]);
 
 	// Manage initial scroll position
 	useEffect(() => {

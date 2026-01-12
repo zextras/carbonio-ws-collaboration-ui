@@ -11,10 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
 import ChatApi from '../../../../network/apis/ChatApi';
-import {
-	getLastTextMessageIdSelector,
-	getRoomUnreadSelector
-} from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../store/Store';
 
 type ClearHistoryModalProps = {
@@ -40,13 +37,10 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const closeLabel = t('action.close', 'Close');
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
-	const lastTextMessageId: string | undefined = useStore((state) =>
-		getLastTextMessageIdSelector(state, roomId)
-	);
 
 	const clearHistory = useCallback(() => {
-		if (unreadMessagesCount > 0 && lastTextMessageId) {
-			ChatApi.setReadMarker(roomId, lastTextMessageId).catch((err) => {
+		if (unreadMessagesCount > 0) {
+			ChatApi.setReadMarker(roomId).catch((err) => {
 				console.error('[ClearHistoryModal] Failed to set read marker:', err);
 			});
 		}
@@ -54,7 +48,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 			successfulSnackbar();
 			closeModal();
 		});
-	}, [closeModal, lastTextMessageId, roomId, successfulSnackbar, unreadMessagesCount]);
+	}, [closeModal, roomId, successfulSnackbar, unreadMessagesCount]);
 
 	return (
 		<Modal

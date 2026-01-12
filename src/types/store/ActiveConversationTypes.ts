@@ -25,6 +25,7 @@ export type ActiveConversationsSlice = {
 	setDraftMessage: (roomId: string, message?: string) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
+	setInitialTimelineLoaded: (roomId: string) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
@@ -43,6 +44,7 @@ export type ActiveConversation = {
 	scrollPositionMessageId?: string;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;
+	isInitialTimelineLoaded?: boolean;
 	inputHasFocus?: boolean;
 	isWritingList?: string[];
 	referenceMessage?: ReferenceMessage;

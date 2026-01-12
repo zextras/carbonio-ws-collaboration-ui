@@ -156,6 +156,16 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/SET_HISTORY_LOAD_DISABLED'
 		);
 	},
+	setInitialTimelineLoaded: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.isInitialTimelineLoaded = true;
+			}),
+			false,
+			'AC/SET_INITIAL_TIMELINE_LOADED'
+		);
+	},
 	setActionsAccordionStatus: (roomId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {

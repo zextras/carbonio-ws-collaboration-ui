@@ -27,6 +27,9 @@ export const getHistoryIsFullyLoaded = (store: RootStore, roomId: string): boole
 export const getHistoryIsLoadedDisabled = (store: RootStore, roomId: string): boolean | undefined =>
 	store.activeConversations[roomId]?.isHistoryLoadDisabled;
 
+export const getIsInitialTimelineLoaded = (store: RootStore, roomId: string): boolean | undefined =>
+	store.activeConversations[roomId]?.isInitialTimelineLoaded;
+
 export const getInputHasFocus = (store: RootStore, roomId: string): boolean | undefined =>
 	store.activeConversations[roomId]?.inputHasFocus;
 
