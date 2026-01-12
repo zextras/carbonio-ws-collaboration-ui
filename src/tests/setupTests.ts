@@ -90,6 +90,7 @@ Object.defineProperty(window, 'location', {
 });
 
 Object.defineProperty(window, 'AudioContext', {
+	writable: true,
 	value: vi.fn(function AudioContextMock() {
 		return {
 			createOscillator: vi.fn(() => ({
@@ -199,6 +200,7 @@ beforeEach(() => {
 	});
 
 	Object.defineProperty(global, 'Audio', {
+		writable: true,
 		value: vi.fn(function AudioMock() {
 			return {
 				play: mockPlayAudio

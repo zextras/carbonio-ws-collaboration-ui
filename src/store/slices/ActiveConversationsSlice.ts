@@ -235,7 +235,7 @@ export const useActiveConversationsSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { filesToAttach } = initActiveConversation(draft, roomId);
 				if (filesToAttach) {
-					if (!fileId && filesToAttach.length > 0) {
+					if (!fileId && filesToAttach.length > 0 && filesToAttach[0].hasFocus) {
 						filesToAttach[0].description = description ?? '';
 						return;
 					}

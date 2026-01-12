@@ -4,31 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {
-	Dispatch,
-	FC,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
-import {
-	Button,
-	Container,
-	Icon,
-	Padding,
-	Row,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import AccessTile from './AccessTile';
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
+import { MicTestButton } from './MicTestButton';
 import { useLocalMediaHandler } from './useLocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useLocalStorage from '../../../hooks/useLocalStorage';
@@ -80,8 +64,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [t] = useTranslation();
-	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');
-	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop mic test');
 	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
 	const enter = t('action.enter', 'Enter');
 	const howToJoinMeeting = t(
@@ -131,7 +113,8 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const {
 		status: audioStatus,
 		deviceId: audioDeviceId,
-		HandlerComponent: AudioHandlerComponent
+		HandlerComponent: AudioHandlerComponent,
+		streamTrack: audioStreamTrack
 	} = useLocalMediaHandler({
 		mediaType: 'audio',
 		initialStatus: meetingStorage.EnableMicrophone,
@@ -151,10 +134,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			setMicTest(false);
 		}
 	}, [audioStatus]);
-
-	const toggleMicTest = useCallback(() => {
-		setMicTest((prev) => !prev);
-	}, []);
 
 	const areNetworksUp = useMemo(() => {
 		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
@@ -187,6 +166,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			return (
 				<Tooltip label={enterButtonDisabledTooltip} disabled={areNetworksUp}>
 					<Button
+						minWidth={'14rem'}
 						data-testid="enterMeetingButton"
 						width="fill"
 						label={enter}
@@ -258,22 +238,13 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						{VideoHandlerComponent}
 						{AudioHandlerComponent}
 					</Container>
-					<Container height="fit" orientation="horizontal" gap="1rem" mainAlignment="flex-start">
-						<Row width={`50%`} minWidth="14rem">
-							<Button
-								width="fill"
-								type="outlined"
-								backgroundColor="text"
-								icon="Mic"
-								iconPlacement="right"
-								label={!micTest ? playMicLabel : stopMicLabel}
-								onClick={toggleMicTest}
-								disabled={!audioStatus}
-							/>
-						</Row>
-						<Row width={`50%`} minWidth="14rem">
-							{enterButton}
-						</Row>
+					<Container height="fit" gap="1rem" mainAlignment="flex-start">
+						<MicTestButton
+							disabled={!audioStatus}
+							stream={audioStreamTrack}
+							backgroundColor={'text'}
+						/>
+						{enterButton}
 					</Container>
 				</Container>
 				{waitingRoomLabels}
