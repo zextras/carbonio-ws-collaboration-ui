@@ -156,7 +156,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 				/>
 			)}
 			<MessagesList roomId={roomId} />
-			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
+			<ConversationFooter key={roomId} roomId={roomId} isInsideMeeting={isInsideMeeting} />
 		</CustomContainer>
 	);
 };

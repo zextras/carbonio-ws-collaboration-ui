@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { getInputHasFocus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
-import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
 const MessageTextarea = styled.textarea<{ $composerIsFull: boolean }>`
 	flex: 1;
@@ -104,15 +103,21 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
-	const firstNewMessage = useFirstUnreadMessage(roomId);
-
-	// Focus input when roomId changes: but if there are unread messages wait to calculate the first unread message
-	useEffect(() => {
-		const unread = useStore.getState().chatsRegistry[roomId]?.unread;
-		if (!unread || unread === 0 || firstNewMessage) {
-			textareaRef.current?.focus();
+	const initialFocus = useCallback(() => {
+		textareaRef.current?.focus();
+		// Place cursor at end of draft message
+		if (useStore.getState().activeConversations[roomId]?.draftMessage) {
+			const textArea = textareaRef.current;
+			if (textArea) {
+				textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+			}
 		}
-	}, [firstNewMessage, roomId, textareaRef]);
+	}, [roomId, textareaRef]);
+
+	useEffect(() => {
+		initialFocus();
+		// eslint-disable-next-line
+	}, []);
 
 	useEffect(() => {
 		if (inputHasFocus) {
