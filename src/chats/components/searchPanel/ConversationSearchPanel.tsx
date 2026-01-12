@@ -21,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 import SearchResultMessage from './SearchResultMessage';
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import ChatApi from '../../../network/apis/ChatApi';
+import { mapChatMessageToTextMessage } from '../../../network/sse/utilities/messageMapper';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -82,6 +84,8 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 		[clearSearchResults, roomId]
 	);
 
+	const setSearchResults = useStore((state) => state.setSearchResults);
+
 	const search = useCallback(() => {
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
 		setRequestStatus(RequestStatus.LOADING);
@@ -91,10 +95,10 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 			roomType,
 			searchTextLength: searchText.length
 		});
-		const { xmppClient } = useStore.getState().connections;
-		xmppClient
-			.fullTextSearch(roomId, searchText)
-			.then(() => {
+		ChatApi.searchMessages(roomId, searchText)
+			.then((response) => {
+				const textMessages = response.messages.map(mapChatMessageToTextMessage);
+				setSearchResults(roomId, textMessages);
 				setRequestStatus(RequestStatus.SUCCESS);
 			})
 			.catch(() => {
@@ -110,7 +114,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					label: errorSnackbarLabel
 				});
 			});
-	}, [capture, createSnackbar, errorSnackbarLabel, requestStatus, roomId, roomType, searchText]);
+	}, [capture, createSnackbar, errorSnackbarLabel, requestStatus, roomId, roomType, searchText, setSearchResults]);
 
 	const searchResults = useMemo(
 		() =>

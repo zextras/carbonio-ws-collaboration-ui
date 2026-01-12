@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
@@ -12,6 +12,7 @@ import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
+import { RoomsApi } from '../../../../network';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -37,22 +38,40 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 	const [t] = useTranslation();
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
-	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
+	const rooms = useStore((state) => state.rooms);
 	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const [isPending, setIsPending] = useState(false);
 
 	const { goToRoomPage } = useRouting();
 
 	const goToUserRoom = useCallback(() => {
+		if (isPending) return;
+
 		const oneToOneChatExist = find(
-			useStore.getState().rooms,
+			rooms,
 			(room) =>
 				room.type === RoomType.ONE_TO_ONE &&
 				!!find(room.members, (user) => user.userId === memberId)
 		);
-		const roomId = oneToOneChatExist?.id ?? `placeholder-${memberId}`;
-		if (!oneToOneChatExist) setPlaceholderRoom(memberId);
-		goToRoomPage(roomId);
-	}, [goToRoomPage, memberId, setPlaceholderRoom]);
+
+		if (oneToOneChatExist) {
+			goToRoomPage(oneToOneChatExist.id);
+		} else {
+			// Create a real room via API
+			setIsPending(true);
+			RoomsApi.addRoom({
+				type: RoomType.ONE_TO_ONE,
+				members: [{ userId: memberId, owner: true }]
+			})
+				.then((response) => {
+					setIsPending(false);
+					goToRoomPage(response.id);
+				})
+				.catch(() => {
+					setIsPending(false);
+				});
+		}
+	}, [goToRoomPage, isPending, memberId, rooms]);
 
 	if (!privateChatCreation) return null;
 	return (

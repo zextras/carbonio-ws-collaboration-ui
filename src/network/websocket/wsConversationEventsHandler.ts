@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
-import { MeetingsApi, RoomsApi } from '../index';
+import { MeetingsApi, RoomsApi, ChatApi } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -20,7 +20,10 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) =>
 				state.addRooms([response])
 			);
-			state.connections.xmppClient.setOnline();
+			// Re-confirm online presence via REST
+			ChatApi.setPresence(true).catch(() => {
+				// Ignore errors - presence already set
+			});
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {

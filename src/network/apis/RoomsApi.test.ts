@@ -13,14 +13,12 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { spyOnFetch } from '../../tests/jest-env-setup';
-import { buildTextMessageFromHistory } from '../../tests/mocks/buildXmppStanza';
 import { mockedUuid } from '../../tests/mocks/global';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import * as FetchUtils from '../../utils/FetchUtils';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -29,15 +27,12 @@ const roomId = 'roomId';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
-		// Send listRooms request
+		// Send listRooms request - now returns basic room data without extraFields
 		const room = createMockRoom({ id: 'room0' });
 		spyOnFetch.mockResolvedValueOnce([room]);
-		await roomsApi.listRooms(true, true);
+		await roomsApi.listRooms();
 
-		expect(spyOnFetch).toHaveBeenCalledWith(
-			'rooms?extraFields=members&extraFields=settings',
-			RequestType.GET
-		);
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms', RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.rooms[room.id]).toEqual(room);
@@ -364,65 +359,37 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages is called correctly', async () => {
-		jest
-			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
-			.mockImplementation(() => Promise.resolve());
-
 		const message = createMockTextMessage();
-		const xmlMessage = buildTextMessageFromHistory({
-			roomId: message.roomId,
-			from: message.from,
-			text: message.text
-		});
-		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		jest
-			.spyOn(HistoryAccumulator, 'getForwardedMessage')
-			.mockImplementationOnce(() => insideMessage);
 
 		await roomsApi.forwardMessages(['roomId'], [message]);
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
 			{
-				originalMessage: insideMessage.outerHTML,
+				originalMessageId: message.stanzaId,
+				originalRoomId: message.roomId,
+				text: message.text,
 				originalMessageSentAt: dateToISODate(message.date)
 			}
 		]);
 	});
 
-	test('forwardMessages - edited message - is called correctly', async () => {
-		jest
-			.spyOn(useStore.getState().connections.xmppClient, 'requestMessageToForward')
-			.mockImplementation(() => Promise.resolve());
+	test('forwardMessages - multiple messages - is called correctly', async () => {
+		const message1 = createMockTextMessage({ text: 'message1' });
+		const message2 = createMockTextMessage({ text: 'message2' });
 
-		const message = createMockTextMessage({ text: 'edited' });
-		const xmlMessage = buildTextMessageFromHistory({
-			roomId: message.roomId,
-			from: message.from,
-			text: 'originalMessage'
-		});
-		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		jest
-			.spyOn(HistoryAccumulator, 'getForwardedMessage')
-			.mockImplementationOnce(() => insideMessage);
-
-		await roomsApi.forwardMessages(['roomId'], [message]);
+		await roomsApi.forwardMessages(['roomId'], [message1, message2]);
 		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
 			{
-				originalMessage: expect.stringContaining(message.text),
-				originalMessageSentAt: dateToISODate(message.date)
+				originalMessageId: message1.stanzaId,
+				originalRoomId: message1.roomId,
+				text: message1.text,
+				originalMessageSentAt: dateToISODate(message1.date)
+			},
+			{
+				originalMessageId: message2.stanzaId,
+				originalRoomId: message2.roomId,
+				text: message2.text,
+				originalMessageSentAt: dateToISODate(message2.date)
 			}
 		]);
-	});
-
-	test('replacePlaceholderRoom is called correctly', async () => {
-		// Send replacePlaceholderRoom request
-		const room = createMockRoom({ id: 'room0' });
-		const testFile = new File([], 'file.pdf', { type: applicationPdf });
-		spyOnFetch.mockResolvedValueOnce(room);
-		await roomsApi.replacePlaceholderRoom('userId', 'text', testFile);
-
-		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
-			type: RoomType.ONE_TO_ONE,
-			members: [{ userId: 'userId', owner: true }]
-		});
 	});
 });

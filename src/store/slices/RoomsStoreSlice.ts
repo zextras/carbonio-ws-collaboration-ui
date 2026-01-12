@@ -154,52 +154,5 @@ export const useRoomsStoreSlice: StateCreator<
 			false,
 			'ROOMS/CLEAR_CONVERSATION'
 		);
-	},
-	setPlaceholderRoom: (userId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const now = Date.now();
-				const roomId = `placeholder-${userId}`;
-				draft.rooms[roomId] = {
-					id: roomId,
-					type: RoomType.ONE_TO_ONE,
-					placeholder: true,
-					members: [
-						{
-							userId,
-							owner: true
-						}
-					],
-					createdAt: dateToISODate(now),
-					updatedAt: dateToISODate(now)
-				};
-				draft.activeConversations[roomId] = {
-					...draft.activeConversations[roomId],
-					isHistoryFullyLoaded: true
-				};
-				draft.chatsRegistry[roomId] = {
-					messages: [],
-					fastenings: {},
-					markers: {},
-					searchResults: [],
-					unread: 0,
-					backfillQueue: []
-				};
-			}),
-			false,
-			'ROOMS/SET_PLACEHOLDER_ROOM'
-		);
-	},
-	removePlaceholderRoom: (userId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const placeholderRoomId = `placeholder-${userId}`;
-				delete draft.rooms[placeholderRoomId];
-				delete draft.activeConversations[placeholderRoomId];
-				delete draft.chatsRegistry[placeholderRoomId];
-			}),
-			false,
-			'ROOMS/REMOVE_PLACEHOLDER_ROOM'
-		);
 	}
 });

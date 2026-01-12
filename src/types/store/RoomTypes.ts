@@ -16,8 +16,6 @@ export type RoomsStoreSlice = {
 	removeRoomMember: (roomId: string, memberId: string | undefined) => void;
 	setMemberModeratorStatus: (roomId: string, memberId: string, isModerator: boolean) => void;
 	clearConversation: (roomId: string, clearedAt: string) => void;
-	setPlaceholderRoom: (userId: string) => void;
-	removePlaceholderRoom: (userId: string) => void;
 };
 
 export type Room = {
@@ -31,7 +29,6 @@ export type Room = {
 	members: Member[];
 	userSettings?: RoomUserSettings;
 	meetingId?: string;
-	placeholder?: boolean;
 };
 
 export enum RoomType {

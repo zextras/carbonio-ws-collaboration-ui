@@ -30,8 +30,8 @@ import {
 } from '../responses/roomsResponses';
 
 interface IRoomsApi {
-	// Room list
-	listRooms(members: boolean, settings: boolean): Promise<ListRoomsResponse>;
+	// Room list - returns basic room data, use ChatApi.getInbox() for initial load with last messages
+	listRooms(): Promise<ListRoomsResponse>;
 	addRoom(room: RoomCreationFields): Promise<AddRoomResponse>;
 	getRoom(roomId: string): Promise<GetRoomResponse>;
 	updateRoom(roomId: string, editableFields: RoomEditableFields): Promise<UpdateRoomResponse>;
@@ -74,7 +74,6 @@ interface IRoomsApi {
 		roomsId: string[],
 		messagesToForward: TextMessage[]
 	): Promise<ForwardMessagesResponse>;
-	replacePlaceholderRoom(userId: string, text: string, file?: File): Promise<AddRoomResponse>;
 }
 
 export default IRoomsApi;

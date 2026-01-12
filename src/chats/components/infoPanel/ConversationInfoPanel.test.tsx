@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import ConversationInfoPanel from './ConversationInfoPanel';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
+import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 
@@ -28,12 +28,9 @@ const oneToOneRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' })]
 });
 
-const user1 = createMockUser({ id: 'user1Id', name: 'User 1' });
-
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([oneToOneRoom, groupRoom]);
-	store.setPlaceholderRoom(user1.id);
 });
 
 describe('Conversation info panel', () => {
@@ -46,10 +43,5 @@ describe('Conversation info panel', () => {
 	test('Check that participant list is not present in the info panel of a one to one room', async () => {
 		setup(<ConversationInfoPanel roomId={oneToOneRoom.id} goToChatView={jest.fn()} />);
 		expect(screen.queryByTestId('participantAccordion')).not.toBeInTheDocument();
-	});
-
-	test('Hide action accordion when the room is a placeholder', async () => {
-		setup(<ConversationInfoPanel roomId={`placeholder-${user1.id}`} goToChatView={jest.fn()} />);
-		expect(screen.queryByTestId('actionsAccordion')).not.toBeInTheDocument();
 	});
 });

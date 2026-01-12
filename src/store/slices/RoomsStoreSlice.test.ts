@@ -197,32 +197,4 @@ describe('RoomsStoreSlice tests', () => {
 		expect(useStore.getState().chatsRegistry[singleRoom1.id]).toBeUndefined();
 		expect(useStore.getState().activeConversations[singleRoom1.id]).toBeUndefined();
 	});
-
-	describe('Placeholder room', () => {
-		test('Placeholder room is been stored correctly with historyFullyLoaded', () => {
-			useStore.getState().setPlaceholderRoom(user1.id);
-
-			const placeholderRoomId = `placeholder-${user1.id}`;
-			const store = useStore.getState();
-			expect(store.rooms[placeholderRoomId]).toEqual(
-				expect.objectContaining({
-					id: `placeholder-${user1.id}`,
-					placeholder: true,
-					type: RoomType.ONE_TO_ONE
-				})
-			);
-			expect(store.activeConversations[placeholderRoomId].isHistoryFullyLoaded).toBeTruthy();
-		});
-
-		test('Placeholder room and all relative data are been removed', () => {
-			useStore.getState().setPlaceholderRoom(user1.id);
-			useStore.getState().removePlaceholderRoom(user1.id);
-
-			const placeholderRoomId = `placeholder-${user1.id}`;
-			const store = useStore.getState();
-			expect(store.rooms[placeholderRoomId]).toBeUndefined();
-			expect(store.activeConversations[placeholderRoomId]).toBeUndefined();
-			expect(store.chatsRegistry[placeholderRoomId]).toBeUndefined();
-		});
-	});
 });

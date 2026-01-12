@@ -135,9 +135,6 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.meetingId;
 
-export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
-	state.rooms[roomId]?.placeholder ?? false;
-
 const userIds: string[] = [];
 
 export const getSingleConversationsUserId = (state: RootStore): string[] => {

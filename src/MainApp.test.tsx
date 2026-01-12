@@ -13,10 +13,10 @@ import { setup } from './tests/test-utils';
 import { useAuthenticated } from '../__mocks__/@zextras/carbonio-shell-ui';
 import sessionApi from './network/apis/InfoApi';
 import {
+	ChatApiToSpy,
 	MeetingsApiToSpy,
-	RoomsApiToSpy,
-	spyOnMeetingsApi,
-	spyOnRoomsApi
+	spyOnChatApi,
+	spyOnMeetingsApi
 } from './tests/mocks/network';
 
 describe('Entry point', () => {
@@ -48,7 +48,8 @@ describe('Entry point', () => {
 	test('Connection is established on app load', async () => {
 		useAuthenticated.mockReturnValue(true);
 		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockResolvedValueOnce([]);
+		spyOnChatApi(ChatApiToSpy.GET_INBOX).mockResolvedValueOnce({ conversations: [] });
+		spyOnChatApi(ChatApiToSpy.SET_PRESENCE).mockResolvedValueOnce(undefined);
 		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
@@ -61,10 +62,10 @@ describe('Entry point', () => {
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
-	test('Connection is not established on app load if listRooms do not respond', async () => {
+	test('Connection is not established on app load if getInbox does not respond', async () => {
 		useAuthenticated.mockReturnValue(true);
 		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnRoomsApi(RoomsApiToSpy.LIST_ROOMS).mockRejectedValueOnce(new Error());
+		spyOnChatApi(ChatApiToSpy.GET_INBOX).mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});

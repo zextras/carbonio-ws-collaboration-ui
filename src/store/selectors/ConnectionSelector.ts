@@ -5,10 +5,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import XMPPClient from '../../network/xmpp/XMPPClient';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getXmppClient = (store: RootStore): XMPPClient => store.connections.xmppClient;
-
 export const getWsClient = (store: RootStore): IWebSocketClient => store.connections.wsClient;
+
+export const getChatSseStatus = (store: RootStore): boolean | undefined =>
+	store.connections.status.chat_sse;
+
+export const getChatConnectionId = (store: RootStore): string | undefined =>
+	store.connections.chatConnectionId;

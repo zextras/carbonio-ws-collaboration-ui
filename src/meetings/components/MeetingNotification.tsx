@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import { getXmppClient } from '../../store/selectors/ConnectionSelector';
+import ChatApi from '../../network/apis/ChatApi';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -47,7 +47,6 @@ const MeetingNotification = ({
 	removeNotification,
 	stopMeetingSound
 }: MeetingNotificationProps): ReactElement => {
-	const xmppClient = useStore(getXmppClient);
 	const userName: string = useStore((store) => getUserName(store, from));
 	const meeting = useStore((store) => getMeeting(store, meetingId));
 
@@ -90,11 +89,13 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			xmppClient.sendChatMessage(meeting.roomId, message);
+			ChatApi.sendMessage(meeting.roomId, message).catch((err) => {
+				console.error('[MeetingNotification] Failed to send message:', err);
+			});
 			setMessage('');
 			stopMeetingSound();
 		}
-	}, [disableSendMessage, xmppClient, meeting, message, stopMeetingSound]);
+	}, [disableSendMessage, meeting, message, stopMeetingSound]);
 
 	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 

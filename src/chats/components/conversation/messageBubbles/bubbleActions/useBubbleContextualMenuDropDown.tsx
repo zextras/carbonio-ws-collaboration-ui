@@ -19,12 +19,12 @@ import { useTranslation } from 'react-i18next';
 
 import usePreview from '../../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../../network';
+import ChatApi from '../../../../../network/apis/ChatApi';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -41,7 +41,6 @@ const useBubbleContextualMenuDropDown = (
 	menuDropdownActive: boolean;
 	menuDropdownRef: React.RefObject<HTMLDivElement>;
 } => {
-	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
@@ -113,12 +112,16 @@ const useBubbleContextualMenuDropDown = (
 	const deleteMessageAction = useCallback(() => {
 		if (message.attachment) {
 			AttachmentsApi.deleteAttachment(message.attachment.id).then(() =>
-				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
+				ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
+					console.error('[useBubbleContextualMenuDropDown] Failed to delete message:', err);
+				})
 			);
 		} else {
-			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
+			ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
+				console.error('[useBubbleContextualMenuDropDown] Failed to delete message:', err);
+			});
 		}
-	}, [message.attachment, message.stanzaId, message.roomId, xmppClient]);
+	}, [message.attachment, message.stanzaId, message.roomId]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

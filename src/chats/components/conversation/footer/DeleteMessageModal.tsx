@@ -9,8 +9,8 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import ChatApi from '../../../../network/apis/ChatApi';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
 
 type DeleteMessageModalProps = {
@@ -20,7 +20,6 @@ type DeleteMessageModalProps = {
 };
 
 const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModalStatus }) => {
-	const xmppClient = useStore(getXmppClient);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const [t] = useTranslation();
@@ -36,10 +35,12 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 
 	const deleteMessage = useCallback(() => {
 		if (referenceMessage) {
-			xmppClient.sendChatMessageDeletion(roomId, referenceMessage.stanzaId);
+			ChatApi.deleteMessage(roomId, referenceMessage.stanzaId).catch((err) => {
+				console.error('[DeleteMessageModal] Failed to delete message:', err);
+			});
 		}
 		onClose();
-	}, [onClose, referenceMessage, roomId, xmppClient]);
+	}, [onClose, referenceMessage, roomId]);
 
 	return (
 		<Modal

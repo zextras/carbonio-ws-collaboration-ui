@@ -8,7 +8,6 @@ import { act } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
 import { WebSocketClient } from '../src/network/websocket/WebSocketClient';
-import XMPPClient from '../src/network/xmpp/XMPPClient';
 import { RootStore } from '../src/types/store/StoreTypes';
 
 // a variable to hold reset functions for all stores declared in the app
@@ -24,7 +23,6 @@ export const create =
 			const resetStore = {
 				...initialState,
 				connections: {
-					xmppClient: new XMPPClient(),
 					wsClient: new WebSocketClient(),
 					status: {}
 				}

@@ -4,14 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbonio-design-system';
+import { find } from 'lodash';
 
 import useRouting from '../../../../hooks/useRouting';
+import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
+import { RoomType } from '../../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest'
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const ListItem = styled(Container)`
@@ -29,7 +32,8 @@ type GalListItemProps = {
 };
 
 const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
-	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
+	const rooms = useStore((state) => state.rooms);
+	const [isPending, setIsPending] = useState(false);
 
 	const themeColor = useTheme();
 
@@ -42,15 +46,39 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 		return `${themeColor.avatarColors[color]}`;
 	}, [username, themeColor.avatarColors]);
 
-	const createPlaceholderRoom = useCallback(() => {
-		const roomId = `placeholder-${contact.id}`;
-		setPlaceholderRoom(contact.id);
-		goToRoomPage(roomId);
-	}, [contact.id, goToRoomPage, setPlaceholderRoom]);
+	const openOrCreateRoom = useCallback(() => {
+		if (isPending) return;
+
+		// Check if a one-to-one chat already exists with this user
+		const existingRoom = find(
+			rooms,
+			(room) =>
+				room.type === RoomType.ONE_TO_ONE &&
+				!!find(room.members, (member) => member.userId === contact.id)
+		);
+
+		if (existingRoom) {
+			goToRoomPage(existingRoom.id);
+		} else {
+			// Create a real room via API
+			setIsPending(true);
+			RoomsApi.addRoom({
+				type: RoomType.ONE_TO_ONE,
+				members: [{ userId: contact.id, owner: true }]
+			})
+				.then((response) => {
+					setIsPending(false);
+					goToRoomPage(response.id);
+				})
+				.catch(() => {
+					setIsPending(false);
+				});
+		}
+	}, [contact.id, goToRoomPage, isPending, rooms]);
 
 	return (
 		<ListItem
-			onClick={createPlaceholderRoom}
+			onClick={openOrCreateRoom}
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			height="fit"

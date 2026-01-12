@@ -20,8 +20,8 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -57,7 +57,6 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const chooseFileLabel = t('attachments.integrations.chooseFile', 'Choose file');
 	const shareLabel = t('attachments.integrations.shareLink', 'Share public link');
 
-	const xmppClient = useStore((store) => getXmppClient(store));
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
@@ -108,7 +107,13 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			if (functionCheck) {
 				getLink({ node: nodes[0], type: 'createLink', description: myDescription })
 					.then((result: { url: string }) => {
-						xmppClient.sendChatMessage(roomId, result.url);
+						ChatApi.sendMessage(roomId, result.url).catch(() => {
+							createSnackbar({
+								key: new Date().toLocaleString(),
+								severity: 'error',
+								label: errorSnackbar
+							});
+						});
 					})
 					.catch(() => {
 						createSnackbar({
@@ -119,7 +124,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 					});
 			}
 		},
-		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType, xmppClient]
+		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType]
 	);
 
 	const actionTarget = useMemo(

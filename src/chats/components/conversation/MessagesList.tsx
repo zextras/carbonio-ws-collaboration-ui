@@ -16,6 +16,7 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import ChatApi from '../../../network/apis/ChatApi';
 import {
 	getHistoryIsFullyLoaded,
 	getIdMessageWhereScrollIsStopped,
@@ -26,7 +27,6 @@ import {
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
@@ -52,7 +52,6 @@ type ConversationProps = {
 };
 
 const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
-	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const roomMessages = useMemo(() => enhanceWithDateMessages(messages), [messages]);
@@ -89,11 +88,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					markedMsg.date !== selectedMessage.date &&
 					isBefore(markedMsg.date, selectedMessage.date);
 				if (!myLastMarker || !markedMsg || canMessageBeMarkedAsRead) {
-					xmppClient.readMessage(selectedMessage.roomId, selectedMessage.id);
+					ChatApi.setReadMarker(selectedMessage.roomId, selectedMessage.id).catch((err) => {
+						console.error('[MessagesList] Failed to set read marker:', err);
+					});
 				}
 			}
 		},
-		[roomMessages, myLastMarker, inputHasFocus, myUserId, xmppClient]
+		[roomMessages, myLastMarker, inputHasFocus, myUserId]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps

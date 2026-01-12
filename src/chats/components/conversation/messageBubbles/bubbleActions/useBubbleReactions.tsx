@@ -12,8 +12,8 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
+import ChatApi from '../../../../../network/apis/ChatApi';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
@@ -51,7 +51,6 @@ const useBubbleReactions = (
 	reactionsPopoverActive: boolean;
 	reactionsPopoverRef: React.RefObject<HTMLDivElement>;
 } => {
-	const xmppClient = useStore(getXmppClient);
 	const [t] = useTranslation();
 	const reactionsLabel = t('tooltip.reactions', 'Reactions');
 	const moreReactionsLabel = t('tooltip.moreReactions', 'More reactions');
@@ -73,13 +72,17 @@ const useBubbleReactions = (
 	const sendReaction = useCallback(
 		(emoji: string) => {
 			if (myReaction !== emoji) {
-				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, emoji);
+				ChatApi.addReaction(message.roomId, message.stanzaId, emoji).catch((err) => {
+					console.error('[useBubbleReactions] Failed to add reaction:', err);
+				});
 			} else {
-				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, '');
+				ChatApi.removeReaction(message.roomId, message.stanzaId, emoji).catch((err) => {
+					console.error('[useBubbleReactions] Failed to remove reaction:', err);
+				});
 			}
 			setPopoverActive(false);
 		},
-		[message.roomId, message.stanzaId, myReaction, xmppClient]
+		[message.roomId, message.stanzaId, myReaction]
 	);
 
 	const openEmojiPicker = useCallback(

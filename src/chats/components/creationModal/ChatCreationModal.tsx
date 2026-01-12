@@ -53,7 +53,6 @@ const ChatCreationModal = ({
 		'Select more than one address to create a Group'
 	);
 
-	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
 	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreation'));
 	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
@@ -111,18 +110,41 @@ const ChatCreationModal = ({
 
 	const onCreateOneToOne = useCallback(
 		(userId: string) => {
+			// Check if a one-to-one chat already exists with this user
 			const oneToOneChatExist = find(
 				useStore.getState().rooms,
 				(room) =>
 					room.type === RoomType.ONE_TO_ONE &&
 					!!find(room.members, (member) => member.userId === userId)
 			);
-			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
-			if (!oneToOneChatExist) setPlaceholderRoom(userId);
-			onModalClose();
-			goToRoomPage(roomId);
+
+			if (oneToOneChatExist) {
+				// Room already exists, just navigate to it
+				onModalClose();
+				goToRoomPage(oneToOneChatExist.id);
+			} else {
+				// Create a real room via API
+				setIsPending(true);
+				RoomsApi.addRoom({
+					type: RoomType.ONE_TO_ONE,
+					members: [{ userId, owner: true }]
+				})
+					.then((response: AddRoomResponse) => {
+						setIsPending(false);
+						onModalClose();
+						goToRoomPage(response.id);
+					})
+					.catch(() => {
+						setIsPending(false);
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							severity: 'error',
+							label: errorSnackbar
+						});
+					});
+			}
 		},
-		[goToRoomPage, onModalClose, setPlaceholderRoom]
+		[goToRoomPage, onModalClose, createSnackbar, errorSnackbar]
 	);
 
 	const onCreateGroup = useCallback(

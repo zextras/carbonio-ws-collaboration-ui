@@ -34,12 +34,12 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
+import ChatApi from '../../../../network/apis/ChatApi';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -84,7 +84,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	textMessage,
 	setTextMessage
 }) => {
-	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
@@ -224,23 +223,23 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	// Send isWriting every 3 seconds
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendThrottleIsWriting = useCallback(
-		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
-		[xmppClient, roomId]
+		throttle(() => ChatApi.sendTypingIndicator(roomId, true), 3000),
+		[roomId]
 	);
 
 	// Send paused after 3,5 seconds user stops typing
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendDebouncedPause = useCallback(
-		debounce(() => xmppClient.sendPaused(roomId), 3500),
-		[xmppClient, roomId]
+		debounce(() => ChatApi.sendTypingIndicator(roomId, false), 3500),
+		[roomId]
 	);
 
 	// Send paused and avoid to send pending isWriting
 	const sendStopWriting = useCallback(() => {
 		sendThrottleIsWriting.cancel();
 		sendDebouncedPause.cancel();
-		xmppClient.sendPaused(roomId);
-	}, [sendThrottleIsWriting, sendDebouncedPause, xmppClient, roomId]);
+		ChatApi.sendTypingIndicator(roomId, false);
+	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -250,12 +249,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					xmppClient.sendChatMessageReply(
-						roomId,
-						message,
-						referenceMessage.senderId,
-						referenceMessage.stanzaId
-					);
+					ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
+						console.error('[MessageComposer] Failed to send reply:', err);
+					});
 					unsetReferenceMessage(roomId);
 					break;
 				}
@@ -265,7 +261,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
+							console.error('[MessageComposer] Failed to edit message:', err);
+						});
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -277,7 +275,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage, xmppClient]
+		[roomId, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
@@ -323,13 +321,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			xmppClient.sendChatMessage(roomId, message);
+			ChatApi.sendMessage(roomId, message).catch((err) => {
+				console.error('[MessageComposer] Failed to send message:', err);
+			});
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		xmppClient,
 		roomId,
 		textMessage,
 		sendStopWriting,

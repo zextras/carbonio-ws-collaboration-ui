@@ -15,7 +15,7 @@ import { ConversationView } from './Conversation';
 import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
-import { getIsPlaceholderRoom, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
+import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 
@@ -80,7 +80,6 @@ const ConversationHeader = ({
 	const searchTooltip = t('conversationInfo.search', 'Search');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
-	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	const isWritingLabel = useIsWritingLabel(roomId);
 	const [isWritingIsDefined, setIsWritingIsDefined] = useState(false);
@@ -128,9 +127,7 @@ const ConversationHeader = ({
 				</Container>
 			</Row>
 			<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.25rem">
-				{videoCallEnabled && !isPlaceholderRoom && (
-					<ConversationHeaderMeetingButton roomId={roomId} />
-				)}
+				{videoCallEnabled && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{conversationView !== ConversationView.SEARCH && (
 					<Tooltip label={searchTooltip}>
 						<Button

@@ -7,6 +7,7 @@
  */
 
 import attachmentsApi from '../../network/apis/AttachmentsApi';
+import chatApi from '../../network/apis/ChatApi';
 import meetingsApi from '../../network/apis/MeetingsApi';
 import roomsApi from '../../network/apis/RoomsApi';
 import usersApi from '../../network/apis/UsersApi';
@@ -63,6 +64,13 @@ export enum UsersApiToSpy {
 	GET_USER = 'getUser'
 }
 
+export enum ChatApiToSpy {
+	GET_INBOX = 'getInbox',
+	GET_MESSAGE_HISTORY = 'getMessageHistory',
+	SEND_MESSAGE = 'sendMessage',
+	SET_PRESENCE = 'setPresence'
+}
+
 export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
 	apiToSpy: AttachmentsApiToSpy
 ) => jest.spyOn(attachmentsApi, apiToSpy);
@@ -78,3 +86,7 @@ export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance 
 export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
 	apiToSpy: UsersApiToSpy
 ) => jest.spyOn(usersApi, apiToSpy);
+
+export const spyOnChatApi: (apiToSpy: ChatApiToSpy) => jest.SpyInstance = (
+	apiToSpy: ChatApiToSpy
+) => jest.spyOn(chatApi, apiToSpy);

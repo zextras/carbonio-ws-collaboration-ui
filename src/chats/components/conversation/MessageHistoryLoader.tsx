@@ -10,8 +10,9 @@ import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
 
+import ChatApi from '../../../network/apis/ChatApi';
+import { mapChatMessageToTextMessage } from '../../../network/sse/utilities/messageMapper';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { now } from '../../../utils/dateUtils';
 
@@ -76,19 +77,35 @@ const MessageHistoryLoader = ({
 	const intersectionObserverRef = useRef<IntersectionObserver>();
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
-	const xmppClient = useStore(getXmppClient);
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
+	const addMessages = useStore((store) => store.newMessage);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const store = useStore.getState();
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
-			const date = first(roomMessages)?.date ?? now();
+			const oldestMessageDate = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date);
 				setHistoryLoadDisabled(roomId, true);
+				ChatApi.getMessageHistory(roomId, oldestMessageDate, 50)
+					.then((response) => {
+						if (response.messages.length > 0) {
+							response.messages.forEach((chatMessage) => {
+								const textMessage = mapChatMessageToTextMessage(chatMessage);
+								addMessages(roomId, textMessage);
+							});
+							// Enable loading more history if we got a full page
+							if (response.messages.length === 50) {
+								setHistoryLoadDisabled(roomId, false);
+							}
+						}
+					})
+					.catch((err) => {
+						console.error('[MessageHistoryLoader] Failed to load history:', err);
+						setHistoryLoadDisabled(roomId, false);
+					});
 			}
 		}, 500),
 		[roomId, historyLoadedDisabled]

@@ -69,7 +69,6 @@ const mockedRoom: RoomBe = createMockRoom({
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.addRooms([mockedRoom]);
-	store.setPlaceholderRoom(mockPaoloUser.id);
 });
 describe('Conversation header test', () => {
 	test('Width of the screen is smaller than 600rem', async () => {
@@ -116,19 +115,6 @@ describe('Conversation header test', () => {
 		setup(
 			<ConversationHeader
 				roomId={mockedRoom.id}
-				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
-			/>
-		);
-		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
-	});
-
-	test("Meeting button isn't displayed when the room is a placeholder", async () => {
-		const store: RootStore = useStore.getState();
-		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
-		setup(
-			<ConversationHeader
-				roomId={`placeholder-${mockPaoloUser.id}`}
 				conversationView={ConversationView.CHAT}
 				setConversationView={jest.fn()}
 			/>

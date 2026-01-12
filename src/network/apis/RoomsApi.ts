@@ -44,9 +44,7 @@ import {
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
-import { MeetingsApi } from '../index';
-import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { MeetingsApi, ChatApi } from '../index';
 
 class RoomsApi implements IRoomsApi {
 	// Singleton design pattern
@@ -59,15 +57,11 @@ class RoomsApi implements IRoomsApi {
 		return RoomsApi.instance;
 	}
 
-	public listRooms(members = false, settings = false): Promise<ListRoomsResponse> {
-		let params = '';
-		if (members || settings) {
-			const array = [];
-			if (members) array.push('extraFields=members');
-			if (settings) array.push('extraFields=settings');
-			params = `?${array.join('&')}`;
-		}
-		return fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
+	public listRooms(): Promise<ListRoomsResponse> {
+		// Returns basic room data without members or settings (RESTful approach)
+		// For initial load, use ChatApi.getInbox() which includes room data with last messages
+		// Members and settings should be fetched separately when needed via getRoomMembers/getRoom
+		return fetchAPI('rooms', RequestType.GET).then((resp: ListRoomsResponse) => {
 			const { addRooms } = useStore.getState();
 			addRooms(resp);
 			return resp;
@@ -76,6 +70,10 @@ class RoomsApi implements IRoomsApi {
 
 	public async addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
 		return fetchAPI('rooms', RequestType.POST, room).then(async (response: AddRoomResponse) => {
+			// Add the newly created room to the store
+			const { addRooms } = useStore.getState();
+			addRooms([response]);
+
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
@@ -197,23 +195,7 @@ class RoomsApi implements IRoomsApi {
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
-		const placeholderRoom = roomId.split('placeholder-');
-		if (placeholderRoom[1]) {
-			return this.replacePlaceholderRoom(
-				placeholderRoom[1],
-				optionalFields.description ?? '',
-				file
-			).then((response) => {
-				this.addRoomAttachment(response.id, file, optionalFields, signal);
-				return response;
-			});
-		}
-
-		const { connections, setPlaceholderMessage } = useStore.getState();
-		// Read messages before sending a new one
-		const lastMessageId = getLastUnreadMessage(roomId);
-		if (lastMessageId) connections.xmppClient.readMessage(roomId, lastMessageId);
-
+		const { setPlaceholderMessage } = useStore.getState();
 		const uuid = uuidGenerator();
 		// Set a placeholder message into the store
 		setPlaceholderMessage({
@@ -274,66 +256,21 @@ class RoomsApi implements IRoomsApi {
 		roomsId: string[],
 		messages: TextMessage[]
 	): Promise<ForwardMessagesResponse> {
-		const { xmppClient } = useStore.getState().connections;
-		const listOfMessages: { [stanzaId: string]: string } = {};
+		// Forward messages via REST API
+		const messagesToForward = messages.map((message) => ({
+			originalMessageId: message.stanzaId,
+			originalRoomId: message.roomId,
+			text: message.text,
+			originalMessageSentAt: dateToISODate(message.date)
+		}));
 
-		// Get the XML messages to forward from history
-		// We need to pass the text of actual message because if it is edited we won't pass the old text content
-		const promises = messages.map((message) => {
-			const queryId = HistoryAccumulator.getNextId();
-			return xmppClient
-				.requestMessageToForward(message.roomId, message.stanzaId, queryId)
-				.then(() => {
-					const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
-					if (historyMessage) {
-						historyMessage.getElementsByTagName('body')[0].textContent = message.text;
-						listOfMessages[message.stanzaId] = historyMessage.outerHTML;
-					}
-				});
-		});
-
-		return Promise.all(promises).then(() => {
-			const messagesToForward = messages.map((message) => ({
-				originalMessage: listOfMessages[message.stanzaId],
-				originalMessageSentAt: dateToISODate(message.date)
-			}));
-			return Promise.all(
-				roomsId.map((roomId) =>
-					fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
-				)
-			);
-		});
+		return Promise.all(
+			roomsId.map((roomId) =>
+				fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
+			)
+		);
 	}
 
-	public replacePlaceholderRoom(
-		userId: string,
-		text: string,
-		file?: File
-	): Promise<AddRoomResponse> {
-		const { setPlaceholderMessage, removePlaceholderRoom } = useStore.getState();
-		setPlaceholderMessage({
-			roomId: `placeholder-${userId}`,
-			id: uuidGenerator(),
-			text,
-			attachment: file
-				? { id: 'placeholderFileId', name: file.name, mimeType: file.type, size: file.size }
-				: undefined
-		});
-
-		return this.addRoom({
-			type: RoomType.ONE_TO_ONE,
-			members: [{ userId, owner: true }]
-		}).then((response) => {
-			removePlaceholderRoom(userId);
-			sendCustomEvent({
-				name: EventName.ROUTE_REDIRECT,
-				data: {
-					path: `/${CHATS_ROUTE}/${response.id}`
-				}
-			});
-			return response;
-		});
-	}
 }
 
 export default RoomsApi.getInstance();

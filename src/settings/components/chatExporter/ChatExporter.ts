@@ -11,6 +11,7 @@ import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
+import ChatApi from '../../../network/apis/ChatApi';
 
 export interface IChatExporter {
 	addMessagesToFullHistory(messages: Message[]): void;
@@ -21,22 +22,64 @@ export interface IChatExporter {
 class ChatExporter implements IChatExporter {
 	readonly roomId: string;
 
-	readonly fullHistory: Message[] = [];
+	fullHistory: Message[] = [];
 
-	readonly xmppClient = useStore.getState().connections.xmppClient;
+	private isLoading = false;
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
-		this.xmppClient.requestFullHistory(this.roomId);
+		this.loadFullHistory();
+	}
+
+	private async loadFullHistory(): Promise<void> {
+		if (this.isLoading) return;
+		this.isLoading = true;
+
+		try {
+			// Load messages in batches using REST API
+			const response = await ChatApi.getMessageHistory(this.roomId, undefined, 100);
+			if (response && Array.isArray(response)) {
+				this.fullHistory = response;
+			}
+		} catch (error) {
+			console.error('[ChatExporter] Failed to load history:', error);
+		} finally {
+			this.isLoading = false;
+		}
 	}
 
 	public addMessagesToFullHistory(messages: Message[]): void {
 		this.fullHistory.push(...messages);
 	}
 
-	public continueExporting(): void {
-		const from = last(this.fullHistory)?.date ?? 0;
-		this.xmppClient.requestFullHistory(this.roomId, from);
+	public async continueExporting(): Promise<void> {
+		const lastMessage = last(this.fullHistory);
+		if (!lastMessage) {
+			this.exportHistory();
+			return;
+		}
+
+		try {
+			const response = await ChatApi.getMessageHistory(
+				this.roomId,
+				new Date(lastMessage.date).toISOString(),
+				100
+			);
+			if (response && Array.isArray(response) && response.length > 0) {
+				this.fullHistory.push(...response);
+				// Continue loading if we got a full batch
+				if (response.length >= 100) {
+					await this.continueExporting();
+				} else {
+					this.exportHistory();
+				}
+			} else {
+				this.exportHistory();
+			}
+		} catch (error) {
+			console.error('[ChatExporter] Failed to continue loading:', error);
+			this.exportHistory();
+		}
 	}
 
 	public exportHistory(): void {

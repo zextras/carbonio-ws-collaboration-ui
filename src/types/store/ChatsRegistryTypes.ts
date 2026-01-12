@@ -20,6 +20,7 @@ export type ChatsRegistryStoreSlice = {
 	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
+	setUnreadCount: (roomId: string, count: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
