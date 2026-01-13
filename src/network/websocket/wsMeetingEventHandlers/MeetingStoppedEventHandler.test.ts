@@ -12,15 +12,29 @@ import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-const oneToOneRoom = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
-const oneToOneMeeting = createMockMeeting({ id: 'oneToOneMeetingId', roomId: oneToOneRoom.id });
-const groupRoom = createMockRoom({ id: 'groupRoomId', type: RoomType.GROUP });
-const groupMeeting = createMockMeeting({ id: 'groupMeetingId', roomId: groupRoom.id });
+const oneToOneRoom = createMockRoom({
+	id: 'oneToOneRoomId',
+	type: RoomType.ONE_TO_ONE,
+	meetingId: 'oneToOneMeetingId'
+});
+const oneToOneMeeting = createMockMeeting({ id: oneToOneRoom.meetingId, roomId: oneToOneRoom.id });
+const groupRoom = createMockRoom({
+	id: 'groupRoomId',
+	type: RoomType.GROUP,
+	meetingId: 'groupMeetingId'
+});
+const groupMeeting = createMockMeeting({ id: groupRoom.meetingId, roomId: groupRoom.id });
 
-const event: MeetingStoppedEvent = {
+const oneToOneEvent: MeetingStoppedEvent = {
 	type: WsEventType.MEETING_STOPPED,
 	sentDate: '2023-01-01T00:00:00.000Z',
 	meetingId: oneToOneMeeting.id
+};
+
+const groupEvent: MeetingStoppedEvent = {
+	type: WsEventType.MEETING_STOPPED,
+	sentDate: '2024-01-01T00:00:00.000Z',
+	meetingId: groupMeeting.id
 };
 
 beforeEach(() => {
@@ -32,34 +46,31 @@ beforeEach(() => {
 
 describe('MeetingStoppedEventHandler tests', () => {
 	test('Meeting stopped information are saved into store', () => {
-		meetingStoppedEventHandler(event);
+		meetingStoppedEventHandler(oneToOneEvent);
 		const store = useStore.getState();
 		expect(store.meetings[oneToOneMeeting.id].active).toBeFalsy();
 		expect(store.meetings[oneToOneMeeting.id].startedAt).toBeUndefined();
 	});
 
 	test('Removed meeting notification is sent if the meeting is from one-to-one room', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
-		meetingStoppedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.REMOVED_MEETING_NOTIFICATION, { detail: event })
-		);
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingStoppedEventHandler(oneToOneEvent);
+		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
+		expect(call.type).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
 	});
 
 	test('Removed meeting notification is not sent if the room is not one-to-one', () => {
-		event.meetingId = groupMeeting.id;
-		meetingStoppedEventHandler(event);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingStoppedEventHandler(groupEvent);
+		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
+		expect(call.type).not.toBe(EventName.REMOVED_MEETING_NOTIFICATION);
 	});
 
 	test('Meeting stopped notification is sent if the meeting is active', () => {
 		useStore.getState().meetingConnection(groupMeeting.id);
-		event.meetingId = groupMeeting.id;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
-		meetingStoppedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_STOPPED, { detail: event })
-		);
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingStoppedEventHandler(groupEvent);
+		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
+		expect(call.type).toBe(EventName.MEETING_STOPPED);
 	});
 });

@@ -6,8 +6,8 @@
 
 import { onComposingMessageStanza } from './composingMessageHandler';
 import useStore from '../../../store/Store';
+import { buildComposingStanza } from '../../../tests/buildXmppStanza';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
-import { buildComposingStanza } from '../../../tests/mocks/buildXmppStanza';
 
 const user0 = createMockUser({ id: 'user0' });
 const mockedRoom = createMockRoom({

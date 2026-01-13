@@ -9,6 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -17,7 +18,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
@@ -111,6 +111,8 @@ const contactUser1: ContactInfo = {
 	displayName: user1Be.name,
 	email: user1Be.email
 };
+
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

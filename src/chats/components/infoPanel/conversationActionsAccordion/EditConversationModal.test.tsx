@@ -29,7 +29,7 @@ beforeEach(() => {
 
 describe('Edit group Details Modal', () => {
 	test('All elements should be rendered', async () => {
-		setup(<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />);
+		setup(<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />);
 		const nameInput = screen.getByTestId('name_input');
 		const descriptionInput = screen.getByTestId('description_input');
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
@@ -41,7 +41,7 @@ describe('Edit group Details Modal', () => {
 
 	test('Button should be active if i modify a field', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const nameInput = screen.getByTestId('name_input');
@@ -55,7 +55,7 @@ describe('Edit group Details Modal', () => {
 
 	test('Errors on input fields - general', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		// inside testRoom, the title field is empty, that's why the title input should be in error state
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
@@ -85,7 +85,7 @@ describe('Edit group Details Modal', () => {
 
 	test('Errors on input fields - description', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const descriptionInput = screen.getByTestId('description_input');
@@ -102,7 +102,7 @@ describe('Edit group Details Modal', () => {
 
 	test('Errors on input fields', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		// inside testRoom, the title field is empty, that's why the title input shound be in error state
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
@@ -132,7 +132,7 @@ describe('Edit group Details Modal', () => {
 
 	test('Errors on input fields - description', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const descriptionInput = screen.getByTestId('description_input');
@@ -149,7 +149,7 @@ describe('Edit group Details Modal', () => {
 
 	test('user modify a field and press edit button', async () => {
 		const { user } = setup(
-			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
+			<EditConversationModal editModalOpen closeModal={vi.fn} roomId={testRoom.id} />
 		);
 		const descriptionInput = screen.getByTestId('description_input');
 		await user.type(descriptionInput, 'This is a new description');

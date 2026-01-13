@@ -113,13 +113,17 @@ describe('Meeting sidebar', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus.png')`
+		);
 	});
 	test('Display meeting chat with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus-dark.png')`
+		);
 	});
 
 	test('title of the accordion changes when a user is writing', async () => {
@@ -135,7 +139,7 @@ describe('Meeting sidebar', () => {
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/User is typing.../i)).not.toBeInTheDocument();
@@ -154,7 +158,7 @@ describe('Meeting sidebar', () => {
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
 			store.setIsWriting(groupRoom.id, mockUser3.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/2 people are typing.../i)).not.toBeInTheDocument();

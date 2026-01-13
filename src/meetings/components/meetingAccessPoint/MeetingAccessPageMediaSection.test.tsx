@@ -6,7 +6,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
 import useStore from '../../../store/Store';
@@ -58,22 +58,22 @@ beforeEach(() => {
 		'ChatsMeetingSettings',
 		JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
 	);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 });
 
 describe('MeetingAccessPageMediaSection tests', () => {
 	test('User does not give the media permissions', async () => {
-		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
+		vi.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 		setup(
 			<MeetingAccessPageMediaSection
 				hasUserDirectAccess
 				userIsReady
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
-				handleEnterMeeting={jest.fn()}
-				handleWaitingRoom={jest.fn()}
-				setMediaStatus={jest.fn()}
+				handleEnterMeeting={vi.fn()}
+				handleWaitingRoom={vi.fn()}
+				setMediaStatus={vi.fn()}
 			/>
 		);
 		const snackbars = await screen.findAllByText('Grant browser permissions to enable resources');
@@ -81,7 +81,7 @@ describe('MeetingAccessPageMediaSection tests', () => {
 	});
 
 	test('Internal user joins meeting', async () => {
-		const joinMeeting = jest.fn();
+		const joinMeeting = vi.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
 				hasUserDirectAccess
@@ -89,8 +89,8 @@ describe('MeetingAccessPageMediaSection tests', () => {
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
 				handleEnterMeeting={joinMeeting}
-				handleWaitingRoom={jest.fn()}
-				setMediaStatus={jest.fn()}
+				handleWaitingRoom={vi.fn()}
+				setMediaStatus={vi.fn()}
 			/>
 		);
 		const enterButton = screen.getByRole('button', { name: 'Enter' });
@@ -100,16 +100,16 @@ describe('MeetingAccessPageMediaSection tests', () => {
 	});
 
 	test('User joins waiting room', async () => {
-		const joinWaiting = jest.fn();
+		const joinWaiting = vi.fn();
 		const { user } = setup(
 			<MeetingAccessPageMediaSection
 				hasUserDirectAccess={false}
 				userIsReady={false}
 				meetingName={groupMeeting.name}
 				wrapperWidth={100}
-				handleEnterMeeting={jest.fn()}
+				handleEnterMeeting={vi.fn()}
 				handleWaitingRoom={joinWaiting}
-				setMediaStatus={jest.fn()}
+				setMediaStatus={vi.fn()}
 			/>
 		);
 		const readyButton = screen.getByRole('button', { name: 'Ready to participate' });

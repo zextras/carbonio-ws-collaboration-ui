@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('ChatExporter tests', () => {
 	test('Initialize ChatExporter sends a full history request', () => {
-		const spyOnRequestFullHistory = jest.spyOn(
+		const spyOnRequestFullHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestFullHistory'
 		);
@@ -31,7 +31,7 @@ describe('ChatExporter tests', () => {
 	});
 
 	test('Request more history when history is not complete', () => {
-		const spyOnRequestFullHistory = jest.spyOn(
+		const spyOnRequestFullHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestFullHistory'
 		);
@@ -55,9 +55,9 @@ describe('ChatExporter tests', () => {
 		const message3 = createMockTextMessage({ deleted: true });
 		chatExporter.addMessagesToFullHistory([message3]);
 
-		document.body.appendChild = jest.fn();
-		document.body.removeChild = jest.fn();
-		URL.createObjectURL = jest.fn().mockReturnValue('blob:url');
+		document.body.appendChild = vi.fn();
+		document.body.removeChild = vi.fn();
+		URL.createObjectURL = vi.fn().mockReturnValue('blob:url');
 
 		chatExporter.exportHistory();
 

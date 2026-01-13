@@ -9,14 +9,14 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
+import roomsApi from '../../../../network/apis/RoomsApi';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
@@ -51,6 +51,8 @@ const mockedRoom = createMockRoom({
 	]
 });
 
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
@@ -79,7 +81,7 @@ describe('Add new member action', () => {
 	});
 
 	test('Add new member', async () => {
-		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
+		const spyOnAddRoomMember = vi.spyOn(roomsApi, 'addRoomMembers');
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 

@@ -27,8 +27,8 @@ describe('Clear history', () => {
 			<ClearHistoryModal
 				roomId={mockRoom.id}
 				clearHistoryModalOpen
-				closeModal={jest.fn()}
-				successfulSnackbar={jest.fn()}
+				closeModal={vi.fn()}
+				successfulSnackbar={vi.fn()}
 			/>
 		);
 		const clearHistoryLabel = screen.getAllByText(/Clear History/i);
@@ -38,14 +38,14 @@ describe('Clear history', () => {
 	});
 
 	test('Clear history modal closing after cleared', async () => {
-		const closeModal = jest.fn();
+		const closeModal = vi.fn();
 
 		const { user } = setup(
 			<ClearHistoryModal
 				roomId={mockRoom.id}
 				clearHistoryModalOpen
 				closeModal={closeModal}
-				successfulSnackbar={jest.fn()}
+				successfulSnackbar={vi.fn()}
 			/>
 		);
 		const clearHistoryLabel = screen.getAllByText(/Clear History/i);

@@ -6,7 +6,7 @@
  */
 
 import HistoryAccumulator from './HistoryAccumulator';
-import { buildTextMessageFromHistory } from '../../../tests/mocks/buildXmppStanza';
+import { buildTextMessageFromHistory } from '../../../tests/buildXmppStanza';
 import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 describe('HistoryAccumulator', () => {

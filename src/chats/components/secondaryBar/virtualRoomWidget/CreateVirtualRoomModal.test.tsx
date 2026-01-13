@@ -10,10 +10,10 @@ import { screen } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
+import roomsApi from '../../../../network/apis/RoomsApi';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
@@ -39,13 +39,14 @@ const contactUser2: ContactInfo = {
 	id: 'user2-id'
 };
 
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo([user1, user2]);
 	store.setAttributes(createMockAttributesList());
 });
-
 describe('VirtualRoomsModal', () => {
 	test('Try to create a room without a name', async () => {
 		const { user } = setup(
@@ -90,7 +91,7 @@ describe('VirtualRoomsModal', () => {
 	test('create virtual room with 2 moderators', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open
@@ -127,7 +128,7 @@ describe('VirtualRoomsModal', () => {
 	test('create virtual room by selecting and removing one moderator', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1, contactUser2] });
 
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open
@@ -161,7 +162,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('create virtual room by typing one moderator name', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				open
@@ -192,7 +193,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('Search user fails ', async () => {
-		jest.spyOn(console, 'error').mockImplementation();
+		vi.spyOn(console, 'error').mockImplementation(() => {});
 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal

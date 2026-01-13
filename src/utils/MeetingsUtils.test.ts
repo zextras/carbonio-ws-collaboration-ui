@@ -14,14 +14,12 @@ import {
 	orderSpeakingTiles,
 	sendAudioFeedback
 } from './MeetingsUtils';
-import { mockPlayAudio } from '../tests/mocks/global';
+import { mockPlayAudio } from '../tests/setupTests';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {
 		test('test return of meetingIn notification', () => {
-			mockPlayAudio.mockImplementation(() => Promise.resolve());
-
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);

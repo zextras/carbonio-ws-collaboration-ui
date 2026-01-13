@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { spyOnFetch } from '../../tests/jest-env-setup';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -23,6 +22,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info: User = createMockUser({
@@ -84,6 +84,8 @@ const groupMeeting: MeetingBe = createMockMeeting({
 
 const subscribeUrl = 'meetings/meetingId/media/subscribe';
 
+vi.mock('../../utils/FetchUtils');
+
 beforeEach(() => {
 	act(() => {
 		const store = useStore.getState();
@@ -106,8 +108,8 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user4', type: STREAM_TYPE.VIDEO },
 			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
 		]);
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user2', type: STREAM_TYPE.SCREEN },
@@ -126,8 +128,8 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user2', type: STREAM_TYPE.SCREEN },
 			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
 		]);
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user2', type: STREAM_TYPE.SCREEN }
@@ -150,7 +152,7 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user4', type: STREAM_TYPE.VIDEO }
 		]);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user4', type: STREAM_TYPE.VIDEO }
@@ -170,7 +172,7 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
 
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [],
 			unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
 		});
@@ -183,7 +185,7 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
 
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [],
 			unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
 		});
@@ -207,7 +209,7 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.addSubscription({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 
-		expect(spyOnFetch).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
+		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
 			subscribe: [{ userId: 'user5', type: STREAM_TYPE.VIDEO }],
 			unsubscribe: []
 		});

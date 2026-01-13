@@ -7,8 +7,6 @@
 import { act } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
-import { WebSocketClient } from '../src/network/websocket/WebSocketClient';
-import XMPPClient from '../src/network/xmpp/XMPPClient';
 import { RootStore } from '../src/types/store/StoreTypes';
 
 // a variable to hold reset functions for all stores declared in the app
@@ -21,21 +19,15 @@ export const create =
 		const store = actualCreate(createState);
 		const initialState = store.getState();
 		storeResetFns.add(() => {
-			const resetStore = {
-				...initialState,
-				connections: {
-					xmppClient: new XMPPClient(),
-					wsClient: new WebSocketClient(),
-					status: {}
-				}
-			};
-			store.setState(resetStore, true);
+			store.setState(initialState, true);
 		});
 		return store;
 	};
-// Reset all stores after each test run
-afterEach(() => {
-	act(() => storeResetFns.forEach((resetFn) => resetFn()));
+
+beforeEach(() => {
+	act(() => {
+		storeResetFns.forEach((resetFn) => resetFn());
+	});
 });
 
 export default create;

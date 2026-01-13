@@ -16,7 +16,7 @@ import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
 
 const iconDoneAll = 'icon: DoneAll';
-const colorGray = 'color: gray';
+const colorGray = { color: 'rgb(128, 128, 128)' };
 
 describe('BubbleFooter test', () => {
 	test('Read icon on my message when it is unread', () => {

@@ -72,7 +72,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Send a reaction', async () => {
-		const spyOnSendChatMessageReaction = jest.spyOn(
+		const spyOnSendChatMessageReaction = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'sendChatMessageReaction'
 		);
@@ -93,7 +93,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 
 	test('Sent reaction is highlight', async () => {
 		const store = useStore.getState();
-		const spyOnSendChatMessageReaction = jest.spyOn(
+		const spyOnSendChatMessageReaction = vi.spyOn(
 			store.connections.xmppClient,
 			'sendChatMessageReaction'
 		);

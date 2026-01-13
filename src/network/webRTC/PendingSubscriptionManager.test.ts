@@ -6,7 +6,7 @@
 import PendingSubscriptionManager from './PendingSubscriptionManager';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 
-const updateSubscriptionMock = jest.fn();
+const updateSubscriptionMock = vi.fn();
 
 const subscriptionMock: Subscription = {
 	userId: '1',

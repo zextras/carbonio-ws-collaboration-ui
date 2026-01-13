@@ -6,12 +6,12 @@
 
 import { onInboxMessageStanza } from './inboxMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockTextMessage } from '../../../tests/createMock';
 import {
 	buildReactionMessageFromInbox,
 	buildReplyMessageFromInbox,
 	buildTextMessageFromInbox
-} from '../../../tests/mocks/buildXmppStanza';
+} from '../../../tests/buildXmppStanza';
+import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 describe('XMPP inboxMessageHandler tests', () => {
@@ -34,7 +34,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Conversation has some unread', () => {
-		const spyOnRequestHistory = jest.spyOn(
+		const spyOnRequestHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestHistory'
 		);
@@ -50,7 +50,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Inbox message is a replied one', () => {
-		const spyOnRequestRepliedMessage = jest.spyOn(
+		const spyOnRequestRepliedMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);
@@ -77,7 +77,6 @@ describe('XMPP inboxMessageHandler tests', () => {
 
 		const fastenings =
 			useStore.getState().chatsRegistry[message.roomId].fastenings[message.stanzaId];
-		console.log(fastenings);
 		expect(fastenings[0].type).toBe(MessageType.FASTENING);
 		expect(fastenings[0].value).toBe('👍');
 	});

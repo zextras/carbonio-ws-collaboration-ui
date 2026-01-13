@@ -8,8 +8,6 @@ import { searchUsersByFeatureRequest } from './SearchUsersByFeatureRequest';
 import { mockSoapFetchV2 } from '../../../__mocks__/@zextras/carbonio-ui-soap-lib';
 import useStore from '../../store/Store';
 
-jest.unmock('./SearchUsersByFeatureRequest');
-
 const contact1Match = {
 	a: [
 		{ n: 'displayName', _content: 'Contact 1' },
@@ -54,6 +52,8 @@ const contact3Info = {
 	displayName: contact3Match.a[0]._content,
 	email: contact3Match.a[1]._content
 };
+
+vi.mock('@zextras/carbonio-ui-soap-lib');
 
 describe('SearchUsersByFeatureRequest', () => {
 	test('Contact info wll be formatted as ContactInfo type', async () => {

@@ -12,7 +12,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/mocks/global';
+import { mockPlayAudio } from '../../../tests/setupTests';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingAudioStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import BidirectionalConnectionAudioInOut from '../../webRTC/BidirectionalConnectionAudioInOut';
@@ -77,7 +77,7 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
-		const closeRtpSender = jest.spyOn(
+		const closeRtpSender = vi.spyOn(
 			activeMeeting!.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,
 			'closeRtpSenderTrack'
 		);

@@ -9,9 +9,14 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as Shell from '@zextras/carbonio-shell-ui';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import AccessPage from './AccessPage';
+import {
+	mockGoToExternalLoginPage,
+	mockGoToMeetingAccessPage
+} from '../../hooks/__mocks__/useRouting';
+import meetingsApi from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -19,8 +24,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -75,7 +78,7 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
@@ -92,7 +95,7 @@ const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
@@ -104,19 +107,19 @@ const setupAccessPageNotAuthenticated = (): { user: UserEvent; store: RootStore 
 	return { user, store: result.current };
 };
 
+vi.mock('../../hooks/useRouting');
+
 describe('Meeting access page', () => {
 	test('Authenticated user -> access the meeting -> redirect to the waiting room', async () => {
-		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		setupAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});
 
 	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
-		const spyOnGetScheduledMeetingName = spyOnMeetingsApi(
-			MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME
-		);
-		const mockUseAuthenticated = jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
-		spyOnGetScheduledMeetingName.mockImplementation(() => Promise.resolve('name'));
+		const spyOnGetScheduledMeetingName = vi.spyOn(meetingsApi, 'getScheduledMeetingName');
+		const mockUseAuthenticated = vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
+		spyOnGetScheduledMeetingName.mockResolvedValueOnce(() => Promise.resolve('name'));
 		setupAccessPageNotAuthenticated();
 
 		expect(mockUseAuthenticated).toHaveBeenCalled();
@@ -125,7 +128,7 @@ describe('Meeting access page', () => {
 	});
 
 	test('Authenticated user -> joins group meeting -> redirect to the waiting room', async () => {
-		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		setupGroupForAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});

@@ -8,9 +8,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
+import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -60,6 +60,8 @@ const testRoom2: RoomBe = createMockRoom({
 		}
 	]
 });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

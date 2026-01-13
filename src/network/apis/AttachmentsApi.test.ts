@@ -5,9 +5,9 @@
  */
 
 import AttachmentsApi from './AttachmentsApi';
-import { spyOnFetch } from '../../tests/jest-env-setup';
 import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -30,6 +30,8 @@ const pdfPreviewURLCases: Array<[string, Array<number | undefined>, string]> = [
 	['last only', [undefined, 5], '?last_page=5']
 ];
 
+vi.mock('../../utils/FetchUtils');
+
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {
 		// Send deleteAttachment request
@@ -39,14 +41,14 @@ describe('Attachments API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId', RequestType.DELETE);
+		expect(mockFetchAPI).toHaveBeenCalledWith('attachments/fileId', RequestType.DELETE);
 	});
 
 	test('getAttachmentInfo is called correctly', async () => {
 		// Send getAttachmentInfo request
 		await AttachmentsApi.getAttachmentInfo('fileId');
 
-		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId', RequestType.GET);
+		expect(mockFetchAPI).toHaveBeenCalledWith('attachments/fileId', RequestType.GET);
 	});
 
 	test('getURLAttachment is called correctly', () => {
@@ -59,7 +61,7 @@ describe('Attachments API', () => {
 		// Send getAttachment request
 		await AttachmentsApi.getAttachment('fileId');
 
-		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId/download', RequestType.GET);
+		expect(mockFetchAPI).toHaveBeenCalledWith('attachments/fileId/download', RequestType.GET);
 	});
 
 	test.each(imagePreviewCases)(
@@ -72,7 +74,7 @@ describe('Attachments API', () => {
 			const headers = new Headers();
 			headers.append(contentType, applicationJson);
 
-			expect(spyOnFetch).toHaveBeenCalledWith(
+			expect(mockFetchAPI).toHaveBeenCalledWith(
 				`preview/image/fileId/0x0/${queryRes}`,
 				RequestType.GET
 			);
@@ -89,7 +91,7 @@ describe('Attachments API', () => {
 			ImageShape.ROUNDED
 		);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(
+		expect(mockFetchAPI).toHaveBeenCalledWith(
 			'preview/image/fileId/0x0/thumbnail/?quality=High&output_format=jpeg&shape=Rounded',
 			RequestType.GET
 		);
@@ -103,7 +105,7 @@ describe('Attachments API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(
+		expect(mockFetchAPI).toHaveBeenCalledWith(
 			'preview/pdf/fileId/?first_page=1&last_page=4',
 			RequestType.GET
 		);
@@ -119,7 +121,7 @@ describe('Attachments API', () => {
 			AttachmentType.PNG
 		);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(
+		expect(mockFetchAPI).toHaveBeenCalledWith(
 			'preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=png',
 			RequestType.GET
 		);
@@ -131,7 +133,7 @@ describe('Attachments API', () => {
 			// Send getAttachmentPreview request
 			await AttachmentsApi.getPdfThumbnail('fileId', '0x0', ...queryParams);
 
-			expect(spyOnFetch).toHaveBeenCalledWith(
+			expect(mockFetchAPI).toHaveBeenCalledWith(
 				`preview/pdf/fileId/0x0/thumbnail/${queryRes}`,
 				RequestType.GET
 			);

@@ -7,7 +7,7 @@ import React from 'react';
 
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import BubblesWrapper from './BubblesWrapper';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
@@ -72,7 +72,7 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
 	store.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<BubblesWrapper />, { meetingId: meeting.id });
 
@@ -91,7 +91,7 @@ describe('BubblesWrapper', () => {
 		expect(messageBubble).toBeVisible();
 
 		act(() => {
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		await waitFor(() =>

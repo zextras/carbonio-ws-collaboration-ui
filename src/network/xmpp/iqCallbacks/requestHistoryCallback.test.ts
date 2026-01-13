@@ -6,12 +6,12 @@
 
 import { requestHistoryCallback } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import {
 	buildEndRequestHistoryStanza,
 	buildReactionMessageFromHistory,
 	buildTextMessageFromHistory
-} from '../../../tests/mocks/buildXmppStanza';
+} from '../../../tests/buildXmppStanza';
+import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 const room = createMockRoom({ id: 'mockRoomId' });
@@ -61,7 +61,7 @@ describe('requestHistoryCallback', () => {
 	});
 
 	test('Request history again if there are only fastenings', () => {
-		const spyOnRequestHistory = jest.spyOn(
+		const spyOnRequestHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestHistory'
 		);
@@ -106,7 +106,7 @@ describe('requestHistoryCallback', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = jest.spyOn(
+		const spyOnRequestMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);
