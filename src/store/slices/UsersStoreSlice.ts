@@ -42,12 +42,15 @@ export const useUsersStoreSlice: StateCreator<
 			'USERS/SET_USER_INFO'
 		);
 	},
-	setUserPresence: (id: string, presence: boolean): void => {
+	setUserPresence: (id: string, presence: boolean, lastActivityAt?: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.users[id] = {
 					...draft.users[id],
-					online: presence
+					online: presence,
+					...(lastActivityAt !== undefined && {
+						lastActivity: new Date(lastActivityAt).getTime()
+					})
 				};
 			}),
 			false,
