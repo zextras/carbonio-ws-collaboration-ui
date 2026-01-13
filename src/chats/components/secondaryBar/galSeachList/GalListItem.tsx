@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import styled from '@emotion/styled';
 import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 
 import useRouting from '../../../../hooks/useRouting';
-import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest'
@@ -33,7 +32,7 @@ type GalListItemProps = {
 
 const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 	const rooms = useStore((state) => state.rooms);
-	const [isPending, setIsPending] = useState(false);
+	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 
 	const themeColor = useTheme();
 
@@ -47,8 +46,6 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 	}, [username, themeColor.avatarColors]);
 
 	const openOrCreateRoom = useCallback(() => {
-		if (isPending) return;
-
 		// Check if a one-to-one chat already exists with this user
 		const existingRoom = find(
 			rooms,
@@ -60,21 +57,11 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 		if (existingRoom) {
 			goToRoomPage(existingRoom.id);
 		} else {
-			// Create a real room via API
-			setIsPending(true);
-			RoomsApi.addRoom({
-				type: RoomType.ONE_TO_ONE,
-				members: [{ userId: contact.id, owner: true }]
-			})
-				.then((response) => {
-					setIsPending(false);
-					goToRoomPage(response.id);
-				})
-				.catch(() => {
-					setIsPending(false);
-				});
+			// Create placeholder room and navigate to it
+			setPlaceholderRoom(contact.id);
+			goToRoomPage(`placeholder-${contact.id}`);
 		}
-	}, [contact.id, goToRoomPage, isPending, rooms]);
+	}, [contact.id, goToRoomPage, rooms, setPlaceholderRoom]);
 
 	return (
 		<ListItem

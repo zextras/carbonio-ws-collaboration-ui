@@ -107,6 +107,9 @@ const MessageHistoryLoader = ({
 				}
 			}
 
+			// Skip timeline loading for placeholder rooms (room doesn't exist yet)
+			if (roomId.startsWith('placeholder-')) return;
+
 			if (!historyLoadedDisabled) {
 				setHistoryLoadDisabled(roomId, true);
 				ChatApi.getTimeline(roomId, beforeDate, 50)

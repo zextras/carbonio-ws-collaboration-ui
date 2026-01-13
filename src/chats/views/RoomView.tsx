@@ -41,6 +41,9 @@ const RoomView = (): ReactElement => {
 	const loadInitialTimeline = useCallback(async () => {
 		if (!selectedRoomId || !currentUserId) return;
 
+		// Skip API call for placeholder rooms (room doesn't exist yet)
+		if (selectedRoomId.startsWith('placeholder-')) return;
+
 		// Check if messages are already loaded for this room
 		const store = useStore.getState();
 		const existingMessages = store.chatsRegistry[selectedRoomId]?.messages;

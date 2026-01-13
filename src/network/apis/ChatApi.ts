@@ -17,6 +17,7 @@ import {
 	RoomReadMarkers,
 	TimelineResponse
 } from '../../types/network/models/chatTypes';
+import RoomsApi from './RoomsApi';
 
 class ChatApi implements IChatApi {
 	private static instance: ChatApi;
@@ -64,6 +65,15 @@ class ChatApi implements IChatApi {
 		messageId?: string,
 		replyToId?: string
 	): Promise<ChatMessage> {
+		// Check if this is a placeholder room
+		const placeholderRoom = roomId.split('placeholder-');
+		if (placeholderRoom[1]) {
+			// First create the real room, then send the message
+			return RoomsApi.replacePlaceholderRoom(placeholderRoom[1]).then((response) =>
+				this.sendMessage(response.id, text, messageId, replyToId)
+			);
+		}
+
 		const body: Record<string, unknown> = { text };
 		if (messageId) body.messageId = messageId;
 		if (replyToId) body.replyToId = replyToId;

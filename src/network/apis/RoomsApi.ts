@@ -195,6 +195,14 @@ class RoomsApi implements IRoomsApi {
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
+		// Check if this is a placeholder room
+		const placeholderRoom = roomId.split('placeholder-');
+		if (placeholderRoom[1]) {
+			return this.replacePlaceholderRoom(placeholderRoom[1]).then((response) =>
+				this.addRoomAttachment(response.id, file, optionalFields, signal)
+			);
+		}
+
 		const { setPlaceholderMessage } = useStore.getState();
 		const uuid = uuidGenerator();
 		// Set a placeholder message into the store
@@ -269,6 +277,30 @@ class RoomsApi implements IRoomsApi {
 				fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
 			)
 		);
+	}
+
+	/**
+	 * Replaces a placeholder room with a real one.
+	 * Creates the room via API, removes the placeholder, and redirects to the real room.
+	 * @param userId The user ID that was used to create the placeholder
+	 * @returns The response from the room creation API
+	 */
+	public replacePlaceholderRoom(userId: string): Promise<AddRoomResponse> {
+		const { removePlaceholderRoom } = useStore.getState();
+
+		return this.addRoom({
+			type: RoomType.ONE_TO_ONE,
+			members: [{ userId, owner: true }]
+		}).then((response) => {
+			removePlaceholderRoom(userId);
+			sendCustomEvent({
+				name: EventName.ROUTE_REDIRECT,
+				data: {
+					path: `/${CHATS_ROUTE}/${response.id}`
+				}
+			});
+			return response;
+		});
 	}
 
 }

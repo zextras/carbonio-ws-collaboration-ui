@@ -226,6 +226,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	// Start typing ping interval - sends ping every 5 seconds while user has text
 	const startTypingPing = useCallback(() => {
+		// Skip typing indicator for placeholder rooms (room doesn't exist yet)
+		if (roomId.startsWith('placeholder-')) return;
+
 		if (!typingIntervalRef.current) {
 			// Send immediately
 			ChatApi.sendTypingIndicator(roomId);
