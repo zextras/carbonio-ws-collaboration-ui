@@ -29,7 +29,12 @@ export const useUsersStoreSlice: StateCreator<
 						id: user.id,
 						email: user.email,
 						name: user.name,
-						type: user.type
+						type: user.type,
+						// Include presence data if available
+						...(user.online !== undefined && { online: user.online }),
+						...(user.lastActivityAt !== undefined && {
+							lastActivity: new Date(user.lastActivityAt).getTime()
+						})
 					};
 				});
 			}),

@@ -12,8 +12,7 @@ import {
 	MessageDeletedEvent,
 	ReactionAddedEvent,
 	ReactionRemovedEvent,
-	TypingStartedEvent,
-	TypingStoppedEvent,
+	TypingEvent,
 	PresenceChangedEvent,
 	ReadMarkerUpdatedEvent
 } from '../../types/network/models/chatTypes';
@@ -23,8 +22,7 @@ import {
 	handleMessageDeleted,
 	handleReactionAdded,
 	handleReactionRemoved,
-	handleTypingStarted,
-	handleTypingStopped,
+	handleTyping,
 	handlePresenceChanged,
 	handleReadMarkerUpdated
 } from './handlers';
@@ -59,12 +57,8 @@ export function chatSseEventsHandler(event: ChatEvent): void {
 			handleReactionRemoved(event as ReactionRemovedEvent);
 			break;
 
-		case 'typing_started':
-			handleTypingStarted(event as TypingStartedEvent);
-			break;
-
-		case 'typing_stopped':
-			handleTypingStopped(event as TypingStoppedEvent);
+		case 'typing':
+			handleTyping(event as TypingEvent);
 			break;
 
 		case 'presence_changed':

@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { debounce, find, forEach, map, throttle } from 'lodash';
+import { find, forEach, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -220,26 +220,39 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		});
 	};
 
-	// Send isWriting every 3 seconds
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendThrottleIsWriting = useCallback(
-		throttle(() => ChatApi.sendTypingIndicator(roomId, true), 3000),
-		[roomId]
-	);
+	// Typing ping interval (5 seconds)
+	const TYPING_PING_INTERVAL = 5000;
+	const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-	// Send paused after 3,5 seconds user stops typing
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendDebouncedPause = useCallback(
-		debounce(() => ChatApi.sendTypingIndicator(roomId, false), 3500),
-		[roomId]
-	);
+	// Start typing ping interval - sends ping every 5 seconds while user has text
+	const startTypingPing = useCallback(() => {
+		if (!typingIntervalRef.current) {
+			// Send immediately
+			ChatApi.sendTypingIndicator(roomId);
+			// Then send every 5 seconds
+			typingIntervalRef.current = setInterval(() => {
+				ChatApi.sendTypingIndicator(roomId);
+			}, TYPING_PING_INTERVAL);
+		}
+	}, [roomId]);
 
-	// Send paused and avoid to send pending isWriting
-	const sendStopWriting = useCallback(() => {
-		sendThrottleIsWriting.cancel();
-		sendDebouncedPause.cancel();
-		ChatApi.sendTypingIndicator(roomId, false);
-	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
+	// Stop typing ping interval
+	const stopTypingPing = useCallback(() => {
+		if (typingIntervalRef.current) {
+			clearInterval(typingIntervalRef.current);
+			typingIntervalRef.current = null;
+		}
+	}, []);
+
+	// Cleanup interval on unmount or room change
+	useEffect(() => {
+		return () => {
+			if (typingIntervalRef.current) {
+				clearInterval(typingIntervalRef.current);
+				typingIntervalRef.current = null;
+			}
+		};
+	}, [roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -279,7 +292,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	);
 
 	const sendMessage = useCallback((): void => {
-		sendStopWriting();
+		stopTypingPing();
 		const message = textMessage.trim();
 		if (filesToUploadArray) {
 			const abortControllerList: AbortController[] = [];
@@ -331,7 +344,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [
 		roomId,
 		textMessage,
-		sendStopWriting,
+		stopTypingPing,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray
@@ -400,13 +413,20 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
-			} else {
-				sendThrottleIsWriting();
-				sendDebouncedPause();
 			}
+			// Typing ping is handled by useEffect watching textMessage
 		},
-		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
+		[sendDisabled, carbonioLanguage, sendMessage]
 	);
+
+	// Start/stop typing ping based on text content
+	useEffect(() => {
+		if (textMessage.trim().length > 0) {
+			startTypingPing();
+		} else {
+			stopTypingPing();
+		}
+	}, [textMessage, startTypingPing, stopTypingPing]);
 
 	useEffect(() => {
 		const ref = messageInputRef.current;

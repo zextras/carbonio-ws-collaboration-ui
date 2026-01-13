@@ -11,4 +11,6 @@ export type UserBe = {
 	email: string;
 	name: string;
 	type: UserType;
+	online?: boolean;
+	lastActivityAt?: string;
 };

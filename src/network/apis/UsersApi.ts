@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { join, map } from 'lodash';
-
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
@@ -33,8 +31,8 @@ class UsersApi implements IUsersApi {
 
 	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
 		const { setUserInfo } = useStore.getState();
-		const ids = map(userIds, (id) => `userIds=${id}`);
-		return fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then((resp: GetUsersResponse) => {
+		return fetchAPI(`users`, RequestType.POST, { userIds }).then((resp: GetUsersResponse) => {
+			// setUserInfo now handles presence data (online, lastActivityAt) automatically
 			setUserInfo(resp);
 			return resp;
 		});

@@ -149,8 +149,7 @@ export type ChatEventType =
 	| 'message_deleted'
 	| 'reaction_added'
 	| 'reaction_removed'
-	| 'typing_started'
-	| 'typing_stopped'
+	| 'typing'
 	| 'presence_changed'
 	| 'read_marker_updated'
 	| 'heartbeat';
@@ -200,14 +199,12 @@ export type ReactionRemovedEvent = BaseChatEvent & {
 	reaction: string;
 };
 
-export type TypingStartedEvent = BaseChatEvent & {
-	type: 'typing_started';
-	roomId: string;
-	userId: string;
-};
-
-export type TypingStoppedEvent = BaseChatEvent & {
-	type: 'typing_stopped';
+/**
+ * Typing ping event. Received every ~5 seconds while a user is typing.
+ * If no ping is received for 10 seconds, the user is considered to have stopped typing.
+ */
+export type TypingEvent = BaseChatEvent & {
+	type: 'typing';
 	roomId: string;
 	userId: string;
 };
@@ -238,8 +235,7 @@ export type ChatEvent =
 	| MessageDeletedEvent
 	| ReactionAddedEvent
 	| ReactionRemovedEvent
-	| TypingStartedEvent
-	| TypingStoppedEvent
+	| TypingEvent
 	| PresenceChangedEvent
 	| ReadMarkerUpdatedEvent
 	| HeartbeatEvent;
