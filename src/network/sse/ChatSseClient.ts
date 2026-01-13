@@ -103,8 +103,7 @@ class ChatSseClient implements IChatSseClient {
 			'message_deleted',
 			'reaction_added',
 			'reaction_removed',
-			'typing_started',
-			'typing_stopped',
+			'typing',
 			'presence_changed',
 			'read_marker_updated',
 			'heartbeat'
