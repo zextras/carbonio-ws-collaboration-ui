@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { filter, findIndex, size, slice } from 'lodash';
 
@@ -24,13 +24,21 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 
 	const [firstUnreadMessageId, setFirstUnreadMessageId] = useState<string | undefined>(undefined);
+	const prevUnreadCountRef = useRef(unreadCount);
 
 	// Reset on conversation change
 	useEffect(() => setFirstUnreadMessageId(undefined), [roomId]);
 
+	// Reset when unread count increases (new messages arrived)
 	useEffect(() => {
-		// Don't calculate if it is just set once
-		// or if necessary data aren't already loaded on local store
+		if (unreadCount > prevUnreadCountRef.current) {
+			setFirstUnreadMessageId(undefined);
+		}
+		prevUnreadCountRef.current = unreadCount;
+	}, [unreadCount]);
+
+	useEffect(() => {
+		// Don't calculate if it is already set or if necessary data aren't loaded
 		if (!firstUnreadMessageId && myUserId && size(messages) > 0) {
 			if (unreadCount > 0) {
 				const lastMessageReadByMe = findIndex(
@@ -42,22 +50,28 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					// Take only messages from other that come later (all unread messages)
 					const unreadMessages = slice(messages, lastMessageReadByMe + 1);
 					const othersMessages = filter(unreadMessages, (message) => message.from !== myUserId);
-					// The fist of them is the fist unread text message
+					// The first of them is the first unread text message
 					if (size(othersMessages) > 0) {
 						setFirstUnreadMessageId(othersMessages[0].id);
 					}
-					// There's no last message read by me inside local store and the message count is higher than the unread count
-					// it means that it's a conversation in which I never have read a message
 				} else if (
 					hasConversationMarkers &&
 					myLastMarker == null &&
 					size(messages) >= unreadCount
 				) {
+					// No last marker - first unread is the first message from others
 					const unreadTextMessages = filter(messages, (message) => message.from !== myUserId);
 					if (size(unreadTextMessages) > 0) {
 						setFirstUnreadMessageId(unreadTextMessages[0].id);
 					} else {
 						setFirstUnreadMessageId('noUnread');
+					}
+				} else {
+					// Calculate first unread based on unread count from the end
+					const othersMessages = filter(messages, (message) => message.from !== myUserId);
+					const firstUnreadIdx = Math.max(0, size(othersMessages) - unreadCount);
+					if (size(othersMessages) > 0 && othersMessages[firstUnreadIdx]) {
+						setFirstUnreadMessageId(othersMessages[firstUnreadIdx].id);
 					}
 				}
 			} else {

@@ -70,34 +70,42 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLDivElement>[]>([]);
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
+	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
+	const setUnreadCount = useStore((store) => store.setUnreadCount);
 
-	// Track if we've already marked this room as read in this session
-	const hasMarkedAsReadRef = useRef(false);
+	// Track if a read request is in flight to prevent duplicate calls
+	const isMarkingAsReadRef = useRef(false);
 
 	// Mark all messages in the room as read (single API call)
 	const markRoomAsRead = useCallback(() => {
-		if (hasMarkedAsReadRef.current) return;
+		// Check if there are unread messages and we're not already marking
+		const currentUnread = useStore.getState().chatsRegistry[roomId]?.unread ?? 0;
+		if (currentUnread === 0 || isMarkingAsReadRef.current) return;
 
-		// Check if there are unread messages in the room
-		const unreadCount = useStore.getState().chatsRegistry[roomId]?.unread ?? 0;
-		if (unreadCount > 0 || !myLastMarker) {
-			hasMarkedAsReadRef.current = true;
-			ChatApi.setReadMarker(roomId).catch((err) => {
+		isMarkingAsReadRef.current = true;
+		ChatApi.setReadMarker(roomId)
+			.then(() => {
+				setUnreadCount(roomId, 0);
+			})
+			.catch((err) => {
 				console.error('[MessagesList] Failed to mark room as read:', err);
-				hasMarkedAsReadRef.current = false; // Allow retry on error
+			})
+			.finally(() => {
+				isMarkingAsReadRef.current = false;
 			});
-		}
-	}, [roomId, myLastMarker]);
+	}, [roomId, setUnreadCount]);
 
-	// Legacy readMessage for scroll position tracking (no longer marks as read per-message)
-	const readMessage = useCallback(
-		(refId: string) => {
-			// Mark all as read when focused (simplified approach)
-			if (inputHasFocus) {
+	// Called when scroll position changes - mark as read if at bottom
+	const onScrollPositionChange = useCallback(
+		(messageId: string) => {
+			// Check if this is the last message (user is at bottom)
+			const msgs = useStore.getState().chatsRegistry[roomId]?.messages;
+			const lastMsgId = msgs?.[msgs.length - 1]?.id;
+			if (messageId === lastMsgId) {
 				markRoomAsRead();
 			}
 		},
-		[inputHasFocus, markRoomAsRead]
+		[roomId, markRoomAsRead]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,9 +116,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (oldScrollPosition !== refId) {
 				setScrollPosition(roomId, refId);
 			}
-			readMessage(refId);
+			onScrollPositionChange(refId);
 		}, 150),
-		[setScrollPosition, readMessage, roomId]
+		[setScrollPosition, onScrollPositionChange, roomId]
 	);
 
 	const intersectionObserverCallback = useCallback(
@@ -156,17 +164,21 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		return (): void => messageScrollPositionObserver.current?.disconnect();
 	}, [observerInit]);
 
-	// Mark all messages as read when user opens/focuses the conversation
+	// Mark as read when user is at bottom and there are unread messages
+	// This handles: initial load at bottom, scrolling to bottom, new messages when at bottom
 	useEffect(() => {
-		if (inputHasFocus && size(roomMessages) > 0) {
-			markRoomAsRead();
-		}
-	}, [inputHasFocus, roomMessages, markRoomAsRead]);
+		if (unreadCount > 0 && size(roomMessages) > 0) {
+			// Check if user is at the bottom (viewing the last message)
+			const currentScrollPos =
+				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+			const lastMsgId = roomMessages[roomMessages.length - 1]?.id;
 
-	// Reset the hasMarkedAsRead flag when room changes
-	useEffect(() => {
-		hasMarkedAsReadRef.current = false;
-	}, [roomId]);
+			// If no scroll position set (initial load) or at last message, mark as read
+			if (!currentScrollPos || currentScrollPos === lastMsgId) {
+				markRoomAsRead();
+			}
+		}
+	}, [unreadCount, roomMessages, roomId, markRoomAsRead]);
 
 	// Manage initial scroll position
 	useEffect(() => {

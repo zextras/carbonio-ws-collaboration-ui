@@ -4,19 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import ChatApi from '../../apis/ChatApi';
 import useStore from '../../../store/Store';
-import { MessageNewEvent, ChatMessage } from '../../../types/network/models/chatTypes';
-import { MessageType, TextMessage, MarkerStatus } from '../../../types/store/ChatsRegistryTypes';
+import { MessageNewEvent } from '../../../types/network/models/chatTypes';
 import { mapChatMessageToTextMessage } from '../utilities/messageMapper';
 
 /**
  * Handles incoming new message events from SSE.
- * Adds the new message to the store and updates unread counts.
+ * Adds the new message to the store and increments unread count for others' messages.
+ * The MessagesList component handles auto-read when user is at bottom.
  */
 export function handleMessageNew(event: MessageNewEvent): void {
-	const { newMessage, incrementUnreadCount, setUnreadCount, rooms, session, activeConversations } =
-		useStore.getState();
+	const { newMessage, incrementUnreadCount, rooms, session } = useStore.getState();
 	const { roomId, message } = event;
 
 	// Check if room exists
@@ -32,31 +30,9 @@ export function handleMessageNew(event: MessageNewEvent): void {
 	// Add message to store
 	newMessage(textMessage);
 
-	// Check if this is from someone else (not our own message)
-	const isFromOther = message.senderId !== session.id;
-
-	if (isFromOther) {
-		// Check if user is viewing this room and is scrolled to the bottom
-		const isViewingRoom = session.selectedRoom === roomId;
-		const scrollPositionMessageId = activeConversations[roomId]?.scrollPositionMessageId;
-		const isAtBottom = !scrollPositionMessageId; // undefined means at bottom
-
-		if (isViewingRoom && isAtBottom) {
-			// User is viewing the room and scrolled to bottom - auto-read
-			ChatApi.setReadMarker(roomId)
-				.then(() => {
-					setUnreadCount(roomId, 0);
-					console.log('[handleMessageNew] Auto-read marker sent for room:', roomId);
-				})
-				.catch((err) => {
-					console.warn('[handleMessageNew] Failed to send auto-read marker:', err);
-				});
-		} else {
-			// User is not viewing this room or not scrolled to bottom - increment unread
-			incrementUnreadCount(roomId, 1);
-			console.log('[handleMessageNew] Unread count incremented for room:', roomId);
-		}
+	// Increment unread count for messages from others
+	// Auto-read is handled by MessagesList when user is viewing and at bottom
+	if (message.senderId !== session.id) {
+		incrementUnreadCount(roomId, 1);
 	}
-
-	console.log('[handleMessageNew] New message added:', message.id);
 }

@@ -95,6 +95,8 @@ export const useConnectionsStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
+				console.log('[updateReadMarker] Called with:', { roomId, userId, messageId });
+
 				if (registry && registry.messages) {
 					// Update the marker in the markers map
 					if (!registry.markers) {
@@ -107,18 +109,33 @@ export const useConnectionsStoreSlice: StateCreator<
 						type: 'displayed'
 					};
 
-					// Update read status for messages up to messageId
-					registry.messages.forEach((msg) => {
-						if (
-							msg.type === MessageType.TEXT_MSG &&
-							(msg.stanzaId === messageId || msg.id === messageId)
-						) {
-							// Mark the message as read by this user
-							if (msg.read === MarkerStatus.UNREAD) {
-								msg.read = MarkerStatus.READ_BY_SOMEONE;
+					// Find the target message to get its date
+					const targetMessage = registry.messages.find(
+						(m) =>
+							m.type === MessageType.TEXT_MSG &&
+							(m.stanzaId === messageId || m.id === messageId)
+					);
+
+					if (targetMessage) {
+						const targetDate = targetMessage.date;
+						const myId = draft.session.id;
+
+						// Create new array with updated read status to ensure re-render
+						registry.messages = registry.messages.map((msg) => {
+							if (
+								msg.type === MessageType.TEXT_MSG &&
+								msg.from === myId &&
+								msg.date <= targetDate &&
+								msg.read === MarkerStatus.UNREAD
+							) {
+								// Return new object with updated read status
+								return { ...msg, read: MarkerStatus.READ };
 							}
-						}
-					});
+							return msg;
+						});
+
+						console.log('[updateReadMarker] Messages updated with READ status');
+					}
 				}
 			}),
 			false,
