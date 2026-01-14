@@ -57,11 +57,11 @@ export type TextMessage = BasicMessage & {
 	from: string;
 	text: string;
 	read: MarkerStatus;
-	edited?: boolean;
-	deleted?: boolean;
+	editedInfo?: EditedInfo;
+	deletedInfo?: DeletedInfo;
 	replyTo?: string;
 	repliedMessage?: TextMessage;
-	forwarded?: ForwardedInfo;
+	forwardedInfo?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
 };
 
@@ -128,10 +128,17 @@ export enum MessageType {
 }
 
 export type ForwardedInfo = {
-	id: string;
-	date: number;
-	from: string;
-	count: number;
+	originalSenderId: string;
+	originalSentAt: string;
+};
+
+export type EditedInfo = {
+	editedAt: string;
+};
+
+export type DeletedInfo = {
+	deletedBy: string;
+	deletedAt: string;
 };
 
 export type AttachmentMessageType = {
@@ -147,7 +154,7 @@ export type PlaceholderFields = {
 	roomId: string;
 	text: string;
 	replyTo?: string;
-	forwarded?: ForwardedInfo;
+	forwardedInfo?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
 };
 

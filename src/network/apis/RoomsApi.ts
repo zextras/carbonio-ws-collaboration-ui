@@ -42,7 +42,6 @@ import {
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
-import { dateToISODate } from '../../utils/dateUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi, ChatApi } from '../index';
 
@@ -264,12 +263,10 @@ class RoomsApi implements IRoomsApi {
 		roomsId: string[],
 		messages: TextMessage[]
 	): Promise<ForwardMessagesResponse> {
-		// Forward messages via REST API
+		// Forward messages via REST API - backend fetches original message data
 		const messagesToForward = messages.map((message) => ({
 			originalMessageId: message.stanzaId,
-			originalRoomId: message.roomId,
-			text: message.text,
-			originalMessageSentAt: dateToISODate(message.date)
+			originalRoomId: message.roomId
 		}));
 
 		return Promise.all(

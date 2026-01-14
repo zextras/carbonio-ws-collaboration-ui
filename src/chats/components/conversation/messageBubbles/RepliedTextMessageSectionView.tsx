@@ -149,7 +149,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				<Row takeAvailableSpace wrap="nowrap">
 					<Container crossAlignment="flex-start">
 						<BubbleHeader senderId={repliedMessage.from} />
-						{repliedMessage.deleted ? (
+						{repliedMessage.deletedInfo ? (
 							<DeletedMessageWrap color="secondary" overflow="ellipsis">
 								{deletedMessageLabel}
 							</DeletedMessageWrap>
@@ -158,7 +158,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 								<MessageWrap color="secondary" overflow="ellipsis">
 									{textToShow}
 								</MessageWrap>
-								<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+								<BubbleFooter date={repliedMessage.date} isEdited={!!repliedMessage.editedInfo} />
 							</>
 						)}
 					</Container>

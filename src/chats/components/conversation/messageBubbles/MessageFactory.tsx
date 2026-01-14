@@ -76,7 +76,7 @@ const MessageFactory = ({
 				return (
 					<>
 						{isFirstNewMessage && newMessagesComponent}
-						{message.deleted ? (
+						{message.deletedInfo ? (
 							<DeletedBubble message={message} refEl={messageRef} />
 						) : (
 							<Bubble

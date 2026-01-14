@@ -19,16 +19,13 @@ type ForwardInfoProps = {
 };
 
 const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
-	const forwardUsername = useStore((store) => getUserName(store, info.from));
+	const forwardUsername = useStore((store) => getUserName(store, info.originalSenderId));
 
 	const [t] = useTranslation();
-	const forwardedMultipleTimesLabel = t(
-		'message.forwardedMultipleTimes',
-		'Forwarded multiple times'
-	);
 
-	const messageDate = formatDate(info.date, 'DD MMM YY');
-	const messageTime = formatDate(info.date, 'HH:mm');
+	const originalDate = new Date(info.originalSentAt).getTime();
+	const messageDate = formatDate(originalDate, 'DD MMM YY');
+	const messageTime = formatDate(originalDate, 'HH:mm');
 	const originallySentByLabel = (
 		<Trans
 			i18nKey="message.originallySentBy"
@@ -48,13 +45,7 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 			mainAlignment="flex-start"
 			gap={'0.25rem'}
 		>
-			{info.count > 1 && (
-				<Tooltip label={forwardedMultipleTimesLabel}>
-					<Padding right="extrasmall">
-						<Icon icon="ForwardMultipleTimes" size="small" color="secondary" />
-					</Padding>
-				</Tooltip>
-			)}
+			<Icon icon="Forward" size="small" color="secondary" />
 			<Tooltip label={originallySentByLabel}>
 				<Text color="secondary" size="small">
 					{originallySentByLabel}

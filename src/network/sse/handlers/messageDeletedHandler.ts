@@ -9,13 +9,13 @@ import { MessageDeletedEvent } from '../../../types/network/models/chatTypes';
 
 /**
  * Handles message deleted events from SSE.
- * Marks the message as deleted and clears its text.
+ * Marks the message as deleted with deletedInfo and clears its text.
  */
 export function handleMessageDeleted(event: MessageDeletedEvent): void {
 	const { deleteMessage } = useStore.getState();
-	const { roomId, messageId } = event;
+	const { roomId, messageId, deletedBy, deletedAt } = event;
 
-	deleteMessage(roomId, messageId);
+	deleteMessage(roomId, messageId, deletedBy, deletedAt);
 
 	console.log('[handleMessageDeleted] Message deleted:', messageId);
 }

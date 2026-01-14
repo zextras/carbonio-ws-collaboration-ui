@@ -65,7 +65,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	// Remove reference view when message is deleted
 	useEffect(() => {
-		if (message?.deleted) {
+		if (message?.deletedInfo) {
 			unsetReferenceMessage(message.roomId);
 		}
 	}, [message, unsetReferenceMessage]);

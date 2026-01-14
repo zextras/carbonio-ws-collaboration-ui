@@ -142,7 +142,7 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/UPDATE_READ_MARKER'
 		);
 	},
-	editMessage: (roomId: string, messageId: string, text: string, edited: boolean): void => {
+	editMessage: (roomId: string, messageId: string, text: string, editedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
@@ -152,7 +152,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.text = text;
-						msg.edited = edited;
+						msg.editedInfo = { editedAt };
 					}
 				}
 			}),
@@ -160,7 +160,7 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/EDIT_MESSAGE'
 		);
 	},
-	deleteMessage: (roomId: string, messageId: string): void => {
+	deleteMessage: (roomId: string, messageId: string, deletedBy: string, deletedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
@@ -169,7 +169,7 @@ export const useConnectionsStoreSlice: StateCreator<
 						(m) => m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
-						msg.deleted = true;
+						msg.deletedInfo = { deletedBy, deletedAt };
 						msg.text = '';
 					}
 				}

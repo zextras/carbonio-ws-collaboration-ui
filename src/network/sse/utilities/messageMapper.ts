@@ -45,8 +45,9 @@ export function mapChatMessageToTextMessage(
 		from: chatMessage.senderId,
 		text: chatMessage.text,
 		read: readStatus,
-		edited: chatMessage.edited,
-		deleted: chatMessage.deleted,
+		forwardedInfo: chatMessage.forwardedInfo,
+		editedInfo: chatMessage.editedInfo,
+		deletedInfo: chatMessage.deletedInfo,
 		replyTo: chatMessage.replyToId,
 		repliedMessage: chatMessage.replyTo
 			? {
@@ -58,7 +59,10 @@ export function mapChatMessageToTextMessage(
 					from: chatMessage.replyTo.senderId,
 					text: chatMessage.replyTo.text || '',
 					read: MarkerStatus.READ,
-					deleted: chatMessage.replyTo.deleted
+					// Map the boolean deleted to deletedInfo
+					deletedInfo: chatMessage.replyTo.deleted
+						? { deletedBy: '', deletedAt: '' }
+						: undefined
 				}
 			: undefined,
 		attachment: chatMessage.attachment

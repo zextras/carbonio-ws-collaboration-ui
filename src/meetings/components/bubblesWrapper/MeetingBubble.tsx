@@ -170,7 +170,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 					<Padding bottom="small" />
 				</>
 			)}
-			{message.forwarded && <ForwardInfo info={message.forwarded} />}
+			{message.forwardedInfo && <ForwardInfo info={message.forwardedInfo} />}
 			{message.repliedMessage && (
 				<RepliedTextMessageSectionView
 					repliedMessageRef={message.repliedMessage}
@@ -188,7 +188,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 				isMyMessage={false}
 				date={message.date}
 				messageRead={message.read}
-				isEdited={message?.edited}
+				isEdited={!!message?.editedInfo}
 				messageExtension={extension}
 				messageSize={size}
 			/>

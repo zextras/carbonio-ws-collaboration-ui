@@ -263,7 +263,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		text,
 		replyTo,
 		attachment,
-		forwarded
+		forwardedInfo
 	}: PlaceholderFields): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -280,7 +280,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					read: MarkerStatus.PENDING,
 					replyTo,
 					attachment,
-					forwarded
+					forwardedInfo
 				};
 
 				// If the placeholder message is a reply, find the message to reply to

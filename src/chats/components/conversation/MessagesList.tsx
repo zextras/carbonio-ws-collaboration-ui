@@ -228,7 +228,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					prevMessage?.type === MessageType.TEXT_MSG &&
 					prevMessage.from === message.from;
 				const isPrevMessageDeleted = !!(
-					prevMessage?.type === MessageType.TEXT_MSG && prevMessage?.deleted
+					prevMessage?.type === MessageType.TEXT_MSG && prevMessage?.deletedInfo
 				);
 
 				const nextMessage = wrapper[index + 1];

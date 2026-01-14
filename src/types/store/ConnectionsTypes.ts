@@ -15,8 +15,8 @@ export type ConnectionsStoreSlice = {
 	resetChatData: () => void;
 	setUserPresence: (userId: string, online: boolean, lastActivityAt?: string) => void;
 	updateReadMarker: (roomId: string, userId: string, messageId: string) => void;
-	editMessage: (roomId: string, messageId: string, text: string, edited: boolean) => void;
-	deleteMessage: (roomId: string, messageId: string) => void;
+	editMessage: (roomId: string, messageId: string, text: string, editedAt: string) => void;
+	deleteMessage: (roomId: string, messageId: string, deletedBy: string, deletedAt: string) => void;
 };
 
 export type Connections = {

@@ -36,14 +36,14 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 					case FasteningAction.EDIT: {
 						return {
 							...message,
-							edited: true,
+							editedInfo: { editedAt: new Date().toISOString() },
 							text: fastening.value ?? ''
 						} as TextMessage;
 					}
 					case FasteningAction.DELETE: {
 						return {
 							...message,
-							deleted: true,
+							deletedInfo: { deletedBy: '', deletedAt: new Date().toISOString() },
 							text: '',
 							attachment: undefined,
 							replyTo: undefined

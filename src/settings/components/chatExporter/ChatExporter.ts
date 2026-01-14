@@ -108,8 +108,8 @@ class ChatExporter implements IChatExporter {
 	private messageFormatter(message: TextMessage): string {
 		const senderName = useStore.getState().users[message.from]?.name || message.from;
 		const header = `[${formatDate(message.date, 'YYYY-MM-DD HH:mm:ss')}] ${senderName}: `;
-		if (message.deleted) {
-			const deletedMessage = t('message.deletedMessage', 'Deleted message');
+		if (message.deletedInfo) {
+			const deletedMessage = t('message.deletedInfoMessage', 'Deleted message');
 			return `${header}[${deletedMessage}]\n`;
 		}
 		if (message.attachment) {

@@ -114,8 +114,9 @@ export default function MainApp(): React.JSX.Element {
 									from: msg.senderId,
 									text: msg.text || msg.attachment?.name || '',
 									read: MarkerStatus.UNREAD,
-									edited: msg.edited,
-									deleted: msg.deleted,
+									forwardedInfo: msg.forwardedInfo,
+									editedInfo: msg.editedInfo,
+									deletedInfo: msg.deletedInfo,
 									attachment: msg.attachment
 										? {
 												id: msg.attachment.id,

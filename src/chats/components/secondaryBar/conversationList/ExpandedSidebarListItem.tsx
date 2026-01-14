@@ -84,7 +84,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		if (
 			lastMessageOfRoom &&
 			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
-			!lastMessageOfRoom.deleted &&
+			!lastMessageOfRoom.deletedInfo &&
 			lastMessageOfRoom.from === sessionId
 		) {
 			switch (lastMessageOfRoom.read) {
@@ -107,7 +107,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		if (
 			lastMessageOfRoom &&
 			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
-			!lastMessageOfRoom.deleted
+			!lastMessageOfRoom.deletedInfo
 		) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
@@ -139,7 +139,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		if (lastMessageOfRoom) {
 			switch (lastMessageOfRoom.type) {
 				case MessageType.TEXT_MSG: {
-					if (lastMessageOfRoom.deleted) {
+					if (lastMessageOfRoom.deletedInfo) {
 						return deletedMessageLabel;
 					}
 					const text =

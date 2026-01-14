@@ -9,6 +9,20 @@ import { RoomBe } from './roomBeTypes';
 
 // ==================== MESSAGE TYPES ====================
 
+export type ForwardedInfo = {
+	originalSenderId: string;
+	originalSentAt: string;
+};
+
+export type EditedInfo = {
+	editedAt: string;
+};
+
+export type DeletedInfo = {
+	deletedBy: string;
+	deletedAt: string;
+};
+
 export type ChatMessage = {
 	id: string;
 	roomId: string;
@@ -16,10 +30,9 @@ export type ChatMessage = {
 	text: string;
 	replyToId?: string;
 	replyTo?: ChatMessageReply;
-	forwarded: boolean;
-	edited: boolean;
-	deleted: boolean;
-	deletedAt?: string;
+	forwardedInfo?: ForwardedInfo;
+	editedInfo?: EditedInfo;
+	deletedInfo?: DeletedInfo;
 	reactions?: ReactionGroup[];
 	attachment?: Attachment;
 	createdAt: string;
@@ -180,6 +193,7 @@ export type MessageDeletedEvent = BaseChatEvent & {
 	type: 'message_deleted';
 	roomId: string;
 	messageId: string;
+	deletedBy: string;
 	deletedAt: string;
 };
 

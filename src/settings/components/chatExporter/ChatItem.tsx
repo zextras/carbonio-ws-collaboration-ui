@@ -47,7 +47,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ roomId, onClick }: ChatItemProps) =
 	const messageToDisplay = useMemo(() => {
 		switch (lastMessageOfRoom?.type) {
 			case MessageType.TEXT_MSG: {
-				if (lastMessageOfRoom.deleted) return deletedMessageLabel;
+				if (lastMessageOfRoom.deletedInfo) return deletedMessageLabel;
 				const text =
 					lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
 						? lastMessageOfRoom.attachment.name
