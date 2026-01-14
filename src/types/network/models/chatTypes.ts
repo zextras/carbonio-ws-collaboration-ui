@@ -36,7 +36,6 @@ export type ChatMessage = {
 	reactions?: ReactionGroup[];
 	attachment?: Attachment;
 	createdAt: string;
-	updatedAt?: string;
 };
 
 export type ChatMessageReply = {
@@ -49,7 +48,6 @@ export type ChatMessageReply = {
 export type ReactionGroup = {
 	reaction: string;
 	userIds: string[];
-	count: number;
 };
 
 // ==================== HISTORY/SEARCH TYPES ====================

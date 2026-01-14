@@ -21,6 +21,7 @@ export type ChatsRegistryStoreSlice = {
 	removeFastening: (roomId: string, messageId: string, fasteningId: string) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
+	decrementUnreadCount: (roomId: string, counter: number) => void;
 	setUnreadCount: (roomId: string, count: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;

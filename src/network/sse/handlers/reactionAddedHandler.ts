@@ -11,9 +11,10 @@ import { FasteningAction, MessageFastening, MessageType } from '../../../types/s
 /**
  * Handles reaction added events from SSE.
  * Adds the reaction as a fastening to the message.
+ * Also increments unread count if the reaction is from another user.
  */
 export function handleReactionAdded(event: ReactionAddedEvent): void {
-	const { addFastening } = useStore.getState();
+	const { addFastening, incrementUnreadCount, session } = useStore.getState();
 	const { roomId, messageId, userId, reaction } = event;
 
 	const fastening: MessageFastening = {
@@ -28,6 +29,11 @@ export function handleReactionAdded(event: ReactionAddedEvent): void {
 	};
 
 	addFastening([fastening]);
+
+	// Increment unread count if the reaction is from another user
+	if (session.id && userId !== session.id) {
+		incrementUnreadCount(roomId, 1);
+	}
 
 	console.log('[handleReactionAdded] Reaction added:', reaction, 'to message:', messageId);
 }

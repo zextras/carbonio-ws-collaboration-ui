@@ -13,8 +13,10 @@ import { debounce, first } from 'lodash';
 import ChatApi from '../../../network/apis/ChatApi';
 import {
 	mapReadMarkersToMarkers,
+	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
 } from '../../../network/sse/utilities/messageMapper';
+import { MessageFastening } from '../../../types/store/ChatsRegistryTypes';
 import {
 	getHistoryIsLoadedDisabled,
 	getIsInitialTimelineLoaded
@@ -88,6 +90,7 @@ const MessageHistoryLoader = ({
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInitialTimelineLoaded = useStore((store) => store.setInitialTimelineLoaded);
 	const updateHistory = useStore((store) => store.updateHistory);
+	const addFastening = useStore((store) => store.addFastening);
 	const currentUserId = useStore(getUserId);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,6 +131,22 @@ const MessageHistoryLoader = ({
 							);
 							// Use updateHistory with markers for atomic update (messages + read status)
 							updateHistory(roomId, messages, markers);
+
+							// Extract reactions from timeline messages and add them as fastenings
+							const allFastenings: MessageFastening[] = [];
+							response.items.forEach((item) => {
+								if (item.itemType === 'message' && item.message.reactions) {
+									const fastenings = mapReactionsToFastenings(
+										item.message.id,
+										roomId,
+										item.message.reactions
+									);
+									allFastenings.push(...fastenings);
+								}
+							});
+							if (allFastenings.length > 0) {
+								addFastening(allFastenings);
+							}
 						} else if (markers) {
 							// Even if no new items, update markers if present
 							updateHistory(roomId, [], markers);
