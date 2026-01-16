@@ -159,14 +159,16 @@ export const HistoryLoaderBefore = ({
 						}
 
 						// Scroll anchoring: maintain visual position after adding content above
-						// Use requestAnimationFrame to wait for DOM update
+						// Use double requestAnimationFrame to ensure DOM is updated
 						requestAnimationFrame(() => {
-							if (scrollContainer) {
-								const scrollHeightAfter = scrollContainer.scrollHeight;
-								const heightDiff = scrollHeightAfter - scrollHeightBefore;
-								scrollContainer.scrollTop = scrollTopBefore + heightDiff;
-							}
-							setIsLoadingTimeline(roomId, false);
+							requestAnimationFrame(() => {
+								if (scrollContainer) {
+									const scrollHeightAfter = scrollContainer.scrollHeight;
+									const heightDiff = scrollHeightAfter - scrollHeightBefore;
+									scrollContainer.scrollTop = scrollTopBefore + heightDiff;
+								}
+								setIsLoadingTimeline(roomId, false);
+							});
 						});
 					} else {
 						if (markers) {
@@ -436,16 +438,18 @@ const MessageHistoryLoader = ({
 								addFastening(allFastenings);
 							}
 
-							// Wait for DOM to update before hiding spinner and applying scroll anchoring
+							// Scroll anchoring: maintain visual position after adding content above
+							// Use double requestAnimationFrame to ensure DOM is updated
 							requestAnimationFrame(() => {
-								// Scroll anchoring: maintain visual position after adding content above
-								// Only apply when loading more history (not initial load)
-								if (hasExistingMessages && scrollContainer) {
-									const scrollHeightAfter = scrollContainer.scrollHeight;
-									const heightDiff = scrollHeightAfter - scrollHeightBefore;
-									scrollContainer.scrollTop = scrollTopBefore + heightDiff;
-								}
-								setIsLoadingTimeline(roomId, false);
+								requestAnimationFrame(() => {
+									// Only apply scroll anchoring when loading more history (not initial load)
+									if (hasExistingMessages && scrollContainer) {
+										const scrollHeightAfter = scrollContainer.scrollHeight;
+										const heightDiff = scrollHeightAfter - scrollHeightBefore;
+										scrollContainer.scrollTop = scrollTopBefore + heightDiff;
+									}
+									setIsLoadingTimeline(roomId, false);
+								});
 							});
 						} else {
 							if (markers) {
