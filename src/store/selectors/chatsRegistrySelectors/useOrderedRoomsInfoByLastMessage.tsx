@@ -17,8 +17,12 @@ export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
 	);
 	const listOfConvLastMessage: FilteredConversation[] = [];
 	forEach(filteredRooms, (room) => {
-		const messages = chatsRegistry[room.id]?.messages;
-		const lastMessageDate = messages?.[messages.length - 1]?.date ?? 0;
+		const registry = chatsRegistry[room.id];
+		const messages = registry?.messages;
+		const lastMessageFromArray = messages?.[messages.length - 1]?.date ?? 0;
+		// Use lastMessageForInbox if it's more recent (received via SSE while viewing historical page)
+		const lastMessageForInbox = registry?.lastMessageForInbox?.date ?? 0;
+		const lastMessageDate = Math.max(lastMessageFromArray, lastMessageForInbox);
 		const draftMessageDate = activeConversations[room.id]?.draftMessage?.date ?? 0;
 		listOfConvLastMessage.push({
 			roomId: room.id,

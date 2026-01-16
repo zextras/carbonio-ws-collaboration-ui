@@ -158,6 +158,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/NEW_INBOX_MESSAGE'
 		);
 	},
+	setLastMessageForInbox: (roomId: string, message: Message): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].lastMessageForInbox = message;
+			}),
+			false,
+			'CHAT/SET_LAST_MESSAGE_FOR_INBOX'
+		);
+	},
 	updateHistory: (roomId: string, messageArray: Message[], markers?: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -487,6 +497,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].hasMoreAfter = hasMore;
+				// Clear lastMessageForInbox when we've loaded the latest page
+				// The messages array now contains the latest messages
+				if (!hasMore) {
+					draft.chatsRegistry[roomId].lastMessageForInbox = undefined;
+				}
 			}),
 			false,
 			'CHAT/SET_HAS_MORE_AFTER'

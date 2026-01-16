@@ -8,6 +8,7 @@ export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
 	newMessage: (message: Message) => void;
 	newInboxMessage: (message: Message) => void;
+	setLastMessageForInbox: (roomId: string, message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[], markers?: Marker[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
 	setRepliedMessage: (
@@ -45,6 +46,8 @@ export type ChatRegistry = {
 	hasMoreBefore: boolean;
 	hasMoreAfter: boolean;
 	isLoadingTimeline: boolean;
+	// Last message received via SSE - used for inbox display when viewing historical pages
+	lastMessageForInbox?: Message;
 };
 
 export type Message = TextMessage | ConfigurationMessage | MessageFastening;

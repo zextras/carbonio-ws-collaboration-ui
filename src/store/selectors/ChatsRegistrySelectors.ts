@@ -71,19 +71,31 @@ export const getLastTextMessageIdSelector = (
 };
 
 export const getLastMessageIdSelector = (store: RootStore, roomId: string): string | undefined => {
-	const messages = store.chatsRegistry[roomId]?.messages;
-	if (messages?.[messages.length - 1]) {
-		return messages[messages.length - 1].id;
+	const registry = store.chatsRegistry[roomId];
+	const messages = registry?.messages;
+	const lastFromArray = messages?.[messages.length - 1];
+	const lastForInbox = registry?.lastMessageForInbox;
+
+	// Return the more recent one (for inbox display when viewing historical pages)
+	if (lastForInbox && (!lastFromArray || lastForInbox.date > lastFromArray.date)) {
+		return lastForInbox.id;
 	}
-	return undefined;
+	return lastFromArray?.id;
 };
 
 export const getMessageSelector = (
 	store: RootStore,
 	roomId: string,
 	messageId: string | undefined
-): Message | undefined =>
-	find(store.chatsRegistry[roomId]?.messages, (message) => message.id === messageId);
+): Message | undefined => {
+	const registry = store.chatsRegistry[roomId];
+	// First check if it's the lastMessageForInbox (for inbox display when viewing historical pages)
+	if (registry?.lastMessageForInbox?.id === messageId) {
+		return registry.lastMessageForInbox;
+	}
+	// Otherwise look in the messages array
+	return find(registry?.messages, (message) => message.id === messageId);
+};
 
 const listOfConvByLastMessage: {
 	roomId: string;

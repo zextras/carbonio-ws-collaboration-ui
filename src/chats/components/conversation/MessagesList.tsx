@@ -81,9 +81,15 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	// Mark all messages in the room as read (single API call)
 	const markRoomAsRead = useCallback(() => {
+		const registry = useStore.getState().chatsRegistry[roomId];
 		// Check if there are unread messages and we're not already marking
-		const currentUnread = useStore.getState().chatsRegistry[roomId]?.unread ?? 0;
+		const currentUnread = registry?.unread ?? 0;
 		if (currentUnread === 0 || isMarkingAsReadRef.current) return;
+
+		// Don't mark as read if we're viewing historical pages (hasMoreAfter=true)
+		// User hasn't actually seen the latest messages yet
+		const hasMoreAfter = registry?.hasMoreAfter ?? false;
+		if (hasMoreAfter) return;
 
 		isMarkingAsReadRef.current = true;
 		ChatApi.setReadMarker(roomId)

@@ -19,7 +19,8 @@ import { mapChatMessageToTextMessage } from '../utilities/messageMapper';
  * or clicks "Return to latest".
  */
 export function handleMessageNew(event: MessageNewEvent): void {
-	const { newMessage, incrementUnreadCount, rooms, session, chatsRegistry } = useStore.getState();
+	const { newMessage, setLastMessageForInbox, incrementUnreadCount, rooms, session, chatsRegistry } =
+		useStore.getState();
 	const { roomId, message } = event;
 
 	// Check if room exists
@@ -36,8 +37,10 @@ export function handleMessageNew(event: MessageNewEvent): void {
 	const hasMoreAfter = chatsRegistry[roomId]?.hasMoreAfter ?? false;
 
 	if (hasMoreAfter) {
-		// User is viewing historical messages - don't add to chat to prevent fragmentation
-		// The message will appear when they scroll to the end or click "Return to latest"
+		// User is viewing historical messages - don't add to chat view to prevent fragmentation
+		// But DO update lastMessageForInbox so the conversation list shows the latest message
+		setLastMessageForInbox(roomId, textMessage);
+
 		// Only increment unread count for messages from others
 		if (message.senderId !== session.id) {
 			incrementUnreadCount(roomId, 1);
