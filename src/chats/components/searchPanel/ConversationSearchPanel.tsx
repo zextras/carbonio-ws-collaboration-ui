@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/no-autofocus */
-import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect, useRef } from 'react';
 
 import {
 	Button,
 	Container,
 	Icon,
 	Input,
+	Spinner,
 	Text,
 	Tooltip,
 	useSnackbar
@@ -27,6 +28,8 @@ import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selecto
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
+
+const SEARCH_LIMIT = 50;
 
 enum RequestStatus {
 	IDLE = 'idle',
@@ -75,6 +78,10 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.IDLE);
 	const [searchText, setSearchText] = useState<string>('');
 	const [activeSearchText, setActiveSearchText] = useState<string>('');
+	const [hasMore, setHasMore] = useState<boolean>(false);
+	const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
 	const clearSearchResults = useStore((state) => state.clearSearchResults);
@@ -92,17 +99,19 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 		if (!searchText || requestStatus === RequestStatus.LOADING) return;
 		setRequestStatus(RequestStatus.LOADING);
 		setActiveSearchText(searchText);
+		setHasMore(false);
 		capture(TRACKER_EVENT.conversationSearch, {
 			app: CHATS_APP_ID,
 			roomType,
 			searchTextLength: searchText.length
 		});
-		ChatApi.searchMessages(roomId, searchText)
+		ChatApi.searchMessages(roomId, searchText, undefined, SEARCH_LIMIT)
 			.then((response) => {
 				const textMessages = response.messages.map((msg) =>
 					mapChatMessageToTextMessage(msg, currentUserId || '')
 				);
 				setSearchResults(roomId, textMessages);
+				setHasMore(response.hasMore);
 				setRequestStatus(RequestStatus.SUCCESS);
 			})
 			.catch(() => {
@@ -119,6 +128,62 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 				});
 			});
 	}, [capture, createSnackbar, currentUserId, errorSnackbarLabel, requestStatus, roomId, roomType, searchText, setSearchResults]);
+
+	const loadMore = useCallback(() => {
+		if (!activeSearchText || isLoadingMore || !hasMore || !results || results.length === 0) return;
+
+		setIsLoadingMore(true);
+		const lastMessage = results[results.length - 1];
+		const beforeTimestamp = lastMessage.date
+			? new Date(lastMessage.date).toISOString()
+			: undefined;
+
+		ChatApi.searchMessages(roomId, activeSearchText, beforeTimestamp, SEARCH_LIMIT)
+			.then((response) => {
+				const textMessages = response.messages.map((msg) =>
+					mapChatMessageToTextMessage(msg, currentUserId || '')
+				);
+				setSearchResults(roomId, [...results, ...textMessages]);
+				setHasMore(response.hasMore);
+				setIsLoadingMore(false);
+			})
+			.catch(() => {
+				setIsLoadingMore(false);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: errorSnackbarLabel
+				});
+			});
+	}, [activeSearchText, createSnackbar, currentUserId, errorSnackbarLabel, hasMore, isLoadingMore, results, roomId, setSearchResults]);
+
+	// IntersectionObserver for infinite scroll
+	useEffect(() => {
+		const scrollContainer = scrollContainerRef.current;
+		const triggerElement = loadMoreRef.current;
+
+		if (!triggerElement || !scrollContainer) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+					loadMore();
+				}
+			},
+			{
+				root: scrollContainer,
+				threshold: 0.1,
+				rootMargin: '100px'
+			}
+		);
+
+		observer.observe(triggerElement);
+
+		return () => {
+			observer.unobserve(triggerElement);
+			observer.disconnect();
+		};
+	}, [hasMore, isLoadingMore, loadMore]);
 
 	const searchResults = useMemo(
 		() =>
@@ -160,8 +225,15 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 			case RequestStatus.SUCCESS:
 				if (results && results.length > 0) {
 					return (
-						<Container mainAlignment="flex-start" gap="0.5rem">
+						<Container mainAlignment="flex-start" gap="0.5rem" width="100%">
 							{searchResults}
+							{/* Infinite scroll trigger and spinner */}
+							<div ref={loadMoreRef} style={{ minHeight: '1px' }} />
+							{isLoadingMore && (
+								<Container padding="medium" mainAlignment="center" crossAlignment="center">
+									<Spinner />
+								</Container>
+							)}
 						</Container>
 					);
 				}
@@ -185,6 +257,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 				return null;
 		}
 	}, [
+		isLoadingMore,
 		noResults1Label,
 		noResults2Label,
 		requestStatus,
@@ -229,6 +302,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 							onClick={() => {
 								setSearchText('');
 								setRequestStatus(RequestStatus.IDLE);
+								setHasMore(false);
 								clearSearchResults(roomId);
 							}}
 						/>
@@ -256,9 +330,25 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					</Tooltip>
 				)}
 			</Container>
-			<Container padding="small" gap="0.5rem" width="fill" style={{ overflowY: 'auto' }}>
+			<div
+				ref={scrollContainerRef}
+				style={{
+					padding: '0.5rem',
+					boxSizing: 'border-box',
+					width: '100%',
+					flex: 1,
+					minHeight: 0,
+					overflowY: 'auto',
+					overflowX: 'hidden',
+					display: 'flex',
+					flexDirection: 'column',
+					gap: '0.5rem',
+					justifyContent: requestStatus === RequestStatus.SUCCESS && results && results.length > 0 ? 'flex-start' : 'center',
+					alignItems: 'center'
+				}}
+			>
 				{resultsComponents}
-			</Container>
+			</div>
 		</Container>
 	);
 };

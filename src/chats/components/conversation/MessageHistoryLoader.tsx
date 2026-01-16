@@ -436,19 +436,22 @@ const MessageHistoryLoader = ({
 								addFastening(allFastenings);
 							}
 
-							// Scroll anchoring: maintain visual position after adding content above
-							// Only apply when loading more history (not initial load)
-							if (hasExistingMessages) {
-								requestAnimationFrame(() => {
-									if (scrollContainer) {
-										const scrollHeightAfter = scrollContainer.scrollHeight;
-										const heightDiff = scrollHeightAfter - scrollHeightBefore;
-										scrollContainer.scrollTop = scrollTopBefore + heightDiff;
-									}
-								});
+							// Wait for DOM to update before hiding spinner and applying scroll anchoring
+							requestAnimationFrame(() => {
+								// Scroll anchoring: maintain visual position after adding content above
+								// Only apply when loading more history (not initial load)
+								if (hasExistingMessages && scrollContainer) {
+									const scrollHeightAfter = scrollContainer.scrollHeight;
+									const heightDiff = scrollHeightAfter - scrollHeightBefore;
+									scrollContainer.scrollTop = scrollTopBefore + heightDiff;
+								}
+								setIsLoadingTimeline(roomId, false);
+							});
+						} else {
+							if (markers) {
+								updateHistory(roomId, [], markers);
 							}
-						} else if (markers) {
-							updateHistory(roomId, [], markers);
+							setIsLoadingTimeline(roomId, false);
 						}
 
 						if (!initialLoaded) {
@@ -469,8 +472,6 @@ const MessageHistoryLoader = ({
 					.catch((err) => {
 						console.error('[MessageHistoryLoader] Failed to load timeline:', err);
 						setHistoryLoadDisabled(roomId, false);
-					})
-					.finally(() => {
 						setIsLoadingTimeline(roomId, false);
 					});
 			}
