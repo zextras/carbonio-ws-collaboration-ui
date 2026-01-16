@@ -164,6 +164,9 @@ export const useConfigurationMessageLabel = (
 		case OperationType.MEMBER_REMOVED:
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
+			if (roomType === RoomType.ONE_TO_ONE) {
+				return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+			}
 			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);

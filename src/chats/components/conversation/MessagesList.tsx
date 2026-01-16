@@ -12,7 +12,7 @@ import { debounce, groupBy, last, map, size } from 'lodash';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
-import MessageHistoryLoader from './MessageHistoryLoader';
+import MessageHistoryLoader, { HistoryLoaderAfter } from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
@@ -72,6 +72,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
 	const setUnreadCount = useStore((store) => store.setUnreadCount);
+
+	// Track the previous last message to detect new messages from me
+	const prevLastMessageIdRef = useRef<string | undefined>(undefined);
+
+	// Track the first message ID to detect if we're loading messages before or after
+	const prevFirstMessageIdRef = useRef<string | undefined>(undefined);
 
 	// Track if a read request is in flight to prevent duplicate calls
 	const isMarkingAsReadRef = useRef(false);
@@ -198,17 +204,28 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const messagesSize = useMemo(() => size(roomMessages), [roomMessages]);
 
+	// Get the first message ID (oldest message in the list)
+	const firstMessageId = useMemo(() => messages?.[0]?.id, [messages]);
+
 	// Manage scroll position when messages size changes
 	useEffect(() => {
 		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+		const prevFirstId = prevFirstMessageIdRef.current;
+
+		// Update the ref for next comparison
+		prevFirstMessageIdRef.current = firstMessageId;
+
 		if (!actualPosition) {
 			// When the chat is loaded for the first time keep scroll to the bottom
 			scrollToEnd(MessagesListWrapperRef);
-		} else {
-			// When history is loaded, keep the scroll to the message where we stopped scroll
+		} else if (prevFirstId !== firstMessageId) {
+			// First message changed - we loaded messages BEFORE (scroll up)
+			// Scroll to maintain the user's position
 			scrollToMessage(actualPosition);
 		}
-	}, [messagesSize, roomId]);
+		// If firstMessageId is the same, we loaded messages AFTER (scroll down)
+		// Don't scroll - let the user's scroll position stay where it is
+	}, [messagesSize, roomId, firstMessageId]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => formatDate(message.date, 'YYMMDD')),
@@ -269,21 +286,50 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
+	// Scroll to bottom when I send a message (detect new message from me)
+	// Use the raw messages array (not enhanced with date messages) to detect new messages
+	useEffect(() => {
+		const store = useStore.getState();
+
+		// Don't auto-scroll when loading timeline (e.g., search result navigation)
+		if (store.chatsRegistry[roomId]?.isLoadingTimeline) return;
+
+		const lastMessage = last(messages);
+		const lastMessageId = lastMessage?.id;
+		const prevLastMessageId = prevLastMessageIdRef.current;
+
+		// Update ref for next comparison
+		prevLastMessageIdRef.current = lastMessageId;
+
+		// If there's a new message and it's from me, scroll to bottom
+		if (
+			lastMessageId &&
+			lastMessageId !== prevLastMessageId &&
+			lastMessage?.type === MessageType.TEXT_MSG &&
+			lastMessage?.from === myUserId
+		) {
+			// Use requestAnimationFrame to ensure DOM is updated, then scroll
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					handleClickScrollButton();
+				});
+			});
+		}
+	}, [messages, myUserId, handleClickScrollButton, roomId]);
+
+	// Scroll to bottom when at bottom and new message arrives from others
 	const newMessageScrollToButtonHandler = useCallback(
-		// scroll to the bottom when a new message arrives, and we are already at the bottom
-		// checking to be actually at the bottom and also if last message it's mine
-		// since we want to go always at the bottom when we send a message, no matter
-		// if we scrolled up in the history
 		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
-			if (
-				size(roomMessages) > 0 &&
-				event?.detail.roomId === roomId &&
-				(actualScrollPosition === last(roomMessages)?.id ||
-					(event?.detail.roomId === MessageType.TEXT_MSG && event?.detail.roomId === myUserId))
-			) {
-				setTimeout(() => {
-					scrollToEnd(MessagesListWrapperRef);
-				}, 200);
+			if (size(roomMessages) > 0 && event?.detail.roomId === roomId) {
+				const isMyMessage = event?.detail.from === myUserId;
+				const isAtBottom = actualScrollPosition === last(roomMessages)?.id;
+
+				// Only scroll for others' messages when at bottom (my messages handled by useEffect above)
+				if (!isMyMessage && isAtBottom) {
+					setTimeout(() => {
+						scrollToEnd(MessagesListWrapperRef);
+					}, 200);
+				}
 			}
 		},
 		[roomId, actualScrollPosition, roomMessages, myUserId]
@@ -310,7 +356,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				{!hasMoreMessageToLoad && (
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
-				{messagesWrapped}
+					{messagesWrapped}
+				<HistoryLoaderAfter roomId={roomId} messageListRef={messageListRef} />
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>

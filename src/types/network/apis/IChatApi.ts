@@ -19,9 +19,19 @@ export interface IChatApi {
 	// ==================== TIMELINE ====================
 
 	/**
-	 * Gets timeline for a room (messages + system events) using cursor-based pagination
+	 * Gets timeline for a room (messages + system events) with bidirectional pagination
+	 * @param roomId - Room identifier
+	 * @param options - Pagination options: before, after, around, limit
 	 */
-	getTimeline(roomId: string, before?: string, limit?: number): Promise<TimelineResponse>;
+	getTimeline(
+		roomId: string,
+		options?: {
+			before?: string;
+			after?: string;
+			around?: string;
+			limit?: number;
+		}
+	): Promise<TimelineResponse>;
 
 	// ==================== MESSAGES ====================
 

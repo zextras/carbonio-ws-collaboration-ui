@@ -58,7 +58,10 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry =
 			markers: {},
 			unread: 0,
 			searchResults: [],
-			backfillQueue: []
+			backfillQueue: [],
+			hasMoreBefore: true,
+			hasMoreAfter: false,
+			isLoadingTimeline: false
 		};
 	}
 	return store.chatsRegistry[roomId];
@@ -467,6 +470,49 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			}),
 			false,
 			'CHAT/BACKFILL_REQUEST_PROCESSED'
+		);
+	},
+	setHasMoreBefore: (roomId: string, hasMore: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].hasMoreBefore = hasMore;
+			}),
+			false,
+			'CHAT/SET_HAS_MORE_BEFORE'
+		);
+	},
+	setHasMoreAfter: (roomId: string, hasMore: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].hasMoreAfter = hasMore;
+			}),
+			false,
+			'CHAT/SET_HAS_MORE_AFTER'
+		);
+	},
+	clearMessages: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.chatsRegistry[roomId]) {
+					draft.chatsRegistry[roomId].messages = [];
+					draft.chatsRegistry[roomId].hasMoreBefore = true;
+					draft.chatsRegistry[roomId].hasMoreAfter = true;
+				}
+			}),
+			false,
+			'CHAT/CLEAR_MESSAGES'
+		);
+	},
+	setIsLoadingTimeline: (roomId: string, isLoading: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].isLoadingTimeline = isLoading;
+			}),
+			false,
+			'CHAT/SET_IS_LOADING_TIMELINE'
 		);
 	}
 });

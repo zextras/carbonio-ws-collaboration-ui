@@ -28,6 +28,10 @@ export type ChatsRegistryStoreSlice = {
 	addMessageRange: (roomId: string, range: MessageRange) => void;
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
 	shiftBackfillQueue: (roomId: string) => void;
+	setHasMoreBefore: (roomId: string, hasMore: boolean) => void;
+	setHasMoreAfter: (roomId: string, hasMore: boolean) => void;
+	clearMessages: (roomId: string) => void;
+	setIsLoadingTimeline: (roomId: string, isLoading: boolean) => void;
 };
 
 export type ChatRegistry = {
@@ -38,6 +42,9 @@ export type ChatRegistry = {
 	searchResults: TextMessage[];
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
+	hasMoreBefore: boolean;
+	hasMoreAfter: boolean;
+	isLoadingTimeline: boolean;
 };
 
 export type Message = TextMessage | ConfigurationMessage | MessageFastening;

@@ -121,21 +121,49 @@ function mapSystemEventTypeToOperation(eventType: SystemEventType): OperationTyp
 }
 
 /**
+ * Extracts actorId and memberId from event content based on event type.
+ * Backend uses different field names for each event type.
+ */
+function extractEventActorAndMember(
+	eventType: SystemEventType,
+	content: Record<string, unknown> | undefined
+): { actorId: string; memberId: string } {
+	if (!content) return { actorId: '', memberId: '' };
+
+	switch (eventType) {
+		case 'ROOM_CREATED':
+			return {
+				actorId: (content.creatorId as string) || '',
+				memberId: ''
+			};
+		case 'MEMBER_ADDED': {
+			const addedUserIds = content.addedUserIds as string[] | undefined;
+			return {
+				actorId: (content.addedByUserId as string) || '',
+				memberId: addedUserIds?.[0] || ''
+			};
+		}
+		case 'MEMBER_REMOVED':
+			return {
+				actorId: (content.removedByUserId as string) || '',
+				memberId: (content.removedUserId as string) || ''
+			};
+		default:
+			return { actorId: '', memberId: '' };
+	}
+}
+
+/**
  * Maps a SystemEvent from the REST API to a ConfigurationMessage for the store.
  */
 export function mapSystemEventToConfigurationMessage(
 	systemEvent: SystemEvent,
 	roomId: string
 ): ConfigurationMessage {
-	// Extract the actor from content (who performed the action)
-	const actorId = (systemEvent.content?.actorId as string) || '';
-
-	// For MEMBER_ADDED/REMOVED, the value is the affected member ID
-	// For ROOM_CREATED, we can use the actor or leave empty
-	let value = '';
-	if (systemEvent.type === 'MEMBER_ADDED' || systemEvent.type === 'MEMBER_REMOVED') {
-		value = (systemEvent.content?.memberId as string) || '';
-	}
+	const { actorId, memberId } = extractEventActorAndMember(
+		systemEvent.type,
+		systemEvent.content as Record<string, unknown> | undefined
+	);
 
 	return {
 		id: systemEvent.id,
@@ -143,7 +171,7 @@ export function mapSystemEventToConfigurationMessage(
 		type: MessageType.CONFIGURATION_MSG,
 		date: new Date(systemEvent.createdAt).getTime(),
 		operation: mapSystemEventTypeToOperation(systemEvent.type),
-		value,
+		value: memberId,
 		from: actorId,
 		read: MarkerStatus.READ // System events don't have read status
 	};

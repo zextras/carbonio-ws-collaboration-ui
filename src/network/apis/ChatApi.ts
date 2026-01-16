@@ -33,12 +33,18 @@ class ChatApi implements IChatApi {
 
 	public getTimeline(
 		roomId: string,
-		before?: string,
-		limit?: number
+		options?: {
+			before?: string;
+			after?: string;
+			around?: string;
+			limit?: number;
+		}
 	): Promise<TimelineResponse> {
 		const params = new URLSearchParams();
-		if (before) params.append('before', before);
-		if (limit) params.append('limit', limit.toString());
+		if (options?.before) params.append('before', options.before);
+		if (options?.after) params.append('after', options.after);
+		if (options?.around) params.append('around', options.around);
+		if (options?.limit) params.append('limit', options.limit.toString());
 		const queryString = params.toString() ? `?${params.toString()}` : '';
 
 		return fetchAPI(`rooms/${roomId}/timeline${queryString}`, RequestType.GET);

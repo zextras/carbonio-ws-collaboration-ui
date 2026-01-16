@@ -28,6 +28,7 @@ import { Message } from '../types/store/ChatsRegistryTypes';
 
 export enum EventName {
 	NEW_MESSAGE = 'newMessage',
+	MESSAGE_SENT = 'messageSent',
 	INCOMING_MEETING = 'incomingMeeting',
 	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification',
 	MEMBER_MUTED = 'memberMuted',
@@ -48,6 +49,11 @@ export enum EventName {
 export type NewMessageEvent = {
 	name: EventName.NEW_MESSAGE;
 	data: Message;
+};
+
+export type MessageSentEvent = {
+	name: EventName.MESSAGE_SENT;
+	data: { roomId: string };
 };
 
 export type IncomingMeetingEvent = {
@@ -127,6 +133,7 @@ export type MeetingParticipantRaiseHandEvent = {
 
 type AppCustomEvent =
 	| NewMessageEvent
+	| MessageSentEvent
 	| IncomingMeetingEvent
 	| RemovedMeetingNotificationEvent
 	| MemberMutedEvent

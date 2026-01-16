@@ -31,7 +31,8 @@ import {
 } from './types/store/ChatsRegistryTypes';
 import { SystemEventType } from './types/network/models/chatTypes';
 import { UserType } from './types/store/UserTypes';
-import { setDateDefault, dateToTimestamp } from './utils/dateUtils';
+import { setDateDefault, dateToTimestamp, isBefore } from './utils/dateUtils';
+import { Marker } from './types/store/ChatsRegistryTypes';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -89,10 +90,96 @@ export default function MainApp(): React.JSX.Element {
 							}
 						};
 
+						// Helper to extract actorId and memberId from event content based on type
+						const extractEventActorAndMember = (
+							eventType: SystemEventType,
+							content: Record<string, unknown> | undefined
+						): { actorId: string; memberId: string } => {
+							if (!content) return { actorId: '', memberId: '' };
+
+							switch (eventType) {
+								case 'ROOM_CREATED':
+									return {
+										actorId: (content.creatorId as string) || '',
+										memberId: ''
+									};
+								case 'MEMBER_ADDED': {
+									const addedUserIds = content.addedUserIds as string[] | undefined;
+									return {
+										actorId: (content.addedByUserId as string) || '',
+										memberId: addedUserIds?.[0] || ''
+									};
+								}
+								case 'MEMBER_REMOVED':
+									return {
+										actorId: (content.removedByUserId as string) || '',
+										memberId: (content.removedUserId as string) || ''
+									};
+								default:
+									return { actorId: '', memberId: '' };
+							}
+						};
+
+						// Helper to convert API markers to store format and calculate read status
+						const calcReadStatusFromMarkers = (
+							messageId: string,
+							messageDate: number,
+							senderId: string,
+							apiMarkers: Array<{ userId: string; messageId: string; readAt: string }> | undefined,
+							members: Array<{ userId: string }> | undefined,
+							sessionId: string
+						): MarkerStatus => {
+							// Only show checkmarks for messages sent by the current user
+							if (senderId !== sessionId) {
+								return MarkerStatus.UNREAD;
+							}
+
+							if (!apiMarkers || apiMarkers.length === 0 || !members) {
+								return MarkerStatus.UNREAD;
+							}
+
+							// Count how many OTHER users have read this message
+							const readByCount = apiMarkers.filter((marker) => {
+								// Skip our own marker
+								if (marker.userId === sessionId) return false;
+								// Check if the marker points to this message or a later one
+								const markerDate = dateToTimestamp(marker.readAt);
+								return isBefore(messageDate, markerDate) || marker.messageId === messageId;
+							}).length;
+
+							// Calculate total other members (excluding ourselves)
+							const otherMembersCount = members.filter(
+								(m) => m.userId !== sessionId
+							).length;
+
+							if (readByCount >= otherMembersCount && otherMembersCount > 0) {
+								return MarkerStatus.READ;
+							} else if (readByCount > 0) {
+								return MarkerStatus.READ_BY_SOMEONE;
+							}
+							return MarkerStatus.UNREAD;
+						};
+
+						// Get session ID
+						const { session } = useStore.getState();
+						const sessionId = session.id;
+
 						// Process last messages/events and unread counts
 						inboxResponse.conversations.forEach((conv) => {
 							// Set unread count for each room
 							setUnreadCount(conv.roomId, conv.unreadCount);
+
+							// Store markers in the registry for this room
+							if (conv.markers && conv.markers.length > 0) {
+								const { updateReadStatus } = useStore.getState();
+								const storeMarkers: Marker[] = conv.markers.map((m) => ({
+									from: m.userId,
+									messageId: m.messageId,
+									markerDate: dateToTimestamp(m.readAt),
+									type: 'displayed' as const
+								}));
+								updateReadStatus(conv.roomId, storeMarkers);
+							}
 
 							// Determine which is more recent: lastMessage or lastEvent
 							const msgDate = conv.lastMessage
@@ -105,6 +192,15 @@ export default function MainApp(): React.JSX.Element {
 							// Add the most recent item (message or event) to chat registry
 							if (msgDate >= eventDate && conv.lastMessage) {
 								const msg = conv.lastMessage;
+								// Calculate read status using markers
+								const readStatus = calcReadStatusFromMarkers(
+									msg.id,
+									dateToTimestamp(msg.createdAt),
+									msg.senderId,
+									conv.markers,
+									conv.room.members,
+									sessionId
+								);
 								const textMessage: TextMessage = {
 									id: msg.id,
 									stanzaId: msg.id,
@@ -113,7 +209,7 @@ export default function MainApp(): React.JSX.Element {
 									type: MessageType.TEXT_MSG,
 									from: msg.senderId,
 									text: msg.text || msg.attachment?.name || '',
-									read: MarkerStatus.UNREAD,
+									read: readStatus,
 									forwardedInfo: msg.forwardedInfo,
 									editedInfo: msg.editedInfo,
 									deletedInfo: msg.deletedInfo,
@@ -129,14 +225,18 @@ export default function MainApp(): React.JSX.Element {
 								newInboxMessage(textMessage);
 							} else if (conv.lastEvent) {
 								const evt = conv.lastEvent;
+								const { actorId, memberId } = extractEventActorAndMember(
+									evt.type,
+									evt.content as Record<string, unknown> | undefined
+								);
 								const configMessage: ConfigurationMessage = {
 									id: evt.id,
 									roomId: conv.roomId,
 									date: dateToTimestamp(evt.createdAt),
 									type: MessageType.CONFIGURATION_MSG,
 									operation: mapEventTypeToOperation(evt.type),
-									value: (evt.content?.memberId as string) || '',
-									from: (evt.content?.actorId as string) || '',
+									value: memberId,
+									from: actorId,
 									read: MarkerStatus.UNREAD
 								};
 								newInboxMessage(configMessage);
