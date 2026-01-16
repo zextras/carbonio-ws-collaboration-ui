@@ -11,6 +11,7 @@ import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first, last } from 'lodash';
 
 import ChatApi from '../../../network/apis/ChatApi';
+import { scrollToMessage } from '../../../utils/scrollUtils';
 import {
 	mapReadMarkersToMarkers,
 	mapReactionsToFastenings,
@@ -27,6 +28,7 @@ import useStore from '../../../store/Store';
 type HistoryLoaderProps = {
 	roomId: string;
 	messageListRef: React.RefObject<HTMLDivElement>;
+	scrollContainerRef: React.RefObject<HTMLDivElement>;
 };
 
 const Loader = styled.div`
@@ -85,7 +87,8 @@ const VisibilityContainer = styled.div`
  */
 export const HistoryLoaderBefore = ({
 	roomId,
-	messageListRef
+	messageListRef,
+	scrollContainerRef
 }: HistoryLoaderProps): ReactElement | null => {
 	const intersectionObserverRef = useRef<IntersectionObserver>();
 	const loaderRef = React.createRef<HTMLDivElement>();
@@ -96,6 +99,7 @@ export const HistoryLoaderBefore = ({
 		(store) => store.chatsRegistry[roomId]?.isLoadingTimeline ?? false
 	);
 	const setHasMoreBefore = useStore((store) => store.setHasMoreBefore);
+	const setIsLoadingTimeline = useStore((store) => store.setIsLoadingTimeline);
 	const updateHistory = useStore((store) => store.updateHistory);
 	const addFastening = useStore((store) => store.addFastening);
 	const currentUserId = useStore(getUserId);
@@ -115,7 +119,14 @@ export const HistoryLoaderBefore = ({
 			const oldestMessage = first(roomMessages);
 			const beforeDate = oldestMessage ? new Date(oldestMessage.date).toISOString() : undefined;
 
+			// Save scroll state before loading for scroll anchoring
+			const scrollContainer = scrollContainerRef?.current;
+			const scrollHeightBefore = scrollContainer?.scrollHeight || 0;
+			const scrollTopBefore = scrollContainer?.scrollTop || 0;
+
 			isLoadingRef.current = true;
+			// Set isLoadingTimeline to prevent other effects from scrolling during pagination
+			setIsLoadingTimeline(roomId, true);
 
 			ChatApi.getTimeline(roomId, { before: beforeDate, limit: 50 })
 				.then((response) => {
@@ -146,20 +157,35 @@ export const HistoryLoaderBefore = ({
 						if (allFastenings.length > 0) {
 							addFastening(allFastenings);
 						}
-					} else if (markers) {
-						updateHistory(roomId, [], markers);
+
+						// Scroll anchoring: maintain visual position after adding content above
+						// Use requestAnimationFrame to wait for DOM update
+						requestAnimationFrame(() => {
+							if (scrollContainer) {
+								const scrollHeightAfter = scrollContainer.scrollHeight;
+								const heightDiff = scrollHeightAfter - scrollHeightBefore;
+								scrollContainer.scrollTop = scrollTopBefore + heightDiff;
+							}
+							setIsLoadingTimeline(roomId, false);
+						});
+					} else {
+						if (markers) {
+							updateHistory(roomId, [], markers);
+						}
+						setIsLoadingTimeline(roomId, false);
 					}
 
 					setHasMoreBefore(roomId, response.hasMoreBefore);
 				})
 				.catch((err) => {
 					console.error('[HistoryLoaderBefore] Failed to load:', err);
+					setIsLoadingTimeline(roomId, false);
 				})
 				.finally(() => {
 					isLoadingRef.current = false;
 				});
 		}, 500),
-		[roomId, currentUserId, setHasMoreBefore, updateHistory, addFastening]
+		[roomId, currentUserId, setHasMoreBefore, setIsLoadingTimeline, updateHistory, addFastening, scrollContainerRef]
 	);
 
 	useEffect(() => {
@@ -196,7 +222,8 @@ export const HistoryLoaderBefore = ({
  */
 export const HistoryLoaderAfter = ({
 	roomId,
-	messageListRef
+	messageListRef,
+	scrollContainerRef
 }: HistoryLoaderProps): ReactElement | null => {
 	const intersectionObserverRef = useRef<IntersectionObserver>();
 	const loaderRef = React.createRef<HTMLDivElement>();
@@ -207,6 +234,7 @@ export const HistoryLoaderAfter = ({
 		(store) => store.chatsRegistry[roomId]?.isLoadingTimeline ?? false
 	);
 	const setHasMoreAfter = useStore((store) => store.setHasMoreAfter);
+	const setIsLoadingTimeline = useStore((store) => store.setIsLoadingTimeline);
 	const updateHistory = useStore((store) => store.updateHistory);
 	const addFastening = useStore((store) => store.addFastening);
 	const currentUserId = useStore(getUserId);
@@ -226,7 +254,13 @@ export const HistoryLoaderAfter = ({
 			const newestMessage = last(roomMessages);
 			const afterDate = newestMessage ? new Date(newestMessage.date).toISOString() : undefined;
 
+			// Save the anchor message ID - we'll scroll to this message after loading
+			// to maintain the user's position when new content is added below
+			const anchorMessageId = newestMessage?.id;
+
 			isLoadingRef.current = true;
+			// Set isLoadingTimeline to prevent other effects from scrolling during pagination
+			setIsLoadingTimeline(roomId, true);
 
 			ChatApi.getTimeline(roomId, { after: afterDate, limit: 50 })
 				.then((response) => {
@@ -257,14 +291,31 @@ export const HistoryLoaderAfter = ({
 						if (allFastenings.length > 0) {
 							addFastening(allFastenings);
 						}
-					} else if (markers) {
-						updateHistory(roomId, [], markers);
+
+						// Scroll anchoring: scroll to the anchor message to maintain position
+						// Use double requestAnimationFrame to ensure DOM is fully updated
+						// and all React effects have completed
+						requestAnimationFrame(() => {
+							requestAnimationFrame(() => {
+								if (anchorMessageId) {
+									scrollToMessage(anchorMessageId, 'end');
+								}
+								// Reset isLoadingTimeline after scroll is complete
+								setIsLoadingTimeline(roomId, false);
+							});
+						});
+					} else {
+						if (markers) {
+							updateHistory(roomId, [], markers);
+						}
+						setIsLoadingTimeline(roomId, false);
 					}
 
 					setHasMoreAfter(roomId, response.hasMoreAfter);
 				})
 				.catch((err) => {
 					console.error('[HistoryLoaderAfter] Failed to load:', err);
+					setIsLoadingTimeline(roomId, false);
 				})
 				.finally(() => {
 					isLoadingRef.current = false;
@@ -307,7 +358,8 @@ export const HistoryLoaderAfter = ({
  */
 const MessageHistoryLoader = ({
 	roomId,
-	messageListRef
+	messageListRef,
+	scrollContainerRef
 }: HistoryLoaderProps): ReactElement | null => {
 	const intersectionObserverRef = useRef<IntersectionObserver>();
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
@@ -336,7 +388,8 @@ const MessageHistoryLoader = ({
 			// Always use 'before' based on oldest message if messages exist (e.g., from inbox)
 			// This ensures we load older messages and the spinner shows above existing ones
 			let beforeDate: string | undefined;
-			if (roomMessages && roomMessages.length > 0) {
+			const hasExistingMessages = roomMessages && roomMessages.length > 0;
+			if (hasExistingMessages) {
 				const oldestMessageDate = first(roomMessages)?.date;
 				if (oldestMessageDate) {
 					beforeDate = new Date(oldestMessageDate).toISOString();
@@ -344,6 +397,11 @@ const MessageHistoryLoader = ({
 			}
 
 			if (roomId.startsWith('placeholder-')) return;
+
+			// Save scroll state before loading for scroll anchoring (only when loading more history)
+			const scrollContainer = scrollContainerRef?.current;
+			const scrollHeightBefore = scrollContainer?.scrollHeight || 0;
+			const scrollTopBefore = scrollContainer?.scrollTop || 0;
 
 			if (!historyLoadedDisabled) {
 				setHistoryLoadDisabled(roomId, true);
@@ -377,6 +435,18 @@ const MessageHistoryLoader = ({
 							if (allFastenings.length > 0) {
 								addFastening(allFastenings);
 							}
+
+							// Scroll anchoring: maintain visual position after adding content above
+							// Only apply when loading more history (not initial load)
+							if (hasExistingMessages) {
+								requestAnimationFrame(() => {
+									if (scrollContainer) {
+										const scrollHeightAfter = scrollContainer.scrollHeight;
+										const heightDiff = scrollHeightAfter - scrollHeightBefore;
+										scrollContainer.scrollTop = scrollTopBefore + heightDiff;
+									}
+								});
+							}
 						} else if (markers) {
 							updateHistory(roomId, [], markers);
 						}
@@ -405,7 +475,7 @@ const MessageHistoryLoader = ({
 					});
 			}
 		}, 500),
-		[roomId, historyLoadedDisabled, currentUserId]
+		[roomId, historyLoadedDisabled, currentUserId, scrollContainerRef]
 	);
 
 	useEffect(() => {

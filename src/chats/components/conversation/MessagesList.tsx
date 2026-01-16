@@ -76,9 +76,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// Track the previous last message to detect new messages from me
 	const prevLastMessageIdRef = useRef<string | undefined>(undefined);
 
-	// Track the first message ID to detect if we're loading messages before or after
-	const prevFirstMessageIdRef = useRef<string | undefined>(undefined);
-
 	// Track if a read request is in flight to prevent duplicate calls
 	const isMarkingAsReadRef = useRef(false);
 
@@ -204,28 +201,18 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const messagesSize = useMemo(() => size(roomMessages), [roomMessages]);
 
-	// Get the first message ID (oldest message in the list)
-	const firstMessageId = useMemo(() => messages?.[0]?.id, [messages]);
-
 	// Manage scroll position when messages size changes
+	// Note: Scroll anchoring for pagination (before/after) is now handled directly in the loaders
+	// This useEffect only handles the initial load case
 	useEffect(() => {
 		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
-		const prevFirstId = prevFirstMessageIdRef.current;
-
-		// Update the ref for next comparison
-		prevFirstMessageIdRef.current = firstMessageId;
 
 		if (!actualPosition) {
 			// When the chat is loaded for the first time keep scroll to the bottom
 			scrollToEnd(MessagesListWrapperRef);
-		} else if (prevFirstId !== firstMessageId) {
-			// First message changed - we loaded messages BEFORE (scroll up)
-			// Scroll to maintain the user's position
-			scrollToMessage(actualPosition);
 		}
-		// If firstMessageId is the same, we loaded messages AFTER (scroll down)
-		// Don't scroll - let the user's scroll position stay where it is
-	}, [messagesSize, roomId, firstMessageId]);
+		// Scroll anchoring for pagination is handled in MessageHistoryLoader and HistoryLoaderAfter
+	}, [messagesSize, roomId]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => formatDate(message.date, 'YYMMDD')),
@@ -291,7 +278,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 
-		// Don't auto-scroll when loading timeline (e.g., search result navigation)
+		// Don't auto-scroll when loading timeline (e.g., search result navigation or pagination)
 		if (store.chatsRegistry[roomId]?.isLoadingTimeline) return;
 
 		const lastMessage = last(messages);
@@ -354,10 +341,18 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
-					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
+					<MessageHistoryLoader
+						roomId={roomId}
+						messageListRef={messageListRef}
+						scrollContainerRef={MessagesListWrapperRef}
+					/>
 				)}
 					{messagesWrapped}
-				<HistoryLoaderAfter roomId={roomId} messageListRef={messageListRef} />
+				<HistoryLoaderAfter
+					roomId={roomId}
+					messageListRef={messageListRef}
+					scrollContainerRef={MessagesListWrapperRef}
+				/>
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>
