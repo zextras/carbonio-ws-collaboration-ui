@@ -93,6 +93,7 @@ export const createMockMessageFastening = (
 	action: FasteningAction.DELETE,
 	originalStanzaId: 'originalStanzaId',
 	from: 'from',
+	stanzaId: 'stanzaId',
 	...fields
 });
 

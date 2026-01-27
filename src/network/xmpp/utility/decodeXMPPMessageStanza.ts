@@ -81,7 +81,6 @@ export function decodeXMPPMessageStanza(
 				action: FasteningAction.EDIT,
 				roomId,
 				date: messageDate,
-				// stanzaId temporaneo per quando faccio l'edit (set)
 				stanzaId: fasteningStanzaId,
 				originalStanzaId,
 				from: getId(resource),
