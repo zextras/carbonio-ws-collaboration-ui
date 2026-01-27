@@ -57,6 +57,7 @@ class XMPPClient {
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
 		Strophe.addNamespace('ZEXTRAS_REACTION', 'zextras:xmpp:reaction:0');
+		Strophe.addNamespace('PIN', 'zextras:iq:pin');
 	}
 
 	public connect(token: string): void {
@@ -501,6 +502,79 @@ class XMPPClient {
 			type: XMPPRequestType.IQ,
 			elem: iq,
 			callback: smartMarkersCallback
+		});
+	}
+
+	pinMessage(roomId: string, stanzaId: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: 'urn:xmpp:pin:0',
+			'message-id': stanzaId
+		});
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq
+		});
+	}
+
+	getMessagePin(roomId: string): void {
+		const iq = $iq({ type: 'get', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: Strophe.NS.PIN
+		});
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza: Element) => {
+				const pinElement = stanza.getElementsByTagName('pin')[0];
+				const stanzaId = pinElement?.getAttribute('message-id');
+
+				if (stanzaId) {
+					this.requestPinnedMessageContent(roomId, stanzaId);
+				}
+			}
+		});
+	}
+
+	requestPinnedMessageContent(roomId: string, pinnedMessageStanzaId: string): void {
+		if (!useStore.getState().rooms[roomId]) return;
+
+		const storeMessages = useStore.getState().chatsRegistry[roomId]?.messages;
+
+		const existingMessage = find(
+			storeMessages,
+			(message) =>
+				message.type === MessageType.TEXT_MSG && message.stanzaId === pinnedMessageStanzaId
+		) as TextMessage;
+
+		if (existingMessage) {
+			useStore.getState().setPinnedMessage(roomId, existingMessage);
+		} else {
+			const queryId = HistoryAccumulator.getNextId();
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { xmlns: jabberData })
+				.c('field', { var: 'ids' })
+				.c('value')
+				.t(pinnedMessageStanzaId);
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: () => {
+					const pinnedMessage = HistoryAccumulator.getPinnedMessage(queryId);
+					useStore.getState().setPinnedMessage(roomId, pinnedMessage);
+				}
+			});
+		}
+	}
+
+	unpinMessage(roomId: string, stanzaId: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: Strophe.NS.PIN,
+			'message-id': stanzaId,
+			action: 'delete'
+		});
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq
 		});
 	}
 }

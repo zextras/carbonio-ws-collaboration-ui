@@ -53,6 +53,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 			successfulSnackbar();
 			closeModal();
 		});
+		useStore.getState().removePinnedMessage(roomId);
 	}, [closeModal, lastTextMessageId, roomId, successfulSnackbar, unreadMessagesCount, xmppClient]);
 
 	return (

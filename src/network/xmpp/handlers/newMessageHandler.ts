@@ -5,8 +5,13 @@
  */
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { getPinnedMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { FasteningAction, MessageType } from '../../../types/store/ChatsRegistryTypes';
+import {
+	FasteningAction,
+	MarkerStatus,
+	MessageType
+} from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
@@ -53,7 +58,19 @@ export function onNewMessageStanza(message: Element): true {
 		}
 		case MessageType.FASTENING: {
 			store.addFastening([newMessage]);
-
+			const pinnedMessage = getPinnedMessage(store, newMessage.roomId);
+			if (
+				newMessage.action === FasteningAction.EDIT &&
+				pinnedMessage?.stanzaId === newMessage.originalStanzaId
+			) {
+				store.setPinnedMessage(newMessage.roomId, {
+					...pinnedMessage,
+					text: newMessage.value || '',
+					edited: true,
+					editedStanzaId: newMessage.stanzaId,
+					read: MarkerStatus.READ
+				});
+			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);
 				store.setNewReaction(

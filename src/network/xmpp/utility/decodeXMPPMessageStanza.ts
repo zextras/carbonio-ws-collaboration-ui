@@ -39,12 +39,22 @@ export function decodeXMPPMessageStanza(
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);
+	// todo: fixme
+	// quando pinno un messaggio e poi lo modifico, resource risulta null
+	if (!resource) {
+		return undefined;
+	}
 	const messageDate = optional?.date ?? now();
 
 	// Message fastening
 	const fasteningElement = getTagElement(messageStanza, 'apply-to');
 	if (fasteningElement) {
 		const originalStanzaId = getRequiredAttribute(fasteningElement, 'id');
+		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+		const fasteningStanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			undefined;
 
 		// Message fastening for a delete message
 		const retracted = getTagElement(fasteningElement, 'retract');
@@ -56,7 +66,8 @@ export function decodeXMPPMessageStanza(
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-				from: getId(resource)
+				from: getId(resource),
+				stanzaId: fasteningStanzaId
 			} as MessageFastening;
 		}
 
@@ -70,6 +81,8 @@ export function decodeXMPPMessageStanza(
 				action: FasteningAction.EDIT,
 				roomId,
 				date: messageDate,
+				// stanzaId temporaneo per quando faccio l'edit (set)
+				stanzaId: fasteningStanzaId,
 				originalStanzaId,
 				from: getId(resource),
 				value: body?.textContent ?? ''
@@ -88,7 +101,8 @@ export function decodeXMPPMessageStanza(
 				date: messageDate,
 				originalStanzaId,
 				from: getId(resource),
-				value: body?.textContent ?? ''
+				value: body?.textContent ?? '',
+				stanzaId: fasteningStanzaId
 			} as MessageFastening;
 		}
 		return undefined;

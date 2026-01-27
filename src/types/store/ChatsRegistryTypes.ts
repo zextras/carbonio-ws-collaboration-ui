@@ -61,6 +61,7 @@ export type TextMessage = BasicMessage & {
 	repliedMessage?: TextMessage;
 	forwarded?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
+	editedStanzaId?: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
@@ -90,7 +91,9 @@ export enum OperationType {
 	ROOM_PICTURE_DELETED = 'roomPictureDeleted',
 	MEMBER_ADDED = 'memberAdded',
 	MEMBER_REMOVED = 'memberRemoved',
-	ROOM_CREATION = 'roomCreation'
+	ROOM_CREATION = 'roomCreation',
+	MESSAGE_PINNED = 'messagePinned',
+	MESSAGE_UNPINNED = 'messageUnpinned'
 }
 
 export enum MarkerStatus {
@@ -110,6 +113,7 @@ export type MessageFastening = BasicMessage & {
 	originalStanzaId: string;
 	from: string;
 	value?: string;
+	stanzaId: string;
 };
 
 export enum FasteningAction {

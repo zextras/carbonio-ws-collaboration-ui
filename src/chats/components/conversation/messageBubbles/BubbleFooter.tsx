@@ -13,23 +13,20 @@ import { useTranslation } from 'react-i18next';
 
 import MessageReactionsList from './MessageReactionsList';
 import ReadByPopoverList from './readByPopoverList/ReadByPopoverList';
+import { usePinMessage } from '../../../../hooks/usePinMessage';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
+import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
 type BubbleFooterProps = {
-	date: number;
+	message: TextMessage;
 	isMyMessage?: boolean;
-	messageRead?: MarkerStatus;
 	messageExtension?: string;
 	messageSize?: string;
-	isEdited?: boolean;
 	canSeeMessageReads?: boolean | number;
 	showReactions?: boolean;
-	roomId?: string;
-	stanzaId?: string;
 };
 
 const ItalicText = styled(Text)`
@@ -42,24 +39,20 @@ const CustomIcon = styled(Icon)<{ $clickable: boolean }>`
 `;
 
 const BubbleFooter: FC<BubbleFooterProps> = ({
-	date,
+	message,
 	isMyMessage = false,
-	messageRead,
 	messageExtension,
 	messageSize,
-	isEdited,
 	canSeeMessageReads,
-	roomId,
-	stanzaId,
 	showReactions = false
 }) => {
 	const [t] = useTranslation();
+	const { isMessagePinned } = usePinMessage(message);
 	const editedLabel = t('message.edited', 'edited');
-
-	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
+	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId ?? ''));
 
 	const { ackIcon, ackIconColor, ackTooltip } = useMemo(() => {
-		switch (messageRead) {
+		switch (message.read) {
 			case MarkerStatus.READ:
 				return {
 					ackIcon: 'DoneAll',
@@ -86,17 +79,17 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					ackTooltip: t('tooltip.pending', 'Pending')
 				};
 		}
-	}, [messageRead, t]);
+	}, [message.read, t]);
 
-	const messageTime = useMemo(() => formatDate(date, 'HH:mm'), [date]);
+	const messageTime = useMemo(() => formatDate(message.date, 'HH:mm'), [message.date]);
 
 	const ref = useRef(null);
 
 	const readByClickable = useMemo(
 		() =>
-			includes([MarkerStatus.READ_BY_SOMEONE, MarkerStatus.READ], messageRead) &&
+			includes([MarkerStatus.READ_BY_SOMEONE, MarkerStatus.READ], message.read) &&
 			roomType !== RoomType.ONE_TO_ONE,
-		[messageRead, roomType]
+		[message.read, roomType]
 	);
 
 	const messageExtensionSizeLabel = useMemo(
@@ -125,11 +118,20 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 							</Text>
 						</Tooltip>
 					)}
-					{showReactions && <MessageReactionsList roomId={roomId!} stanzaId={stanzaId!} />}
+					{showReactions && (
+						<MessageReactionsList roomId={message.roomId} stanzaId={message.stanzaId} />
+					)}
 				</Container>
 			</Row>
 			<Row orientation="horizontal" width="fit">
-				{isEdited && (
+				{isMessagePinned && (
+					<Tooltip label={t('', 'Pinned message')}>
+						<Container width="fit">
+							<Icon color="secondary" icon={'Pin3'} size="small" />
+						</Container>
+					</Tooltip>
+				)}
+				{message.edited && (
 					<Container width="fit">
 						<ItalicText color="secondary" size="extrasmall">
 							{editedLabel}
@@ -137,8 +139,8 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					</Container>
 				)}
 				{isMyMessage &&
-					messageRead &&
-					(canSeeMessageReads || messageRead === MarkerStatus.PENDING) && (
+					message.read &&
+					(canSeeMessageReads || message.read === MarkerStatus.PENDING) && (
 						<Container
 							id="container-read-by-icon"
 							width="fit"
@@ -155,8 +157,12 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 									/>
 								</Padding>
 							</Tooltip>
-							{roomId && stanzaId && readByClickable && (
-								<ReadByPopoverList roomId={roomId} stanzaId={stanzaId} anchorRef={ref} />
+							{message.roomId && message.stanzaId && readByClickable && (
+								<ReadByPopoverList
+									roomId={message.roomId}
+									stanzaId={message.stanzaId}
+									anchorRef={ref}
+								/>
 							)}
 						</Container>
 					)}

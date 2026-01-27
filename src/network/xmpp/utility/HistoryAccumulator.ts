@@ -8,7 +8,12 @@ import { orderBy } from 'lodash';
 
 import { getRequiredAttribute, getRequiredTagElement } from './decodeStanza';
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import {
+	MarkerStatus,
+	Message,
+	MessageType,
+	TextMessage
+} from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
 class HistoryAccumulator {
@@ -153,6 +158,44 @@ class HistoryAccumulator {
 
 			return accumulator;
 		}, []);
+	}
+
+	public getPinnedMessage(queryId: string): TextMessage {
+		const cachedElements = this.getCachedElements(queryId);
+		if (cachedElements.length !== 1) {
+			throw new Error('There should be exactly one cached element for pinned messages');
+		}
+		const message = cachedElements[0];
+		const result = getRequiredTagElement(message, 'result');
+		const id = getRequiredAttribute(result, 'id');
+		const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+		const insideMessage = getRequiredTagElement(result, 'message');
+		const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+			date: dateToTimestamp(date),
+			stanzaId: id
+		});
+
+		if (!historyMessage) {
+			throw new Error('Error decoding pinned message');
+		}
+
+		// spostare la logica su requestpinned
+		if (historyMessage.type === MessageType.FASTENING && historyMessage.action === 'edit') {
+			return {
+				...historyMessage,
+				type: MessageType.TEXT_MSG,
+				stanzaId: historyMessage.originalStanzaId,
+				text: historyMessage.value || '',
+				read: MarkerStatus.READ,
+				edited: true,
+				editedStanzaId: historyMessage.stanzaId
+			} as TextMessage;
+		}
+
+		if (!historyMessage || historyMessage.type !== MessageType.TEXT_MSG) {
+			throw new Error('Error decoding pinned message');
+		}
+		return historyMessage;
 	}
 }
 

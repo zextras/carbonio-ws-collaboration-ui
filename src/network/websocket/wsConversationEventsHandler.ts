@@ -104,5 +104,6 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		default: {
 			console.error(`Unhandled conversation event type: ${event.type}`);
 		}
+		//
 	}
 };

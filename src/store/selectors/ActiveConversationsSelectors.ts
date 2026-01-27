@@ -108,5 +108,8 @@ export const getIsMessageSelected = (store: RootStore, roomId: string, stanzaId:
     store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
 
 export const getIsMessageSelectedAlreadyStored = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-    !!store.chatsRegistry[roomId].messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
-    
+!!store.chatsRegistry[roomId].messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
+
+export const getPinnedMessage = (store: RootStore, roomId: string): TextMessage | undefined =>
+	store.activeConversations[roomId]?.messagePinned;
+ 

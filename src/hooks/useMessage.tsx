@@ -37,7 +37,8 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 						return {
 							...message,
 							edited: true,
-							text: fastening.value ?? ''
+							text: fastening.value ?? '',
+							editedStanzaId: fastening.stanzaId
 						} as TextMessage;
 					}
 					case FasteningAction.DELETE: {
