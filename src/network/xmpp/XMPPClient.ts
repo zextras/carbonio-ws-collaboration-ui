@@ -21,7 +21,7 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { MarkerStatus, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
@@ -559,8 +559,24 @@ class XMPPClient {
 				type: XMPPRequestType.IQ,
 				elem: iq,
 				callback: () => {
-					const pinnedMessage = HistoryAccumulator.getPinnedMessage(queryId);
-					useStore.getState().setPinnedMessage(roomId, pinnedMessage);
+					const message = HistoryAccumulator.getPinnedMessage(queryId);
+
+					if (message.type === MessageType.TEXT_MSG) {
+						useStore.getState().setPinnedMessage(roomId, message);
+					}
+
+					if (message.type === MessageType.FASTENING && message.action === 'edit') {
+						const msg = {
+							...message,
+							type: MessageType.TEXT_MSG,
+							stanzaId: message.originalStanzaId,
+							text: message.value || '',
+							read: MarkerStatus.READ,
+							edited: true,
+							editedStanzaId: message.stanzaId
+						} as TextMessage;
+						useStore.getState().setPinnedMessage(roomId, msg);
+					}
 				}
 			});
 		}
