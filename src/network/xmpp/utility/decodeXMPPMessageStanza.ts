@@ -39,11 +39,6 @@ export function decodeXMPPMessageStanza(
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);
-	// todo: fixme
-	// quando pinno un messaggio e poi lo modifico, resource risulta null
-	if (!resource) {
-		return undefined;
-	}
 	const messageDate = optional?.date ?? now();
 
 	// Message fastening

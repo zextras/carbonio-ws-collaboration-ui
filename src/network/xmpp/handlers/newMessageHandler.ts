@@ -9,8 +9,8 @@ import { getPinnedMessage } from '../../../store/selectors/ActiveConversationsSe
 import useStore from '../../../store/Store';
 import {
 	FasteningAction,
-	MarkerStatus,
-	MessageType
+	MessageType,
+	OperationType
 } from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
@@ -54,6 +54,12 @@ export function onNewMessageStanza(message: Element): true {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 				store.incrementUnreadCount(newMessage.roomId, 1);
 			}
+			if (newMessage.operation === OperationType.MESSAGE_PINNED) {
+				xmppClient.getMessagePin(newMessage.roomId);
+			}
+			if (newMessage.operation === OperationType.MESSAGE_UNPINNED) {
+				store.removePinnedMessage(newMessage.roomId);
+			}
 			break;
 		}
 		case MessageType.FASTENING: {
@@ -63,13 +69,7 @@ export function onNewMessageStanza(message: Element): true {
 				newMessage.action === FasteningAction.EDIT &&
 				pinnedMessage?.stanzaId === newMessage.originalStanzaId
 			) {
-				store.setPinnedMessage(newMessage.roomId, {
-					...pinnedMessage,
-					text: newMessage.value || '',
-					edited: true,
-					editedStanzaId: newMessage.stanzaId,
-					read: MarkerStatus.READ
-				});
+				xmppClient.getMessagePin(newMessage.roomId);
 			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);

@@ -99,6 +99,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
 			state.clearConversation(event.roomId, event.clearedAt);
+			state.removePinnedMessage(event.roomId);
 			break;
 		}
 		default: {

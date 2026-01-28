@@ -22,10 +22,15 @@ import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
+import {
+	getIsMessageSelected,
+	getIsMessageSelectedAlreadyStored
+} from '../../../store/selectors/ActiveConversationsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { scrollToMessage } from '../../../utils/scrollUtils';
 
 interface PinMessageProps {
 	pinnedMessage: TextMessage;
@@ -35,6 +40,10 @@ const ContainerShadow = styled(Container)`
 	box-shadow: 0 0.25rem 0.25rem 0 rgba(0, 0, 0, 0.25);
 	border-radius: 0 0 0.5rem 0.5rem;
 	z-index: 2;
+	cursor: pointer;
+	&:hover {
+		background: ${({ theme }): string => theme.palette.gray6.focus};
+	}
 `;
 
 const StyledText = styled(Text)`
@@ -111,6 +120,28 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const toggleExpand = useCallback(() => {
 		setIsExpanded((prev) => !prev);
 	}, []);
+	const isMessageSelected = useStore((state) =>
+		getIsMessageSelected(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
+	);
+
+	const isMessageSelectedAlreadyStored = useStore((state) =>
+		getIsMessageSelectedAlreadyStored(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
+	);
+
+	const onResultClick = useCallback(() => {
+		useStore.getState().setSelectedSearchResult(pinnedMessage.roomId, pinnedMessage.stanzaId);
+		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
+			const { xmppClient } = useStore.getState().connections;
+			xmppClient
+				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
+				.then(() => {
+					scrollToMessage(pinnedMessage.id);
+					useStore.getState().setScrollPosition(pinnedMessage.roomId, pinnedMessage.id);
+				});
+		} else {
+			scrollToMessage(pinnedMessage.id);
+		}
+	}, [isMessageSelected, isMessageSelectedAlreadyStored, pinnedMessage]);
 
 	const expandedMessage = useMemo(() => {
 		if (pinnedMessage.attachment) {
@@ -164,6 +195,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 
 	return (
 		<ContainerShadow
+			onClick={() => undefined}
 			background="gray6"
 			orientation="horizontal"
 			mainAlignment="space-between"
