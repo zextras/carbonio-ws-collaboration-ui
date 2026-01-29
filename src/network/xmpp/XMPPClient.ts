@@ -206,10 +206,19 @@ class XMPPClient {
 	 * Edit a message using Message Fastening
 	 * Documentation: https://xmpp.org/extensions/xep-0422.html
 	 */
-	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void {
+	sendChatMessageEdit(
+		roomId: string,
+		message: string,
+		messageStanzaId: string,
+		parentStanzaId: string
+	): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('apply-to', {
+				id: messageStanzaId,
+				xmlns: Strophe.NS.XMPP_FASTEN,
+				'parent-id': parentStanzaId
+			})
 			.c('edit', { xmlns: Strophe.NS.ZEXTRAS_EDIT })
 			.up()
 			.c('external', { name: 'body' })

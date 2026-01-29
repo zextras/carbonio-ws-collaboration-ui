@@ -30,6 +30,7 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, message.roomId));
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
+	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	const stanzaIdToPin = useMemo(() => {
 		if (message.edited) {
@@ -76,6 +77,7 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 					xmppClient.pinMessage(message.roomId, stanzaIdToPin);
 					useStore.getState().setPinnedMessage(message.roomId, messageToPin);
 					closeModal(modalId);
+					clearSearchResults(message.roomId);
 				},
 				showCloseIcon: true,
 				onSecondaryAction: () => {
@@ -95,9 +97,11 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 		if (!isMessagePinned) {
 			xmppClient.pinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().setPinnedMessage(message.roomId, messageToPin);
+			clearSearchResults(message.roomId);
 		} else {
 			xmppClient.unpinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().removePinnedMessage(message.roomId);
+			clearSearchResults(message.roomId);
 		}
 	}, [
 		pinnedMessage,
@@ -108,7 +112,8 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 		message.roomId,
 		stanzaIdToPin,
 		messageToPin,
-		closeModal
+		closeModal,
+		clearSearchResults
 	]);
 
 	return {

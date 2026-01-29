@@ -109,17 +109,21 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const { avatarColor } = useAvatarUtilities(pinnedMessage.from);
 	const { pinAction, canMessageBePinned } = usePinMessage(pinnedMessage);
 	const loggedUserId = useStore(getUserId);
+	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	const ownerMessage = useMemo(() => {
 		if (pinnedMessage.from === loggedUserId) {
 			return t('status.you', 'You');
 		}
+
 		return username;
 	}, [loggedUserId, pinnedMessage.from, t, username]);
 
-	const toggleExpand = useCallback(() => {
+	const toggleExpand = useCallback((e: React.MouseEvent<HTMLSpanElement>) => {
+		e.stopPropagation();
 		setIsExpanded((prev) => !prev);
 	}, []);
+
 	const isMessageSelected = useStore((state) =>
 		getIsMessageSelected(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
 	);
@@ -128,7 +132,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		getIsMessageSelectedAlreadyStored(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
 	);
 
-	const onResultClick = useCallback(() => {
+	const goToPinMessage = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(pinnedMessage.roomId, pinnedMessage.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
 			const { xmppClient } = useStore.getState().connections;
@@ -137,11 +141,27 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
 					useStore.getState().setScrollPosition(pinnedMessage.roomId, pinnedMessage.id);
+					clearSearchResults(pinnedMessage.roomId);
 				});
 		} else {
 			scrollToMessage(pinnedMessage.id);
 		}
-	}, [isMessageSelected, isMessageSelectedAlreadyStored, pinnedMessage]);
+	}, [
+		clearSearchResults,
+		isMessageSelected,
+		isMessageSelectedAlreadyStored,
+		pinnedMessage.id,
+		pinnedMessage.roomId,
+		pinnedMessage.stanzaId
+	]);
+
+	const unpin = useCallback(
+		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement>) => {
+			e.stopPropagation();
+			pinAction();
+		},
+		[pinAction]
+	);
 
 	const expandedMessage = useMemo(() => {
 		if (pinnedMessage.attachment) {
@@ -167,6 +187,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				background="gray6"
 				padding={{ horizontal: 'large', vertical: 'medium' }}
 				height="fit"
+				onClick={goToPinMessage}
 			>
 				<Container mainAlignment={'flex-start'} crossAlignment={'flex-start'} gap="1rem">
 					<Row mainAlignment="space-between" width="fill" gap={'1rem'}>
@@ -182,7 +203,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 							</StyledText>
 							{canMessageBePinned && (
 								<Tooltip label={t('', 'Unpin message')}>
-									<Button onClick={pinAction} icon="Close" type="ghost" color="text" />
+									<Button onClick={unpin} icon="Close" type="ghost" color="text" />
 								</Tooltip>
 							)}
 						</Row>
@@ -195,12 +216,13 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 
 	return (
 		<ContainerShadow
-			onClick={() => undefined}
+			onClick={goToPinMessage}
 			background="gray6"
 			orientation="horizontal"
 			mainAlignment="space-between"
 			padding={{ horizontal: 'large', vertical: 'medium' }}
 			height="fit"
+			data-testid={'pin-message'}
 		>
 			<Row mainAlignment="flex-start" gap="0.5rem" takeAvailableSpace>
 				<Icon icon="Pin3" size="large" />
@@ -224,7 +246,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				</StyledText>
 				{canMessageBePinned && (
 					<Tooltip label={t('', 'Unpin message')}>
-						<Button onClick={pinAction} icon="Close" type="ghost" color="text" />
+						<Button onClick={unpin} icon="Close" type="ghost" color="text" />
 					</Tooltip>
 				)}
 			</Row>

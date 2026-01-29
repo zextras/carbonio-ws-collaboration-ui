@@ -38,6 +38,7 @@ export type ActiveConversationsSlice = {
 	setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
 	setPinnedMessage: (roomId: string, message: TextMessage) => void;
 	removePinnedMessage: (roomId: string) => void;
+	// setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined) => void;
 };
 
 export type ActiveConversation = {

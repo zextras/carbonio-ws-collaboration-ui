@@ -141,26 +141,42 @@ describe('PinMessage', () => {
 		expect(await screen.findByText(/unpin message/i)).toBeVisible();
 	});
 
+	it('should render the forwarded pin message', async () => {
+		const forwardedTextMessage = createMockTextMessage({
+			id: 'idSimpleTextMessage',
+			roomId: oneToOneRoom.id,
+			from: 'user1'
+			// forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+		});
+		const { user } = setup(<PinMessage pinnedMessage={forwardedTextMessage} />);
+
+		await user.click(/show more/i);
+		expect(screen.getByText('Originally sent by:'));
+		// todo
+		// expect(screen.getByText('nome sender'));
+		expect(screen.getByText(forwardedTextMessage.text)).toBeVisible();
+	});
+
 	describe.each([
 		{
 			description: 'image attachment',
 			mimeType: 'image/png',
-			expectedIcon: 'Image'
+			expectedIcon: 'icon: Image'
 		},
 		{
 			description: 'PDF attachment',
 			mimeType: 'application/pdf',
-			expectedIcon: 'FilePdf'
+			expectedIcon: 'icon: FilePdf'
 		},
 		{
 			description: 'text file attachment',
 			mimeType: 'text/plain',
-			expectedIcon: 'FileText'
+			expectedIcon: 'icon: FileText'
 		},
 		{
 			description: 'generic file attachment',
 			mimeType: 'application/octet-stream',
-			expectedIcon: 'FileText'
+			expectedIcon: 'icon: FileText'
 		}
 	])('Attachment - $description', ({ mimeType, expectedIcon }) => {
 		it('should render the correct icon with its name file if the pin message has an attachment', () => {
@@ -178,7 +194,7 @@ describe('PinMessage', () => {
 			});
 			setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 
-			expect(screen.getByTestId(`icon: ${expectedIcon}`)).toBeVisible();
+			expect(screen.getByTestId(expectedIcon)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.attachment!.name)).toBeVisible();
 		});
 
@@ -197,7 +213,7 @@ describe('PinMessage', () => {
 			});
 			setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 
-			expect(screen.getByTestId(`icon: ${expectedIcon}`)).toBeVisible();
+			expect(screen.getByTestId(expectedIcon)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
 			expect(screen.queryByText(mockedTextMessage.attachment!.name)).not.toBeInTheDocument();
 		});

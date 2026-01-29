@@ -265,7 +265,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						xmppClient.sendChatMessageEdit(
+							roomId,
+							message,
+							referenceMessage.stanzaId,
+							completeReferenceMessage.editedStanzaId ?? referenceMessage.stanzaId
+						);
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
