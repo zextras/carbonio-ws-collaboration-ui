@@ -38,7 +38,7 @@ export type ActiveConversationsSlice = {
 	setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
 	setPinnedMessage: (roomId: string, message: TextMessage) => void;
 	removePinnedMessage: (roomId: string) => void;
-	// setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined) => void;
+	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined) => void;
 };
 
 export type ActiveConversation = {
@@ -55,6 +55,7 @@ export type ActiveConversation = {
 	newReactions?: NewReaction[];
 	selectedSearchResult?: string;
 	messagePinned?: TextMessage;
+	selectedPinnedMessage?: string;
 };
 
 export type ActiveConversationsMap = {

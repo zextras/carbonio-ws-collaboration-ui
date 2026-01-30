@@ -23,27 +23,30 @@ import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
 import {
-	getIsMessageSelected,
-	getIsMessageSelectedAlreadyStored
+	getIsMessageSelectedAlreadyStored,
+	getIsPinnedMessageSelected
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 import { scrollToMessage } from '../../../utils/scrollUtils';
 
 interface PinMessageProps {
 	pinnedMessage: TextMessage;
 }
 
-const ContainerShadow = styled(Container)`
+const ContainerShadow = styled(Container)<{ $isClickable: boolean }>`
 	box-shadow: 0 0.25rem 0.25rem 0 rgba(0, 0, 0, 0.25);
 	border-radius: 0 0 0.5rem 0.5rem;
 	z-index: 2;
-	cursor: pointer;
-	&:hover {
-		background: ${({ theme }): string => theme.palette.gray6.focus};
-	}
+	${({ $isClickable }): string | boolean => $isClickable && `cursor: pointer;`}
+	${({ $isClickable, theme }): string | boolean =>
+		$isClickable &&
+		`&:hover {
+            background: ${theme.palette.gray6.focus};
+        }`}
 `;
 
 const StyledText = styled(Text)`
@@ -109,7 +112,15 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const { avatarColor } = useAvatarUtilities(pinnedMessage.from);
 	const { pinAction, canMessageBePinned } = usePinMessage(pinnedMessage);
 	const loggedUserId = useStore(getUserId);
-	const clearSearchResults = useStore((state) => state.clearSearchResults);
+	const clearedAt = useStore((store) => store.rooms[pinnedMessage.roomId].userSettings?.clearedAt);
+
+	const isMessageSelected = useStore((state) =>
+		getIsPinnedMessageSelected(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
+	);
+
+	const isMessageInStore = useStore((state) =>
+		getIsMessageSelectedAlreadyStored(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
+	);
 
 	const ownerMessage = useMemo(() => {
 		if (pinnedMessage.from === loggedUserId) {
@@ -124,32 +135,29 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		setIsExpanded((prev) => !prev);
 	}, []);
 
-	const isMessageSelected = useStore((state) =>
-		getIsMessageSelected(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
-	);
-
-	const isMessageSelectedAlreadyStored = useStore((state) =>
-		getIsMessageSelectedAlreadyStored(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
+	const isClickable = useMemo(
+		() => !clearedAt || pinnedMessage.date > dateToTimestamp(clearedAt),
+		[clearedAt, pinnedMessage.date]
 	);
 
 	const goToPinMessage = useCallback(() => {
-		useStore.getState().setSelectedSearchResult(pinnedMessage.roomId, pinnedMessage.stanzaId);
-		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
+		if (!isClickable) return;
+		useStore.getState().setSelectedPinnedMessage(pinnedMessage.roomId, pinnedMessage.stanzaId);
+		if (!isMessageInStore && !isMessageSelected) {
 			const { xmppClient } = useStore.getState().connections;
 			xmppClient
 				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
 					useStore.getState().setScrollPosition(pinnedMessage.roomId, pinnedMessage.id);
-					clearSearchResults(pinnedMessage.roomId);
 				});
 		} else {
 			scrollToMessage(pinnedMessage.id);
 		}
 	}, [
-		clearSearchResults,
+		isClickable,
+		isMessageInStore,
 		isMessageSelected,
-		isMessageSelectedAlreadyStored,
 		pinnedMessage.id,
 		pinnedMessage.roomId,
 		pinnedMessage.stanzaId
@@ -188,6 +196,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				padding={{ horizontal: 'large', vertical: 'medium' }}
 				height="fit"
 				onClick={goToPinMessage}
+				$isClickable={isClickable}
 			>
 				<Container mainAlignment={'flex-start'} crossAlignment={'flex-start'} gap="1rem">
 					<Row mainAlignment="space-between" width="fill" gap={'1rem'}>
@@ -217,6 +226,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	return (
 		<ContainerShadow
 			onClick={goToPinMessage}
+			$isClickable={isClickable}
 			background="gray6"
 			orientation="horizontal"
 			mainAlignment="space-between"

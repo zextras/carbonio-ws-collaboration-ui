@@ -368,5 +368,15 @@ export const useActiveConversationsSlice: StateCreator<
 			false,
 			'AC/REMOVE_PINNED_MESSAGE'
 		);
+	},
+	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.selectedPinnedMessage = stanzaId;
+			}),
+			false,
+			'AC/SET_SELECTED_PINNED_MESSAGE'
+		);
 	}
 });

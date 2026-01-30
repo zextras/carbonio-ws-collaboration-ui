@@ -145,12 +145,12 @@ describe('PinMessage', () => {
 		const forwardedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
 			roomId: oneToOneRoom.id,
-			from: 'user1'
-			// forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+			from: 'user1',
+			forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 		});
 		const { user } = setup(<PinMessage pinnedMessage={forwardedTextMessage} />);
 
-		await user.click(/show more/i);
+		await user.click(screen.getByText(/show more/i));
 		expect(screen.getByText('Originally sent by:'));
 		// todo
 		// expect(screen.getByText('nome sender'));
@@ -234,9 +234,8 @@ describe('PinMessage', () => {
 			const { user } = setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 
 			await user.click(screen.getByText(/show more/i));
-
-			// todo: add expect thumbnail
-			// expect().toBeVisible()
+			// attachment is visible
+			expect(screen.getByTestId('hover-container')).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.attachment!.name)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
 			expect(screen.queryByTestId(`icon: ${expectedIcon}`)).not.toBeInTheDocument();

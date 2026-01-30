@@ -49,6 +49,10 @@ export function onNewMessageStanza(message: Element): true {
 			break;
 		}
 		case MessageType.CONFIGURATION_MSG: {
+			if (newMessage.operation === OperationType.MESSAGE_PIN_UPDATED) {
+				xmppClient.getMessagePin(newMessage.roomId);
+				return true;
+			}
 			store.newMessage(newMessage);
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
@@ -66,10 +70,10 @@ export function onNewMessageStanza(message: Element): true {
 			store.addFastening([newMessage]);
 			const pinnedMessage = getPinnedMessage(store, newMessage.roomId);
 			if (
-				newMessage.action === FasteningAction.EDIT &&
+				newMessage.action === FasteningAction.DELETE &&
 				pinnedMessage?.stanzaId === newMessage.originalStanzaId
 			) {
-				xmppClient.getMessagePin(newMessage.roomId);
+				store.removePinnedMessage(newMessage.roomId);
 			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);

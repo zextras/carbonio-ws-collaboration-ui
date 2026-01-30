@@ -137,6 +137,9 @@ const Bubble: FC<BubbleProps> = ({
 	const isSelectedSearchItem = useStore(
 		(store) => store.activeConversations[message.roomId]?.selectedSearchResult === message.stanzaId
 	);
+	const isSelectedPinnedMessage = useStore(
+		(store) => store.activeConversations[message.roomId]?.selectedPinnedMessage === message.stanzaId
+	);
 
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {
@@ -207,7 +210,7 @@ const Bubble: FC<BubbleProps> = ({
 			height="fit"
 			mainAlignment="space-between"
 			ref={forwardContainerRef}
-			$forwardIsActive={forwardIsActive || isSelectedSearchItem}
+			$forwardIsActive={forwardIsActive || isSelectedSearchItem || isSelectedPinnedMessage}
 			$hoverIsActive={hoverIsActive}
 			data-testid="forward_bubble_container"
 		>

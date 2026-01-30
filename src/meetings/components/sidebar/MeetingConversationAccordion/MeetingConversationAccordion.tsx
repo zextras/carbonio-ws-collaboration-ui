@@ -14,7 +14,9 @@ import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
+import { PinMessage } from '../../../../chats/components/conversation/PinMessage';
 import useDarkReader from '../../../../hooks/useDarkReader';
+import { getPinnedMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
@@ -63,7 +65,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
-
+	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore(getMeetingChatVisibility);
@@ -196,6 +198,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					height="fill"
 					$darkModeActive={darkReaderStatus}
 				>
+					{pinnedMessage && <PinMessage pinnedMessage={pinnedMessage} />}
 					<Chat roomId={roomId} />
 				</WrapperMeetingChat>
 			)}

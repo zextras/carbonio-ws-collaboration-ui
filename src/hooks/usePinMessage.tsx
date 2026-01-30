@@ -30,7 +30,6 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, message.roomId));
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
-	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	const stanzaIdToPin = useMemo(() => {
 		if (message.edited) {
@@ -38,14 +37,6 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 		}
 
 		return message.stanzaId;
-	}, [message]);
-
-	const messageToPin = useMemo(() => {
-		if (message.edited) {
-			return message;
-		}
-
-		return message;
 	}, [message]);
 
 	const isMessagePinned = useMemo(
@@ -75,9 +66,8 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 				secondaryActionLabel: t('', 'cancel'),
 				onConfirm: () => {
 					xmppClient.pinMessage(message.roomId, stanzaIdToPin);
-					useStore.getState().setPinnedMessage(message.roomId, messageToPin);
 					closeModal(modalId);
-					clearSearchResults(message.roomId);
+					useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 				},
 				showCloseIcon: true,
 				onSecondaryAction: () => {
@@ -96,12 +86,11 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 
 		if (!isMessagePinned) {
 			xmppClient.pinMessage(message.roomId, stanzaIdToPin);
-			useStore.getState().setPinnedMessage(message.roomId, messageToPin);
-			clearSearchResults(message.roomId);
+			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		} else {
 			xmppClient.unpinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().removePinnedMessage(message.roomId);
-			clearSearchResults(message.roomId);
+			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		}
 	}, [
 		pinnedMessage,
@@ -111,9 +100,7 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 		xmppClient,
 		message.roomId,
 		stanzaIdToPin,
-		messageToPin,
-		closeModal,
-		clearSearchResults
+		closeModal
 	]);
 
 	return {

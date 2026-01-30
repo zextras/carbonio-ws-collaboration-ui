@@ -93,7 +93,8 @@ export enum OperationType {
 	MEMBER_REMOVED = 'memberRemoved',
 	ROOM_CREATION = 'roomCreation',
 	MESSAGE_PINNED = 'messagePinned',
-	MESSAGE_UNPINNED = 'messageUnpinned'
+	MESSAGE_UNPINNED = 'messageUnpinned',
+	MESSAGE_PIN_UPDATED = 'messagePinUpdated'
 }
 
 export enum MarkerStatus {

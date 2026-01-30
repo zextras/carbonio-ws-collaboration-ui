@@ -124,19 +124,19 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				</Container>
 			</Row>
 			<Row orientation="horizontal" width="fit">
-				{isMessagePinned && (
-					<Tooltip label={t('', 'Pinned message')}>
-						<Container width="fit">
-							<Icon color="secondary" icon={'Pin3'} size="small" />
-						</Container>
-					</Tooltip>
-				)}
 				{message.edited && (
 					<Container width="fit">
 						<ItalicText color="secondary" size="extrasmall">
 							{editedLabel}
 						</ItalicText>
 					</Container>
+				)}
+				{isMessagePinned && (
+					<Tooltip label={t('', 'Pinned message')}>
+						<Container width="fit">
+							<Icon color="secondary" icon={'Pin3'} size="small" />
+						</Container>
+					</Tooltip>
 				)}
 				{isMyMessage &&
 					message.read &&

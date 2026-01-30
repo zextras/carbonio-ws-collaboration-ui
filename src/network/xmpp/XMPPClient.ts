@@ -21,7 +21,7 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { MarkerStatus, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
@@ -34,6 +34,7 @@ class XMPPClient {
 			this.setInbox();
 			this.getContactList();
 			this.setOnline();
+			this.getFeatures();
 		});
 
 		// Useful namespaces
@@ -105,18 +106,23 @@ class XMPPClient {
 	}
 
 	/**
-	 * INBOX:
-	 * Request chat initial information like unread messages or active conversations.
+	 *
+	 * Request XMPP active features.
 	 */
 
 	// Request the supported form
-	public getInbox(): void {
-		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+	public getFeatures(): void {
+		const iq = $iq({ type: 'get', to: 'carbonio' }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq
 		});
 	}
+
+	/**
+	 * INBOX:
+	 * Request chat initial information like unread messages or active conversations.
+	 */
 
 	// Fetch the inbox and get initial information:
 	public setInbox(): void {
@@ -572,19 +578,31 @@ class XMPPClient {
 
 					if (message.type === MessageType.TEXT_MSG) {
 						useStore.getState().setPinnedMessage(roomId, message);
+						return;
 					}
 
 					if (message.type === MessageType.FASTENING && message.action === 'edit') {
-						const msg = {
-							...message,
-							type: MessageType.TEXT_MSG,
-							stanzaId: message.originalStanzaId,
-							text: message.value || '',
-							read: MarkerStatus.READ,
-							edited: true,
-							editedStanzaId: message.stanzaId
-						} as TextMessage;
-						useStore.getState().setPinnedMessage(roomId, msg);
+						const queryId2 = HistoryAccumulator.getNextId();
+						const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+							.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId2 })
+							.c('x', { xmlns: jabberData })
+							.c('field', { var: 'ids' })
+							.c('value')
+							.t(message.originalStanzaId);
+						this.xmppConnection.send({
+							type: XMPPRequestType.IQ,
+							elem: iq,
+							callback: () => {
+								const originalMessage = HistoryAccumulator.getPinnedMessage(queryId2);
+								const msg = {
+									...originalMessage,
+									text: message.value || '',
+									edited: true,
+									editedStanzaId: message.stanzaId
+								} as TextMessage;
+								useStore.getState().setPinnedMessage(roomId, msg);
+							}
+						});
 					}
 				}
 			});

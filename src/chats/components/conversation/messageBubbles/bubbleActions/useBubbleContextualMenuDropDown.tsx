@@ -117,7 +117,6 @@ const useBubbleContextualMenuDropDown = (
 	const deleteMessageAction = useCallback(() => {
 		if (pinnedMessage?.stanzaId === message.stanzaId) {
 			xmppClient.unpinMessage(message.roomId, message.stanzaId);
-			useStore.getState().removePinnedMessage(message.roomId);
 		}
 
 		if (message.attachment) {
