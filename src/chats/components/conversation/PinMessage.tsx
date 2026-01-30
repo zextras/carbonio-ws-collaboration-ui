@@ -101,7 +101,11 @@ const ExpandedMessageWithThumbnail = ({
 				{attachment.name}
 			</Text>
 		</RoundedRow>
-		{messageText && <Text overflow="break-word">{messageText}</Text>}
+		{messageText && (
+			<Text overflow="break-word" style={{ whiteSpace: 'pre-wrap' }}>
+				{messageText}
+			</Text>
+		)}
 	</Container>
 );
 
@@ -184,7 +188,9 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		return (
 			<Container crossAlignment="flex-start">
 				{pinnedMessage.forwarded && <ForwardInfo info={pinnedMessage.forwarded} />}
-				<Text overflow="break-word">{pinnedMessage.text}</Text>
+				<Text overflow="break-word" style={{ whiteSpace: 'pre-wrap' }}>
+					{pinnedMessage.text}
+				</Text>
 			</Container>
 		);
 	}, [pinnedMessage]);

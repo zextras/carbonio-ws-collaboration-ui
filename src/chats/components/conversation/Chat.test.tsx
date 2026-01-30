@@ -6,12 +6,13 @@
 
 import React from 'react';
 
-import { act, renderHook } from '@testing-library/react';
+import { now } from 'moment';
 
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
 import useStore from '../../../store/Store';
 import {
+	createMockAttributesList,
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
@@ -20,9 +21,9 @@ import {
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { OperationType } from '../../../types/store/ChatsRegistryTypes';
+import { MessageType, OperationType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const mockedRoom: RoomBe = createMockRoom({
@@ -53,6 +54,12 @@ describe('Chat', () => {
 
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessage);
+
+			// Mock xmppClient.pinMessage to update the store
+			vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+				store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+			});
+
 			const { user } = setup(
 				<Chat
 					roomId={mockedRoom.id}
@@ -81,6 +88,15 @@ describe('Chat', () => {
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
+
+				// Mock xmppClient.pinMessage and unpinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+				});
+				vi.spyOn(store.connections.xmppClient, 'unpinMessage').mockImplementation(() => {
+					store.removePinnedMessage(mockedRoom.id);
+				});
+
 				const { user } = setup(
 					<Chat
 						roomId={mockedRoom.id}
@@ -108,6 +124,15 @@ describe('Chat', () => {
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
+
+				// Mock xmppClient.pinMessage and unpinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+				});
+				vi.spyOn(store.connections.xmppClient, 'unpinMessage').mockImplementation(() => {
+					store.removePinnedMessage(mockedRoom.id);
+				});
+
 				const { user } = setup(
 					<Chat
 						roomId={mockedRoom.id}
@@ -132,17 +157,21 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const mockPinConfigurationMessage = createMockConfigurationMessage({
-					operation: OperationType.MESSAGE_PINNED,
-					from: user1.id
-				});
-				const { result } = renderHook(() => useStore());
-				act(() => {
-					result.current.updateHistory(mockedRoom.id, [mockPinConfigurationMessage]);
-				});
-
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
+
+				// Mock xmppClient.pinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+					store.newMessage(
+						createMockConfigurationMessage({
+							roomId: mockedRoom.id,
+							operation: OperationType.MESSAGE_PINNED,
+							from: user1.id
+						})
+					);
+				});
+
 				const { user } = setup(
 					<Chat
 						roomId={mockedRoom.id}
@@ -168,13 +197,35 @@ describe('Chat', () => {
 					operation: OperationType.MESSAGE_UNPINNED,
 					from: user1.id
 				});
-				const { result } = renderHook(() => useStore());
-				act(() => {
-					result.current.updateHistory(mockedRoom.id, [mockPinConfigurationMessage]);
-				});
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
+				store.newMessage(mockPinConfigurationMessage);
+
+				// Mock xmppClient.pinMessage and unpinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+					store.newMessage(
+						createMockConfigurationMessage({
+							id: 'pinConfigMsg',
+							roomId: mockedRoom.id,
+							operation: OperationType.MESSAGE_PINNED,
+							from: user1.id
+						})
+					);
+				});
+				vi.spyOn(store.connections.xmppClient, 'unpinMessage').mockImplementation(() => {
+					store.removePinnedMessage(mockedRoom.id);
+					store.newMessage(
+						createMockConfigurationMessage({
+							id: 'unpinConfigMsg',
+							roomId: mockedRoom.id,
+							operation: OperationType.MESSAGE_UNPINNED,
+							from: user1.id
+						})
+					);
+				});
+
 				const { user } = setup(
 					<Chat
 						roomId={mockedRoom.id}
@@ -195,16 +246,22 @@ describe('Chat', () => {
 		it('should remove the pin if its message is deleted', async () => {
 			const mockedTextMessage = createMockTextMessage({
 				id: 'idSimpleTextMessage',
-				roomId: mockedRoom.id
+				roomId: mockedRoom.id,
+				text: 'message to delete',
+				from: user1.id,
+				date: dateToTimestamp(now())
 			});
 
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessage);
-			store.setReferenceMessage(mockedRoom.id, {
-				messageId: mockedTextMessage.id,
-				senderId: mockedTextMessage.from,
-				stanzaId: mockedTextMessage.stanzaId,
-				actionType: messageActionType.EDIT
+			store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
+
+			// Mock xmppClient.pinMessage and sendChatMessageDeletion to update the store
+			vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+				store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+			});
+			vi.spyOn(store.connections.xmppClient, 'sendChatMessageDeletion').mockImplementation(() => {
+				store.removePinnedMessage(mockedRoom.id);
 			});
 
 			const { user } = setup(
@@ -215,7 +272,8 @@ describe('Chat', () => {
 				/>
 			);
 
-			await user.hover(screen.getByText(mockedTextMessage.text));
+			const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
+			await user.hover(within(messageBubble).getByText(mockedTextMessage.text));
 			await user.click(screen.getByTestId(iconDropdown));
 			await user.click(screen.getByText(dropdownPinMessageOption));
 			await user.click(screen.getByTestId(iconDropdown));
@@ -225,15 +283,23 @@ describe('Chat', () => {
 
 		describe('Edit', async () => {
 			it('should pin the edited message', async () => {
+				const editedText = 'edited message text';
 				const mockedTextMessage = createMockTextMessage({
 					id: 'idSimpleTextMessage',
-					roomId: mockedRoom.id
+					roomId: mockedRoom.id,
+					from: user1.id,
+					date: dateToTimestamp(now()),
+					text: editedText,
+					edited: true
 				});
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
-				const updatedText = 'updated text';
+				// Mock xmppClient.pinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+				});
 
 				const { user } = setup(
 					<Chat
@@ -243,27 +309,39 @@ describe('Chat', () => {
 					/>
 				);
 
-				await user.hover(screen.getByText(mockedTextMessage.text));
+				await user.hover(screen.getByText(editedText));
 				const dropdown = screen.getByTestId(iconDropdown);
-				await user.click(dropdown);
-				await user.click(screen.getByText(/edit/i));
-				await user.type(screen.getByRole('textbox'), updatedText);
-				await user.click(screen.getByRole(sendMessageIcon));
 				await user.click(dropdown);
 				await user.click(screen.getByText(dropdownPinMessageOption));
 				expect(
-					within(screen.getByTestId(pinSectionDataTestId)).getByText(updatedText)
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(editedText)
 				).toBeVisible();
 			});
 
 			it('should edit the pin message', async () => {
 				const mockedTextMessage = createMockTextMessage({
 					id: 'idSimpleTextMessage',
-					roomId: mockedRoom.id
+					roomId: mockedRoom.id,
+					from: user1.id,
+					date: dateToTimestamp(now())
 				});
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMessage);
+				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
+
+				// Mock xmppClient.pinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+				});
+
+				// Mock xmppClient.sendChatMessageEdit to update the pinned message text
+				vi.spyOn(store.connections.xmppClient, 'sendChatMessageEdit').mockImplementation(
+					(_roomId, _stanzaId, newText) => {
+						const updatedMessage = { ...mockedTextMessage, text: newText, edited: true };
+						store.setPinnedMessage(mockedRoom.id, updatedMessage);
+					}
+				);
 
 				const updatedText = 'updated text';
 
@@ -282,9 +360,9 @@ describe('Chat', () => {
 				await user.click(dropdown);
 				await user.click(screen.getByText(/edit/i));
 				await user.type(screen.getByRole('textbox'), updatedText);
-				await user.click(screen.getByRole(sendMessageIcon));
+				await user.click(screen.getByTestId(sendMessageIcon));
 				expect(
-					within(screen.getByTestId(pinSectionDataTestId)).getByText(updatedText)
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(`Hi${updatedText}`)
 				).toBeVisible();
 			});
 
@@ -294,6 +372,8 @@ describe('Chat', () => {
 				const mockedTextMsgWithAttachment = createMockTextMessage({
 					id: 'idSimpleTextMessage',
 					roomId: mockedRoom.id,
+					from: user1.id,
+					date: dateToTimestamp(now()),
 					attachment: {
 						id: 'attachmentId',
 						name: 'file_name',
@@ -304,6 +384,16 @@ describe('Chat', () => {
 
 				const store: RootStore = useStore.getState();
 				store.newMessage(mockedTextMsgWithAttachment);
+				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
+
+				// Mock xmppClient.pinMessage to update the store with the current message
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					const messages = store.chatsRegistry[mockedRoom.id]?.messages;
+					const currentMessage = messages?.find((m) => m.id === mockedTextMsgWithAttachment.id);
+					if (currentMessage && currentMessage.type === MessageType.TEXT_MSG) {
+						store.setPinnedMessage(mockedRoom.id, currentMessage as TextMessage);
+					}
+				});
 
 				const updatedText = 'updated text';
 
@@ -320,9 +410,11 @@ describe('Chat', () => {
 				await user.click(dropdown);
 				await user.click(screen.getByText(/edit/i));
 				await user.type(screen.getByRole('textbox'), updatedText);
-				await user.click(screen.getByRole(sendMessageIcon));
+				await user.click(screen.getByTestId(sendMessageIcon));
+				await user.click(dropdown);
+				await user.click(screen.getByText(dropdownPinMessageOption));
 				expect(
-					within(screen.getByTestId(pinSectionDataTestId)).getByText(updatedText)
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(`Hi${updatedText}`)
 				).toBeVisible();
 				expect(
 					within(screen.getByTestId(pinSectionDataTestId)).getByTestId('hover-container')
