@@ -64,6 +64,13 @@ const RoundedRow = styled(Row)`
 	border-radius: 0.25rem;
 `;
 
+const TextExpanded = styled(Text)`
+	white-space: pre-wrap;
+	max-height: 7.5rem;
+	overflow-y: auto;
+	width: 100%;
+`;
+
 const getAttachmentIcon = (fileType: string): string => {
 	if (fileType === 'application/pdf') {
 		return 'FilePdf';
@@ -101,11 +108,7 @@ const ExpandedMessageWithThumbnail = ({
 				{attachment.name}
 			</Text>
 		</RoundedRow>
-		{messageText && (
-			<Text overflow="break-word" style={{ whiteSpace: 'pre-wrap' }}>
-				{messageText}
-			</Text>
-		)}
+		{messageText && <TextExpanded overflow="break-word">{messageText}</TextExpanded>}
 	</Container>
 );
 
@@ -188,9 +191,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		return (
 			<Container crossAlignment="flex-start">
 				{pinnedMessage.forwarded && <ForwardInfo info={pinnedMessage.forwarded} />}
-				<Text overflow="break-word" style={{ whiteSpace: 'pre-wrap' }}>
-					{pinnedMessage.text}
-				</Text>
+				<TextExpanded overflow="break-word">{pinnedMessage.text}</TextExpanded>
 			</Container>
 		);
 	}, [pinnedMessage]);
