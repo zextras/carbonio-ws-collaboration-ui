@@ -69,7 +69,6 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 					closeModal(modalId);
 					useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 				},
-				showCloseIcon: true,
 				onSecondaryAction: () => {
 					closeModal(modalId);
 				},
@@ -81,6 +80,7 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 					'This conversation already has a pinned message. Only one message can be pinned at a time. Do you want to replace it with this message?'
 				)
 			});
+
 			return;
 		}
 

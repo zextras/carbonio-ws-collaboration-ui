@@ -6,6 +6,7 @@
 
 import React, { lazy, Suspense, useEffect } from 'react';
 
+import { ModalManager } from '@zextras/carbonio-design-system';
 import { addRoute } from '@zextras/carbonio-shell-ui';
 
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
@@ -18,8 +19,10 @@ const LazyMeetingMainView = lazy(
 
 const MeetingMain = (): React.JSX.Element => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<ConnectionSnackbarManager />
-		<LazyMeetingMainView />
+		<ModalManager>
+			<ConnectionSnackbarManager />
+			<LazyMeetingMainView />
+		</ModalManager>
 	</Suspense>
 );
 

@@ -191,6 +191,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					)}
 				</Row>
 			</Container>
+			{pinnedMessage && isChatOpenOrFullExpanded && <PinMessage pinnedMessage={pinnedMessage} />}
 			{isChatOpenOrFullExpanded && (
 				<WrapperMeetingChat
 					data-testid="WrapperMeetingChat"
@@ -198,7 +199,6 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					height="fill"
 					$darkModeActive={darkReaderStatus}
 				>
-					{pinnedMessage && <PinMessage pinnedMessage={pinnedMessage} />}
 					<Chat roomId={roomId} />
 				</WrapperMeetingChat>
 			)}
