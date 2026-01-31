@@ -15,13 +15,18 @@ import {
 	createMockAttributesList,
 	createMockConfigurationMessage,
 	createMockMember,
+	createMockMessageFastening,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MessageType, OperationType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import {
+	FasteningAction,
+	OperationType,
+	TextMessage
+} from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
@@ -337,7 +342,7 @@ describe('Chat', () => {
 
 				// Mock xmppClient.sendChatMessageEdit to update the pinned message text
 				vi.spyOn(store.connections.xmppClient, 'sendChatMessageEdit').mockImplementation(
-					(_roomId, _stanzaId, newText) => {
+					(_roomId, newText) => {
 						const updatedMessage = { ...mockedTextMessage, text: newText, edited: true };
 						store.setPinnedMessage(mockedRoom.id, updatedMessage);
 					}
@@ -366,7 +371,74 @@ describe('Chat', () => {
 				).toBeVisible();
 			});
 
-			it.todo('should edit the edited pin message');
+			it('should edit the edited pin message', async () => {
+				const originalText = 'Hi';
+				const firstModification = ' modified';
+				const mockedEditedMessage = createMockTextMessage({
+					id: 'idEditedMessage',
+					roomId: mockedRoom.id,
+					from: user1.id,
+					date: dateToTimestamp(now()),
+					text: `${originalText}${firstModification}`,
+					edited: true,
+					editedStanzaId: 'editedStanzaId1'
+				});
+
+				const store: RootStore = useStore.getState();
+				store.newMessage(mockedEditedMessage);
+				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
+
+				// Mock xmppClient.pinMessage to update the store
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedEditedMessage);
+				});
+
+				// Mock xmppClient.sendChatMessageEdit to update the pinned message text
+				vi.spyOn(store.connections.xmppClient, 'sendChatMessageEdit').mockImplementation(
+					(_roomId, newText) => {
+						const updatedMessage = {
+							...mockedEditedMessage,
+							text: newText,
+							edited: true,
+							editedStanzaId: 'editedStanzaId2'
+						};
+						store.setPinnedMessage(mockedRoom.id, updatedMessage);
+					}
+				);
+
+				const secondModification = ' again';
+
+				const { user } = setup(
+					<Chat
+						roomId={mockedRoom.id}
+						conversationView={ConversationView.CHAT}
+						setConversationView={vi.fn()}
+					/>
+				);
+
+				await user.hover(screen.getByText(mockedEditedMessage.text));
+				const dropdown = screen.getByTestId(iconDropdown);
+				await user.click(dropdown);
+				await user.click(screen.getByText(dropdownPinMessageOption));
+
+				expect(
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(
+						`${originalText}${firstModification}`
+					)
+				).toBeVisible();
+
+				await user.click(dropdown);
+				const editOptions = screen.getAllByText(/^Edit$/i);
+				await user.click(editOptions[editOptions.length - 1]);
+				await user.type(screen.getByRole('textbox'), secondModification);
+				await user.click(screen.getByTestId(sendMessageIcon));
+
+				expect(
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(
+						`${originalText}${firstModification}${secondModification}`
+					)
+				).toBeVisible();
+			});
 
 			it('should edit the pin message and maintain the attachment', async () => {
 				const mockedTextMsgWithAttachment = createMockTextMessage({
@@ -386,16 +458,30 @@ describe('Chat', () => {
 				store.newMessage(mockedTextMsgWithAttachment);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
-				// Mock xmppClient.pinMessage to update the store with the current message
-				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
-					const messages = store.chatsRegistry[mockedRoom.id]?.messages;
-					const currentMessage = messages?.find((m) => m.id === mockedTextMsgWithAttachment.id);
-					if (currentMessage && currentMessage.type === MessageType.TEXT_MSG) {
-						store.setPinnedMessage(mockedRoom.id, currentMessage as TextMessage);
-					}
-				});
-
 				const updatedText = 'updated text';
+
+				// Mock xmppClient.sendChatMessageEdit to update the message via fastening
+				vi.spyOn(store.connections.xmppClient, 'sendChatMessageEdit').mockImplementation(
+					(_roomId, newText) => {
+						const fastening = createMockMessageFastening({
+							roomId: mockedRoom.id,
+							originalStanzaId: mockedTextMsgWithAttachment.stanzaId,
+							action: FasteningAction.EDIT,
+							value: newText
+						});
+						store.addFastening([fastening]);
+					}
+				);
+
+				// Mock xmppClient.pinMessage to update the store with the edited message including attachment
+				vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(() => {
+					const editedMessage: TextMessage = {
+						...mockedTextMsgWithAttachment,
+						text: `Hi${updatedText}`,
+						edited: true
+					};
+					store.setPinnedMessage(mockedRoom.id, editedMessage);
+				});
 
 				const { user } = setup(
 					<Chat
@@ -417,7 +503,7 @@ describe('Chat', () => {
 					within(screen.getByTestId(pinSectionDataTestId)).getByText(`Hi${updatedText}`)
 				).toBeVisible();
 				expect(
-					within(screen.getByTestId(pinSectionDataTestId)).getByTestId('hover-container')
+					within(screen.getByTestId(pinSectionDataTestId)).getByTestId('icon: Image')
 				).toBeVisible();
 			});
 		});
