@@ -49,6 +49,7 @@ describe('Chat', () => {
 	const pinSectionDataTestId = 'pin-message';
 	const dropdownPinMessageOption = /pin message/i;
 	const sendMessageIcon = 'icon: Navigation2';
+	const replaceLabel = /replace pinned message/i;
 
 	describe('Pin message', () => {
 		it('should pin the message', async () => {
@@ -81,6 +82,105 @@ describe('Chat', () => {
 			expect(within(pinSection).getByText(mockedTextMessage.text)).toBeVisible();
 			expect(
 				within(screen.getByTestId(`Bubble-${mockedTextMessage.id}`)).getByTestId('icon: Pin3')
+			).toBeVisible();
+		});
+
+		it('should show confirmation modal when trying to replace a pinned message', async () => {
+			const firstMessage = createMockTextMessage({
+				id: 'firstMessageId',
+				stanzaId: 'firstStanzaId',
+				roomId: mockedRoom.id,
+				text: 'First message'
+			});
+			const secondMessage = createMockTextMessage({
+				id: 'secondMessageId',
+				stanzaId: 'secondStanzaId',
+				roomId: mockedRoom.id,
+				text: 'Second message'
+			});
+
+			const store: RootStore = useStore.getState();
+			store.newMessage(firstMessage);
+			store.newMessage(secondMessage);
+			store.setPinnedMessage(mockedRoom.id, firstMessage);
+
+			// Mock xmppClient.pinMessage to update the store with the new pinned message
+			vi.spyOn(store.connections.xmppClient, 'pinMessage').mockImplementation(
+				(_roomId, stanzaId) => {
+					if (stanzaId === secondMessage.stanzaId) {
+						store.setPinnedMessage(mockedRoom.id, secondMessage);
+					}
+				}
+			);
+
+			const { user } = setup(
+				<Chat
+					roomId={mockedRoom.id}
+					conversationView={ConversationView.CHAT}
+					setConversationView={vi.fn()}
+				/>
+			);
+
+			expect(
+				within(screen.getByTestId(pinSectionDataTestId)).getByText(firstMessage.text)
+			).toBeVisible();
+			const secondBubble = screen.getByTestId(`Bubble-${secondMessage.id}`);
+			await user.hover(within(secondBubble).getByText(secondMessage.text));
+			const dropdown = within(secondBubble).getByTestId(iconDropdown);
+			await user.click(dropdown);
+			await user.click(screen.getByText(dropdownPinMessageOption));
+			expect(screen.getByText(replaceLabel)).toBeVisible();
+			expect(screen.getByText(/This conversation already has a pinned message/i)).toBeVisible();
+			await user.click(screen.getByRole('button', { name: /Replace pin/i }));
+			expect(
+				within(screen.getByTestId(pinSectionDataTestId)).getByText(secondMessage.text)
+			).toBeVisible();
+		});
+
+		it('should cancel replacing pin when clicking cancel in modal', async () => {
+			const firstMessage = createMockTextMessage({
+				id: 'firstMessageId',
+				stanzaId: 'firstStanzaId',
+				roomId: mockedRoom.id,
+				text: 'First message'
+			});
+			const secondMessage = createMockTextMessage({
+				id: 'secondMessageId',
+				stanzaId: 'secondStanzaId',
+				roomId: mockedRoom.id,
+				text: 'Second message'
+			});
+
+			const store: RootStore = useStore.getState();
+			store.newMessage(firstMessage);
+			store.newMessage(secondMessage);
+			store.setPinnedMessage(mockedRoom.id, firstMessage);
+
+			const pinMessageSpy = vi.spyOn(store.connections.xmppClient, 'pinMessage');
+
+			const { user } = setup(
+				<Chat
+					roomId={mockedRoom.id}
+					conversationView={ConversationView.CHAT}
+					setConversationView={vi.fn()}
+				/>
+			);
+
+			expect(
+				within(screen.getByTestId(pinSectionDataTestId)).getByText(firstMessage.text)
+			).toBeVisible();
+			const secondBubble = screen.getByTestId(`Bubble-${secondMessage.id}`);
+			await user.hover(within(secondBubble).getByText(secondMessage.text));
+			const dropdown = within(secondBubble).getByTestId(iconDropdown);
+			await user.click(dropdown);
+			await user.click(screen.getByText(dropdownPinMessageOption));
+
+			expect(screen.getByText(replaceLabel)).toBeVisible();
+			await user.click(screen.getByText(/cancel/i));
+			expect(screen.queryByText(replaceLabel)).not.toBeInTheDocument();
+			expect(pinMessageSpy).not.toHaveBeenCalled();
+			expect(
+				within(screen.getByTestId(pinSectionDataTestId)).getByText(firstMessage.text)
 			).toBeVisible();
 		});
 
