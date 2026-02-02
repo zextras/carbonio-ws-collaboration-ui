@@ -220,10 +220,10 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 						</Row>
 						<Row mainAlignment="flex-end" gap="0.25rem">
 							<StyledText onClick={toggleExpand} color="primary">
-								{t('', 'Hide')}
+								{t('action.hide', 'Hide')}
 							</StyledText>
 							{canMessageBePinned && (
-								<Tooltip label={t('', 'Unpin message')}>
+								<Tooltip label={t('tooltip.unpinMessage', 'Unpin message')}>
 									<Button onClick={unpin} icon="Close" type="ghost" color="text" />
 								</Tooltip>
 							)}
@@ -265,10 +265,10 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 			</Row>
 			<Row mainAlignment="flex-end" gap="0.25rem" flexShrink={0}>
 				<StyledText onClick={toggleExpand} color="primary">
-					{t('', 'Show more')}
+					{t('action.showMore', 'Show more')}
 				</StyledText>
 				{canMessageBePinned && (
-					<Tooltip label={t('', 'Unpin message')}>
+					<Tooltip label={t('tooltip.unpinMessage', 'Unpin message')}>
 						<Button onClick={unpin} icon="Close" type="ghost" color="text" />
 					</Tooltip>
 				)}

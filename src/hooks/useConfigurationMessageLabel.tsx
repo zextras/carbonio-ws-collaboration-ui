@@ -152,20 +152,28 @@ export const useConfigurationMessageLabel = (
 
 	const pinMessageLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
-			return t('', 'You pinned a message');
+			return t('configurationMessages.user.pinMessage', 'You pinned a message');
 		}
-		return t('', '{{actionMakerUsername}} pinned a message', {
-			actionMakerUsername
-		});
+		return t(
+			'configurationMessages.member.pinMessage',
+			'{{actionMakerUsername}} pinned a message',
+			{
+				actionMakerUsername
+			}
+		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
 	const unpinMessageLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
-			return t('', 'You unpinned a message');
+			return t('configurationMessages.user.unpinMessage', 'You unpinned a message');
 		}
-		return t('', '{{actionMakerUsername}} unpinned a message', {
-			actionMakerUsername
-		});
+		return t(
+			'configurationMessages.member.unpinMessage',
+			'{{actionMakerUsername}} unpinned a message',
+			{
+				actionMakerUsername
+			}
+		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
 	switch (message.operation) {

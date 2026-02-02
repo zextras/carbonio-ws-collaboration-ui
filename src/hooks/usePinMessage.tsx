@@ -63,9 +63,9 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 			const modalId = 'pin-modal';
 			createModal({
 				id: modalId,
-				title: t('', 'Replace pinned message'),
-				confirmLabel: t('', 'Yes, replace pin'),
-				secondaryActionLabel: t('', 'No, cancel'),
+				title: t('modal.replacePinMessage', 'Replace pinned message'),
+				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
+				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
 					xmppClient.pinMessage(message.roomId, stanzaIdToPin);
 					closeModal(modalId);
@@ -78,7 +78,7 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 					closeModal(modalId);
 				},
 				children: t(
-					'',
+					'modal.replacePinDescription',
 					'This conversation already has a pinned message. Only one message can be pinned at a time. Do you want to replace it with this message?'
 				)
 			});

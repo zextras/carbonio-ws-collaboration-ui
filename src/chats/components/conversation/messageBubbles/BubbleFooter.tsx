@@ -132,7 +132,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					</Container>
 				)}
 				{isMessagePinned && (
-					<Tooltip label={t('', 'Pinned message')}>
+					<Tooltip label={t('tooltip.pinnedMessage', 'Pinned message')}>
 						<Container width="fit">
 							<Icon color="secondary" icon={'Pin3'} size="small" />
 						</Container>
