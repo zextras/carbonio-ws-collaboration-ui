@@ -344,6 +344,9 @@ export const useActiveConversationsSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
 				conversation.selectedSearchResult = stanzaId;
+				if (stanzaId) {
+					conversation.selectedPinnedMessage = undefined;
+				}
 			}),
 			false,
 			'AC/SET_SELECTED_SEARCH_RESULT'
@@ -374,6 +377,9 @@ export const useActiveConversationsSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
 				conversation.selectedPinnedMessage = stanzaId;
+				if (stanzaId !== undefined) {
+					conversation.selectedSearchResult = undefined;
+				}
 			}),
 			false,
 			'AC/SET_SELECTED_PINNED_MESSAGE'

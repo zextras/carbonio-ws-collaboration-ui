@@ -150,6 +150,11 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const goToPinMessage = useCallback(() => {
 		if (!isClickable) return;
 		useStore.getState().setSelectedPinnedMessage(pinnedMessage.roomId, pinnedMessage.stanzaId);
+
+		setTimeout(() => {
+			useStore.getState().setSelectedPinnedMessage(pinnedMessage.roomId, undefined);
+		}, 5000);
+
 		if (!isMessageInStore && !isMessageSelected) {
 			const { xmppClient } = useStore.getState().connections;
 			xmppClient
@@ -240,6 +245,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 			padding={{ horizontal: 'large', vertical: 'medium' }}
 			height="fit"
 			data-testid={'pin-message'}
+			gap={'0.5rem'}
 		>
 			<Row mainAlignment="flex-start" gap="0.5rem" takeAvailableSpace>
 				<Icon icon="Pin3" size="large" />
