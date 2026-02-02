@@ -21,7 +21,7 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { MessageFastening, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
@@ -559,6 +559,44 @@ class XMPPClient {
 		});
 	}
 
+	/**
+	 * Fetches a message by its stanza ID and calls the callback with the result
+	 */
+	private fetchMessageByStanzaId(
+		roomId: string,
+		stanzaId: string,
+		callback: (queryId: string) => void
+	): void {
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+			.c('x', { xmlns: jabberData })
+			.c('field', { var: 'ids' })
+			.c('value')
+			.t(stanzaId);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: () => callback(queryId)
+		});
+	}
+
+	/**
+	 * Handles setting the pinned message when it's an edited message (FASTENING type)
+	 */
+	private handleEditedPinnedMessage(roomId: string, fasteningMessage: MessageFastening): void {
+		this.fetchMessageByStanzaId(roomId, fasteningMessage.originalStanzaId, (queryId) => {
+			const originalMessage = HistoryAccumulator.getPinnedMessage(queryId);
+			const editedMessage: TextMessage = {
+				...originalMessage,
+				text: fasteningMessage.value || '',
+				edited: true,
+				editedStanzaId: fasteningMessage.stanzaId
+			} as TextMessage;
+			useStore.getState().setPinnedMessage(roomId, editedMessage);
+		});
+	}
+
 	requestPinnedMessageContent(roomId: string, pinnedMessageStanzaId: string): void {
 		if (!useStore.getState().rooms[roomId]) return;
 
@@ -572,51 +610,21 @@ class XMPPClient {
 
 		if (existingMessage) {
 			useStore.getState().setPinnedMessage(roomId, existingMessage);
-		} else {
-			const queryId = HistoryAccumulator.getNextId();
-			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
-				.c('x', { xmlns: jabberData })
-				.c('field', { var: 'ids' })
-				.c('value')
-				.t(pinnedMessageStanzaId);
-			this.xmppConnection.send({
-				type: XMPPRequestType.IQ,
-				elem: iq,
-				callback: () => {
-					const message = HistoryAccumulator.getPinnedMessage(queryId);
-
-					if (message.type === MessageType.TEXT_MSG) {
-						useStore.getState().setPinnedMessage(roomId, message);
-						return;
-					}
-
-					if (message.type === MessageType.FASTENING && message.action === 'edit') {
-						const queryId2 = HistoryAccumulator.getNextId();
-						const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-							.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId2 })
-							.c('x', { xmlns: jabberData })
-							.c('field', { var: 'ids' })
-							.c('value')
-							.t(message.originalStanzaId);
-						this.xmppConnection.send({
-							type: XMPPRequestType.IQ,
-							elem: iq,
-							callback: () => {
-								const originalMessage = HistoryAccumulator.getPinnedMessage(queryId2);
-								const msg = {
-									...originalMessage,
-									text: message.value || '',
-									edited: true,
-									editedStanzaId: message.stanzaId
-								} as TextMessage;
-								useStore.getState().setPinnedMessage(roomId, msg);
-							}
-						});
-					}
-				}
-			});
+			return;
 		}
+
+		this.fetchMessageByStanzaId(roomId, pinnedMessageStanzaId, (queryId) => {
+			const message = HistoryAccumulator.getPinnedMessage(queryId);
+
+			if (message.type === MessageType.TEXT_MSG) {
+				useStore.getState().setPinnedMessage(roomId, message);
+				return;
+			}
+
+			if (message.type === MessageType.FASTENING && message.action === 'edit') {
+				this.handleEditedPinnedMessage(roomId, message);
+			}
+		});
 	}
 
 	unpinMessage(roomId: string, stanzaId: string): void {
