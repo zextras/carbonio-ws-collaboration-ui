@@ -52,6 +52,30 @@ describe('Chat', () => {
 	const replaceLabel = /replace pinned message/i;
 
 	describe('Pin message', () => {
+		it('should not show pin option when feature is not supported', async () => {
+			const mockedTextMessage = createMockTextMessage({
+				id: 'idSimpleTextMessage',
+				roomId: mockedRoom.id
+			});
+
+			const store: RootStore = useStore.getState();
+			store.newMessage(mockedTextMessage);
+			store.connections.xmppClient.features = [];
+
+			const { user } = setup(
+				<Chat
+					roomId={mockedRoom.id}
+					conversationView={ConversationView.CHAT}
+					setConversationView={vi.fn()}
+				/>
+			);
+
+			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
+			await user.hover(screen.getByText(mockedTextMessage.text));
+			await user.click(screen.getByTestId(iconDropdown));
+			expect(screen.queryByText(dropdownPinMessageOption)).not.toBeInTheDocument();
+		});
+
 		it('should pin the message', async () => {
 			const mockedTextMessage = createMockTextMessage({
 				id: 'idSimpleTextMessage',

@@ -45,8 +45,10 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 	);
 
 	const canMessageBePinned = useMemo(
-		() => roomType === RoomType.ONE_TO_ONE || amIModerator,
-		[amIModerator, roomType]
+		() =>
+			xmppClient.features.includes('zextras:iq:pin') &&
+			(roomType === RoomType.ONE_TO_ONE || amIModerator),
+		[amIModerator, roomType, xmppClient.features]
 	);
 
 	const pinActionLabel = useMemo(() => {

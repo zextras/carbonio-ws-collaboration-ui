@@ -29,6 +29,8 @@ const jabberData = 'jabber:x:data';
 class XMPPClient {
 	public xmppConnection: XMPPConnection;
 
+	public features: string[] = [];
+
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {
 			this.setInbox();
@@ -115,7 +117,13 @@ class XMPPClient {
 		const iq = $iq({ type: 'get', to: 'carbonio' }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq
+			elem: iq,
+			callback: (stanza: Element) => {
+				const featureElements = stanza.getElementsByTagName('feature');
+				this.features = Array.from(featureElements).map(
+					(feature) => feature.getAttribute('var') || ''
+				);
+			}
 		});
 	}
 
@@ -525,10 +533,12 @@ class XMPPClient {
 			xmlns: 'urn:xmpp:pin:0',
 			'message-id': stanzaId
 		});
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq
-		});
+		setTimeout(() => {
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq
+			});
+		}, 500);
 	}
 
 	getMessagePin(roomId: string): void {

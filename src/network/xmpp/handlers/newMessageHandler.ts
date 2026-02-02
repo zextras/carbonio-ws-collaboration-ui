@@ -50,7 +50,10 @@ export function onNewMessageStanza(message: Element): true {
 		}
 		case MessageType.CONFIGURATION_MSG: {
 			if (newMessage.operation === OperationType.MESSAGE_PIN_UPDATED) {
-				xmppClient.getMessagePin(newMessage.roomId);
+				const pinnedMessage = store.activeConversations[newMessage.roomId].messagePinned;
+				if (pinnedMessage) {
+					store.setPinnedMessage(newMessage.roomId, { ...pinnedMessage, text: newMessage.value });
+				}
 				return true;
 			}
 			store.newMessage(newMessage);

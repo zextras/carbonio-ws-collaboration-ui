@@ -126,6 +126,10 @@ export function decodeXMPPMessageStanza(
 					value = Strophe.getText(getRequiredTagElement(x, 'user-id'));
 					break;
 				}
+				case OperationType.MESSAGE_PIN_UPDATED: {
+					value = Strophe.getText(getRequiredTagElement(x, 'body'));
+					break;
+				}
 				default:
 					break;
 			}
