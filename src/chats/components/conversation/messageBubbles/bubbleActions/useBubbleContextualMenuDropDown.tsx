@@ -115,10 +115,6 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		if (pinnedMessage?.stanzaId === message.stanzaId) {
-			xmppClient.unpinMessage(message.roomId, message.stanzaId);
-		}
-
 		if (message.attachment) {
 			AttachmentsApi.deleteAttachment(message.attachment.id).then(() =>
 				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
@@ -126,7 +122,7 @@ const useBubbleContextualMenuDropDown = (
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.stanzaId, message.attachment, message.roomId, pinnedMessage?.stanzaId, xmppClient]);
+	}, [message.stanzaId, message.attachment, message.roomId, xmppClient]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

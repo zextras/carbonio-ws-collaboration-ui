@@ -30,6 +30,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { getPinAttachmentColor, getPinAttachmentIcon } from '../../../utils/attachmentUtils';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { scrollToMessage } from '../../../utils/scrollUtils';
 
@@ -70,23 +71,6 @@ const TextExpanded = styled(Text)`
 	overflow-y: auto;
 	width: 100%;
 `;
-
-const getAttachmentIcon = (fileType: string): string => {
-	if (fileType === 'application/pdf') {
-		return 'FilePdf';
-	}
-	if (fileType.split('/')[0] === 'image') {
-		return 'Image';
-	}
-	return 'FileText';
-};
-
-const getColorIcon = (fileType: string): string => {
-	if (fileType.split('/')[0] === 'image' || fileType === 'application/pdf') {
-		return 'error';
-	}
-	return 'primary';
-};
 
 const ExpandedMessageWithThumbnail = ({
 	attachment,
@@ -210,7 +194,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				onClick={goToPinMessage}
 				$isClickable={isClickable}
 			>
-				<Container mainAlignment={'flex-start'} crossAlignment={'flex-start'} gap="1rem">
+				<Container mainAlignment={'flex-start'} crossAlignment={'flex-start'} gap="0.5rem">
 					<Row mainAlignment="space-between" width="fill" gap={'1rem'}>
 						<Row mainAlignment="flex-start" gap="0.5rem">
 							<Icon icon="Pin3" size="large" />
@@ -252,16 +236,18 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				<Text color={avatarColor} weight="bold">
 					{ownerMessage}:
 				</Text>
-				{pinnedMessage.attachment && (
-					<Icon
-						icon={getAttachmentIcon(pinnedMessage.attachment.mimeType)}
-						color={getColorIcon(pinnedMessage.attachment.mimeType)}
-						size="large"
-					/>
-				)}
-				<Text overflow="ellipsis" style={{ flex: 1 }}>
-					{pinnedMessage.text || pinnedMessage.attachment?.name}
-				</Text>
+				<Row gap="0.25rem" takeAvailableSpace>
+					{pinnedMessage.attachment && (
+						<Icon
+							icon={getPinAttachmentIcon(pinnedMessage.attachment.mimeType)}
+							color={getPinAttachmentColor(pinnedMessage.attachment.mimeType)}
+							size="large"
+						/>
+					)}
+					<Text overflow="ellipsis" style={{ flex: 1 }}>
+						{pinnedMessage.text || pinnedMessage.attachment?.name}
+					</Text>
+				</Row>
 			</Row>
 			<Row mainAlignment="flex-end" gap="0.25rem" flexShrink={0}>
 				<StyledText onClick={toggleExpand} color="primary">
