@@ -204,18 +204,18 @@ export const uid = (): string => {
 	return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
 };
 
-const spreadsheetMimeTypes = [
+const spreadsheetMimeTypes = new Set([
 	'application/vnd.ms-excel',
 	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 	'application/vnd.oasis.opendocument.spreadsheet',
 	'text/csv'
-];
+]);
 
-const presentationMimeTypes = [
+const presentationMimeTypes = new Set([
 	'application/vnd.ms-powerpoint',
 	'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 	'application/vnd.oasis.opendocument.presentation'
-];
+]);
 
 export const getPinAttachmentIcon = (fileType: string): string => {
 	const mainType = fileType.split('/')[0];
@@ -226,10 +226,10 @@ export const getPinAttachmentIcon = (fileType: string): string => {
 	if (mainType === 'image') {
 		return 'Image';
 	}
-	if (spreadsheetMimeTypes.includes(fileType)) {
+	if (spreadsheetMimeTypes.has(fileType)) {
 		return 'FileCalc';
 	}
-	if (presentationMimeTypes.includes(fileType)) {
+	if (presentationMimeTypes.has(fileType)) {
 		return 'FilePresentation';
 	}
 	if (mainType === 'video') {
@@ -247,10 +247,10 @@ export const getPinAttachmentColor = (fileType: string): string => {
 	if (fileType === 'application/pdf' || mainType === 'image' || mainType === 'video') {
 		return 'error';
 	}
-	if (spreadsheetMimeTypes.includes(fileType)) {
+	if (spreadsheetMimeTypes.has(fileType)) {
 		return 'success';
 	}
-	if (presentationMimeTypes.includes(fileType)) {
+	if (presentationMimeTypes.has(fileType)) {
 		return '#FFA726'; // avatar_47
 	}
 	if (mainType === 'audio') {

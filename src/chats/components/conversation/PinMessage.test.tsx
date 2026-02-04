@@ -146,14 +146,13 @@ describe('PinMessage', () => {
 			id: 'idSimpleTextMessage',
 			roomId: oneToOneRoom.id,
 			from: 'user1',
-			forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+			forwarded: { id: 'forwardedId', date: 1661441294393, from: 'user2', count: 1 }
 		});
 		const { user } = setup(<PinMessage pinnedMessage={forwardedTextMessage} />);
 
 		await user.click(screen.getByText(/show more/i));
-		expect(screen.getByText('Originally sent by:'));
-		// todo
-		// expect(screen.getByText('nome sender'));
+		expect(screen.getByText('Originally sent by:')).toBeVisible();
+		expect(screen.getByText(/user2/i)).toBeVisible();
 		expect(screen.getByText(forwardedTextMessage.text)).toBeVisible();
 	});
 

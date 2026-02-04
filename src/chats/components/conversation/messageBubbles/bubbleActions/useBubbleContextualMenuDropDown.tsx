@@ -23,7 +23,6 @@ import { AttachmentsApi } from '../../../../../network';
 import {
 	getFilesToUploadArray,
 	getForwardList,
-	getPinnedMessage,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
@@ -47,7 +46,6 @@ const useBubbleContextualMenuDropDown = (
 
 	const [t] = useTranslation();
 	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
-	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.deleteForAll', 'Delete for all');
 	const editActionLabel = t('action.edit', 'Edit');

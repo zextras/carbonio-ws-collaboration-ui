@@ -16,14 +16,14 @@ import useStore from '../store/Store';
 import { TextMessage } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
 
-interface usePinMessageReturnType {
+interface UsePinMessageReturnType {
 	canMessageBePinned: boolean;
 	pinAction: () => void;
 	pinActionLabel: string;
 	isMessagePinned: boolean;
 }
 
-export const usePinMessage = (message: TextMessage): usePinMessageReturnType => {
+export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => {
 	const [t] = useTranslation();
 	const { createModal, closeModal } = useModal();
 	const xmppClient = useStore(getXmppClient);
@@ -86,12 +86,12 @@ export const usePinMessage = (message: TextMessage): usePinMessageReturnType => 
 			return;
 		}
 
-		if (!isMessagePinned) {
-			xmppClient.pinMessage(message.roomId, stanzaIdToPin);
-			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
-		} else {
+		if (isMessagePinned) {
 			xmppClient.unpinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().removePinnedMessage(message.roomId);
+			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
+		} else {
+			xmppClient.pinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		}
 	}, [
