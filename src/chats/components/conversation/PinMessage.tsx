@@ -198,7 +198,6 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				<Container mainAlignment={'flex-start'} crossAlignment={'flex-start'} gap="0.5rem">
 					<Row mainAlignment="space-between" width="fill" gap={'1rem'}>
 						<Row mainAlignment="flex-start" gap="0.5rem">
-							<Icon icon="Pin3" size="large" />
 							<Text color={avatarColor} weight="bold">
 								{ownerMessage}:
 							</Text>
@@ -209,7 +208,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 							</StyledText>
 							{canMessageBePinned && (
 								<Tooltip label={t('tooltip.unpinMessage', 'Unpin message')}>
-									<Button onClick={unpin} icon="Close" type="ghost" color="text" />
+									<Button onClick={unpin} icon="Unpin3" type="ghost" color="text" size="large" />
 								</Tooltip>
 							)}
 						</Row>
@@ -233,7 +232,6 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 			gap={'0.5rem'}
 		>
 			<Row mainAlignment="flex-start" gap="0.5rem" takeAvailableSpace>
-				<Icon icon="Pin3" size="large" />
 				<Text color={avatarColor} weight="bold">
 					{ownerMessage}:
 				</Text>
@@ -256,7 +254,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				</StyledText>
 				{canMessageBePinned && (
 					<Tooltip label={t('tooltip.unpinMessage', 'Unpin message')}>
-						<Button onClick={unpin} icon="Close" type="ghost" color="text" />
+						<Button onClick={unpin} icon="Unpin3" type="ghost" color="text" size="large" />
 					</Tooltip>
 				)}
 			</Row>

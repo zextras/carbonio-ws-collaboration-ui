@@ -274,7 +274,7 @@ describe('Chat', () => {
 				const dropdown = screen.getByTestId(iconDropdown);
 				await user.click(dropdown);
 				await user.click(screen.getByText(dropdownPinMessageOption));
-				await user.click(screen.getByTestId('icon: Close'));
+				await user.click(screen.getByTestId('icon: Unpin3'));
 				expect(screen.queryByTestId(pinSectionDataTestId)).not.toBeInTheDocument();
 			});
 		});
@@ -367,7 +367,7 @@ describe('Chat', () => {
 				const dropdown = screen.getByTestId(iconDropdown);
 				await user.click(dropdown);
 				await user.click(screen.getByText(dropdownPinMessageOption));
-				await user.click(screen.getByTestId('icon: Close'));
+				await user.click(screen.getByTestId('icon: Unpin3'));
 				expect(screen.getByText(/you unpinned a message/i)).toBeVisible();
 			});
 		});

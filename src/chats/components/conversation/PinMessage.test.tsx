@@ -32,7 +32,7 @@ beforeEach(() => {
 	store.addRooms([oneToOneRoom]);
 });
 
-const iconClose = 'icon: Close';
+const iconClose = 'icon: Unpin3';
 
 describe('PinMessage', () => {
 	describe('One to one', () => {
@@ -44,7 +44,6 @@ describe('PinMessage', () => {
 			});
 			setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 
-			expect(screen.getByTestId('icon: Pin3')).toBeVisible();
 			expect(screen.getByText(/you/i)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
 			expect(screen.getByText(/show more/i)).toBeVisible();
@@ -59,7 +58,6 @@ describe('PinMessage', () => {
 			});
 			setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 
-			expect(screen.getByTestId('icon: Pin3')).toBeVisible();
 			expect(screen.getByText(/user2/i)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
 			expect(screen.getByText(/show more/i)).toBeVisible();
