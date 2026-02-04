@@ -57,8 +57,8 @@ export function onNewMessageStanza(message: Element): true {
 				return true;
 			}
 			store.newMessage(newMessage);
+			sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 			if (newMessage.from !== sessionId) {
-				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 				store.incrementUnreadCount(newMessage.roomId, 1);
 			}
 			if (newMessage.operation === OperationType.MESSAGE_PINNED) {
