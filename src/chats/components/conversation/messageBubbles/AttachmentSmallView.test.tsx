@@ -55,4 +55,58 @@ describe('Attachment Small view', () => {
 		await user.click(previewIcon);
 		expect(spyOnGetImageThumbnailURL).toHaveBeenCalled();
 	});
+
+	test('Display correct icon for Word document', () => {
+		const docxAttachment: AttachmentMessageType = {
+			id: 'docxAttachmentId',
+			name: 'document.docx',
+			mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			size: 21412
+		};
+		setup(<AttachmentSmallView attachment={docxAttachment} />);
+		const docIcon = screen.getByTestId('icon: FileTextOutline');
+		expect(docIcon).toBeVisible();
+	});
+
+	test('Display correct icon for Excel spreadsheet', () => {
+		const xlsxAttachment: AttachmentMessageType = {
+			id: 'xlsxAttachmentId',
+			name: 'spreadsheet.xlsx',
+			mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			size: 21412
+		};
+		setup(<AttachmentSmallView attachment={xlsxAttachment} />);
+		const xlsIcon = screen.getByTestId('icon: FileCalcOutline');
+		expect(xlsIcon).toBeVisible();
+	});
+
+	test('Display correct icon for PowerPoint presentation', () => {
+		const pptxAttachment: AttachmentMessageType = {
+			id: 'pptxAttachmentId',
+			name: 'presentation.pptx',
+			mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			size: 21412
+		};
+		setup(<AttachmentSmallView attachment={pptxAttachment} />);
+		const pptIcon = screen.getByTestId('icon: FilePresentationOutline');
+		expect(pptIcon).toBeVisible();
+	});
+
+	test('Avatar shows thumbnail for image attachments', () => {
+		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentsApi, 'getImageThumbnailURL');
+		const imageAttachment: AttachmentMessageType = {
+			id: 'thumbnailImageId',
+			name: 'photo.png',
+			mimeType: 'image/png',
+			size: 21412
+		};
+		setup(<AttachmentSmallView attachment={imageAttachment} />);
+		expect(spyOnGetImageThumbnailURL).toHaveBeenCalledWith(
+			imageAttachment.id,
+			'0x0',
+			'Low',
+			'png',
+			'Rectangular'
+		);
+	});
 });
