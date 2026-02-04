@@ -70,6 +70,7 @@ const TextExpanded = styled(Text)`
 	max-height: 7.5rem;
 	overflow-y: auto;
 	width: 100%;
+	height: 100%;
 `;
 
 const ExpandedMessageWithThumbnail = ({

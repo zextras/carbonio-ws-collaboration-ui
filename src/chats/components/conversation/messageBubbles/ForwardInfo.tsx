@@ -47,6 +47,7 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			gap={'0.25rem'}
+			height={'fit'}
 		>
 			{info.count > 1 && (
 				<Tooltip label={forwardedMultipleTimesLabel}>
