@@ -542,7 +542,7 @@ class XMPPClient {
 	}
 
 	getMessagePin(roomId: string): void {
-		if (!this.features.includes('zextras:iq:pin')) return;
+		if (!this.features.includes('zextras:iq:pin') && this.features.length > 0) return;
 
 		const iq = $iq({ type: 'get', to: carbonizeMUC(roomId) }).c('pin', {
 			xmlns: Strophe.NS.PIN
