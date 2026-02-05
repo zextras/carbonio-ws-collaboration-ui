@@ -73,7 +73,8 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 			allowFolders: true,
 			canCreateFolder: true,
 			maxSelection: 1,
-			isValidSelection
+			isValidSelection,
+			canSelectOpenedFolder: true
 		};
 
 		filesSelectFilesAction(actionTarget);
