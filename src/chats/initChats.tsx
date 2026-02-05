@@ -7,12 +7,12 @@
 import React, { lazy, Suspense, useCallback, useEffect } from 'react';
 
 import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-system';
-import { addRoute, SecondaryBarComponentProps, upsertApp } from '@zextras/carbonio-shell-ui';
+import { addRoute, SecondaryBarComponentProps } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
-import { CHATS_APP_ID, CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
+import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 import useEventListener, { EventName, RouteRedirectEvent } from '../hooks/useEventListener';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
