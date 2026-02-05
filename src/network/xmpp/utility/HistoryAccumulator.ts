@@ -154,6 +154,31 @@ class HistoryAccumulator {
 			return accumulator;
 		}, []);
 	}
+
+	public getPinnedMessage(queryId: string): Message {
+		const cachedElements = this.getCachedElements(queryId);
+		if (cachedElements.length !== 1) {
+			throw new Error('There should be exactly one cached element for pinned messages');
+		}
+		const message = cachedElements[0];
+		const result = getRequiredTagElement(message, 'result');
+		const id = getRequiredAttribute(result, 'id');
+		const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
+		const insideMessage = getRequiredTagElement(result, 'message');
+		const historyMessage = decodeXMPPMessageStanza(insideMessage, {
+			date: dateToTimestamp(date),
+			stanzaId: id
+		});
+
+		if (
+			!historyMessage ||
+			(historyMessage.type !== MessageType.TEXT_MSG &&
+				historyMessage.type !== MessageType.FASTENING)
+		) {
+			throw new Error('Error decoding pinned message');
+		}
+		return historyMessage;
+	}
 }
 
 export default HistoryAccumulator.getInstance();

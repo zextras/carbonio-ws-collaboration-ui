@@ -45,6 +45,11 @@ export function decodeXMPPMessageStanza(
 	const fasteningElement = getTagElement(messageStanza, 'apply-to');
 	if (fasteningElement) {
 		const originalStanzaId = getRequiredAttribute(fasteningElement, 'id');
+		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+		const fasteningStanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			undefined;
 
 		// Message fastening for a delete message
 		const retracted = getTagElement(fasteningElement, 'retract');
@@ -56,7 +61,8 @@ export function decodeXMPPMessageStanza(
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-				from: getId(resource)
+				from: getId(resource),
+				stanzaId: fasteningStanzaId
 			} as MessageFastening;
 		}
 
@@ -70,6 +76,7 @@ export function decodeXMPPMessageStanza(
 				action: FasteningAction.EDIT,
 				roomId,
 				date: messageDate,
+				stanzaId: fasteningStanzaId,
 				originalStanzaId,
 				from: getId(resource),
 				value: body?.textContent ?? ''
@@ -88,7 +95,8 @@ export function decodeXMPPMessageStanza(
 				date: messageDate,
 				originalStanzaId,
 				from: getId(resource),
-				value: body?.textContent ?? ''
+				value: body?.textContent ?? '',
+				stanzaId: fasteningStanzaId
 			} as MessageFastening;
 		}
 		return undefined;
@@ -116,6 +124,10 @@ export function decodeXMPPMessageStanza(
 				case OperationType.MEMBER_ADDED:
 				case OperationType.MEMBER_REMOVED: {
 					value = Strophe.getText(getRequiredTagElement(x, 'user-id'));
+					break;
+				}
+				case OperationType.MESSAGE_PIN_UPDATED: {
+					value = Strophe.getText(getRequiredTagElement(x, 'body'));
 					break;
 				}
 				default:

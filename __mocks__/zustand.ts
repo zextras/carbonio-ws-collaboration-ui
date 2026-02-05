@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act } from '@testing-library/react';
+import { act, cleanup } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
+import useStore from '../src/store/Store';
 import { RootStore } from '../src/types/store/StoreTypes';
 
 // a variable to hold reset functions for all stores declared in the app
@@ -28,6 +29,11 @@ beforeEach(() => {
 	act(() => {
 		storeResetFns.forEach((resetFn) => resetFn());
 	});
+	useStore.getState().connections.xmppClient.features = ['zextras:iq:pin'];
+});
+
+afterEach(() => {
+	cleanup();
 });
 
 export default create;

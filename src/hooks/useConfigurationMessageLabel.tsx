@@ -150,6 +150,32 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [affiliatedUsername, isAffiliatedUserAnonymous, loggedUserId, message.value, roomName, t]);
 
+	const pinMessageLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.pinMessage', 'You pinned a message');
+		}
+		return t(
+			'configurationMessages.member.pinMessage',
+			'{{actionMakerUsername}} pinned a message',
+			{
+				actionMakerUsername
+			}
+		);
+	}, [actionMakerUsername, loggedUserId, message.from, t]);
+
+	const unpinMessageLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.unpinMessage', 'You unpinned a message');
+		}
+		return t(
+			'configurationMessages.member.unpinMessage',
+			'{{actionMakerUsername}} unpinned a message',
+			{
+				actionMakerUsername
+			}
+		);
+	}, [actionMakerUsername, loggedUserId, message.from, t]);
+
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:
 			return roomNameChangedLabel;
@@ -165,6 +191,10 @@ export const useConfigurationMessageLabel = (
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
 			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
+		case OperationType.MESSAGE_PINNED:
+			return pinMessageLabel;
+		case OperationType.MESSAGE_UNPINNED:
+			return unpinMessageLabel;
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

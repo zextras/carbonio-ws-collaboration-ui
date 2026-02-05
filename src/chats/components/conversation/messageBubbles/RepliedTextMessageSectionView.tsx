@@ -158,7 +158,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 								<MessageWrap color="secondary" overflow="ellipsis">
 									{textToShow}
 								</MessageWrap>
-								<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+								<BubbleFooter message={repliedMessage} />
 							</>
 						)}
 					</Container>

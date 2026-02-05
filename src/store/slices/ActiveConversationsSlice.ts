@@ -344,9 +344,45 @@ export const useActiveConversationsSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
 				conversation.selectedSearchResult = stanzaId;
+				if (stanzaId) {
+					conversation.selectedPinnedMessage = undefined;
+				}
 			}),
 			false,
 			'AC/SET_SELECTED_SEARCH_RESULT'
+		);
+	},
+	setPinnedMessage: (roomId: string, message: TextMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.messagePinned = message;
+			}),
+			false,
+			'AC/SET_PINNED_MESSAGE'
+		);
+	},
+	removePinnedMessage: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				delete conversation.messagePinned;
+			}),
+			false,
+			'AC/REMOVE_PINNED_MESSAGE'
+		);
+	},
+	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.selectedPinnedMessage = stanzaId;
+				if (stanzaId !== undefined) {
+					conversation.selectedSearchResult = undefined;
+				}
+			}),
+			false,
+			'AC/SET_SELECTED_PINNED_MESSAGE'
 		);
 	}
 });

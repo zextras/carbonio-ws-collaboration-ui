@@ -185,10 +185,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 			)}
 			<TextContentBubble textContent={messageFormatted || ''} />
 			<BubbleFooter
+				message={message}
 				isMyMessage={false}
-				date={message.date}
-				messageRead={message.read}
-				isEdited={message?.edited}
 				messageExtension={extension}
 				messageSize={size}
 			/>
