@@ -7,7 +7,7 @@
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
 	newMessage: (message: Message) => void;
-	newInboxMessage: (message: Message) => void;
+	newInboxMessages: (message: Message[]) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
 	setRepliedMessage: (

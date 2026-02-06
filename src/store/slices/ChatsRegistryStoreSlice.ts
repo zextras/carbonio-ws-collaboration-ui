@@ -140,16 +140,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/NEW_MESSAGE'
 		);
 	},
-	newInboxMessage: (message: Message): void => {
+	newInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = initRoomChatsRegistry(draft, message.roomId);
-				const alreadyExists = find(messages, { id: message.id });
-				const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
-				// Add message only if it doesn't already exist and the history is not cleared
-				if (!alreadyExists && (!clearedAt || isBefore(clearedAt, message.date))) {
-					messages.push(message);
-				}
+				inbox.forEach((message) => {
+					const { messages } = initRoomChatsRegistry(draft, message.roomId);
+					const alreadyExists = find(messages, { id: message.id });
+					const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
+					// Add message only if it doesn't already exist and the history is not cleared
+					if (!alreadyExists && (!clearedAt || isBefore(clearedAt, message.date))) {
+						messages.push(message);
+					}
+				});
 			}),
 			false,
 			'CHAT/NEW_INBOX_MESSAGE'

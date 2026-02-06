@@ -17,12 +17,12 @@ describe('HistoryAccumulator', () => {
 		HistoryAccumulator.pushToCache(queryId2, buildTextMessageFromHistory({ text: 'message2' }));
 		HistoryAccumulator.pushToCache(queryId1, buildTextMessageFromHistory({ text: 'message3' }));
 
-		const cached1 = HistoryAccumulator.getCachedElements(queryId1);
+		const cached1 = HistoryAccumulator.getCachedElements(queryId1) as Element[];
 		expect(cached1.length).toBe(2);
 		expect(cached1[0].getElementsByTagName('body')[0].textContent).toBe('message1');
 		expect(cached1[1].getElementsByTagName('body')[0].textContent).toBe('message3');
 
-		const cached2 = HistoryAccumulator.getCachedElements(queryId2);
+		const cached2 = HistoryAccumulator.getCachedElements(queryId2) as Element[];
 		expect(cached2.length).toBe(1);
 		expect(cached2[0].getElementsByTagName('body')[0].textContent).toBe('message2');
 	});
