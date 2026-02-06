@@ -26,7 +26,9 @@ export const useSessionStoreSlice: StateCreator<
 	[],
 	SessionStoreSlice
 > = (set) => ({
-	session: {},
+	session: {
+		_persistedAt: Date.now()
+	},
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
 		set(
 			produce((draft: RootStore) => {
