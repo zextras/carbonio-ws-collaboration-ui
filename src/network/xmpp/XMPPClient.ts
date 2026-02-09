@@ -134,10 +134,15 @@ class XMPPClient {
 
 	// Fetch the inbox and get initial information:
 	public setInbox(): void {
-		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', id: queryId }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq
+			elem: iq,
+			callback: () => {
+				const messages = HistoryAccumulator.getInboxMessages(queryId);
+				useStore.getState().newInboxMessages(messages);
+			}
 		});
 	}
 

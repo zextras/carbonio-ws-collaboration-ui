@@ -13,6 +13,7 @@ import {
 } from '../../../tests/buildXmppStanza';
 import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 describe('XMPP inboxMessageHandler tests', () => {
 	test('Text message inbox arrives', () => {
@@ -25,8 +26,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 		});
 		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
-		const textMessage = useStore.getState().chatsRegistry[message.roomId]
-			.messages[0] as TextMessage;
+		const textMessage = HistoryAccumulator.getInboxMessages('queryId')[0] as TextMessage;
 		expect(textMessage.id).toBe(message.id);
 		expect(textMessage.type).toBe(MessageType.TEXT_MSG);
 		expect(textMessage.roomId).toBe(message.roomId);

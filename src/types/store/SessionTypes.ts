@@ -39,6 +39,7 @@ export type Session = {
 		exporter: IChatExporter;
 		status: ExportStatus;
 	};
+	_persistedAt?: number;
 };
 
 export type Version = `${number}.${number}.${number}`;

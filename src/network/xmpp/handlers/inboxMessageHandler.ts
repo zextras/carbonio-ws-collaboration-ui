@@ -9,6 +9,7 @@ import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
+import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 /**
  * INBOX (XEP-0430)
@@ -20,6 +21,7 @@ export function onInboxMessageStanza(message: Element): true {
 	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
 	const insideMessage = getRequiredTagElement(result, 'message');
 	const inboxMessage = decodeXMPPMessageStanza(insideMessage, { date: dateToTimestamp(date) });
+	const queryid = getRequiredAttribute(result, 'queryid');
 
 	if (inboxMessage) {
 		const store = useStore.getState();
@@ -40,7 +42,7 @@ export function onInboxMessageStanza(message: Element): true {
 
 		switch (inboxMessage.type) {
 			case MessageType.TEXT_MSG:
-				store.newInboxMessage(inboxMessage);
+				HistoryAccumulator.pushToCache(queryid, inboxMessage);
 
 				// Request message subject of reply
 				if (inboxMessage.replyTo) {
@@ -52,7 +54,7 @@ export function onInboxMessageStanza(message: Element): true {
 				}
 				break;
 			case MessageType.CONFIGURATION_MSG: {
-				store.newInboxMessage(inboxMessage);
+				HistoryAccumulator.pushToCache(queryid, inboxMessage);
 				break;
 			}
 			case MessageType.FASTENING:
