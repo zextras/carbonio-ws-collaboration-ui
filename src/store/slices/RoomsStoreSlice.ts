@@ -148,7 +148,24 @@ export const useRoomsStoreSlice: StateCreator<
 						...room.userSettings,
 						clearedAt
 					};
-					delete draft.chatsRegistry[roomId];
+					if (room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE) {
+						delete draft.chatsRegistry[roomId];
+					}
+
+					if (room.type === RoomType.TEMPORARY) {
+						const registry = draft.chatsRegistry[roomId];
+						if (registry) {
+							registry.messages = filter(
+								registry.messages,
+								(message) => !isBefore(message.date, clearedAt)
+							);
+							registry.unread = 0;
+							registry.backfillQueue = [];
+							registry.fastenings = {};
+							registry.markers = {};
+							registry.searchResults = [];
+						}
+					}
 				}
 			}),
 			false,
