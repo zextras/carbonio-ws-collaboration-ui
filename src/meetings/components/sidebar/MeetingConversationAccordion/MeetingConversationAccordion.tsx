@@ -278,7 +278,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					)}
 				</Row>
 			</Container>
-			{isHistoryClearedVisible && (
+			{isHistoryClearedVisible && isChatOpenOrFullExpanded && (
 				<Container
 					background={'gray0'}
 					orientation="horizontal"

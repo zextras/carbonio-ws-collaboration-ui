@@ -182,13 +182,16 @@ export const useConfigurationMessageLabel = (
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
 	const clearHistoryLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
+		}
 		if (amIModerator) {
 			return t('', 'Chat history has been cleared by {{actionMakerUsername}}.', {
 				actionMakerUsername
 			});
 		}
 		return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
-	}, [actionMakerUsername, amIModerator, t]);
+	}, [actionMakerUsername, amIModerator, loggedUserId, message.from, t]);
 
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:

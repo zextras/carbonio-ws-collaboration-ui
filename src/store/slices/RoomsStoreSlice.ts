@@ -6,10 +6,15 @@
  */
 
 import { produce } from 'immer';
-import { filter, find, forEach, size, some } from 'lodash';
+import { filter, find, findLast, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
+import {
+	ConfigurationMessage,
+	MessageType,
+	OperationType
+} from '../../types/store/ChatsRegistryTypes';
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
@@ -155,10 +160,24 @@ export const useRoomsStoreSlice: StateCreator<
 					if (room.type === RoomType.TEMPORARY) {
 						const registry = draft.chatsRegistry[roomId];
 						if (registry) {
-							registry.messages = filter(
+							const filteredMessages = filter(
 								registry.messages,
-								(message) => !isBefore(message.date, clearedAt)
+								(message) =>
+									!isBefore(message.date, clearedAt) &&
+									!(
+										message.type === MessageType.CONFIGURATION_MSG &&
+										message.operation === OperationType.CLEARED_HISTORY
+									)
 							);
+							const latestClearMsg = findLast(
+								registry.messages,
+								(message): message is ConfigurationMessage =>
+									message.type === MessageType.CONFIGURATION_MSG &&
+									message.operation === OperationType.CLEARED_HISTORY
+							);
+							registry.messages = latestClearMsg
+								? [...filteredMessages, latestClearMsg]
+								: filteredMessages;
 							registry.unread = 0;
 							registry.backfillQueue = [];
 							registry.fastenings = {};

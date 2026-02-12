@@ -293,6 +293,60 @@ describe('RoomsStoreSlice tests', () => {
 			expect(registry.messages[0].id).toBe('clear-config-msg');
 			expect(registry.messages[0].type).toBe(MessageType.CONFIGURATION_MSG);
 		});
+
+		test('clearConversation keeps only the latest CLEARED_HISTORY config message after successive clears', () => {
+			const firstClear = new Date('2025-01-01T10:00:00Z');
+			const secondClear = new Date('2025-01-01T11:00:00Z');
+			const betweenClears = new Date('2025-01-01T10:30:00Z');
+			const afterSecondClear = new Date('2025-01-01T11:30:00Z');
+			useStore.getState().addRooms([temporaryRoom]);
+			useStore.setState({
+				chatsRegistry: {
+					[temporaryRoom.id]: {
+						messages: [
+							createMockConfigurationMessage({
+								id: 'first-clear-config',
+								roomId: temporaryRoom.id,
+								type: MessageType.CONFIGURATION_MSG,
+								operation: OperationType.CLEARED_HISTORY,
+								date: dateToTimestamp(firstClear.toISOString())
+							}),
+							createMockTextMessage({
+								id: 'msg-between-clears',
+								roomId: temporaryRoom.id,
+								date: dateToTimestamp(betweenClears.toISOString())
+							}),
+							createMockConfigurationMessage({
+								id: 'second-clear-config',
+								roomId: temporaryRoom.id,
+								type: MessageType.CONFIGURATION_MSG,
+								operation: OperationType.CLEARED_HISTORY,
+								date: dateToTimestamp(secondClear.toISOString())
+							}),
+							createMockTextMessage({
+								id: 'msg-after-second-clear',
+								roomId: temporaryRoom.id,
+								date: dateToTimestamp(afterSecondClear.toISOString())
+							})
+						],
+						fastenings: {},
+						markers: {},
+						searchResults: [],
+						unread: 0,
+						backfillQueue: []
+					}
+				}
+			});
+			useStore.getState().clearConversation(temporaryRoom.id, secondClear.toISOString());
+			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
+			expect(registry).toBeDefined();
+			// Should keep: msg-after-second-clear + only the latest clear config message
+			expect(size(registry.messages)).toBe(2);
+			expect(registry.messages.map((m) => m.id)).toContain('msg-after-second-clear');
+			expect(registry.messages.map((m) => m.id)).toContain('second-clear-config');
+			expect(registry.messages.map((m) => m.id)).not.toContain('first-clear-config');
+			expect(registry.messages.map((m) => m.id)).not.toContain('msg-between-clears');
+		});
 	});
 
 	describe('Placeholder room', () => {
