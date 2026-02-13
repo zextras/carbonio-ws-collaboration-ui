@@ -11,6 +11,7 @@ import {
 	Badge,
 	Button,
 	Container,
+	Icon,
 	Row,
 	Text,
 	Tooltip,
@@ -191,24 +192,12 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 		const modalId = 'clear-history-modal';
 		createModal({
 			id: modalId,
-			title: t('modal.clearHistoryTitle', 'Clear history'),
-			confirmLabel: t('modal.clearHistoryConfirm', 'Yes, clear history'),
-			secondaryActionLabel: t('modal.clearHistoryCancel', 'No, cancel'),
-			onConfirm: () => {
-				RoomsApi.clearRoomHistory(roomId).then(() => {
-					closeModal(modalId);
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						severity: 'success',
-						label: t('', 'History cleared successfully'),
-						hideButton: true,
-						autoHideTimeout: 3000
-					});
-				});
-			},
-			onSecondaryAction: () => {
-				closeModal(modalId);
-			},
+			title: (
+				<Container mainAlignment="flex-start" orientation="horizontal" gap="0.5rem">
+					<Icon icon="AlertCircleOutline" color="error" size="large" />
+					<Text>{t('modal.clearHistoryTitle', 'Clear History')}</Text>
+				</Container>
+			),
 			onClose: () => {
 				closeModal(modalId);
 			},
@@ -219,7 +208,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					gap="1rem"
 					padding={{ vertical: '1rem' }}
 				>
-					<Text>
+					<Text overflow="break-word">
 						{t(
 							'',
 							'This will permanently delete all messages and shared files in this room for all participants.'
@@ -228,6 +217,32 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					<Text color={'error'} weight="bold">
 						{t('', 'This action cannot be undone.')}
 					</Text>
+				</Container>
+			),
+			customFooter: (
+				<Container mainAlignment="flex-end" orientation="horizontal" gap="0.5rem">
+					<Button
+						type="outlined"
+						color="text"
+						label={t('modal.clearHistoryCancel', 'No, cancel')}
+						onClick={() => closeModal(modalId)}
+					/>
+					<Button
+						color="error"
+						label={t('modal.clearHistoryConfirm', 'Yes, clear history')}
+						onClick={() => {
+							RoomsApi.clearRoomHistory(roomId).then(() => {
+								closeModal(modalId);
+								createSnackbar({
+									key: new Date().toLocaleString(),
+									severity: 'success',
+									label: t('', 'History cleared successfully'),
+									hideButton: true,
+									autoHideTimeout: 3000
+								});
+							});
+						}}
+					/>
 				</Container>
 			)
 		});
