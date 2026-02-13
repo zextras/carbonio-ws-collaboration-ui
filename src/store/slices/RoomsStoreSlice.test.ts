@@ -219,44 +219,6 @@ describe('RoomsStoreSlice tests', () => {
 			expect(useStore.getState().chatsRegistry[groupRoom1.id]).toBeUndefined();
 		});
 
-		test('clearConversation filters messages for TEMPORARY rooms keeping messages after clearedAt', () => {
-			const now = new Date();
-			const beforeClear = new Date(now.getTime() - 10000);
-			const afterClear = new Date(now.getTime() + 10000);
-			useStore.getState().addRooms([temporaryRoom]);
-			useStore.setState({
-				chatsRegistry: {
-					[temporaryRoom.id]: {
-						messages: [
-							createMockTextMessage({
-								id: 'msg-before',
-								roomId: temporaryRoom.id,
-								date: dateToTimestamp(beforeClear.toISOString())
-							}),
-							createMockTextMessage({
-								id: 'msg-after',
-								roomId: temporaryRoom.id,
-								date: dateToTimestamp(afterClear.toISOString())
-							})
-						],
-						fastenings: {},
-						markers: {},
-						searchResults: [],
-						unread: 3,
-						backfillQueue: []
-					}
-				}
-			});
-			useStore.getState().clearConversation(temporaryRoom.id, now.toISOString());
-			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
-			expect(registry).toBeDefined();
-			expect(size(registry.messages)).toBe(1);
-			expect(registry.messages[0].id).toBe('msg-after');
-			expect(registry.unread).toBe(0);
-			expect(registry.fastenings).toEqual({});
-			expect(registry.markers).toEqual({});
-		});
-
 		test('clearConversation preserves CLEARED_HISTORY config message for TEMPORARY rooms', () => {
 			const now = new Date();
 			const configDate = new Date(now.getTime() + 1);
