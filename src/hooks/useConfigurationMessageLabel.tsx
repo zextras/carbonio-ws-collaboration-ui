@@ -186,9 +186,13 @@ export const useConfigurationMessageLabel = (
 			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
 		}
 		if (amIModerator) {
-			return t('', 'Chat history has been cleared by {{actionMakerUsername}}.', {
-				actionMakerUsername
-			});
+			return t(
+				'configurationMessages.moderator.clearHistory',
+				'Chat history has been cleared by {{actionMakerUsername}}.',
+				{
+					actionMakerUsername
+				}
+			);
 		}
 		return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
 	}, [actionMakerUsername, amIModerator, loggedUserId, message.from, t]);

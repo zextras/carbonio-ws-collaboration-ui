@@ -210,12 +210,12 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 				>
 					<Text overflow="break-word">
 						{t(
-							'',
+							'modal.clearHistoryForAllDescription',
 							'This will permanently delete all messages and shared files in this room for all participants.'
 						)}
 					</Text>
 					<Text color={'error'} weight="bold">
-						{t('', 'This action cannot be undone.')}
+						{t('modal.clearHistoryWarning', 'This action cannot be undone.')}
 					</Text>
 				</Container>
 			),
@@ -236,7 +236,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 								createSnackbar({
 									key: new Date().toLocaleString(),
 									severity: 'success',
-									label: t('', 'History cleared successfully'),
+									label: t('snackbar.clearHistorySuccess', 'History cleared successfully'),
 									hideButton: true,
 									autoHideTimeout: 3000
 								});
@@ -304,14 +304,14 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					gap={'0.5rem'}
 				>
 					<Button
-						label={t('', 'Clear history')}
+						label={t('action.clearHistory', 'Clear history')}
 						onClick={openModal}
 						icon="BookOpenOutline"
 						color={'error'}
 						iconPlacement="left"
 					/>
 					<Button
-						label={t('', 'Export messages')}
+						label={t('action.exportMessages', 'Export messages')}
 						onClick={() => setChatExporting(roomId)}
 						icon="Copy"
 						iconPlacement="left"
