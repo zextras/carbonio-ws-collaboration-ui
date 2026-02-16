@@ -236,7 +236,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 								createSnackbar({
 									key: new Date().toLocaleString(),
 									severity: 'success',
-									label: t('feedback.historyCleared', 'History cleared successfully'),
+									label: t('feedback.historyCleared', 'History cleared successfully!'),
 									hideButton: true,
 									autoHideTimeout: 3000
 								});
