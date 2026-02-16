@@ -193,7 +193,7 @@ const setupTemporaryRoom = (
 		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
 		result.current.setUserInfo([mockUser2]);
-		result.current.setApiVersion('1.6.6');
+		result.current.setApiVersion('1.6.7');
 		result.current.addRooms([temporaryRoom]);
 		result.current.addMeetings([temporaryMeeting]);
 		result.current.meetingConnection(temporaryMeeting.id);

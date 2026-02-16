@@ -181,7 +181,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 
 	const isHistoryClearedVisible = useMemo(
 		() =>
-			(!version || gte(version, '1.6.6')) &&
+			(!version || gte(version, '1.6.7')) &&
 			!isMsgEmpty &&
 			iAmOwner &&
 			roomType === RoomType.TEMPORARY,

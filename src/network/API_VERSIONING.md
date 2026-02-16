@@ -2,7 +2,7 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
-## Version 1.6.6
+## Version 1.6.7
 ### Changes
 - **XMPP**: Added `roomHistoryCleared` configuration message
 
