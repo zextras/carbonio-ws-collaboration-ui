@@ -9,6 +9,7 @@ import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { RoomType } from '../../types/store/RoomTypes';
 import { MeetingsApi, RoomsApi } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
@@ -99,6 +100,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
 			state.clearConversation(event.roomId, event.clearedAt);
+			if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
+				state.removePinnedMessage(event.roomId);
+			}
 			break;
 		}
 		default: {

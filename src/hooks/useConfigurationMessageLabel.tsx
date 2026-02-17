@@ -9,7 +9,11 @@ import React, { Fragment, useMemo } from 'react';
 
 import { Trans, useTranslation } from 'react-i18next';
 
-import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
+import {
+	getOwnershipOfTheRoom,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../store/selectors/RoomsSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
@@ -27,6 +31,7 @@ export const useConfigurationMessageLabel = (
 	const actionMakerUsername = useStore((store) => getUserName(store, message.from));
 	const affiliatedUsername = useStore((store) => getUserName(store, message.value));
 	const isAffiliatedUserAnonymous = useStore((store) => getIsAnonymousUser(store, message.value));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, message.roomId));
 
 	const roomNameChangedLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
@@ -176,6 +181,22 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
+	const clearHistoryLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
+		}
+		if (amIModerator) {
+			return t(
+				'configurationMessages.moderator.clearHistory',
+				'Chat history has been cleared by {{actionMakerUsername}}.',
+				{
+					actionMakerUsername
+				}
+			);
+		}
+		return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+	}, [actionMakerUsername, amIModerator, loggedUserId, message.from, t]);
+
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:
 			return roomNameChangedLabel;
@@ -195,6 +216,8 @@ export const useConfigurationMessageLabel = (
 			return pinMessageLabel;
 		case OperationType.MESSAGE_UNPINNED:
 			return unpinMessageLabel;
+		case OperationType.CLEARED_HISTORY:
+			return clearHistoryLabel;
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

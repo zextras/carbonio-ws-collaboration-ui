@@ -94,7 +94,8 @@ export enum OperationType {
 	ROOM_CREATION = 'roomCreation',
 	MESSAGE_PINNED = 'messagePinned',
 	MESSAGE_UNPINNED = 'messageUnpinned',
-	MESSAGE_PIN_UPDATED = 'messagePinUpdated'
+	MESSAGE_PIN_UPDATED = 'messagePinUpdated',
+	CLEARED_HISTORY = 'roomHistoryCleared'
 }
 
 export enum MarkerStatus {

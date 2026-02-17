@@ -2,6 +2,13 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.7
+### Changes
+- **XMPP**: Added `roomHistoryCleared` configuration message
+
+### Affected Files
+- 'src/meetings/components/sidebar/MeetingConversationAccordion/MeetingConversationAccordion.tsx'
+
 ---
 ## Version 1.6.5 (2025-11-12 - Released with Carbonio 25.12.0)
 ### Changes
