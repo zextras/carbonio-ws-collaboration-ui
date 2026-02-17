@@ -228,6 +228,8 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 						onClick={() => closeModal(modalId)}
 					/>
 					<Button
+						// eslint-disable-next-line jsx-a11y/no-autofocus
+						autoFocus
 						color="error"
 						label={t('modal.clearHistoryConfirm', 'Yes, clear history')}
 						onClick={() => {
