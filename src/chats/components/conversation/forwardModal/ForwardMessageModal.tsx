@@ -44,6 +44,7 @@ import { useTranslation } from 'react-i18next';
 
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
+import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { RoomsApi } from '../../../../network';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
@@ -185,7 +186,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		const roomsId = map(selected, (key, value) => value);
 		RoomsApi.forwardMessages(roomsId, messagesToForward || [])
 			.then(() => {
-				if (roomsId.length === 1) {
+				if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
 					goToRoomPage(roomsId[0]);
 				}
 				onClose();
