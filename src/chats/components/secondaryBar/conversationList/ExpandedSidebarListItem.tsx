@@ -4,16 +4,25 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
-import { Badge, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Badge,
+	Button,
+	Container,
+	Icon,
+	Row,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { ConfigurationMessageLabel } from '../../../../hooks/useConfigurationMessageLabel';
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import useMessage from '../../../../hooks/useMessage';
 import useRouting from '../../../../hooks/useRouting';
+import { RoomsApi } from '../../../../network';
 import {
 	getDraftMessage,
 	getLastNewReaction
@@ -23,8 +32,10 @@ import {
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
+	getOwnershipOfTheRoom,
 	getRoomMutedSelector,
 	getRoomNameSelector,
+	getNumbersOfRoomMembers,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import {
@@ -36,6 +47,7 @@ import useStore from '../../../../store/Store';
 import { MarkerStatus, Message, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
+import DeleteConversationModal from '../../infoPanel/conversationActionsAccordion/DeleteConversationModal';
 import UserAvatar from '../../UserAvatar';
 
 type ExpandedSidebarListItemProps = {
@@ -56,8 +68,9 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const [t] = useTranslation();
 	const draftLabel = t('message.draft', 'draft');
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
+	const deleteLabel = t('action.delete', 'Delete');
 
-	const { goToRoomPage } = useRouting();
+	const { goToMainPage, goToRoomPage } = useRouting();
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const lastMessageId: string | undefined = useStore((state) =>
@@ -68,6 +81,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const lastNewReaction = useStore((store) => getLastNewReaction(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
+	const iAmOwner = useStore((store) => getOwnershipOfTheRoom(store, roomId));
+	const numberOfMembers = useStore((store) => getNumbersOfRoomMembers(store, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
@@ -79,6 +94,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const canSeeMessageReads = useStore((store) => getAttribute(store, 'showMessageReads'));
 
 	const isWritingLabel = useIsWritingLabel(roomId, true);
+
+	const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
 
 	const ackIcon = useMemo(() => {
 		if (
@@ -238,43 +255,85 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 
 	const openConversation = useCallback(() => goToRoomPage(roomId), [roomId, goToRoomPage]);
 
+	const closeDeleteConversationModal = useCallback(() => setDeleteConversationModalOpen(false), []);
+
+	const openDeleteConversationModal = useCallback(() => setDeleteConversationModalOpen(true), []);
+
+	const deleteConversation = useCallback(
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(goToMainPage),
+		[goToMainPage, roomId]
+	);
+
+	const canDeleteConversation = iAmOwner && roomType !== RoomType.ONE_TO_ONE;
+
 	return (
-		<ListItem
-			background={isConversationSelected ? 'highlight' : 'none'}
-			onClick={openConversation}
-			orientation="horizontal"
-			mainAlignment="flex-start"
-			height="fit"
-			padding={{ all: '0.422rem' }}
-			$selected={isConversationSelected}
-			data-testid="list-item"
-		>
-			<Row>
-				{roomType === RoomType.GROUP ? (
-					<GroupAvatar roomId={roomId} draftMessage={false} />
-				) : (
-					<UserAvatar roomId={roomId} draftMessage={false} />
-				)}
-			</Row>
-			<Row
-				takeAvailableSpace
-				crossAlignment="center"
-				width="fill"
-				padding={{ left: 'small' }}
+		<>
+			<ListItem
+				background={isConversationSelected ? 'highlight' : 'none'}
+				onClick={openConversation}
 				orientation="horizontal"
+				mainAlignment="flex-start"
+				height="fit"
+				padding={{ all: '0.422rem' }}
+				$selected={isConversationSelected}
+				data-testid="list-item"
 			>
-				<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
-					<Text size="small">{roomName}</Text>
-					<Container width="fill" height="1rem" orientation="horizontal" mainAlignment="flex-start">
-						{iconToDisplay}
-						<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
-							{messageToDisplay}
-						</Text>
-					</Container>
+				<Row>
+					{roomType === RoomType.GROUP ? (
+						<GroupAvatar roomId={roomId} draftMessage={false} />
+					) : (
+						<UserAvatar roomId={roomId} draftMessage={false} />
+					)}
 				</Row>
-				{UnreadCounter}
-			</Row>
-		</ListItem>
+				<Row
+					takeAvailableSpace
+					crossAlignment="center"
+					width="fill"
+					padding={{ left: 'small' }}
+					orientation="horizontal"
+				>
+					<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
+						<Text size="small">{roomName}</Text>
+						<Container
+							width="fill"
+							height="1rem"
+							orientation="horizontal"
+							mainAlignment="flex-start"
+						>
+							{iconToDisplay}
+							<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
+								{messageToDisplay}
+							</Text>
+						</Container>
+					</Row>
+					{canDeleteConversation && (
+						<Tooltip label={deleteLabel} maxWidth="fit-content">
+							<Button
+								type="ghost"
+								color="error"
+								size="small"
+								icon="Trash2Outline"
+								onClick={(event): void => {
+									event.stopPropagation();
+									openDeleteConversationModal();
+								}}
+							/>
+						</Tooltip>
+					)}
+					{UnreadCounter}
+				</Row>
+			</ListItem>
+			{deleteConversationModalOpen && (
+				<DeleteConversationModal
+					deleteConversationModalOpen={deleteConversationModalOpen}
+					deleteConversation={deleteConversation}
+					closeModal={closeDeleteConversationModal}
+					type={roomType}
+					numberOfMembers={numberOfMembers}
+					roomId={roomId}
+				/>
+			)}
+		</>
 	);
 };
 

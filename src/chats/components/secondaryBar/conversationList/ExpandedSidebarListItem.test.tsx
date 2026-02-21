@@ -6,9 +6,10 @@
 
 import React from 'react';
 
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
+import { RoomsApi } from '../../../../network';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
 import useStore from '../../../../store/Store';
 import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
@@ -275,6 +276,29 @@ describe('Expanded sidebar list item', () => {
 			expect(screen.queryByTestId('icon: FileTextOutline')).not.toBeInTheDocument();
 			expect(screen.queryByText(mockedAttachmentMessage.attachment!.name)).not.toBeInTheDocument();
 			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
+		});
+	});
+
+	describe('Delete chat action', () => {
+		test('shows delete button for group owners', () => {
+			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+
+			expect(screen.getByTestId('icon: Trash2Outline')).toBeVisible();
+		});
+
+		test('deletes chat after modal confirmation', async () => {
+			const deleteRoomAndMeetingSpy = vi
+				.spyOn(RoomsApi, 'deleteRoomAndMeeting')
+				.mockResolvedValueOnce(undefined as never);
+
+			const { user } = setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+
+			await user.click(screen.getByTestId('icon: Trash2Outline'));
+			await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+			await waitFor(() => {
+				expect(deleteRoomAndMeetingSpy).toHaveBeenCalledWith(mockedGroup.id);
+			});
 		});
 	});
 
