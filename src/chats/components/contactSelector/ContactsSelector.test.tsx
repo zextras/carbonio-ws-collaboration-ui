@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
-import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
@@ -32,17 +32,19 @@ const MockComponent = ({ owner }: { owner?: boolean }): React.ReactElement => {
 	);
 };
 
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+
 describe('ContactsSelector', () => {
 	test('Initial request has a result', async () => {
 		mockSearchUsersByFeatureRequest.mockResolvedValueOnce({ contacts: [user1] });
-		setup(<ContactsSelector contactsSelected={[]} setContactSelected={jest.fn()} />);
+		setup(<ContactsSelector contactsSelected={[]} setContactSelected={vi.fn()} />);
 		expect(screen.getByTestId('chip_input_contact_selector')).toBeInTheDocument();
 		expect(await screen.findByTestId('list_contacts')).toBeInTheDocument();
 	});
 
 	test('Initial request has no result', async () => {
 		mockSearchUsersByFeatureRequest.mockResolvedValueOnce({ contacts: [] });
-		setup(<ContactsSelector contactsSelected={[]} setContactSelected={jest.fn()} />);
+		setup(<ContactsSelector contactsSelected={[]} setContactSelected={vi.fn()} />);
 		expect(screen.getByTestId('chip_input_contact_selector')).toBeInTheDocument();
 		expect(
 			await screen.findByText('There are no items that match this search in your company.')
@@ -123,7 +125,7 @@ describe('ContactsSelector', () => {
 			contacts: [user1],
 			more: true
 		});
-		jest.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { user } = setup(<MockComponent />);
 
 		await waitFor(() => {

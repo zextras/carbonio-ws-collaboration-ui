@@ -4,21 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {
-	Dispatch,
-	ReactElement,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useRef,
-	useState
-} from 'react';
+import React, { Dispatch, ReactElement, SetStateAction, useEffect, useRef, useState } from 'react';
 
-import { Button, Container, Row } from '@zextras/carbonio-design-system';
-import { useTranslation } from 'react-i18next';
+import { Container, Row } from '@zextras/carbonio-design-system';
 
 import { MediaStatus } from './MeetingExternalAccessPage';
 import AccessTile from '../AccessTile';
+import { MicTestButton } from '../MicTestButton';
 import { useLocalMediaHandler } from '../useLocalMediaHandler';
 
 type AudioAndVideoCardProps = {
@@ -30,10 +22,6 @@ const AudioAndVideoCard = ({
 	mediaStatus,
 	setMediaStatus
 }: AudioAndVideoCardProps): ReactElement => {
-	const [t] = useTranslation();
-	const startMicTestLabel = t('meeting.interactions.playMic', 'Start mic test');
-	const stopMicTestLabel = t('meeting.interactions.stopMic', 'Stop mic test');
-
 	const [micTest, setMicTest] = useState(false);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 	const audioStreamRef = useRef<HTMLAudioElement>(null);
@@ -51,7 +39,8 @@ const AudioAndVideoCard = ({
 	const {
 		status: audioStatus,
 		deviceId: audioDeviceId,
-		HandlerComponent: AudioHandlerComponent
+		HandlerComponent: AudioHandlerComponent,
+		streamTrack: audioStreamTrack
 	} = useLocalMediaHandler({
 		mediaType: 'audio',
 		initialStatus: mediaStatus.audio.enabled,
@@ -70,10 +59,6 @@ const AudioAndVideoCard = ({
 			setMicTest(false);
 		}
 	}, [audioStatus]);
-
-	const toggleMicTest = useCallback(() => {
-		setMicTest((prev) => !prev);
-	}, []);
 
 	return (
 		<Row
@@ -98,15 +83,9 @@ const AudioAndVideoCard = ({
 				{VideoHandlerComponent}
 				{AudioHandlerComponent}
 			</Container>
-			<Button
-				width="fill"
-				label={!micTest ? startMicTestLabel : stopMicTestLabel}
-				type="outlined"
-				icon="Mic"
-				iconPlacement="right"
-				onClick={toggleMicTest}
-				disabled={!audioStatus}
-			/>
+			<Container height="fit">
+				<MicTestButton disabled={!audioStatus} stream={audioStreamTrack} />
+			</Container>
 		</Row>
 	);
 };

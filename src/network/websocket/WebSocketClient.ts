@@ -10,7 +10,6 @@ import { gte } from 'semver';
 import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
-import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
@@ -23,7 +22,7 @@ enum WsReadyState {
 	CLOSED = 3
 }
 
-export class WebSocketClient implements IWebSocketClient {
+export class WebSocketClient {
 	_webSocket: WebSocket | undefined;
 
 	_reconnectionTime = 0;

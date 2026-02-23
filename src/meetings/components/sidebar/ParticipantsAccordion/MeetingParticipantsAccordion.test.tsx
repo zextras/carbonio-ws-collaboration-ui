@@ -18,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import {} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -106,26 +105,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		const participantList = screen.getAllByTestId('participant_element');
 		expect(participantList).toHaveLength(3);
 	});
-	// test('pin a video', async () => {
-	//
-	// 	const { user } = storeSetupParticipantModerator();
-	//
-	// 	const pinVideo = screen.getByTestId('icon: Pin3Outline');
-	// 	// pin of user 2's video
-	// 	user.click(pinVideo);
-	// 	const pinnedVideo = await screen.findByTestId('icon: Unpin3Outline');
-	// 	expect(pinnedVideo).toBeInTheDocument();
-	// });
-	// test('mute a member', async () => {
-	// 	fail('not implemented yet');
-	// 	const { user } = storeSetupParticipantModerator();
-	//
-	// 	const muteAction = screen.getByTestId('icon: MicOffOutline');
-	// 	user.click(muteAction);
-	//
-	// 	const mutedIcon = await screen.findByTestId('icon: MicOff');
-	// 	expect(mutedIcon).toBeInTheDocument();
-	// });
+
 	test('promote moderator', async () => {
 		const { user } = storeSetupParticipantModerator();
 

@@ -60,13 +60,13 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 					<GroupAvatar
 						roomId={roomId}
 						unreadCount={unreadMessagesCount}
-						draftMessage={!!draftMessage}
+						draftMessage={!!draftMessage && unreadMessagesCount === 0}
 					/>
 				) : (
 					<UserAvatar
 						roomId={roomId}
 						unreadCount={unreadMessagesCount}
-						draftMessage={!!draftMessage}
+						draftMessage={!!draftMessage && unreadMessagesCount === 0}
 					/>
 				)}
 			</SidebarItem>

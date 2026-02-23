@@ -8,6 +8,8 @@ import React, { createRef } from 'react';
 import { screen, within } from '@testing-library/react';
 
 import EditVirtualRoomModal from './EditVirtualRoomModal';
+import roomsApi from '../../../../../network/apis/RoomsApi';
+import { mockSearchUsersByFeatureRequest } from '../../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMeeting,
@@ -16,8 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../../tests/test-utils';
 import { RoomType } from '../../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../../types/network/soap/searchUsersByFeatureRequest';
@@ -44,6 +44,8 @@ const virtualRoom = createMockRoom({
 
 const meeting = createMockMeeting({ roomId: virtualRoom.id });
 
+vi.mock('../../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([virtualRoom]);
@@ -56,7 +58,7 @@ describe('EditVirtualRoomModal test', () => {
 		setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -70,11 +72,11 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Edit only the name', async () => {
-		const spyOnUpdateRoom = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM);
+		const spyOnUpdateRoom = vi.spyOn(roomsApi, 'updateRoom');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -86,11 +88,11 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Add a new moderators', async () => {
-		const spyOnAddMembers = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
+		const spyOnAddMembers = vi.spyOn(roomsApi, 'addRoomMembers');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -104,11 +106,11 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Remove an old moderator', async () => {
-		const spyOnDeleteMembers = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+		const spyOnDeleteMembers = vi.spyOn(roomsApi, 'deleteRoomMember');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>
@@ -125,11 +127,11 @@ describe('EditVirtualRoomModal test', () => {
 		const store = useStore.getState();
 		store.addParticipant(meeting.id, createMockParticipants({ userId: member1.id }));
 		store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
-		const spyUpdateOwners = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_OWNERS);
+		const spyUpdateOwners = vi.spyOn(roomsApi, 'updateRoomOwners');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
-				setShowModal={jest.fn()}
+				setShowModal={vi.fn()}
 				modalRef={createRef}
 				roomId={virtualRoom.id}
 			/>

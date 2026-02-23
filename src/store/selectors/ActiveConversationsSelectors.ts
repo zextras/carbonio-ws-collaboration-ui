@@ -43,12 +43,17 @@ export const getParticipantsAccordionStatus = (store: RootStore, roomId: string)
 };
 
 export const getDraftMessage = (store: RootStore, roomId: string): string | undefined =>
-	store.activeConversations[roomId] ? store.activeConversations[roomId]?.draftMessage : '';
+	store.activeConversations[roomId] ? store.activeConversations[roomId]?.draftMessage?.text : '';
 
 export const getFilesToUploadArray = (
 	store: RootStore,
 	roomId: string
 ): FileToUpload[] | undefined => store.activeConversations[roomId]?.filesToAttach;
+
+export const getFocusedFile = (store: RootStore, roomId: string): string | undefined => {
+    const files = store.activeConversations[roomId]?.filesToAttach;
+    return files?.find(file => file.hasFocus)?.fileId;
+};
 
 export const getForwardList = (store: RootStore, roomId: string): TextMessage[] | undefined =>
 	store.activeConversations[roomId]?.forwardMessageList;
@@ -103,5 +108,10 @@ export const getIsMessageSelected = (store: RootStore, roomId: string, stanzaId:
     store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
 
 export const getIsMessageSelectedAlreadyStored = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-    !!store.chatsRegistry[roomId].messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
-    
+!!store.chatsRegistry[roomId]?.messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
+
+export const getPinnedMessage = (store: RootStore, roomId: string): TextMessage | undefined =>
+	store.activeConversations[roomId]?.messagePinned;
+
+export const getIsPinnedMessageSelected = (store: RootStore, roomId: string, stanzaId: string): boolean =>
+	store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;

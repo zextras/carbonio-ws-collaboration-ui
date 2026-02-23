@@ -11,8 +11,8 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import MessageComposer from './MessageComposer';
-import UploadAttachmentManagerView from './UploadAttachmentManagerView';
+import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -22,12 +22,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import {
-	AttachmentsApiToSpy,
-	RoomsApiToSpy,
-	spyOnAttachmentsApi,
-	spyOnRoomsApi
-} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -77,12 +71,7 @@ const otherMockedMessage: Message = createMockTextMessage({
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	const { user } = setup(
-		<>
-			<UploadAttachmentManagerView roomId={mockedRoom.id} />
-			<MessageComposer roomId={mockedRoom.id} />
-		</>
-	);
+	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return { user, store };
 };
 
@@ -90,12 +79,7 @@ const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 	store.newMessage(mockedMessage);
-	const { user } = setup(
-		<>
-			<UploadAttachmentManagerView roomId={mockedRoom.id} />
-			<MessageComposer roomId={mockedRoom.id} />
-		</>
-	);
+	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return { user, store };
 };
 
@@ -111,9 +95,9 @@ beforeEach(() => {
 	store.addRooms([mockedRoom]);
 });
 
-describe('MessageComposer', () => {
+describe('ConversationFooter', () => {
 	test('Open/close emoji picker by hovering it', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 
 		// Initial state
 		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
@@ -135,26 +119,26 @@ describe('MessageComposer', () => {
 	});
 
 	test('Send message button status - initial status', () => {
-		setup(<MessageComposer roomId={'roomId'} />);
+		setup(<ConversationFooter roomId={'roomId'} />);
 		expect(screen.getByTestId(iconNavigator2).parentNode).toBeDisabled();
 	});
 
 	test('Send message button status - spaces and text', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
 		expect(screen.getByTestId(iconNavigator2).parentNode).not.toBeDisabled();
 	});
 
 	test('Send message button status - only spaces', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, '     ');
 		expect(screen.getByTestId(iconNavigator2).parentNode).toBeDisabled();
 	});
 
 	test('Select file button', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 		const selectFileButton = screen.getByTestId(iconAttach);
 		expect(selectFileButton).toBeVisible();
 
@@ -165,7 +149,7 @@ describe('MessageComposer', () => {
 	});
 
 	test('User type some text in the composer => text is displayed and button to send si enabled', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
 		expect(screen.getByTestId(iconNavigator2).parentNode).not.toBeDisabled();
@@ -198,13 +182,13 @@ describe('MessageComposer', () => {
 	});
 
 	test('User copy/paste an image in the text input', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		storeSetupAdvanced();
 		const composerTextArea = screen.getByRole('textbox');
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture]
 			}
 		};
@@ -227,13 +211,13 @@ describe('MessageComposer', () => {
 	});
 
 	test('User copy/paste multiple images in the text input', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		storeSetupAdvanced();
 		const composerTextArea = screen.getByRole('textbox');
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture, luigiPicture, peachPicture]
 			}
 		};
@@ -256,7 +240,7 @@ describe('MessageComposer', () => {
 	});
 
 	test('input has text and user paste an image => upload manger will display the image selected with the input focused with the text', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = initText;
@@ -264,7 +248,7 @@ describe('MessageComposer', () => {
 		await user.type(composerTextArea, initialText);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture]
 			}
 		};
@@ -285,7 +269,7 @@ describe('MessageComposer', () => {
 	});
 
 	test('input has text and user paste more images => upload manger will display the first image selected with the input focused with the text', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = initText;
@@ -293,7 +277,7 @@ describe('MessageComposer', () => {
 		await user.type(composerTextArea, initialText);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture, luigiPicture, peachPicture]
 			}
 		};
@@ -316,14 +300,20 @@ describe('MessageComposer', () => {
 	test('User can reply to a message attaching a file', async () => {
 		const store = useStore.getState();
 		// Set reply message
+		const originalMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			from: 'senderId',
+			id: 'messageId'
+		});
+		store.newMessage(originalMessage);
 		store.setReferenceMessage(mockedRoom.id, {
-			messageId: 'messageId',
-			senderId: 'senderId',
-			stanzaId: 'stanzaId',
+			messageId: originalMessage.id,
+			senderId: originalMessage.from,
+			stanzaId: originalMessage.stanzaId,
 			actionType: messageActionType.REPLY
 		});
 
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const attachFileButton = screen.getByTestId('icon: Attach');
 		expect(attachFileButton).toBeEnabled();
@@ -334,10 +324,7 @@ describe('MessageComposer', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
-		const spySendChatMessageReply = jest.spyOn(
-			store.connections.xmppClient,
-			'sendChatMessageReply'
-		);
+		const spySendChatMessageReply = vi.spyOn(store.connections.xmppClient, 'sendChatMessageReply');
 		const textToSend = 'hi!';
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -348,7 +335,7 @@ describe('MessageComposer', () => {
 			stanzaId: mockedMessage.stanzaId,
 			actionType: messageActionType.REPLY
 		});
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, textToSend);
@@ -358,7 +345,7 @@ describe('MessageComposer', () => {
 	});
 
 	test('User can edit a message and send it', async () => {
-		const spySendChatMessageEdit = jest.spyOn(
+		const spySendChatMessageEdit = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'sendChatMessageEdit'
 		);
@@ -373,7 +360,7 @@ describe('MessageComposer', () => {
 			actionType: messageActionType.EDIT
 		});
 
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
@@ -395,7 +382,7 @@ describe('MessageComposer', () => {
 			actionType: messageActionType.EDIT
 		});
 
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const textArea = screen.getByRole('textbox');
 		await user.clear(textArea);
@@ -407,9 +394,9 @@ describe('MessageComposer', () => {
 	});
 });
 
-describe('MessageComposer - send message', () => {
+describe('Send message', () => {
 	test('Send a message', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const { user } = setup(<ConversationFooter roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
 		const sendButton = screen.getByTestId(iconNavigator2);
@@ -419,8 +406,8 @@ describe('MessageComposer - send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
-		const spyOnGetImageSize = spyOnAttachmentsApi(AttachmentsApiToSpy.GET_IMAGE_SIZE);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnGetImageSize = vi.spyOn(attachmentsApi, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -434,14 +421,16 @@ describe('MessageComposer - send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnGetImageSize).toHaveBeenCalledTimes(1);
+			expect(spyOnAddRoomAttachment).toHaveBeenCalled();
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnGetImageSize).toHaveBeenCalledTimes(1);
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -453,13 +442,15 @@ describe('MessageComposer - send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
+		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 
@@ -471,8 +462,10 @@ describe('MessageComposer - send message', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
+		await waitFor(() => {
+			expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
+		});
 		const updatedStore = useStore.getState();
-		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -481,7 +474,7 @@ describe('MessageComposer - send message', () => {
 		store.addRooms([mockedRoomTemporary]);
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
 		store.setUserInfo([guestUser]);
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();
 	});
@@ -523,9 +516,9 @@ describe('MessageComposer - send message', () => {
 	});
 });
 
-describe('MessageComposer - paste on textbox', () => {
+describe('Paste on textbox', () => {
 	test('Paste some text at the end of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'we are gonna see ';
@@ -537,7 +530,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste some text in the middle of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'we are gonna later';
@@ -552,7 +545,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste some text at the beginning of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Sam';
@@ -564,7 +557,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste single attachment at the beginning of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi';
@@ -573,7 +566,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, `{arrowleft}{arrowleft}`);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture]
 			}
 		};
@@ -594,7 +587,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste single attachment at the end of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi';
@@ -602,7 +595,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, initialText);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture]
 			}
 		};
@@ -623,7 +616,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste single attachment in the middle of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi Red';
@@ -632,7 +625,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, `{arrowleft}{arrowleft}{arrowleft}`);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture]
 			}
 		};
@@ -653,7 +646,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste more attachments at the beginning of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi';
@@ -662,7 +655,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, `{arrowleft}{arrowleft}`);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture, luigiPicture, peachPicture]
 			}
 		};
@@ -683,7 +676,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste more attachments at the end of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi';
@@ -691,7 +684,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, initialText);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture, luigiPicture, peachPicture]
 			}
 		};
@@ -712,7 +705,7 @@ describe('MessageComposer - paste on textbox', () => {
 	});
 
 	test('Paste more attachments in the middle of the text present in the composer', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		const navigatorSetter = vi.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
 		const initialText = 'Hi Red';
@@ -721,7 +714,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, `{arrowleft}{arrowleft}{arrowleft}`);
 		const eventProperties = {
 			clipboardData: {
-				getData: jest.fn(),
+				getData: vi.fn(),
 				files: [marioPicture, luigiPicture, peachPicture]
 			}
 		};
@@ -744,53 +737,47 @@ describe('MessageComposer - paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendIsWriting is called immediately when user start writing', async () => {
-		const spySendIsWriting = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendIsWriting'
-		);
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, 'Hi');
 		expect(spySendIsWriting).toHaveBeenCalled();
 	});
 
 	test('sendIsWriting is called every 3 seconds', async () => {
-		const spySendIsWriting = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendIsWriting'
-		);
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		// User type for 5 seconds
 		await user.type(composerTextArea, 'Hi');
-		jest.advanceTimersByTime(500);
+		vi.advanceTimersByTime(500);
 		await user.type(composerTextArea, '!');
-		jest.advanceTimersByTime(500);
+		vi.advanceTimersByTime(500);
 		await user.type(composerTextArea, ':)');
-		jest.advanceTimersByTime(2000);
+		vi.advanceTimersByTime(2000);
 		await user.type(composerTextArea, 'How are you?');
-		jest.advanceTimersByTime(2000);
+		vi.advanceTimersByTime(2000);
 		await user.type(composerTextArea, 'I am fine');
 		expect(spySendIsWriting).toHaveBeenCalledTimes(2);
-		jest.advanceTimersByTime(1000);
+		vi.advanceTimersByTime(1000);
 		expect(spySendIsWriting).toHaveBeenCalledTimes(3);
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
-		const spySendPaused = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
 
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
-		jest.advanceTimersByTime(4000);
+		vi.advanceTimersByTime(4000);
 		expect(spySendPaused).toHaveBeenCalledTimes(1);
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
-		const spySendPaused = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
@@ -800,12 +787,12 @@ describe('MessageComposer - isWriting events', () => {
 	});
 });
 
-describe('MessageComposer - draft message', () => {
+describe('Draft message', () => {
 	test('The composer should have the draft message in the text area on opening the conversation', () => {
 		const store = useStore.getState();
 		store.setDraftMessage(mockedRoom.id, draftMessage);
 
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect(composerTextArea as HTMLTextAreaElement).toHaveValue(draftMessage);
@@ -815,8 +802,8 @@ describe('MessageComposer - draft message', () => {
 		const store = useStore.getState();
 		store.setDraftMessage(mockedRoom.id, draftMessage);
 
-		const { rerender } = setup(<MessageComposer roomId="anotherRoomId" />);
-		rerender(<MessageComposer roomId={mockedRoom.id} />);
+		const { rerender } = setup(<ConversationFooter roomId="anotherRoomId" />);
+		rerender(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(draftMessage.length);
@@ -852,7 +839,7 @@ describe('MessageComposer - draft message', () => {
 	});
 });
 
-describe('forward footer', () => {
+describe('Forward footer', () => {
 	test('adding a message to the forward list triggers the footer', async () => {
 		const store = useStore.getState();
 		store.newMessage(mockedMessage);

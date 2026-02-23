@@ -30,16 +30,19 @@ export type ActiveConversationsSlice = {
 	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
 	removeFilesToAttach: (roomId: string, fileId?: string) => void;
 	setFileFocus: (roomId: string, fileId: string, active: boolean) => void;
-	setFileDescription: (roomId: string, fileId: string, description?: string) => void;
+	setFileDescription: (roomId: string, fileId: string | undefined, description?: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
 	unsetNewReactions: (roomId: string) => void;
 	setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
+	setPinnedMessage: (roomId: string, message: TextMessage) => void;
+	removePinnedMessage: (roomId: string) => void;
+	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined) => void;
 };
 
 export type ActiveConversation = {
-	draftMessage?: string;
+	draftMessage?: { text: string; date: number };
 	scrollPositionMessageId?: string;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;
@@ -51,6 +54,8 @@ export type ActiveConversation = {
 	forwardMessageList?: TextMessage[];
 	newReactions?: NewReaction[];
 	selectedSearchResult?: string;
+	messagePinned?: TextMessage;
+	selectedPinnedMessage?: string;
 };
 
 export type ActiveConversationsMap = {

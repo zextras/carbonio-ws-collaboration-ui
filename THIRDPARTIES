@@ -9,21 +9,18 @@ MIT License (MIT) applies to:
 @commitlint/config-conventional, Copyright (c) 2016 - present Mario Nebl
 @emoji-mart/data, Copyright (c) Missive.
 @emotion/babel-plugin, Copyright (c) Emotion team and other contributors
-@emotion/jest, Copyright (c) Emotion team and other contributors
 @emotion/react, Copyright (c) Emotion team and other contributors
 @emotion/styled, Copyright (c) Emotion team and other contributors
 @testing-library/dom, Copyright (c) 2017 Kent C. Dodds
 @testing-library/jest-dom, Copyright (c) 2017 Kent C. Dodds
 @testing-library/react, Copyright (c) 2017-Present Kent C. Dodds
 @testing-library/user-event, Copyright (c) 2020 Giorgio Polvara
-@types/jest, Copyright (c) Microsoft Corporation.
 @types/lodash, Copyright (c) Microsoft Corporation.
 @types/react-dom, Copyright (c) Microsoft Corporation.
 @types/react, Copyright (c) Microsoft Corporation.
 @types/uuid, Copyright (c) Microsoft Corporation.
 @typescript-eslint/eslint-plugin, Copyright (c) 2019 typescript-eslint and other contributors
 babel-eslint, Copyright (c) 2014-2016 Sebastian McKenzie <sebmck@gmail.com>
-babel-jest, Copyright (c) Meta Platforms, Inc. and affiliates.
 emoji-mart, Copyright (c) Missive.
 eslint-plugin-import, Copyright (c) 2015 Ben Mosher
 eslint-plugin-jest-dom,  Copyright (c) 2019 Ben Monro
@@ -33,9 +30,7 @@ husky, Copyright (c) 2021 typicode
 identity-obj-proxy, Copyright (c) 2015 Keyan Zhang
 immer, Copyright (c) 2017 Michel Weststrate
 is-ci, Copyright (c) 2016-2021 Thomas Watson Steen
-jest-environment-jsdom, Copyright (c) Meta Platforms, Inc. and affiliates.
-jest-fail-on-console, Copyright (c) 2022 Valentin Hervieu
-jest, Copyright (c) Meta Platforms, Inc. and affiliates.
+jsdom, Copyright (c) 2010 Elijah Insua
 lodash, Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
 moment-timezone, Copyright (c) JS Foundation and other contributors
 moment, Copyright (c) JS Foundation and other contributors
@@ -47,6 +42,8 @@ react, Copyright (c) Facebook, Inc. and its affiliates.
 strophe.js, Copyright (c) 2006-2009 Collecta, Inc.
 ts-node, Copyright (c) 2014 Blake Embrey (hello@blakeembrey.com)
 uuid, Copyright (c) 2010-2020 Robert Kieffer and other contributors
+vitest-fail-on-console, Copyright (c) 2024 Thomas Brodusch
+vitest, Copyright (c) 2021-Present Vitest Team
 zustand, Copyright (c) 2019 Paul Henschel
 
 MIT License

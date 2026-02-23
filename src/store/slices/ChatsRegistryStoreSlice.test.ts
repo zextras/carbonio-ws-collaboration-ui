@@ -80,7 +80,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 	describe('newInboxMessage', () => {
 		test('Arrive an inbox text message', () => {
 			const inboxMessage = createMockTextMessage();
-			useStore.getState().newInboxMessage(inboxMessage);
+			useStore.getState().newInboxMessages([inboxMessage]);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
 			expect(messages).toHaveLength(1);
@@ -93,7 +93,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				date: dateToTimestamp('2024-05-01 13:01:05')
 			});
 			useStore.getState().updateHistory(inboxMessage.roomId, [textMessage0, textMessage1]);
-			useStore.getState().newInboxMessage(inboxMessage);
+			useStore.getState().newInboxMessages([inboxMessage]);
 
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
 			// Messages list: [MESSAGE0, MESSAGE1]]
@@ -114,7 +114,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				date: date2
 			});
 			useStore.getState().addRooms([room]);
-			useStore.getState().newInboxMessage(inboxMessage);
+			useStore.getState().newInboxMessages([inboxMessage]);
 
 			// Messages list: [DATE, INBOX MESSAGE]
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
@@ -133,7 +133,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				date: date1
 			});
 			useStore.getState().addRooms([room]);
-			useStore.getState().newInboxMessage(inboxMessage);
+			useStore.getState().newInboxMessages([inboxMessage]);
 
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];
 			// Messages list: []
@@ -143,7 +143,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 
 	describe('updateHistory', () => {
 		test('First update history after an inbox message', () => {
-			useStore.getState().newInboxMessage(newTextMessage);
+			useStore.getState().newInboxMessages([newTextMessage]);
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
 
 			const { messages } = useStore.getState().chatsRegistry[newTextMessage.roomId];
@@ -159,7 +159,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				id: 'newMessage',
 				date: dateToTimestamp('2024-05-01 14:04')
 			});
-			useStore.getState().newInboxMessage(inboxMessage);
+			useStore.getState().newInboxMessages([inboxMessage]);
 			useStore.getState().updateHistory(inboxMessage.roomId, [textMessage0, inboxMessage]);
 
 			const { messages } = useStore.getState().chatsRegistry[inboxMessage.roomId];

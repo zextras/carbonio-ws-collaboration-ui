@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { debounce, find, forEach, map, size, throttle } from 'lodash';
+import { debounce, find, forEach, map, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -35,7 +35,6 @@ import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
 import {
-	getDraftMessage,
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
@@ -57,6 +56,8 @@ import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
+	textMessage: string;
+	setTextMessage: (message: string) => void;
 };
 
 const BlockUploadButton = styled(Button)`
@@ -78,7 +79,11 @@ const UploadSpinnerWrapper = styled(Container)`
 
 const SendButton = styled(Button)<{ alt?: string }>``;
 
-const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
+const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
+	roomId,
+	textMessage,
+	setTextMessage
+}) => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
@@ -92,11 +97,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const myUserId = useStore(getUserId);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
-	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
-	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
+	const setFileDescription = useStore((store) => store.setFileDescription);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
@@ -117,7 +121,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
-	const [textMessage, setTextMessage] = useState(draftMessage ?? '');
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
@@ -150,14 +153,17 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
-		if (textareaValue.length >= MESSAGE_CHAR_LIMIT) {
-			setTextMessage(textareaValue.slice(0, MESSAGE_CHAR_LIMIT));
-			setNoMoreCharsOnInputComposer(true);
-		} else {
-			setNoMoreCharsOnInputComposer(false);
-		}
-	}, []);
+	const checkMaxLengthAndSetMessage = useCallback(
+		(textareaValue: string): void => {
+			if (textareaValue.length >= MESSAGE_CHAR_LIMIT) {
+				setTextMessage(textareaValue.slice(0, MESSAGE_CHAR_LIMIT));
+				setNoMoreCharsOnInputComposer(true);
+			} else {
+				setNoMoreCharsOnInputComposer(false);
+			}
+		},
+		[setTextMessage]
+	);
 
 	// Check message max length when some files are attached
 	useEffect(() => {
@@ -259,7 +265,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						xmppClient.sendChatMessageEdit(
+							roomId,
+							message,
+							referenceMessage.stanzaId,
+							completeReferenceMessage.editedStanzaId ?? referenceMessage.stanzaId
+						);
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -339,9 +350,16 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
 
-	const handleTypingMessage = useCallback((e: BaseSyntheticEvent): void => {
-		setTextMessage(e.target.value);
-	}, []);
+	const handleTypingMessage = useCallback(
+		(e: BaseSyntheticEvent): void => {
+			setTextMessage(e.target.value);
+			const focusedFile = filesToUploadArray?.find((file) => file.hasFocus);
+			if (focusedFile) {
+				setFileDescription(roomId, focusedFile.fileId, e.target.value);
+			}
+		},
+		[setTextMessage, filesToUploadArray, roomId, setFileDescription]
+	);
 
 	const handleKeyUp = useCallback(
 		(e: KeyboardEvent) => {
@@ -396,14 +414,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
-	const handleOnBlur = useCallback(() => {
-		if (size(textMessage) > 0) {
-			setDraftMessage(roomId, textMessage);
-		} else {
-			setDraftMessage(roomId);
-		}
-		setInputHasFocus(roomId, false);
-	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
+	useEffect(() => {
+		const ref = messageInputRef.current;
+		return () => {
+			const draft = ref?.value ?? '';
+			setDraftMessage(roomId, draft.trim() || undefined);
+		};
+	}, [roomId, setDraftMessage, messageInputRef]);
 
 	const handlePaste = useCallback(
 		(ev: ClipboardEvent) => {
@@ -448,10 +465,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	useEffect(() => {
-		setTextMessage(draftMessage ?? '');
-	}, [draftMessage, roomId]);
-
-	useEffect(() => {
 		if (referenceMessage && messageInputRef.current) {
 			messageInputRef.current.focus();
 			// clean the composer section and remove all file uploading if user
@@ -475,7 +488,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				messageRef.value = '';
 			}
 		};
-	}, [roomId]);
+	}, [roomId, setTextMessage]);
 
 	const isDisabledWhileAttachingFile = useMemo(() => {
 		if (filesToUploadArray) {
@@ -510,7 +523,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				composerIsFull={noMoreCharsOnInputComposer}
 				handleKeyDownTextarea={handleKeyDown}
 				handleKeyUpTextarea={handleKeyUp}
-				handleOnBlur={handleOnBlur}
 				handleOnPaste={handlePaste}
 				isDisabled={isDisabledWhileAttachingFile}
 			/>

@@ -32,7 +32,7 @@ export default function MainApp(): React.JSX.Element {
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setSupportedVersions(['1.6.5', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
+		setSupportedVersions(['1.6.7', '1.6.6', '1.6.5', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
 	}, [setSupportedVersions]);
 
 	// STORE: init with user session main infos

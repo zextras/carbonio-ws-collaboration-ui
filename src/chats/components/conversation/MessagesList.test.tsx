@@ -18,7 +18,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+import { scrollToEnd, scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
 
 const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
 const helloString = 'Hello guys!';
@@ -141,6 +141,8 @@ const messages = generateListMessage([
 	{ from: fromId },
 	{ from: fromId }
 ]);
+
+vi.mock('../../../utils/scrollUtils');
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -398,12 +400,14 @@ describe('render list of messages with history loader visible for first time ope
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRooms([room]);
+	store.addRooms([room, mockedRoom]);
+	store.setLoginInfo('userId', 'User');
+	store.setUserInfo([userA, userB, userC]);
 });
 describe('Scroll position', () => {
 	test('Opening a conversation for the first time sets scroll to the bottom', () => {
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toHaveBeenCalled();
+		expect(scrollToEnd).toHaveBeenCalled();
 	});
 
 	test('Opening an already opened conversation sets scroll to the previous position', () => {
@@ -411,8 +415,8 @@ describe('Scroll position', () => {
 		store.updateHistory(room.id, messages);
 		store.setScrollPosition(room.id, messages[0].id);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToMessage).toHaveBeenCalled();
-		expect(mockedScrollToMessage).toHaveBeenCalledWith(messages[0].id);
+		expect(scrollToMessage).toHaveBeenCalled();
+		expect(scrollToMessage).toHaveBeenCalledWith(messages[0].id);
 	});
 
 	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
@@ -421,15 +425,8 @@ describe('Scroll position', () => {
 		store.setScrollPosition(room.id, messages[0].id);
 		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toHaveBeenCalled();
+		expect(scrollToEnd).toHaveBeenCalled();
 	});
-});
-
-beforeEach(() => {
-	const store = useStore.getState();
-	store.addRooms([mockedRoom]);
-	store.setLoginInfo('userId', 'User');
-	store.setUserInfo([userA, userB, userC]);
 });
 
 describe('Display group of messages', () => {
@@ -517,13 +514,7 @@ describe('forward mode', () => {
 		const markedCheckbox = await screen.findByTestId('icon: CheckmarkSquare');
 		expect(markedCheckbox).toBeInTheDocument();
 
-		await user.hover(forwardContainer[1]);
-		expect(forwardContainer[1]).toHaveStyle('background: rgba(230, 230, 230, 0.50)');
-
-		await act(async () => {
-			await user.click(forwardContainer[1]);
-		});
-
+		await user.click(forwardContainer[1]);
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
 		expect(result.current.activeConversations[room.id].forwardMessageList).toHaveLength(2);
 		const markedCheckboxes = await screen.findAllByTestId('icon: CheckmarkSquare');

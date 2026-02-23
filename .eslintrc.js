@@ -38,7 +38,8 @@ module.exports = {
 				'**/__tests__/**/*.[jt]s?(x)',
 				'**/?(*.)+(spec|test).[jt]s?(x)',
 				'**/utils/test-utils.tsx',
-				'jest-setup.ts'
+				'src/tests/setupTests.ts',
+				'vitest.config.ts'
 			],
 			rules: {
 				'testing-library/no-node-access': 'off',

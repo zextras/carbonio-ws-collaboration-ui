@@ -9,6 +9,7 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useEffect,
 	useMemo,
 	useState
 } from 'react';
@@ -31,6 +32,7 @@ import useEventListener, {
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 
@@ -46,6 +48,7 @@ type ChatsProps = {
 
 const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
+	const xmppClient = useStore(getXmppClient);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
@@ -132,6 +135,10 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_PROMOTED, promoteMemberHandler);
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
+	useEffect(() => {
+		xmppClient.getMessagePin(roomId);
+	}, [roomId, xmppClient]);
+
 	return (
 		<CustomContainer
 			data-testid="conversationCollapsedView"
@@ -156,7 +163,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 				/>
 			)}
 			<MessagesList roomId={roomId} />
-			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
+			<ConversationFooter key={roomId} roomId={roomId} isInsideMeeting={isInsideMeeting} />
 		</CustomContainer>
 	);
 };

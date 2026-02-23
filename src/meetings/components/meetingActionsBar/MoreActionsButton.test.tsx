@@ -7,7 +7,7 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import MoreActionsButton from './MoreActionsButton';
 import useStore from '../../../store/Store';
@@ -18,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { requestFullscreen } from '../../../tests/mocks/global';
 import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -78,7 +77,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
 
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<MoreActionsButton />, { meetingId: meeting.id });
 
@@ -94,7 +93,7 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 		result.current.addMeetings([meetingWithOnePerson]);
 		result.current.meetingConnection(meetingWithOnePerson.id);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meetingWithOnePerson.id });
 	const { user } = setup(<MoreActionsButton />);
 
@@ -103,9 +102,9 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 
 const customPiPContextValue = {
 	isSupported: true,
-	requestPipWindow: jest.fn(),
+	requestPipWindow: vi.fn(),
 	pipWindow: null,
-	closePipWindow: jest.fn()
+	closePipWindow: vi.fn()
 };
 
 const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
@@ -118,7 +117,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setLocalStreams(STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	store.setTalkingUser(user2.id, true);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
 		<PiPContext.Provider value={customPiPContextValue}>
@@ -133,9 +132,7 @@ const moreActionsTestId = 'more-actions';
 
 describe('Meeting action bar - More actions button interactions', () => {
 	test('Check full screen mode is set correctly', async () => {
-		const mockRequestFullscreen = jest
-			.spyOn(document.documentElement, 'requestFullscreen')
-			.mockImplementation(requestFullscreen);
+		document.documentElement.requestFullscreen = vi.fn(() => Promise.resolve());
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
@@ -143,7 +140,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		expect(mockRequestFullscreen).toHaveBeenCalledTimes(1);
+		expect(document.documentElement.requestFullscreen).toHaveBeenCalledTimes(1);
 	});
 
 	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {

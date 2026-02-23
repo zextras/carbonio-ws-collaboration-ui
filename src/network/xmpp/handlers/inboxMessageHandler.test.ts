@@ -6,13 +6,14 @@
 
 import { onInboxMessageStanza } from './inboxMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockTextMessage } from '../../../tests/createMock';
 import {
 	buildReactionMessageFromInbox,
 	buildReplyMessageFromInbox,
 	buildTextMessageFromInbox
-} from '../../../tests/mocks/buildXmppStanza';
+} from '../../../tests/buildXmppStanza';
+import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import HistoryAccumulator from '../utility/HistoryAccumulator';
 
 describe('XMPP inboxMessageHandler tests', () => {
 	test('Text message inbox arrives', () => {
@@ -25,8 +26,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 		});
 		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
-		const textMessage = useStore.getState().chatsRegistry[message.roomId]
-			.messages[0] as TextMessage;
+		const textMessage = HistoryAccumulator.getInboxMessages('queryId')[0] as TextMessage;
 		expect(textMessage.id).toBe(message.id);
 		expect(textMessage.type).toBe(MessageType.TEXT_MSG);
 		expect(textMessage.roomId).toBe(message.roomId);
@@ -34,7 +34,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Conversation has some unread', () => {
-		const spyOnRequestHistory = jest.spyOn(
+		const spyOnRequestHistory = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestHistory'
 		);
@@ -50,7 +50,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Inbox message is a replied one', () => {
-		const spyOnRequestRepliedMessage = jest.spyOn(
+		const spyOnRequestRepliedMessage = vi.spyOn(
 			useStore.getState().connections.xmppClient,
 			'requestMessageSubjectOfReply'
 		);
@@ -77,7 +77,6 @@ describe('XMPP inboxMessageHandler tests', () => {
 
 		const fastenings =
 			useStore.getState().chatsRegistry[message.roomId].fastenings[message.stanzaId];
-		console.log(fastenings);
 		expect(fastenings[0].type).toBe(MessageType.FASTENING);
 		expect(fastenings[0].value).toBe('👍');
 	});

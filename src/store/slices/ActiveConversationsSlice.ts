@@ -124,8 +124,13 @@ export const useActiveConversationsSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
-				if (message) conversation.draftMessage = message;
-				else delete conversation.draftMessage;
+				if (!message) delete conversation.draftMessage;
+				else if (message !== conversation.draftMessage?.text) {
+					conversation.draftMessage = {
+						text: message,
+						date: Date.now()
+					};
+				}
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'
@@ -203,11 +208,6 @@ export const useActiveConversationsSlice: StateCreator<
 						conversation.filesToAttach[indexFileToRemove - 1];
 					if (nextFile) {
 						nextFile.hasFocus = true;
-						if (nextFile.description) {
-							conversation.draftMessage = nextFile.description;
-						}
-					} else {
-						delete conversation.draftMessage;
 					}
 				}
 				remove(conversation.filesToAttach, (file) => file.fileId === fileId);
@@ -230,15 +230,18 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/SET_FILE_FOCUS'
 		);
 	},
-	setFileDescription: (roomId: string, fileId: string, description?: string): void => {
+	setFileDescription: (roomId: string, fileId: string | undefined, description?: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const { filesToAttach } = initActiveConversation(draft, roomId);
 				if (filesToAttach) {
+					if (!fileId && filesToAttach.length > 0 && filesToAttach[0].hasFocus) {
+						filesToAttach[0].description = description ?? '';
+						return;
+					}
 					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileId);
 					if (fileToAttach) {
 						fileToAttach.description = description ?? '';
-						fileToAttach.hasFocus = false;
 					}
 				}
 			}),
@@ -341,9 +344,45 @@ export const useActiveConversationsSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
 				conversation.selectedSearchResult = stanzaId;
+				if (stanzaId) {
+					conversation.selectedPinnedMessage = undefined;
+				}
 			}),
 			false,
 			'AC/SET_SELECTED_SEARCH_RESULT'
+		);
+	},
+	setPinnedMessage: (roomId: string, message: TextMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.messagePinned = message;
+			}),
+			false,
+			'AC/SET_PINNED_MESSAGE'
+		);
+	},
+	removePinnedMessage: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				delete conversation.messagePinned;
+			}),
+			false,
+			'AC/REMOVE_PINNED_MESSAGE'
+		);
+	},
+	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.selectedPinnedMessage = stanzaId;
+				if (stanzaId !== undefined) {
+					conversation.selectedSearchResult = undefined;
+				}
+			}),
+			false,
+			'AC/SET_SELECTED_PINNED_MESSAGE'
 		);
 	}
 });

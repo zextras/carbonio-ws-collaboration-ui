@@ -78,8 +78,7 @@ describe('Collapsed sidebar list item', () => {
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
 		expect(unreadBadge).toHaveStyle(backgroundColor);
-		const avatarWithWithDraft = screen.getByTestId('icon: Edit2');
-		expect(avatarWithWithDraft).toBeVisible();
+		expect(screen.queryByTestId('icon: Edit2')).not.toBeInTheDocument();
 	});
 
 	test('One to one - There is a new message', async () => {
@@ -112,7 +111,6 @@ describe('Collapsed sidebar list item', () => {
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
 		expect(unreadBadge).toHaveStyle(backgroundColor);
-		const avatarWithWithDraft = screen.getByTestId('icon: Edit2');
-		expect(avatarWithWithDraft).toBeVisible();
+		expect(screen.queryByTestId('icon: Edit2')).not.toBeInTheDocument();
 	});
 });

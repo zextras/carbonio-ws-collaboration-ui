@@ -10,6 +10,7 @@ import { act, screen } from '@testing-library/react';
 
 import { ConversationView } from './Conversation';
 import ConversationHeader from './ConversationHeader';
+import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -17,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -66,6 +66,8 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
+vi.mock('../../../hooks/useMediaQueryCheck');
+
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.addRooms([mockedRoom]);
@@ -78,7 +80,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		const infoIcon = screen.getByTestId('icon: InfoOutline');
@@ -91,7 +93,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('icon: InfoOutline')).toBeNull();
@@ -104,7 +106,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
@@ -117,7 +119,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
@@ -130,7 +132,7 @@ describe('Conversation header test', () => {
 			<ConversationHeader
 				roomId={`placeholder-${mockPaoloUser.id}`}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
@@ -151,7 +153,7 @@ describe('isWriting functionality', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 
@@ -160,7 +162,7 @@ describe('isWriting functionality', () => {
 
 		act(() => {
 			useStore.getState().setIsWriting(mockedRoom.id, mockRobertoUser.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(isWriting).not.toBeVisible();
@@ -177,7 +179,7 @@ describe('isWriting functionality', () => {
 			<ConversationHeader
 				roomId={mockedRoom.id}
 				conversationView={ConversationView.CHAT}
-				setConversationView={jest.fn()}
+				setConversationView={vi.fn()}
 			/>
 		);
 

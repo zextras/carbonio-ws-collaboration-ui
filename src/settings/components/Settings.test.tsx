@@ -52,7 +52,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
@@ -63,7 +63,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
@@ -74,7 +74,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
@@ -86,7 +86,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
@@ -98,7 +98,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
@@ -110,7 +110,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
@@ -122,7 +122,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]
@@ -134,7 +134,7 @@ describe('Settings view', () => {
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
-					setUpdatedNotificationsSettings={jest.fn()}
+					setUpdatedNotificationsSettings={vi.fn()}
 				/>
 			);
 			const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]

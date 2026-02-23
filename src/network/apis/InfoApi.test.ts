@@ -5,7 +5,9 @@
  */
 
 import infoApi from './InfoApi';
-import { spyOnFetch } from '../../tests/jest-env-setup';
+import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
+
+vi.mock('../../utils/FetchUtils');
 
 describe('Session API', () => {
 	test('getLicense is called correctly', async () => {
@@ -13,8 +15,8 @@ describe('Session API', () => {
 		await infoApi.getLicense();
 
 		// Check if fetch is called with the correct parameters
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
-		expect(spyOnFetch).toHaveBeenCalledWith(`license`, 'GET');
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledWith(`license`, 'GET');
 	});
 
 	test('getToken is called correctly', async () => {
@@ -22,7 +24,7 @@ describe('Session API', () => {
 		await infoApi.getToken();
 
 		// Check if fetch is called with the correct parameters
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
-		expect(spyOnFetch).toHaveBeenCalledWith(`auth/token`, 'GET');
+		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
+		expect(mockFetchAPI).toHaveBeenCalledWith(`auth/token`, 'GET');
 	});
 });

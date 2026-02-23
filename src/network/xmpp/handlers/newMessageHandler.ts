@@ -5,8 +5,13 @@
  */
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { getPinnedMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { FasteningAction, MessageType } from '../../../types/store/ChatsRegistryTypes';
+import {
+	FasteningAction,
+	MessageType,
+	OperationType
+} from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
@@ -44,16 +49,35 @@ export function onNewMessageStanza(message: Element): true {
 			break;
 		}
 		case MessageType.CONFIGURATION_MSG: {
+			if (newMessage.operation === OperationType.MESSAGE_PIN_UPDATED) {
+				const pinnedMessage = store.activeConversations[newMessage.roomId].messagePinned;
+				if (pinnedMessage) {
+					store.setPinnedMessage(newMessage.roomId, { ...pinnedMessage, text: newMessage.value });
+				}
+				return true;
+			}
 			store.newMessage(newMessage);
+			sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 			if (newMessage.from !== sessionId) {
-				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 				store.incrementUnreadCount(newMessage.roomId, 1);
+			}
+			if (newMessage.operation === OperationType.MESSAGE_PINNED) {
+				xmppClient.getMessagePin(newMessage.roomId);
+			}
+			if (newMessage.operation === OperationType.MESSAGE_UNPINNED) {
+				store.removePinnedMessage(newMessage.roomId);
 			}
 			break;
 		}
 		case MessageType.FASTENING: {
 			store.addFastening([newMessage]);
-
+			const pinnedMessage = getPinnedMessage(store, newMessage.roomId);
+			if (
+				newMessage.action === FasteningAction.DELETE &&
+				pinnedMessage?.stanzaId === newMessage.originalStanzaId
+			) {
+				store.removePinnedMessage(newMessage.roomId);
+			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);
 				store.setNewReaction(

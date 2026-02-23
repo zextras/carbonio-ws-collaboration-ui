@@ -21,12 +21,11 @@ const setupMessageArea = (text?: string): { rerender: (ui: React.ReactElement) =
 			roomId={roomId}
 			textareaRef={React.createRef<HTMLTextAreaElement>()}
 			message={text || ''}
-			onInput={jest.fn()}
+			onInput={vi.fn()}
 			composerIsFull={false}
-			handleKeyDownTextarea={jest.fn()}
-			handleKeyUpTextarea={jest.fn()}
-			handleOnBlur={jest.fn()}
-			handleOnPaste={jest.fn}
+			handleKeyDownTextarea={vi.fn()}
+			handleKeyUpTextarea={vi.fn()}
+			handleOnPaste={vi.fn}
 			isDisabled={false}
 		/>
 	);
@@ -48,12 +47,11 @@ describe('MessageArea', () => {
 				roomId={roomId}
 				textareaRef={React.createRef<HTMLTextAreaElement>()}
 				message={messageText}
-				onInput={jest.fn()}
+				onInput={vi.fn()}
 				composerIsFull={false}
-				handleKeyDownTextarea={jest.fn()}
-				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
-				handleOnPaste={jest.fn}
+				handleKeyDownTextarea={vi.fn()}
+				handleKeyUpTextarea={vi.fn()}
+				handleOnPaste={vi.fn}
 				isDisabled={false}
 			/>
 		);
@@ -62,12 +60,11 @@ describe('MessageArea', () => {
 				roomId="roomId1"
 				textareaRef={React.createRef<HTMLTextAreaElement>()}
 				message={messageText}
-				onInput={jest.fn()}
+				onInput={vi.fn()}
 				composerIsFull={false}
-				handleKeyDownTextarea={jest.fn()}
-				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
-				handleOnPaste={jest.fn}
+				handleKeyDownTextarea={vi.fn()}
+				handleKeyUpTextarea={vi.fn()}
+				handleOnPaste={vi.fn}
 				isDisabled={false}
 			/>
 		);
@@ -84,18 +81,17 @@ describe('MessageArea', () => {
 	test('Height with two line of text', () => {
 		const { rerender } = setupMessageArea();
 		const textarea = screen.getByRole('textbox');
-		jest.spyOn(textarea, 'scrollHeight', 'get').mockImplementation(() => 51);
+		vi.spyOn(textarea, 'scrollHeight', 'get').mockImplementation(() => 51);
 		rerender(
 			<MessageArea
 				roomId="roomId1"
 				textareaRef={React.createRef<HTMLTextAreaElement>()}
 				message={'Test. \n Test.'}
-				onInput={jest.fn()}
+				onInput={vi.fn()}
 				composerIsFull={false}
-				handleKeyDownTextarea={jest.fn()}
-				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
-				handleOnPaste={jest.fn}
+				handleKeyDownTextarea={vi.fn()}
+				handleKeyUpTextarea={vi.fn()}
+				handleOnPaste={vi.fn}
 				isDisabled={false}
 			/>
 		);
@@ -110,12 +106,11 @@ describe('MessageArea', () => {
 				roomId="new-roomId"
 				textareaRef={React.createRef<HTMLTextAreaElement>()}
 				message={''}
-				onInput={jest.fn()}
+				onInput={vi.fn()}
 				composerIsFull={false}
-				handleKeyDownTextarea={jest.fn()}
-				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
-				handleOnPaste={jest.fn}
+				handleKeyDownTextarea={vi.fn()}
+				handleKeyUpTextarea={vi.fn()}
+				handleOnPaste={vi.fn}
 				isDisabled={false}
 			/>
 		);
@@ -129,12 +124,11 @@ describe('MessageArea', () => {
 				roomId="new-roomId"
 				textareaRef={React.createRef<HTMLTextAreaElement>()}
 				message="I'm a short draft message"
-				onInput={jest.fn()}
+				onInput={vi.fn()}
 				composerIsFull={false}
-				handleKeyDownTextarea={jest.fn()}
-				handleKeyUpTextarea={jest.fn()}
-				handleOnBlur={jest.fn()}
-				handleOnPaste={jest.fn}
+				handleKeyDownTextarea={vi.fn()}
+				handleKeyUpTextarea={vi.fn()}
+				handleOnPaste={vi.fn}
 				isDisabled={false}
 			/>
 		);

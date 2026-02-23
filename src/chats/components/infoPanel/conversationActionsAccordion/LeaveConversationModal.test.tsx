@@ -24,8 +24,8 @@ describe('Leave Conversation', () => {
 			updatedAt: '12345678',
 			pictureUpdatedAt: '123456789'
 		};
-		const leaveConversationMock = jest.fn();
-		const closeModalMock = jest.fn();
+		const leaveConversationMock = vi.fn();
+		const closeModalMock = vi.fn();
 
 		useStore.getState().addRooms([room]);
 		setup(

@@ -45,7 +45,7 @@ describe('CopyRoomIntegration tests', () => {
 	});
 
 	test('Duplicate Chats group in WSC', async () => {
-		const addRoom = jest.spyOn(RoomsApi, 'addRoom').mockResolvedValue(createMockRoom());
+		const addRoom = vi.spyOn(RoomsApi, 'addRoom').mockResolvedValue(createMockRoom());
 
 		const { user } = setup(
 			<CopyRoomWidget
@@ -99,7 +99,7 @@ describe('CopyRoomIntegration tests', () => {
 	});
 
 	test('Convert a Chats space in a WSC group', async () => {
-		const addRoom = jest.spyOn(RoomsApi, 'addRoom').mockResolvedValue(createMockRoom());
+		const addRoom = vi.spyOn(RoomsApi, 'addRoom').mockResolvedValue(createMockRoom());
 
 		const { user } = setup(
 			<CopyRoomWidget

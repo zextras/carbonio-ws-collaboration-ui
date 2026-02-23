@@ -42,7 +42,7 @@ describe('MeetingRecordingStoppedEventHandler tests', () => {
 
 	test('A custom event is sent if the session user is inside meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingRecordingStoppedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_RECORDING_STOPPED, { detail: event })
@@ -50,7 +50,7 @@ describe('MeetingRecordingStoppedEventHandler tests', () => {
 	});
 
 	test('A custom event is not sent if the session user is not inside meeting', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingRecordingStoppedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});

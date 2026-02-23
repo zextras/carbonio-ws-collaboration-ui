@@ -8,13 +8,13 @@ import { size } from 'lodash';
 
 import { onNewMessageStanza } from './newMessageHandler';
 import useStore from '../../../store/Store';
+import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
 	createMockMessageFastening,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
 import {
 	FasteningAction,
 	MessageFastening,
@@ -147,7 +147,7 @@ describe('XMPP newMessageHandler', () => {
 
 	test('readMessage is not called for my own text messages', () => {
 		const { xmppClient } = useStore.getState().connections;
-		const spyOnReadMessage = jest.spyOn(xmppClient, 'readMessage');
+		const spyOnReadMessage = vi.spyOn(xmppClient, 'readMessage');
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
 		onNewMessageStanza.call(xmppClient, messageXMPP);
@@ -155,7 +155,6 @@ describe('XMPP newMessageHandler', () => {
 	});
 
 	test('New reaction removed when input has focus', () => {
-		jest.useFakeTimers();
 		const sessionUser = createMockUser({ id: 'sessionUser' });
 		const otherUser = createMockUser({ id: 'otherUser' });
 		const room = createMockRoom({ id: 'roomId' });
@@ -180,12 +179,11 @@ describe('XMPP newMessageHandler', () => {
 			})
 		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
-		jest.runAllTimers();
+		vi.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toBeUndefined();
 	});
 
 	test('New reaction is kept when input is not focused', () => {
-		jest.useFakeTimers();
 		const sessionUser = createMockUser({ id: 'sessionUser2' });
 		const otherUser = createMockUser({ id: 'otherUser2' });
 		const room = createMockRoom({ id: 'roomId2' });
@@ -209,7 +207,7 @@ describe('XMPP newMessageHandler', () => {
 			})
 		);
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
-		jest.runAllTimers();
+		vi.runAllTimers();
 		expect(useStore.getState().activeConversations[room.id].newReactions).toHaveLength(1);
 	});
 });

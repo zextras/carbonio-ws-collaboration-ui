@@ -45,13 +45,13 @@ beforeEach(() => {
 });
 describe('ChatItem test', () => {
 	test('1-to-1 ChatItem displays user name', () => {
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const name = screen.getByText(otherUser.name);
 		expect(name).toBeInTheDocument();
 	});
 
 	test('Group ChatItem displays group name', () => {
-		setup(<ChatItem roomId={groupRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={groupRoom.id} onClick={vi.fn()} />);
 		const name = screen.getByText(groupRoom.name!);
 		expect(name).toBeInTheDocument();
 	});
@@ -63,7 +63,7 @@ describe('ChatItem test', () => {
 			from: otherUser.id
 		});
 		useStore.getState().newMessage(message);
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText(`Other: ${message.text}`);
 		expect(lastMessage).toBeInTheDocument();
 	});
@@ -76,7 +76,7 @@ describe('ChatItem test', () => {
 			deleted: true
 		});
 		useStore.getState().newMessage(message);
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText('Deleted message');
 		expect(lastMessage).toBeInTheDocument();
 	});
@@ -89,7 +89,7 @@ describe('ChatItem test', () => {
 			from: otherUser.id
 		});
 		useStore.getState().newMessage(message);
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText(`Other: ${message.attachment!.name}`);
 		expect(lastMessage).toBeInTheDocument();
 	});
@@ -102,14 +102,14 @@ describe('ChatItem test', () => {
 			from: otherUser.id
 		});
 		useStore.getState().newMessage(message);
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText('Other User changed the title of this Group in .');
 		expect(lastMessage).toBeInTheDocument();
 	});
 
 	test('If chat is exported, chat item displays export icon', () => {
 		useStore.getState().setChatExporting(singleRoom.id);
-		setup(<ChatItem roomId={singleRoom.id} onClick={jest.fn()} />);
+		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const spinner = screen.getByTestId('spinner');
 		expect(spinner).toBeInTheDocument();
 	});

@@ -17,6 +17,7 @@ import {
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreview from '../../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../../network';
 import {
@@ -44,6 +45,7 @@ const useBubbleContextualMenuDropDown = (
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
+	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.deleteForAll', 'Delete for all');
 	const editActionLabel = t('action.edit', 'Edit');
@@ -118,7 +120,7 @@ const useBubbleContextualMenuDropDown = (
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.attachment, message.stanzaId, message.roomId, xmppClient]);
+	}, [message.stanzaId, message.attachment, message.roomId, xmppClient]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
@@ -233,6 +235,15 @@ const useBubbleContextualMenuDropDown = (
 			});
 		}
 
+		// Pin functionality
+		if (canMessageBePinned) {
+			actions.push({
+				id: 'Pin',
+				label: pinActionLabel,
+				onClick: pinAction
+			});
+		}
+
 		return actions;
 	}, [
 		canBeEdited,
@@ -244,6 +255,7 @@ const useBubbleContextualMenuDropDown = (
 		canBeDeleted,
 		canBePreviewed,
 		canBeDownloaded,
+		canMessageBePinned,
 		editActionLabel,
 		editMessageAction,
 		filesToUploadArray,
@@ -254,7 +266,9 @@ const useBubbleContextualMenuDropDown = (
 		previewActionLabel,
 		onPreviewClick,
 		downloadActionLabel,
-		downloadAction
+		downloadAction,
+		pinActionLabel,
+		pinAction
 	]);
 
 	const MenuDropdown = useMemo(

@@ -19,9 +19,9 @@ const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
 describe('Delete user modal', () => {
 	test('User click the "Remove" button', async () => {
 		useStore.getState().addRooms([mockRoom]);
-		const deleteUser = jest.fn();
+		const deleteUser = vi.fn();
 		const { user } = setup(
-			<DeleteUserModal deleteUser={deleteUser} closeModal={jest.fn} deleteUserModalOpen />
+			<DeleteUserModal deleteUser={deleteUser} closeModal={vi.fn} deleteUserModalOpen />
 		);
 		expect(screen.getByText(/Remove Member/i)).toBeInTheDocument();
 

@@ -6,8 +6,8 @@
 
 import { onPingStanza, onPresenceStanza } from './presenceHandler';
 import useStore from '../../../store/Store';
+import { buildPingStanza, buildPresenceStanza } from '../../../tests/buildXmppStanza';
 import { createMockUser } from '../../../tests/createMock';
-import { buildPingStanza, buildPresenceStanza } from '../../../tests/mocks/buildXmppStanza';
 
 const loggedUser = createMockUser({ id: 'userId-logged', name: 'User Logged' });
 const mockUser = createMockUser({ id: 'userId-mock', name: 'User Mock' });
@@ -64,7 +64,7 @@ describe('XMPP presenceHandler', () => {
 	});
 
 	test('Send pong when a ping stanza arrives', () => {
-		const spyOnSendPong = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
+		const spyOnSendPong = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
 		// A new ping stanza arrives
 		const stanzaId = 'pingStanzaId';
 		onPingStanza.call(

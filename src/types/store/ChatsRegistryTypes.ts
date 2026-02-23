@@ -7,7 +7,7 @@
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
 	newMessage: (message: Message) => void;
-	newInboxMessage: (message: Message) => void;
+	newInboxMessages: (message: Message[]) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
 	setRepliedMessage: (
@@ -61,6 +61,7 @@ export type TextMessage = BasicMessage & {
 	repliedMessage?: TextMessage;
 	forwarded?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
+	editedStanzaId?: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
@@ -90,7 +91,11 @@ export enum OperationType {
 	ROOM_PICTURE_DELETED = 'roomPictureDeleted',
 	MEMBER_ADDED = 'memberAdded',
 	MEMBER_REMOVED = 'memberRemoved',
-	ROOM_CREATION = 'roomCreation'
+	ROOM_CREATION = 'roomCreation',
+	MESSAGE_PINNED = 'messagePinned',
+	MESSAGE_UNPINNED = 'messageUnpinned',
+	MESSAGE_PIN_UPDATED = 'messagePinUpdated',
+	CLEARED_HISTORY = 'roomHistoryCleared'
 }
 
 export enum MarkerStatus {
@@ -110,6 +115,7 @@ export type MessageFastening = BasicMessage & {
 	originalStanzaId: string;
 	from: string;
 	value?: string;
+	stanzaId: string;
 };
 
 export enum FasteningAction {

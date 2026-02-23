@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act } from '@testing-library/react';
+import { act, cleanup } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
-import { WebSocketClient } from '../src/network/websocket/WebSocketClient';
-import XMPPClient from '../src/network/xmpp/XMPPClient';
+import useStore from '../src/store/Store';
 import { RootStore } from '../src/types/store/StoreTypes';
 
 // a variable to hold reset functions for all stores declared in the app
@@ -21,21 +20,20 @@ export const create =
 		const store = actualCreate(createState);
 		const initialState = store.getState();
 		storeResetFns.add(() => {
-			const resetStore = {
-				...initialState,
-				connections: {
-					xmppClient: new XMPPClient(),
-					wsClient: new WebSocketClient(),
-					status: {}
-				}
-			};
-			store.setState(resetStore, true);
+			store.setState(initialState, true);
 		});
 		return store;
 	};
-// Reset all stores after each test run
+
+beforeEach(() => {
+	act(() => {
+		storeResetFns.forEach((resetFn) => resetFn());
+	});
+	useStore.getState().connections.xmppClient.features = ['zextras:iq:pin'];
+});
+
 afterEach(() => {
-	act(() => storeResetFns.forEach((resetFn) => resetFn()));
+	cleanup();
 });
 
 export default create;

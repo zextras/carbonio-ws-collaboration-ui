@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export const mockDarkReaderIsEnabled = jest.fn();
-export const isEnabled: jest.Mock = mockDarkReaderIsEnabled;
+export const mockDarkReaderIsEnabled = vi.fn();
+export const isEnabled = mockDarkReaderIsEnabled;
 
-export const mockDarkReaderEnable = jest.fn();
-export const enable: jest.Mock = mockDarkReaderEnable;
+export const mockDarkReaderEnable = vi.fn();
+export const enable = mockDarkReaderEnable;
 
-export const mockDarkReaderDisable = jest.fn();
-export const disable: jest.Mock = mockDarkReaderDisable;
+export const mockDarkReaderDisable = vi.fn();
+export const disable = mockDarkReaderDisable;

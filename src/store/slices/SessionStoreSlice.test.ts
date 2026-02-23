@@ -27,7 +27,8 @@ describe('SessionStoreSlice tests', () => {
 			id: 'id',
 			name: 'name',
 			displayName: 'displayName',
-			userType: UserType.INTERNAL
+			userType: UserType.INTERNAL,
+			_persistedAt: expect.any(Number)
 		});
 	});
 

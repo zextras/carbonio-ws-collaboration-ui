@@ -5,7 +5,7 @@
  */
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { buildReactionStanza } from '../../../tests/mocks/buildXmppStanza';
+import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
 	MessageFastening,
 	MessageType,

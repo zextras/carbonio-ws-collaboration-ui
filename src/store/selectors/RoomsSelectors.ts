@@ -36,6 +36,14 @@ export const useRoomIdsList = (): string[] => {
 	}, [rooms]);
 };
 
+export const getAreConversationsToShowSelector = (state: RootStore): boolean => {
+	const nonTemporaryRooms = filter(
+		state.rooms,
+		(room) => room.type === RoomType.ONE_TO_ONE || room.type === RoomType.GROUP
+	);
+	return size(nonTemporaryRooms) > 0;
+};
+
 export const useTemporaryRoomIdsOrderedByCreation = (): string[] => {
 	const rooms = useStore((store) => store.rooms);
 	return useMemo(() => {

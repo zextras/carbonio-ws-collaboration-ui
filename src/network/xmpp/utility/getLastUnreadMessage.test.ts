@@ -58,7 +58,7 @@ describe('getLastUnreadMessage', () => {
 		test('Conversation has only the inbox message sent by me', () => {
 			const message = createMockTextMessage({ roomId: room.id, from: sessionUser.id });
 			const store = useStore.getState();
-			store.newInboxMessage(message);
+			store.newInboxMessages([message]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(undefined);
 		});
@@ -66,7 +66,7 @@ describe('getLastUnreadMessage', () => {
 		test('Conversation has only the inbox message sent by another user', () => {
 			const message = createMockTextMessage({ roomId: room.id, from: user1.id });
 			const store = useStore.getState();
-			store.newInboxMessage(message);
+			store.newInboxMessages([message]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(message.id);
 		});

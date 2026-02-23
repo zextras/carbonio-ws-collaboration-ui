@@ -21,7 +21,7 @@ import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
-import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { MessageFastening, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
@@ -29,11 +29,14 @@ const jabberData = 'jabber:x:data';
 class XMPPClient {
 	public xmppConnection: XMPPConnection;
 
+	public features: string[] = [];
+
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {
 			this.setInbox();
 			this.getContactList();
 			this.setOnline();
+			this.getFeatures();
 		});
 
 		// Useful namespaces
@@ -57,6 +60,7 @@ class XMPPClient {
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
 		Strophe.addNamespace('ZEXTRAS_REACTION', 'zextras:xmpp:reaction:0');
+		Strophe.addNamespace('PIN', 'zextras:iq:pin');
 	}
 
 	public connect(token: string): void {
@@ -104,25 +108,41 @@ class XMPPClient {
 	}
 
 	/**
+	 *
+	 * Request XMPP active features.
+	 */
+
+	// Request the supported form
+	public getFeatures(): void {
+		const iq = $iq({ type: 'get', to: 'carbonio' }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza: Element) => {
+				const featureElements = stanza.getElementsByTagName('feature');
+				this.features = Array.from(featureElements).map(
+					(feature) => feature.getAttribute('var') || ''
+				);
+			}
+		});
+	}
+
+	/**
 	 * INBOX:
 	 * Request chat initial information like unread messages or active conversations.
 	 */
 
-	// Request the supported form
-	public getInbox(): void {
-		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
-		this.xmppConnection.send({
-			type: XMPPRequestType.IQ,
-			elem: iq
-		});
-	}
-
 	// Fetch the inbox and get initial information:
 	public setInbox(): void {
-		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', id: queryId }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
-			elem: iq
+			elem: iq,
+			callback: () => {
+				const messages = HistoryAccumulator.getInboxMessages(queryId);
+				useStore.getState().newInboxMessages(messages);
+			}
 		});
 	}
 
@@ -205,10 +225,19 @@ class XMPPClient {
 	 * Edit a message using Message Fastening
 	 * Documentation: https://xmpp.org/extensions/xep-0422.html
 	 */
-	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void {
+	sendChatMessageEdit(
+		roomId: string,
+		message: string,
+		messageStanzaId: string,
+		parentStanzaId: string
+	): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('apply-to', {
+				id: messageStanzaId,
+				xmlns: Strophe.NS.XMPP_FASTEN,
+				'parent-id': parentStanzaId
+			})
 			.c('edit', { xmlns: Strophe.NS.ZEXTRAS_EDIT })
 			.up()
 			.c('external', { name: 'body' })
@@ -501,6 +530,119 @@ class XMPPClient {
 			type: XMPPRequestType.IQ,
 			elem: iq,
 			callback: smartMarkersCallback
+		});
+	}
+
+	pinMessage(roomId: string, stanzaId: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: 'urn:xmpp:pin:0',
+			'message-id': stanzaId
+		});
+		setTimeout(() => {
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq
+			});
+		}, 500);
+	}
+
+	getMessagePin(roomId: string): void {
+		if (!this.features.includes('zextras:iq:pin') && this.features.length > 0) return;
+
+		const iq = $iq({ type: 'get', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: Strophe.NS.PIN
+		});
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza: Element) => {
+				const pinElement = stanza.getElementsByTagName('pin')[0];
+				const stanzaId = pinElement?.getAttribute('message-id');
+
+				if (stanzaId) {
+					this.requestPinnedMessageContent(roomId, stanzaId);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Fetches a message by its stanza ID and calls the callback with the result
+	 */
+	private fetchMessageByStanzaId(
+		roomId: string,
+		stanzaId: string,
+		callback: (queryId: string) => void
+	): void {
+		const queryId = HistoryAccumulator.getNextId();
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+			.c('x', { xmlns: jabberData })
+			.c('field', { var: 'ids' })
+			.c('value')
+			.t(stanzaId);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: () => callback(queryId)
+		});
+	}
+
+	/**
+	 * Handles setting the pinned message when it's an edited message (FASTENING type)
+	 */
+	private handleEditedPinnedMessage(roomId: string, fasteningMessage: MessageFastening): void {
+		this.fetchMessageByStanzaId(roomId, fasteningMessage.originalStanzaId, (queryId) => {
+			const originalMessage = HistoryAccumulator.getPinnedMessage(queryId);
+			const editedMessage: TextMessage = {
+				...originalMessage,
+				text: fasteningMessage.value || '',
+				edited: true,
+				editedStanzaId: fasteningMessage.stanzaId
+			} as TextMessage;
+			useStore.getState().setPinnedMessage(roomId, editedMessage);
+		});
+	}
+
+	requestPinnedMessageContent(roomId: string, pinnedMessageStanzaId: string): void {
+		if (!useStore.getState().rooms[roomId]) return;
+
+		const storeMessages = useStore.getState().chatsRegistry[roomId]?.messages;
+
+		const existingMessage = find(
+			storeMessages,
+			(message) =>
+				message.type === MessageType.TEXT_MSG && message.stanzaId === pinnedMessageStanzaId
+		) as TextMessage;
+
+		if (existingMessage) {
+			useStore.getState().setPinnedMessage(roomId, existingMessage);
+			return;
+		}
+
+		this.fetchMessageByStanzaId(roomId, pinnedMessageStanzaId, (queryId) => {
+			const message = HistoryAccumulator.getPinnedMessage(queryId);
+
+			if (message.type === MessageType.TEXT_MSG) {
+				useStore.getState().setPinnedMessage(roomId, message);
+				return;
+			}
+
+			if (message.type === MessageType.FASTENING && message.action === 'edit') {
+				this.handleEditedPinnedMessage(roomId, message);
+			}
+		});
+	}
+
+	unpinMessage(roomId: string, stanzaId: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('pin', {
+			xmlns: Strophe.NS.PIN,
+			'message-id': stanzaId,
+			action: 'delete'
+		});
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq
 		});
 	}
 }

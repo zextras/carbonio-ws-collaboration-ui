@@ -7,23 +7,39 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
 import styled from '@emotion/styled';
-import { Badge, Button, Container, Row, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Badge,
+	Button,
+	Container,
+	Icon,
+	Row,
+	Text,
+	Tooltip,
+	useModal,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import { gte } from 'semver';
 
 import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
+import { PinMessage } from '../../../../chats/components/conversation/PinMessage';
 import useDarkReader from '../../../../hooks/useDarkReader';
+import { RoomsApi } from '../../../../network';
+import { getPinnedMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
+	getOwnershipOfTheRoom,
 	getRoomMutedSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
+import { MessageType, OperationType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 type MeetingConversationAccordionProps = {
@@ -56,14 +72,21 @@ const CustomLargeButton = styled(Button)`
 		min-height: ${({ theme }): string => theme.sizes.icon.large};
 	}
 `;
+const EMPTY_MESSAGES: never[] = [];
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
+	const { createModal, closeModal } = useModal();
+	const createSnackbar = useSnackbar();
+	const version = useStore.getState().session.apiVersion;
+	const setChatExporting = useStore((store) => store.setChatExporting);
+	const messages = useStore((state) => state.chatsRegistry[roomId]?.messages ?? EMPTY_MESSAGES);
+	const iAmOwner = useStore((state) => getOwnershipOfTheRoom(state, roomId));
 	const extendChatLabel = t('meeting.extendChat', 'Extend chat');
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
-
+	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore(getMeetingChatVisibility);
@@ -144,6 +167,89 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 		return '2.75rem';
 	}, [chatFullExpanded, chatIsOpen]);
 
+	const isMsgEmpty = useMemo(
+		() =>
+			messages.filter(
+				(msg) =>
+					!(
+						msg.type === MessageType.CONFIGURATION_MSG &&
+						msg.operation === OperationType.CLEARED_HISTORY
+					)
+			).length === 0,
+		[messages]
+	);
+
+	const isHistoryClearedVisible = useMemo(
+		() =>
+			(!version || gte(version, '1.6.7')) &&
+			!isMsgEmpty &&
+			iAmOwner &&
+			roomType === RoomType.TEMPORARY,
+		[version, iAmOwner, roomType, isMsgEmpty]
+	);
+
+	const openModal = useCallback(() => {
+		const modalId = 'clear-history-modal';
+		createModal({
+			id: modalId,
+			title: (
+				<Container mainAlignment="flex-start" orientation="horizontal" gap="0.5rem">
+					<Icon icon="AlertCircleOutline" color="error" size="large" />
+					<Text>{t('modal.clearHistoryTitle', 'Clear History')}</Text>
+				</Container>
+			),
+			onClose: () => {
+				closeModal(modalId);
+			},
+			children: (
+				<Container
+					mainAlignment={'flex-start'}
+					crossAlignment={'flex-start'}
+					gap="1rem"
+					padding={{ vertical: '1rem' }}
+				>
+					<Text overflow="break-word">
+						{t(
+							'modal.clearHistoryForAllDescription',
+							'This will permanently delete all messages and shared files in this room for all participants.'
+						)}
+					</Text>
+					<Text color={'error'} weight="bold">
+						{t('modal.clearHistoryWarning', 'This action cannot be undone.')}
+					</Text>
+				</Container>
+			),
+			customFooter: (
+				<Container mainAlignment="flex-end" orientation="horizontal" gap="0.5rem">
+					<Button
+						type="outlined"
+						color="text"
+						label={t('modal.clearHistoryCancel', 'No, cancel')}
+						onClick={() => closeModal(modalId)}
+					/>
+					<Button
+						// eslint-disable-next-line jsx-a11y/no-autofocus
+						autoFocus
+						color="error"
+						label={t('modal.clearHistoryConfirm', 'Yes, clear history')}
+						onClick={() => {
+							RoomsApi.clearRoomHistory(roomId).then(() => {
+								closeModal(modalId);
+								createSnackbar({
+									key: new Date().toLocaleString(),
+									severity: 'success',
+									label: t('feedback.historyCleared', 'History cleared successfully!'),
+									hideButton: true,
+									autoHideTimeout: 3000
+								});
+							});
+						}}
+					/>
+				</Container>
+			)
+		});
+	}, [createModal, t, roomId, closeModal, createSnackbar]);
+
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
@@ -189,6 +295,32 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					)}
 				</Row>
 			</Container>
+			{isHistoryClearedVisible && isChatOpenOrFullExpanded && (
+				<Container
+					background={'gray0'}
+					orientation="horizontal"
+					maxHeight="2.75rem"
+					width="100%"
+					borderRadius="none"
+					padding={{ vertical: 'extrasmall', left: 'large', right: 'medium' }}
+					gap={'0.5rem'}
+				>
+					<Button
+						label={t('action.clearHistory', 'Clear history')}
+						onClick={openModal}
+						icon="BookOpenOutline"
+						color={'error'}
+						iconPlacement="left"
+					/>
+					<Button
+						label={t('action.exportMessages', 'Export messages')}
+						onClick={() => setChatExporting(roomId)}
+						icon="Copy"
+						iconPlacement="left"
+					/>
+				</Container>
+			)}
+			{pinnedMessage && isChatOpenOrFullExpanded && <PinMessage pinnedMessage={pinnedMessage} />}
 			{isChatOpenOrFullExpanded && (
 				<WrapperMeetingChat
 					data-testid="WrapperMeetingChat"
