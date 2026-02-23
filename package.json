@@ -1,6 +1,6 @@
 {
 	"name": "carbonio-ws-collaboration-ui",
-	"version": "0.9.18",
+	"version": "0.9.19",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
 	"scripts": {
@@ -52,7 +52,7 @@
 		"husky": "^9.1.7",
 		"identity-obj-proxy": "^3.0.0",
 		"is-ci": "^3.0.1",
-        "sonarqube-scanner": "^4.3.4",
+		"sonarqube-scanner": "^4.3.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.15",
