@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.20](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.19...v0.9.20) (2026-02-27)
+
+
+### Bug Fixes
+
+* update jenkins-lib-ui to version 1.0.9 ([3989ded](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3989ded6f26a4e38a712a911a3c237538f04482c))
+
 ### [0.9.19](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.18...v0.9.19) (2026-02-23)
 
 
