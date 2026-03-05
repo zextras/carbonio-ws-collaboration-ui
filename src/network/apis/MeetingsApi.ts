@@ -9,7 +9,6 @@ import { lte } from 'semver';
 
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
 import {
 	CreateMeetingData,
@@ -44,7 +43,7 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
-import { fetchAPI } from '../../utils/FetchUtils';
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
 class MeetingsApi implements IMeetingsApi {

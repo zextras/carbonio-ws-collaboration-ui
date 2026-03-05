@@ -7,10 +7,15 @@
 import { act } from '@testing-library/react';
 import { Mock } from 'vitest';
 
-import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI, wscApiVersionHeader } from './FetchUtils';
+import {
+	fetchAPI,
+	RequestType,
+	sendFileFetchAPI,
+	uploadFileFetchAPI,
+	wscApiVersionHeader
+} from './FetchUtils';
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { RequestType } from '../types/network/apis/IBaseAPI';
 
 const defPath = '/services/chats/test';
 

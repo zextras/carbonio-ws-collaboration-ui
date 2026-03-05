@@ -11,7 +11,6 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
@@ -29,6 +28,7 @@ import { Message } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
 
 const iconNavigator2 = 'icon: Navigation2';
@@ -407,7 +407,7 @@ describe('Send message', () => {
 
 	test('Send a message with attachment - image', async () => {
 		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
-		const spyOnGetImageSize = vi.spyOn(attachmentsApi, 'getImageSize');
+		const spyOnGetImageSize = vi.spyOn(attachmentUtils, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });

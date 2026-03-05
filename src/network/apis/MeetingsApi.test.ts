@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import {
 	CreateGuestAccountResponse,
@@ -27,6 +26,7 @@ import { RootStore } from '../../types/store/StoreTypes';
 import { User, UserType } from '../../types/store/UserTypes';
 import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RequestType } from '../../utils/FetchUtils';
 
 const meetingMock = createMockMeeting();
 const meetingNotActiveMock = createMockMeeting({ active: false });

@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 

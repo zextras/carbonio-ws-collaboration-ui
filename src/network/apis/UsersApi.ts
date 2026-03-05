@@ -7,10 +7,9 @@
 import { join, map } from 'lodash';
 
 import useStore from '../../store/Store';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
 import { GetUserResponse, GetUsersResponse } from '../../types/network/responses/usersResponses';
-import { fetchAPI } from '../../utils/FetchUtils';
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 
 class UsersApi implements IUsersApi {
 	// Singleton design pattern

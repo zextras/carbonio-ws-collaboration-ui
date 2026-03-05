@@ -10,7 +10,6 @@ import { v4 as uuidGenerator } from 'uuid';
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import {
@@ -43,7 +42,12 @@ import {
 } from '../../types/network/responses/roomsResponses';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
+import {
+	fetchAPI,
+	RequestType,
+	sendFileFetchAPI,
+	uploadFileFetchAPI
+} from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';

@@ -10,9 +10,9 @@ import * as uuid from 'uuid';
 import usersApi from './UsersApi';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
+import { RequestType } from '../../utils/FetchUtils';
 
 const user: UserBe = createMockUser({ id: uuid.v6() });
 const user2: UserBe = createMockUser({ id: uuid.v6() });

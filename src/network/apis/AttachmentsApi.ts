@@ -3,196 +3,103 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint-disable sonarjs/no-nested-template-literals */
 
-import IAttachmentsApi from '../../types/network/apis/IAttachmentsApi';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
-import {
-	DeleteAttachmentResponse,
-	GetAttachmentInfoResponse,
-	GetAttachmentResponse,
-	GetImageResponse,
-	GetImageThumbnailResponse,
-	GetPdfResponse,
-	GetPdfThumbnailResponse,
-	ImageSize
-} from '../../types/network/responses/attachmentsResponses';
-import { fetchAPI } from '../../utils/FetchUtils';
+import { Attachment } from '../../types/network/models/attachmentTypes';
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 
-class AttachmentsApi implements IAttachmentsApi {
-	// Singleton design pattern
-	private static instance: IAttachmentsApi;
+const buildParams = (obj: Record<string, string | number | undefined>): string => {
+	const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
+	if (entries.length === 0) return '';
+	return `?${entries.map(([k, v]) => `${k}=${v}`).join('&')}`;
+};
 
-	public static getInstance(): IAttachmentsApi {
-		if (!AttachmentsApi.instance) {
-			AttachmentsApi.instance = new AttachmentsApi();
-		}
-		return AttachmentsApi.instance;
-	}
+export const getAttachment = (fileId: string): Promise<Blob> =>
+	fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
 
-	public deleteAttachment(fileId: string): Promise<DeleteAttachmentResponse> {
-		return fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
-	}
+export const getAttachmentInfo = (fileId: string): Promise<Attachment> =>
+	fetchAPI(`attachments/${fileId}`, RequestType.GET);
 
-	public getAttachmentInfo(fileId: string): Promise<GetAttachmentInfoResponse> {
-		return fetchAPI(`attachments/${fileId}`, RequestType.GET);
-	}
+export const getURLAttachment = (fileId: string): string =>
+	`${window.document.location.origin}/services/chats/attachments/${fileId}/download`;
 
-	public getURLAttachment = (fileId: string): string =>
-		`${window.document.location.origin}/services/chats/attachments/${fileId}/download`;
+export const deleteAttachment = (fileId: string): Promise<Response> =>
+	fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
 
-	public getAttachment(fileId: string): Promise<GetAttachmentResponse> {
-		return fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
-	}
+export const getImagePreview = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	format?: string
+): Promise<Blob> => {
+	const params = buildParams({ quality, output_format: format });
+	return fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
+};
 
-	public getImagePreview(
-		fileId: string,
-		area: string,
-		quality?: string,
-		format?: string
-	): Promise<GetImageResponse> {
-		let params = '';
-		if (quality || format) {
-			const array = [];
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			params = `?${array.join('&')}`;
-		}
-		return fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
-	}
+export const getImagePreviewURL = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	format?: string
+): string => {
+	const params = buildParams({ quality, output_format: format });
+	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
+};
 
-	public getImagePreviewURL = (
-		fileId: string,
-		area: string,
-		quality?: string,
-		format?: string
-	): string => {
-		let params = '';
-		if (quality || format) {
-			const array = [];
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			params = `?${array.join('&')}`;
-		}
-		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
-	};
+export const getImageThumbnail = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	format?: string,
+	shape?: string
+): Promise<Blob> => {
+	const params = buildParams({ quality, output_format: format, shape });
+	return fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+};
 
-	public getImageThumbnail(
-		fileId: string,
-		area: string,
-		quality?: string,
-		format?: string,
-		shape?: string
-	): Promise<GetImageThumbnailResponse> {
-		let params = '';
-		if (shape || quality || format) {
-			const array = [];
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			if (shape) array.push(`shape=${shape}`);
-			params = `?${array.join('&')}`;
-		}
-		return fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
-	}
+export const getImageThumbnailURL = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	format?: string,
+	shape?: string
+): string => {
+	const params = buildParams({ quality, output_format: format, shape });
+	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
+};
 
-	public getImageThumbnailURL = (
-		fileId: string,
-		area: string,
-		quality?: string,
-		format?: string,
-		shape?: string
-	): string => {
-		let params = '';
-		if (shape || quality || format) {
-			const array = [];
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			if (shape) array.push(`shape=${shape}`);
-			params = `?${array.join('&')}`;
-		}
-		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
-	};
+export const getPdfPreview = (
+	fileId: string,
+	firstPage?: number,
+	lastPage?: number
+): Promise<Blob> => {
+	const params = buildParams({ first_page: firstPage, last_page: lastPage });
+	return fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
+};
 
-	public getPdfPreview(
-		fileId: string,
-		firstPage?: number,
-		lastPage?: number
-	): Promise<GetPdfResponse> {
-		let params = '';
-		if (firstPage || lastPage) {
-			const array = [];
-			if (firstPage) array.push(`first_page=${firstPage}`);
-			if (lastPage) array.push(`last_page=${lastPage}`);
-			params = `?${array.join('&')}`;
-		}
-		return fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
-	}
+export const getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
+	const params = buildParams({ first_page: firstPage, last_page: lastPage });
+	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
+};
 
-	public getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
-		let params = '';
-		if (firstPage || lastPage) {
-			const array = [];
-			if (firstPage) array.push(`first_page=${firstPage}`);
-			if (lastPage) array.push(`last_page=${lastPage}`);
-			params = `?${array.join('&')}`;
-		}
-		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
-	};
+export const getPdfThumbnail = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	shape?: string,
+	format = 'jpeg'
+): Promise<Blob> => {
+	const params = buildParams({ shape, quality, output_format: format });
+	return fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+};
 
-	public getPdfThumbnail(
-		fileId: string,
-		area: string,
-		quality?: string,
-		shape?: string,
-		format = 'jpeg'
-	): Promise<GetPdfThumbnailResponse> {
-		let params = '';
-		if (shape || quality || format) {
-			const array = [];
-			if (shape) array.push(`shape=${shape}`);
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			params = `?${array.join('&')}`;
-		}
-		return fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
-	}
-
-	public getPdfThumbnailURL = (
-		fileId: string,
-		area: string,
-		quality?: string,
-		shape?: string,
-		format = 'jpeg'
-	): string => {
-		let params = '';
-		if (shape || quality || format) {
-			const array = [];
-			if (shape) array.push(`shape=${shape}`);
-			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`output_format=${format}`);
-			params = `?${array.join('&')}`;
-		}
-		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
-	};
-
-	public getImageSize(url: string): Promise<ImageSize> {
-		return new Promise((resolve, reject) => {
-			try {
-				const img = new Image();
-
-				img.addEventListener(
-					'load',
-					() => {
-						resolve({ width: img.naturalWidth, height: img.naturalHeight });
-					},
-					{ once: true }
-				);
-
-				img.src = url;
-			} catch (err) {
-				reject(new Error());
-			}
-		});
-	}
-}
-
-export default AttachmentsApi.getInstance();
+export const getPdfThumbnailURL = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	shape?: string,
+	format = 'jpeg'
+): string => {
+	const params = buildParams({ shape, quality, output_format: format });
+	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
+};

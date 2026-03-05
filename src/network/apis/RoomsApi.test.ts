@@ -13,7 +13,6 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import {
@@ -22,6 +21,7 @@ import {
 	mockUploadFileFetchAPI
 } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RequestType } from '../../utils/FetchUtils';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 const contentType = 'Content-Type';

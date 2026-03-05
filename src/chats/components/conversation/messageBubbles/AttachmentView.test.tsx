@@ -10,7 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported } from '../../../../utils/attachmentUtils';

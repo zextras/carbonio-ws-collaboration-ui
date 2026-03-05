@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
