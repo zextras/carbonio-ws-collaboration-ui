@@ -12,7 +12,7 @@ import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
-import roomsApi from '../../../network/apis/RoomsApi';
+import * as api from '../../../network/apis/RoomsApi';
 import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
@@ -127,7 +127,7 @@ describe('Conversation view', () => {
 		});
 
 		test('Leave a group and check everything is shown correctly', async () => {
-			const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
+			const spyOnDeleteRoomMember = vi.spyOn(api, 'deleteRoomMember');
 			mockUseMediaQueryCheck.mockReturnValue(true);
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();

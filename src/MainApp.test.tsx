@@ -9,9 +9,8 @@ import { waitFor } from '@testing-library/react';
 import * as shell from '@zextras/carbonio-shell-ui';
 
 import MainApp from './MainApp';
-import * as api from './network/apis/InfoApi';
+import * as api from './network';
 import meetingsApi from './network/apis/MeetingsApi';
-import roomsApi from './network/apis/RoomsApi';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
 
@@ -44,7 +43,7 @@ describe('Entry point', () => {
 	test('Connection is established on app load', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		vi.spyOn(roomsApi, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(meetingsApi, 'listMeetings').mockResolvedValueOnce([]);
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
@@ -60,7 +59,7 @@ describe('Entry point', () => {
 	test('Connection is not established on app load if listRooms do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		vi.spyOn(roomsApi, 'listRooms').mockRejectedValueOnce(new Error());
+		vi.spyOn(api, 'listRooms').mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});

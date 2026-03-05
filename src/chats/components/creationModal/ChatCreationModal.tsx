@@ -18,11 +18,10 @@ import { useTranslation } from 'react-i18next';
 
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
-import { RoomsApi } from '../../../network';
+import { addRoom } from '../../../network';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
 import ContactsSelector, { ContactsSelected } from '../contactSelector/ContactsSelector';
 
 const ChatCreationModal = ({
@@ -128,13 +127,13 @@ const ChatCreationModal = ({
 	const onCreateGroup = useCallback(
 		(ids: MemberBe[]) => {
 			setIsPending(true);
-			RoomsApi.addRoom({
+			addRoom({
 				name: title,
 				description: topic,
 				type: RoomType.GROUP,
 				members: ids
 			})
-				.then((response: AddRoomResponse) => {
+				.then((response) => {
 					setIsPending(false);
 					goToRoomPage(response.id);
 					onModalClose();

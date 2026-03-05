@@ -11,7 +11,7 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -406,7 +406,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
 		const spyOnGetImageSize = vi.spyOn(attachmentUtils, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
@@ -430,7 +430,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -450,7 +450,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 

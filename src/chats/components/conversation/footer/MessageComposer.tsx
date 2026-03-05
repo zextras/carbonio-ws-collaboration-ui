@@ -33,7 +33,7 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { RoomsApi } from '../../../../network';
+import { addRoomAttachment } from '../../../../network';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -43,7 +43,6 @@ import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import {
 	FileToUpload,
 	messageActionType,
@@ -190,7 +189,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
 		controller: AbortController
-	): Promise<AddRoomAttachmentResponse> => {
+	): Promise<{ id: string }> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
@@ -206,7 +205,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return Promise.reject(err);
 			}
 		}
-		return RoomsApi.addRoomAttachment(
+		return addRoomAttachment(
 			roomId,
 			file.file,
 			{
@@ -303,7 +302,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
-				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
+				(acc: Promise<{ id: string } | void>, file, i) =>
 					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);

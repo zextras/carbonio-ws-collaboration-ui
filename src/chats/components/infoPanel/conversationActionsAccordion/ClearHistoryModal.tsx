@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { RoomsApi } from '../../../../network';
+import { clearRoomHistory } from '../../../../network';
 import {
 	getLastTextMessageIdSelector,
 	getRoomUnreadSelector
@@ -49,7 +49,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 		if (unreadMessagesCount > 0 && lastTextMessageId) {
 			xmppClient.readMessage(roomId, lastTextMessageId);
 		}
-		RoomsApi.clearRoomHistory(roomId).then(() => {
+		clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();
 			closeModal();
 		});

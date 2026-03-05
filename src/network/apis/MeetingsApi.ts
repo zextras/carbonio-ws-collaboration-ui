@@ -44,7 +44,7 @@ import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { fetchAPI, RequestType } from '../../utils/FetchUtils';
-import { RoomsApi } from '../index';
+import { deleteRoomMember } from '../index';
 
 class MeetingsApi implements IMeetingsApi {
 	// Singleton design pattern
@@ -176,7 +176,7 @@ class MeetingsApi implements IMeetingsApi {
 					room?.type === RoomType.TEMPORARY &&
 					iAmNotOwner
 				) {
-					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
+					deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 				}
 				if (isExternal) {
 					BrowserUtils.clearAuthCookies();

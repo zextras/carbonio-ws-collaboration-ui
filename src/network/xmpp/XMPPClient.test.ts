@@ -14,7 +14,7 @@ import useStore from '../../store/Store';
 import { buildPingStanza } from '../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import roomsApi from '../apis/RoomsApi';
+import * as api from '../apis/RoomsApi';
 
 const getStanzaFromSpy = (spy: Mock, callIndex = 0): Element =>
 	spy.mock.calls[callIndex][0].elem.tree();
@@ -100,7 +100,7 @@ describe('XMPPClient', () => {
 	});
 
 	test('sendChatMessage to a placeholder should create a room', () => {
-		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
+		const spyOnAddRoom = vi.spyOn(api, 'replacePlaceholderRoom');
 		spyOnAddRoom.mockImplementation(() => Promise.resolve(createMockRoom({ id: 'roomId123' })));
 		const xmppClient = new XMPPClient();
 		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');

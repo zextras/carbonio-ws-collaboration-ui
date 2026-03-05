@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import MeetingsApi from './apis/MeetingsApi';
-import RoomsApi from './apis/RoomsApi';
 
-export { RoomsApi, MeetingsApi };
+export { MeetingsApi };
 export * from './apis/InfoApi';
 export * from './apis/UsersApi';
+export * from './apis/RoomsApi';
 export * from './apis/AttachmentsApi';

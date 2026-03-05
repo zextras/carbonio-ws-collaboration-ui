@@ -15,7 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
-import { RoomsApi } from '../../../../network';
+import { deleteRoomAndMeeting } from '../../../../network';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -62,7 +62,7 @@ const DeleteVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	});
 
 	const handleDeleteRoom = useCallback(() => {
-		RoomsApi.deleteRoomAndMeeting(roomId)
+		deleteRoomAndMeeting(roomId)
 			.then(() => {
 				if (onChangeVirtualRoom !== undefined) {
 					onChangeVirtualRoom({
