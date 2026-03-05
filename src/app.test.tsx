@@ -10,7 +10,7 @@ import * as shell from '@zextras/carbonio-shell-ui';
 
 import App from './app';
 import { MEETINGS_PATH } from './constants/appConstants';
-import InfoApi from './network/apis/InfoApi';
+import * as InfoApi from './network/apis/InfoApi';
 import { setup } from './tests/test-utils';
 
 describe('App tests', () => {

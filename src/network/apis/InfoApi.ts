@@ -4,29 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { RequestType } from '../../types/network/apis/IBaseAPI';
-import IInfoApi from '../../types/network/apis/IInfoApi';
-import { GetLicenseResponse, GetTokenResponse } from '../../types/network/responses/infoResponses';
-import { fetchAPI } from '../../utils/FetchUtils';
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 
-class InfoApi implements IInfoApi {
-	// Singleton design pattern
-	private static instance: IInfoApi;
+export const getLicense = (): Promise<{ licensed: boolean }> =>
+	fetchAPI(`license`, RequestType.GET);
 
-	public static getInstance(): IInfoApi {
-		if (!InfoApi.instance) {
-			InfoApi.instance = new InfoApi();
-		}
-		return InfoApi.instance;
-	}
-
-	public getLicense(): Promise<GetLicenseResponse> {
-		return fetchAPI(`license`, RequestType.GET);
-	}
-
-	public getToken(): Promise<GetTokenResponse> {
-		return fetchAPI(`auth/token`, RequestType.GET);
-	}
-}
-
-export default InfoApi.getInstance();
+export const getToken = (): Promise<{ zmToken: string }> => fetchAPI(`auth/token`, RequestType.GET);

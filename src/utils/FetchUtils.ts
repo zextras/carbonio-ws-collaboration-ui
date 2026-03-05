@@ -8,13 +8,19 @@ import { includes } from 'lodash';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { RequestType } from '../types/network/apis/IBaseAPI';
 import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
 import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
+
+export enum RequestType {
+	GET = 'GET',
+	POST = 'POST',
+	PUT = 'PUT',
+	DELETE = 'DELETE'
+}
 
 const MAX_VERSION_MISMATCH_RETRIES = 3;
 
