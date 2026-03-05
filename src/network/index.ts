@@ -5,8 +5,8 @@
  */
 import MeetingsApi from './apis/MeetingsApi';
 import RoomsApi from './apis/RoomsApi';
-import UsersApi from './apis/UsersApi';
 
-export { RoomsApi, UsersApi, MeetingsApi };
+export { RoomsApi, MeetingsApi };
 export * from './apis/InfoApi';
+export * from './apis/UsersApi';
 export * from './apis/AttachmentsApi';

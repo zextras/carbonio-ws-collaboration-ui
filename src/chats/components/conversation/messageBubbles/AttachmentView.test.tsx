@@ -10,7 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
-import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported } from '../../../../utils/attachmentUtils';
@@ -19,7 +19,7 @@ const fileIcon = 'icon: FileTextOutline';
 
 describe('Attachment view', () => {
 	test('Generic file visualization', async () => {
-		const spyOnGetURLAttachment = vi.spyOn(attachmentsApi, 'getURLAttachment');
+		const spyOnGetURLAttachment = vi.spyOn(api, 'getURLAttachment');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',

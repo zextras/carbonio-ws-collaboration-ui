@@ -56,12 +56,12 @@ const handleResponse = async (response: Response): Promise<any> => {
 	return response;
 };
 
-export const fetchAPI = (
+export function fetchAPI<T>(
 	endpoint: string,
 	method: RequestType,
 	data?: Record<string, unknown> | Array<Record<string, unknown>>,
 	retryCount = 0
-): Promise<any> => {
+): Promise<T> {
 	const headers = buildHeaders();
 	headers.append(contentTypeHeader, 'application/json');
 	return fetch(BASE_PATH + endpoint, {
@@ -76,7 +76,7 @@ export const fetchAPI = (
 			}
 			return Promise.reject(err);
 		});
-};
+}
 
 export const sendFileFetchAPI = (
 	endpoint: string,
