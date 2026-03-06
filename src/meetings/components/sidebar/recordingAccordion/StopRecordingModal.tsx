@@ -15,7 +15,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MeetingsApi } from '../../../../network';
+import { stopRecording } from '../../../../network';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
@@ -69,8 +69,8 @@ const StopRecordingModal = ({
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId)
+	const stopRecordingAction = useCallback(() => {
+		stopRecording(meetingId)
 			.then(() => {
 				const snackbarLabel = loggedUserId === recStartedBy ? recordingGeneral : recordingStopped;
 				createSnackbar({
@@ -107,7 +107,7 @@ const StopRecordingModal = ({
 			size="small"
 			open={isOpen}
 			title={title}
-			onConfirm={stopRecording}
+			onConfirm={stopRecordingAction}
 			confirmColor="error"
 			confirmLabel={stopButtonLabel}
 			showCloseIcon

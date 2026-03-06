@@ -10,7 +10,7 @@ import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import { mockGoToRoomPage } from '../../../hooks/__mocks__/useRouting';
-import meetingsApi from '../../../network/apis/MeetingsApi';
+import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -108,7 +108,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting for the first time', async () => {
-		const spyOnCreateMeeting = vi.spyOn(meetingsApi, 'createMeeting');
+		const spyOnCreateMeeting = vi.spyOn(api, 'createMeeting');
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');

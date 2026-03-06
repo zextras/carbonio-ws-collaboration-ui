@@ -6,6 +6,7 @@
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { createMeeting, deleteMeeting } from './MeetingsApi';
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -27,7 +28,6 @@ import {
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
-import { MeetingsApi } from '../index';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
@@ -49,7 +49,7 @@ export const addRoom = async (room: RoomCreationFields): Promise<RoomBe> =>
 	fetchAPI<RoomBe>('rooms', RequestType.POST, room).then(async (response) => {
 		const meetingType =
 			room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-		await MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
+		await createMeeting(response.id, meetingType, response.name ?? '');
 		console.log(response.id);
 		return response;
 	});
@@ -66,7 +66,7 @@ export const deleteRoom = (roomId: string): Promise<Response> =>
 export const deleteRoomAndMeeting = (roomId: string): Promise<Response> => {
 	const meetingId = useStore.getState().rooms[roomId]?.meetingId;
 	if (meetingId) {
-		return MeetingsApi.deleteMeeting(meetingId).finally(() => deleteRoom(roomId));
+		return deleteMeeting(meetingId).finally(() => deleteRoom(roomId));
 	}
 	return deleteRoom(roomId);
 };

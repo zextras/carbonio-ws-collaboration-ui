@@ -6,10 +6,9 @@
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { getRoom, MeetingsApi } from '../index';
+import { getMeeting, getRoom } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -62,9 +61,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				getRoom(event.roomId).then((response) => {
 					state.addRooms([response]);
 					if (response.meetingId) {
-						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
-							state.addMeetings([meetingResponse])
-						);
+						getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
 					}
 				});
 			} else {

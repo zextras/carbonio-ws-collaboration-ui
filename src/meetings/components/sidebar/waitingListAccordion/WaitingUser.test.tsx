@@ -8,7 +8,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import WaitingUser from './WaitingUser';
-import meetingsApi from '../../../../network/apis/MeetingsApi';
+import * as api from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -38,7 +38,7 @@ describe('WaitingUser tests', () => {
 	});
 
 	test('Moderator clicks on accept button', async () => {
-		const spyOnAcceptWaitingUser = vi.spyOn(meetingsApi, 'acceptWaitingUser');
+		const spyOnAcceptWaitingUser = vi.spyOn(api, 'acceptWaitingUser');
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const acceptButton = screen.getByTestId('icon: CheckmarkOutline');
 		await user.click(acceptButton);
@@ -46,7 +46,7 @@ describe('WaitingUser tests', () => {
 	});
 
 	test('Moderator clicks on reject button', async () => {
-		const spyOnAcceptWaitingUser = vi.spyOn(meetingsApi, 'acceptWaitingUser');
+		const spyOnAcceptWaitingUser = vi.spyOn(api, 'acceptWaitingUser');
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const acceptButton = screen.getByTestId('icon: CloseOutline');
 		await user.click(acceptButton);

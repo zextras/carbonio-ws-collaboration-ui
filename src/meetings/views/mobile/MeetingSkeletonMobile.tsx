@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Container } from '@zextras/carbonio-design-system';
 
 import useGeneralMeetingControls from '../../../hooks/useGeneralMeetingControls';
-import { MeetingsApi } from '../../../network';
+import { leaveMeeting } from '../../../network';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
@@ -39,20 +39,20 @@ const MeetingSkeletonMobile = (): ReactElement => {
 
 	useGeneralMeetingControls(meetingId!);
 
-	const leaveMeeting = useCallback(() => {
+	const leaveMeetingAction = useCallback(() => {
 		const isLoggedUserExternal = useStore.getState().session.userType === UserType.GUEST;
-		MeetingsApi.leaveMeeting(meetingId!);
+		leaveMeeting(meetingId!);
 		if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
 	}, [meetingId]);
 
 	useEffect(() => {
-		window.addEventListener('pagehide', leaveMeeting);
+		window.addEventListener('pagehide', leaveMeetingAction);
 		return (): void => {
-			window.removeEventListener('pagehide', leaveMeeting);
+			window.removeEventListener('pagehide', leaveMeetingAction);
 		};
-	}, [leaveMeeting]);
+	}, [leaveMeetingAction]);
 
 	return (
 		<Container background="gray0" padding={{ vertical: '4.4rem', horizontal: '1rem' }}>

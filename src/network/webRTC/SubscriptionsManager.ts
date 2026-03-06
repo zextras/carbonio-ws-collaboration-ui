@@ -9,7 +9,7 @@ import { concat, differenceWith, filter, find, forEach, isEqual, remove, size } 
 import PendingSubscriptionManager from './PendingSubscriptionManager';
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
-import { MeetingsApi } from '../index';
+import { subscribeToMedia } from '../apis/MeetingsApi';
 
 class SubscriptionsManager {
 	meetingId: string;
@@ -40,12 +40,9 @@ class SubscriptionsManager {
 		});
 	}
 
-	private subscribeToMedia(
-		subscriptionToAdd: Subscription[],
-		subscriptionToRemove: Subscription[]
-	): void {
+	private subscribe(subscriptionToAdd: Subscription[], subscriptionToRemove: Subscription[]): void {
 		this.pendingSubscription.subscriptionRequesting();
-		MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
+		subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
 			.then(() => {
 				this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
 				this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
@@ -107,7 +104,7 @@ class SubscriptionsManager {
 				differenceWith(this.subscriptions, subsToRequest, isEqual)
 			);
 			if (size(subToAdd) > 0 || size(subToRemove) > 0) {
-				this.subscribeToMedia(subToAdd, subToRemove);
+				this.subscribe(subToAdd, subToRemove);
 			}
 		}
 	}
