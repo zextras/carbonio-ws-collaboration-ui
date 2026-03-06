@@ -271,7 +271,7 @@ export const getLoginConfig = (): Promise<LoginV3ConfigResponse> =>
 	fetch('/zx/login/v3/config', { method: RequestType.GET })
 		.then((resp) => {
 			if (resp.ok) return resp;
-			return Promise.reject(new Error(`${resp.status}`));
+			throw new Error(`${resp.status}`);
 		})
 		.then((resp) => resp.json())
-		.catch((err: Error) => Promise.reject(err));
+		.catch((err: Error) => console.error(err));

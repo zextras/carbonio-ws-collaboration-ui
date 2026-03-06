@@ -55,7 +55,9 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, roomType, emptyRoom }) 
 						severity: 'info',
 						label: notificationsActivatedForThisChatLabel,
 						actionLabel: undoLabel,
-						onActionClick: () => muteRoomNotification(roomId)
+						onActionClick: () => {
+							muteRoomNotification(roomId);
+						}
 					});
 				})
 				.catch(() => null);
@@ -67,7 +69,9 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, roomType, emptyRoom }) 
 						severity: 'info',
 						label: notificationsMutedForThisChatLabel,
 						actionLabel: undoLabel,
-						onActionClick: () => unmuteRoomNotification(roomId)
+						onActionClick: () => {
+							unmuteRoomNotification(roomId);
+						}
 					});
 				})
 				.catch(() => null);

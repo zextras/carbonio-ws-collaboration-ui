@@ -184,7 +184,7 @@ export const getImageSize = (url: string): Promise<{ width: number; height: numb
 			);
 			img.src = url;
 		} catch {
-			reject(new Error());
+			reject();
 		}
 	});
 
