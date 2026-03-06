@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
+import { wsClient } from '../../../../network/websocket/WebSocketClient';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -62,7 +64,6 @@ const useExternalAccess = (): {
 					setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
 
 					setChatsBeStatus(true);
-					const { xmppClient, wsClient } = useStore.getState().connections;
 					xmppClient.connect(res.zmToken);
 					wsClient.connect();
 

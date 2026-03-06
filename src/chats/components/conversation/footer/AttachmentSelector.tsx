@@ -20,8 +20,8 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -57,7 +57,6 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const chooseFileLabel = t('attachments.integrations.chooseFile', 'Choose file');
 	const shareLabel = t('attachments.integrations.shareLink', 'Share public link');
 
-	const xmppClient = useStore((store) => getXmppClient(store));
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
@@ -119,7 +118,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 					});
 			}
 		},
-		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType, xmppClient]
+		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType]
 	);
 
 	const actionTarget = useMemo(

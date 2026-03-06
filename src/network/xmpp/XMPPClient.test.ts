@@ -8,7 +8,7 @@ import { Mock } from 'vitest';
 
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { rosterCallback } from './iqCallbacks/rosterCallback';
-import XMPPClient from './XMPPClient';
+import { xmppClient } from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import { buildPingStanza } from '../../tests/buildXmppStanza';
@@ -36,14 +36,12 @@ beforeEach(() => {
 });
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppConnect = vi.spyOn(xmppClient, 'connect');
 		xmppClient.connect('token');
 		expect(spyOnXmppConnect).toHaveBeenCalledWith('token');
 	});
 
 	test('getContactList is called with the correct params', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.getContactList();
 
@@ -55,7 +53,6 @@ describe('XMPPClient', () => {
 	});
 
 	test('setOnline should send a presence stanza', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.setOnline();
 
@@ -66,7 +63,6 @@ describe('XMPPClient', () => {
 	});
 
 	test('sendPong should respond to a ping request', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.sendPong(buildPingStanza({ pingId: 'id' }));
 
@@ -77,7 +73,6 @@ describe('XMPPClient', () => {
 	});
 
 	test('getLastActivity is called with the correct params', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.getLastActivity('userId@carbonio');
 
@@ -89,7 +84,6 @@ describe('XMPPClient', () => {
 	});
 
 	test('sendChatMessage should send a message', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.sendChatMessage(room.id, 'Hello, world!');
 
@@ -102,13 +96,11 @@ describe('XMPPClient', () => {
 	test('sendChatMessage to a placeholder should create a room', () => {
 		const spyOnAddRoom = vi.spyOn(api, 'replacePlaceholderRoom');
 		spyOnAddRoom.mockImplementation(() => Promise.resolve(createMockRoom({ id: 'roomId123' })));
-		const xmppClient = new XMPPClient();
 		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');
 		expect(spyOnAddRoom).toHaveBeenCalledTimes(1);
 	});
 
 	test('sendChatMessageReaction', () => {
-		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.sendChatMessageReaction(room.id, 'stanzaId-test', '\uD83D\uDC4D');
 		expect(spyOnXmppSend).toHaveBeenCalledWith({
@@ -119,7 +111,6 @@ describe('XMPPClient', () => {
 
 	describe('History methods', () => {
 		test('history requests are not called for a unknown room', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			xmppClient.requestHistory('unknownId', dateToTimestamp('2024-03-12'), 10);
 			xmppClient.requestMessageSubjectOfReply('unknownId', 'messageId1', 'messageId2');
@@ -129,7 +120,6 @@ describe('XMPPClient', () => {
 		});
 
 		test('requestHistory should start retrieve history from creation date', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			xmppClient.requestHistory(room.id, 300, 50);
 			const stanza = getStanzaFromSpy(spyOnXmppSend);
@@ -138,7 +128,6 @@ describe('XMPPClient', () => {
 		});
 
 		test('requestHistory should start retrieve history from cleared history date', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			useStore.getState().clearConversation(room.id, dateToISODate(200));
 			xmppClient.requestHistory(room.id, 300, 50);
@@ -152,7 +141,6 @@ describe('XMPPClient', () => {
 		test('avoid requesting message subject of reply when message is already into store', () => {
 			const message = createMockTextMessage({ roomId: room.id });
 			useStore.getState().newMessage(message);
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 
 			xmppClient.requestMessageSubjectOfReply(room.id, message.id, 'messageId2');
@@ -160,7 +148,6 @@ describe('XMPPClient', () => {
 		});
 
 		test('fullTextSearch should have correct attributes', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			xmppClient.fullTextSearch(room.id, 'test');
 			const stanza = getStanzaFromSpy(spyOnXmppSend);
@@ -169,7 +156,6 @@ describe('XMPPClient', () => {
 		});
 
 		test('requestHistoryBetweenTwoDates should have correct attributes', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			xmppClient.requestHistoryBetweenTwoDates(room.id, 200, 300);
 			const stanza = getStanzaFromSpy(spyOnXmppSend);
@@ -179,7 +165,6 @@ describe('XMPPClient', () => {
 		});
 
 		test('requestMessageResultHistoryToId should have correct attributes', () => {
-			const xmppClient = new XMPPClient();
 			const spyOnXmppSend = vi.spyOn(xmppClient.xmppConnection, 'send');
 			xmppClient.requestMessageResultHistoryToId(room.id, 'stanzaId-1');
 			const stanza = getStanzaFromSpy(spyOnXmppSend);

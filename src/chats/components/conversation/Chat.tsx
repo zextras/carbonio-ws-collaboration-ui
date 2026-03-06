@@ -31,8 +31,8 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 
@@ -48,7 +48,6 @@ type ChatsProps = {
 
 const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
-	const xmppClient = useStore(getXmppClient);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
@@ -137,7 +136,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 
 	useEffect(() => {
 		xmppClient.getMessagePin(roomId);
-	}, [roomId, xmppClient]);
+	}, [roomId]);
 
 	return (
 		<CustomContainer

@@ -34,12 +34,12 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { addRoomAttachment } from '../../../../network';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -83,8 +83,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	textMessage,
 	setTextMessage
 }) => {
-	const xmppClient = useStore(getXmppClient);
-
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
 	const sendMessageLabel = t('tooltip.sendMessage', 'Send message');
@@ -239,7 +237,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		sendThrottleIsWriting.cancel();
 		sendDebouncedPause.cancel();
 		xmppClient.sendPaused(roomId);
-	}, [sendThrottleIsWriting, sendDebouncedPause, xmppClient, roomId]);
+	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -281,7 +279,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage, xmppClient]
+		[roomId, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
@@ -333,7 +331,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		xmppClient,
 		roomId,
 		textMessage,
 		sendStopWriting,

@@ -10,11 +10,11 @@ import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { clearRoomHistory } from '../../../../network';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getLastTextMessageIdSelector,
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
 
 type ClearHistoryModalProps = {
@@ -39,7 +39,6 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear history');
 	const closeLabel = t('action.close', 'Close');
 
-	const xmppClient = useStore(getXmppClient);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastTextMessageId: string | undefined = useStore((state) =>
 		getLastTextMessageIdSelector(state, roomId)
@@ -53,7 +52,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 			successfulSnackbar();
 			closeModal();
 		});
-	}, [closeModal, lastTextMessageId, roomId, successfulSnackbar, unreadMessagesCount, xmppClient]);
+	}, [closeModal, lastTextMessageId, roomId, successfulSnackbar, unreadMessagesCount]);
 
 	return (
 		<Modal

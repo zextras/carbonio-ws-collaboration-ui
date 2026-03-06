@@ -10,6 +10,7 @@ import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 
 /**
  * INBOX (XEP-0430)
@@ -25,7 +26,6 @@ export function onInboxMessageStanza(message: Element): true {
 
 	if (inboxMessage) {
 		const store = useStore.getState();
-		const { xmppClient } = store.connections;
 		xmppClient.lastMarkers(inboxMessage.roomId);
 
 		// Request history to count the real number of unread messages

@@ -14,6 +14,7 @@ import {
 import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 
 describe('XMPP inboxMessageHandler tests', () => {
 	test('Text message inbox arrives', () => {
@@ -24,7 +25,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 			messageId: message.id,
 			unread: 0
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		const textMessage = HistoryAccumulator.getInboxMessages('queryId')[0] as TextMessage;
 		expect(textMessage.id).toBe(message.id);
@@ -34,33 +35,27 @@ describe('XMPP inboxMessageHandler tests', () => {
 	});
 
 	test('Conversation has some unread', () => {
-		const spyOnRequestHistory = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestHistory'
-		);
+		const spyOnRequestHistory = vi.spyOn(xmppClient, 'requestHistory');
 
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = buildTextMessageFromInbox({
 			roomId: message.roomId,
 			unread: 5
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		expect(spyOnRequestHistory).toHaveBeenCalled();
 	});
 
 	test('Inbox message is a replied one', () => {
-		const spyOnRequestRepliedMessage = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageSubjectOfReply'
-		);
+		const spyOnRequestRepliedMessage = vi.spyOn(xmppClient, 'requestMessageSubjectOfReply');
 
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = buildReplyMessageFromInbox({
 			roomId: message.roomId,
 			replyToStanzaId: '1234'
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		expect(spyOnRequestRepliedMessage).toHaveBeenCalledTimes(1);
 	});
@@ -73,7 +68,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 			originalStanzaId: message.stanzaId,
 			reaction: '👍'
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		const fastenings =
 			useStore.getState().chatsRegistry[message.roomId].fastenings[message.stanzaId];

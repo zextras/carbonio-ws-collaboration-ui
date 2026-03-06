@@ -20,12 +20,12 @@ import { useTranslation } from 'react-i18next';
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreview from '../../../../../hooks/usePreview';
 import { deleteAttachment, getURLAttachment } from '../../../../../network';
+import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -42,8 +42,6 @@ const useBubbleContextualMenuDropDown = (
 	menuDropdownActive: boolean;
 	menuDropdownRef: React.RefObject<HTMLDivElement>;
 } => {
-	const xmppClient = useStore(getXmppClient);
-
 	const [t] = useTranslation();
 	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
 	const copyActionLabel = t('action.copy', 'Copy');
@@ -120,7 +118,7 @@ const useBubbleContextualMenuDropDown = (
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.stanzaId, message.attachment, message.roomId, xmppClient]);
+	}, [message.stanzaId, message.attachment, message.roomId]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

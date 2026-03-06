@@ -156,7 +156,6 @@ class XMPPClient {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
 			replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
-				console.log(response.id);
 				this.sendChatMessage(response.id, message);
 			});
 			return;
@@ -648,4 +647,4 @@ class XMPPClient {
 	}
 }
 
-export default XMPPClient;
+export const xmppClient = new XMPPClient();

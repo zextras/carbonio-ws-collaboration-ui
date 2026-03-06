@@ -12,6 +12,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
 import * as api from '../../../../network/apis/RoomsApi';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -324,7 +325,7 @@ describe('ConversationFooter', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
-		const spySendChatMessageReply = vi.spyOn(store.connections.xmppClient, 'sendChatMessageReply');
+		const spySendChatMessageReply = vi.spyOn(xmppClient, 'sendChatMessageReply');
 		const textToSend = 'hi!';
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -345,10 +346,7 @@ describe('ConversationFooter', () => {
 	});
 
 	test('User can edit a message and send it', async () => {
-		const spySendChatMessageEdit = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessageEdit'
-		);
+		const spySendChatMessageEdit = vi.spyOn(xmppClient, 'sendChatMessageEdit');
 		const store = useStore.getState();
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -737,7 +735,7 @@ describe('Paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendIsWriting is called immediately when user start writing', async () => {
-		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, 'Hi');
@@ -745,7 +743,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendIsWriting is called every 3 seconds', async () => {
-		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
@@ -765,7 +763,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
-		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
 
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
@@ -776,7 +774,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
-		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 

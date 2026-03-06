@@ -30,6 +30,7 @@ import {
 } from '../../utils/FetchUtils';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { xmppClient } from '../xmpp/XMPPClient';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -50,7 +51,6 @@ export const addRoom = async (room: RoomCreationFields): Promise<RoomBe> =>
 		const meetingType =
 			room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
 		await createMeeting(response.id, meetingType, response.name ?? '');
-		console.log(response.id);
 		return response;
 	});
 
@@ -182,12 +182,11 @@ export const addRoomAttachment = (
 		);
 	}
 
-	const { connections, setPlaceholderMessage } = useStore.getState();
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) connections.xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
-	setPlaceholderMessage({
+	useStore.getState().setPlaceholderMessage({
 		roomId,
 		id: uuid,
 		text: optionalFields.description ?? '',
@@ -239,7 +238,6 @@ export const forwardMessages = (
 	roomsId: string[],
 	messages: TextMessage[]
 ): Promise<Response[]> => {
-	const { xmppClient } = useStore.getState().connections;
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {

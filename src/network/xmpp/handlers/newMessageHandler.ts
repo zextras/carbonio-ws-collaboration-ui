@@ -16,6 +16,7 @@ import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
+import { xmppClient } from '../XMPPClient';
 
 export function onNewMessageStanza(message: Element): true {
 	if (getTagElement(message, 'result') != null) return true;
@@ -24,7 +25,6 @@ export function onNewMessageStanza(message: Element): true {
 	if (!newMessage) return true;
 
 	const store = useStore.getState();
-	const { xmppClient } = store.connections;
 	const sessionId: string | undefined = useStore.getState().session.id;
 
 	switch (newMessage.type) {
