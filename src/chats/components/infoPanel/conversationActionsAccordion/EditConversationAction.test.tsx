@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -68,7 +68,7 @@ describe('Edit conversation action', () => {
 	});
 
 	test('edit conversation', async () => {
-		const spyOnUpdateRoom = vi.spyOn(roomsApi, 'updateRoom');
+		const spyOnUpdateRoom = vi.spyOn(api, 'updateRoom');
 		spyOnUpdateRoom.mockRejectedValueOnce('Not edited');
 
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);

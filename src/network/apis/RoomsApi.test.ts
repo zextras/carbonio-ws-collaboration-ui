@@ -4,7 +4,30 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import roomsApi from './RoomsApi';
+import {
+	addRoom,
+	addRoomAttachment,
+	addRoomMembers,
+	clearRoomHistory,
+	deleteRoom,
+	deleteRoomAndMeeting,
+	deleteRoomMember,
+	deleteRoomPicture,
+	demotesRoomMember,
+	forwardMessages,
+	getRoom,
+	getRoomAttachments,
+	getRoomMembers,
+	getRoomPicture,
+	getURLRoomPicture,
+	listRooms,
+	muteRoomNotification,
+	promoteRoomMember,
+	replacePlaceholderRoom,
+	unmuteRoomNotification,
+	updateRoom,
+	updateRoomPicture
+} from './RoomsApi';
 import useStore from '../../store/Store';
 import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import {
@@ -13,7 +36,6 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import {
@@ -22,7 +44,9 @@ import {
 	mockUploadFileFetchAPI
 } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RequestType } from '../../utils/FetchUtils';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { xmppClient } from '../xmpp/XMPPClient';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -37,7 +61,7 @@ describe('Rooms API', () => {
 		// Send listRooms request
 		const room = createMockRoom({ id: 'room0' });
 		mockFetchAPI.mockResolvedValueOnce([room]);
-		await roomsApi.listRooms(true, true);
+		await listRooms(true, true);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			'rooms?extraFields=members&extraFields=settings',
@@ -58,7 +82,7 @@ describe('Rooms API', () => {
 			members: []
 		};
 
-		await roomsApi.addRoom(roomToAdd);
+		await addRoom(roomToAdd);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms', RequestType.POST, roomToAdd);
 		expect(mockFetchAPI).toHaveBeenLastCalledWith('meetings', RequestType.POST, {
@@ -71,7 +95,7 @@ describe('Rooms API', () => {
 		// Send getRoom request
 		const room = createMockRoom({ id: 'room0' });
 		mockFetchAPI.mockResolvedValueOnce(room);
-		await roomsApi.getRoom(room.id);
+		await getRoom(room.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/room0', RequestType.GET);
 	});
@@ -80,7 +104,7 @@ describe('Rooms API', () => {
 		// Send updateRoom request
 		const room = createMockRoom({ id: 'room0', name: 'new name' });
 		mockFetchAPI.mockResolvedValueOnce(room);
-		await roomsApi.updateRoom(room.id, { name: 'new name' });
+		await updateRoom(room.id, { name: 'new name' });
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/room0', RequestType.PUT, { name: 'new name' });
 	});
@@ -88,7 +112,7 @@ describe('Rooms API', () => {
 	test('deleteRoom is called correctly', async () => {
 		const room = createMockRoom();
 		// Send deleteRoom request
-		await roomsApi.deleteRoom(room.id);
+		await deleteRoom(room.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${room.id}`, RequestType.DELETE);
 	});
@@ -96,7 +120,7 @@ describe('Rooms API', () => {
 	test('deleteRoomAndMeeting without an associated meeting is called correctly', async () => {
 		const room = createMockRoom();
 		// Send deleteRoom request
-		await roomsApi.deleteRoomAndMeeting(room.id);
+		await deleteRoomAndMeeting(room.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${room.id}`, RequestType.DELETE);
 	});
@@ -106,7 +130,7 @@ describe('Rooms API', () => {
 		const meeting = createMockMeeting({ roomId: room.id });
 		useStore.getState().addMeetings([meeting]);
 		// Send deleteRoom request
-		await roomsApi.deleteRoomAndMeeting(room.id);
+		await deleteRoomAndMeeting(room.id);
 
 		expect(mockFetchAPI).toHaveBeenNthCalledWith(1, `meetings/${meeting.id}`, RequestType.DELETE);
 		expect(mockFetchAPI).toHaveBeenNthCalledWith(2, `rooms/${room.id}`, RequestType.DELETE);
@@ -114,14 +138,14 @@ describe('Rooms API', () => {
 
 	test('getURLRoomPicture is called correctly', () => {
 		const room = createMockRoom({ id: roomId, name: 'new name' });
-		const url = roomsApi.getURLRoomPicture(room.id);
+		const url = getURLRoomPicture(room.id);
 
 		expect(url).toEqual(`http://localhost/services/chats/rooms/${roomId}/picture`);
 	});
 
 	test('getRoomPicture is called correctly', async () => {
 		// Send getUserPicture request
-		await roomsApi.getRoomPicture('roomId');
+		await getRoomPicture('roomId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/picture`, RequestType.GET);
 	});
@@ -130,7 +154,7 @@ describe('Rooms API', () => {
 		mockUploadFileFetchAPI.mockResolvedValue(true);
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
-		await roomsApi.updateRoomPicture(roomId, testFile);
+		await updateRoomPicture(roomId, testFile);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -152,43 +176,41 @@ describe('Rooms API', () => {
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 * 3 });
 
-		await expect(roomsApi.updateRoomPicture(roomId, testFile)).rejects.toThrowError(
-			'File too large'
-		);
+		await expect(updateRoomPicture(roomId, testFile)).rejects.toThrowError('File too large');
 		expect(mockFetchAPI).not.toHaveBeenCalled();
 	});
 
 	test('deleteRoomPicture is called correctly', async () => {
 		// Send deleteRoomPicture request
-		await roomsApi.deleteRoomPicture(roomId);
+		await deleteRoomPicture(roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/picture`, RequestType.DELETE);
 	});
 
 	test('muteRoomNotification is called correctly', async () => {
 		// Send muteRoomNotification request
-		await roomsApi.muteRoomNotification(roomId);
+		await muteRoomNotification(roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/mute`, RequestType.PUT);
 	});
 
 	test('unmuteRoomNotification is called correctly', async () => {
 		// Send unmuteRoomNotification request
-		await roomsApi.unmuteRoomNotification(roomId);
+		await unmuteRoomNotification(roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/mute`, RequestType.DELETE);
 	});
 
 	test('clearRoomHistory is called correctly', async () => {
 		// Send clearRoomHistory request
-		await roomsApi.clearRoomHistory(roomId);
+		await clearRoomHistory(roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/clear`, RequestType.PUT);
 	});
 
 	test('getRoomMembers is called correctly', async () => {
 		// Send getRoomMembers request
-		await roomsApi.getRoomMembers(roomId);
+		await getRoomMembers(roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/members`, RequestType.GET);
 	});
@@ -202,14 +224,14 @@ describe('Rooms API', () => {
 				historyCleared: true
 			}
 		];
-		await roomsApi.addRoomMembers(roomId, member);
+		await addRoomMembers(roomId, member);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/${roomId}/members`, RequestType.POST, member);
 	});
 
 	test('deleteRoomMember is called correctly', async () => {
 		// Send deleteRoomMember request
-		await roomsApi.deleteRoomMember(roomId, 'userId');
+		await deleteRoomMember(roomId, 'userId');
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -220,7 +242,7 @@ describe('Rooms API', () => {
 
 	test('promoteRoomMember is called correctly', async () => {
 		// Send promoteRoomMember request
-		await roomsApi.promoteRoomMember(roomId, 'userId');
+		await promoteRoomMember(roomId, 'userId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`rooms/${roomId}/members/userId/owner`,
@@ -230,7 +252,7 @@ describe('Rooms API', () => {
 
 	test('demotesRoomMember is called correctly', async () => {
 		// Send demotesRoomMember request
-		await roomsApi.demotesRoomMember('roomId', 'userId');
+		await demotesRoomMember('roomId', 'userId');
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -244,14 +266,14 @@ describe('Rooms API', () => {
 
 	test('getRoomAttachments is called correctly', async () => {
 		// Send getRoomAttachments request
-		await roomsApi.getRoomAttachments('roomId');
+		await getRoomAttachments('roomId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/attachments`, RequestType.GET);
 	});
 
 	test('getRoomAttachments is called correctly with params', async () => {
 		// Send getRoomAttachments request
-		await roomsApi.getRoomAttachments('roomId', 3, 'filter');
+		await getRoomAttachments('roomId', 3, 'filter');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`rooms/roomId/attachments?itemsNumber=3&extraFields=filter`,
@@ -267,7 +289,7 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
-			await roomsApi.addRoomAttachment(roomId, testFile, { area }, signal);
+			await addRoomAttachment(roomId, testFile, { area }, signal);
 
 			expect(mockUploadFileFetchAPI).toHaveBeenCalledWith(
 				`rooms/${roomId}/attachments`,
@@ -284,7 +306,7 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
-			await roomsApi.addRoomAttachment(
+			await addRoomAttachment(
 				roomId,
 				testFile,
 				{ description: 'description', replyId: 'stanzaId', area },
@@ -312,7 +334,7 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
-			await roomsApi.addRoomAttachment('placeholder-userId', testFile, { area }, signal);
+			await addRoomAttachment('placeholder-userId', testFile, { area }, signal);
 
 			expect(mockFetchAPI).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
 				type: RoomType.ONE_TO_ONE,
@@ -329,7 +351,7 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
-			await roomsApi.addRoomAttachment(roomId, testFile, { area }, signal);
+			await addRoomAttachment(roomId, testFile, { area }, signal);
 
 			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
 				`rooms/${roomId}/attachments`,
@@ -347,7 +369,7 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
-			await roomsApi.addRoomAttachment(
+			await addRoomAttachment(
 				roomId,
 				testFile,
 				{ description: 'description', replyId: 'stanzaId', area },
@@ -370,10 +392,7 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages is called correctly', async () => {
-		vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		).mockImplementation(() => Promise.resolve());
+		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
 		const message = createMockTextMessage();
 		const xmlMessage = buildTextMessageFromHistory({
@@ -384,7 +403,7 @@ describe('Rooms API', () => {
 		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
 		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
 
-		await roomsApi.forwardMessages(['roomId'], [message]);
+		await forwardMessages(['roomId'], [message]);
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
 			{
 				originalMessage: insideMessage.outerHTML,
@@ -394,10 +413,7 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages - edited message - is called correctly', async () => {
-		vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageToForward'
-		).mockImplementation(() => Promise.resolve());
+		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
 		const message = createMockTextMessage({ text: 'edited' });
 		const xmlMessage = buildTextMessageFromHistory({
@@ -408,7 +424,7 @@ describe('Rooms API', () => {
 		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
 		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
 
-		await roomsApi.forwardMessages(['roomId'], [message]);
+		await forwardMessages(['roomId'], [message]);
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
 			{
 				originalMessage: expect.stringContaining(message.text),
@@ -422,7 +438,7 @@ describe('Rooms API', () => {
 		const room = createMockRoom({ id: 'room0' });
 		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		mockFetchAPI.mockResolvedValueOnce(room);
-		await roomsApi.replacePlaceholderRoom('userId', 'text', testFile);
+		await replacePlaceholderRoom('userId', 'text', testFile);
 
 		expect(mockFetchAPI).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
 			type: RoomType.ONE_TO_ONE,

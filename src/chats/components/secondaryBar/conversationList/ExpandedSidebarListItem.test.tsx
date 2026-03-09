@@ -10,6 +10,7 @@ import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
@@ -324,7 +325,7 @@ describe('Expanded sidebar list item', () => {
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
 				onComposingMessageStanza.call(
-					useStore.getState().connections.xmppClient,
+					xmppClient,
 					buildComposingStanza({
 						roomId: mockedGroup.id,
 						from: user4Be.id,
@@ -336,7 +337,7 @@ describe('Expanded sidebar list item', () => {
 			vi.advanceTimersByTime(3000);
 			act(() => {
 				onComposingMessageStanza.call(
-					useStore.getState().connections.xmppClient,
+					xmppClient,
 					buildComposingStanza({
 						roomId: mockedGroup.id,
 						from: user4Be.id,

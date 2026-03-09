@@ -8,7 +8,7 @@ import React, { ReactElement, useCallback, useContext, useEffect, useRef } from 
 import { Button, CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MeetingsApi } from '../../../network';
+import { raiseHand } from '../../../network';
 import {
 	getUserHasHandRaised,
 	getUserIsTalking
@@ -36,12 +36,12 @@ const RaiseHandButton = (): ReactElement | null => {
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const toggleRaiseHand = useCallback(() => {
-		MeetingsApi.raiseHand(meetingId!, !iHaveHandRaised);
+		raiseHand(meetingId!, !iHaveHandRaised);
 	}, [iHaveHandRaised, meetingId]);
 
 	const handleAutoHandDown = useCallback(() => {
 		setTimeout(() => {
-			MeetingsApi.raiseHand(meetingId!, false).then(() => {
+			raiseHand(meetingId!, false).then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'info',

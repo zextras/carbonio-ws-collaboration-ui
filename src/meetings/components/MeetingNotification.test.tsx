@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
+import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
@@ -51,10 +52,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
-		const spyOnSendChatMessage = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessage'
-		);
+		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -70,10 +68,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking Enter', async () => {
-		const spyOnSendChatMessage = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessage'
-		);
+		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}

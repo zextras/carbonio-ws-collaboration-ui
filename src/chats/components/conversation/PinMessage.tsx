@@ -22,6 +22,7 @@ import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
@@ -141,7 +142,6 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		}, 5000);
 
 		if (!isMessageInStore && !isMessageSelected) {
-			const { xmppClient } = useStore.getState().connections;
 			xmppClient
 				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
 				.then(() => {

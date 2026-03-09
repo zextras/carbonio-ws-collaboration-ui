@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import useMediaDevices from '../../../hooks/useMediaDevices';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import MeetingsApi from '../../../network/apis/MeetingsApi';
+import { updateAudioStreamStatus, updateMediaOffer } from '../../../network';
 import {
 	getNameOfFirstTalkingUser,
 	getSelectedAudioDeviceId,
@@ -83,7 +83,7 @@ const PictureInPictureView = (): ReactElement => {
 				getAudioStream(selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
+							updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
@@ -91,7 +91,7 @@ const PictureInPictureView = (): ReactElement => {
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
+				updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
@@ -108,7 +108,7 @@ const PictureInPictureView = (): ReactElement => {
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
+								.then(() => updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							console.log(e);

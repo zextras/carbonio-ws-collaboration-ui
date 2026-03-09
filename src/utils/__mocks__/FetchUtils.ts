@@ -16,3 +16,10 @@ export const uploadFileFetchAPI = mockUploadFileFetchAPI;
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
+
+export enum RequestType {
+	GET = 'GET',
+	POST = 'POST',
+	PUT = 'PUT',
+	DELETE = 'DELETE'
+}

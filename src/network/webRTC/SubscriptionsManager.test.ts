@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
@@ -23,6 +22,7 @@ import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/ws
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
 import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
+import { RequestType } from '../../utils/FetchUtils';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info: User = createMockUser({

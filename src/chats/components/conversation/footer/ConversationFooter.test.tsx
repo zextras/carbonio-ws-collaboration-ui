@@ -11,8 +11,8 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -29,6 +29,7 @@ import { Message } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
 
 const iconNavigator2 = 'icon: Navigation2';
@@ -324,7 +325,7 @@ describe('ConversationFooter', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
-		const spySendChatMessageReply = vi.spyOn(store.connections.xmppClient, 'sendChatMessageReply');
+		const spySendChatMessageReply = vi.spyOn(xmppClient, 'sendChatMessageReply');
 		const textToSend = 'hi!';
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -345,10 +346,7 @@ describe('ConversationFooter', () => {
 	});
 
 	test('User can edit a message and send it', async () => {
-		const spySendChatMessageEdit = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessageEdit'
-		);
+		const spySendChatMessageEdit = vi.spyOn(xmppClient, 'sendChatMessageEdit');
 		const store = useStore.getState();
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -406,8 +404,8 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
-		const spyOnGetImageSize = vi.spyOn(attachmentsApi, 'getImageSize');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
+		const spyOnGetImageSize = vi.spyOn(attachmentUtils, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -430,7 +428,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -450,7 +448,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(roomsApi, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 
@@ -737,7 +735,7 @@ describe('Paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendIsWriting is called immediately when user start writing', async () => {
-		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, 'Hi');
@@ -745,7 +743,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendIsWriting is called every 3 seconds', async () => {
-		const spySendIsWriting = vi.spyOn(useStore.getState().connections.xmppClient, 'sendIsWriting');
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
@@ -765,7 +763,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
-		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
 
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
@@ -776,7 +774,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
-		const spySendPaused = vi.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 

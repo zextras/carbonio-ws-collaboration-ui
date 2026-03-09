@@ -8,7 +8,7 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { RoomsApi } from '../index';
+import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
@@ -155,7 +155,7 @@ class XMPPClient {
 	sendChatMessage(roomId: string, message: string): void {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
-			RoomsApi.replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
+			replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
 				this.sendChatMessage(response.id, message);
 			});
 			return;
@@ -647,4 +647,4 @@ class XMPPClient {
 	}
 }
 
-export default XMPPClient;
+export const xmppClient = new XMPPClient();

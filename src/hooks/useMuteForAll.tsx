@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MeetingsApi } from '../network';
+import { updateAudioStreamStatus } from '../network';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -49,7 +49,7 @@ const useMuteForAll = (
 
 	const muteForAll = useCallback(() => {
 		if (meetingId !== undefined && participantAudioStatus) {
-			MeetingsApi.updateAudioStreamStatus(meetingId, false, userIdToMute).catch(() => {
+			updateAudioStreamStatus(meetingId, false, userIdToMute).catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'error',

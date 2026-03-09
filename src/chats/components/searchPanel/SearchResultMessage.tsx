@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
@@ -59,7 +60,6 @@ const SearchResultMessage = ({
 	const onResultClick = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
-			const { xmppClient } = useStore.getState().connections;
 			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
 				scrollToMessage(message.id);
 				useStore.getState().setScrollPosition(message.roomId, message.id);

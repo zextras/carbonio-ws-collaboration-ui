@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useMediaDevices from '../../../hooks/useMediaDevices';
-import { MeetingsApi } from '../../../network';
+import { updateAudioStreamStatus } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -96,7 +96,7 @@ const MicrophoneButton = ({
 				getAudioStream(selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
+							updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
@@ -104,7 +104,7 @@ const MicrophoneButton = ({
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
+				updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]

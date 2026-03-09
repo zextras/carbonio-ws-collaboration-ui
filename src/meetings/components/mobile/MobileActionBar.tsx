@@ -9,7 +9,7 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 import { Button, Container } from '@zextras/carbonio-design-system';
 
 import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
+import { leaveMeeting, updateAudioStreamStatus } from '../../../network';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -34,18 +34,17 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		if (!audioStatus) {
 			getAudioStream().then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+					updateAudioStreamStatus(meetingId, !audioStatus);
 				});
 			});
 		} else {
 			bidirectionalAudioConn?.closeRtpSenderTrack();
-			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+			updateAudioStreamStatus(meetingId, !audioStatus);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);
 
-	const leaveMeeting = useCallback(
-		() =>
-			MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED)),
+	const leaveMeetingAction = useCallback(
+		() => leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED)),
 		[meetingId, goToInfoPage]
 	);
 
@@ -76,7 +75,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 				onClick={toggleChatView}
 			/>
 			<Button size="large" icon={audioStatus ? 'Mic' : 'MicOff'} onClick={toggleAudioStream} />
-			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeeting} />
+			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeetingAction} />
 		</Container>
 	);
 };

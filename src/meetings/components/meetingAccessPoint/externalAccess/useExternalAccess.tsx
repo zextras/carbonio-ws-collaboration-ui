@@ -11,7 +11,9 @@ import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
+import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
+import { wsClient } from '../../../../network/websocket/WebSocketClient';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -43,7 +45,7 @@ const useExternalAccess = (): {
 
 	useEffect(() => {
 		const meetingId = window.location.pathname.split(MEETINGS_PATH)[1];
-		MeetingsApi.getScheduledMeetingName(meetingId)
+		getScheduledMeetingName(meetingId)
 			.then((resp) => {
 				setMeetingName(resp.name);
 			})
@@ -52,17 +54,16 @@ const useExternalAccess = (): {
 			});
 	}, [goToInfoPage]);
 
-	const createGuestAccount = useCallback(
+	const createGuestAccountAction = useCallback(
 		(guestName: string) => {
 			const { setLoginInfo, setChatsBeStatus, setAttributes } = useStore.getState();
-			MeetingsApi.createGuestAccount(guestName)
+			createGuestAccount(guestName)
 				.then((res) => {
 					document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 					document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
 					setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
 
 					setChatsBeStatus(true);
-					const { xmppClient, wsClient } = useStore.getState().connections;
 					xmppClient.connect(res.zmToken);
 					wsClient.connect();
 
@@ -86,6 +87,6 @@ const useExternalAccess = (): {
 		[createSnackbar, generalErrorSnackbar]
 	);
 
-	return { meetingName, createGuestAccount };
+	return { meetingName, createGuestAccount: createGuestAccountAction };
 };
 export default useExternalAccess;

@@ -11,7 +11,7 @@ import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
+import { enterMeeting, joinMeeting, leaveWaitingRoom } from '../../../network';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -45,7 +45,7 @@ const useAccessMeeting = (
 
 	const handleEnterMeeting = useCallback(() => {
 		const roomId = getRoomIdByMeetingId(useStore.getState(), meetingId) ?? '';
-		MeetingsApi.enterMeeting(
+		enterMeeting(
 			roomId,
 			{
 				videoStreamEnabled: mediaStatus.video.enabled,
@@ -64,7 +64,7 @@ const useAccessMeeting = (
 	}, [meetingId, mediaStatus, enableDarkReader, goToMeetingPage]);
 
 	const handleWaitingRoom = useCallback(() => {
-		MeetingsApi.joinMeeting(
+		joinMeeting(
 			meetingId,
 			{
 				videoStreamEnabled: mediaStatus.video.enabled,
@@ -107,7 +107,7 @@ const useAccessMeeting = (
 
 	const handleLeave = useCallback(() => {
 		if (userIsReady) {
-			MeetingsApi.leaveWaitingRoom(meetingId);
+			leaveWaitingRoom(meetingId);
 		}
 		if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();

@@ -15,7 +15,9 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { MeetingsApi, RoomsApi, InfoApi } from './network';
+import { getToken, listMeetings, listRooms } from './network';
+import { wsClient } from './network/websocket/WebSocketClient';
+import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -51,13 +53,12 @@ export default function MainApp(): React.JSX.Element {
 
 	// NETWORKS: init XMPP and WebSocket clients
 	const connect = useCallback(() => {
-		InfoApi.getToken()
+		getToken()
 			.then((resp) => {
-				Promise.all([RoomsApi.listRooms(true, true), MeetingsApi.listMeetings()])
+				Promise.all([listRooms(true, true), listMeetings()])
 					.then(() => {
 						setChatsBeStatus(true);
 						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						const { xmppClient, wsClient } = useStore.getState().connections;
 						xmppClient.connect(resp.zmToken);
 						wsClient.connect();
 					})
