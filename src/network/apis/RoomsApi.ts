@@ -80,7 +80,7 @@ export const getRoomPicture = (roomId: string): Promise<Blob> =>
 export const updateRoomPicture = (roomId: string, file: File): Promise<Response> =>
 	new Promise((resolve, reject) => {
 		const sizeLimit = useStore.getState().session.attributes?.maxRoomPictureSize;
-		if (sizeLimit !== undefined && file.size > sizeLimit * 1024 * 1024) {
+		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 			reject(new Error('File too large'));
 		} else {
 			uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
@@ -203,7 +203,7 @@ export const addRoomAttachment = (
 	return new Promise<{ id: string }>((resolve, reject) => {
 		const { session, removePlaceholderMessage } = useStore.getState();
 		const sizeLimit = session.attributes?.maxAttachmentSize;
-		if (sizeLimit !== undefined && file.size > sizeLimit * 1024 * 1024) {
+		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 			removePlaceholderMessage(roomId, uuid);
 			reject(new Error('file_too_large'));
 		} else {
