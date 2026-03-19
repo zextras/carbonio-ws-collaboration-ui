@@ -74,6 +74,15 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_ATTRS'
 		);
 	},
+	setCapabilities: (capabilities: AttributesList): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.attributes = capabilities;
+			}),
+			false,
+			'SESSION/SET_CAPABILITIES'
+		);
+	},
 	setQueueId: (queueId: string): void => {
 		set(
 			produce((draft: RootStore) => {

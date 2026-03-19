@@ -13,6 +13,7 @@ export type SessionStoreSlice = {
 	session: Session;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
 	setAttributes: (attrs: AccountSettings['attrs']) => void;
+	setCapabilities: (capabilities: AttributesList) => void;
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string) => void;
