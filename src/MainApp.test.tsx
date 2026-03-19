@@ -62,4 +62,43 @@ describe('Entry point', () => {
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
+
+	test('getCapabilities is called when API version >= 1.6.8', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({
+			privateChatCreation: true,
+			groupChatCreation: true,
+			maxGroupMembers: 32,
+			messageDeleteTimeLimit: 5,
+			messageEditTimeLimit: 5,
+			maxRoomPictureSize: 2,
+			attachmentUpload: true,
+			maxAttachmentSize: 2,
+			showMessageReads: true,
+			showUsersPresence: true,
+			videoCallEnabled: true,
+			recordingEnabled: true,
+			virtualBackgroundEnabled: true
+		});
+		setup(<MainApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(getCapabilitiesSpy).toHaveBeenCalled();
+	});
+
+	test('setAttributes is called when API version < 1.6.8', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities');
+		setup(<MainApp />);
+		useStore.getState().setApiVersion('1.6.7');
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(getCapabilitiesSpy).not.toHaveBeenCalled();
+		expect(useStore.getState().session.attributes).toBeDefined();
+	});
 });

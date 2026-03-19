@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { ExportStatus, Version } from '../../types/store/SessionTypes';
+import { AttributesList, ExportStatus, Version } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 import useStore from '../Store';
 
@@ -119,6 +119,26 @@ describe('SessionStoreSlice tests', () => {
 				carbonioWscMaxGroupMembers: '2'
 			});
 			expect(useStore.getState().session.attributes?.groupChatCreation).toBe(false);
+		});
+
+		test('setCapabilities sets attributes directly', () => {
+			const capabilities: AttributesList = {
+				privateChatCreation: true,
+				groupChatCreation: false,
+				maxGroupMembers: 16,
+				messageDeleteTimeLimit: 10,
+				messageEditTimeLimit: 10,
+				maxRoomPictureSize: 5,
+				attachmentUpload: true,
+				maxAttachmentSize: 50,
+				showMessageReads: false,
+				showUsersPresence: true,
+				videoCallEnabled: true,
+				recordingEnabled: false,
+				virtualBackgroundEnabled: true
+			};
+			useStore.getState().setCapabilities(capabilities);
+			expect(useStore.getState().session.attributes).toStrictEqual(capabilities);
 		});
 	});
 
