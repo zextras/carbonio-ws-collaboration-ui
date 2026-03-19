@@ -7,7 +7,7 @@ This document tracks internal changes related to API versioning, renamed events,
 - **API**: New `GET /users/capabilities` endpoint to retrieve user capabilities directly from WSC (replaces LDAP/Mailbox lookup for clients >= 1.6.8)
 
 ### Affected Files
-- 'src/network/apis/UsersApi.ts' on function `getCapabilities`
+- 'src/network/apis/InfoApi.ts' on function `getCapabilities`
 - 'src/store/slices/SessionStoreSlice.ts' on function `setCapabilities`
 - 'src/MainApp.tsx'
 
