@@ -69,7 +69,9 @@ export default function MainApp(): React.JSX.Element {
 					.then(() => {
 						const version = useStore.getState().session.apiVersion;
 						if (version && gte(version, '1.6.8')) {
-							getCapabilities();
+							getCapabilities().catch(() => {
+								setAttributes(attrs);
+							});
 						} else {
 							setAttributes(attrs);
 						}
