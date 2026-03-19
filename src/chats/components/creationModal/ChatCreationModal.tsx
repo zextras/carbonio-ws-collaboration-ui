@@ -53,8 +53,10 @@ const ChatCreationModal = ({
 	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
-	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreation'));
+	const privateChatCreation = useStore((store) =>
+		getAttribute(store, 'privateChatCreationEnabled')
+	);
+	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreationEnabled'));
 	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);

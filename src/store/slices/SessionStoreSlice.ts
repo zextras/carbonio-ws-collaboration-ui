@@ -49,8 +49,8 @@ export const useSessionStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
 				draft.session.attributes = {
-					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
-					groupChatCreation:
+					privateChatCreationEnabled: attrs.carbonioWscPrivateChatCreation === 'TRUE',
+					groupChatCreationEnabled:
 						attrs.carbonioWscGroupChatCreation === 'TRUE' &&
 						Number(attrs.carbonioWscMaxGroupMembers || 0) > 2,
 					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
@@ -61,7 +61,7 @@ export const useSessionStoreSlice: StateCreator<
 						(attrs.carbonioWscMessageEditTimeLimit as string) || '0m'
 					),
 					maxRoomPictureSize: Number(attrs.carbonioWscMaxRoomPictureSize || 0),
-					attachmentUpload: attrs.carbonioWscAttachmentUpload === 'TRUE',
+					attachmentUploadEnabled: attrs.carbonioWscAttachmentUpload === 'TRUE',
 					maxAttachmentSize: Number(attrs.carbonioWscMaxAttachmentSize || 0),
 					showMessageReads: attrs.carbonioWscShowMessageReads === 'TRUE',
 					showUsersPresence: attrs.carbonioWscShowUsersPresence === 'TRUE',

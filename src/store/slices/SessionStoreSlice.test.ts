@@ -66,8 +66,8 @@ describe('SessionStoreSlice tests', () => {
 			});
 
 			const { attributes } = useStore.getState().session;
-			expect(attributes?.privateChatCreation).toBe(true);
-			expect(attributes?.attachmentUpload).toBe(true);
+			expect(attributes?.privateChatCreationEnabled).toBe(true);
+			expect(attributes?.attachmentUploadEnabled).toBe(true);
 			expect(attributes?.showMessageReads).toBe(true);
 			expect(attributes?.showUsersPresence).toBe(true);
 			expect(attributes?.videoCallEnabled).toBe(true);
@@ -87,8 +87,8 @@ describe('SessionStoreSlice tests', () => {
 			});
 
 			const { attributes } = useStore.getState().session;
-			expect(attributes?.privateChatCreation).toBe(false);
-			expect(attributes?.attachmentUpload).toBe(false);
+			expect(attributes?.privateChatCreationEnabled).toBe(false);
+			expect(attributes?.attachmentUploadEnabled).toBe(false);
 			expect(attributes?.showMessageReads).toBe(false);
 			expect(attributes?.showUsersPresence).toBe(false);
 			expect(attributes?.videoCallEnabled).toBe(false);
@@ -118,18 +118,18 @@ describe('SessionStoreSlice tests', () => {
 				carbonioWscGroupChatCreation: 'TRUE',
 				carbonioWscMaxGroupMembers: '2'
 			});
-			expect(useStore.getState().session.attributes?.groupChatCreation).toBe(false);
+			expect(useStore.getState().session.attributes?.groupChatCreationEnabled).toBe(false);
 		});
 
 		test('setCapabilities sets attributes directly', () => {
 			const capabilities: AttributesList = {
-				privateChatCreation: true,
-				groupChatCreation: false,
+				privateChatCreationEnabled: true,
+				groupChatCreationEnabled: false,
 				maxGroupMembers: 16,
 				messageDeleteTimeLimit: 10,
 				messageEditTimeLimit: 10,
 				maxRoomPictureSize: 5,
-				attachmentUpload: true,
+				attachmentUploadEnabled: true,
 				maxAttachmentSize: 50,
 				showMessageReads: false,
 				showUsersPresence: true,

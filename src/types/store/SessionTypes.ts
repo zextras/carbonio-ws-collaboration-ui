@@ -46,13 +46,13 @@ export type Session = {
 export type Version = `${number}.${number}.${number}`;
 
 export type AttributesList = {
-	privateChatCreation: boolean;
-	groupChatCreation: boolean;
+	privateChatCreationEnabled: boolean;
+	groupChatCreationEnabled: boolean;
 	maxGroupMembers: number;
 	messageDeleteTimeLimit: number;
 	messageEditTimeLimit: number;
 	maxRoomPictureSize: number;
-	attachmentUpload: boolean;
+	attachmentUploadEnabled: boolean;
 	maxAttachmentSize: number;
 	showMessageReads: boolean;
 	showUsersPresence: boolean;

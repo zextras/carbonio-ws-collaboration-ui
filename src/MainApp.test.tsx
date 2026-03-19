@@ -69,13 +69,13 @@ describe('Entry point', () => {
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({
-			privateChatCreation: true,
-			groupChatCreation: true,
+			privateChatCreationEnabled: true,
+			groupChatCreationEnabled: true,
 			maxGroupMembers: 32,
 			messageDeleteTimeLimit: 5,
 			messageEditTimeLimit: 5,
 			maxRoomPictureSize: 2,
-			attachmentUpload: true,
+			attachmentUploadEnabled: true,
 			maxAttachmentSize: 2,
 			showMessageReads: true,
 			showUsersPresence: true,
