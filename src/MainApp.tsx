@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
+import { gte } from 'semver';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -15,7 +16,7 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { getToken, listMeetings, listRooms } from './network';
+import { getCapabilities, getToken, listMeetings, listRooms } from './network';
 import { wsClient } from './network/websocket/WebSocketClient';
 import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
@@ -34,7 +35,17 @@ export default function MainApp(): React.JSX.Element {
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setSupportedVersions(['1.6.7', '1.6.6', '1.6.5', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
+		setSupportedVersions([
+			'1.6.8',
+			'1.6.7',
+			'1.6.6',
+			'1.6.5',
+			'1.6.4',
+			'1.6.3',
+			'1.6.2',
+			'1.6.1',
+			'1.6.0'
+		]);
 	}, [setSupportedVersions]);
 
 	// STORE: init with user session main infos
@@ -42,9 +53,8 @@ export default function MainApp(): React.JSX.Element {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
 			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
-			setAttributes(attrs);
 		}
-	}, [setLoginInfo, authenticated, setAttributes, attrs]);
+	}, [setLoginInfo, authenticated]);
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
@@ -57,6 +67,14 @@ export default function MainApp(): React.JSX.Element {
 			.then((resp) => {
 				Promise.all([listRooms(true, true), listMeetings()])
 					.then(() => {
+						const version = useStore.getState().session.apiVersion;
+						if (version && gte(version, '1.6.8')) {
+							getCapabilities().catch(() => {
+								setAttributes(attrs);
+							});
+						} else {
+							setAttributes(attrs);
+						}
 						setChatsBeStatus(true);
 						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 						xmppClient.connect(resp.zmToken);
@@ -67,7 +85,7 @@ export default function MainApp(): React.JSX.Element {
 			.catch(() => {
 				setChatsBeStatus(false);
 			});
-	}, [setChatsBeStatus]);
+	}, [setChatsBeStatus, setAttributes, attrs]);
 
 	useEffect(() => {
 		if (authenticated) {

@@ -61,7 +61,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const attachmentUpload = useStore((store) => getAttribute(store, 'attachmentUpload'));
+	const attachmentUpload = useStore((store) => getAttribute(store, 'attachmentUploadEnabled'));
 
 	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
 		useIntegratedFunction('select-nodes');

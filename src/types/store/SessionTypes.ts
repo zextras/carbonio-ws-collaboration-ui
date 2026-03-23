@@ -13,6 +13,7 @@ export type SessionStoreSlice = {
 	session: Session;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
 	setAttributes: (attrs: AccountSettings['attrs']) => void;
+	setCapabilities: (capabilities: AttributesList) => void;
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string) => void;
@@ -45,13 +46,13 @@ export type Session = {
 export type Version = `${number}.${number}.${number}`;
 
 export type AttributesList = {
-	privateChatCreation: boolean;
-	groupChatCreation: boolean;
+	privateChatCreationEnabled: boolean;
+	groupChatCreationEnabled: boolean;
 	maxGroupMembers: number;
 	messageDeleteTimeLimit: number;
 	messageEditTimeLimit: number;
 	maxRoomPictureSize: number;
-	attachmentUpload: boolean;
+	attachmentUploadEnabled: boolean;
 	maxAttachmentSize: number;
 	showMessageReads: boolean;
 	showUsersPresence: boolean;
