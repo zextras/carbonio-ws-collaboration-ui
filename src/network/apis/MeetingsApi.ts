@@ -21,6 +21,8 @@ import { BrowserUtils } from '../../utils/BrowserUtils';
 import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 import { deleteRoomMember } from '../index';
+import { PeerConnConfig } from '../webRTC/PeerConnConfig';
+import { fetchTurnIceServers } from '../webRTC/TurnCredentials';
 
 export const listMeetings = (): Promise<MeetingBe[]> =>
 	fetchAPI<MeetingBe[]>(`meetings`, RequestType.GET).then((resp) => {
@@ -67,30 +69,37 @@ export const joinMeeting = (
 		settings
 	).then((resp) => {
 		if (resp.status === 'ACCEPTED') {
-			useStore
-				.getState()
-				.meetingConnection(
-					meetingId,
-					{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
-					{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
-				);
-			return getMeetingByMeetingId(meetingId).then((meeting) => {
-				if (meeting.meetingType === MeetingType.SCHEDULED) {
-					const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
-					const iAmOwner = find(
-						room?.members,
-						(member) => member.userId === useStore.getState().session.id && member.owner
+			return fetchTurnIceServers().then((turnServers) => {
+				PeerConnConfig.setTurnServers(turnServers);
+				useStore
+					.getState()
+					.meetingConnection(
+						meetingId,
+						{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
+						{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
 					);
-					if (iAmOwner) getWaitingList(meetingId);
-				}
-				chain(meeting.participants)
-					.filter((p) => p.handRaisedAt !== undefined)
-					.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
-					.each((participant) => {
-						useStore.getState().setUserWithHandRaised(participant.userId, true);
-					})
-					.value();
-				return resp;
+				return getMeetingByMeetingId(meetingId).then((meeting) => {
+					if (meeting.meetingType === MeetingType.SCHEDULED) {
+						const room = find(
+							useStore.getState().rooms,
+							(room) => room.meetingId === meetingId
+						);
+						const iAmOwner = find(
+							room?.members,
+							(member) =>
+								member.userId === useStore.getState().session.id && member.owner
+						);
+						if (iAmOwner) getWaitingList(meetingId);
+					}
+					chain(meeting.participants)
+						.filter((p) => p.handRaisedAt !== undefined)
+						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
+						.each((participant) => {
+							useStore.getState().setUserWithHandRaised(participant.userId, true);
+						})
+						.value();
+					return resp;
+				});
 			});
 		}
 		return resp;
