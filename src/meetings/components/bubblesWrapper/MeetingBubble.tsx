@@ -29,7 +29,6 @@ import {
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
-import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import { RouterContext } from '../../contexts/routerContext';
 
 const BubbleContainer = styled(Container)<{
@@ -99,7 +98,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const size = getAttachmentSize(messageAttachment?.size);
 
 	const messageFormatted = useMemo(
-		() => message?.type === MessageType.TEXT_MSG && parseUrlOnMessage(message.text),
+		() => message?.type === MessageType.TEXT_MSG && message.text,
 		[message]
 	);
 
