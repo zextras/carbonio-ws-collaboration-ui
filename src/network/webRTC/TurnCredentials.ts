@@ -36,7 +36,6 @@ export async function fetchTurnIceServers(): Promise<RTCIceServer[]> {
 			}
 		];
 	} catch {
-		console.warn('Failed to fetch TURN credentials, proceeding without TURN');
 		return [];
 	}
 }
