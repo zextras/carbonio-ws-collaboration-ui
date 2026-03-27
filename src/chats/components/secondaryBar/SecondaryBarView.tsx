@@ -8,14 +8,13 @@ import React, { useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Tooltip, Text } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useFilteredConversationList from './conversationList/useFilteredConversationList';
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
 import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
-import { useOrderedRoomsInfoByLastMessage } from '../../../store/selectors/chatsRegistrySelectors/useOrderedRoomsInfoByLastMessage';
+import { getAreConversationsToShowSelector } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -31,7 +30,6 @@ export type FilteredConversation = {
 	roomId: string;
 	name: string;
 	roomType: string;
-	lastMessageTimestamp: number;
 	members: Member[];
 };
 
@@ -51,9 +49,11 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 	);
 
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
-	const roomsIds = useOrderedRoomsInfoByLastMessage();
+	const areConversationsToShow = useStore(getAreConversationsToShowSelector);
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const privateChatCreation = useStore((store) =>
+		getAttribute(store, 'privateChatCreationEnabled')
+	);
 
 	const [filteredInput, setFilteredInput] = useState('');
 
@@ -78,7 +78,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 
 	const ListView = useMemo(
 		() =>
-			size(roomsIds) > 0 ? (
+			areConversationsToShow ? (
 				<Container>
 					<ConversationsFilter
 						expanded={expanded}
@@ -112,7 +112,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 				<DefaultUserSidebarView expanded={expanded} />
 			),
 		[
-			roomsIds,
+			areConversationsToShow,
 			expanded,
 			noResults,
 			noResultsLabel,

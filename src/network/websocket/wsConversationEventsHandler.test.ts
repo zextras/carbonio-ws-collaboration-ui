@@ -11,12 +11,6 @@ import { wsEventsHandler } from './wsEventsHandler';
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
-import {
-	MeetingsApiToSpy,
-	RoomsApiToSpy,
-	spyOnMeetingsApi,
-	spyOnRoomsApi
-} from '../../tests/mocks/network';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
@@ -24,6 +18,7 @@ import {
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import * as api from '../index';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 
@@ -46,8 +41,8 @@ beforeEach(() => {
 
 describe('wsConversationEventHandler tests', () => {
 	test('ROOM_MEMBER_ADDED: session user is added in a room with an ongoing meeting', async () => {
-		const spyOnGetRoom = spyOnRoomsApi(RoomsApiToSpy.GET_ROOM);
-		const spyOnGetMeeting = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING);
+		const spyOnGetRoom = vi.spyOn(api, 'getRoom');
+		const spyOnGetMeeting = vi.spyOn(api, 'getMeeting');
 		spyOnGetRoom.mockImplementation(() => Promise.resolve(room));
 		spyOnGetMeeting.mockImplementation(() => Promise.resolve(meeting));
 

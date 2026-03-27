@@ -10,9 +10,9 @@ import { act, screen } from '@testing-library/react';
 
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
+import { mockUseMediaQueryCheck } from '../../../../hooks/__mocks__/useMediaQueryCheck';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockUseMediaQueryCheck } from '../../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
@@ -41,6 +41,8 @@ const oneToOneRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: user1Be.id, owner: true })]
 });
 
+vi.mock('../../../../hooks/useMediaQueryCheck');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user1Be]);
@@ -68,26 +70,26 @@ describe('Conversation Info', () => {
 			<ConversationInfo
 				roomId={oneToOneRoom.id}
 				roomType={RoomType.ONE_TO_ONE}
-				goToChatView={jest.fn()}
+				goToChatView={vi.fn()}
 			/>
 		);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 	});
 
 	test('group info should appear as expected', async () => {
-		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={jest.fn()} />);
+		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={vi.fn()} />);
 		expect(screen.getByText(room.name!)).toBeInTheDocument();
 	});
 
 	test('infoPanel take all space', async () => {
-		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={jest.fn()} />);
+		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={vi.fn()} />);
 		const messagesIcon = screen.getByTestId('icon: MessageCircleOutline');
 		expect(messagesIcon).toBeInTheDocument();
 	});
 
 	test('infoPanel does not take all space', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
-		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={jest.fn()} />);
+		setup(<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} goToChatView={vi.fn()} />);
 		expect(screen.queryByTestId('icon: MessageCircleOutline')).toBeNull();
 	});
 });

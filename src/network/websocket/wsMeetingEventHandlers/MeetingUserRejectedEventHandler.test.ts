@@ -46,14 +46,14 @@ describe('MeetingUserRejectedEventHandler tests', () => {
 
 	test('Do not send user rejected custom event if another user is rejected', () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
 
 	test('Send user rejected custom event only if the rejected user is session user session', () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(iAmRejectedEvent);
 		expect(dispatchEvent).toHaveBeenCalledWith(
 			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_REJECTED, { detail: iAmRejectedEvent })
@@ -62,7 +62,7 @@ describe('MeetingUserRejectedEventHandler tests', () => {
 
 	test('Do not send user rejected custom event if user is in the chat page', () => {
 		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(iAmRejectedEvent);
 		expect(dispatchEvent).not.toHaveBeenCalledWith();
 	});

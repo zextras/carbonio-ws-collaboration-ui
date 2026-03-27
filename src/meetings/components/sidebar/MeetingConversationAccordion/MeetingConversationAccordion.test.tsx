@@ -13,21 +13,26 @@ import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
+	createMockConfigurationMessage,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
 	createMockRoom,
+	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
 import { routerContextSetup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { OperationType } from '../../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
+import { dateToTimestamp } from '../../../../utils/dateUtils';
 import MeetingSidebar from '../MeetingSidebar';
 
 const heightRem = 'height: 2.75rem';
 const heightPercentage = 'height: 100%';
+const clearHistoryLabel = 'Clear history';
 
 const mockUser1 = createMockUser({
 	id: 'user1',
@@ -113,13 +118,17 @@ describe('Meeting sidebar', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus.png')`
+		);
 	});
 	test('Display meeting chat with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
-		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+		expect(wrapperMeetingChat).toHaveStyle(
+			`background-image: url('/src/chats/assets/papyrus-dark.png')`
+		);
 	});
 
 	test('title of the accordion changes when a user is writing', async () => {
@@ -135,7 +144,7 @@ describe('Meeting sidebar', () => {
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/User is typing.../i)).not.toBeInTheDocument();
@@ -154,9 +163,117 @@ describe('Meeting sidebar', () => {
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
 			store.setIsWriting(groupRoom.id, mockUser3.id, false);
-			jest.advanceTimersByTime(4000);
+			vi.advanceTimersByTime(4000);
 		});
 
 		expect(screen.queryByText(/2 people are typing.../i)).not.toBeInTheDocument();
+	});
+});
+
+const temporaryRoom: RoomBe = createMockRoom({
+	id: 'temp-room-test',
+	type: RoomType.TEMPORARY,
+	members: [
+		createMockMember({ userId: mockUser1.id, owner: true }),
+		createMockMember({ userId: mockUser2.id })
+	],
+	userSettings: { muted: false }
+});
+
+const temporaryMeeting: MeetingBe = createMockMeeting({
+	roomId: temporaryRoom.id,
+	participants: [user1Participant]
+});
+
+const setupTemporaryRoom = (
+	chatsRegistry?: RootStore['chatsRegistry']
+): { user: UserEvent; store: RootStore } => {
+	const { result } = renderHook(() => useStore());
+	act(() => {
+		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
+		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
+		result.current.setUserInfo([mockUser2]);
+		result.current.setApiVersion('1.6.7');
+		result.current.addRooms([temporaryRoom]);
+		result.current.addMeetings([temporaryMeeting]);
+		result.current.meetingConnection(temporaryMeeting.id);
+		if (chatsRegistry) {
+			useStore.setState({ chatsRegistry });
+		}
+	});
+	const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: temporaryMeeting.id });
+	return { user, store: result.current };
+};
+
+describe('Clear history in virtual rooms', () => {
+	test('Clear history buttons are visible when temporary room has messages', () => {
+		const now = new Date();
+		setupTemporaryRoom({
+			[temporaryRoom.id]: {
+				messages: [
+					createMockTextMessage({
+						id: 'msg-1',
+						roomId: temporaryRoom.id,
+						date: dateToTimestamp(now.toISOString())
+					})
+				],
+				fastenings: {},
+				markers: {},
+				searchResults: [],
+				unread: 0,
+				backfillQueue: []
+			}
+		});
+		expect(screen.getByText(clearHistoryLabel)).toBeInTheDocument();
+		expect(screen.getByText('Export messages')).toBeInTheDocument();
+	});
+
+	test('Clear history buttons are hidden when only CLEARED_HISTORY config messages remain', () => {
+		const now = new Date();
+		setupTemporaryRoom({
+			[temporaryRoom.id]: {
+				messages: [
+					createMockConfigurationMessage({
+						id: 'clear-msg',
+						roomId: temporaryRoom.id,
+						operation: OperationType.CLEARED_HISTORY,
+						date: dateToTimestamp(now.toISOString())
+					})
+				],
+				fastenings: {},
+				markers: {},
+				searchResults: [],
+				unread: 0,
+				backfillQueue: []
+			}
+		});
+		expect(screen.queryByText(clearHistoryLabel)).not.toBeInTheDocument();
+		expect(screen.queryByText('Export messages')).not.toBeInTheDocument();
+	});
+
+	test('Clear history buttons are hidden for GROUP rooms even with messages', () => {
+		const now = new Date();
+		setupBasicGroup();
+		act(() => {
+			useStore.setState({
+				chatsRegistry: {
+					[groupRoom.id]: {
+						messages: [
+							createMockTextMessage({
+								id: 'msg-1',
+								roomId: groupRoom.id,
+								date: dateToTimestamp(now.toISOString())
+							})
+						],
+						fastenings: {},
+						markers: {},
+						searchResults: [],
+						unread: 0,
+						backfillQueue: []
+					}
+				}
+			});
+		});
+		expect(screen.queryByText(clearHistoryLabel)).not.toBeInTheDocument();
 	});
 });

@@ -6,13 +6,7 @@
 import React from 'react';
 
 import * as Shell from '@zextras/carbonio-shell-ui';
-
-import {
-	filesSelectFilesAction,
-	filesSelectFilesActionAvailable,
-	functionCheck,
-	getLink
-} from './carbonio-files-ui';
+import { type Mock } from 'vitest';
 
 export const USER_SETTINGS: Shell.AccountSettings = {
 	attrs: {},
@@ -35,21 +29,18 @@ export const ACCOUNT: Shell.Account = {
 	rights: { targets: [] }
 };
 
-export const mockNotify: jest.Mock = jest.fn();
+export const mockNotify: Mock = vi.fn();
 
 export const NOTIFICATION_MANAGER = {
-	showPopup: jest.fn(),
+	showPopup: vi.fn(),
 	notify: mockNotify,
-	multipleNotify: jest.fn(),
-	playSound: jest.fn()
+	multipleNotify: vi.fn(),
+	playSound: vi.fn()
 };
 
 export const IS_FOCUS_MODE = false;
 
-export const useAuthenticated = jest.fn<
-	ReturnType<typeof Shell.useAuthenticated>,
-	Parameters<typeof Shell.useAuthenticated>
->(() => true);
+export const useAuthenticated: typeof Shell.useAuthenticated = () => true;
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
 
@@ -77,9 +68,9 @@ export const t = (key: string, value: string): string => value;
 export const useIntegratedFunction: typeof Shell.useIntegratedFunction = <T,>(id: string) => {
 	switch (id) {
 		case 'select-nodes':
-			return [filesSelectFilesAction as T, filesSelectFilesActionAvailable];
+			return [vi.fn() as T, true];
 		case 'get-link':
-			return [getLink as T, functionCheck];
+			return [vi.fn() as T, true];
 		default:
 			return [((): void => undefined) as T, false];
 	}
@@ -88,7 +79,7 @@ export const useIntegratedFunction: typeof Shell.useIntegratedFunction = <T,>(id
 export const updatePrimaryBadge: typeof Shell.updatePrimaryBadge = () => undefined;
 
 export const useTracker: typeof Shell.useTracker = () => ({
-	capture: jest.fn(),
-	enableTracker: jest.fn(),
-	reset: jest.fn()
+	capture: vi.fn(),
+	enableTracker: vi.fn(),
+	reset: vi.fn()
 });

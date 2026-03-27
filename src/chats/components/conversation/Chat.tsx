@@ -9,6 +9,7 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useEffect,
 	useMemo,
 	useState
 } from 'react';
@@ -30,6 +31,7 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
@@ -132,6 +134,10 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_PROMOTED, promoteMemberHandler);
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
+	useEffect(() => {
+		xmppClient.getMessagePin(roomId);
+	}, [roomId]);
+
 	return (
 		<CustomContainer
 			data-testid="conversationCollapsedView"
@@ -156,7 +162,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 				/>
 			)}
 			<MessagesList roomId={roomId} />
-			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
+			<ConversationFooter key={roomId} roomId={roomId} isInsideMeeting={isInsideMeeting} />
 		</CustomContainer>
 	);
 };

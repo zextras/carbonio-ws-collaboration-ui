@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
+import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
@@ -27,6 +27,8 @@ const room = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id })]
 });
+
+vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();

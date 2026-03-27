@@ -9,9 +9,9 @@ import React from 'react';
 import { screen, within } from '@testing-library/react';
 
 import AddNewMemberModal from './AddNewMemberModal';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
@@ -30,19 +30,20 @@ const user1: ContactInfo = {
 	id: 'user1-id'
 };
 
+vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([testRoom]);
 });
-
 describe('Add new Member Modal', () => {
 	test('Everything should be rendered - checkbox selected', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValue({ contacts: [user1] });
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
-				addNewMember={jest.fn()}
-				closeModal={jest.fn()}
+				addNewMember={vi.fn()}
+				closeModal={vi.fn()}
 				members={[
 					{
 						userId: 'user2',
@@ -52,9 +53,9 @@ describe('Add new Member Modal', () => {
 					}
 				]}
 				contactsSelected={[]}
-				setContactsSelected={jest.fn()}
+				setContactsSelected={vi.fn()}
 				showHistory
-				setShowHistory={jest.fn()}
+				setShowHistory={vi.fn()}
 				label={testRoom.name!}
 			/>
 		);
@@ -77,8 +78,8 @@ describe('Add new Member Modal', () => {
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
-				addNewMember={jest.fn()}
-				closeModal={jest.fn()}
+				addNewMember={vi.fn()}
+				closeModal={vi.fn()}
 				members={[
 					{
 						userId: 'user2',
@@ -88,9 +89,9 @@ describe('Add new Member Modal', () => {
 					}
 				]}
 				contactsSelected={[]}
-				setContactsSelected={jest.fn()}
+				setContactsSelected={vi.fn()}
 				showHistory={false}
-				setShowHistory={jest.fn()}
+				setShowHistory={vi.fn()}
 				label={testRoom.name!}
 			/>
 		);

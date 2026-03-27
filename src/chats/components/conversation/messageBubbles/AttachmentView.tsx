@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
-import { AttachmentsApi } from '../../../../network';
+import { getURLAttachment } from '../../../../network';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
@@ -197,7 +197,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 	);
 
 	const download = useCallback(() => {
-		const downloadUrl = AttachmentsApi.getURLAttachment(attachment.id);
+		const downloadUrl = getURLAttachment(attachment.id);
 		const linkTag: HTMLAnchorElement = document.createElement('a');
 		document.body.appendChild(linkTag);
 		linkTag.href = downloadUrl;

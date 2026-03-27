@@ -9,6 +9,8 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
+import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMember,
@@ -16,8 +18,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -40,6 +40,8 @@ const chat: RoomBe = createMockRoom({
 const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2', type: RoomType.GROUP });
 const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomType.TEMPORARY });
 
+vi.mock('../../../../hooks/useRouting');
+
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -52,7 +54,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -73,7 +75,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -89,7 +91,7 @@ describe('Forward Message Modal', () => {
 		setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -102,11 +104,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a 1-to-1 room', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -128,11 +130,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a group', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -154,11 +156,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to a group', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
@@ -180,11 +182,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to multiple conversations', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward]}
 			/>
@@ -208,11 +210,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to multiple conversations', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
-				onClose={jest.fn()}
+				onClose={vi.fn()}
 				roomId={testRoom.id}
 				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
@@ -236,10 +238,9 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -258,12 +259,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -282,12 +282,11 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('forwarding to one room redirect to tht room', async () => {
-		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
-		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -302,6 +301,6 @@ describe('Forward Message Modal', () => {
 		await user.click(await screen.findByText(chat2.name!));
 		await user.click(await screen.findByRole('button', { name: /Forward/i }));
 
-		mockGoToRoomPage.mockReturnValue(`room of ${chat2.name}`);
+		expect(mockGoToRoomPage).toHaveBeenCalled();
 	});
 });

@@ -22,7 +22,7 @@ beforeEach(() => {
 
 describe('ScrollButton', () => {
 	test('Display ScrollButton without unread message', async () => {
-		setup(<ScrollButton roomId={room.id} onClickCb={jest.fn()} />);
+		setup(<ScrollButton roomId={room.id} onClickCb={vi.fn()} />);
 
 		const scrollButton = screen.getByTestId('scrollButton');
 		expect(scrollButton).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('ScrollButton', () => {
 
 	test('Display sScrollButton with 1 unread message', async () => {
 		useStore.getState().incrementUnreadCount(room.id, 1);
-		setup(<ScrollButton roomId={room.id} onClickCb={jest.fn()} />);
+		setup(<ScrollButton roomId={room.id} onClickCb={vi.fn()} />);
 
 		const scrollButton = screen.getByTestId('scrollButton');
 		expect(scrollButton).toBeInTheDocument();

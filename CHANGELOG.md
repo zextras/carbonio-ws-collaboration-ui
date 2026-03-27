@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.20](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.19...v0.9.20) (2026-02-27)
+
+
+### Bug Fixes
+
+* update jenkins-lib-ui to version 1.0.9 ([3989ded](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3989ded6f26a4e38a712a911a3c237538f04482c))
+
+### [0.9.19](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.18...v0.9.19) (2026-02-23)
+
+
+### Features
+
+* add clear history on virtual room ([bd3f3a9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bd3f3a94d5b945c3ce3c87782071b52b8ebe9461)), closes [#662](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/662)
+* display translated module name in primary bar and settings [CO-3018] ([#659](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/659)) ([aec41f9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/aec41f9ff23968545a2b00e886c06b83f7abb8e6))
+* enable primary action on folder navigation ([e19ab3f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e19ab3f2dc9850b879797292ef3644af17745556)), closes [#658](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/658)
+* implement pin message ([f0bbe92](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f0bbe92704a4593fd458b37e951ae223d5c9afcf)), closes [#655](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/655)
+* improve microphone test experience ([2f1500e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2f1500e3d8f195680db7cf4032e8a10011c3d7da)), closes [#650](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/650)
+* move on top of the list the conversation with a draft message [CO-2580] ([#625](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/625)) ([406d694](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/406d6946c831c47ed474345d0b6c613db2020616))
+* open Chats app when meetings are opened in a mobile environment [CO-2904] ([d0438c3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d0438c386cd922926e6d97a684aea6bd11585465))
+
+
+### Bug Fixes
+
+* **deps:** upgrade node to v22 ([#645](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/645)) ([5e876ce](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5e876ce1240a4a632748e4c9bf2137f97210dd85))
+* forward message from meeting tab ([#667](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/667)) ([25e1b9d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/25e1b9d09bcaffd770e4ba306f10986c63eabda3))
+* save attachment description as draft ([#649](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/649)) ([3d566af](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3d566afa12b12170f1b174429c657e303363707d))
+
 ### [0.9.18](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.17...v0.9.18) (2025-11-18)
 
 

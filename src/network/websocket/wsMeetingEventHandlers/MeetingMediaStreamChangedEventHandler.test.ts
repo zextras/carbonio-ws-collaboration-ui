@@ -12,7 +12,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/mocks/global';
+import { mockPlayAudio } from '../../../tests/setupTests';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -84,7 +84,7 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 		event.active = false;
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
-		const removeSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'removeSubscription');
+		const removeSub = vi.spyOn(subscriptionManager as SubscriptionsManager, 'removeSubscription');
 		meetingMediaStreamChangedEventHandler(event);
 		expect(removeSub).toHaveBeenCalled();
 	});
@@ -93,7 +93,7 @@ describe('meetingMediaStreamChangedEventHandler tests', () => {
 		event.active = true;
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
-		const addSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'addSubscription');
+		const addSub = vi.spyOn(subscriptionManager as SubscriptionsManager, 'addSubscription');
 		meetingMediaStreamChangedEventHandler(event);
 		expect(addSub).toHaveBeenCalled();
 	});

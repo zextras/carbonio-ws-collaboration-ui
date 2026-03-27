@@ -6,6 +6,7 @@
 
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
 
+
 export type ConnectionsStoreSlice = {
 	connections: Connections;
 	setChatsBeStatus: (status: boolean) => void;

@@ -8,12 +8,12 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
+import * as api from '../../../../network/apis/MeetingsApi';
 import { setup } from '../../../../tests/test-utils';
 
 describe('MeetingExternalAccessPage tests', () => {
 	test('Meeting name is displayed correctly', async () => {
-		spyOnMeetingsApi(MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME).mockResolvedValue({
+		vi.spyOn(api, 'getScheduledMeetingName').mockResolvedValue({
 			name: 'Test Meeting'
 		});
 		setup(<MeetingExternalAccessPage />);
@@ -22,9 +22,7 @@ describe('MeetingExternalAccessPage tests', () => {
 	});
 
 	test('Create new guest', async () => {
-		const spyCreateGuest = spyOnMeetingsApi(
-			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
-		).mockResolvedValueOnce({});
+		const spyCreateGuest = vi.spyOn(api, 'createGuestAccount');
 
 		const { user } = setup(<MeetingExternalAccessPage />);
 		const nameInput = await screen.findByPlaceholderText('Enter your name');

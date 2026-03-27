@@ -39,7 +39,9 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 
 	const rooms = useStore((state) => state.rooms);
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const privateChatCreation = useStore((store) =>
+		getAttribute(store, 'privateChatCreationEnabled')
+	);
 
 	const { goToRoomPage } = useRouting();
 

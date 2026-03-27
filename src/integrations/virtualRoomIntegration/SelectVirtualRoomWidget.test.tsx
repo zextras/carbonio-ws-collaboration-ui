@@ -46,7 +46,7 @@ describe('SelectVirtualRoomWidget', () => {
 		await act(async () => {
 			setup(
 				<SelectVirtualRoomWidgetComponent
-					onChange={jest.fn()}
+					onChange={vi.fn()}
 					defaultValue={{
 						label: temporaryRoomMod.name ?? '',
 						link: 'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'

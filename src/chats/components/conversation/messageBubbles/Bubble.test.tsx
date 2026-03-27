@@ -10,6 +10,8 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
+import * as api from '../../../../network/apis/AttachmentsApi';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -18,8 +20,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
-import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
@@ -165,7 +165,10 @@ const mockedTextMessagePending = createMockTextMessage({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRooms([mockedRoom]);
+	store.addRooms([mockedRoom, mockedTempRoom]);
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setUserInfo([guestUser, user1Be]);
+	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 });
 
 describe('Message bubble component visualization', () => {
@@ -291,12 +294,6 @@ describe('Attachment footer', () => {
 	});
 });
 
-beforeEach(() => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setUserInfo([guestUser, user1Be]);
-});
-
 describe('Message header', () => {
 	test('Sender is guest user', async () => {
 		setup(
@@ -324,13 +321,6 @@ describe('Message header', () => {
 	});
 });
 
-beforeEach(() => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
-	store.addRooms([mockedTempRoom]);
-	store.setUserInfo([user1Be]);
-});
 describe('Actions', () => {
 	test('Download an attachment', async () => {
 		const { user } = setup(
@@ -341,7 +331,8 @@ describe('Actions', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		jest.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
+		const spyOnAppendChild = vi.spyOn(document.body, 'appendChild');
+		spyOnAppendChild.mockReturnValue(document.createElement('a'));
 
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -349,14 +340,13 @@ describe('Actions', () => {
 		const downloadAction = await screen.findByText(/Download/i);
 		await user.click(downloadAction);
 
-		expect(document.body.appendChild).toHaveBeenCalledWith(
+		expect(spyOnAppendChild).toHaveBeenCalledWith(
 			expect.objectContaining({ download: 'image.jpeg' })
 		);
 	});
 	test('Delete a message with attachment', async () => {
-		const spyOnDeleteAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.DELETE_ATTACHMENT);
-		const store: RootStore = useStore.getState();
-		store.newMessage(mockedAttachmentMessageGb);
+		const spyOnDeleteAttachment = vi.spyOn(api, 'deleteAttachment');
+		useStore.getState().newMessage(mockedAttachmentMessageGb);
 		const { user } = setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
@@ -375,12 +365,9 @@ describe('Actions', () => {
 		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		const spySendChatMessageDeletion = jest
-			.spyOn(useStore.getState().connections.xmppClient, 'sendChatMessageDeletion')
-			.mockImplementation(() => 'deleted');
+		const spySendChatMessageDeletion = vi.spyOn(xmppClient, 'sendChatMessageDeletion');
 
-		const store: RootStore = useStore.getState();
-		store.newMessage(mockedTextMessageSentByMe);
+		useStore.getState().newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}

@@ -34,9 +34,7 @@ export type RouterContextType = {
 
 export const RouterContext = createContext<RouterContextType>({
 	route: MEETINGS_ROUTES.MAIN,
-	navigate: () => {
-		throw new Error('Not implemented');
-	}
+	navigate: () => {}
 });
 
 export const useRouterContextSetup = (): RouterContextType => {

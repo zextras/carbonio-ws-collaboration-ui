@@ -8,14 +8,14 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
+import * as api from '../../../../network/apis/RoomsApi';
+import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
 	createMockMeeting,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingType } from '../../../../types/network/models/meetingBeTypes';
 
@@ -25,6 +25,8 @@ const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 
 const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 
+vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -32,11 +34,10 @@ beforeEach(() => {
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 	store.addMeetings([virtualRoom]);
 });
-
 describe('VirtualRoomsButton', () => {
 	test('create virtual modal', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
 
 		const { user } = setup(<VirtualRoomsButton expanded />);
 

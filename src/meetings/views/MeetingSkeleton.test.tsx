@@ -9,6 +9,8 @@ import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
+import { mockGoToInfoPage } from '../../hooks/__mocks__/useRouting';
+import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
@@ -17,8 +19,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -27,7 +27,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import SelfieSegmentationManager from '../components/virtualBackground/SelfieSegmentationManager';
+import { mockInitialize } from '../components/virtualBackground/__mocks__/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
@@ -79,8 +79,13 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	return { user, store };
 };
 
+vi.mock('../../hooks/useRouting');
+vi.mock('../components/virtualBackground/SelfieSegmentationManager');
+vi.mock('../../utils/MeetingsUtils');
+
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
+		document.documentElement.requestFullscreen = vi.fn(() => Promise.resolve());
 		const { user } = storeSetupGroupMeetingSkeleton();
 		await waitFor(() => user.hover(screen.getByTestId(meetingActionBarLabel)));
 		const moreActions = await screen.findByTestId('more-actions');
@@ -102,7 +107,7 @@ describe('Grid mode meeting view', () => {
 	});
 
 	test('Close the meeting', async () => {
-		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
+		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
 		await user.hover(meetingActionBar);
@@ -195,11 +200,7 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
-		const mockInitialize = jest
-			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
-			.mockImplementation(() => Promise.resolve());
-
-		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
+		HTMLCanvasElement.prototype.captureStream = vi.fn().mockReturnValue(new MediaStream());
 
 		const { store } = storeSetupGroupMeetingSkeleton();
 		expect(store.activeMeeting).not.toBeDefined();

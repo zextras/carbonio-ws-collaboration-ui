@@ -26,7 +26,9 @@ export const useSessionStoreSlice: StateCreator<
 	[],
 	SessionStoreSlice
 > = (set) => ({
-	session: {},
+	session: {
+		_persistedAt: Date.now()
+	},
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -47,8 +49,8 @@ export const useSessionStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
 				draft.session.attributes = {
-					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
-					groupChatCreation:
+					privateChatCreationEnabled: attrs.carbonioWscPrivateChatCreation === 'TRUE',
+					groupChatCreationEnabled:
 						attrs.carbonioWscGroupChatCreation === 'TRUE' &&
 						Number(attrs.carbonioWscMaxGroupMembers || 0) > 2,
 					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
@@ -59,7 +61,7 @@ export const useSessionStoreSlice: StateCreator<
 						(attrs.carbonioWscMessageEditTimeLimit as string) || '0m'
 					),
 					maxRoomPictureSize: Number(attrs.carbonioWscMaxRoomPictureSize || 0),
-					attachmentUpload: attrs.carbonioWscAttachmentUpload === 'TRUE',
+					attachmentUploadEnabled: attrs.carbonioWscAttachmentUpload === 'TRUE',
 					maxAttachmentSize: Number(attrs.carbonioWscMaxAttachmentSize || 0),
 					showMessageReads: attrs.carbonioWscShowMessageReads === 'TRUE',
 					showUsersPresence: attrs.carbonioWscShowUsersPresence === 'TRUE',
@@ -70,6 +72,15 @@ export const useSessionStoreSlice: StateCreator<
 			}),
 			false,
 			'SESSION/SET_ATTRS'
+		);
+	},
+	setCapabilities: (capabilities: AttributesList): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.attributes = capabilities;
+			}),
+			false,
+			'SESSION/SET_CAPABILITIES'
 		);
 	},
 	setQueueId: (queueId: string): void => {

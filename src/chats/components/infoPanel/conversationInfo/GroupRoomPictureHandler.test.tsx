@@ -6,9 +6,10 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -90,7 +90,7 @@ describe('Room Picture Handler - groups', () => {
 		expect(deleteButton).toBeInTheDocument();
 	});
 	test('upload an image', async () => {
-		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
+		const spyOnUpdateRoomPicture = vi.spyOn(api, 'updateRoomPicture');
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
@@ -104,14 +104,16 @@ describe('Room Picture Handler - groups', () => {
 		expect(input).not.toBeNull();
 		expect(input.files).toHaveLength(0);
 
-		await user.upload(input, testImageFile);
+		await act(async () => {
+			await user.upload(input, testImageFile);
+		});
 		expect(input.files).toHaveLength(1);
 
 		expect(spyOnUpdateRoomPicture).toHaveBeenCalled();
 	});
 
 	test('update an image fails', async () => {
-		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
+		const spyOnUpdateRoomPicture = vi.spyOn(api, 'updateRoomPicture');
 		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
 		const store: RootStore = useStore.getState();
@@ -125,13 +127,15 @@ describe('Room Picture Handler - groups', () => {
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 		expect(input).not.toBeNull();
-		await user.upload(input, testImageFile);
 
-		expect(spyOnUpdateRoomPicture).rejects.toThrowError();
+		await act(async () => {
+			await user.upload(input, testImageFile);
+		});
+		await expect(spyOnUpdateRoomPicture).rejects.toThrowError();
 	});
 
 	test('delete an image', async () => {
-		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
+		const spyOnDeleteRoomPicture = vi.spyOn(api, 'deleteRoomPicture');
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
@@ -152,7 +156,7 @@ describe('Room Picture Handler - groups', () => {
 	});
 
 	test('delete an image fails ', async () => {
-		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
+		const spyOnDeleteRoomPicture = vi.spyOn(api, 'deleteRoomPicture');
 		spyOnDeleteRoomPicture.mockRejectedValue(false);
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);

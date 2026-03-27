@@ -24,8 +24,10 @@ const RegisterCreationButton = (): ReactElement => {
 	const [newChatModal, setNewChatModal] = useState(false);
 	const createChatLabel = 'create-chat';
 
-	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
-	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreation'));
+	const privateChatCreation = useStore((store) =>
+		getAttribute(store, 'privateChatCreationEnabled')
+	);
+	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreationEnabled'));
 
 	const newAction = useMemo(
 		(): NewAction => ({

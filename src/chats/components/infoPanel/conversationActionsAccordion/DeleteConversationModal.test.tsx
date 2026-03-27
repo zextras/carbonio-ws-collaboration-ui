@@ -52,8 +52,8 @@ describe('Delete Conversation Modal', () => {
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
-				deleteConversation={jest.fn()}
-				closeModal={jest.fn()}
+				deleteConversation={vi.fn()}
+				closeModal={vi.fn()}
 				type={RoomType.GROUP}
 				numberOfMembers={1}
 				roomId={testRoom.id}
@@ -66,8 +66,8 @@ describe('Delete Conversation Modal', () => {
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
-				deleteConversation={jest.fn()}
-				closeModal={jest.fn()}
+				deleteConversation={vi.fn()}
+				closeModal={vi.fn()}
 				type={RoomType.GROUP}
 				numberOfMembers={2}
 				roomId={testRoom.id}
@@ -80,8 +80,8 @@ describe('Delete Conversation Modal', () => {
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
-				deleteConversation={jest.fn()}
-				closeModal={jest.fn()}
+				deleteConversation={vi.fn()}
+				closeModal={vi.fn()}
 				type={RoomType.GROUP}
 				numberOfMembers={2}
 				roomId={testRoom.id}
@@ -94,8 +94,8 @@ describe('Delete Conversation Modal', () => {
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
-				deleteConversation={jest.fn()}
-				closeModal={jest.fn()}
+				deleteConversation={vi.fn()}
+				closeModal={vi.fn()}
 				type={RoomType.GROUP}
 				numberOfMembers={2}
 				roomId={testRoom.id}

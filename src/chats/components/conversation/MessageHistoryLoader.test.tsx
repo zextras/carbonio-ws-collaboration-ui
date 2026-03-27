@@ -8,9 +8,9 @@ import React from 'react';
 
 import MessageHistoryLoader from './MessageHistoryLoader';
 import {
-	intersectionObserverMockDisconnect,
-	intersectionObserverMockObserve
-} from '../../../tests/mocks/global';
+	mockIntersectionObserverDisconnect,
+	mockIntersectionObserverObserve
+} from '../../../tests/setupTests';
 import { setup } from '../../../tests/test-utils';
 
 describe('MessageHistoryLoader - IntersectionObserver behaviour', () => {
@@ -22,7 +22,7 @@ describe('MessageHistoryLoader - IntersectionObserver behaviour', () => {
 				<MessageHistoryLoader roomId={'roomId'} messageListRef={ref} />
 			</>
 		);
-		expect(intersectionObserverMockObserve).toBeCalledTimes(1);
+		expect(mockIntersectionObserverObserve).toBeCalledTimes(1);
 	});
 
 	test('Intersection observer stops observing on MessageHistoryLoader unmount', () => {
@@ -34,6 +34,6 @@ describe('MessageHistoryLoader - IntersectionObserver behaviour', () => {
 			</>
 		);
 		unmount();
-		expect(intersectionObserverMockDisconnect).toBeCalledTimes(1);
+		expect(mockIntersectionObserverDisconnect).toBeCalledTimes(1);
 	});
 });

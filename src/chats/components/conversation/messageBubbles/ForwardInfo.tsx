@@ -44,6 +44,7 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			gap={'0.25rem'}
+			height={'fit'}
 		>
 			<Icon icon="Forward" size="small" color="secondary" />
 			<Tooltip label={originallySentByLabel}>

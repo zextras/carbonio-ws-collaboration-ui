@@ -10,9 +10,9 @@ import { screen } from '@testing-library/react';
 
 import MeetingAccessPage from './MeetingAccessPage';
 import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
+import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 
@@ -22,7 +22,7 @@ describe('MeetingAccessPage', () => {
 		expect(mockDarkReaderEnable).toHaveBeenCalled();
 	});
 	test('Internal user has userHasDirectAccess to permanent meeting', async () => {
-		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		const spyOnGetMeetingByMeetingId = vi.spyOn(api, 'getMeetingByMeetingId');
 		spyOnGetMeetingByMeetingId.mockImplementation(() => Promise.resolve(createMockMeeting()));
 		useStore.getState().setChatsBeStatus(true);
 		setup(<MeetingAccessPage />);
@@ -30,7 +30,7 @@ describe('MeetingAccessPage', () => {
 	});
 
 	test('Internal user has not userHasDirectAccess to scheduled meeting', async () => {
-		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		const spyOnGetMeetingByMeetingId = vi.spyOn(api, 'getMeetingByMeetingId');
 		spyOnGetMeetingByMeetingId.mockImplementation(() =>
 			Promise.resolve(createMockMeeting({ meetingType: MeetingType.SCHEDULED }))
 		);

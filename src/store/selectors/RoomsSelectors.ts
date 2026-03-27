@@ -19,7 +19,7 @@ import {
 } from 'lodash';
 
 import { getUserName } from './UsersSelectors';
-import { RoomsApi } from '../../network';
+import { getURLRoomPicture } from '../../network';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -34,6 +34,14 @@ export const useRoomIdsList = (): string[] => {
 		});
 		return idsList;
 	}, [rooms]);
+};
+
+export const getAreConversationsToShowSelector = (state: RootStore): boolean => {
+	const nonTemporaryRooms = filter(
+		state.rooms,
+		(room) => room.type === RoomType.ONE_TO_ONE || room.type === RoomType.GROUP
+	);
+	return size(nonTemporaryRooms) > 0;
 };
 
 export const useTemporaryRoomIdsOrderedByCreation = (): string[] => {
@@ -129,7 +137,7 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 	if (room.type === RoomType.ONE_TO_ONE) {
 		return undefined;
 	}
-	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
+	return room.pictureUpdatedAt && getURLRoomPicture(room.id);
 };
 
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>

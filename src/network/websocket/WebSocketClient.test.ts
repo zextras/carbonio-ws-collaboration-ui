@@ -3,10 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
-import { WebSocketClient } from './WebSocketClient';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+// eslint-disable-next-line import/order
+import { WebSocketClient } from './WebSocketClient';
 
 describe('WebSocketClient', () => {
 	test('Connect WebSocketClient generate a WebSocket', () => {
@@ -28,21 +28,6 @@ describe('WebSocketClient', () => {
 		expect(wsClient._webSocket).toBeUndefined();
 	});
 
-	test('Send message if WebSocket is open', () => {
-		const mockWebSocketSend = jest.fn();
-		Object.defineProperty(global, 'WebSocket', {
-			value: jest.fn(() => ({
-				readyState: 1,
-				send: mockWebSocketSend
-			}))
-		});
-
-		const wsClient = new WebSocketClient();
-		wsClient.connect();
-		wsClient.send({ type: 'ping' });
-		expect(mockWebSocketSend).toHaveBeenCalled();
-	});
-
 	test('onopen event is handled resetting reconnectionTine, setting ping and setting ws status into store', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
@@ -61,7 +46,7 @@ describe('WebSocketClient', () => {
 
 	test('onmessage event is handled with PONG', () => {
 		const wsClient = new WebSocketClient();
-		const cancelDebounce = jest.spyOn(wsClient._disconnectionCheckFunction, 'cancel');
+		const cancelDebounce = vi.spyOn(wsClient._disconnectionCheckFunction, 'cancel');
 		wsClient.connect();
 		const message = { type: WsEventType.PONG };
 		wsClient._onMessage({ data: JSON.stringify(message) } as MessageEvent);

@@ -286,7 +286,7 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 		act(() => {
 			useStore.getState().setPinnedTile({ userId: '2', type: STREAM_TYPE.VIDEO });
 			useStore.getState().setTalkingUser(participant3.userId, true);
-			jest.advanceTimersByTime(1000);
+			vi.advanceTimersByTime(1000);
 		});
 
 		expect(result.current.carouselTiles[0]).toEqual({
@@ -296,7 +296,7 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 		});
 
 		act(() => {
-			jest.advanceTimersByTime(2000);
+			vi.advanceTimersByTime(2000);
 		});
 
 		expect(result.current.carouselTiles[0]).toEqual({

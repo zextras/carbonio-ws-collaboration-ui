@@ -307,7 +307,7 @@ describe('useConfigurationMessageLabel', () => {
 	});
 
 	test('Undefined operation type', () => {
-		const warn = jest.spyOn(console, 'warn').mockImplementation();
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: groupRoom.id,
 			operation: 'unknownOperation' as OperationType

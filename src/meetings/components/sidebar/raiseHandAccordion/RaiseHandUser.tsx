@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { MeetingsApi } from '../../../../network';
+import { raiseHand } from '../../../../network';
 import { getUserHandRank } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
@@ -69,7 +69,7 @@ const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 	);
 
 	const lowerHand = useCallback(() => {
-		MeetingsApi.raiseHand(meetingId, false, userId);
+		raiseHand(meetingId, false, userId);
 	}, [meetingId, userId]);
 
 	const tooltipSelector = useMemo(() => {

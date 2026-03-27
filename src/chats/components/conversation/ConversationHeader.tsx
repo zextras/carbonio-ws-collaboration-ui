@@ -12,10 +12,12 @@ import { Button, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-
 import { useTranslation } from 'react-i18next';
 
 import { ConversationView } from './Conversation';
+import { PinMessage } from './PinMessage';
 import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
-import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
+import { getPinnedMessage } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getIsPlaceholderRoom, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 
@@ -76,6 +78,7 @@ const ConversationHeader = ({
 	setConversationView
 }: ConversationHeaderProps): ReactElement => {
 	const [t] = useTranslation();
+	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
 	const infoTooltip = t('conversationInfo.info', 'Info');
 	const searchTooltip = t('conversationInfo.search', 'Search');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
@@ -98,63 +101,68 @@ const ConversationHeader = ({
 	const isDesktopView = useMediaQueryCheck();
 
 	return (
-		<RoomInfoHeader
-			height="3rem"
-			minHeight="3rem"
-			background="gray5"
-			orientation="horizontal"
-			mainAlignment="space-between"
-			padding="small"
-		>
-			<Row takeAvailableSpace mainAlignment="flex-start">
-				<Container
-					orientation="vertical"
-					height="fit"
-					crossAlignment="flex-start"
-					padding={{ horizontal: 'small' }}
-				>
-					<Tooltip label={roomName} overflow="ellipsis" overflowTooltip>
-						<CustomText $isWritingIsVisible={isWritingIsDefined}>{roomName}</CustomText>
-					</Tooltip>
-					<CustomIsWritingText
-						size="small"
-						color="secondary"
-						$isWritingIsVisible={isWritingIsDefined}
-						data-testid="is_writing_text"
+		<RoomInfoHeader height={'fit'}>
+			<Container
+				height="3rem"
+				minHeight="3rem"
+				background="gray5"
+				orientation="horizontal"
+				mainAlignment="space-between"
+				padding="small"
+			>
+				<Row takeAvailableSpace mainAlignment="flex-start">
+					<Container
+						orientation="vertical"
+						height="fit"
+						crossAlignment="flex-start"
+						padding={{ horizontal: 'small' }}
 					>
-						{writingLabel}
-					</CustomIsWritingText>
+						<Tooltip label={roomName} overflow="ellipsis" overflowTooltip>
+							<CustomText $isWritingIsVisible={isWritingIsDefined}>{roomName}</CustomText>
+						</Tooltip>
+						<CustomIsWritingText
+							size="small"
+							color="secondary"
+							$isWritingIsVisible={isWritingIsDefined}
+							data-testid="is_writing_text"
+						>
+							{writingLabel}
+						</CustomIsWritingText>
+					</Container>
+				</Row>
+				<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.25rem">
+					{videoCallEnabled && !isPlaceholderRoom && (
+						<ConversationHeaderMeetingButton roomId={roomId} />
+					)}
+					{conversationView !== ConversationView.SEARCH && (
+						<Tooltip label={searchTooltip}>
+							<Button
+								type="ghost"
+								onClick={() => setConversationView(ConversationView.SEARCH)}
+								color="gray0"
+								size="large"
+								minWidth="large"
+								icon="Search"
+							/>
+						</Tooltip>
+					)}
+					{(!isDesktopView || conversationView === ConversationView.SEARCH) && (
+						<Tooltip label={infoTooltip}>
+							<Button
+								type="ghost"
+								onClick={() =>
+									setConversationView(isDesktopView ? ConversationView.CHAT : ConversationView.INFO)
+								}
+								color="gray0"
+								size="large"
+								minWidth="large"
+								icon="InfoOutline"
+							/>
+						</Tooltip>
+					)}
 				</Container>
-			</Row>
-			<Container orientation="horizontal" width="fit" minWidth="fit" gap="0.25rem">
-				{videoCallEnabled && <ConversationHeaderMeetingButton roomId={roomId} />}
-				{conversationView !== ConversationView.SEARCH && (
-					<Tooltip label={searchTooltip}>
-						<Button
-							type="ghost"
-							onClick={() => setConversationView(ConversationView.SEARCH)}
-							color="gray0"
-							size="large"
-							minWidth="large"
-							icon="Search"
-						/>
-					</Tooltip>
-				)}
-				{(!isDesktopView || conversationView === ConversationView.SEARCH) && (
-					<Tooltip label={infoTooltip}>
-						<Button
-							type="ghost"
-							onClick={() =>
-								setConversationView(isDesktopView ? ConversationView.CHAT : ConversationView.INFO)
-							}
-							color="gray0"
-							size="large"
-							minWidth="large"
-							icon="InfoOutline"
-						/>
-					</Tooltip>
-				)}
 			</Container>
+			{pinnedMessage && <PinMessage pinnedMessage={pinnedMessage} />}
 		</RoomInfoHeader>
 	);
 };

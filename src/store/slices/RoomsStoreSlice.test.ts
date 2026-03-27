@@ -7,11 +7,13 @@
 import { size } from 'lodash';
 
 import {
+	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
+import { MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
@@ -36,6 +38,15 @@ const groupRoom1 = createMockRoom({
 		createMockMember({ userId: user1.id, owner: true }),
 		createMockMember({ userId: user2.id }),
 		createMockMember({ userId: user3.id })
+	]
+});
+
+const temporaryRoom = createMockRoom({
+	id: 'temporary-room-id',
+	type: RoomType.TEMPORARY,
+	members: [
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id })
 	]
 });
 
@@ -187,14 +198,116 @@ describe('RoomsStoreSlice tests', () => {
 		});
 	});
 
-	test('clearConversation deletes all room data', () => {
-		const now = new Date();
-		useStore.getState().addRooms([singleRoom1]);
-		useStore.getState().clearConversation(singleRoom1.id, now.toISOString());
-		expect(useStore.getState().rooms[singleRoom1.id].userSettings?.clearedAt).toBe(
-			now.toISOString()
-		);
-		expect(useStore.getState().chatsRegistry[singleRoom1.id]).toBeUndefined();
-		expect(useStore.getState().activeConversations[singleRoom1.id]).toBeUndefined();
+	describe('clearConversation', () => {
+		test('clearConversation deletes chatsRegistry for ONE_TO_ONE rooms', () => {
+			const now = new Date();
+			useStore.getState().addRooms([singleRoom1]);
+			useStore.getState().clearConversation(singleRoom1.id, now.toISOString());
+			expect(useStore.getState().rooms[singleRoom1.id].userSettings?.clearedAt).toBe(
+				now.toISOString()
+			);
+			expect(useStore.getState().chatsRegistry[singleRoom1.id]).toBeUndefined();
+		});
+
+		test('clearConversation deletes chatsRegistry for GROUP rooms', () => {
+			const now = new Date();
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().clearConversation(groupRoom1.id, now.toISOString());
+			expect(useStore.getState().rooms[groupRoom1.id].userSettings?.clearedAt).toBe(
+				now.toISOString()
+			);
+			expect(useStore.getState().chatsRegistry[groupRoom1.id]).toBeUndefined();
+		});
+
+		test('clearConversation preserves CLEARED_HISTORY config message for TEMPORARY rooms', () => {
+			const now = new Date();
+			const configDate = new Date(now.getTime() + 1);
+			useStore.getState().addRooms([temporaryRoom]);
+			useStore.setState({
+				chatsRegistry: {
+					[temporaryRoom.id]: {
+						messages: [
+							createMockTextMessage({
+								id: 'old-msg',
+								roomId: temporaryRoom.id,
+								date: dateToTimestamp(new Date(now.getTime() - 10000).toISOString())
+							}),
+							createMockConfigurationMessage({
+								id: 'clear-config-msg',
+								roomId: temporaryRoom.id,
+								type: MessageType.CONFIGURATION_MSG,
+								operation: OperationType.CLEARED_HISTORY,
+								date: dateToTimestamp(configDate.toISOString())
+							})
+						],
+						fastenings: {},
+						markers: {},
+						searchResults: [],
+						unread: 0,
+						backfillQueue: []
+					}
+				}
+			});
+			useStore.getState().clearConversation(temporaryRoom.id, now.toISOString());
+			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
+			expect(registry).toBeDefined();
+			expect(size(registry.messages)).toBe(1);
+			expect(registry.messages[0].id).toBe('clear-config-msg');
+			expect(registry.messages[0].type).toBe(MessageType.CONFIGURATION_MSG);
+		});
+
+		test('clearConversation keeps only the latest CLEARED_HISTORY config message after successive clears', () => {
+			const firstClear = new Date('2025-01-01T10:00:00Z');
+			const secondClear = new Date('2025-01-01T11:00:00Z');
+			const betweenClears = new Date('2025-01-01T10:30:00Z');
+			const afterSecondClear = new Date('2025-01-01T11:30:00Z');
+			useStore.getState().addRooms([temporaryRoom]);
+			useStore.setState({
+				chatsRegistry: {
+					[temporaryRoom.id]: {
+						messages: [
+							createMockConfigurationMessage({
+								id: 'first-clear-config',
+								roomId: temporaryRoom.id,
+								type: MessageType.CONFIGURATION_MSG,
+								operation: OperationType.CLEARED_HISTORY,
+								date: dateToTimestamp(firstClear.toISOString())
+							}),
+							createMockTextMessage({
+								id: 'msg-between-clears',
+								roomId: temporaryRoom.id,
+								date: dateToTimestamp(betweenClears.toISOString())
+							}),
+							createMockConfigurationMessage({
+								id: 'second-clear-config',
+								roomId: temporaryRoom.id,
+								type: MessageType.CONFIGURATION_MSG,
+								operation: OperationType.CLEARED_HISTORY,
+								date: dateToTimestamp(secondClear.toISOString())
+							}),
+							createMockTextMessage({
+								id: 'msg-after-second-clear',
+								roomId: temporaryRoom.id,
+								date: dateToTimestamp(afterSecondClear.toISOString())
+							})
+						],
+						fastenings: {},
+						markers: {},
+						searchResults: [],
+						unread: 0,
+						backfillQueue: []
+					}
+				}
+			});
+			useStore.getState().clearConversation(temporaryRoom.id, secondClear.toISOString());
+			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
+			expect(registry).toBeDefined();
+			// Should keep: msg-after-second-clear + only the latest clear config message
+			expect(size(registry.messages)).toBe(2);
+			expect(registry.messages.map((m) => m.id)).toContain('msg-after-second-clear');
+			expect(registry.messages.map((m) => m.id)).toContain('second-clear-config');
+			expect(registry.messages.map((m) => m.id)).not.toContain('first-clear-config');
+			expect(registry.messages.map((m) => m.id)).not.toContain('msg-between-clears');
+		});
 	});
 });

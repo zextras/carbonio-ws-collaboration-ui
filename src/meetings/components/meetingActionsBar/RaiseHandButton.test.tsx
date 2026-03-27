@@ -7,9 +7,10 @@ import React from 'react';
 
 import { act, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import * as ReactRouter from 'react-router-dom';
 
 import RaiseHandButton from './RaiseHandButton';
+import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -17,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -62,7 +62,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<RaiseHandButton />, { meetingId: meeting.id });
 
@@ -71,7 +71,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 
 describe('Raise hand button', () => {
 	test('User Raise Hand', async () => {
-		const spyOnRaiseHand = spyOnMeetingsApi(MeetingsApiToSpy.RAISE_HAND);
+		const spyOnRaiseHand = vi.spyOn(api, 'raiseHand');
 
 		const { user } = storeSetupGroupMeeting();
 

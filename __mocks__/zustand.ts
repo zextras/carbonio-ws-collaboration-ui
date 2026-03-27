@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act } from '@testing-library/react';
+import { act, cleanup } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
 import { WebSocketClient } from '../src/network/websocket/WebSocketClient';
@@ -31,9 +31,15 @@ export const create =
 		});
 		return store;
 	};
-// Reset all stores after each test run
+
+beforeEach(() => {
+	act(() => {
+		storeResetFns.forEach((resetFn) => resetFn());
+	});
+});
+
 afterEach(() => {
-	act(() => storeResetFns.forEach((resetFn) => resetFn()));
+	cleanup();
 });
 
 export default create;

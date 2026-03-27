@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
+import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
@@ -20,7 +21,7 @@ const joinMeeting = 'Join meeting';
 const user = createMockUser({ id: 'userId', name: 'User' });
 const room = createMockRoom({ id: 'roomId', type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
-const mockRemoveNotification = jest.fn();
+const mockRemoveNotification = vi.fn();
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -37,7 +38,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
-				stopMeetingSound={jest.fn()}
+				stopMeetingSound={vi.fn()}
 			/>
 		);
 
@@ -51,17 +52,14 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
-		const spyOnSendChatMessage = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessage'
-		);
+		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
 				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
-				stopMeetingSound={jest.fn()}
+				stopMeetingSound={vi.fn()}
 			/>
 		);
 		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello');
@@ -70,17 +68,14 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking Enter', async () => {
-		const spyOnSendChatMessage = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessage'
-		);
+		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
 				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
-				stopMeetingSound={jest.fn()}
+				stopMeetingSound={vi.fn()}
 			/>
 		);
 		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
@@ -94,7 +89,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
-				stopMeetingSound={jest.fn()}
+				stopMeetingSound={vi.fn()}
 			/>
 		);
 		await userEvent.click(screen.getByText('Decline'));
@@ -102,14 +97,14 @@ describe('MeetingNotification', () => {
 	});
 
 	test('Joining a meeting removes the notification', async () => {
-		jest.spyOn(window, 'open').mockImplementation(() => null);
+		vi.spyOn(window, 'open').mockImplementation(() => null);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
 				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
-				stopMeetingSound={jest.fn()}
+				stopMeetingSound={vi.fn()}
 			/>
 		);
 		await userEvent.click(screen.getByText(joinMeeting));

@@ -8,7 +8,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ScreenShareButton from './ScreenShareButton';
-import { useParams } from '../../../../__mocks__/react-router';
+import { useParams } from '../../../../__mocks__/react-router-dom';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,

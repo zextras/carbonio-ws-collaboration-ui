@@ -9,6 +9,8 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
+import { mockGoToRoomPage } from '../../../hooks/__mocks__/useRouting';
+import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -18,8 +20,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { mockGoToRoomPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -68,7 +68,10 @@ const groupMeeting = createMockMeeting({
 	]
 });
 
+vi.mock('../../../hooks/useRouting');
+
 beforeEach(() => {
+	window.open = vi.fn(() => null);
 	const store = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo([user1, user2, user3]);
@@ -105,7 +108,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting for the first time', async () => {
-		const spyOnCreateMeeting = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_MEETING);
+		const spyOnCreateMeeting = vi.spyOn(api, 'createMeeting');
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
@@ -176,7 +179,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting', async () => {
-		const meetingOpen = jest.spyOn(window, 'open');
+		const meetingOpen = vi.spyOn(window, 'open');
 		const store = useStore.getState();
 		store.addMeetings([groupMeeting]);
 		store.removeParticipant(groupMeeting.id, user1.id);

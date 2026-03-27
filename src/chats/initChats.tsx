@@ -8,6 +8,7 @@ import React, { lazy, Suspense, useCallback, useEffect } from 'react';
 
 import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-system';
 import { addRoute, SecondaryBarComponentProps } from '@zextras/carbonio-shell-ui';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
@@ -50,6 +51,7 @@ const SecondaryBar = (props: SecondaryBarComponentProps): React.JSX.Element => (
 );
 
 export default function useChatsApp(): void {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 
 	const handleRedirectFromBrowserNotification = useCallback(
@@ -67,10 +69,10 @@ export default function useChatsApp(): void {
 		addRoute({
 			route: CHATS_ROUTE,
 			visible: true,
-			label: PRODUCT_NAME,
+			label: t('label.app_name', PRODUCT_NAME),
 			primaryBar: 'WscOutline',
 			appView: ChatsMain,
 			secondaryBar: SecondaryBar
 		});
-	}, []);
+	}, [t]);
 }

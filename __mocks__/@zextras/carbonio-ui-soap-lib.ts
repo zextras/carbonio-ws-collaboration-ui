@@ -6,7 +6,7 @@
 
 import { RawSoapResponse } from '@zextras/carbonio-ui-soap-lib';
 
-export const mockSoapFetchV2 = jest.fn();
+export const mockSoapFetchV2 = vi.fn();
 
 export const soapFetchV2 = (): Promise<RawSoapResponse<Record<string, unknown>>> =>
 	new Promise((resolve, reject) => {

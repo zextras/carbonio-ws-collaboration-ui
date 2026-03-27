@@ -36,7 +36,7 @@ describe('meetingSDPOfferedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const videoScreenIn = useStore.getState().activeMeeting?.videoScreenIn;
-		const handleRemoteOffer = jest.spyOn(
+		const handleRemoteOffer = vi.spyOn(
 			videoScreenIn as IVideoScreenInConnection,
 			'handleRemoteOffer'
 		);

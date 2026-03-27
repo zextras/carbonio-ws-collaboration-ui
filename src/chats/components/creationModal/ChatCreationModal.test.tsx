@@ -9,14 +9,14 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
+import * as api from '../../../network/apis/RoomsApi';
+import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
-import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
@@ -46,6 +46,8 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
+vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+
 beforeEach(() => {
 	useStore.getState().setAttributes(
 		createMockAttributesList({
@@ -57,7 +59,7 @@ beforeEach(() => {
 describe('Chat Creation Modal', () => {
 	test('All elements are rendered', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1] });
-		setup(<ChatCreationModal open onClose={jest.fn()} />);
+		setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		const title = await screen.findByText('New Chat');
 		expect(title).toBeInTheDocument();
@@ -74,7 +76,7 @@ describe('Chat Creation Modal', () => {
 
 	test('Creating a 1to1 Chat add a placeholder room', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValue({ contacts: [user1] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -99,10 +101,10 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Create a group', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
@@ -132,10 +134,10 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on creating a group displaying a snackbar', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
@@ -163,7 +165,7 @@ describe('Chat Creation Modal', () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -188,7 +190,7 @@ describe('Chat Creation Modal', () => {
 
 	test('Error on title input', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
@@ -211,7 +213,7 @@ describe('Chat Creation Modal', () => {
 
 	test('Error on topic input', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -238,7 +240,7 @@ describe('Chat Creation Modal', () => {
 		store.addRooms([testRoom]);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		// Add user1 to ChipInput
 		const userComponent = await screen.findByText(user1.displayName);
@@ -252,7 +254,7 @@ describe('Chat Creation Modal', () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '3' }));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2, user3] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
@@ -273,7 +275,7 @@ describe('Chat Creation Modal', () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '4' }));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2, user3] });
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
@@ -290,7 +292,7 @@ describe('Chat Creation Modal', () => {
 	test('User wants to add another user as a moderator', async () => {
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 
@@ -317,8 +319,3 @@ describe('Chat Creation Modal', () => {
 		expect(crownOutlineButtonsUpdated).toHaveLength(4);
 	});
 });
-
-// Useful debug functions for test
-// screen.logTestingPlaygroundURL()
-// console.log(prettyDOM(element))
-// screen.debug()

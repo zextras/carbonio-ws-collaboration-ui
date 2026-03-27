@@ -6,18 +6,12 @@
 import React from 'react';
 
 import { waitFor } from '@testing-library/react';
+import * as shell from '@zextras/carbonio-shell-ui';
 
 import MainApp from './MainApp';
+import * as api from './network';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
-import { useAuthenticated } from '../__mocks__/@zextras/carbonio-shell-ui';
-import sessionApi from './network/apis/InfoApi';
-import {
-	ChatApiToSpy,
-	MeetingsApiToSpy,
-	spyOnChatApi,
-	spyOnMeetingsApi
-} from './tests/mocks/network';
 
 describe('Entry point', () => {
 	test('Set app version', () => {
@@ -26,7 +20,7 @@ describe('Entry point', () => {
 	});
 
 	test('Set login info of an authenticated user', () => {
-		useAuthenticated.mockReturnValue(true);
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		setup(<MainApp />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeDefined();
@@ -36,7 +30,7 @@ describe('Entry point', () => {
 	});
 
 	test('Avoid setting login info of an unauthenticated user', () => {
-		useAuthenticated.mockReturnValue(false);
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(false);
 		setup(<MainApp />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeUndefined();
@@ -46,27 +40,65 @@ describe('Entry point', () => {
 	});
 
 	test('Connection is established on app load', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnChatApi(ChatApiToSpy.GET_INBOX).mockResolvedValueOnce({ conversations: [] });
-		spyOnChatApi(ChatApiToSpy.SET_PRESENCE).mockResolvedValueOnce(undefined);
-		spyOnMeetingsApi(MeetingsApiToSpy.LIST_MEETINGS).mockResolvedValueOnce([]);
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 	});
 
 	test('Connection is not established on app load if getToken do not respond', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockRejectedValueOnce(new Error('Token error'));
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockRejectedValueOnce(new Error('Token error'));
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
-	test('Connection is not established on app load if getInbox does not respond', async () => {
-		useAuthenticated.mockReturnValue(true);
-		jest.spyOn(sessionApi, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		spyOnChatApi(ChatApiToSpy.GET_INBOX).mockRejectedValueOnce(new Error());
+	test('Connection is not established on app load if listRooms do not respond', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
+	});
+
+	test('getCapabilities is called when API version >= 1.6.8', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({
+			privateChatCreationEnabled: true,
+			groupChatCreationEnabled: true,
+			maxGroupMembers: 32,
+			messageDeleteTimeLimit: 5,
+			messageEditTimeLimit: 5,
+			maxRoomPictureSize: 2,
+			attachmentUploadEnabled: true,
+			maxAttachmentSize: 2,
+			showMessageReads: true,
+			showUsersPresence: true,
+			videoCallEnabled: true,
+			recordingEnabled: true,
+			virtualBackgroundEnabled: true
+		});
+		setup(<MainApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(getCapabilitiesSpy).toHaveBeenCalled();
+	});
+
+	test('setAttributes is called when API version < 1.6.8', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities');
+		setup(<MainApp />);
+		useStore.getState().setApiVersion('1.6.7');
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(getCapabilitiesSpy).not.toHaveBeenCalled();
+		expect(useStore.getState().session.attributes).toBeDefined();
 	});
 });

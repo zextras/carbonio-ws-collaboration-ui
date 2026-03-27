@@ -6,6 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -59,13 +60,13 @@ const clearSearchIcon = 'icon: BackspaceOutline';
 
 describe('ConversationSearchPanel', () => {
 	test('should render "Search messages with {userName} on one to one conversation', () => {
-		const goToChatViewFn = jest.fn();
+		const goToChatViewFn = vi.fn();
 		setup(<ConversationSearchPanel roomId={oneToOneRoom.id} goToChatView={goToChatViewFn} />);
 		expect(screen.getByText(`Search messages with ${user2.name}`)).toBeVisible();
 	});
 
 	test('should render the search panel', () => {
-		const goToChatViewFn = jest.fn();
+		const goToChatViewFn = vi.fn();
 		setup(<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />);
 
 		expect(screen.getByRole('textbox', { name: /search messages/i })).toBeVisible();
@@ -78,7 +79,7 @@ describe('ConversationSearchPanel', () => {
 	});
 
 	test('should enable the search button and render the clear button when the user starts typing', async () => {
-		const goToChatViewFn = jest.fn();
+		const goToChatViewFn = vi.fn();
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
 		);
@@ -90,12 +91,11 @@ describe('ConversationSearchPanel', () => {
 
 	describe('Searched messages', () => {
 		test('should render the searched messages when the user types something and click on search button', async () => {
-			const goToChatViewFn = jest.fn();
+			const goToChatViewFn = vi.fn();
 			const textMessage = createMockTextMessage({ from: user2.id });
 			useStore.getState().newMessage(textMessage);
 
-			const { xmppClient } = useStore.getState().connections;
-			jest.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
+			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
 				useStore.getState().setSearchResults(roomId, [textMessage]);
 				return Promise.resolve();
 			});
@@ -113,12 +113,11 @@ describe('ConversationSearchPanel', () => {
 		});
 
 		test('should render the "YOU" on your searched messages', async () => {
-			const goToChatViewFn = jest.fn();
+			const goToChatViewFn = vi.fn();
 			const textMessage = createMockTextMessage({ from: loggedUser.id });
 			useStore.getState().newMessage(textMessage);
 
-			const { xmppClient } = useStore.getState().connections;
-			jest.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
+			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
 				useStore.getState().setSearchResults(roomId, [textMessage]);
 				return Promise.resolve();
 			});
@@ -137,10 +136,9 @@ describe('ConversationSearchPanel', () => {
 	});
 
 	test('should render the no results message if there are no results', async () => {
-		const goToChatViewFn = jest.fn();
-		const { xmppClient } = useStore.getState().connections;
+		const goToChatViewFn = vi.fn();
 
-		jest.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId: string) => {
+		vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId: string) => {
 			useStore.getState().setSearchResults(roomId, []);
 			return Promise.resolve();
 		});
@@ -156,7 +154,7 @@ describe('ConversationSearchPanel', () => {
 	});
 
 	test('should clear the input message when the user clicks on clear button', async () => {
-		const goToChatViewFn = jest.fn();
+		const goToChatViewFn = vi.fn();
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
 		);
@@ -170,9 +168,9 @@ describe('ConversationSearchPanel', () => {
 	});
 
 	test('should show error snackbar when search fails', async () => {
-		const goToChatViewFn = jest.fn();
-		const { xmppClient } = useStore.getState().connections;
-		jest.spyOn(xmppClient, 'fullTextSearch').mockRejectedValue(new Error('Search failed'));
+		const goToChatViewFn = vi.fn();
+
+		vi.spyOn(xmppClient, 'fullTextSearch').mockRejectedValue(new Error('Search failed'));
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
 		);

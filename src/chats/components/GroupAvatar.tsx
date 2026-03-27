@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
-import { RoomsApi } from '../../network';
+import { getURLRoomPicture } from '../../network';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import {
 	getPictureUpdatedAt,
@@ -62,7 +62,7 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const picture = useMemo(() => {
 		if (pictureUpdatedAt != null) {
-			return `${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`;
+			return `${getURLRoomPicture(roomId)}?${pictureUpdatedAt}`;
 		}
 		return '';
 	}, [roomId, pictureUpdatedAt]);

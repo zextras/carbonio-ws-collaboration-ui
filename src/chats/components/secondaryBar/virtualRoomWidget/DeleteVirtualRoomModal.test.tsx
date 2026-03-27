@@ -8,6 +8,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import DeleteVirtualRoomModal from './DeleteVirtualRoomModal';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -16,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -37,7 +37,7 @@ const scheduledMeetingMod: MeetingBe = createMockMeeting({
 
 describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
-		const spyOnDeleteRoomAndMeeting = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_AND_MEETING);
+		const spyOnDeleteRoomAndMeeting = vi.spyOn(api, 'deleteRoomAndMeeting');
 		act(() => {
 			const store = useStore.getState();
 			store.setLoginInfo(sessionUser.id, sessionUser.name);

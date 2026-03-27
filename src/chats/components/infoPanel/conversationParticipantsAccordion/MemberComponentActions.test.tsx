@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
@@ -12,14 +11,14 @@ import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
+import { mockGoToMainPage, mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
-import { mockGoToMainPage, mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
@@ -109,6 +108,8 @@ const mockedRoom2 = createMockRoom({
 	]
 });
 
+vi.mock('../../../../hooks/useRouting');
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
@@ -122,7 +123,6 @@ beforeEach(() => {
 });
 describe('participants actions - go to private chat', () => {
 	test('existent chat', async () => {
-		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
 		expect(mockGoToRoomPage).toHaveBeenCalled();
@@ -155,8 +155,7 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
-		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		mockGoToMainPage.mockReturnValue('main page');
+		const spyOnDeleteRoomMember = vi.spyOn(api, 'deleteRoomMember');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner={false}
@@ -191,8 +190,7 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('delete_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
-		const spyOnDeleteRoom = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM);
-		mockGoToMainPage.mockReturnValue('main page');
+		const spyOnDeleteRoom = vi.spyOn(api, 'deleteRoomAndMeeting');
 		const { user } = setup(
 			<LeaveConversationListAction
 				iAmOwner
@@ -213,7 +211,7 @@ describe('participants actions - leave/delete conversation', () => {
 
 describe('participants actions - promote/demote member', () => {
 	test('Promote member', async () => {
-		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
+		const spyOnPromoteRoomMember = vi.spyOn(api, 'promoteRoomMember');
 		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -227,7 +225,7 @@ describe('participants actions - promote/demote member', () => {
 	});
 
 	test('Demote member', async () => {
-		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
+		const spyOnDemoteRoomMember = vi.spyOn(api, 'demotesRoomMember');
 		const { user } = setup(
 			<MemberComponentInfo
 				roomId={mockedRoom.id}
@@ -264,7 +262,7 @@ describe('participants actions - delete user', () => {
 	});
 
 	test('delete user', async () => {
-		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
+		const spyOnDeleteRoomMember = vi.spyOn(api, 'deleteRoomMember');
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);

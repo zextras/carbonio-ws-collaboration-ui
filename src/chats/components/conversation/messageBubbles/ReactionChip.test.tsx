@@ -9,6 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ReactionChip from './ReactionChip';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -87,10 +88,7 @@ describe('ReactionChip', () => {
 	});
 
 	test('Clicking on the chip sends a reaction if session user does not previous send id', async () => {
-		const spyOnSendChatMessageReaction = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessageReaction'
-		);
+		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
 		const { user } = setup(
 			<ReactionChip
 				reaction={'\uD83D\uDC4D'}
@@ -105,10 +103,7 @@ describe('ReactionChip', () => {
 	});
 
 	test('Clicking on the chip that the user sent remove it', async () => {
-		const spyOnSendChatMessageReaction = jest.spyOn(
-			useStore.getState().connections.xmppClient,
-			'sendChatMessageReaction'
-		);
+		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
 		const { user } = setup(
 			<ReactionChip
 				reaction={'\uD83D\uDC4D'}
