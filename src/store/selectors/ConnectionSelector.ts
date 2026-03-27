@@ -10,8 +10,5 @@ import { RootStore } from '../../types/store/StoreTypes';
 
 export const getWsClient = (store: RootStore): IWebSocketClient => store.connections.wsClient;
 
-export const getChatSseStatus = (store: RootStore): boolean | undefined =>
-	store.connections.status.chat_sse;
-
 export const getChatConnectionId = (store: RootStore): string | undefined =>
 	store.connections.chatConnectionId;

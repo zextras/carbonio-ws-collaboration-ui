@@ -12,7 +12,7 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
-import ChatApi from '../../../../../network/apis/ChatApi';
+import { chatWsClient } from '../../../../../network/websocket/ChatWebSocketClient';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
@@ -72,13 +72,9 @@ const useBubbleReactions = (
 	const sendReaction = useCallback(
 		(emoji: string) => {
 			if (myReaction !== emoji) {
-				ChatApi.addReaction(message.roomId, message.stanzaId, emoji).catch((err) => {
-					console.error('[useBubbleReactions] Failed to add reaction:', err);
-				});
+				chatWsClient.addReaction(message.roomId, message.stanzaId, emoji);
 			} else {
-				ChatApi.removeReaction(message.roomId, message.stanzaId, emoji).catch((err) => {
-					console.error('[useBubbleReactions] Failed to remove reaction:', err);
-				});
+				chatWsClient.removeReaction(message.roomId, message.stanzaId, emoji);
 			}
 			setPopoverActive(false);
 		},

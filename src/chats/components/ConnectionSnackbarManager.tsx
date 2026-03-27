@@ -20,26 +20,23 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 	);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const chatSseNetworkStatus = useStore(({ connections }) => connections.status.chat_sse);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [snackbarManuallyClosed, setSnackbarManuallyClosed] = useState(false);
 	const [timer, setTimer] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (chatsBeNetworkStatus || chatSseNetworkStatus || websocketNetworkStatus) {
+		if (chatsBeNetworkStatus || websocketNetworkStatus) {
 			setSnackbarManuallyClosed(false);
 			setTimer(false);
 		}
-	}, [chatsBeNetworkStatus, websocketNetworkStatus, chatSseNetworkStatus]);
+	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
 
 	const showSnackbar = useMemo(
 		() =>
 			!snackbarManuallyClosed &&
-			(chatsBeNetworkStatus === false ||
-				chatSseNetworkStatus === false ||
-				websocketNetworkStatus === false),
-		[chatsBeNetworkStatus, websocketNetworkStatus, chatSseNetworkStatus, snackbarManuallyClosed]
+			(chatsBeNetworkStatus === false || websocketNetworkStatus === false),
+		[chatsBeNetworkStatus, websocketNetworkStatus, snackbarManuallyClosed]
 	);
 
 	useEffect(() => {
@@ -57,7 +54,7 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 	if (showSnackbar && timer) {
 		return (
 			<Snackbar
-				open={!chatsBeNetworkStatus || !chatSseNetworkStatus || !websocketNetworkStatus}
+				open={!chatsBeNetworkStatus || !websocketNetworkStatus}
 				onClose={(): void => setSnackbarManuallyClosed(true)}
 				actionLabel={actionLabel}
 				disableAutoHide

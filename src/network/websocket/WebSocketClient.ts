@@ -8,6 +8,7 @@ import { debounce, DebouncedFunc, includes } from 'lodash';
 import { gte } from 'semver';
 
 import { normalizeEventType } from './normalizedEventType';
+import { wsChatEventsHandler } from './wsChatEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
@@ -102,12 +103,21 @@ export class WebSocketClient {
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
 			const rowEvent = JSON.parse(e.data);
-			const event = normalizeEventType(rowEvent);
-			if (event.type === WsEventType.PONG) {
+
+			// Handle pong from either legacy or new protocol
+			if (rowEvent.type === WsEventType.PONG || rowEvent.type === 'pong') {
 				this._disconnectionCheckFunction.cancel();
-			} else {
-				wsEventsHandler(event);
+				return;
 			}
+
+			// Try the new chat event handler first (messaging, presence, reactions, read markers)
+			if (wsChatEventsHandler(rowEvent)) {
+				return;
+			}
+
+			// Fall back to legacy room/meeting event handler
+			const event = normalizeEventType(rowEvent);
+			wsEventsHandler(event);
 		}
 	};
 

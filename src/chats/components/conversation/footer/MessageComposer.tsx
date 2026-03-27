@@ -35,6 +35,7 @@ import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
 import ChatApi from '../../../../network/apis/ChatApi';
+import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -265,9 +266,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
-						console.error('[MessageComposer] Failed to send reply:', err);
-					});
+					chatWsClient.sendMessage(roomId, message, referenceMessage.stanzaId);
 					unsetReferenceMessage(roomId);
 					break;
 				}
@@ -277,9 +276,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
-							console.error('[MessageComposer] Failed to edit message:', err);
-						});
+						chatWsClient.editMessage(roomId, referenceMessage.stanzaId, message);
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -337,9 +334,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			ChatApi.sendMessage(roomId, message).catch((err) => {
-				console.error('[MessageComposer] Failed to send message:', err);
-			});
+			// Handle placeholder rooms: create room first, then send via WS
+			const placeholderRoom = roomId.split('placeholder-');
+			if (placeholderRoom[1]) {
+				RoomsApi.replacePlaceholderRoom(placeholderRoom[1]).then((response) => {
+					chatWsClient.sendMessage(response.id, message);
+				});
+			} else {
+				chatWsClient.sendMessage(roomId, message);
+			}
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}

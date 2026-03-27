@@ -17,8 +17,6 @@ import MeetingNotificationHandler from './meetings/components/MeetingNotificatio
 import initMeetings from './meetings/initMeetings';
 import { MeetingsApi, InfoApi } from './network';
 import ChatApi from './network/apis/ChatApi';
-import PresenceApi from './network/apis/PresenceApi';
-import ChatSseClient from './network/sse/ChatSseClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -244,14 +242,10 @@ export default function MainApp(): React.JSX.Element {
 						});
 
 						setChatsBeStatus(true);
-						// Init SSE client and webSocket after inbox request to avoid missing data
+						// Init WebSocket after inbox request to avoid missing data
+						// Presence is handled by WebSocket connection lifecycle (no polling needed)
 						const { wsClient } = useStore.getState().connections;
-						ChatSseClient.connect();
 						wsClient.connect();
-						// Start presence polling (sends heartbeats to stay online)
-						PresenceApi.startPolling().catch((error) => {
-							console.error('[MainApp] Error starting presence polling:', error);
-						});
 					})
 					.catch(() => setChatsBeStatus(false));
 			})
@@ -265,10 +259,10 @@ export default function MainApp(): React.JSX.Element {
 			connect();
 		}
 
-		// Cleanup: disconnect SSE and stop presence polling when leaving
+		// Cleanup: disconnect WebSocket when leaving
 		const handleBeforeUnload = (): void => {
-			PresenceApi.stopPolling();
-			ChatSseClient.disconnect();
+			const { wsClient: ws } = useStore.getState().connections;
+			ws.disconnect();
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
@@ -276,8 +270,8 @@ export default function MainApp(): React.JSX.Element {
 		return (): void => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 			if (authenticated) {
-				PresenceApi.stopPolling();
-				ChatSseClient.disconnect();
+				const { wsClient: ws } = useStore.getState().connections;
+				ws.disconnect();
 			}
 		};
 	}, [authenticated, connect]);

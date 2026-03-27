@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import ChatApi from '../../network/apis/ChatApi';
+import { chatWsClient } from '../../network/websocket/ChatWebSocketClient';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -89,9 +89,7 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			ChatApi.sendMessage(meeting.roomId, message).catch((err) => {
-				console.error('[MeetingNotification] Failed to send message:', err);
-			});
+			chatWsClient.sendMessage(meeting.roomId, message);
 			setMessage('');
 			stopMeetingSound();
 		}

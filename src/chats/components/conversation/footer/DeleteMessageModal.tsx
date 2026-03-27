@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import ChatApi from '../../../../network/apis/ChatApi';
+import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -35,9 +35,7 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 
 	const deleteMessage = useCallback(() => {
 		if (referenceMessage) {
-			ChatApi.deleteMessage(roomId, referenceMessage.stanzaId).catch((err) => {
-				console.error('[DeleteMessageModal] Failed to delete message:', err);
-			});
+			chatWsClient.deleteMessage(roomId, referenceMessage.stanzaId);
 		}
 		onClose();
 	}, [onClose, referenceMessage, roomId]);

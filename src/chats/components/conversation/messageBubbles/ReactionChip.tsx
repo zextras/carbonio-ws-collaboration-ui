@@ -11,7 +11,7 @@ import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-sy
 import { includes, size } from 'lodash';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import ChatApi from '../../../../network/apis/ChatApi';
+import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';
@@ -97,13 +97,9 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 	const changeReaction = useCallback(() => {
 		setIsAnimating(true);
 		if (includes(from, sessionId)) {
-			ChatApi.removeReaction(roomId, stanzaId, reaction).catch((err) => {
-				console.error('[ReactionChip] Failed to remove reaction:', err);
-			});
+			chatWsClient.removeReaction(roomId, stanzaId, reaction);
 		} else {
-			ChatApi.addReaction(roomId, stanzaId, reaction).catch((err) => {
-				console.error('[ReactionChip] Failed to add reaction:', err);
-			});
+			chatWsClient.addReaction(roomId, stanzaId, reaction);
 		}
 		setTimeout(() => setIsAnimating(false), 500);
 	}, [from, reaction, roomId, sessionId, stanzaId]);
