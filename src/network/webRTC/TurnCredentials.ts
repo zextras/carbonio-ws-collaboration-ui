@@ -5,7 +5,6 @@
  */
 
 interface TurnCredentialsResponse {
-	url: string;
 	username: string;
 	credential: string;
 	ttl: number;
@@ -15,6 +14,9 @@ interface TurnCredentialsResponse {
  * Fetches ephemeral TURN credentials from the auth service.
  * Returns an RTCIceServer array for use in PeerConnConfig.
  * Returns empty array if TURN is not configured (204) or on error.
+ *
+ * The TURN URL is computed from the current proxy hostname — the backend
+ * no longer returns it because it is always `turns:<proxy>:443?transport=tcp`.
  */
 export async function fetchTurnIceServers(): Promise<RTCIceServer[]> {
 	try {
@@ -28,9 +30,10 @@ export async function fetchTurnIceServers(): Promise<RTCIceServer[]> {
 		}
 
 		const data: TurnCredentialsResponse = await response.json();
+		const turnUrl = `turns:${window.location.hostname}:443?transport=tcp`;
 		return [
 			{
-				urls: data.url,
+				urls: turnUrl,
 				username: data.username,
 				credential: data.credential
 			}
