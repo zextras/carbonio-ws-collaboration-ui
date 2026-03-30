@@ -33,7 +33,6 @@ export class PeerConnConfig implements IPeerConnConfig {
 	}
 
 	getConfig(): RTCConfiguration {
-		const hasTurn = PeerConnConfig.turnServers.length > 0;
 		return {
 			...this.defaultConfig,
 			iceServers: [
@@ -41,7 +40,7 @@ export class PeerConnConfig implements IPeerConnConfig {
 				...this.additionalRTCIceServers,
 				...PeerConnConfig.turnServers
 			],
-			iceTransportPolicy: hasTurn ? 'relay' : 'all'
+			iceTransportPolicy: 'all'
 		};
 	}
 }
