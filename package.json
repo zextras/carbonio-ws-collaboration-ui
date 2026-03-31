@@ -46,7 +46,7 @@
 		"@vitest/coverage-v8": "^4.0.15",
 		"@vitest/ui": "^4.0.15",
 		"@zextras/carbonio-ui-configs": "^2.1.0",
-		"@zextras/carbonio-ui-sdk": "2.2.1",
+		"@zextras/carbonio-ui-sdk": "2.2.2",
 		"babel-plugin-transform-import-meta": "^2.3.3",
 		"eslint-plugin-notice": "^0.9.10",
 		"husky": "^9.1.7",
