@@ -52,7 +52,8 @@ export const useMeetingsStoreSlice: StateCreator<
 						meetingType: meeting.meetingType,
 						startedAt: meeting.startedAt,
 						recStartedAt: meeting.recStartedAt,
-						recUserId: meeting.recUserId
+						recUserId: meeting.recUserId,
+						serviceId: meeting.serviceId
 					};
 
 					// Set meetingId on room data
