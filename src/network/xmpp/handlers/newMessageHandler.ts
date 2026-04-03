@@ -67,11 +67,17 @@ export function onNewMessageStanza(message: Element): true {
 			}
 			if (newMessage.operation === OperationType.MESSAGE_UNPINNED) {
 				store.removePinnedMessage(newMessage.roomId);
+				store.setSelectedPinnedMessage(newMessage.roomId, undefined);
+			}
+			// Mark message as read if the message configuration is sent after user action
+			if (newMessage.from === sessionId) {
+				xmppClient.readMessage(newMessage.roomId, newMessage.id);
 			}
 			break;
 		}
 		case MessageType.FASTENING: {
 			store.addFastening([newMessage]);
+
 			// Update lastMessage
 			const lastMessage = store.chatsRegistry[newMessage.roomId]?.lastMessage;
 			if (
@@ -97,13 +103,6 @@ export function onNewMessageStanza(message: Element): true {
 					} as TextMessage);
 				}
 			}
-			// const pinnedMessage = getPinnedMessage(store, newMessage.roomId);
-			// if (
-			// 	newMessage.action === FasteningAction.DELETE &&
-			// 	pinnedMessage?.stanzaId === newMessage.originalStanzaId
-			// ) {
-			// 	store.removePinnedMessage(newMessage.roomId);
-			// }
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);
 				store.setNewReaction(
