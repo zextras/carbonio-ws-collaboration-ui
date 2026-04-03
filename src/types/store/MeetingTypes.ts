@@ -44,7 +44,6 @@ export type Meeting = {
 	startedAt?: string;
 	recStartedAt?: string;
 	recUserId?: string;
-	serviceId?: string;
 };
 
 export type MeetingParticipantMap = {

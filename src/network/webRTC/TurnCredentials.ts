@@ -12,20 +12,17 @@ interface TurnCredentialsResponse {
 }
 
 /**
- * Fetches ephemeral TURN credentials from the auth service.
+ * Fetches ephemeral TURN credentials from the meetings service.
  * Returns an RTCIceServer array for use in PeerConnConfig.
  * Returns empty array if TURN is not configured (204) or on error.
  *
- * @param serviceId - The service-id of the TURN server instance to authenticate against.
+ * @param meetingId - The meeting ID to fetch TURN credentials for.
  */
-export async function fetchTurnIceServers(serviceId: string): Promise<RTCIceServer[]> {
+export async function fetchTurnIceServers(meetingId: string): Promise<RTCIceServer[]> {
 	try {
-		const response = await fetch('/services/turn/credentials', {
+		const response = await fetch(`/services/chats/meetings/${meetingId}/turn-credentials`, {
 			method: 'GET',
-			credentials: 'same-origin',
-			headers: {
-				'service-id': serviceId
-			}
+			credentials: 'same-origin'
 		});
 
 		if (response.status === 204 || !response.ok) {

@@ -69,9 +69,7 @@ export const joinMeeting = (
 		settings
 	).then((resp) => {
 		if (resp.status === 'ACCEPTED') {
-			const meeting = useStore.getState().meetings[meetingId];
-			const serviceId = meeting?.serviceId ?? '';
-			return fetchTurnIceServers(serviceId).then((turnServers) => {
+			return fetchTurnIceServers(meetingId).then((turnServers) => {
 				PeerConnConfig.setTurnServers(turnServers);
 				useStore
 					.getState()
