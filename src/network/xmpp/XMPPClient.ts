@@ -215,10 +215,7 @@ class XMPPClient {
 									setLastMessage(newLastMessage.roomId, newLastMessage);
 									return;
 								}
-								date = messages.reduce(
-									(oldest, m) => (m.date < oldest ? m.date : oldest),
-									messages[0]?.date
-								);
+								date = messages.reduce((oldest, m) => Math.min(m.date, oldest), messages[0]?.date);
 							}
 						})
 					);
