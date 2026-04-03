@@ -51,7 +51,7 @@ describe('clear history action', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRooms([mockedRoom]);
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 			result.current.setUserInfo([user1Info, user2Info]);
 			result.current.newMessage(message);
 		});

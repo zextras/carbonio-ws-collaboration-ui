@@ -43,7 +43,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1.id, 'user1');
+	store.setLoginInfo({ id: user1.id, name: 'user1' });
 	store.setUserInfo([user1, user2]);
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
@@ -111,7 +111,7 @@ describe('Snackbar notifications', () => {
 	test('shows snackbar when moderator lowers your hand', () => {
 		const store = useStore.getState();
 		act(() => {
-			store.setLoginInfo(user2.id, 'user2');
+			store.setLoginInfo({ id: user2.id, name: 'user2' });
 			store.setUserWithHandRaised(user2.id, true);
 		});
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);

@@ -42,7 +42,7 @@ const mockedOneToOne: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.setUserInfo([user1Be, user2Be]);
 	store.addRooms([mockedOneToOne, mockedGroup]);
 });

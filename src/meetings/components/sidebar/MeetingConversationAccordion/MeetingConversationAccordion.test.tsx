@@ -71,7 +71,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
-		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
+		result.current.setLoginInfo({ id: mockUser1.id });
 		result.current.setUserInfo([mockUser2]);
 		result.current.addRooms([groupRoom]);
 		result.current.addMeetings([groupMeeting]);
@@ -191,7 +191,7 @@ const setupTemporaryRoom = (
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
-		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
+		result.current.setLoginInfo({ id: mockUser1.id });
 		result.current.setUserInfo([mockUser2]);
 		result.current.setApiVersion('1.6.7');
 		result.current.addRooms([temporaryRoom]);

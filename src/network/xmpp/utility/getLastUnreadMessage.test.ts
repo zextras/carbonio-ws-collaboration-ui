@@ -33,7 +33,7 @@ const myMarker = createMockMarker({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.addRooms([room]);
 });
 describe('getLastUnreadMessage', () => {

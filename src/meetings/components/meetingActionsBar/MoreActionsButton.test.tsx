@@ -72,7 +72,7 @@ const meetingWithOnePerson: MeetingBe = createMockMeeting({
 const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
@@ -88,7 +88,7 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setUserInfo([user1]);
-		result.current.setLoginInfo(user1.id, user1.name);
+		result.current.setLoginInfo({ id: user1.id, name: user1.name });
 		result.current.addRooms([room]);
 		result.current.addMeetings([meetingWithOnePerson]);
 		result.current.meetingConnection(meetingWithOnePerson.id);
@@ -110,7 +110,7 @@ const customPiPContextValue = {
 const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);

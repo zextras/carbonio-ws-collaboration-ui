@@ -73,7 +73,7 @@ describe('MobileActionBar test', () => {
 	test('Toggle audio stream', async () => {
 		const spyOnUpdateAudioStreamStatus = vi.spyOn(api, 'updateAudioStreamStatus');
 		const store = useStore.getState();
-		store.setLoginInfo('userId', 'User');
+		store.setLoginInfo({ id: 'userId', name: 'User' });
 		store.addMeetings([mockMeeting]);
 		store.addParticipant(mockMeeting.id, {
 			userId: 'userId',

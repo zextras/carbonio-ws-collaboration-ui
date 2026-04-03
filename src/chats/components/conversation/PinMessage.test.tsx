@@ -27,7 +27,7 @@ const oneToOneRoom: RoomBe = createMockRoom({
 });
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1.id, 'user1');
+	store.setLoginInfo({ id: user1.id, name: 'user1' });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([oneToOneRoom]);
 });
@@ -78,7 +78,7 @@ describe('PinMessage', () => {
 
 		beforeEach(() => {
 			const store = useStore.getState();
-			store.setLoginInfo(user1.id, 'user1');
+			store.setLoginInfo({ id: user1.id, name: 'user1' });
 			store.setUserInfo([user1, user2, user3]);
 			store.addRooms([group]);
 		});
@@ -104,7 +104,7 @@ describe('PinMessage', () => {
 				from: 'user1'
 			});
 			const store = useStore.getState();
-			store.setLoginInfo(user2.id, 'user2');
+			store.setLoginInfo({ id: user2.id, name: 'user2' });
 
 			setup(<PinMessage pinnedMessage={mockedTextMessage} />);
 

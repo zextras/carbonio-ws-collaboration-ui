@@ -15,7 +15,7 @@ const mockUser = createMockUser({ id: 'userId-mock', name: 'User Mock' });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(loggedUser.id, loggedUser.name);
+	store.setLoginInfo({ id: loggedUser.id, name: loggedUser.name });
 	store.setUserInfo([mockUser]);
 });
 

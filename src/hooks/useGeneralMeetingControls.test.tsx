@@ -20,7 +20,7 @@ vi.mock('../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('userId', 'User');
+	store.setLoginInfo({ id: 'userId', name: 'User' });
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
 	store.meetingConnection(meeting.id);

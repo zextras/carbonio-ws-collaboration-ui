@@ -56,7 +56,7 @@ vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
-	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user2Info]);
 	store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 });

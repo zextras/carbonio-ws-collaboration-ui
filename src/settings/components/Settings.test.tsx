@@ -44,7 +44,7 @@ const dataTestid = 'data-testid';
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setUserInfo([user1]);
-	store.setLoginInfo(user1.id, user1.name, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name, displayName: user1.name });
 });
 describe('Settings view', () => {
 	describe('Notifications Settings', () => {

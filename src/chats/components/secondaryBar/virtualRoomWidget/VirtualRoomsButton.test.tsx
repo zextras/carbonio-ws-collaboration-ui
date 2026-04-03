@@ -29,7 +29,7 @@ vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.setUserInfo([user1]);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 	store.addMeetings([virtualRoom]);

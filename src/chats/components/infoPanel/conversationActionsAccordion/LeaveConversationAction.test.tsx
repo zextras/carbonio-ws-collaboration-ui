@@ -34,7 +34,7 @@ vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user2Info.id, user2Info.name);
+	store.setLoginInfo({ id: user2Info.id, name: user2Info.name });
 	store.addRooms([mockedRoom]);
 });
 describe('Leave conversation Action', () => {

@@ -73,7 +73,7 @@ vi.mock('../../utils/FetchUtils');
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setApiVersion('1.6.4');
-	store.setLoginInfo(userId, 'User');
+	store.setLoginInfo({ id: userId, name: 'User' });
 	store.setQueueId('queueId');
 	store.addRooms([roomMock]);
 });
@@ -259,7 +259,7 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
 		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
@@ -296,7 +296,7 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
 
 		await leaveMeeting(meetingMock.id);
 
@@ -431,7 +431,12 @@ describe('Meetings API', () => {
 
 	test('leaveWaitingRoom is called correctly for guest user', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789`;
-		useStore.getState().setLoginInfo(userId, guestUser.email, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo({
+			id: userId,
+			name: guestUser.email,
+			displayName: guestUser.name,
+			userType: guestUser.type
+		});
 		useStore.getState().setQueueId('queueId');
 		await leaveWaitingRoom(meetingMock.id);
 

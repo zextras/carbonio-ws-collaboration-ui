@@ -22,7 +22,6 @@ import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
-import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
 
 export default function MainApp(): React.JSX.Element {
@@ -52,7 +51,11 @@ export default function MainApp(): React.JSX.Element {
 	useEffect(() => {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
-			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+			setLoginInfo({
+				id: userAccount.id,
+				name: userAccount.name,
+				displayName: userAccount.displayName
+			});
 		}
 	}, [setLoginInfo, authenticated]);
 

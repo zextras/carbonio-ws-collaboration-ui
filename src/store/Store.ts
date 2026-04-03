@@ -18,8 +18,7 @@ import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
 
 const STORAGE_KEY = 'carbonio-ws-collaboration-storage';
-const TTL = 48 * 60 * 60 * 1000;
-
+const TTL = 2 * 24 * 60 * 60 * 1000;
 const checkAndCleanExpiredStorage = (): void => {
 	const stored = localStorage.getItem(STORAGE_KEY);
 	if (stored) {
@@ -47,7 +46,7 @@ const useStore = create<RootStore>()(
 				...useActiveMeetingSlice(set, get, api)
 			}),
 			{
-				name: 'carbonio-ws-collaboration-storage',
+				name: STORAGE_KEY,
 				partialize: (state) => ({
 					session: {
 						_persistedAt: state.session._persistedAt

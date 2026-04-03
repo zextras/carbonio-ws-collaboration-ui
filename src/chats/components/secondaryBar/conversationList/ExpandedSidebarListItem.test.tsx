@@ -149,7 +149,7 @@ const mockedAttachmentMessage = createMockTextMessage({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.setUserInfo([user1Be, user2Be, user4Be]);
 	store.addRooms([mockedGroup, mockedOneToOne]);
 	store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'TRUE' }));
@@ -249,7 +249,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('Deleted image message', () => {
 			const store: RootStore = useStore.getState();
-			store.setLoginInfo(user2Be.id, user2Be.name);
+			store.setLoginInfo({ id: user2Be.id, name: user2Be.name });
 			store.newMessage(mockedConfigurationMessage);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(

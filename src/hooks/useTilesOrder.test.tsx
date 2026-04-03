@@ -24,7 +24,7 @@ const participant5 = createMockParticipants({ userId: '5', joinedAt: '2023-09-18
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('0', 'User');
+	store.setLoginInfo({ id: '0' });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
