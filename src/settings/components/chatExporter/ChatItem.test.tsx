@@ -62,7 +62,7 @@ describe('ChatItem test', () => {
 			text: 'Last message',
 			from: otherUser.id
 		});
-		useStore.getState().newMessage(message);
+		useStore.getState().setInboxMessages([message]);
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText(`Other: ${message.text}`);
 		expect(lastMessage).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('ChatItem test', () => {
 			from: otherUser.id,
 			deleted: true
 		});
-		useStore.getState().newMessage(message);
+		useStore.getState().setInboxMessages([message]);
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText('Deleted message');
 		expect(lastMessage).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe('ChatItem test', () => {
 			attachment: { id: 'file', name: 'Attachment.txt', mimeType: 'txt', size: 2300 },
 			from: otherUser.id
 		});
-		useStore.getState().newMessage(message);
+		useStore.getState().setInboxMessages([message]);
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText(`Other: ${message.attachment!.name}`);
 		expect(lastMessage).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('ChatItem test', () => {
 			value: 'newName',
 			from: otherUser.id
 		});
-		useStore.getState().newMessage(message);
+		useStore.getState().setInboxMessages([message]);
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const lastMessage = screen.getByText('Other User changed the title of this Group in .');
 		expect(lastMessage).toBeInTheDocument();

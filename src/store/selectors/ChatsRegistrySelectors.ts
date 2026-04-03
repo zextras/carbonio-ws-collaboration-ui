@@ -56,27 +56,10 @@ export const getReadableMessagesSelector = (
 	return readableMessages;
 };
 
-export const getLastTextMessageIdSelector = (
+export const getLastMessageSelector = (
 	store: RootStore,
 	roomId: string
-): string | undefined => {
-	const textMessages = filter(
-		store.chatsRegistry[roomId]?.messages,
-		(message) => message.type === MessageType.TEXT_MSG
-	);
-	if (textMessages && textMessages[textMessages.length - 1]) {
-		return textMessages[textMessages.length - 1].id;
-	}
-	return undefined;
-};
-
-export const getLastMessageIdSelector = (store: RootStore, roomId: string): string | undefined => {
-	const messages = store.chatsRegistry[roomId]?.messages;
-	if (messages?.[messages.length - 1]) {
-		return messages[messages.length - 1].id;
-	}
-	return undefined;
-};
+): TextMessage | ConfigurationMessage | undefined => store.chatsRegistry[roomId]?.lastMessage;
 
 export const getMessageSelector = (
 	store: RootStore,

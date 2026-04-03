@@ -55,22 +55,6 @@ describe('getLastUnreadMessage', () => {
 			expect(getLastUnreadMessage(room.id)).toBe(message.id);
 		});
 
-		test('Conversation has only the inbox message sent by me', () => {
-			const message = createMockTextMessage({ roomId: room.id, from: sessionUser.id });
-			const store = useStore.getState();
-			store.newInboxMessages([message]);
-
-			expect(getLastUnreadMessage(room.id)).toBe(undefined);
-		});
-
-		test('Conversation has only the inbox message sent by another user', () => {
-			const message = createMockTextMessage({ roomId: room.id, from: user1.id });
-			const store = useStore.getState();
-			store.newInboxMessages([message]);
-
-			expect(getLastUnreadMessage(room.id)).toBe(message.id);
-		});
-
 		test('Conversation has only text messages sent by me', () => {
 			const message1 = createMockTextMessage({
 				roomId: room.id,

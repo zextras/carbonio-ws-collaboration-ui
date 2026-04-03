@@ -20,9 +20,15 @@ import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import HistoryAccumulator from './utility/HistoryAccumulator';
 import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
+import { getEditAndDeleteFasteningSelector } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
-import { MessageFastening, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
-import { dateToISODate } from '../../utils/dateUtils';
+import {
+	FasteningAction,
+	MessageFastening,
+	MessageType,
+	TextMessage
+} from '../../types/store/ChatsRegistryTypes';
+import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
 
@@ -140,8 +146,83 @@ class XMPPClient {
 			type: XMPPRequestType.IQ,
 			elem: iq,
 			callback: () => {
-				const messages = HistoryAccumulator.getInboxMessages(queryId);
-				useStore.getState().newInboxMessages(messages);
+				const inboxMessages = HistoryAccumulator.getInboxMessages(queryId);
+				const filteredInbox = inboxMessages.filter((message) => {
+					const inboxMessageId = useStore.getState().chatsRegistry[message.roomId]?.inboxMessageId;
+					const cleanHistoryDate =
+						useStore.getState().rooms[message.roomId]?.userSettings?.clearedAt;
+					return (
+						(!inboxMessageId || message.id !== inboxMessageId) &&
+						(!cleanHistoryDate || message.date > dateToTimestamp(cleanHistoryDate))
+					);
+				});
+				if (filteredInbox.length === 0) return;
+
+				const { setInboxMessages, addFastening, setLastMessage } = useStore.getState();
+				setInboxMessages(filteredInbox);
+				const fastenings = filteredInbox.filter(
+					(message) => message.type === MessageType.FASTENING
+				);
+				if (fastenings.length > 0) {
+					addFastening(fastenings);
+					Promise.all(
+						fastenings.map(async (fastening) => {
+							let { date } = fastening;
+							while (true) {
+								const queryId = HistoryAccumulator.getNextId();
+								// eslint-disable-next-line no-await-in-loop
+								const resp = await this.requestMessages(queryId, fastening.roomId, date, 3);
+								if (!resp) return;
+								const messages = HistoryAccumulator.getHistoryMessages(queryId);
+								if (messages.length === 0) return;
+
+								const fasteningMessages = messages.filter(
+									(msg) => msg.type === MessageType.FASTENING
+								);
+								if (fasteningMessages.length > 0) {
+									addFastening(fasteningMessages);
+								}
+								const textOrConfig = messages.findLast(
+									(m) => m.type === MessageType.TEXT_MSG || m.type === MessageType.CONFIGURATION_MSG
+								);
+
+								if (textOrConfig) {
+									let newLastMessage = textOrConfig;
+									if (newLastMessage.type === MessageType.TEXT_MSG) {
+										const lastFastening = getEditAndDeleteFasteningSelector(
+											useStore.getState(),
+											fastening.roomId,
+											newLastMessage.stanzaId
+										);
+										if (lastFastening?.action === FasteningAction.EDIT) {
+											newLastMessage = {
+												...textOrConfig,
+												edited: true,
+												text: lastFastening.value ?? '',
+												editedStanzaId: fastening.stanzaId
+											} as TextMessage;
+										}
+										if (FasteningAction.DELETE === lastFastening?.action) {
+											newLastMessage = {
+												...textOrConfig,
+												deleted: true,
+												text: '',
+												attachment: undefined,
+												replyTo: undefined
+											} as TextMessage;
+										}
+									}
+									setLastMessage(newLastMessage.roomId, newLastMessage);
+									return;
+								}
+								date = messages.reduce(
+									(oldest, m) => (m.date < oldest ? m.date : oldest),
+									messages[0]?.date
+								);
+							}
+						})
+					);
+				}
 			}
 		});
 	}
@@ -260,6 +341,55 @@ class XMPPClient {
 			.c('body')
 			.t(reaction);
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
+	}
+
+	public requestMessages(
+		queryId: string,
+		roomId: string,
+		endHistory: number,
+		quantity: number
+	): Promise<Element | null> {
+		return new Promise((resolve, reject) => {
+			if (!useStore.getState().rooms[roomId]) {
+				resolve(null);
+				return;
+			}
+
+			const clearedAt = useStore.getState().rooms[roomId]?.userSettings?.clearedAt;
+			const startHistory = clearedAt ?? useStore.getState().rooms[roomId]?.createdAt ?? 0;
+
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
+				.c('x', { type: 'submit', xmlns: jabberData })
+				.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+				.c('value')
+				.t(Strophe.NS.MAM)
+				.up()
+				.up()
+				.c('field', { var: 'start' })
+				.c('value')
+				.t(dateToISODate(startHistory))
+				.up()
+				.up()
+				.c('field', { var: 'end' })
+				.c('value')
+				.t(dateToISODate(endHistory))
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: Strophe.NS.RSM })
+				.c('max')
+				.t(String(quantity))
+				.up()
+				.c('before');
+
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: (stanza) => resolve(stanza),
+				errorCallback: reject
+			});
+		});
 	}
 
 	// Request n messages before end date but not before start date

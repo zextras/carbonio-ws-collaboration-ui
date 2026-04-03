@@ -12,14 +12,13 @@ import { useTranslation } from 'react-i18next';
 
 import { ConfigurationMessageLabel } from '../../../../hooks/useConfigurationMessageLabel';
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
-import useMessage from '../../../../hooks/useMessage';
 import useRouting from '../../../../hooks/useRouting';
 import {
 	getDraftMessage,
 	getLastNewReaction
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import {
-	getLastMessageIdSelector,
+	getLastMessageSelector,
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
@@ -33,7 +32,7 @@ import {
 } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus, Message, MessageType } from '../../../../types/store/ChatsRegistryTypes';
+import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';
@@ -60,15 +59,12 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const { goToRoomPage } = useRouting();
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const lastMessageId: string | undefined = useStore((state) =>
-		getLastMessageIdSelector(state, roomId)
-	);
-	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastNewReaction = useStore((store) => getLastNewReaction(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
+	const lastMessageOfRoom = useStore((state) => getLastMessageSelector(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
@@ -154,7 +150,6 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				case MessageType.CONFIGURATION_MSG:
 					return <ConfigurationMessageLabel message={lastMessageOfRoom} />;
 				default:
-					console.error('Message to replace: ', lastMessageOfRoom.type);
 					return '';
 			}
 		}

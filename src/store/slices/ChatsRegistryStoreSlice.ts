@@ -140,21 +140,31 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/NEW_MESSAGE'
 		);
 	},
-	newInboxMessages: (inbox: Message[]): void => {
+	setInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				inbox.forEach((message) => {
-					const { messages } = initRoomChatsRegistry(draft, message.roomId);
-					const alreadyExists = find(messages, { id: message.id });
-					const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
-					// Add message only if it doesn't already exist and the history is not cleared
-					if (!alreadyExists && (!clearedAt || isBefore(clearedAt, message.date))) {
-						messages.push(message);
+					const registry = initRoomChatsRegistry(draft, message.roomId);
+					registry.inboxMessageId = message.id;
+					if (
+						message.type === MessageType.TEXT_MSG ||
+						message.type === MessageType.CONFIGURATION_MSG
+					) {
+						registry.lastMessage = message;
 					}
 				});
 			}),
 			false,
 			'CHAT/NEW_INBOX_MESSAGE'
+		);
+	},
+	setLastMessage: (roomId: string, message: TextMessage | ConfigurationMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId).lastMessage = message;
+			}),
+			false,
+			'CHAT/SET_LAST_MESSAGE'
 		);
 	},
 	updateHistory: (roomId: string, messageArray: Message[]): void => {
@@ -175,9 +185,10 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	addCreateRoomMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = draft.chatsRegistry[roomId];
 				const room = draft.rooms[roomId];
+				if (!room) return;
 
+				const { messages } = initRoomChatsRegistry(draft, roomId);
 				const alreadyHasCreationMsg = some(
 					messages,
 					(message) =>
@@ -204,7 +215,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						from: '',
 						read: MarkerStatus.READ
 					};
-					draft.chatsRegistry[roomId].messages.splice(0, 0, creationMsg);
+					messages.splice(0, 0, creationMsg);
 				}
 			}),
 			false,
@@ -271,7 +282,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 
 				// Add message to the end of list or replace a placeholder message
-				draft.chatsRegistry[roomId].messages.push(placeholderMessage);
+				messages.push(placeholderMessage);
 
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),
@@ -305,7 +316,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	updateReadStatus: (roomId: string, newMarkers: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages, markers } = initRoomChatsRegistry(draft, roomId);
+				const { messages, markers, lastMessage } = initRoomChatsRegistry(draft, roomId);
 
 				// Set a member marker only when it's a new marker, or it is more recent than other
 				forEach(newMarkers, (marker) => {
@@ -314,6 +325,15 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						markers[marker.from] = marker;
 					}
 				});
+
+				// Update last message read status
+				if (
+					lastMessage &&
+					[MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG].includes(lastMessage.type) &&
+					[MarkerStatus.UNREAD, MarkerStatus.READ_BY_SOMEONE].includes(lastMessage.read)
+				) {
+					lastMessage.read = calcReads(lastMessage.date, roomId, markers);
+				}
 
 				// Update messages' read status of TEXT and CONFIGURATION messages
 				draft.chatsRegistry[roomId].messages = map(messages, (msg) => {
@@ -328,7 +348,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 
 				// Recalculate unread count
 				const myId = draft.session.id;
-				const myMarker = myId ? draft.chatsRegistry[roomId].markers[myId] : undefined;
+				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
 				const lastMarkedDate = myMarker
 					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
 					: undefined;
@@ -345,6 +365,15 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			}),
 			false,
 			'CHAT/UPDATE_READ_STATUS'
+		);
+	},
+	setUnreadCount: (roomId: string, count: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId).unread = count;
+			}),
+			false,
+			'CHAT/SET_UNREAD_COUNT'
 		);
 	},
 	incrementUnreadCount: (roomId: string, counter: number): void => {

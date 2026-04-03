@@ -79,6 +79,7 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
+	store.setInboxMessages([mockedMessage]);
 	store.newMessage(mockedMessage);
 	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return { user, store };
@@ -828,7 +829,7 @@ describe('Draft message', () => {
 			roomId: mockedRoom.id,
 			date: Date.now()
 		});
-		act(() => store.newMessage(messageByRoberto));
+		act(() => store.setInboxMessages([messageByRoberto]));
 
 		await user.keyboard('{ArrowUp}');
 

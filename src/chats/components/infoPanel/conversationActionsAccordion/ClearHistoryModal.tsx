@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { clearRoomHistory } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
-	getLastTextMessageIdSelector,
+	getLastMessageSelector,
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../store/Store';
@@ -40,19 +40,17 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const closeLabel = t('action.close', 'Close');
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
-	const lastTextMessageId: string | undefined = useStore((state) =>
-		getLastTextMessageIdSelector(state, roomId)
-	);
+	const lastTextMessage = useStore((state) => getLastMessageSelector(state, roomId));
 
 	const clearHistory = useCallback(() => {
-		if (unreadMessagesCount > 0 && lastTextMessageId) {
-			xmppClient.readMessage(roomId, lastTextMessageId);
+		if (unreadMessagesCount > 0 && lastTextMessage) {
+			xmppClient.readMessage(roomId, lastTextMessage.id);
 		}
 		clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();
 			closeModal();
 		});
-	}, [closeModal, lastTextMessageId, roomId, successfulSnackbar, unreadMessagesCount]);
+	}, [closeModal, lastTextMessage, roomId, successfulSnackbar, unreadMessagesCount]);
 
 	return (
 		<Modal
