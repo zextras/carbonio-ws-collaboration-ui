@@ -59,7 +59,7 @@ const useExternalAccess = (): {
 				.then((res) => {
 					document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 					document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-					setLoginInfo(res.id, guestName, guestName, UserType.GUEST);
+					setLoginInfo({ id: res.id, name: guestName, userType: UserType.GUEST });
 
 					setChatsBeStatus(true);
 					const { wsClient } = useStore.getState().connections;

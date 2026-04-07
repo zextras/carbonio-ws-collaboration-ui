@@ -23,7 +23,7 @@ const user2 = createMockUser({ id: 'user2', name: 'user2' });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1.id, 'user1');
+	store.setLoginInfo({ id: user1.id, name: 'user1' });
 	store.setUserInfo([user1, user2]);
 });
 

@@ -40,7 +40,7 @@ import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -50,8 +50,8 @@ import {
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { isAttachmentImage } from '../../../../utils/attachmentUtils';
+import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
+import { getImageSize, isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
@@ -102,13 +102,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const setFileDescription = useStore((store) => store.setFileDescription);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const lastMessageId: string | undefined = useStore((state) =>
-		getLastMessageIdSelector(state, roomId)
-	);
 	const messageEditTimeLimit = useStore((store) =>
 		getAttribute(store, 'messageEditTimeLimit')
 	) as number;
-	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
+	const lastMessageOfRoom = useStore((state) => getLastMessageSelector(state, roomId));
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const maxAttachmentSize = useStore((store) => getAttribute(store, 'maxAttachmentSize'));
 

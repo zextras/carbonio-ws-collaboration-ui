@@ -43,7 +43,7 @@ vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.setUserInfo([user1, user2]);
 	store.setAttributes(createMockAttributesList());
 });

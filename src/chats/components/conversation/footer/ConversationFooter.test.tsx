@@ -79,6 +79,7 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
+	store.setInboxMessages([mockedMessage]);
 	store.newMessage(mockedMessage);
 	const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 	return { user, store };
@@ -92,7 +93,7 @@ const draftMessage = 'I am a draft message';
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('idPaolo', 'Paolo');
+	store.setLoginInfo({ id: 'idPaolo', name: 'Paolo' });
 	store.addRooms([mockedRoom]);
 });
 
@@ -470,7 +471,7 @@ describe('Send message', () => {
 	test("attachment selector shouldn't be present if the user is a guest", () => {
 		const store = useStore.getState();
 		store.addRooms([mockedRoomTemporary]);
-		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
+		store.setLoginInfo({ id: guestUser.id, name: guestUser.name, userType: guestUser.type });
 		store.setUserInfo([guestUser]);
 		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
@@ -828,7 +829,7 @@ describe('Draft message', () => {
 			roomId: mockedRoom.id,
 			date: Date.now()
 		});
-		act(() => store.newMessage(messageByRoberto));
+		act(() => store.setInboxMessages([messageByRoberto]));
 
 		await user.keyboard('{ArrowUp}');
 

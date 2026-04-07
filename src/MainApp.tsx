@@ -49,7 +49,11 @@ export default function MainApp(): React.JSX.Element {
 	useEffect(() => {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
-			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+			setLoginInfo({
+				id: userAccount.id,
+				name: userAccount.name,
+				displayName: userAccount.displayName
+			});
 			setAttributes(attrs);
 		}
 	}, [setLoginInfo, authenticated, setAttributes, attrs]);

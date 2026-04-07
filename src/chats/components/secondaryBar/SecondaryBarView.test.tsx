@@ -117,13 +117,13 @@ vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setChatsBeStatus(true);
-	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.addRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
 	store.setUserInfo([user1Be, user2Be, user3Be]);
-	store.newMessage(mkdTextMsgUser3Group1);
-	store.newMessage(mkdTextMsgUser1OneToOne);
-	store.newMessage(mkdTextMsgUser2OneToOne);
-	store.newMessage(mkdTextMsgUser3Group2);
+	store.setInboxMessages([mkdTextMsgUser3Group1]);
+	store.setInboxMessages([mkdTextMsgUser1OneToOne]);
+	store.setInboxMessages([mkdTextMsgUser2OneToOne]);
+	store.setInboxMessages([mkdTextMsgUser3Group2]);
 	store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 });
 describe('SecondaryBar tests', () => {

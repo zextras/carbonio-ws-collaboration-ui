@@ -29,6 +29,7 @@ const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
 
 const room1 = createMockRoom({ id: 'roomId1', type: RoomType.ONE_TO_ONE });
 const meeting1 = createMockMeeting({ id: 'meetingId1', roomId: room1.id });
+
 const addIncomingMeetingNotification = (room: RoomBe, meeting: MeetingBe): void => {
 	const event: MeetingStartedEvent = {
 		sentDate: '2412412421',
@@ -37,14 +38,16 @@ const addIncomingMeetingNotification = (room: RoomBe, meeting: MeetingBe): void 
 		starterUser: room.id,
 		startedAt: '2024-04-04T15:42:22.932426Z'
 	};
-	const store = useStore.getState();
 	act(() => {
-		store.addRooms([room]);
-		store.addMeetings([meeting]);
 		sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 	});
 };
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room, room1]);
+	store.addMeetings([meeting, meeting1]);
+});
 describe('MeetingNotificationsHandler', () => {
 	test('Nothing is rendered when there are no notifications', () => {
 		setup(<MeetingNotificationsHandler />);

@@ -83,12 +83,12 @@ describe('eventHandlersUtilities tests', () => {
 
 	describe('isMyId tests', () => {
 		test('isMyId returns true if the id is the same as the session userId', () => {
-			useStore.getState().setLoginInfo('userId', 'User');
+			useStore.getState().setLoginInfo({ id: 'userId', name: 'User' });
 			expect(isMyId('userId')).toBe(true);
 		});
 
 		test('isMyId returns false if the id is different from the session userId', () => {
-			useStore.getState().setLoginInfo('userId', 'User');
+			useStore.getState().setLoginInfo({ id: 'userId', name: 'User' });
 			expect(isMyId('otherId')).toBe(false);
 		});
 	});

@@ -92,7 +92,7 @@ const complexHistory = [
 describe('useFirstUnreadMessage with text messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
-		store.setLoginInfo(myUserId, 'User');
+		store.setLoginInfo({ id: myUserId });
 		store.addRooms([room]);
 		store.updateHistory(room.id, textHistory);
 	});
@@ -146,7 +146,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 describe('useFirstUnreadMessage with all types of messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
-		store.setLoginInfo(myUserId, 'User');
+		store.setLoginInfo({ id: myUserId });
 		store.addRooms([room]);
 		store.updateHistory(room.id, complexHistory);
 	});

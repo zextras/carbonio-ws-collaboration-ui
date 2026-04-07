@@ -7,9 +7,9 @@
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
 	newMessage: (message: Message) => void;
-	newInboxMessage: (message: Message) => void;
-	newInboxMessages: (message: Message[]) => void;
+	setInboxMessages: (message: Message[]) => void;
 	setLastMessageForInbox: (roomId: string, message: Message) => void;
+	setLastMessage: (roomId: string, message: TextMessage | ConfigurationMessage) => void;
 	updateHistory: (roomId: string, messageArray: Message[], markers?: Marker[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
 	setRepliedMessage: (
@@ -22,6 +22,7 @@ export type ChatsRegistryStoreSlice = {
 	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	removeFastening: (roomId: string, messageId: string, fasteningId: string) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
+	setUnreadCount: (roomId: string, count: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	decrementUnreadCount: (roomId: string, counter: number) => void;
 	setUnreadCount: (roomId: string, count: number) => void;
@@ -37,10 +38,12 @@ export type ChatsRegistryStoreSlice = {
 };
 
 export type ChatRegistry = {
+	unread: number;
+	inboxMessageId?: string;
+	lastMessage?: TextMessage | ConfigurationMessage;
 	messages: Message[];
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
-	unread: number;
 	searchResults: TextMessage[];
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];

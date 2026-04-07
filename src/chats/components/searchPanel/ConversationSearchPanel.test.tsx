@@ -50,7 +50,7 @@ const oneToOneRoom: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(loggedUser.id, loggedUser.name);
+	store.setLoginInfo({ id: loggedUser.id, name: loggedUser.name });
 	store.setUserInfo([loggedUser, user2]);
 	store.addRooms([groupRoom, oneToOneRoom]);
 });

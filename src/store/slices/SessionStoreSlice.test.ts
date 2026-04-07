@@ -22,14 +22,16 @@ const groupRoom: RoomBe = createMockRoom({
 
 describe('SessionStoreSlice tests', () => {
 	test('loginInfo', () => {
-		useStore.getState().setLoginInfo('id', 'name', 'displayName');
-		expect(useStore.getState().session).toStrictEqual({
-			id: 'id',
-			name: 'name',
-			displayName: 'displayName',
-			userType: UserType.INTERNAL,
-			_persistedAt: expect.any(Number)
-		});
+		useStore.getState().setLoginInfo({ id: 'id', name: 'name', displayName: 'displayName' });
+		expect(useStore.getState().session).toEqual(
+			expect.objectContaining({
+				id: 'id',
+				name: 'name',
+				displayName: 'displayName',
+				userType: UserType.INTERNAL,
+				_persistedAt: expect.any(Number)
+			})
+		);
 	});
 
 	test('queueId', () => {

@@ -29,7 +29,7 @@ const RefComponent = (props: Omit<UserPopoverListProps, 'anchorEl'>): ReactEleme
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.email);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.email });
 	store.setUserInfo([user1, user2]);
 });
 

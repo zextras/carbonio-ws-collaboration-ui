@@ -72,7 +72,7 @@ const mockedRoomOneOwner = createMockRoom({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.addRooms([mockedRoomOneOwner, mockedRoom]);
 	store.setUserInfo([user1Be, user2Be, user3Be, user4Be]);
 });
@@ -145,7 +145,7 @@ describe('Participant component info', () => {
 	describe("User isn't an owner", () => {
 		test('The user is not an owner and sees his element inside list', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user2', 'User 2');
+			store.setLoginInfo({ id: 'user2', name: 'User 2' });
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
@@ -157,7 +157,7 @@ describe('Participant component info', () => {
 		});
 		test('the user is not an owner and sees an owner inside list', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user2', 'User 2');
+			store.setLoginInfo({ id: 'user2', name: 'User 2' });
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
@@ -172,7 +172,7 @@ describe('Participant component info', () => {
 		});
 		test('The user is not an owner and sees a normal user inside list', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user2', 'User 2');
+			store.setLoginInfo({ id: 'user2', name: 'User 2' });
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			setup(<MemberComponentInfo member={members[3]} roomId={mockedRoom.id} />);
 

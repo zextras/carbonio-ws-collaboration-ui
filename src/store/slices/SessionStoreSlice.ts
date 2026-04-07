@@ -14,6 +14,7 @@ import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import {
 	AttributesList,
 	ExportStatus,
+	Session,
 	SessionStoreSlice,
 	Version
 } from '../../types/store/SessionTypes';
@@ -29,7 +30,15 @@ export const useSessionStoreSlice: StateCreator<
 	session: {
 		_persistedAt: Date.now()
 	},
-	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
+	setLoginInfo: ({
+		id,
+		name,
+		displayName,
+		userType,
+		zmAuthToken,
+		zxAuthToken,
+		server
+	}: Session): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.session = {
@@ -37,6 +46,9 @@ export const useSessionStoreSlice: StateCreator<
 					id,
 					name,
 					displayName,
+					zmAuthToken,
+					zxAuthToken,
+					server,
 					userType: userType ?? UserType.INTERNAL
 				};
 			}),
@@ -160,6 +172,26 @@ export const useSessionStoreSlice: StateCreator<
 			}),
 			false,
 			'SESSION/SET_SUPPORTED_VERSIONS'
+		);
+	},
+	reset: (): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session = {
+					supportedVersions: draft.session.supportedVersions
+				};
+				draft.users = {};
+				draft.rooms = {};
+				draft.activeConversations = {};
+				draft.chatsRegistry = {};
+				draft.connections = {
+					status: {}
+				};
+				draft.meetings = {};
+				draft.activeMeeting = undefined;
+			}),
+			false,
+			'SESSION/RESET'
 		);
 	}
 });

@@ -57,7 +57,7 @@ const centralTileScreen: TileData = {
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
