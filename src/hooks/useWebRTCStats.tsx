@@ -18,8 +18,9 @@ const computeQuality = (
 	if (rtt === undefined && fractionLost === undefined) return NetworkQualityLevel.UNKNOWN;
 	const rttMs = rtt ?? 0;
 	const loss = fractionLost ?? 0;
-	if (rttMs < 150 && loss < 0.02) return NetworkQualityLevel.GOOD;
-	if (rttMs < 300 && loss < 0.05) return NetworkQualityLevel.FAIR;
+	console.log(`Computed network quality with RTT: ${rttMs} ms, Loss: ${loss * 100}%`);
+	if (rttMs < 80 && loss < 0.02) return NetworkQualityLevel.GOOD;
+	if (rttMs < 150 && loss < 0.05) return NetworkQualityLevel.FAIR;
 	return NetworkQualityLevel.POOR;
 };
 
