@@ -116,6 +116,9 @@ const useWebRTCStats = (meetingId: string): void => {
 							currentMeeting?.bidirectionalAudioConn
 								?.setOutboundQuality(quality)
 								.catch((err) => console.warn('Failed to set audio outbound quality', err));
+							currentMeeting?.screenOutConn
+								?.setOutboundQuality(quality)
+								.catch((err) => console.warn('Failed to set screen outbound quality', err));
 						}
 					}
 				})

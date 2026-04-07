@@ -7,7 +7,7 @@
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { NetworkQualityLevel, STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getScreenStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
@@ -17,6 +17,8 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	meetingId: string;
 
 	rtpSender: RTCRtpSender | null;
+
+	private originalEncodings: RTCRtpEncodingParameters[] | null = null;
 
 	constructor(meetingId: string) {
 		this.peerConn = null;
@@ -101,5 +103,39 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		this.peerConn?.close();
 		this.peerConn = null;
 		this.rtpSender = null;
+	}
+
+	public async setOutboundQuality(level: NetworkQualityLevel): Promise<void> {
+		if (!this.rtpSender) return;
+		const params = this.rtpSender.getParameters();
+		if (!params.encodings || params.encodings.length === 0) {
+			params.encodings = [{}];
+		}
+
+		if (level === NetworkQualityLevel.GOOD && this.originalEncodings === null) return;
+
+		if (this.originalEncodings === null) {
+			this.originalEncodings = params.encodings.map((enc) => ({ ...enc }));
+		}
+
+		if (level === NetworkQualityLevel.GOOD) {
+			params.encodings = this.originalEncodings.map((enc) => ({ ...enc }));
+		} else if (level === NetworkQualityLevel.FAIR) {
+			params.encodings = this.originalEncodings.map((enc) => ({
+				...enc,
+				maxBitrate: 20_000, // bps
+				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 2
+			}));
+		} else if (level === NetworkQualityLevel.POOR) {
+			params.encodings = this.originalEncodings.map((enc) => ({
+				...enc,
+				maxBitrate: 10_000, // bps
+				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 5
+			}));
+		} else {
+			return;
+		}
+
+		await this.rtpSender.setParameters(params);
 	}
 }

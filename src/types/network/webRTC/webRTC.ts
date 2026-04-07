@@ -52,6 +52,7 @@ export interface IScreenOutConnection extends IPeerConnection {
 	startScreenShare(): void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	stopScreenShare(): void;
+	setOutboundQuality(level: NetworkQualityLevel): Promise<void>;
 }
 
 export interface IVideoScreenInConnection extends IPeerConnection {
