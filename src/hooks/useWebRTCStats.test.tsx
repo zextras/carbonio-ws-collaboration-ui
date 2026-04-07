@@ -456,3 +456,172 @@ describe('useWebRTCStats hook', () => {
 		expect(stats?.quality).toBe(NetworkQualityLevel.FAIR);
 	});
 });
+
+describe('quality re-application after media reconnection', () => {
+	let mockSetParameters: ReturnType<typeof vi.fn>;
+	let mockGetParameters: ReturnType<typeof vi.fn>;
+	let mockAddTrack: ReturnType<typeof vi.fn>;
+	let mockSetRemoteDescription: ReturnType<typeof vi.fn>;
+
+	beforeEach(() => {
+		mockSetParameters = vi.fn(() => Promise.resolve());
+		mockGetParameters = vi.fn(() => ({ encodings: [{}] }));
+		mockSetRemoteDescription = vi.fn(() => Promise.resolve());
+		mockAddTrack = vi.fn(() => ({
+			getParameters: mockGetParameters,
+			setParameters: mockSetParameters
+		}));
+
+		vi.mocked(window.RTCPeerConnection).mockImplementation(function () {
+			return {
+				ontrack: null,
+				onnegotiationneeded: null,
+				oniceconnectionstatechange: null,
+				addTrack: mockAddTrack,
+				close: vi.fn(),
+				createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+				setRemoteDescription: mockSetRemoteDescription,
+				setLocalDescription: vi.fn(() => Promise.resolve()),
+				getStats: vi.fn(() => Promise.resolve({ forEach: vi.fn() }))
+			} as unknown as RTCPeerConnection;
+		});
+
+		const store = useStore.getState();
+		store.setLoginInfo('userId', 'User');
+		store.addMeetings([meeting]);
+		store.meetingConnection(meeting.id);
+	});
+
+	test('videoOutConn re-applies the last quality when handleRemoteAnswer is called after reconnection', async () => {
+		const store = useStore.getState();
+		store.meetingDisconnection(meeting.id);
+		store.meetingConnection(meeting.id, { enabled: false }, { enabled: true });
+
+		// Flush getUserMedia so the rtpSender is initialised
+		await act(async () => {});
+
+		// Record the established quality in the store
+		store.setNetworkStats({ quality: NetworkQualityLevel.POOR });
+
+		mockSetParameters.mockClear();
+
+		// Simulate a re-connection answer arriving
+		const videoConn = useStore.getState().activeMeeting?.videoOutConn;
+		await act(async () => {
+			videoConn?.handleRemoteAnswer({ sdp: 'mock-sdp', type: 'answer' });
+			// Flush the setRemoteDescription promise chain
+			await Promise.resolve();
+			await Promise.resolve();
+		});
+
+		const poorCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.scaleResolutionDownBy === 5
+		);
+		expect(poorCall).toBeDefined();
+	});
+
+	test('screenOutConn re-applies the last quality when handleRemoteAnswer is called after reconnection', async () => {
+		const store = useStore.getState();
+
+		// Inject a mock peerConn and rtpSender into the screenOutConn
+		const screenConn = store.activeMeeting?.screenOutConn;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(screenConn as any).peerConn = { setRemoteDescription: vi.fn(() => Promise.resolve()) };
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(screenConn as any).rtpSender = {
+			getParameters: mockGetParameters,
+			setParameters: mockSetParameters
+		};
+
+		// Record the established quality in the store
+		store.setNetworkStats({ quality: NetworkQualityLevel.FAIR });
+
+		mockSetParameters.mockClear();
+
+		await act(async () => {
+			screenConn?.handleRemoteAnswer({ sdp: 'mock-sdp', type: 'answer' });
+			await Promise.resolve();
+			await Promise.resolve();
+		});
+
+		const fairCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.scaleResolutionDownBy === 2
+		);
+		expect(fairCall).toBeDefined();
+	});
+
+	test('bidirectionalAudioConn re-applies the last quality when handleRemoteAnswer is called after reconnection', async () => {
+		const store = useStore.getState();
+
+		// Flush constructor promises so the audio rtpSender is set up
+		await act(async () => {});
+
+		// Record the established quality in the store
+		store.setNetworkStats({ quality: NetworkQualityLevel.POOR });
+
+		mockSetParameters.mockClear();
+
+		const audioConn = store.activeMeeting?.bidirectionalAudioConn;
+		await act(async () => {
+			audioConn?.handleRemoteAnswer({ sdp: 'mock-sdp', type: 'answer' });
+			await Promise.resolve();
+			await Promise.resolve();
+		});
+
+		const poorCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.maxBitrate === 10_000
+		);
+		expect(poorCall).toBeDefined();
+	});
+
+	test('videoOutConn.closePeerConnection resets originalEncodings so the new connection captures fresh defaults', async () => {
+		const store = useStore.getState();
+		store.meetingDisconnection(meeting.id);
+		store.meetingConnection(meeting.id, { enabled: false }, { enabled: true });
+
+		await act(async () => {});
+
+		// Get the video connection from the UPDATED store state
+		const videoConn = useStore.getState().activeMeeting?.videoOutConn;
+
+		// Populate originalEncodings by applying a non-GOOD quality
+		await act(async () => {
+			await videoConn?.setOutboundQuality(NetworkQualityLevel.POOR);
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		expect((videoConn as any).originalEncodings).not.toBeNull();
+
+		// Close the connection — originalEncodings must be cleared
+		videoConn?.closePeerConnection();
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		expect((videoConn as any).originalEncodings).toBeNull();
+	});
+
+	test('screenOutConn.closePeerConnection resets originalEncodings so the new connection captures fresh defaults', async () => {
+		const store = useStore.getState();
+		const screenConn = store.activeMeeting?.screenOutConn;
+
+		// Inject a mock rtpSender so setOutboundQuality can act on it
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(screenConn as any).rtpSender = {
+			getParameters: mockGetParameters,
+			setParameters: mockSetParameters
+		};
+
+		// Populate originalEncodings by applying a non-GOOD quality
+		await act(async () => {
+			await screenConn?.setOutboundQuality(NetworkQualityLevel.POOR);
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		expect((screenConn as any).originalEncodings).not.toBeNull();
+
+		// Close the connection — originalEncodings must be cleared
+		screenConn?.closePeerConnection();
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		expect((screenConn as any).originalEncodings).toBeNull();
+	});
+});
