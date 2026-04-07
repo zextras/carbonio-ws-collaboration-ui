@@ -101,14 +101,17 @@ export default class BidirectionalConnectionAudioInOut
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn.setRemoteDescription(remoteDescription).then(() => {
-				const quality = useStore.getState().activeMeeting?.networkStats?.quality;
-				if (quality && quality !== NetworkQualityLevel.UNKNOWN) {
-					this.setOutboundQuality(quality).catch((err) =>
-						console.warn('Failed to re-apply audio outbound quality after re-connection', err)
-					);
-				}
-			});
+			this.peerConn
+				.setRemoteDescription(remoteDescription)
+				.then(() => {
+					const quality = useStore.getState().activeMeeting?.networkStats?.quality;
+					if (quality && quality !== NetworkQualityLevel.UNKNOWN) {
+						this.setOutboundQuality(quality).catch((err) =>
+							console.warn('Failed to re-apply audio outbound quality after reconnection', err)
+						);
+					}
+				})
+				.catch((err) => console.warn('Failed to set audio remote description', err));
 		}
 	}
 
