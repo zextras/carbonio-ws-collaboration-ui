@@ -16,6 +16,7 @@ export enum EventArea {
 }
 
 export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
+	console.log(eventType);
 	switch (eventType) {
 		case WsEventType.INITIALIZATION:
 		case WsEventType.PONG: {

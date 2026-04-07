@@ -44,12 +44,14 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							.setLocalDescription(rtcSessionDesc)
 							.then(() => {
 								if (rtcSessionDesc.sdp) {
-									MeetingsApi.createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
+									MeetingsApi.createMediaAnswer(this.meetingId, rtcSessionDesc.sdp).then(() => {	
+										console.log('Media answer created successfully');
+									}).catch((reason) => console.warn('Failed to create media answer', reason));
 								}
 							})
 							.catch((reason) => console.warn('setLocalDescription failed', reason));
-					})
-					.catch((reason) => console.warn('createAnswer failed', reason));
+
+					}).catch((reason) => console.warn('createAnswer failed', reason));
 			})
 			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
@@ -73,6 +75,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		forEach(streamType, (type) => {
 			delete this.streamsMap[`${streamKey}-${type}`];
 		});
+		this.updateStreams();
 	};
 
 	private onTrack = (ev: RTCTrackEvent): void => {

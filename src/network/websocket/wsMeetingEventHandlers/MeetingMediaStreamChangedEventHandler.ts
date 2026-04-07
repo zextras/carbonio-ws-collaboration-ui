@@ -20,6 +20,7 @@ export const meetingMediaStreamChangedEventHandler = (
 		const sub = { userId: event.userId, type: mediaType };
 		if (mediaType === STREAM_TYPE.VIDEO) {
 			state.setRemoveSubscription(event.meetingId, sub);
+			state.setDeleteSubscription(event.meetingId, event.userId, [STREAM_TYPE.VIDEO]);
 		}
 		if (mediaType === STREAM_TYPE.SCREEN) {
 			state.setDeleteSubscription(event.meetingId, event.userId, [STREAM_TYPE.SCREEN]);

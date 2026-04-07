@@ -148,6 +148,28 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				// Check if the incoming streams are different from the current ones to avoid unnecessary updates
+				const currentStreams = draft.activeMeeting.subscription;
+				const incomingStreamKeys = Object.keys(streams);
+				const currentStreamKeys = Object.keys(currentStreams);
+				console.log('Updating subscribed streams. Incoming streams:', streams, 'Current streams:', currentStreams);
+				const areStreamsEqual =
+					incomingStreamKeys.length === currentStreamKeys.length &&
+					incomingStreamKeys.every((key) => {
+						const incomingStream = streams[key];
+						const currentStream = currentStreams[key];
+						return (
+							currentStream &&
+							incomingStream.userId === currentStream.userId &&
+							incomingStream.type === currentStream.type &&
+							incomingStream.stream?.id === currentStream.stream?.id
+						);
+					});
+
+				if (areStreamsEqual) {
+					console.log('Incoming subscribed streams are the same as current, skipping update');
+					return;
+				}
 				draft.activeMeeting.subscription = streams;
 			}),
 			false,
