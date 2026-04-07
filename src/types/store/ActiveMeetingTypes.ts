@@ -11,6 +11,20 @@ import {
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
 
+export enum NetworkQualityLevel {
+	UNKNOWN = 'unknown',
+	GOOD = 'good',
+	FAIR = 'fair',
+	POOR = 'poor'
+}
+
+export type NetworkStats = {
+	quality: NetworkQualityLevel;
+	rtt?: number;
+	fractionLost?: number;
+	videoBitrateKbps?: number;
+};
+
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;
 	meetingConnection: (
@@ -47,6 +61,7 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
+	setNetworkStats: (stats: NetworkStats) => void;
 };
 
 export type ActiveMeeting = {
@@ -65,6 +80,7 @@ export type ActiveMeeting = {
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
 	pinnedTile?: PinnedTile;
+	networkStats?: NetworkStats;
 };
 
 export enum MeetingAccordionType {

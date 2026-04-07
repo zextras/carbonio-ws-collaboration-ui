@@ -11,6 +11,7 @@ import { Container } from '@zextras/carbonio-design-system';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import usePiPWindow from '../../hooks/usePipWindow';
+import useWebRTCStats from '../../hooks/useWebRTCStats';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getAttribute, getUserId } from '../../store/selectors/SessionSelectors';
@@ -59,6 +60,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
 	useGeneralMeetingControls(meetingId!);
+	useWebRTCStats(meetingId!);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {

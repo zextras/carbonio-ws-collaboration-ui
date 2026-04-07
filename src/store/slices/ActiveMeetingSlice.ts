@@ -18,6 +18,7 @@ import {
 	MeetingChatVisibility,
 	MeetingAccordionType,
 	MeetingViewType,
+	NetworkStats,
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
 	Subscription,
@@ -366,6 +367,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_USER_WITH_HAND_RAISED'
+		);
+	},
+	setNetworkStats: (stats: NetworkStats): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.networkStats = stats;
+			}),
+			false,
+			'AM/SET_NETWORK_STATS'
 		);
 	}
 });

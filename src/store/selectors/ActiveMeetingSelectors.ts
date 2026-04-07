@@ -122,3 +122,5 @@ export const getUserHandRank = (store: RootStore, userId: string): number => {
 
 export const getHandRaisedList = (store: RootStore): string[] | undefined =>
 	store.activeMeeting?.usersWithHandRaised;
+
+export const getNetworkStats = (store: RootStore) => store.activeMeeting?.networkStats;

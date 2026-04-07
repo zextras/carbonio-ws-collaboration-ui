@@ -22,6 +22,7 @@ import LeaveMeetingButton from './LeaveMeetingButton';
 import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
 import MoreActionsButton from './MoreActionsButton';
+import NetworkQualityIndicator from './NetworkQualityIndicator';
 import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
@@ -226,6 +227,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				$compactMode={compactMode}
 			>
 				<MeetingDuration meetingId={meetingId} />
+				<NetworkQualityIndicator />
 				<LeaveMeetingButton isHoovering={isHoovering} />
 			</SecondActionsWrapper>
 		</BarContainer>
