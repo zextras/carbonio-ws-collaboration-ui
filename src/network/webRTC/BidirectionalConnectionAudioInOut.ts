@@ -162,4 +162,17 @@ export default class BidirectionalConnectionAudioInOut
 		this.oscillatorAudioTrack?.stop?.();
 		this.peerConn?.close?.();
 	}
+
+	async reduceOutboundQuality(): Promise<void> {
+		if (!this.rtpSender) return;
+		const params = this.rtpSender.getParameters();
+		if (!params.encodings || params.encodings.length === 0) {
+			params.encodings = [{}];
+		}
+		params.encodings = params.encodings.map((enc) => ({
+			...enc,
+			maxBitrate: 20_000
+		}));
+		await this.rtpSender.setParameters(params);
+	}
 }

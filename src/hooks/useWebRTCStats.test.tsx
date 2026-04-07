@@ -50,6 +50,9 @@ describe('computeQuality', () => {
 
 describe('useWebRTCStats hook', () => {
 	let mockGetStats: ReturnType<typeof vi.fn>;
+	let mockSetParameters: ReturnType<typeof vi.fn>;
+	let mockGetParameters: ReturnType<typeof vi.fn>;
+	let mockAddTrack: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
 		mockGetStats = vi.fn(() =>
@@ -65,6 +68,13 @@ describe('useWebRTCStats hook', () => {
 			])
 		);
 
+		mockSetParameters = vi.fn(() => Promise.resolve());
+		mockGetParameters = vi.fn(() => ({ encodings: [{}] }));
+		mockAddTrack = vi.fn(() => ({
+			getParameters: mockGetParameters,
+			setParameters: mockSetParameters
+		}));
+
 		// window.RTCPeerConnection is already a vi.fn() defined in setupTests.ts.
 		// We use mockImplementation to inject getStats into every new instance that
 		// will be created by the connection classes inside meetingConnection.
@@ -73,7 +83,7 @@ describe('useWebRTCStats hook', () => {
 				ontrack: null,
 				onnegotiationneeded: null,
 				oniceconnectionstatechange: null,
-				addTrack: vi.fn(),
+				addTrack: mockAddTrack,
 				createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
 				setRemoteDescription: vi.fn(() => Promise.resolve()),
 				setLocalDescription: vi.fn(() => Promise.resolve()),
@@ -171,7 +181,88 @@ describe('useWebRTCStats hook', () => {
 			await vi.advanceTimersByTimeAsync(4000);
 		});
 
-		// No network stats update on failure \u2014 existing value (undefined) remains
+		// No network stats update on failure — existing value (undefined) remains
 		expect(useStore.getState().activeMeeting?.networkStats).toBeUndefined();
+	});
+
+	test('reduces video and audio quality once when POOR quality is detected', async () => {
+		mockGetStats.mockImplementation(() =>
+			makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: 0.5,
+					fractionLost: 0.08,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			])
+		);
+
+		// Initialize with video enabled so the video rtpSender is set up
+		const store = useStore.getState();
+		store.meetingDisconnection(meeting.id);
+		store.meetingConnection(meeting.id, { enabled: false }, { enabled: true });
+
+		// Flush getUserMedia promise so VideoOutConnection.rtpSender is initialized
+		await act(async () => {});
+
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		expect(mockSetParameters).toHaveBeenCalled();
+		const videoCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.scaleResolutionDownBy === 2
+		);
+		expect(videoCall).toBeDefined();
+		const audioCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.maxBitrate === 20_000
+		);
+		expect(audioCall).toBeDefined();
+	});
+
+	test('does not reduce quality again after it has been reduced once', async () => {
+		mockGetStats.mockImplementation(() =>
+			makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: 0.5,
+					fractionLost: 0.08,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			])
+		);
+
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		const callsAfterFirstInterval = mockSetParameters.mock.calls.length;
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		expect(mockSetParameters.mock.calls.length).toBe(callsAfterFirstInterval);
+	});
+
+	test('does not reduce quality when network is GOOD', async () => {
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		expect(useStore.getState().activeMeeting?.networkStats?.quality).toBe(
+			NetworkQualityLevel.GOOD
+		);
+		expect(mockSetParameters).not.toHaveBeenCalled();
 	});
 });

@@ -123,4 +123,18 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.rtpSender = null;
 		this.peerConn = null;
 	}
+
+	public async reduceOutboundQuality(): Promise<void> {
+		if (!this.rtpSender) return;
+		const params = this.rtpSender.getParameters();
+		if (!params.encodings || params.encodings.length === 0) {
+			params.encodings = [{}];
+		}
+		params.encodings = params.encodings.map((enc) => ({
+			...enc,
+			maxBitrate: 300_000,
+			scaleResolutionDownBy: 2
+		}));
+		await this.rtpSender.setParameters(params);
+	}
 }

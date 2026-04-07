@@ -19,13 +19,14 @@ const computeQuality = (
 	const rttMs = rtt ?? 0;
 	const loss = fractionLost ?? 0;
 	console.log(`Computed network quality with RTT: ${rttMs} ms, Loss: ${loss * 100}%`);
-	if (rttMs < 80 && loss < 0.02) return NetworkQualityLevel.GOOD;
-	if (rttMs < 150 && loss < 0.05) return NetworkQualityLevel.FAIR;
+	if (rttMs < 150 && loss < 0.02) return NetworkQualityLevel.GOOD;
+	if (rttMs < 300 && loss < 0.05) return NetworkQualityLevel.FAIR;
 	return NetworkQualityLevel.POOR;
 };
 
 const useWebRTCStats = (meetingId: string): void => {
 	const prevVideoBytesRef = useRef<number>(0);
+	const hasReducedQualityRef = useRef<boolean>(false);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -81,6 +82,16 @@ const useWebRTCStats = (meetingId: string): void => {
 						videoBitrateKbps: videoStats.videoBitrateKbps
 					};
 					setNetworkStats(stats);
+
+					if (
+						!hasReducedQualityRef.current &&
+						stats.quality === NetworkQualityLevel.POOR
+					) {
+						hasReducedQualityRef.current = true;
+						const { activeMeeting: currentMeeting } = useStore.getState();
+						currentMeeting?.videoOutConn?.reduceOutboundQuality().catch(() => undefined);
+						currentMeeting?.bidirectionalAudioConn?.reduceOutboundQuality().catch(() => undefined);
+					}
 				})
 				.catch(() => undefined);
 		}, POLL_INTERVAL_MS);
