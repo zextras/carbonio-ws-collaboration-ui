@@ -9,7 +9,7 @@ import { first } from 'lodash';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { NetworkQualityLevel, STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
@@ -27,6 +27,8 @@ export default class BidirectionalConnectionAudioInOut
 	initialAudioStatus: boolean;
 
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
+
+	private originalEncodings: RTCRtpEncodingParameters[] | null = null;
 
 	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -163,16 +165,29 @@ export default class BidirectionalConnectionAudioInOut
 		this.peerConn?.close?.();
 	}
 
-	async reduceOutboundQuality(): Promise<void> {
+	async setOutboundQuality(level: NetworkQualityLevel): Promise<void> {
 		if (!this.rtpSender) return;
 		const params = this.rtpSender.getParameters();
 		if (!params.encodings || params.encodings.length === 0) {
 			params.encodings = [{}];
 		}
-		params.encodings = params.encodings.map((enc) => ({
-			...enc,
-			maxBitrate: 20_000
-		}));
+
+		if (level === NetworkQualityLevel.GOOD && this.originalEncodings === null) return;
+
+		if (this.originalEncodings === null) {
+			this.originalEncodings = params.encodings.map((enc) => ({ ...enc }));
+		}
+
+		if (level === NetworkQualityLevel.GOOD) {
+			params.encodings = this.originalEncodings.map((enc) => ({ ...enc }));
+		} else if (level === NetworkQualityLevel.FAIR) {
+			params.encodings = params.encodings.map((enc) => ({ ...enc, maxBitrate: 20_000 })); // bps
+		} else if (level === NetworkQualityLevel.POOR) {
+			params.encodings = params.encodings.map((enc) => ({ ...enc, maxBitrate: 10_000 })); // bps
+		} else {
+			return;
+		}
+
 		await this.rtpSender.setParameters(params);
 	}
 }

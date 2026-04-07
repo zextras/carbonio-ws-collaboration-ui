@@ -7,7 +7,7 @@
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { NetworkQualityLevel, STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
@@ -19,6 +19,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	rtpSender: RTCRtpSender | null;
 
 	selectedVideoDeviceId: string | undefined;
+
+	private originalEncodings: RTCRtpEncodingParameters[] | null = null;
 
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
@@ -124,17 +126,37 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.peerConn = null;
 	}
 
-	public async reduceOutboundQuality(): Promise<void> {
+	public async setOutboundQuality(level: NetworkQualityLevel): Promise<void> {
 		if (!this.rtpSender) return;
 		const params = this.rtpSender.getParameters();
 		if (!params.encodings || params.encodings.length === 0) {
 			params.encodings = [{}];
 		}
-		params.encodings = params.encodings.map((enc) => ({
-			...enc,
-			maxBitrate: 300_000,
-			scaleResolutionDownBy: 2
-		}));
+
+		if (level === NetworkQualityLevel.GOOD && this.originalEncodings === null) return;
+
+		if (this.originalEncodings === null) {
+			this.originalEncodings = params.encodings.map((enc) => ({ ...enc }));
+		}
+
+		if (level === NetworkQualityLevel.GOOD) {
+			params.encodings = this.originalEncodings.map((enc) => ({ ...enc }));
+		} else if (level === NetworkQualityLevel.FAIR) {
+			params.encodings = this.originalEncodings.map((enc) => ({
+				...enc,
+				maxBitrate: 20_000, // bps
+				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 2
+			}));
+		} else if (level === NetworkQualityLevel.POOR) {
+			params.encodings = this.originalEncodings.map((enc) => ({
+				...enc,
+				maxBitrate: 10_000, // bps
+				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 5
+			}));
+		} else {
+			return;
+		}
+
 		await this.rtpSender.setParameters(params);
 	}
 }

@@ -5,7 +5,7 @@
  */
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
-import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+import { NetworkQualityLevel, STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
@@ -31,7 +31,7 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;
 	closeRtpSenderTrack(): void;
-	reduceOutboundQuality(): Promise<void>;
+	setOutboundQuality(level: NetworkQualityLevel): Promise<void>;
 }
 
 export interface IVideoOutConnection extends IPeerConnection {
@@ -44,7 +44,7 @@ export interface IVideoOutConnection extends IPeerConnection {
 		mediaStreamTrack: MediaStream,
 		isVirtualBackground?: boolean
 	): Promise<MediaStreamTrack | undefined>;
-	reduceOutboundQuality(): Promise<void>;
+	setOutboundQuality(level: NetworkQualityLevel): Promise<void>;
 }
 
 export interface IScreenOutConnection extends IPeerConnection {

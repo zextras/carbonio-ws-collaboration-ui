@@ -10,6 +10,9 @@ import useStore from '../store/Store';
 import { NetworkQualityLevel, NetworkStats } from '../types/store/ActiveMeetingTypes';
 
 const POLL_INTERVAL_MS = 4000;
+const STATS_HISTORY_SIZE = 5;
+
+type RawStats = { rtt?: number; fractionLost?: number };
 
 const computeQuality = (
 	rtt: number | undefined,
@@ -24,9 +27,22 @@ const computeQuality = (
 	return NetworkQualityLevel.POOR;
 };
 
+const computeAverageQuality = (history: RawStats[]): NetworkQualityLevel => {
+	if (history.length === 0) return NetworkQualityLevel.UNKNOWN;
+	const rtts = history.filter((s) => s.rtt !== undefined).map((s) => s.rtt as number);
+	const losses = history
+		.filter((s) => s.fractionLost !== undefined)
+		.map((s) => s.fractionLost as number);
+	const avgRtt = rtts.length > 0 ? rtts.reduce((a, b) => a + b, 0) / rtts.length : undefined;
+	const avgLoss =
+		losses.length > 0 ? losses.reduce((a, b) => a + b, 0) / losses.length : undefined;
+	return computeQuality(avgRtt, avgLoss);
+};
+
 const useWebRTCStats = (meetingId: string): void => {
 	const prevVideoBytesRef = useRef<number>(0);
-	const hasReducedQualityRef = useRef<boolean>(false);
+	const statsHistoryRef = useRef<RawStats[]>([]);
+	const prevQualityRef = useRef<NetworkQualityLevel>(NetworkQualityLevel.UNKNOWN);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -75,26 +91,32 @@ const useWebRTCStats = (meetingId: string): void => {
 
 			Promise.all([audioStatsPromise, videoStatsPromise])
 				.then(([audioStats, videoStats]) => {
+					const rawStats: RawStats = { rtt: audioStats.rtt, fractionLost: audioStats.fractionLost };
+					statsHistoryRef.current = [
+						...statsHistoryRef.current.slice(-(STATS_HISTORY_SIZE - 1)),
+						rawStats
+					];
+
+					const quality = computeAverageQuality(statsHistoryRef.current);
 					const stats: NetworkStats = {
-						quality: computeQuality(audioStats.rtt, audioStats.fractionLost),
+						quality,
 						rtt: audioStats.rtt,
 						fractionLost: audioStats.fractionLost,
 						videoBitrateKbps: videoStats.videoBitrateKbps
 					};
 					setNetworkStats(stats);
 
-					if (
-						!hasReducedQualityRef.current &&
-						stats.quality === NetworkQualityLevel.POOR
-					) {
-						hasReducedQualityRef.current = true;
-						const { activeMeeting: currentMeeting } = useStore.getState();
-						currentMeeting?.videoOutConn
-							?.reduceOutboundQuality()
-							.catch((err) => console.warn('Failed to reduce video outbound quality', err));
-						currentMeeting?.bidirectionalAudioConn
-							?.reduceOutboundQuality()
-							.catch((err) => console.warn('Failed to reduce audio outbound quality', err));
+					if (quality !== prevQualityRef.current) {
+						prevQualityRef.current = quality;
+						if (quality !== NetworkQualityLevel.UNKNOWN) {
+							const { activeMeeting: currentMeeting } = useStore.getState();
+							currentMeeting?.videoOutConn
+								?.setOutboundQuality(quality)
+								.catch((err) => console.warn('Failed to set video outbound quality', err));
+							currentMeeting?.bidirectionalAudioConn
+								?.setOutboundQuality(quality)
+								.catch((err) => console.warn('Failed to set audio outbound quality', err));
+						}
 					}
 				})
 				.catch(() => undefined);
@@ -104,5 +126,5 @@ const useWebRTCStats = (meetingId: string): void => {
 	}, [meetingId]);
 };
 
-export { computeQuality };
+export { computeQuality, computeAverageQuality };
 export default useWebRTCStats;

@@ -6,7 +6,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import useWebRTCStats, { computeQuality } from './useWebRTCStats';
+import useWebRTCStats, { computeAverageQuality, computeQuality } from './useWebRTCStats';
 import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { NetworkQualityLevel } from '../types/store/ActiveMeetingTypes';
@@ -45,6 +45,47 @@ describe('computeQuality', () => {
 
 	test('returns GOOD when only fractionLost is provided and below threshold', () => {
 		expect(computeQuality(undefined, 0.01)).toBe(NetworkQualityLevel.GOOD);
+	});
+});
+
+describe('computeAverageQuality', () => {
+	test('returns UNKNOWN for an empty history', () => {
+		expect(computeAverageQuality([])).toBe(NetworkQualityLevel.UNKNOWN);
+	});
+
+	test('returns GOOD when all samples are good', () => {
+		const history = [
+			{ rtt: 80, fractionLost: 0.01 },
+			{ rtt: 90, fractionLost: 0.01 },
+			{ rtt: 100, fractionLost: 0.01 }
+		];
+		expect(computeAverageQuality(history)).toBe(NetworkQualityLevel.GOOD);
+	});
+
+	test('returns POOR when average exceeds POOR thresholds', () => {
+		const history = [
+			{ rtt: 400, fractionLost: 0.1 },
+			{ rtt: 350, fractionLost: 0.08 },
+			{ rtt: 500, fractionLost: 0.12 }
+		];
+		expect(computeAverageQuality(history)).toBe(NetworkQualityLevel.POOR);
+	});
+
+	test('smooths out a single spike with 4 good samples', () => {
+		const history = [
+			{ rtt: 80, fractionLost: 0.01 },
+			{ rtt: 80, fractionLost: 0.01 },
+			{ rtt: 80, fractionLost: 0.01 },
+			{ rtt: 80, fractionLost: 0.01 },
+			{ rtt: 500, fractionLost: 0.15 }
+		];
+		// avg rtt = (80*4+500)/5 = 420/5 = 164, avg loss = (0.01*4+0.15)/5 = 0.038 -> FAIR
+		expect(computeAverageQuality(history)).toBe(NetworkQualityLevel.FAIR);
+	});
+
+	test('handles samples with undefined rtt or fractionLost gracefully', () => {
+		const history = [{ rtt: undefined, fractionLost: undefined }];
+		expect(computeAverageQuality(history)).toBe(NetworkQualityLevel.UNKNOWN);
 	});
 });
 
@@ -185,7 +226,7 @@ describe('useWebRTCStats hook', () => {
 		expect(useStore.getState().activeMeeting?.networkStats).toBeUndefined();
 	});
 
-	test('reduces video and audio quality once when POOR quality is detected', async () => {
+	test('applies POOR quality settings (maxBitrate 10_000, scaleResolutionDownBy 5 for video) when quality is POOR', async () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
@@ -215,6 +256,43 @@ describe('useWebRTCStats hook', () => {
 
 		expect(mockSetParameters).toHaveBeenCalled();
 		const videoCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.scaleResolutionDownBy === 5
+		);
+		expect(videoCall).toBeDefined();
+		const audioCall = mockSetParameters.mock.calls.find(
+			([params]) => params.encodings?.[0]?.maxBitrate === 10_000
+		);
+		expect(audioCall).toBeDefined();
+	});
+
+	test('applies FAIR quality settings (maxBitrate 20_000, scaleResolutionDownBy 2 for video) when quality is FAIR', async () => {
+		mockGetStats.mockImplementation(() =>
+			makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: 0.25,
+					fractionLost: 0.03,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			])
+		);
+
+		const store = useStore.getState();
+		store.meetingDisconnection(meeting.id);
+		store.meetingConnection(meeting.id, { enabled: false }, { enabled: true });
+
+		await act(async () => {});
+
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		expect(mockSetParameters).toHaveBeenCalled();
+		const videoCall = mockSetParameters.mock.calls.find(
 			([params]) => params.encodings?.[0]?.scaleResolutionDownBy === 2
 		);
 		expect(videoCall).toBeDefined();
@@ -224,7 +302,7 @@ describe('useWebRTCStats hook', () => {
 		expect(audioCall).toBeDefined();
 	});
 
-	test('does not reduce quality again after it has been reduced once', async () => {
+	test('does not call setParameters again when quality stays the same between polls', async () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
@@ -264,5 +342,88 @@ describe('useWebRTCStats hook', () => {
 			NetworkQualityLevel.GOOD
 		);
 		expect(mockSetParameters).not.toHaveBeenCalled();
+	});
+
+	test('restores original quality settings when quality improves back to GOOD', async () => {
+		// First, establish POOR quality
+		mockGetStats.mockImplementation(() =>
+			makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: 0.5,
+					fractionLost: 0.08,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			])
+		);
+
+		const store = useStore.getState();
+		store.meetingDisconnection(meeting.id);
+		store.meetingConnection(meeting.id, { enabled: false }, { enabled: true });
+
+		await act(async () => {});
+
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		const callsAfterPoor = mockSetParameters.mock.calls.length;
+		expect(callsAfterPoor).toBeGreaterThan(0);
+
+		// Switch to GOOD quality
+		mockGetStats.mockImplementation(() =>
+			makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: 0.08,
+					fractionLost: 0.01,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			])
+		);
+
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(4000);
+		});
+
+		// setParameters should have been called again to restore original settings
+		expect(mockSetParameters.mock.calls.length).toBeGreaterThan(callsAfterPoor);
+	});
+
+	test('rolling buffer keeps only the last 5 samples', async () => {
+		// 4 GOOD samples followed by 1 POOR sample: average should be FAIR (not POOR)
+		let callCount = 0;
+		mockGetStats.mockImplementation(() => {
+			callCount += 1;
+			const isPoor = callCount === 5;
+			return makeStatsMock([
+				{
+					type: 'remote-inbound-rtp',
+					kind: 'audio',
+					roundTripTime: isPoor ? 0.5 : 0.08, // seconds; 500 ms : 80 ms
+					fractionLost: isPoor ? 0.08 : 0.01,
+					id: 'rtp-audio',
+					timestamp: Date.now()
+				} as unknown as RTCStats
+			]);
+		});
+
+		renderHook(() => useWebRTCStats(meeting.id));
+
+		// Advance through 5 poll intervals
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(20000);
+		});
+
+		// With 4 good + 1 poor sample: avg rtt = (80*4+500)/5=164ms, avg loss = (0.01*4+0.08)/5=0.024
+		// 164ms < 300 and 0.024 < 0.05 => FAIR
+		const stats = useStore.getState().activeMeeting?.networkStats;
+		expect(stats?.quality).toBe(NetworkQualityLevel.FAIR);
 	});
 });
