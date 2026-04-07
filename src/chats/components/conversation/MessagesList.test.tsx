@@ -343,7 +343,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setUserInfo([user2Be]);
-			result.current.setLoginInfo(user1Be.id, user1Be.name);
+			result.current.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -401,7 +401,7 @@ describe('render list of messages with history loader visible for first time ope
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([room, mockedRoom]);
-	store.setLoginInfo('userId', 'User');
+	store.setLoginInfo({ id: 'userId', name: 'User' });
 	store.setUserInfo([userA, userB, userC]);
 });
 describe('Scroll position', () => {
@@ -440,7 +440,7 @@ describe('Display group of messages', () => {
 		]);
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.setLoginInfo('userId', 'User');
+			result.current.setLoginInfo({ id: 'userId', name: 'User' });
 			result.current.addRooms([mockedRoom]);
 		});
 
@@ -470,7 +470,7 @@ describe('Display group of messages', () => {
 		]);
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.setLoginInfo('userId', 'User');
+			result.current.setLoginInfo({ id: 'userId', name: 'User' });
 			result.current.setUserInfo([userA, userB, userC]);
 		});
 

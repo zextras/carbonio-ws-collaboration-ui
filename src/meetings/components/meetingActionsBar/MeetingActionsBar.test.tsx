@@ -51,7 +51,7 @@ const streamRef = React.createRef<HTMLDivElement>();
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);
 	store.addMeetings([meeting]);

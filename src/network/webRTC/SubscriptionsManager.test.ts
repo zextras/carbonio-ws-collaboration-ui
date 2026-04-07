@@ -89,7 +89,7 @@ vi.mock('../../utils/FetchUtils');
 beforeEach(() => {
 	act(() => {
 		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+		store.setLoginInfo({ id: user1Info.id, name: user1Info.email, displayName: user1Info.name });
 		store.addRooms([groupRoom]);
 		store.addMeetings([groupMeeting]);
 		store.meetingConnection(groupMeeting.id);

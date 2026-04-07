@@ -28,7 +28,7 @@ const event: MeetingStartedEvent = {
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('myUserId', 'myusername');
+	store.setLoginInfo({ id: 'myUserId', name: 'User' });
 	store.addRooms([oneToOneRoom, groupRoom]);
 	store.addMeetings([oneToOneMeeting, groupMeeting]);
 });
@@ -49,7 +49,7 @@ describe('MeetingStartedEventHandler tests', () => {
 	});
 
 	test('Incoming meeting notification is not sent if the meeting is started by me', () => {
-		useStore.getState().setLoginInfo(event.starterUser, 'myusername');
+		useStore.getState().setLoginInfo({ id: event.starterUser, name: 'myusername' });
 		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStartedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();

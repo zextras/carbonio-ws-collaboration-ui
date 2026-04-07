@@ -38,7 +38,7 @@ describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
 		act(() => {
 			const store = useStore.getState();
-			store.setLoginInfo(sessionUser.id, sessionUser.name);
+			store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 			store.setAttributes(createMockAttributesList());
 			store.addRooms([temporaryRoomMod]);
 			store.addMeetings([scheduledMeetingMod]);
@@ -64,7 +64,7 @@ describe('SelectVirtualRoomWidget', () => {
 
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
 		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
+		store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 		store.setAttributes(createMockAttributesList());
 		await act(async () => {
 			setup(

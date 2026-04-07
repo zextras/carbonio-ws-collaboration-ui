@@ -69,7 +69,7 @@ vi.mock('../../../hooks/useMediaQueryCheck');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+	store.setLoginInfo({ id: user1Info.id, name: user1Info.email, displayName: user1Info.name });
 	store.setUserInfo([user2Info]);
 	store.addRooms([testRoom, testRoom2]);
 });

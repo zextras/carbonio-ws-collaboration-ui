@@ -73,7 +73,7 @@ vi.mock('../../../hooks/useRouting');
 beforeEach(() => {
 	window.open = vi.fn(() => null);
 	const store = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([oneToOneRoom, groupRoom]);
 	store.setAttributes(

@@ -71,7 +71,7 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setUserInfo([user1, user2, user3]);
-		result.current.setLoginInfo(user3.id, user3.name);
+		result.current.setLoginInfo({ id: user3.id, name: user3.name });
 		result.current.addRooms([groupRoom]);
 		result.current.addMeetings([groupMeeting]);
 		result.current.setChatsBeStatus(true);
@@ -88,7 +88,7 @@ const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setUserInfo([user2, user3]);
-		result.current.setLoginInfo(user2.id, user2.name);
+		result.current.setLoginInfo({ id: user2.id, name: user2.name });
 		result.current.addRooms([groupForWaitingRoom]);
 		result.current.addMeetings([meetingForWaitingRoom]);
 		result.current.setChatsBeStatus(true);

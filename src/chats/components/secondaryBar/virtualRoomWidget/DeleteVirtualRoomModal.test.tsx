@@ -40,7 +40,7 @@ describe('SelectVirtualRoomWidget', () => {
 		const spyOnDeleteRoomAndMeeting = vi.spyOn(api, 'deleteRoomAndMeeting');
 		act(() => {
 			const store = useStore.getState();
-			store.setLoginInfo(sessionUser.id, sessionUser.name);
+			store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 			store.setAttributes(createMockAttributesList());
 			store.addRooms([temporaryRoomMod]);
 			store.addMeetings([scheduledMeetingMod]);

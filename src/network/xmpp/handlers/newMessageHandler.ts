@@ -5,12 +5,12 @@
  */
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
-import { getPinnedMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import {
 	FasteningAction,
 	MessageType,
-	OperationType
+	OperationType,
+	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
@@ -27,6 +27,7 @@ export function onNewMessageStanza(message: Element): true {
 	const store = useStore.getState();
 	const sessionId: string | undefined = useStore.getState().session.id;
 
+	store.setInboxMessages([newMessage]);
 	switch (newMessage.type) {
 		case MessageType.TEXT_MSG: {
 			store.newMessage(newMessage);
@@ -66,17 +67,41 @@ export function onNewMessageStanza(message: Element): true {
 			}
 			if (newMessage.operation === OperationType.MESSAGE_UNPINNED) {
 				store.removePinnedMessage(newMessage.roomId);
+				store.setSelectedPinnedMessage(newMessage.roomId, undefined);
+			}
+			// Mark message as read if the message configuration is sent after user action
+			if (newMessage.from === sessionId) {
+				xmppClient.readMessage(newMessage.roomId, newMessage.id);
 			}
 			break;
 		}
 		case MessageType.FASTENING: {
 			store.addFastening([newMessage]);
-			const pinnedMessage = getPinnedMessage(store, newMessage.roomId);
+
+			// Update lastMessage
+			const lastMessage = store.chatsRegistry[newMessage.roomId]?.lastMessage;
 			if (
-				newMessage.action === FasteningAction.DELETE &&
-				pinnedMessage?.stanzaId === newMessage.originalStanzaId
+				[FasteningAction.EDIT, FasteningAction.DELETE].includes(newMessage.action) &&
+				lastMessage?.type === MessageType.TEXT_MSG &&
+				newMessage.originalStanzaId === lastMessage.stanzaId
 			) {
-				store.removePinnedMessage(newMessage.roomId);
+				if (newMessage.action === FasteningAction.DELETE) {
+					store.setLastMessage(newMessage.roomId, {
+						...lastMessage,
+						deleted: true,
+						text: '',
+						attachment: undefined,
+						replyTo: undefined
+					} as TextMessage);
+				}
+				if (newMessage.action === FasteningAction.EDIT) {
+					store.setLastMessage(newMessage.roomId, {
+						...lastMessage,
+						edited: true,
+						text: newMessage.value ?? '',
+						attachment: lastMessage.attachment
+					} as TextMessage);
+				}
 			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 				displayReactionBrowserNotification(newMessage);

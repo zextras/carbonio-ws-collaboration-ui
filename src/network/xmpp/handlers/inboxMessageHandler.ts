@@ -24,47 +24,31 @@ export function onInboxMessageStanza(message: Element): true {
 	const inboxMessage = decodeXMPPMessageStanza(insideMessage, { date: dateToTimestamp(date) });
 	const queryid = getRequiredAttribute(result, 'queryid');
 
-	if (inboxMessage) {
-		const store = useStore.getState();
-		xmppClient.lastMarkers(inboxMessage.roomId);
+	if (!inboxMessage) return true;
+	HistoryAccumulator.pushToCache(queryid, inboxMessage);
 
-		// Request history to count the real number of unread messages
-		const unreadMessages = getAttribute(result, 'unread');
-		if (unreadMessages && parseInt(unreadMessages, 10) > 0) {
-			const unreadCount = parseInt(unreadMessages, 10);
+	const store = useStore.getState();
+	// Handle initial unread count
+	const unreadMessages = getAttribute(result, 'unread');
+	if (unreadMessages && parseInt(unreadMessages, 10) > 0) {
+		const unreadCount = parseInt(unreadMessages, 10);
+		// Avoid to request history if the unread count is too high, to prevent performance issues
+		if (unreadCount < 15) {
 			xmppClient.requestHistory(
 				inboxMessage.roomId,
 				inboxMessage.date,
 				unreadCount + 1,
 				unreadCount
 			);
-		}
-
-		switch (inboxMessage.type) {
-			case MessageType.TEXT_MSG:
-				HistoryAccumulator.pushToCache(queryid, inboxMessage);
-
-				// Request message subject of reply
-				if (inboxMessage.replyTo) {
-					xmppClient.requestMessageSubjectOfReply(
-						inboxMessage.roomId,
-						inboxMessage.replyTo,
-						inboxMessage.id
-					);
-				}
-				break;
-			case MessageType.CONFIGURATION_MSG: {
-				HistoryAccumulator.pushToCache(queryid, inboxMessage);
-				break;
-			}
-			case MessageType.FASTENING:
-				store.addFastening([inboxMessage]);
-				// Last inboxMessage is a fastening, we need to request more messages to display the real last one
-				xmppClient.requestHistory(inboxMessage.roomId, inboxMessage.date, 3);
-				break;
-			default:
-				break;
+		} else {
+			store.setUnreadCount(inboxMessage.roomId, unreadCount);
 		}
 	}
+
+	// Request marker to display the right read status
+	if (inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.from === store.session.id) {
+		xmppClient.lastMarkers(inboxMessage.roomId);
+	}
+
 	return true;
 }

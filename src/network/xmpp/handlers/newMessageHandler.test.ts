@@ -159,7 +159,7 @@ describe('XMPP newMessageHandler', () => {
 		const otherUser = createMockUser({ id: 'otherUser' });
 		const room = createMockRoom({ id: 'roomId' });
 		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name || '');
+		store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 		store.setUserInfo([otherUser]);
 		store.addRooms([room]);
 		const myMessage = createMockTextMessage({
@@ -188,7 +188,7 @@ describe('XMPP newMessageHandler', () => {
 		const otherUser = createMockUser({ id: 'otherUser2' });
 		const room = createMockRoom({ id: 'roomId2' });
 		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name || '');
+		store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 		store.setUserInfo([otherUser]);
 		store.addRooms([room]);
 		const myMessage = createMockTextMessage({
