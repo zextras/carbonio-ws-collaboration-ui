@@ -89,8 +89,12 @@ const useWebRTCStats = (meetingId: string): void => {
 					) {
 						hasReducedQualityRef.current = true;
 						const { activeMeeting: currentMeeting } = useStore.getState();
-						currentMeeting?.videoOutConn?.reduceOutboundQuality().catch(() => undefined);
-						currentMeeting?.bidirectionalAudioConn?.reduceOutboundQuality().catch(() => undefined);
+						currentMeeting?.videoOutConn
+							?.reduceOutboundQuality()
+							.catch((err) => console.warn('Failed to reduce video outbound quality', err));
+						currentMeeting?.bidirectionalAudioConn
+							?.reduceOutboundQuality()
+							.catch((err) => console.warn('Failed to reduce audio outbound quality', err));
 					}
 				})
 				.catch(() => undefined);
