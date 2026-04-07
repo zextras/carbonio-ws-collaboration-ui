@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
-import { Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Icon, Tooltip, Snackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { getNetworkStats } from '../../../store/selectors/ActiveMeetingSelectors';
@@ -36,7 +36,23 @@ const NetworkQualityIndicator: FC = () => {
 	const [t] = useTranslation();
 	const networkStats = useStore(getNetworkStats);
 	const quality = networkStats?.quality ?? NetworkQualityLevel.UNKNOWN;
+	const rtt = networkStats?.rtt !== undefined ? `${networkStats.rtt.toFixed(1)} ms` : 'N/A';
+	const loss =
+		networkStats?.fractionLost !== undefined
+			? `${(networkStats.fractionLost * 100).toFixed(1)}%`
+			: 'N/A';
+	const stats = `rtt: ${rtt}, loss: ${loss}`;
 
+	const [showNetworkPoorSnackbar, setShowNetworkPoorSnackbar] = useState(false);
+	const [prevQuality, setPrevQuality] = useState<NetworkQualityLevel>(quality);
+
+	// Reset snackbar if quality improves
+	if (quality !== NetworkQualityLevel.POOR && prevQuality === NetworkQualityLevel.POOR) {
+		setShowNetworkPoorSnackbar(false);
+	}
+	if (quality !== prevQuality) {
+		setPrevQuality(quality);
+	}
 	const tooltipLabel = useMemo(() => {
 		const labels: Record<NetworkQualityLevel, string> = {
 			[NetworkQualityLevel.GOOD]: t('meeting.networkQuality.good', 'Network quality: Good'),
@@ -47,8 +63,43 @@ const NetworkQualityIndicator: FC = () => {
 				'Network quality: Checking\u2026'
 			)
 		};
-		return labels[quality];
-	}, [quality, t]);
+		return `${labels[quality]}\n\n(${stats})`;
+	}, [quality, t, stats]);
+
+	// Show connection snackbar if quality is poor
+	if (quality === NetworkQualityLevel.POOR) {
+		if (!showNetworkPoorSnackbar && prevQuality !== NetworkQualityLevel.POOR) {
+			setShowNetworkPoorSnackbar(true);
+		}
+		return (
+			<>
+				<Snackbar
+					label={t(
+						'meeting.networkQuality.poorConnection',
+						'Your network connection is poor, which may affect the meeting experience.'
+					)}
+					severity="warning"
+					dismissable
+					data-testid="network_quality_snackbar"
+					style={{ maxWidth: 'none' }}
+					open={showNetworkPoorSnackbar}
+					placement="top"
+					onClose={(): void => setShowNetworkPoorSnackbar(false)}
+				/>
+				<Tooltip label={tooltipLabel} placement="top">
+				<ClickableContainer
+					orientation="horizontal"
+					width="fit"
+					height="fit"
+					crossAlignment="center"
+					data-testid="network_quality_indicator"
+				>
+					<Icon icon={ICON_MAP[quality]} color={COLOR_MAP[quality]} size="medium" />
+				</ClickableContainer>
+				</Tooltip>
+			</>
+		);
+	}
 
 	return (
 		<Tooltip label={tooltipLabel} placement="top">
