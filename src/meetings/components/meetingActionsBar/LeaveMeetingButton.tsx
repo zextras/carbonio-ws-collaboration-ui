@@ -13,6 +13,12 @@ import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
+import { use } from 'i18next';
+import useStore from '../../../store/Store';
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
+import { useConnectionsStoreSlice } from '../../../store/slices/ConnectionStoreSlice';
+import { LocalStreams, StreamsSubscriptionMap } from '../../../types/store/ActiveMeetingTypes';
+import { getAudioStream } from '../../../utils/UserMediaManager';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -67,6 +73,13 @@ const LeaveMeetingButton = ({
 					closePipWindow();
 				}
 			});
+
+			// Stop all local media tracks to release the camera and microphone
+			const localStreams = useStore.getState().activeMeeting?.localStreams as LocalStreams;
+			localStreams.audio?.getTracks().forEach((track) => track.stop());
+			localStreams.video?.getTracks().forEach((track) => track.stop());
+			localStreams.screen?.getTracks().forEach((track) => track.stop());
+
 		},
 		[meetingId, goToInfoPage, isPip, closePipWindow]
 	);
