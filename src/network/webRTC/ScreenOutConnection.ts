@@ -89,7 +89,14 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
 		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-		this.peerConn?.setRemoteDescription(remoteDescription);
+		this.peerConn?.setRemoteDescription(remoteDescription).then(() => {
+			const quality = useStore.getState().activeMeeting?.networkStats?.quality;
+			if (quality && quality !== NetworkQualityLevel.UNKNOWN) {
+				this.setOutboundQuality(quality).catch((err) =>
+					console.warn('Failed to re-apply screen outbound quality after re-connection', err)
+				);
+			}
+		});
 	}
 
 	public stopScreenShare(): void {
@@ -103,6 +110,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		this.peerConn?.close();
 		this.peerConn = null;
 		this.rtpSender = null;
+		this.originalEncodings = null;
 	}
 
 	public async setOutboundQuality(level: NetworkQualityLevel): Promise<void> {

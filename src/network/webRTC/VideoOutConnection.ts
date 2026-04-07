@@ -114,7 +114,14 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
 		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-		this.peerConn?.setRemoteDescription(remoteDescription);
+		this.peerConn?.setRemoteDescription(remoteDescription).then(() => {
+			const quality = useStore.getState().activeMeeting?.networkStats?.quality;
+			if (quality && quality !== NetworkQualityLevel.UNKNOWN) {
+				this.setOutboundQuality(quality).catch((err) =>
+					console.warn('Failed to re-apply video outbound quality after re-connection', err)
+				);
+			}
+		});
 	}
 
 	public closePeerConnection(): void {
@@ -124,6 +131,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.peerConn?.close();
 		this.rtpSender = null;
 		this.peerConn = null;
+		this.originalEncodings = null;
 	}
 
 	public async setOutboundQuality(level: NetworkQualityLevel): Promise<void> {
