@@ -20,7 +20,7 @@ interface TurnCredentialsResponse {
  */
 export async function fetchTurnIceServers(meetingId: string): Promise<RTCIceServer[]> {
 	try {
-		const response = await fetch(`/services/chats/meetings/${meetingId}/turn-credentials`, {
+		const response = await fetch(`/services/chats/meetings/${meetingId}/turnCredentials`, {
 			method: 'GET',
 			credentials: 'same-origin'
 		});
