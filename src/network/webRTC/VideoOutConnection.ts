@@ -35,7 +35,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
-			this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
@@ -71,17 +70,11 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	private onConnectionStateChange = (): void => {
-		if (this.peerConn?.connectionState === 'failed') {
-			this.peerConn.restartIce();
-		}
-	};
-
 	private onIceConnectionStateChange = (ev: Event): void => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		if (ev.target.iceConnectionState === 'failed') {
-			this.peerConn?.restartIce();
+			this.onNegotiationNeeded();
 		}
 	};
 
