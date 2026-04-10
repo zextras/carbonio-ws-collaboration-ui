@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
+
 interface TurnCredentialsResponse {
 	url: string;
 	username: string;
@@ -18,26 +20,22 @@ interface TurnCredentialsResponse {
  *
  * @param meetingId - The meeting ID to fetch TURN credentials for.
  */
-export async function fetchTurnIceServers(meetingId: string): Promise<RTCIceServer[]> {
-	try {
-		const response = await fetch(`/services/chats/meetings/${meetingId}/turnCredentials`, {
-			method: 'GET',
-			credentials: 'same-origin'
-		});
-
-		if (response.status === 204 || !response.ok) {
-			return [];
-		}
-
-		const data: TurnCredentialsResponse = await response.json();
-		return [
-			{
-				urls: data.url,
-				username: data.username,
-				credential: data.credential
+export function fetchTurnIceServers(meetingId: string): Promise<RTCIceServer[]> {
+	return fetchAPI<TurnCredentialsResponse>(`meetings/${meetingId}/turnCredentials`, RequestType.GET)
+		.then((data) => {
+			// fetchAPI resolves with parsed JSON when Content-Type is application/json.
+			// If TURN is not configured the server returns 204 (no body, no JSON content-type),
+			// in which case handleResponse returns the raw Response object — treat that as no TURN.
+			if (!data || data instanceof Response) {
+				return [];
 			}
-		];
-	} catch {
-		return [];
-	}
+			return [
+				{
+					urls: data.url,
+					username: data.username,
+					credential: data.credential
+				}
+			];
+		})
+		.catch(() => []);
 }

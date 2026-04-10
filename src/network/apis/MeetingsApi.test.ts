@@ -128,6 +128,7 @@ describe('Meetings API', () => {
 
 	test('joinMeeting is called correctly for a permanent meeting', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		mockFetchAPI.mockResolvedValueOnce(meetingMock);
 		await joinMeeting(
 			meetingMock.id,
@@ -151,6 +152,7 @@ describe('Meetings API', () => {
 
 	test('joinMeeting is called correctly for a scheduled meeting', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		mockFetchAPI.mockResolvedValueOnce(scheduledMeetingMock);
 		await joinMeeting(
 			meetingMock.id,
@@ -517,6 +519,7 @@ describe('Meetings API', () => {
 
 	test('User joins a meeting where some participants have raised their hands', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		const meeting = createMockMeeting({
 			participants: [
 				createMockParticipants({ userId: 'user1' }),
