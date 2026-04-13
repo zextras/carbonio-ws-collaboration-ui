@@ -264,15 +264,23 @@ export const forwardMessages = (
 			originalMessage: listOfMessages[message.stanzaId],
 			originalMessageSentAt: dateToISODate(message.date)
 		}));
-		return Promise.all(
+		const hasAttachments = messages.some((message) => message.attachment);
+		return Promise.allSettled(
 			roomsId.map((roomId) =>
 				fetchAPI<Response>(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
 			)
-		).then((responses) => {
-			if (messages.some((message) => message.attachment)) {
+		).then((results) => {
+			const fulfilled = results.filter(
+				(r): r is PromiseFulfilledResult<Response> => r.status === 'fulfilled'
+			);
+			if (hasAttachments && fulfilled.length > 0) {
 				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 			}
-			return responses;
+			const rejected = results.find((r) => r.status === 'rejected');
+			if (rejected) {
+				throw (rejected as PromiseRejectedResult).reason;
+			}
+			return fulfilled.map((r) => r.value);
 		});
 	});
 };

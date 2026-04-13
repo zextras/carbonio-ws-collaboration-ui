@@ -525,6 +525,30 @@ describe('Rooms API', () => {
 			);
 			dispatchSpy.mockRestore();
 		});
+
+		test('dispatches event even when some rooms fail (partial success)', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+
+			const message = createMockTextMessage({
+				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+			});
+			const xmlMessage = buildTextMessageFromHistory({
+				roomId: message.roomId,
+				from: message.from,
+				text: message.text
+			});
+			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementation(() => insideMessage);
+
+			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
+
+			await expect(forwardMessages(['room1', 'room2'], [message])).rejects.toThrow();
+			expect(dispatchSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
 	});
 
 	test('replacePlaceholderRoom is called correctly', async () => {
