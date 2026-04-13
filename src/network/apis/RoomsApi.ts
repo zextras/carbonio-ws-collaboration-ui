@@ -278,7 +278,7 @@ export const forwardMessages = (
 			}
 			const rejected = results.find((r) => r.status === 'rejected');
 			if (rejected) {
-				throw (rejected as PromiseRejectedResult).reason;
+				throw rejected.reason;
 			}
 			return fulfilled.map((r) => r.value);
 		});
