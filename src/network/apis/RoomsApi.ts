@@ -7,7 +7,7 @@ import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { createMeeting, deleteMeeting } from './MeetingsApi';
-import { CHATS_ROUTE } from '../../constants/appConstants';
+import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { Attachment } from '../../types/network/models/attachmentTypes';
@@ -217,14 +217,20 @@ export const addRoomAttachment = (
 			//  * Remove once support for v1.6.0 is officially dropped.
 			if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
 				sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
-					.then((resp: { id: string }) => resolve(resp))
+					.then((resp: { id: string }) => {
+						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+						resolve(resp);
+					})
 					.catch((error) => {
 						removePlaceholderMessage(roomId, uuid);
 						reject(new Error(error));
 					});
 			} else {
 				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
-					.then((resp: { id: string }) => resolve(resp))
+					.then((resp: { id: string }) => {
+						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+						resolve(resp);
+					})
 					.catch((error) => {
 						removePlaceholderMessage(roomId, uuid);
 						reject(new Error(error));
@@ -262,6 +268,11 @@ export const forwardMessages = (
 			roomsId.map((roomId) =>
 				fetchAPI<Response>(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
 			)
-		);
+		).then((responses) => {
+			if (messages.some((message) => message.attachment)) {
+				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+			}
+			return responses;
+		});
 	});
 };
