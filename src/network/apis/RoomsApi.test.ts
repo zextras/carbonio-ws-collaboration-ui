@@ -28,6 +28,7 @@ import {
 	updateRoom,
 	updateRoomPicture
 } from './RoomsApi';
+import { QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import useStore from '../../store/Store';
 import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import {
@@ -391,6 +392,51 @@ describe('Rooms API', () => {
 		});
 	});
 
+	describe('addRoomAttachment dispatches quota changed event', () => {
+		test('dispatches event on successful upload (legacy path)', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			mockUploadFileFetchAPI.mockResolvedValueOnce({ id: 'fileId' });
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
+			expect(dispatchSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
+
+		test('dispatches event on successful upload (1.6.1+ path)', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			store.setApiVersion('1.6.1');
+			mockSendFileFetchAPI.mockResolvedValueOnce({ id: 'fileId' });
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
+			expect(dispatchSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
+
+		test('does not dispatch event on upload failure', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			mockUploadFileFetchAPI.mockRejectedValueOnce(new Error('upload failed'));
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			await expect(addRoomAttachment(roomId, testFile, { area: '0x0' }, signal)).rejects.toThrow();
+			expect(dispatchSpy).not.toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
+	});
+
 	test('forwardMessages is called correctly', async () => {
 		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
@@ -431,6 +477,78 @@ describe('Rooms API', () => {
 				originalMessageSentAt: dateToISODate(message.date)
 			}
 		]);
+	});
+
+	describe('forwardMessages dispatches quota changed event', () => {
+		test('dispatches event when forwarded messages have attachments', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+
+			const message = createMockTextMessage({
+				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+			});
+			const xmlMessage = buildTextMessageFromHistory({
+				roomId: message.roomId,
+				from: message.from,
+				text: message.text
+			});
+			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+				() => insideMessage
+			);
+
+			await forwardMessages(['roomId'], [message]);
+			expect(dispatchSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
+
+		test('does not dispatch event when forwarded messages have no attachments', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+
+			const message = createMockTextMessage();
+			const xmlMessage = buildTextMessageFromHistory({
+				roomId: message.roomId,
+				from: message.from,
+				text: message.text
+			});
+			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+				() => insideMessage
+			);
+
+			await forwardMessages(['roomId'], [message]);
+			expect(dispatchSpy).not.toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
+
+		test('dispatches event even when some rooms fail (partial success)', async () => {
+			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+
+			const message = createMockTextMessage({
+				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+			});
+			const xmlMessage = buildTextMessageFromHistory({
+				roomId: message.roomId,
+				from: message.from,
+				text: message.text
+			});
+			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
+			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementation(() => insideMessage);
+
+			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
+
+			await expect(forwardMessages(['room1', 'room2'], [message])).rejects.toThrow();
+			expect(dispatchSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			);
+			dispatchSpy.mockRestore();
+		});
 	});
 
 	test('replacePlaceholderRoom is called correctly', async () => {

@@ -7,7 +7,7 @@
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { CHATS_ROUTE } from '../../constants/appConstants';
+import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -236,7 +236,10 @@ class RoomsApi implements IRoomsApi {
 				//  * Remove once support for v1.6.0 is officially dropped.
 				if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
 					sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
-						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.then((resp: AddRoomAttachmentResponse) => {
+							window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+							resolve(resp);
+						})
 						.catch((error) => {
 							removePlaceholderMessage(roomId, uuid);
 							reject(new Error(error));
@@ -249,7 +252,10 @@ class RoomsApi implements IRoomsApi {
 						signal,
 						optional
 					)
-						.then((resp: AddRoomAttachmentResponse) => resolve(resp))
+						.then((resp: AddRoomAttachmentResponse) => {
+							window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+							resolve(resp);
+						})
 						.catch((error) => {
 							removePlaceholderMessage(roomId, uuid);
 							reject(new Error(error));
@@ -269,11 +275,24 @@ class RoomsApi implements IRoomsApi {
 			originalRoomId: message.roomId
 		}));
 
-		return Promise.all(
+		const hasAttachments = messages.some((message) => message.attachment);
+		return Promise.allSettled(
 			roomsId.map((roomId) =>
 				fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
 			)
-		);
+		).then((results) => {
+			const fulfilled = results.filter(
+				(r): r is PromiseFulfilledResult<Response> => r.status === 'fulfilled'
+			);
+			if (hasAttachments && fulfilled.length > 0) {
+				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+			}
+			const rejected = results.find((r) => r.status === 'rejected');
+			if (rejected) {
+				throw rejected.reason;
+			}
+			return fulfilled.map((r) => r.value);
+		});
 	}
 
 	/**
