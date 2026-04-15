@@ -63,7 +63,7 @@
 		"@emoji-mart/data": "1.2.1",
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
-		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@zextras/carbonio-design-system": "12.0.2",
 		"@zextras/carbonio-shell-ui": "^14.0.0",
 		"@zextras/carbonio-ui-preview": "4.0.2",
