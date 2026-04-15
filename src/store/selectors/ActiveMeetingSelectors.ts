@@ -124,3 +124,6 @@ export const getHandRaisedList = (store: RootStore): string[] | undefined =>
 	store.activeMeeting?.usersWithHandRaised;
 
 export const getNetworkStats = (store: RootStore) => store.activeMeeting?.networkStats;
+
+export const getVideoSubscriptionsEnabled = (store: RootStore): boolean =>
+	store.activeMeeting?.videoSubscriptionsEnabled ?? true;

@@ -86,7 +86,8 @@ export const useActiveMeetingSlice: StateCreator<
 						backgroundImage: VirtualBackgroundType.NONE
 					},
 					talkingUsers: [],
-					usersWithHandRaised: []
+					usersWithHandRaised: [],
+					videoSubscriptionsEnabled: true
 				};
 			}),
 			false,
@@ -282,6 +283,7 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting.videoSubscriptionsEnabled) return;
 				draft.activeMeeting.videoScreenIn?.subscriptionManager?.addSubscription(subToAdd);
 			}),
 			false,
@@ -292,6 +294,7 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting.videoSubscriptionsEnabled) return;
 				draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToRequest);
 			}),
 			false,
@@ -377,6 +380,35 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_NETWORK_STATS'
+		);
+	},
+	setVideoSubscriptionsEnabled: (enabled: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.videoSubscriptionsEnabled = enabled;
+
+				if (enabled) {
+					const { meetingId } = draft.activeMeeting;
+					const myUserId = draft.session.id;
+					const participants = draft.meetings[meetingId]?.participants;
+					if (participants) {
+						const subsToRequest = Object.values(participants).flatMap((p) => {
+							const subs: Subscription[] = [];
+							if (p.userId !== myUserId) {
+								if (p.videoStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.VIDEO });
+								if (p.screenStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.SCREEN });
+							}
+							return subs;
+						});
+						if (subsToRequest.length > 0) {
+							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToRequest);
+						}
+					}
+				}
+			}),
+			false,
+			'AM/SET_VIDEO_SUBSCRIPTIONS_ENABLED'
 		);
 	}
 });

@@ -25,6 +25,7 @@ import MoreActionsButton from './MoreActionsButton';
 import NetworkQualityIndicator from './NetworkQualityIndicator';
 import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
+import VideoSubscriptionToggleButton from './VideoSubscriptionToggleButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { RouterContext } from '../../contexts/routerContext';
 
@@ -227,6 +228,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				$compactMode={compactMode}
 			>
 				<MeetingDuration meetingId={meetingId} />
+				<VideoSubscriptionToggleButton />
 				<NetworkQualityIndicator />
 				<LeaveMeetingButton isHoovering={isHoovering} />
 			</SecondActionsWrapper>
