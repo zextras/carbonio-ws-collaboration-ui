@@ -82,6 +82,7 @@
 		"react-router-dom": "6.29.0",
 		"semver": "7.7.4",
 		"strophe.js": "1.6.2",
+		"use-sync-external-store": "1.6.0",
 		"uuid": "13.0.0",
 		"zustand": "5.0.9"
 	},
