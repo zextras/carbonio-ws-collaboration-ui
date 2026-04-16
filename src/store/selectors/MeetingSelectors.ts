@@ -95,6 +95,17 @@ export const getParticipantScreenStatus = (
 	return participant?.screenStreamOn ?? false;
 };
 
+export const getParticipantHideVideoStream = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
+	if (!meetingId || !userId) return false;
+	const meeting = store.meetings[meetingId];
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.hideVideoStream ?? false;
+};
+
 const centralTileData: TileData = <TileData>{};
 
 export const getCentralTileData = (store: RootStore, meetingId: string): TileData | undefined => {

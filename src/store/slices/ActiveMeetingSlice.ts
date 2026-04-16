@@ -401,9 +401,48 @@ export const useActiveMeetingSlice: StateCreator<
 							}
 							return subs;
 						});
+						// for each participant change tile TileAvatarComponent to TileVideoComponent when enabling video subscriptions to show their video instead of a profile picture
+						subsToRequest.forEach((sub) => {
+							const participant = draft.meetings[meetingId].participants[sub.userId];
+							if (participant) {
+								participant.hideVideoStream = false;
+							}
+						});
+
 						if (subsToRequest.length > 0) {
 							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToRequest);
 						}
+					}
+				} else {
+					const { meetingId } = draft.activeMeeting;
+					const myUserId = draft.session.id;
+					const participants = draft.meetings[meetingId]?.participants;
+					if (participants) {
+						const subsToDelete = Object.values(participants).flatMap((p) => {
+							const subs: Subscription[] = [];
+							if (p.userId !== myUserId) {
+								if (p.videoStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.VIDEO });
+								if (p.screenStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.SCREEN });
+							}
+							return subs;
+						});
+						subsToDelete.forEach((sub) => {
+							draft.activeMeeting?.videoScreenIn?.subscriptionManager?.removeSubscription(sub);
+							draft.activeMeeting?.videoScreenIn?.removeStream(sub.userId, [sub.type]);
+							delete draft.activeMeeting?.subscription[`${sub.userId}-${sub.type}`];
+						});
+
+						if (subsToDelete.length > 0) {
+							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription([]);
+						}
+
+						subsToDelete.forEach((sub) => {
+							const participant = draft.meetings[meetingId].participants[sub.userId];
+							if (participant) {
+								participant.hideVideoStream = true;
+							}
+						});
+
 					}
 				}
 			}),

@@ -102,6 +102,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 				<WhoIsSpeaking visibleTiles={concat(carouselTiles, centralTile)} />
 				<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 					<Tile
+						key={`tile-${centralTile.userId}-${centralTile.type}`}
 						userId={centralTile?.userId}
 						meetingId={meetingId}
 						isScreenShare={centralTile?.type === STREAM_TYPE.SCREEN}

@@ -21,6 +21,7 @@ import {
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
+	getParticipantHideVideoStream,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
@@ -90,6 +91,7 @@ const VideoEl = styled.video<{
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
+	const hideVideoStream = useStore((store) => getParticipantHideVideoStream(store, meetingId, userId));
 	const userIsTalking = useStore((store) => getUserIsTalking(store, userId ?? ''));
 	const userHasHandRaised = useStore((store) => getUserHasHandRaised(store, userId ?? ''));
 	const videoStream = useStore((store) =>
@@ -121,11 +123,11 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	const videoStreamEnabled = useMemo(() => {
 		if (modalProps) {
-			return modalProps.videoStreamEnabled;
+			return modalProps.videoStreamEnabled && !hideVideoStream;
 		}
-		if (isScreenShare) return true;
-		return videoStatus;
-	}, [isScreenShare, modalProps, videoStatus]);
+		if (isScreenShare) return !hideVideoStream;
+		return videoStatus && !hideVideoStream;
+	}, [isScreenShare, modalProps, videoStatus, hideVideoStream]);
 
 	const showHoverContainer = useMemo(
 		() => !modalProps && !isPip && (canUsePinFeature || muteForAllHasToAppear),

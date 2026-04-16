@@ -119,6 +119,19 @@ const useWebRTCStats = (meetingId: string): void => {
 							currentMeeting?.screenOutConn
 								?.setOutboundQuality(quality)
 								.catch((err) => console.warn('Failed to set screen outbound quality', err));
+
+							if (quality === NetworkQualityLevel.POOR && currentMeeting?.videoSubscriptionsEnabled) {
+								// set video subscription to false to save bandwidth
+								useStore.getState().setVideoSubscriptionsEnabled(false);
+								console.warn('Network quality is poor. Consider switching to audio-only mode.');
+							}
+
+							if (quality === NetworkQualityLevel.GOOD && !currentMeeting?.videoSubscriptionsEnabled) {
+								// set video subscription to true to restore video
+								useStore.getState().setVideoSubscriptionsEnabled(true);
+								console.warn('Network quality has improved. Consider switching back to video mode.');
+							}
+
 						}
 					}
 				})

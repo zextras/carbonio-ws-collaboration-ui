@@ -81,6 +81,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 			centralTile ? (
 				<CentralTile width={centralTileWidth} height="fit" background={'text'}>
 					<Tile
+						key={`tile-${centralTile.userId}-${centralTile.type}`}
 						userId={centralTile.userId}
 						meetingId={meetingId}
 						isScreenShare={centralTile.type === STREAM_TYPE.SCREEN}

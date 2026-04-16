@@ -58,4 +58,5 @@ export type MeetingParticipant = {
 	joinedAt: string;
 	dateScreenOn?: string;
 	handRaisedAt?: string;
+	hideVideoStream?: boolean;
 };
