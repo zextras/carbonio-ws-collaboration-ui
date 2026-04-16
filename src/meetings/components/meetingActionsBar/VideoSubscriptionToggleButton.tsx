@@ -10,9 +10,7 @@ import styled from '@emotion/styled';
 import { Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import {
-	getVideoSubscriptionsEnabled
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getVideoSubscriptionsEnabled } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 
 const ClickableContainer = styled(Container)`

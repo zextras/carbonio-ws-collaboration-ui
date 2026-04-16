@@ -79,23 +79,21 @@ const NetworkQualityIndicator: FC = () => {
 						'Your network connection is poor, which may affect the meeting experience.'
 					)}
 					severity="warning"
-					dismissable
 					data-testid="network_quality_snackbar"
 					style={{ maxWidth: 'none' }}
 					open={showNetworkPoorSnackbar}
-					placement="top"
 					onClose={(): void => setShowNetworkPoorSnackbar(false)}
 				/>
 				<Tooltip label={tooltipLabel} placement="top">
-				<ClickableContainer
-					orientation="horizontal"
-					width="fit"
-					height="fit"
-					crossAlignment="center"
-					data-testid="network_quality_indicator"
-				>
-					<Icon icon={ICON_MAP[quality]} color={COLOR_MAP[quality]} size="medium" />
-				</ClickableContainer>
+					<ClickableContainer
+						orientation="horizontal"
+						width="fit"
+						height="fit"
+						crossAlignment="center"
+						data-testid="network_quality_indicator"
+					>
+						<Icon icon={ICON_MAP[quality]} color={COLOR_MAP[quality]} size="medium" />
+					</ClickableContainer>
 				</Tooltip>
 			</>
 		);

@@ -12,13 +12,9 @@ import { useTranslation } from 'react-i18next';
 import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
-import { use } from 'i18next';
 import useStore from '../../../store/Store';
-import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { useConnectionsStoreSlice } from '../../../store/slices/ConnectionStoreSlice';
-import { LocalStreams, StreamsSubscriptionMap } from '../../../types/store/ActiveMeetingTypes';
-import { getAudioStream } from '../../../utils/UserMediaManager';
+import { LocalStreams } from '../../../types/store/ActiveMeetingTypes';
+import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -79,7 +75,6 @@ const LeaveMeetingButton = ({
 			localStreams.audio?.getTracks().forEach((track) => track.stop());
 			localStreams.video?.getTracks().forEach((track) => track.stop());
 			localStreams.screen?.getTracks().forEach((track) => track.stop());
-
 		},
 		[meetingId, goToInfoPage, isPip, closePipWindow]
 	);

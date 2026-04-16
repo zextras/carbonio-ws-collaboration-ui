@@ -155,14 +155,12 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		} else if (level === NetworkQualityLevel.FAIR) {
 			params.encodings = this.originalEncodings.map((enc) => ({
 				...enc,
-				maxBitrate: 20_000, // bps
-				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 2
+				maxBitrate: 800_000
 			}));
 		} else if (level === NetworkQualityLevel.POOR) {
 			params.encodings = this.originalEncodings.map((enc) => ({
 				...enc,
-				maxBitrate: 10_000, // bps
-				scaleResolutionDownBy: (enc.scaleResolutionDownBy ?? 1) * 5
+				maxBitrate: 200_000
 			}));
 		} else {
 			return;

@@ -11,6 +11,7 @@ import {
 	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
+	NetworkStats,
 	STREAM_TYPE,
 	TileData,
 	VirtualBackgroundType
@@ -123,7 +124,8 @@ export const getUserHandRank = (store: RootStore, userId: string): number => {
 export const getHandRaisedList = (store: RootStore): string[] | undefined =>
 	store.activeMeeting?.usersWithHandRaised;
 
-export const getNetworkStats = (store: RootStore) => store.activeMeeting?.networkStats;
+export const getNetworkStats = (store: RootStore): NetworkStats | undefined =>
+	store.activeMeeting?.networkStats;
 
 export const getVideoSubscriptionsEnabled = (store: RootStore): boolean =>
 	store.activeMeeting?.videoSubscriptionsEnabled ?? true;

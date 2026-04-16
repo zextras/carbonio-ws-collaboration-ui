@@ -12,6 +12,7 @@ import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { NetworkQualityLevel } from '../types/store/ActiveMeetingTypes';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
+const REMOTE_INBOUND_RTP_TYPE = 'remote-inbound-rtp';
 
 const makeStatsMock = (reports: RTCStats[]): Promise<RTCStatsReport> =>
 	Promise.resolve({
@@ -99,7 +100,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats = vi.fn(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.08,
 					fractionLost: 0.01,
@@ -192,7 +193,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.5,
 					fractionLost: 0.08,
@@ -208,9 +209,7 @@ describe('useWebRTCStats hook', () => {
 			await vi.advanceTimersByTimeAsync(4000);
 		});
 
-		expect(useStore.getState().activeMeeting?.networkStats?.quality).toBe(
-			NetworkQualityLevel.POOR
-		);
+		expect(useStore.getState().activeMeeting?.networkStats?.quality).toBe(NetworkQualityLevel.POOR);
 	});
 
 	test('handles getStats rejection gracefully without throwing', async () => {
@@ -230,7 +229,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.5,
 					fractionLost: 0.08,
@@ -269,7 +268,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.5,
 					fractionLost: 0.08,
@@ -298,7 +297,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.25,
 					fractionLost: 0.03,
@@ -335,7 +334,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.5,
 					fractionLost: 0.08,
@@ -367,9 +366,7 @@ describe('useWebRTCStats hook', () => {
 			await vi.advanceTimersByTimeAsync(4000);
 		});
 
-		expect(useStore.getState().activeMeeting?.networkStats?.quality).toBe(
-			NetworkQualityLevel.GOOD
-		);
+		expect(useStore.getState().activeMeeting?.networkStats?.quality).toBe(NetworkQualityLevel.GOOD);
 		expect(mockSetParameters).not.toHaveBeenCalled();
 	});
 
@@ -378,7 +375,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.5,
 					fractionLost: 0.08,
@@ -407,7 +404,7 @@ describe('useWebRTCStats hook', () => {
 		mockGetStats.mockImplementation(() =>
 			makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: 0.08,
 					fractionLost: 0.01,
@@ -433,7 +430,7 @@ describe('useWebRTCStats hook', () => {
 			const isPoor = callCount === 5;
 			return makeStatsMock([
 				{
-					type: 'remote-inbound-rtp',
+					type: REMOTE_INBOUND_RTP_TYPE,
 					kind: 'audio',
 					roundTripTime: isPoor ? 0.5 : 0.08, // seconds; 500 ms : 80 ms
 					fractionLost: isPoor ? 0.08 : 0.01,

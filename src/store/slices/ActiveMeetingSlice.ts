@@ -154,7 +154,12 @@ export const useActiveMeetingSlice: StateCreator<
 				const currentStreams = draft.activeMeeting.subscription;
 				const incomingStreamKeys = Object.keys(streams);
 				const currentStreamKeys = Object.keys(currentStreams);
-				console.log('Updating subscribed streams. Incoming streams:', streams, 'Current streams:', currentStreams);
+				console.log(
+					'Updating subscribed streams. Incoming streams:',
+					streams,
+					'Current streams:',
+					currentStreams
+				);
 				const areStreamsEqual =
 					incomingStreamKeys.length === currentStreamKeys.length &&
 					incomingStreamKeys.every((key) => {
@@ -410,7 +415,9 @@ export const useActiveMeetingSlice: StateCreator<
 						});
 
 						if (subsToRequest.length > 0) {
-							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToRequest);
+							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(
+								subsToRequest
+							);
 						}
 					}
 				} else {
@@ -442,7 +449,6 @@ export const useActiveMeetingSlice: StateCreator<
 								participant.hideVideoStream = true;
 							}
 						});
-
 					}
 				}
 			}),

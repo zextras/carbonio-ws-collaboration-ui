@@ -70,7 +70,7 @@ const MeetingSkeleton = (): ReactElement => {
 	}, [meetingViewSelected, numberOfTiles]);
 
 	const isVirtualBackgroundVisible = useMemo(
-		() => ( virtualBackgroundEnabled && !isUserGuest ) || isUserGuest,
+		() => (virtualBackgroundEnabled && !isUserGuest) || isUserGuest,
 		[virtualBackgroundEnabled, isUserGuest]
 	);
 
