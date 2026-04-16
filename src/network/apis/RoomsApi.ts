@@ -41,7 +41,7 @@ export const listRooms = (members = false, settings = false): Promise<RoomBe[]> 
 		paramsStr = `?${array.join('&')}`;
 	}
 	return fetchAPI<RoomBe[]>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
-		useStore.getState().addRooms(resp);
+		useStore.getState().addRooms(resp, true);
 		return resp;
 	});
 };
