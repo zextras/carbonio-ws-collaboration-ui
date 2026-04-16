@@ -44,7 +44,8 @@ const useDarkReader = (): UseDarkReaderReturnType => {
 					}
 				`,
 				ignoreInlineStyle: ['.tox-menu *'],
-				disableStyleSheetsProxy: false
+				disableStyleSheetsProxy: false,
+				ignoreCSSUrl: []
 			}
 		);
 	}, []);
