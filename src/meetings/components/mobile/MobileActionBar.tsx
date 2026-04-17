@@ -10,10 +10,14 @@ import { Button, Container } from '@zextras/carbonio-design-system';
 
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
+import {
+	getParticipantAudioStatus,
+	getParticipantVideoStatus
+} from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { getAudioStream } from '../../../utils/UserMediaManager';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { getAudioStream, getFrontCameraStream } from '../../../utils/UserMediaManager';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
@@ -28,7 +32,9 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
+	const videoOutConn = useStore((store) => store.activeMeeting?.videoOutConn);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
@@ -42,6 +48,22 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);
+
+	const toggleVideoStream = useCallback(() => {
+		if (!videoStatus) {
+			if (!videoOutConn?.peerConn) {
+				videoOutConn?.startVideo();
+			} else {
+				getFrontCameraStream().then((stream) => {
+					videoOutConn
+						?.updateLocalStreamTrack(stream)
+						.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+				});
+			}
+		} else {
+			videoOutConn?.stopVideo();
+		}
+	}, [videoStatus, videoOutConn, meetingId]);
 
 	const leaveMeeting = useCallback(
 		() =>
@@ -76,6 +98,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 				onClick={toggleChatView}
 			/>
 			<Button size="large" icon={audioStatus ? 'Mic' : 'MicOff'} onClick={toggleAudioStream} />
+			<Button size="large" icon={videoStatus ? 'Video' : 'VideoOff'} onClick={toggleVideoStream} />
 			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeeting} />
 		</Container>
 	);
