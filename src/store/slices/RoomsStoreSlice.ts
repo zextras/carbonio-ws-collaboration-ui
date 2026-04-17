@@ -27,9 +27,25 @@ export const useRoomsStoreSlice: StateCreator<
 	RoomsStoreSlice
 > = (set) => ({
 	rooms: {},
-	addRooms: (roomsBe: RoomBe[]): void => {
+	addRooms: (roomsBe: RoomBe[], fullSync = false): void => {
 		set(
 			produce((draft: RootStore) => {
+				// Remove rooms that no longer exist on the server only during a full sync
+				if (fullSync) {
+					const incomingIds = new Set(roomsBe.map((r) => r.id));
+					forEach(Object.keys(draft.rooms), (roomId) => {
+						if (!incomingIds.has(roomId) && !draft.rooms[roomId]?.placeholder) {
+							const meetingId = getMeetingIdFromRoom(draft, roomId);
+							if (meetingId) delete draft.meetings[meetingId];
+
+							delete draft.rooms[roomId];
+							delete draft.activeConversations[roomId];
+							delete draft.chatsRegistry[roomId];
+						}
+					});
+				}
+
+				// Add or update only changed rooms
 				forEach(roomsBe, (roomBe) => {
 					draft.rooms[roomBe.id] = {
 						id: roomBe.id,

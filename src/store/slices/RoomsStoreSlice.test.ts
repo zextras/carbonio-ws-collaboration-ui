@@ -78,6 +78,24 @@ describe('RoomsStoreSlice tests', () => {
 			);
 		});
 
+		test('Adding a room without fullSync does not remove existing rooms', () => {
+			useStore.getState().addRooms([singleRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
+			expect(useStore.getState().rooms[singleRoom1.id]).toBeDefined();
+			expect(useStore.getState().rooms[groupRoom1.id]).toBeDefined();
+		});
+
+		test('Adding a room with fullSync removes rooms not in the incoming list', () => {
+			useStore.getState().addRooms([singleRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
+			expect(useStore.getState().rooms[singleRoom1.id]).toBeDefined();
+			expect(useStore.getState().rooms[groupRoom1.id]).toBeDefined();
+
+			useStore.getState().addRooms([singleRoom1], true);
+			expect(useStore.getState().rooms[singleRoom1.id]).toBeDefined();
+			expect(useStore.getState().rooms[groupRoom1.id]).toBeUndefined();
+		});
+
 		test('If a room is added with clearedAt, messages before that date are removed', () => {
 			useStore.setState({
 				chatsRegistry: {

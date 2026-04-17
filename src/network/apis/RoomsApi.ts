@@ -62,7 +62,7 @@ class RoomsApi implements IRoomsApi {
 		// Members and settings should be fetched separately when needed via getRoomMembers/getRoom
 		return fetchAPI('rooms', RequestType.GET).then((resp: ListRoomsResponse) => {
 			const { addRooms } = useStore.getState();
-			addRooms(resp);
+			addRooms(resp, true);
 			return resp;
 		});
 	}
