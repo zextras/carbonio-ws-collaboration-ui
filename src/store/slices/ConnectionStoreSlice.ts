@@ -9,8 +9,6 @@ import { produce } from 'immer';
 import { forEach } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { WebSocketClient } from '../../network/websocket/WebSocketClient';
-import XMPPClient from '../../network/xmpp/XMPPClient';
 import { ConnectionsStoreSlice } from '../../types/store/ConnectionsTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -21,8 +19,6 @@ export const useConnectionsStoreSlice: StateCreator<
 	ConnectionsStoreSlice
 > = (set) => ({
 	connections: {
-		xmppClient: new XMPPClient(),
-		wsClient: new WebSocketClient(),
 		status: {}
 	},
 	setChatsBeStatus: (status: boolean): void => {

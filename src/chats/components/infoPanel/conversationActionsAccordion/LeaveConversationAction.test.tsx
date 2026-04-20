@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -34,7 +34,7 @@ vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user2Info.id, user2Info.name);
+	store.setLoginInfo({ id: user2Info.id, name: user2Info.name });
 	store.addRooms([mockedRoom]);
 });
 describe('Leave conversation Action', () => {
@@ -54,7 +54,7 @@ describe('Leave conversation Action', () => {
 	});
 
 	test('leave conversation', async () => {
-		const spyOnDeleteRoomMember = vi.spyOn(roomsApi, 'deleteRoomMember');
+		const spyOnDeleteRoomMember = vi.spyOn(api, 'deleteRoomMember');
 		const { user } = setup(
 			<LeaveConversationAction
 				type={mockedRoom.type}

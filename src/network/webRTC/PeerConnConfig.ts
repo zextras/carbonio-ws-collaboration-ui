@@ -7,6 +7,8 @@
 import { IPeerConnConfig } from '../../types/network/webRTC/webRTC';
 
 export class PeerConnConfig implements IPeerConnConfig {
+	static turnServers: RTCIceServer[] = [];
+
 	defaultConfig: RTCConfiguration;
 
 	defaultRTCIceServers: RTCIceServer[];
@@ -22,6 +24,10 @@ export class PeerConnConfig implements IPeerConnConfig {
 		};
 	}
 
+	static setTurnServers(servers: RTCIceServer[]): void {
+		PeerConnConfig.turnServers = servers;
+	}
+
 	addIceServer(iceServer: RTCIceServer): void {
 		this.additionalRTCIceServers.push(iceServer);
 	}
@@ -29,8 +35,12 @@ export class PeerConnConfig implements IPeerConnConfig {
 	getConfig(): RTCConfiguration {
 		return {
 			...this.defaultConfig,
-			...this.defaultRTCIceServers,
-			...this.additionalRTCIceServers
+			iceServers: [
+				...this.defaultRTCIceServers,
+				...this.additionalRTCIceServers,
+				...PeerConnConfig.turnServers
+			],
+			iceTransportPolicy: 'all'
 		};
 	}
 }

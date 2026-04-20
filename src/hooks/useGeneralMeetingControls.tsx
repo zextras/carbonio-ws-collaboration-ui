@@ -17,7 +17,7 @@ import useEventListener, {
 import usePiPWindow from './usePipWindow';
 import useRouting from './useRouting';
 import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
-import { MeetingsApi } from '../network';
+import { getMeetingByMeetingId, leaveMeeting } from '../network';
 import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
@@ -68,14 +68,14 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [goToInfoPage, isMeetingActive, meetingDisconnection, meetingId]);
 
 	// Leave meeting on window close
-	const leaveMeeting = useCallback(() => MeetingsApi.leaveMeeting(meetingId), [meetingId]);
+	const leaveMeetingAction = useCallback(() => leaveMeeting(meetingId), [meetingId]);
 
 	useEffect(() => {
-		window.parent.addEventListener('beforeunload', leaveMeeting);
+		window.parent.addEventListener('beforeunload', leaveMeetingAction);
 		return (): void => {
-			window.parent.removeEventListener('beforeunload', leaveMeeting);
+			window.parent.removeEventListener('beforeunload', leaveMeetingAction);
 		};
-	}, [leaveMeeting]);
+	}, [leaveMeetingAction]);
 
 	// Handle pinned tile disappearance
 	useEffect(() => {
@@ -139,7 +139,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const websocketNetworkStatusPrev = useRef(websocketNetworkStatus);
 	useEffect(() => {
 		if (websocketNetworkStatusPrev.current === false && websocketNetworkStatus === true) {
-			MeetingsApi.getMeetingByMeetingId(meetingId).then((meeting) => {
+			getMeetingByMeetingId(meetingId).then((meeting) => {
 				const userInMeeting = find(
 					meeting?.participants,
 					(member) => member.userId === useStore.getState().session.id

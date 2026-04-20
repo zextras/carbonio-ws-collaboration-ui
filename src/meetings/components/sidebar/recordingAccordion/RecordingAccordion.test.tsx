@@ -9,7 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import RecordingAccordion from './RecordingAccordion';
-import meetingsApi from '../../../../network/apis/MeetingsApi';
+import * as api from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -40,7 +40,7 @@ const iconDown = 'icon: ChevronDown';
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1.id, 'user1');
+	store.setLoginInfo({ id: user1.id, name: 'user1' });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
@@ -82,7 +82,7 @@ describe('RecordingAccordion tests', () => {
 	});
 
 	test('When user clicks on the start button the recording starts', async () => {
-		const spyOnStartRecording = vi.spyOn(meetingsApi, 'startRecording');
+		const spyOnStartRecording = vi.spyOn(api, 'startRecording');
 		useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RECORDING, true);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
@@ -94,7 +94,7 @@ describe('RecordingAccordion tests', () => {
 	});
 
 	test('Show a snackbar when the start recording request fails', async () => {
-		const spyOnStartRecording = vi.spyOn(meetingsApi, 'startRecording');
+		const spyOnStartRecording = vi.spyOn(api, 'startRecording');
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const chevron = screen.getByTestId(iconDown);

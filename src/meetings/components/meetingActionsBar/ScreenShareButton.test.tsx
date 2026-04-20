@@ -39,7 +39,7 @@ describe('ScreenShare button', () => {
 		useParams.mockReturnValue({ meetingId: meeting.id });
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
-		store.setLoginInfo('userId', 'User', 'User');
+		store.setLoginInfo({ id: 'userId', name: 'User' });
 		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,
@@ -54,7 +54,7 @@ describe('ScreenShare button', () => {
 	test('ScreenSharingOn icon when screenshare is enabled', async () => {
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
-		store.setLoginInfo('userId', 'User', 'User');
+		store.setLoginInfo({ id: 'userId', name: 'User' });
 		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,

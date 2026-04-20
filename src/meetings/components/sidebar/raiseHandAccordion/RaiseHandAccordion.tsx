@@ -24,7 +24,7 @@ import useEventListener, {
 	EventName,
 	MeetingParticipantRaiseHandEvent
 } from '../../../../hooks/useEventListener';
-import { MeetingsApi } from '../../../../network';
+import { raiseHand } from '../../../../network';
 import {
 	getHandRaisedList,
 	getRaiseHandAccordionStatus
@@ -106,7 +106,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	const lowerAllHands = useCallback(() => {
 		map(raiseHandList, (userWithHandRaised) => {
 			const userId = userWithHandRaised !== myUserId ? userWithHandRaised : undefined;
-			MeetingsApi.raiseHand(meetingId, false, userId);
+			raiseHand(meetingId, false, userId);
 		});
 	}, [meetingId, myUserId, raiseHandList]);
 

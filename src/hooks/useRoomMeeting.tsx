@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { CHATS_ROUTE, MEETINGS_PATH } from '../constants/appConstants';
-import { MeetingsApi } from '../network';
+import { createMeeting } from '../network';
 import {
 	getMeetingIdFromRoom,
 	getRoomNameSelector,
@@ -34,7 +34,7 @@ const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 			const meetingType =
 				roomType === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
 			const meetingName = roomType === RoomType.ONE_TO_ONE ? '' : roomName;
-			MeetingsApi.createMeeting(roomId, meetingType, meetingName).then((meeting) =>
+			createMeeting(roomId, meetingType, meetingName).then((meeting) =>
 				window.open(`${MEETINGS_PATH}${meeting.id}`)
 			);
 		}

@@ -6,7 +6,28 @@
 
 import { size } from 'lodash';
 
-import meetingsApi from './MeetingsApi';
+import {
+	acceptWaitingUser,
+	createAudioOffer,
+	createMediaAnswer,
+	createMeeting,
+	deleteMeeting,
+	enterMeeting,
+	getMeeting,
+	getMeetingByMeetingId,
+	getScheduledMeetingName,
+	getWaitingList,
+	joinMeeting,
+	leaveMeeting,
+	leaveWaitingRoom,
+	listMeetings,
+	startMeeting,
+	startRecording,
+	stopMeeting,
+	stopRecording,
+	updateAudioStreamStatus,
+	updateMediaOffer
+} from './MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -15,18 +36,14 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import {
-	CreateGuestAccountResponse,
-	LoginV3ConfigResponse
-} from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User, UserType } from '../../types/store/UserTypes';
 import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RequestType } from '../../utils/FetchUtils';
 
 const meetingMock = createMockMeeting();
 const meetingNotActiveMock = createMockMeeting({ active: false });
@@ -56,7 +73,7 @@ vi.mock('../../utils/FetchUtils');
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setApiVersion('1.6.4');
-	store.setLoginInfo(userId, 'User');
+	store.setLoginInfo({ id: userId, name: 'User' });
 	store.setQueueId('queueId');
 	store.addRooms([roomMock]);
 });
@@ -64,7 +81,7 @@ beforeEach(() => {
 describe('Meetings API', () => {
 	test('listMeetings is called correctly', async () => {
 		mockFetchAPI.mockResolvedValueOnce([meetingMock, meetingMock1]);
-		await meetingsApi.listMeetings();
+		await listMeetings();
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('meetings', RequestType.GET);
 		// Check if store is correctly updated
@@ -77,7 +94,7 @@ describe('Meetings API', () => {
 	});
 
 	test('createMeeting is called correctly', async () => {
-		await meetingsApi.createMeeting('roomId', MeetingType.PERMANENT, '');
+		await createMeeting('roomId', MeetingType.PERMANENT, '');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('meetings', RequestType.POST, {
 			expiration: undefined,
@@ -88,7 +105,7 @@ describe('Meetings API', () => {
 	});
 
 	test('getMeeting is called correctly', async () => {
-		await meetingsApi.getMeeting(meetingMock.roomId);
+		await getMeeting(meetingMock.roomId);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`rooms/${meetingMock.roomId}/meeting`,
@@ -98,21 +115,22 @@ describe('Meetings API', () => {
 
 	test('getMeetingById is called correctly', async () => {
 		mockFetchAPI.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.getMeetingByMeetingId(meetingMock.id);
+		await getMeetingByMeetingId(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}`, RequestType.GET);
 	});
 
 	test('start is called correctly', async () => {
-		await meetingsApi.startMeeting('meetingId');
+		await startMeeting('meetingId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/start`, RequestType.POST);
 	});
 
 	test('joinMeeting is called correctly for a permanent meeting', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		mockFetchAPI.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.joinMeeting(
+		await joinMeeting(
 			meetingMock.id,
 			{
 				audioStreamEnabled: false,
@@ -134,8 +152,9 @@ describe('Meetings API', () => {
 
 	test('joinMeeting is called correctly for a scheduled meeting', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		mockFetchAPI.mockResolvedValueOnce(scheduledMeetingMock);
-		await meetingsApi.joinMeeting(
+		await joinMeeting(
 			meetingMock.id,
 			{
 				audioStreamEnabled: false,
@@ -164,7 +183,7 @@ describe('Meetings API', () => {
 
 	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
 		useStore.getState().addMeetings([meetingMock]);
-		await meetingsApi.enterMeeting(
+		await enterMeeting(
 			meetingMock.roomId,
 			{
 				audioStreamEnabled: false,
@@ -181,7 +200,7 @@ describe('Meetings API', () => {
 
 	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
 		useStore.getState().addMeetings([meetingNotActiveMock]);
-		await meetingsApi.enterMeeting(
+		await enterMeeting(
 			meetingNotActiveMock.roomId,
 			{
 				audioStreamEnabled: false,
@@ -209,7 +228,7 @@ describe('Meetings API', () => {
 		useStore.getState().addRooms([roomWithoutMeetingMock]);
 		mockFetchAPI.mockResolvedValueOnce(scheduledMeetingMock);
 
-		await meetingsApi.enterMeeting(
+		await enterMeeting(
 			roomWithoutMeetingMock.id,
 			{
 				audioStreamEnabled: false,
@@ -242,8 +261,8 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
@@ -255,7 +274,7 @@ describe('Meetings API', () => {
 	test('leaveMeeting for internal user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
@@ -267,7 +286,7 @@ describe('Meetings API', () => {
 	test('leaveMeeting for internal user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
@@ -279,9 +298,9 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
 
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
@@ -300,7 +319,7 @@ describe('Meetings API', () => {
 		store.setSupportedVersions(['1.6.2']);
 		store.addRooms([temporaryRoom]);
 
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toBeCalledTimes(2);
 		// Check if store is correctly updated
@@ -317,7 +336,7 @@ describe('Meetings API', () => {
 		const store = useStore.getState();
 		store.addRooms([temporaryRoom]);
 
-		await meetingsApi.leaveMeeting(meetingMock.id);
+		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toBeCalledTimes(1);
 		// Check if store is correctly updated
@@ -326,20 +345,20 @@ describe('Meetings API', () => {
 	});
 
 	test('stopMeeting is called correctly', async () => {
-		await meetingsApi.stopMeeting('meetingId');
+		await stopMeeting('meetingId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/stop`, RequestType.POST);
 	});
 
 	test('deleteMeeting is called correctly', async () => {
-		await meetingsApi.deleteMeeting(meetingMock.id);
+		await deleteMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}`, RequestType.DELETE);
 	});
 
 	test('updateAudioStreamStatus is called to set audio enabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateAudioStreamStatus(meetingMock.id, true);
+		await updateAudioStreamStatus(meetingMock.id, true);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/audio`, RequestType.PUT, {
 			enabled: true
@@ -348,7 +367,7 @@ describe('Meetings API', () => {
 
 	test('updateAudioStreamStatus is called to set audio disabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateAudioStreamStatus(meetingMock.id, false);
+		await updateAudioStreamStatus(meetingMock.id, false);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/audio`, RequestType.PUT, {
 			enabled: false
@@ -357,7 +376,7 @@ describe('Meetings API', () => {
 
 	test('updateVideoStreamStatus is called to set video enabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, true, sdpOffer);
+		await updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, true, sdpOffer);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/media`, RequestType.PUT, {
 			type: STREAM_TYPE.VIDEO,
@@ -368,7 +387,7 @@ describe('Meetings API', () => {
 
 	test('updateVideoStreamStatus is called to set video disabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, false);
+		await updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, false);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/media`, RequestType.PUT, {
 			type: STREAM_TYPE.VIDEO,
@@ -378,7 +397,7 @@ describe('Meetings API', () => {
 
 	test('updateScreenStreamStatus is called to set screen share enabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, true, sdpOffer);
+		await updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, true, sdpOffer);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/media`, RequestType.PUT, {
 			type: STREAM_TYPE.SCREEN,
@@ -389,7 +408,7 @@ describe('Meetings API', () => {
 
 	test('updateScreenStreamStatus is called to set screen share disabled', async () => {
 		ongoingMeetingSetup();
-		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, false);
+		await updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, false);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/media`, RequestType.PUT, {
 			type: STREAM_TYPE.SCREEN,
@@ -400,7 +419,7 @@ describe('Meetings API', () => {
 	test('leaveWaitingRoom is called correctly for internal user', async () => {
 		const cookie = `ZM_AUTH_TOKEN=123456789`;
 		document.cookie = cookie;
-		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+		await leaveWaitingRoom(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/queue/${userId}`,
@@ -414,9 +433,14 @@ describe('Meetings API', () => {
 
 	test('leaveWaitingRoom is called correctly for guest user', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789`;
-		useStore.getState().setLoginInfo(userId, guestUser.email, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo({
+			id: userId,
+			name: guestUser.email,
+			displayName: guestUser.name,
+			userType: guestUser.type
+		});
 		useStore.getState().setQueueId('queueId');
-		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+		await leaveWaitingRoom(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/queue/${userId}`,
@@ -429,13 +453,13 @@ describe('Meetings API', () => {
 	});
 
 	test('getWaitingList is called correctly', async () => {
-		await meetingsApi.getWaitingList(meetingMock.id);
+		await getWaitingList(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/queue`, RequestType.GET);
 	});
 
 	test('acceptWaitingUser is called correctly', async () => {
-		await meetingsApi.acceptWaitingUser(meetingMock.id, userId, true);
+		await acceptWaitingUser(meetingMock.id, userId, true);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/queue/${userId}`,
@@ -447,7 +471,7 @@ describe('Meetings API', () => {
 	});
 
 	test('startRecording is called correctly', async () => {
-		await meetingsApi.startRecording(meetingMock.id, 'folderId');
+		await startRecording(meetingMock.id, 'folderId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/startRecording`,
@@ -459,7 +483,7 @@ describe('Meetings API', () => {
 	});
 
 	test('stopRecording is called correctly', async () => {
-		await meetingsApi.stopRecording(meetingMock.id);
+		await stopRecording(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/stopRecording`,
@@ -469,7 +493,7 @@ describe('Meetings API', () => {
 	});
 
 	test('createMediaAnswer is called correctly', async () => {
-		await meetingsApi.createMediaAnswer(meetingMock.id, 'sdpAnswer');
+		await createMediaAnswer(meetingMock.id, 'sdpAnswer');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/media/answer`,
@@ -481,7 +505,7 @@ describe('Meetings API', () => {
 	});
 
 	test('createAudioOffer is called correctly', async () => {
-		await meetingsApi.createAudioOffer(meetingMock.id, 'sdpOffer');
+		await createAudioOffer(meetingMock.id, 'sdpOffer');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
 			`meetings/${meetingMock.id}/audio/offer`,
@@ -493,39 +517,14 @@ describe('Meetings API', () => {
 	});
 
 	test('getScheduledMeetingName is called correctly', async () => {
-		await meetingsApi.getScheduledMeetingName(meetingMock.id);
+		await getScheduledMeetingName(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`public/meetings/${meetingMock.id}`, RequestType.GET);
 	});
 
-	test('authLogin is called correctly', async () => {
-		const spyOnAuthLogin = vi
-			.spyOn(meetingsApi, 'getLoginConfig')
-			.mockImplementation(() => Promise.resolve({} as LoginV3ConfigResponse));
-		await meetingsApi.getLoginConfig();
-
-		expect(spyOnAuthLogin).toHaveBeenCalled();
-	});
-
-	test('createGuestAccount is called correctly', async () => {
-		const spyOnCreateGuestAccount = vi
-			.spyOn(meetingsApi, 'createGuestAccount')
-			.mockImplementation(() => Promise.resolve({} as CreateGuestAccountResponse));
-		await meetingsApi.createGuestAccount('userName');
-
-		expect(spyOnCreateGuestAccount).toHaveBeenCalledWith('userName');
-	});
-
-	test('user raise hand', async () => {
-		const spyOnRaiseHand = vi.spyOn(meetingsApi, 'raiseHand');
-		ongoingMeetingSetup();
-
-		await meetingsApi.raiseHand(meetingMock.id, true);
-		expect(spyOnRaiseHand).toHaveBeenCalled();
-	});
-
 	test('User joins a meeting where some participants have raised their hands', async () => {
 		mockFetchAPI.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		mockFetchAPI.mockResolvedValueOnce(null); // fetchTurnIceServers → TURN not configured → []
 		const meeting = createMockMeeting({
 			participants: [
 				createMockParticipants({ userId: 'user1' }),
@@ -544,11 +543,7 @@ describe('Meetings API', () => {
 			]
 		});
 		mockFetchAPI.mockResolvedValueOnce(meeting);
-		await meetingsApi.joinMeeting(
-			meetingMock.id,
-			{ audioStreamEnabled: false, videoStreamEnabled: false },
-			{}
-		);
+		await joinMeeting(meetingMock.id, { audioStreamEnabled: false, videoStreamEnabled: false }, {});
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/join`, RequestType.POST, {
 			audioStreamEnabled: false,
 			videoStreamEnabled: false

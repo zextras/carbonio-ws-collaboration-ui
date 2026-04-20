@@ -69,6 +69,11 @@ const InfoPage = (): ReactElement => {
 		}
 	}, [isLoggedUserExternal]);
 
+	useEffect(() => {
+		const { activeMeeting, meetingDisconnection } = useStore.getState();
+		if (activeMeeting) meetingDisconnection(activeMeeting.meetingId);
+	}, []);
+
 	switch (infoType) {
 		case PAGE_INFO_TYPE.ROOM_EMPTY:
 			titleLabel = t('external.roomIsEmpty', 'This Room is empty');

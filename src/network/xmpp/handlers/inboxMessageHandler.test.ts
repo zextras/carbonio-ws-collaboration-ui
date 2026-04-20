@@ -5,15 +5,11 @@
  */
 
 import { onInboxMessageStanza } from './inboxMessageHandler';
-import useStore from '../../../store/Store';
-import {
-	buildReactionMessageFromInbox,
-	buildReplyMessageFromInbox,
-	buildTextMessageFromInbox
-} from '../../../tests/buildXmppStanza';
+import { buildTextMessageFromInbox } from '../../../tests/buildXmppStanza';
 import { createMockTextMessage } from '../../../tests/createMock';
 import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 
 describe('XMPP inboxMessageHandler tests', () => {
 	test('Text message inbox arrives', () => {
@@ -24,7 +20,7 @@ describe('XMPP inboxMessageHandler tests', () => {
 			messageId: message.id,
 			unread: 0
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		const textMessage = HistoryAccumulator.getInboxMessages('queryId')[0] as TextMessage;
 		expect(textMessage.id).toBe(message.id);
@@ -33,51 +29,29 @@ describe('XMPP inboxMessageHandler tests', () => {
 		expect(textMessage.from).toBe(message.from);
 	});
 
-	test('Conversation has some unread', () => {
-		const spyOnRequestHistory = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestHistory'
-		);
+	test('Conversation has some unread (< 15)', () => {
+		const spyOnRequestHistory = vi.spyOn(xmppClient, 'requestHistory');
 
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = buildTextMessageFromInbox({
 			roomId: message.roomId,
 			unread: 5
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
 		expect(spyOnRequestHistory).toHaveBeenCalled();
 	});
 
-	test('Inbox message is a replied one', () => {
-		const spyOnRequestRepliedMessage = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageSubjectOfReply'
-		);
+	test('Conversation has a lot of unread', () => {
+		const spyOnRequestHistory = vi.spyOn(xmppClient, 'requestHistory');
 
 		const message = createMockTextMessage({ text: 'Hi!' });
-		const messageXMPP = buildReplyMessageFromInbox({
+		const messageXMPP = buildTextMessageFromInbox({
 			roomId: message.roomId,
-			replyToStanzaId: '1234'
+			unread: 30
 		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
+		onInboxMessageStanza.call(xmppClient, messageXMPP);
 
-		expect(spyOnRequestRepliedMessage).toHaveBeenCalledTimes(1);
-	});
-
-	test('Inbox message is a fastening', () => {
-		const message = createMockTextMessage({ text: 'Hi!' });
-		const messageXMPP = buildReactionMessageFromInbox({
-			roomId: message.roomId,
-			from: message.from,
-			originalStanzaId: message.stanzaId,
-			reaction: '👍'
-		});
-		onInboxMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
-
-		const fastenings =
-			useStore.getState().chatsRegistry[message.roomId].fastenings[message.stanzaId];
-		expect(fastenings[0].type).toBe(MessageType.FASTENING);
-		expect(fastenings[0].value).toBe('👍');
+		expect(spyOnRequestHistory).not.toHaveBeenCalled();
 	});
 });

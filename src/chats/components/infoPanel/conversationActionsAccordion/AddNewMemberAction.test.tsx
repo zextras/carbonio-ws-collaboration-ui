@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
@@ -56,7 +56,7 @@ vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
-	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user2Info]);
 	store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 });
@@ -81,7 +81,7 @@ describe('Add new member action', () => {
 	});
 
 	test('Add new member', async () => {
-		const spyOnAddRoomMember = vi.spyOn(roomsApi, 'addRoomMembers');
+		const spyOnAddRoomMember = vi.spyOn(api, 'addRoomMembers');
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [user1, user2] });
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 

@@ -11,7 +11,7 @@ import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import MeetingsApi from '../apis/MeetingsApi';
+import { createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut
 	// eslint-disable-next-line prettier/prettier
@@ -76,8 +76,8 @@ export default class BidirectionalConnectionAudioInOut
 						.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							if (rtcSessionDesc.sdp) {
-								MeetingsApi.createAudioOffer(this.meetingId, rtcSessionDesc.sdp).then(() => {
-									MeetingsApi.updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
+								createAudioOffer(this.meetingId, rtcSessionDesc.sdp).then(() => {
+									updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
 								});
 							}
 						})
@@ -110,8 +110,8 @@ export default class BidirectionalConnectionAudioInOut
 				.setLocalDescription(rtcSessDesc)
 				.then(() => {
 					if (rtcSessDesc.sdp) {
-						MeetingsApi.createAudioOffer(this.meetingId, rtcSessDesc.sdp).then(() => {
-							MeetingsApi.updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
+						createAudioOffer(this.meetingId, rtcSessDesc.sdp).then(() => {
+							updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
 						});
 					}
 				})

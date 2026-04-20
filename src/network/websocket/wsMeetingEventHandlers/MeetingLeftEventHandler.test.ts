@@ -48,7 +48,7 @@ const event: MeetingLeftEvent = {
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('myUserId', 'User');
+	store.setLoginInfo({ id: 'myUserId', name: 'User' });
 	store.addRooms([room, room2]);
 	store.addMeetings([meeting, meetingWith12Participants]);
 	store.meetingConnection(meeting.id);

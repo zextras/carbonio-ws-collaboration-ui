@@ -34,7 +34,7 @@ const messageFromUser = createMockTextMessage({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(loggedUser.id, loggedUser.name);
+	store.setLoginInfo({ id: loggedUser.id, name: loggedUser.name });
 	store.setUserInfo([user]);
 	store.addRooms([room]);
 	store.newMessage(messageFromMe);

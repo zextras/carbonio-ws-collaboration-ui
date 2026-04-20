@@ -15,9 +15,9 @@ import {
 	isAttachmentImage,
 	getAttachmentType,
 	getApplicationIcon,
-	getAttachmentIcon
+	getAttachmentIcon,
+	AttachmentType
 } from './attachmentUtils';
-import { AttachmentType } from '../types/network/apis/IAttachmentsApi';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
 const enum MimeTypes {

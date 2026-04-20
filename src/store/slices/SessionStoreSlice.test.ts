@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { ExportStatus, Version } from '../../types/store/SessionTypes';
+import { AttributesList, ExportStatus, Version } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 import useStore from '../Store';
 
@@ -22,14 +22,16 @@ const groupRoom: RoomBe = createMockRoom({
 
 describe('SessionStoreSlice tests', () => {
 	test('loginInfo', () => {
-		useStore.getState().setLoginInfo('id', 'name', 'displayName');
-		expect(useStore.getState().session).toStrictEqual({
-			id: 'id',
-			name: 'name',
-			displayName: 'displayName',
-			userType: UserType.INTERNAL,
-			_persistedAt: expect.any(Number)
-		});
+		useStore.getState().setLoginInfo({ id: 'id', name: 'name', displayName: 'displayName' });
+		expect(useStore.getState().session).toEqual(
+			expect.objectContaining({
+				id: 'id',
+				name: 'name',
+				displayName: 'displayName',
+				userType: UserType.INTERNAL,
+				_persistedAt: expect.any(Number)
+			})
+		);
 	});
 
 	test('queueId', () => {
@@ -66,8 +68,8 @@ describe('SessionStoreSlice tests', () => {
 			});
 
 			const { attributes } = useStore.getState().session;
-			expect(attributes?.privateChatCreation).toBe(true);
-			expect(attributes?.attachmentUpload).toBe(true);
+			expect(attributes?.privateChatCreationEnabled).toBe(true);
+			expect(attributes?.attachmentUploadEnabled).toBe(true);
 			expect(attributes?.showMessageReads).toBe(true);
 			expect(attributes?.showUsersPresence).toBe(true);
 			expect(attributes?.videoCallEnabled).toBe(true);
@@ -87,8 +89,8 @@ describe('SessionStoreSlice tests', () => {
 			});
 
 			const { attributes } = useStore.getState().session;
-			expect(attributes?.privateChatCreation).toBe(false);
-			expect(attributes?.attachmentUpload).toBe(false);
+			expect(attributes?.privateChatCreationEnabled).toBe(false);
+			expect(attributes?.attachmentUploadEnabled).toBe(false);
 			expect(attributes?.showMessageReads).toBe(false);
 			expect(attributes?.showUsersPresence).toBe(false);
 			expect(attributes?.videoCallEnabled).toBe(false);
@@ -118,7 +120,27 @@ describe('SessionStoreSlice tests', () => {
 				carbonioWscGroupChatCreation: 'TRUE',
 				carbonioWscMaxGroupMembers: '2'
 			});
-			expect(useStore.getState().session.attributes?.groupChatCreation).toBe(false);
+			expect(useStore.getState().session.attributes?.groupChatCreationEnabled).toBe(false);
+		});
+
+		test('setCapabilities sets attributes directly', () => {
+			const capabilities: AttributesList = {
+				privateChatCreationEnabled: true,
+				groupChatCreationEnabled: false,
+				maxGroupMembers: 16,
+				messageDeleteTimeLimit: 10,
+				messageEditTimeLimit: 10,
+				maxRoomPictureSize: 5,
+				attachmentUploadEnabled: true,
+				maxAttachmentSize: 50,
+				showMessageReads: false,
+				showUsersPresence: true,
+				videoCallEnabled: true,
+				recordingEnabled: false,
+				virtualBackgroundEnabled: true
+			};
+			useStore.getState().setCapabilities(capabilities);
+			expect(useStore.getState().session.attributes).toStrictEqual(capabilities);
 		});
 	});
 

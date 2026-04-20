@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import attachmentsApi from '../../../../network/apis/AttachmentsApi';
+import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 describe('Attachment Small view', () => {
 	test('Download generic file', async () => {
-		const spyOnGetURLAttachment = vi.spyOn(attachmentsApi, 'getURLAttachment');
+		const spyOnGetURLAttachment = vi.spyOn(api, 'getURLAttachment');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',
@@ -37,7 +37,7 @@ describe('Attachment Small view', () => {
 	});
 
 	test('Preview image file', async () => {
-		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentsApi, 'getImageThumbnailURL');
+		const spyOnGetImageThumbnailURL = vi.spyOn(api, 'getImageThumbnailURL');
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
@@ -93,7 +93,7 @@ describe('Attachment Small view', () => {
 	});
 
 	test('Avatar shows thumbnail for image attachments', () => {
-		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentsApi, 'getImageThumbnailURL');
+		const spyOnGetImageThumbnailURL = vi.spyOn(api, 'getImageThumbnailURL');
 		const imageAttachment: AttachmentMessageType = {
 			id: 'thumbnailImageId',
 			name: 'photo.png',

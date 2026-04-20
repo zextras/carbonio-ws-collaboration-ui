@@ -7,7 +7,8 @@
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
 	newMessage: (message: Message) => void;
-	newInboxMessages: (message: Message[]) => void;
+	setInboxMessages: (message: Message[]) => void;
+	setLastMessage: (roomId: string, message: TextMessage | ConfigurationMessage) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
 	setRepliedMessage: (
@@ -19,6 +20,7 @@ export type ChatsRegistryStoreSlice = {
 	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
+	setUnreadCount: (roomId: string, count: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
@@ -28,10 +30,12 @@ export type ChatsRegistryStoreSlice = {
 };
 
 export type ChatRegistry = {
+	unread: number;
+	inboxMessageId?: string;
+	lastMessage?: TextMessage | ConfigurationMessage;
 	messages: Message[];
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
-	unread: number;
 	searchResults: TextMessage[];
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];

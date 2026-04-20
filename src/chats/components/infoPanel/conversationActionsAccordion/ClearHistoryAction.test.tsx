@@ -9,7 +9,7 @@ import React from 'react';
 import { act, renderHook, screen } from '@testing-library/react';
 
 import ClearHistoryAction from './ClearHistoryAction';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockRoom,
@@ -47,11 +47,11 @@ const message = createMockTextMessage({ roomId: mockedRoom.id });
 
 describe('clear history action', () => {
 	test('clear history', async () => {
-		const spyOnClearRoomHistory = vi.spyOn(roomsApi, 'clearRoomHistory');
+		const spyOnClearRoomHistory = vi.spyOn(api, 'clearRoomHistory');
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRooms([mockedRoom]);
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 			result.current.setUserInfo([user1Info, user2Info]);
 			result.current.newMessage(message);
 		});

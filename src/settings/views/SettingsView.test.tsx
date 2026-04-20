@@ -14,7 +14,7 @@ import { setup } from '../../tests/test-utils';
 
 describe('SettingsView tests', () => {
 	test('SettingsView renders correctly if session user is loaded', () => {
-		useStore.getState().setLoginInfo('sessionId', 'Session User');
+		useStore.getState().setLoginInfo({ id: 'sessionId', name: 'Session User' });
 		setup(<SettingsView />);
 		expect(screen.getByTestId('settings_container')).toBeInTheDocument();
 	});

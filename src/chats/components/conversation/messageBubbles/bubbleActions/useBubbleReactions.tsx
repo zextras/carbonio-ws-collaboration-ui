@@ -12,8 +12,8 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
+import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
@@ -51,7 +51,6 @@ const useBubbleReactions = (
 	reactionsPopoverActive: boolean;
 	reactionsPopoverRef: React.RefObject<HTMLDivElement>;
 } => {
-	const xmppClient = useStore(getXmppClient);
 	const [t] = useTranslation();
 	const reactionsLabel = t('tooltip.reactions', 'Reactions');
 	const moreReactionsLabel = t('tooltip.moreReactions', 'More reactions');
@@ -79,7 +78,7 @@ const useBubbleReactions = (
 			}
 			setPopoverActive(false);
 		},
-		[message.roomId, message.stanzaId, myReaction, xmppClient]
+		[message.roomId, message.stanzaId, myReaction]
 	);
 
 	const openEmojiPicker = useCallback(

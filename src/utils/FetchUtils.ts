@@ -8,13 +8,19 @@ import { includes } from 'lodash';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { RequestType } from '../types/network/apis/IBaseAPI';
 import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
 import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';
 export const contentTypeHeader = 'Content-Type';
+
+export enum RequestType {
+	GET = 'GET',
+	POST = 'POST',
+	PUT = 'PUT',
+	DELETE = 'DELETE'
+}
 
 const MAX_VERSION_MISMATCH_RETRIES = 3;
 
@@ -50,12 +56,12 @@ const handleResponse = async (response: Response): Promise<any> => {
 	return response;
 };
 
-export const fetchAPI = (
+export function fetchAPI<T>(
 	endpoint: string,
 	method: RequestType,
 	data?: Record<string, unknown> | Array<Record<string, unknown>>,
 	retryCount = 0
-): Promise<any> => {
+): Promise<T> {
 	const headers = buildHeaders();
 	headers.append(contentTypeHeader, 'application/json');
 	return fetch(BASE_PATH + endpoint, {
@@ -70,7 +76,7 @@ export const fetchAPI = (
 			}
 			return Promise.reject(err);
 		});
-};
+}
 
 export const sendFileFetchAPI = (
 	endpoint: string,

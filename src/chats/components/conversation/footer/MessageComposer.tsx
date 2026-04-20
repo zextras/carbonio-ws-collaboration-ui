@@ -33,24 +33,23 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { AttachmentsApi, RoomsApi } from '../../../../network';
+import { addRoomAttachment } from '../../../../network';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
+import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import {
 	FileToUpload,
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { isAttachmentImage } from '../../../../utils/attachmentUtils';
+import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
+import { getImageSize, isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
@@ -84,8 +83,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	textMessage,
 	setTextMessage
 }) => {
-	const xmppClient = useStore(getXmppClient);
-
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
 	const sendMessageLabel = t('tooltip.sendMessage', 'Send message');
@@ -102,13 +99,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const setFileDescription = useStore((store) => store.setFileDescription);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const lastMessageId: string | undefined = useStore((state) =>
-		getLastMessageIdSelector(state, roomId)
-	);
 	const messageEditTimeLimit = useStore((store) =>
 		getAttribute(store, 'messageEditTimeLimit')
 	) as number;
-	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
+	const lastMessageOfRoom = useStore((state) => getLastMessageSelector(state, roomId));
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const maxAttachmentSize = useStore((store) => getAttribute(store, 'maxAttachmentSize'));
 
@@ -190,7 +184,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
 		controller: AbortController
-	): Promise<AddRoomAttachmentResponse> => {
+	): Promise<{ id: string }> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
@@ -200,13 +194,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		let area;
 		if (isAttachmentImage(file.file.type)) {
 			try {
-				const imageSize = await AttachmentsApi.getImageSize(file.localUrl);
+				const imageSize = await getImageSize(file.localUrl);
 				area = `${imageSize.width}x${imageSize.height}`;
 			} catch (err) {
 				return Promise.reject(err);
 			}
 		}
-		return RoomsApi.addRoomAttachment(
+		return addRoomAttachment(
 			roomId,
 			file.file,
 			{
@@ -240,7 +234,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		sendThrottleIsWriting.cancel();
 		sendDebouncedPause.cancel();
 		xmppClient.sendPaused(roomId);
-	}, [sendThrottleIsWriting, sendDebouncedPause, xmppClient, roomId]);
+	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -282,7 +276,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage, xmppClient]
+		[roomId, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
@@ -303,7 +297,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
-				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
+				(acc: Promise<{ id: string } | void>, file, i) =>
 					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);
@@ -334,7 +328,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		xmppClient,
 		roomId,
 		textMessage,
 		sendStopWriting,

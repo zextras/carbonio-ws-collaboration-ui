@@ -19,7 +19,7 @@ describe('DefaultUserSidebarView', () => {
 	test('should render virtual button when empty', () => {
 		act(() => {
 			useStore.getState().setUserInfo([user1]);
-			useStore.getState().setLoginInfo('user1Id', 'user 1');
+			useStore.getState().setLoginInfo({ id: 'user1Id', name: 'user 1' });
 			useStore
 				.getState()
 				.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));

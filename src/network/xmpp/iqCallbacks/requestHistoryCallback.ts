@@ -17,6 +17,7 @@ import {
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 
 export function handleHistory(
 	queryId: string,
@@ -45,13 +46,7 @@ export function handleHistory(
 	forEach(storeMessages, (message) => {
 		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
 		if (messageSubjectOfReplyId) {
-			useStore
-				.getState()
-				.connections.xmppClient.requestMessageSubjectOfReply(
-					message.roomId,
-					messageSubjectOfReplyId,
-					message.id
-				);
+			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 
@@ -91,7 +86,6 @@ export function requestHistoryCallback(stanza: Element, queryId: string, unread 
 	const fin = getRequiredTagElement(stanza, 'fin');
 	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	const store = useStore.getState();
-	const { xmppClient } = store.connections;
 
 	const { historyMessages, storeMessages, fasteningMessages } = handleHistory(queryId, roomId);
 

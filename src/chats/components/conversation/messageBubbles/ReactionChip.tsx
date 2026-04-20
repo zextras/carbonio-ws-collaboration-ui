@@ -11,8 +11,8 @@ import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-sy
 import { includes, size } from 'lodash';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';
 import useStore from '../../../../store/Store';
@@ -58,7 +58,6 @@ type ReactionChipProps = {
 };
 
 const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): ReactElement => {
-	const xmppClient = useStore(getXmppClient);
 	const sessionId = useStore(getUserId);
 	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
 	const userNameList = useUserNameList(from);
@@ -103,7 +102,7 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 			xmppClient.sendChatMessageReaction(roomId, stanzaId, reaction);
 		}
 		setTimeout(() => setIsAnimating(false), 500);
-	}, [from, reaction, roomId, sessionId, stanzaId, xmppClient]);
+	}, [from, reaction, roomId, sessionId, stanzaId]);
 
 	return (
 		<Tooltip label={tooltipLabel}>

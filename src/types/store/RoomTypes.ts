@@ -8,7 +8,7 @@ import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 
 export type RoomsStoreSlice = {
 	rooms: RoomsMap;
-	addRooms: (rooms: RoomBe[]) => void;
+	addRooms: (rooms: RoomBe[], fullSync?: boolean) => void;
 	removeRoom: (roomId: string) => void;
 	editRoom: (roomId: string, room: Partial<Room>) => void;
 	setRoomMuteStatus: (roomId: string, muted: boolean) => void;

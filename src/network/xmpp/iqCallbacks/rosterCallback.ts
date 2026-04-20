@@ -6,8 +6,8 @@
 
 import { forEach } from 'lodash';
 
-import useStore from '../../../store/Store';
 import { getRequiredAttribute } from '../utility/decodeStanza';
+import { xmppClient } from '../XMPPClient';
 
 /**
  * ROSTER (XEP-0012)
@@ -18,6 +18,6 @@ export function rosterCallback(stanza: Element): void {
 	const contacts = stanza.getElementsByTagName('item');
 	forEach(contacts, (contact) => {
 		const jid = getRequiredAttribute(contact, 'jid');
-		useStore.getState().connections.xmppClient.getLastActivity(jid);
+		xmppClient.getLastActivity(jid);
 	});
 }

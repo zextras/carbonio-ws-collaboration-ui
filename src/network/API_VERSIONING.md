@@ -2,6 +2,16 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.8
+### Changes
+- **API**: New `GET /users/capabilities` endpoint to retrieve user capabilities directly from WSC (replaces LDAP/Mailbox lookup for clients >= 1.6.8)
+
+### Affected Files
+- 'src/network/apis/InfoApi.ts' on function `getCapabilities`
+- 'src/store/slices/SessionStoreSlice.ts' on function `setCapabilities`
+- 'src/MainApp.tsx'
+
+---
 ## Version 1.6.7
 ### Changes
 - **XMPP**: Added `roomHistoryCleared` configuration message

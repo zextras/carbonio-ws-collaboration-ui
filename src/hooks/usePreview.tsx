@@ -9,7 +9,7 @@ import { useCallback, useContext, useMemo } from 'react';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 
-import { AttachmentsApi } from '../network';
+import { getURLAttachment } from '../network';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 import {
 	getAttachmentExtension,
@@ -37,7 +37,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	);
 
 	const download = useCallback(() => {
-		const downloadUrl = AttachmentsApi.getURLAttachment(attachment.id);
+		const downloadUrl = getURLAttachment(attachment.id);
 		const linkTag: HTMLAnchorElement = document.createElement('a');
 		document.body.appendChild(linkTag);
 		linkTag.href = downloadUrl;

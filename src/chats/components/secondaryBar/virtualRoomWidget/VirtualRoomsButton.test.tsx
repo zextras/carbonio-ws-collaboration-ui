@@ -8,7 +8,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
-import roomsApi from '../../../../network/apis/RoomsApi';
+import * as api from '../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
@@ -29,7 +29,7 @@ vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.setUserInfo([user1]);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 	store.addMeetings([virtualRoom]);
@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('VirtualRoomsButton', () => {
 	test('create virtual modal', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [] });
-		const spyOnAddRoom = vi.spyOn(roomsApi, 'addRoom');
+		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
 
 		const { user } = setup(<VirtualRoomsButton expanded />);
 

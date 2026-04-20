@@ -9,7 +9,7 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 import { Button, Container } from '@zextras/carbonio-design-system';
 
 import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
+import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } from '../../../network';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -40,12 +40,12 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		if (!audioStatus) {
 			getAudioStream().then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+					updateAudioStreamStatus(meetingId, !audioStatus);
 				});
 			});
 		} else {
 			bidirectionalAudioConn?.closeRtpSenderTrack();
-			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+			updateAudioStreamStatus(meetingId, !audioStatus);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);
 
@@ -57,7 +57,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 				getFrontCameraStream().then((stream) => {
 					videoOutConn
 						?.updateLocalStreamTrack(stream)
-						.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+						.then(() => updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
 				});
 			}
 		} else {
@@ -65,9 +65,8 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		}
 	}, [videoStatus, videoOutConn, meetingId]);
 
-	const leaveMeeting = useCallback(
-		() =>
-			MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED)),
+	const leaveMeetingAction = useCallback(
+		() => leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED)),
 		[meetingId, goToInfoPage]
 	);
 
@@ -99,7 +98,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 			/>
 			<Button size="large" icon={audioStatus ? 'Mic' : 'MicOff'} onClick={toggleAudioStream} />
 			<Button size="large" icon={videoStatus ? 'Video' : 'VideoOff'} onClick={toggleVideoStream} />
-			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeeting} />
+			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeetingAction} />
 		</Container>
 	);
 };

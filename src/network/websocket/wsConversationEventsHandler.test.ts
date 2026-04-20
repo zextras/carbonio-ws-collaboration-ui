@@ -18,8 +18,7 @@ import {
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
-import meetingsApi from '../apis/MeetingsApi';
-import roomsApi from '../apis/RoomsApi';
+import * as api from '../index';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 
@@ -36,14 +35,14 @@ const room: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.addRooms([room]);
 });
 
 describe('wsConversationEventHandler tests', () => {
 	test('ROOM_MEMBER_ADDED: session user is added in a room with an ongoing meeting', async () => {
-		const spyOnGetRoom = vi.spyOn(roomsApi, 'getRoom');
-		const spyOnGetMeeting = vi.spyOn(meetingsApi, 'getMeeting');
+		const spyOnGetRoom = vi.spyOn(api, 'getRoom');
+		const spyOnGetMeeting = vi.spyOn(api, 'getMeeting');
 		spyOnGetRoom.mockImplementation(() => Promise.resolve(room));
 		spyOnGetMeeting.mockImplementation(() => Promise.resolve(meeting));
 

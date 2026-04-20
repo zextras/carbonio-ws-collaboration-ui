@@ -141,7 +141,7 @@ describe('Conversation header test', () => {
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
+	store.setLoginInfo({ id: mockPaoloUser.id, name: mockPaoloUser.name });
 	store.setUserInfo([mockRobertoUser, mockLucaUser, mockGianniUser, mockQuintoUser]);
 	store.addRooms([mockedRoom]);
 });

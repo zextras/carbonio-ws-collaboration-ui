@@ -10,7 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
 import { mockGoToInfoPage } from '../../hooks/__mocks__/useRouting';
-import meetingsApi from '../../network/apis/MeetingsApi';
+import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
@@ -65,7 +65,7 @@ const meeting: MeetingBe = createMockMeeting({
 const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, { enabled: false }, { enabled: true, deviceId: 'videoId' });
@@ -107,7 +107,7 @@ describe('Grid mode meeting view', () => {
 	});
 
 	test('Close the meeting', async () => {
-		const spyOnLeaveMeeting = vi.spyOn(meetingsApi, 'leaveMeeting');
+		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
 		await user.hover(meetingActionBar);

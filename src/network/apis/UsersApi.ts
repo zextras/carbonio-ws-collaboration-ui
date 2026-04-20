@@ -7,38 +7,19 @@
 import { join, map } from 'lodash';
 
 import useStore from '../../store/Store';
-import { RequestType } from '../../types/network/apis/IBaseAPI';
-import IUsersApi from '../../types/network/apis/IUsersApi';
-import { GetUserResponse, GetUsersResponse } from '../../types/network/responses/usersResponses';
-import { fetchAPI } from '../../utils/FetchUtils';
+import { UserBe } from '../../types/network/models/userBeTypes';
+import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 
-class UsersApi implements IUsersApi {
-	// Singleton design pattern
-	private static instance: IUsersApi;
+export const getUser = (userId: string): Promise<UserBe> =>
+	fetchAPI<UserBe>(`users/${userId}`, RequestType.GET).then((resp) => {
+		useStore.getState().setUserInfo([resp]);
+		return resp;
+	});
 
-	public static getInstance(): IUsersApi {
-		if (!UsersApi.instance) {
-			UsersApi.instance = new UsersApi();
-		}
-		return UsersApi.instance;
-	}
-
-	public getUser(userId: string): Promise<GetUserResponse> {
-		const { setUserInfo } = useStore.getState();
-		return fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
-			setUserInfo([resp]);
-			return resp;
-		});
-	}
-
-	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
-		const { setUserInfo } = useStore.getState();
-		const ids = map(userIds, (id) => `userIds=${id}`);
-		return fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then((resp: GetUsersResponse) => {
-			setUserInfo(resp);
-			return resp;
-		});
-	}
-}
-
-export default UsersApi.getInstance();
+export const getUsers = (userIds: string[]): Promise<UserBe[]> => {
+	const ids = map(userIds, (id) => `userIds=${id}`);
+	return fetchAPI<UserBe[]>(`users?${join(ids, '&')}`, RequestType.GET).then((resp) => {
+		useStore.getState().setUserInfo(resp);
+		return resp;
+	});
+};

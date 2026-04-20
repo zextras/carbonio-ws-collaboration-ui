@@ -3,9 +3,44 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { AttachmentsApi } from '../network';
-import { AttachmentType, ImageQuality, ImageShape } from '../types/network/apis/IAttachmentsApi';
+import {
+	getImagePreviewURL,
+	getImageThumbnailURL,
+	getPdfPreviewURL,
+	getPdfThumbnailURL
+} from '../network';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+
+export enum AttachmentType {
+	JPEG = 'jpeg',
+	PNG = 'png',
+	GIF = 'gif',
+	SVG = 'svg',
+	WEBP = 'webp',
+	PDF = 'pdf',
+	DOCX = 'docx',
+	PPTX = 'pptx',
+	XLSX = 'xlsx',
+	MPKG = 'mpkg',
+	ODP = 'odp',
+	ODS = 'ods',
+	ODT = 'odt',
+	PPT = 'ppt',
+	XLS = 'xls'
+}
+
+export enum ImageQuality {
+	LOWEST = 'Lowest',
+	LOW = 'Low',
+	MEDIUM = 'Medium',
+	HIGH = 'High',
+	HIGHEST = 'Highest'
+}
+
+export enum ImageShape {
+	ROUNDED = 'Rounded',
+	RECTANGULAR = 'Rectangular'
+}
 
 export const extensionsSupported = [
 	{
@@ -116,13 +151,8 @@ export const getAttachmentDimensions = (
 export const getAttachmentURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
-		return AttachmentsApi.getPdfPreviewURL(attachmentId);
-	return AttachmentsApi.getImagePreviewURL(
-		attachmentId,
-		'0x0',
-		ImageQuality.HIGH,
-		getPreviewType(mimeType)
-	);
+		return getPdfPreviewURL(attachmentId);
+	return getImagePreviewURL(attachmentId, '0x0', ImageQuality.HIGH, getPreviewType(mimeType));
 };
 
 export const getAttachmentThumbnailURL = (
@@ -131,8 +161,8 @@ export const getAttachmentThumbnailURL = (
 ): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
-		return AttachmentsApi.getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
-	return AttachmentsApi.getImageThumbnailURL(
+		return getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
+	return getImageThumbnailURL(
 		attachmentId,
 		'0x0',
 		ImageQuality.LOW,
@@ -140,6 +170,23 @@ export const getAttachmentThumbnailURL = (
 		ImageShape.RECTANGULAR
 	);
 };
+
+export const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
+	new Promise((resolve, reject) => {
+		try {
+			const img = new Image();
+			img.addEventListener(
+				'load',
+				() => {
+					resolve({ width: img.naturalWidth, height: img.naturalHeight });
+				},
+				{ once: true }
+			);
+			img.src = url;
+		} catch {
+			reject(new Error(`Could not get image size for`));
+		}
+	});
 
 export const canDisplayPreviewOnLoad = (attachmentType: string): boolean => {
 	const type = attachmentType.split('/');

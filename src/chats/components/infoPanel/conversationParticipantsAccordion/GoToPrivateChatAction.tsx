@@ -38,7 +38,9 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const privateChatCreation = useStore((store) =>
+		getAttribute(store, 'privateChatCreationEnabled')
+	);
 
 	const { goToRoomPage } = useRouting();
 

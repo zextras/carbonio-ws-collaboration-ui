@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import AddNewMemberModal from './AddNewMemberModal';
-import { RoomsApi } from '../../../../network';
+import { addRoomMembers } from '../../../../network';
 import { getRoomMembers, getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -54,7 +54,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 				historyCleared: !showHistory
 			});
 		});
-		RoomsApi.addRoomMembers(roomId, members).then(() => closeModal());
+		addRoomMembers(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
 	const addMemberDisabled = useMemo(() => maxMembers <= size(members), [maxMembers, members]);

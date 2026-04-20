@@ -69,7 +69,7 @@ describe('SearchUsersByFeatureRequest', () => {
 	});
 
 	test('Contact info of the current user will be removed', async () => {
-		useStore.getState().setLoginInfo(contact1Info.id, contact1Info.email);
+		useStore.getState().setLoginInfo({ id: contact1Info.id });
 		mockSoapFetchV2.mockReturnValueOnce({
 			SearchUsersByFeatureResponse: {
 				account: [contact1Match, contact2Match, contact3Match],

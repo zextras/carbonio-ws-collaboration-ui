@@ -27,7 +27,7 @@ const event: MeetingSDPAnsweredEvent = {
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('myUserId', 'User');
+	store.setLoginInfo({ id: 'myUserId', name: 'User' });
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 });

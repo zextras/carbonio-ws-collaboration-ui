@@ -45,7 +45,7 @@ const user3Be: UserBe = createMockUser({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user1Be, user2Be, user3Be]);
-	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 });
 
 describe('Actions Accordion', () => {

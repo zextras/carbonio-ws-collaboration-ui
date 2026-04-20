@@ -53,7 +53,7 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 		members: [member1, member2, member3]
 	});
 	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
@@ -79,7 +79,7 @@ const storeSetupParticipantModerator = (): {
 		members: [member1, member2]
 	});
 	store.setUserInfo([user1, user2]);
-	store.setLoginInfo(user1.id, user1.name);
+	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
 
 	const meeting: MeetingBe = createMockMeeting({

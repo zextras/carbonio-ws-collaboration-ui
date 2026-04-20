@@ -20,6 +20,8 @@ export const MEETINGS_PATH = `focus-mode/${MEETINGS_ROUTE}/`;
 export const SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD = 3;
 export const LARGE_MEETING_THRESHOLD = 15;
 
+export const QUOTA_CHANGED_EVENT = 'carbonio-ws-collaboration-ui:quota-changed';
+
 export const TRACKER_EVENT = {
 	meetingEvaluation: 'Meeting evaluation',
 	conversationSearch: 'Conversation search performed',

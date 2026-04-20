@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useBrowserPermission from '../../../hooks/useMediaDevices';
-import MeetingsApi from '../../../network/apis/MeetingsApi';
+import { updateMediaOffer } from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -118,7 +118,7 @@ const CameraButton = ({
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
+								.then(() => updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							setButtonStatus(true);

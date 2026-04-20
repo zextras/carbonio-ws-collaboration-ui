@@ -6,6 +6,7 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
@@ -23,11 +24,9 @@ class ChatExporter implements IChatExporter {
 
 	readonly fullHistory: Message[] = [];
 
-	readonly xmppClient = useStore.getState().connections.xmppClient;
-
 	constructor(roomId: string) {
 		this.roomId = roomId;
-		this.xmppClient.requestFullHistory(this.roomId);
+		xmppClient.requestFullHistory(this.roomId);
 	}
 
 	public addMessagesToFullHistory(messages: Message[]): void {
@@ -36,7 +35,7 @@ class ChatExporter implements IChatExporter {
 
 	public continueExporting(): void {
 		const from = last(this.fullHistory)?.date ?? 0;
-		this.xmppClient.requestFullHistory(this.roomId, from);
+		xmppClient.requestFullHistory(this.roomId, from);
 	}
 
 	public exportHistory(): void {

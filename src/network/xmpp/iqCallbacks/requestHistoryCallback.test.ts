@@ -13,6 +13,7 @@ import {
 } from '../../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 
 const room = createMockRoom({ id: 'mockRoomId' });
 const textMessage = createMockTextMessage({ id: 'testId', roomId: room.id });
@@ -61,10 +62,7 @@ describe('requestHistoryCallback', () => {
 	});
 
 	test('Request history again if there are only fastenings', () => {
-		const spyOnRequestHistory = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestHistory'
-		);
+		const spyOnRequestHistory = vi.spyOn(xmppClient, 'requestHistory');
 		const queryId = HistoryAccumulator.getNextId();
 		HistoryAccumulator.pushToCache(
 			queryId,
@@ -106,10 +104,7 @@ describe('requestHistoryCallback', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = vi.spyOn(
-			useStore.getState().connections.xmppClient,
-			'requestMessageSubjectOfReply'
-		);
+		const spyOnRequestMessage = vi.spyOn(xmppClient, 'requestMessageSubjectOfReply');
 		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
 			queryId
