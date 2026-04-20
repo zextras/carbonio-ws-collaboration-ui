@@ -105,6 +105,8 @@ const useWebRTCStats = (meetingId: string): void => {
 					};
 					setNetworkStats(stats);
 
+					const manualVideoSubEnabled = useStore.getState().activeMeeting?.manualVideoSubEnabled;
+
 					if (quality !== prevQualityRef.current) {
 						prevQualityRef.current = quality;
 						if (quality !== NetworkQualityLevel.UNKNOWN) {
@@ -121,7 +123,8 @@ const useWebRTCStats = (meetingId: string): void => {
 
 							if (
 								quality === NetworkQualityLevel.POOR &&
-								currentMeeting?.videoSubscriptionsEnabled
+								currentMeeting?.videoSubscriptionsEnabled &&
+								!manualVideoSubEnabled
 							) {
 								// set video subscription to false to save bandwidth
 								useStore.getState().setVideoSubscriptionsEnabled(false);
@@ -130,7 +133,8 @@ const useWebRTCStats = (meetingId: string): void => {
 
 							if (
 								quality === NetworkQualityLevel.GOOD &&
-								!currentMeeting?.videoSubscriptionsEnabled
+								!currentMeeting?.videoSubscriptionsEnabled &&
+								!manualVideoSubEnabled
 							) {
 								// set video subscription to true to restore video
 								useStore.getState().setVideoSubscriptionsEnabled(true);

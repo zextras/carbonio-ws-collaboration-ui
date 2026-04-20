@@ -22,10 +22,12 @@ const VideoSubscriptionToggleButton: FC = () => {
 
 	const videoSubscriptionsEnabled = useStore(getVideoSubscriptionsEnabled);
 	const setVideoSubscriptionsEnabled = useStore((store) => store.setVideoSubscriptionsEnabled);
+	const setManualVideoSubEnabled = useStore((store) => store.setManualVideoSubEnabled);
 
 	const handleClick = useCallback(() => {
 		setVideoSubscriptionsEnabled(!videoSubscriptionsEnabled);
-	}, [setVideoSubscriptionsEnabled, videoSubscriptionsEnabled]);
+		setManualVideoSubEnabled(videoSubscriptionsEnabled);
+	}, [setVideoSubscriptionsEnabled, setManualVideoSubEnabled, videoSubscriptionsEnabled]);
 
 	const tooltipLabel = videoSubscriptionsEnabled
 		? t('meeting.videoSubscriptions.unsubscribe', 'Unsubscribe from all video streams')

@@ -87,7 +87,8 @@ export const useActiveMeetingSlice: StateCreator<
 					},
 					talkingUsers: [],
 					usersWithHandRaised: [],
-					videoSubscriptionsEnabled: true
+					videoSubscriptionsEnabled: true,
+					manualVideoSubEnabled: false
 				};
 			}),
 			false,
@@ -454,6 +455,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_VIDEO_SUBSCRIPTIONS_ENABLED'
+		);
+	},
+	setManualVideoSubEnabled: (enabled: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.manualVideoSubEnabled = enabled;
+			}),
+			false,
+			'AM/SET_MANUAL_VIDEO_SUB_ENABLED'
 		);
 	}
 });

@@ -63,6 +63,7 @@ export type ActiveMeetingSlice = {
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setNetworkStats: (stats: NetworkStats) => void;
 	setVideoSubscriptionsEnabled: (enabled: boolean) => void;
+	setManualVideoSubEnabled: (enabled: boolean) => void;
 };
 
 export type ActiveMeeting = {
@@ -83,6 +84,7 @@ export type ActiveMeeting = {
 	pinnedTile?: PinnedTile;
 	networkStats?: NetworkStats;
 	videoSubscriptionsEnabled: boolean;
+	manualVideoSubEnabled: boolean;
 };
 
 export enum MeetingAccordionType {
