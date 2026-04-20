@@ -33,6 +33,11 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 	const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const currentStreamRef = useRef<MediaStream | null>(null);
+
+	useEffect(() => {
+		currentStreamRef.current = videoStream;
+	}, [videoStream]);
 
 	const customLogo = useStore(getCustomLogo);
 	const queueId = useStore((state) => state.session.queueId);
@@ -68,9 +73,8 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 
 	useEffect(
 		() => () => {
-			freeMediaResources(videoStream);
+			freeMediaResources(currentStreamRef.current);
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);
 
