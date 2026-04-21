@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
 import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
-import * as api from '../../../../network/apis/RoomsApi';
+import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import useStore from '../../../../store/Store';
 import {
 	createMockMember,
@@ -104,7 +104,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a 1-to-1 room', async () => {
-		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
+		const spyOnForwardMessage = vi.spyOn(chatWsClient, 'forwardMessage');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -130,7 +130,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a group', async () => {
-		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
+		const spyOnForwardMessage = vi.spyOn(chatWsClient, 'forwardMessage');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -156,7 +156,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to a group', async () => {
-		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
+		const spyOnForwardMessage = vi.spyOn(chatWsClient, 'forwardMessage');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -178,11 +178,12 @@ describe('Forward Message Modal', () => {
 		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
-		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
+		// One WS call per message per target room (3 messages × 1 room = 3 calls)
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(3);
 	});
 
 	test('Forward a message to multiple conversations', async () => {
-		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
+		const spyOnForwardMessage = vi.spyOn(chatWsClient, 'forwardMessage');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -206,11 +207,12 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
-		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
+		// One WS call per message per target room (1 message × 2 rooms = 2 calls)
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(2);
 	});
 
 	test('Forward more than one message to multiple conversations', async () => {
-		const spyOnForwardMessage = vi.spyOn(api, 'forwardMessages');
+		const spyOnForwardMessage = vi.spyOn(chatWsClient, 'forwardMessage');
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -234,11 +236,12 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
-		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
+		// One WS call per message per target room (3 messages × 2 rooms = 6 calls)
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(6);
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
+		vi.spyOn(chatWsClient, 'forwardMessage').mockImplementation(() => 'mock-request-id');
 
 		const onClose = vi.fn();
 		const { user } = setup(
@@ -259,7 +262,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
+		vi.spyOn(chatWsClient, 'forwardMessage').mockImplementation(() => 'mock-request-id');
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
@@ -282,7 +285,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('forwarding to one room redirect to tht room', async () => {
-		vi.spyOn(api, 'forwardMessages').mockImplementation(() => Promise.resolve([]));
+		vi.spyOn(chatWsClient, 'forwardMessage').mockImplementation(() => 'mock-request-id');
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 

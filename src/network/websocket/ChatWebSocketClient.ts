@@ -105,33 +105,14 @@ class ChatWebSocketClient {
 	}
 
 	/**
-	 * Add a reaction to a message.
+	 * Send a typing notification for a room.
+	 * Call this (debounced, at most once per second) on every keystroke.
 	 */
-	addReaction(roomId: string, messageId: string, reaction: string): string {
-		const requestId = uuidv4();
+	sendTyping(roomId: string): void {
 		this.sendAction({
-			action: 'add-reaction',
-			requestId,
-			roomId,
-			messageId,
-			reaction
+			action: 'typing',
+			roomId
 		});
-		return requestId;
-	}
-
-	/**
-	 * Remove a reaction from a message.
-	 */
-	removeReaction(roomId: string, messageId: string, reaction: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'remove-reaction',
-			requestId,
-			roomId,
-			messageId,
-			reaction
-		});
-		return requestId;
 	}
 
 	/**

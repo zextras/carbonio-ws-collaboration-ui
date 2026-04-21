@@ -34,7 +34,6 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
-import ChatApi from '../../../../network/apis/ChatApi';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
@@ -218,39 +217,33 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		});
 	};
 
-	// Typing ping interval (5 seconds)
-	const TYPING_PING_INTERVAL = 5000;
-	const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+	// Debounced typing notification via WS (at most 1 call per second)
+	const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const lastTypingSentRef = useRef<number>(0);
+	const TYPING_DEBOUNCE_MS = 1000;
 
-	// Start typing ping interval - sends ping every 5 seconds while user has text
-	const startTypingPing = useCallback(() => {
+	const sendTypingWs = useCallback(() => {
 		// Skip typing indicator for placeholder rooms (room doesn't exist yet)
 		if (roomId.startsWith('placeholder-')) return;
-
-		if (!typingIntervalRef.current) {
-			// Send immediately
-			ChatApi.sendTypingIndicator(roomId);
-			// Then send every 5 seconds
-			typingIntervalRef.current = setInterval(() => {
-				ChatApi.sendTypingIndicator(roomId);
-			}, TYPING_PING_INTERVAL);
+		const now = Date.now();
+		if (now - lastTypingSentRef.current >= TYPING_DEBOUNCE_MS) {
+			lastTypingSentRef.current = now;
+			chatWsClient.sendTyping(roomId);
+		} else {
+			if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+			typingDebounceRef.current = setTimeout(() => {
+				lastTypingSentRef.current = Date.now();
+				chatWsClient.sendTyping(roomId);
+			}, TYPING_DEBOUNCE_MS - (now - lastTypingSentRef.current));
 		}
 	}, [roomId]);
 
-	// Stop typing ping interval
-	const stopTypingPing = useCallback(() => {
-		if (typingIntervalRef.current) {
-			clearInterval(typingIntervalRef.current);
-			typingIntervalRef.current = null;
-		}
-	}, []);
-
-	// Cleanup interval on unmount or room change
+	// Cleanup debounce timer on unmount or room change
 	useEffect(() => {
 		return () => {
-			if (typingIntervalRef.current) {
-				clearInterval(typingIntervalRef.current);
-				typingIntervalRef.current = null;
+			if (typingDebounceRef.current) {
+				clearTimeout(typingDebounceRef.current);
+				typingDebounceRef.current = null;
 			}
 		};
 	}, [roomId]);
@@ -289,7 +282,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	);
 
 	const sendMessage = useCallback((): void => {
-		stopTypingPing();
+		// Cancel any pending typing debounce when message is sent
+		if (typingDebounceRef.current) {
+			clearTimeout(typingDebounceRef.current);
+			typingDebounceRef.current = null;
+		}
 		const message = textMessage.trim();
 		if (filesToUploadArray) {
 			const abortControllerList: AbortController[] = [];
@@ -347,7 +344,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [
 		roomId,
 		textMessage,
-		stopTypingPing,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray
@@ -422,14 +418,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		[sendDisabled, carbonioLanguage, sendMessage]
 	);
 
-	// Start/stop typing ping based on text content
+	// Send typing WS notification on keystroke (debounced, at most once per second)
 	useEffect(() => {
 		if (textMessage.trim().length > 0) {
-			startTypingPing();
-		} else {
-			stopTypingPing();
+			sendTypingWs();
 		}
-	}, [textMessage, startTypingPing, stopTypingPing]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [textMessage]);
 
 	useEffect(() => {
 		const ref = messageInputRef.current;

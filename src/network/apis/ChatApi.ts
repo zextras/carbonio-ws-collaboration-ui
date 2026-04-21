@@ -144,16 +144,6 @@ class ChatApi implements IChatApi {
 		return fetchAPI(`rooms/${roomId}/read`, RequestType.GET);
 	}
 
-	// ==================== TYPING ====================
-
-	/**
-	 * Sends a typing ping. Call this every 5 seconds while user is typing (with text present).
-	 * Recipients will show "is typing" until 10 seconds pass without a ping.
-	 */
-	public sendTypingIndicator(roomId: string): Promise<void> {
-		return fetchAPI(`rooms/${roomId}/typing`, RequestType.POST);
-	}
-
 	// ==================== INBOX ====================
 
 	public getInbox(): Promise<InboxResponse> {

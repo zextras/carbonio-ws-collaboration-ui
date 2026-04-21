@@ -35,26 +35,16 @@ export type WsAction =
 			toRoomId: string;
 	  }
 	| {
-			action: 'add-reaction';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-			reaction: string;
-	  }
-	| {
-			action: 'remove-reaction';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-			reaction: string;
-	  }
-	| {
 			action: 'mark-read';
 			requestId: string;
 			roomId: string;
 			messageId: string;
 	  }
-	| { action: 'ping' };
+	| { action: 'ping' }
+	| {
+			action: 'typing';
+			roomId: string;
+	  };
 
 export interface WsAttachment {
 	id: string;
@@ -126,6 +116,12 @@ export type WsChatEvent =
 	  }
 	| { type: 'pong' }
 	| {
+			type: 'typing';
+			roomId: string;
+			userId: string;
+			timestamp: string;
+	  }
+	| {
 			type: 'error';
 			requestId?: string;
 			code: string;
@@ -146,6 +142,7 @@ export function isChatEvent(eventType: string): boolean {
 		'reaction-changed',
 		'read-updated',
 		'presence-changed',
+		'typing',
 		'pong',
 		'error'
 	];

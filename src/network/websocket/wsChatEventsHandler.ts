@@ -15,6 +15,10 @@ import {
 } from './handlers';
 import { WsChatEvent, isChatEvent } from './types';
 import { wsDebug } from '../../utils/debug';
+import useStore from '../../store/Store';
+
+/** Tracks per-room per-user auto-clear timers for typing state */
+const typingClearTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
 /**
  * Routes incoming chat WebSocket events to the appropriate handler.
@@ -65,6 +69,24 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 		case 'presence-changed':
 			handleWsPresenceChanged(chatEvent);
 			break;
+
+		case 'typing': {
+			const { roomId, userId } = chatEvent;
+			const { setIsWriting } = useStore.getState();
+			// Set user as writing
+			setIsWriting(roomId, userId, true);
+			// Cancel any existing auto-clear timer for this user+room
+			const timerKey = `${roomId}:${userId}`;
+			const existing = typingClearTimers.get(timerKey);
+			if (existing) clearTimeout(existing);
+			// Auto-clear after 3 seconds
+			const timer = setTimeout(() => {
+				useStore.getState().setIsWriting(roomId, userId, false);
+				typingClearTimers.delete(timerKey);
+			}, 3000);
+			typingClearTimers.set(timerKey, timer);
+			break;
+		}
 
 		case 'pong':
 			// Already handled by WebSocketClient._onMessage — this is a fallback

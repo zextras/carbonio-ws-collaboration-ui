@@ -28,7 +28,6 @@ import {
 	DeleteRoomPictureResponse,
 	DeleteRoomResponse,
 	DemotesRoomMemberResponse,
-	ForwardMessagesResponse,
 	GetRoomAttachmentsResponse,
 	GetRoomMembersResponse,
 	GetRoomPictureResponse,
@@ -41,7 +40,6 @@ import {
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
-import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi, ChatApi } from '../index';
 
@@ -262,36 +260,6 @@ class RoomsApi implements IRoomsApi {
 						});
 				}
 			}
-		});
-	}
-
-	public forwardMessages(
-		roomsId: string[],
-		messages: TextMessage[]
-	): Promise<ForwardMessagesResponse> {
-		// Forward messages via REST API - backend fetches original message data
-		const messagesToForward = messages.map((message) => ({
-			originalMessageId: message.stanzaId,
-			originalRoomId: message.roomId
-		}));
-
-		const hasAttachments = messages.some((message) => message.attachment);
-		return Promise.allSettled(
-			roomsId.map((roomId) =>
-				fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
-			)
-		).then((results) => {
-			const fulfilled = results.filter(
-				(r): r is PromiseFulfilledResult<Response> => r.status === 'fulfilled'
-			);
-			if (hasAttachments && fulfilled.length > 0) {
-				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
-			}
-			const rejected = results.find((r) => r.status === 'rejected');
-			if (rejected) {
-				throw rejected.reason;
-			}
-			return fulfilled.map((r) => r.value);
 		});
 	}
 

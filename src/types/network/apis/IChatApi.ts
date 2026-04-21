@@ -110,14 +110,6 @@ export interface IChatApi {
 	 */
 	getRoomReadMarkers(roomId: string): Promise<RoomReadMarkers>;
 
-	// ==================== TYPING ====================
-
-	/**
-	 * Sends a typing ping. Call this every 5 seconds while user is typing (with text present).
-	 * Recipients will show "is typing" until 10 seconds pass without a ping.
-	 */
-	sendTypingIndicator(roomId: string): Promise<void>;
-
 	// ==================== INBOX ====================
 
 	/**

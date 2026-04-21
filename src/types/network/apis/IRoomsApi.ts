@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { TextMessage } from '../../store/ChatsRegistryTypes';
 import { AddMemberFields, RoomCreationFields, RoomEditableFields } from '../models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
@@ -15,7 +14,6 @@ import {
 	DeleteRoomPictureResponse,
 	DeleteRoomResponse,
 	DemotesRoomMemberResponse,
-	ForwardMessagesResponse,
 	GetRoomAttachmentsResponse,
 	GetRoomMembersResponse,
 	GetRoomPictureResponse,
@@ -70,10 +68,6 @@ interface IRoomsApi {
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse>;
-	forwardMessages(
-		roomsId: string[],
-		messagesToForward: TextMessage[]
-	): Promise<ForwardMessagesResponse>;
 }
 
 export default IRoomsApi;
