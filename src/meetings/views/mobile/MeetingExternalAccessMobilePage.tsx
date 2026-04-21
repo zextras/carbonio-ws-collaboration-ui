@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Button, Container, Icon, Input, Text } from '@zextras/carbonio-design-system';
@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 
 import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { freeMediaResources } from '../../../utils/MeetingsUtils';
+import { getFrontCameraStream } from '../../../utils/UserMediaManager';
 import defaultLogo from '../../assets/Logo.png';
 import AccessTile from '../../components/meetingAccessPoint/AccessTile';
 import { SpinningIcon } from '../../components/meetingAccessPoint/externalAccess/JoinAsGuestCard';
@@ -27,17 +29,54 @@ const LogoApp = styled.img`
 const MeetingExternalAccessMobilePage = (): ReactElement => {
 	const [guestName, setGuestName] = useState<string>('');
 	const [audioStatus, setAudioStatus] = useState<boolean>(false);
+	const [videoStatus, setVideoStatus] = useState<boolean>(false);
+	const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const currentStreamRef = useRef<MediaStream | null>(null);
+
+	useEffect(() => {
+		currentStreamRef.current = videoStream;
+	}, [videoStream]);
 
 	const customLogo = useStore(getCustomLogo);
 	const queueId = useStore((state) => state.session.queueId);
 
 	const { handleWaitingRoom, userIsReady } = useAccessMeeting({
 		audio: { enabled: audioStatus },
-		video: { enabled: false }
+		video: { enabled: videoStatus }
 	});
 	const { meetingName, createGuestAccount } = useExternalAccess();
+
+	const toggleCamera = useCallback(() => {
+		if (videoStatus) {
+			freeMediaResources(videoStream);
+			setVideoStream(null);
+			setVideoStatus(false);
+			if (videoStreamRef.current) {
+				videoStreamRef.current.srcObject = null;
+			}
+		} else {
+			getFrontCameraStream()
+				.then((stream) => {
+					setVideoStream(stream);
+					setVideoStatus(true);
+					if (videoStreamRef.current) {
+						videoStreamRef.current.srcObject = stream;
+					}
+				})
+				.catch((err) => {
+					console.error('Error enabling front camera', err);
+				});
+		}
+	}, [videoStatus, videoStream]);
+
+	useEffect(
+		() => () => {
+			freeMediaResources(currentStreamRef.current);
+		},
+		[]
+	);
 
 	const [t] = useTranslation();
 	const titleLabel = t('welcomePage.title', 'Welcome to "{{title}}" virtual room', {
@@ -98,7 +137,7 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 					videoPlayerTestMuted
 					mediaDevicesEnabled={{
 						audio: audioStatus,
-						video: false
+						video: videoStatus
 					}}
 				/>
 				{!userIsReady ? (
@@ -109,6 +148,13 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 							size="large"
 							minWidth="large"
 							icon={audioStatus ? 'Mic' : 'MicOff'}
+						/>
+						<Button
+							onClick={toggleCamera}
+							color="primary"
+							size="large"
+							minWidth="large"
+							icon={videoStatus ? 'Video' : 'VideoOff'}
 						/>
 						<Button
 							width="fill"
