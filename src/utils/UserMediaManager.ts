@@ -79,6 +79,17 @@ export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 			});
 	});
 
+/**
+ * Request the front camera stream on mobile devices using facingMode constraint.
+ * Uses facingMode 'user' as an ideal (non-exact) constraint so that desktop browsers
+ * without facingMode support can still fall back to any available camera.
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+ */
+export const getFrontCameraStream = (): Promise<MediaStream> =>
+	navigator.mediaDevices
+		.getUserMedia({ video: { facingMode: 'user', ...CONSTRAINT_ASPECT_RATIO } })
+		.catch(() => navigator.mediaDevices.getUserMedia({ video: CONSTRAINT_ASPECT_RATIO }));
+
 export const getAudioAndVideo = (
 	audio?:
 		| boolean
