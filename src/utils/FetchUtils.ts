@@ -73,7 +73,7 @@ export function fetchAPI<T>(
 		headers,
 		body: hasBody ? JSON.stringify(data) : undefined
 	})
-		.then((resp: Response) => handleResponse(resp))
+		.then((resp: Response) => handleResponse(resp) as Promise<T>)
 		.catch((err: Error): Promise<any> => {
 			if (err.message === 'version_mismatch' && retryCount < MAX_VERSION_MISMATCH_RETRIES) {
 				return fetchAPI(endpoint, method, data, retryCount + 1);

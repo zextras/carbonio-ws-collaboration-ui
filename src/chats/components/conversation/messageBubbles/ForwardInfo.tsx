@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -19,11 +19,14 @@ type ForwardInfoProps = {
 };
 
 const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
-	const forwardUsername = useStore((store) => getUserName(store, info.originalSenderId));
+	const senderId = info.originalSenderId ?? info.from ?? '';
+	const forwardUsername = useStore((store) => getUserName(store, senderId));
 
 	const [t] = useTranslation();
 
-	const originalDate = new Date(info.originalSentAt).getTime();
+	const originalDate = info.originalSentAt
+		? new Date(info.originalSentAt).getTime()
+		: (info.date ?? 0);
 	const messageDate = formatDate(originalDate, 'DD MMM YY');
 	const messageTime = formatDate(originalDate, 'HH:mm');
 	const originallySentByLabel = (

@@ -25,7 +25,6 @@ export type ChatsRegistryStoreSlice = {
 	setUnreadCount: (roomId: string, count: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	decrementUnreadCount: (roomId: string, counter: number) => void;
-	setUnreadCount: (roomId: string, count: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
@@ -47,9 +46,9 @@ export type ChatRegistry = {
 	searchResults: TextMessage[];
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
-	hasMoreBefore: boolean;
-	hasMoreAfter: boolean;
-	isLoadingTimeline: boolean;
+	hasMoreBefore?: boolean;
+	hasMoreAfter?: boolean;
+	isLoadingTimeline?: boolean;
 	// Last message received via SSE - used for inbox display when viewing historical pages
 	lastMessageForInbox?: Message;
 };
@@ -79,6 +78,12 @@ export type TextMessage = BasicMessage & {
 	forwardedInfo?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
 	editedStanzaId?: string;
+	/** @deprecated Use editedInfo instead */
+	edited?: boolean;
+	/** @deprecated Use deletedInfo instead */
+	deleted?: boolean;
+	/** @deprecated Use forwardedInfo instead */
+	forwarded?: ForwardedInfo;
 };
 
 export type ConfigurationMessage = BasicMessage & {
@@ -149,8 +154,16 @@ export enum MessageType {
 }
 
 export type ForwardedInfo = {
-	originalSenderId: string;
-	originalSentAt: string;
+	originalSenderId?: string;
+	originalSentAt?: string;
+	/** @deprecated Use originalSenderId */
+	from?: string;
+	/** @deprecated Use originalSentAt */
+	date?: number;
+	/** @deprecated Forwarding count (old format) */
+	count?: number;
+	/** @deprecated Old id field */
+	id?: string;
 };
 
 export type EditedInfo = {

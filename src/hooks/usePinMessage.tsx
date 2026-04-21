@@ -31,8 +31,8 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
 
 	const stanzaIdToPin = useMemo(() => {
-		if (message.edited) {
-			return message.editedStanzaId ?? message.stanzaId;
+		if (message.editedStanzaId) {
+			return message.editedStanzaId;
 		}
 
 		return message.stanzaId;

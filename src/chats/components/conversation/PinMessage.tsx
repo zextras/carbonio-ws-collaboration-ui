@@ -180,7 +180,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 
 		return (
 			<Container crossAlignment="flex-start">
-				{pinnedMessage.forwarded && <ForwardInfo info={pinnedMessage.forwarded} />}
+				{pinnedMessage.forwardedInfo && <ForwardInfo info={pinnedMessage.forwardedInfo} />}
 				<TextExpanded overflow="break-word">{pinnedMessage.text}</TextExpanded>
 			</Container>
 		);

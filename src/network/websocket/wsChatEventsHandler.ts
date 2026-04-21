@@ -14,9 +14,9 @@ import {
 	handleWsPresenceChanged
 } from './handlers';
 import { WsChatEvent, isChatEvent } from './types';
-import { wsDebug } from '../../utils/debug';
 import useStore from '../../store/Store';
 import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { wsDebug } from '../../utils/debug';
 
 /** Tracks per-room per-user auto-clear timers for typing state */
 const typingClearTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -44,7 +44,7 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 		case 'message-sent':
 			// message-sent is the acknowledgment to the sender; the message was already
 			// added to the store as a placeholder when sent. We can use this to confirm it.
-			wsDebug('Message sent confirmed:', chatEvent.requestId);
+			wsDebug(`Message sent confirmed: ${chatEvent.requestId}`);
 			break;
 
 		case 'message-edited':
@@ -83,7 +83,10 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			if (pinned && pinned.type === MessageType.TEXT_MSG) {
 				setPinnedMessage(roomId, pinned as TextMessage);
 			} else {
-				console.warn('[wsChatEventsHandler] message-pinned: message not found in store for id', messageId);
+				console.warn(
+					'[wsChatEventsHandler] message-pinned: message not found in store for id',
+					messageId
+				);
 			}
 			break;
 		}
@@ -122,7 +125,7 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 
 		default:
-			wsDebug('Unhandled chat event type', eventType);
+			wsDebug(`Unhandled chat event type: ${eventType}`);
 			return false;
 	}
 

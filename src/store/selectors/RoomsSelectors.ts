@@ -160,6 +160,9 @@ export const getSingleConversationsUserId = (state: RootStore): string[] => {
 
 export const getIsThereAnyRoom = (state: RootStore): boolean => size(state.rooms) > 0;
 
+export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
+	state.rooms[roomId]?.placeholder ?? false;
+
 export const getDuplicatedRoom = (
 	state: RootStore,
 	name: string,

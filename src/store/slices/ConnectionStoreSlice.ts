@@ -10,9 +10,9 @@ import { forEach } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { WebSocketClient } from '../../network/websocket/WebSocketClient';
+import { MarkerStatus, MessageType } from '../../types/store/ChatsRegistryTypes';
 import { ConnectionsStoreSlice } from '../../types/store/ConnectionsTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { MarkerStatus, MessageType } from '../../types/store/ChatsRegistryTypes';
 
 export const useConnectionsStoreSlice: StateCreator<
 	RootStore,
@@ -94,8 +94,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					// Find the target message to get its date
 					const targetMessage = registry.messages.find(
 						(m) =>
-							m.type === MessageType.TEXT_MSG &&
-							(m.stanzaId === messageId || m.id === messageId)
+							m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
 					);
 
 					if (targetMessage) {
@@ -130,7 +129,8 @@ export const useConnectionsStoreSlice: StateCreator<
 				const registry = draft.chatsRegistry[roomId];
 				if (registry && registry.messages) {
 					const msg = registry.messages.find(
-						(m) => m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
+						(m) =>
+							m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.text = text;
@@ -142,13 +142,19 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/EDIT_MESSAGE'
 		);
 	},
-	deleteMessage: (roomId: string, messageId: string, deletedBy: string, deletedAt: string): void => {
+	deleteMessage: (
+		roomId: string,
+		messageId: string,
+		deletedBy: string,
+		deletedAt: string
+	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
 				if (registry && registry.messages) {
 					const msg = registry.messages.find(
-						(m) => m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
+						(m) =>
+							m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.deletedInfo = { deletedBy, deletedAt };

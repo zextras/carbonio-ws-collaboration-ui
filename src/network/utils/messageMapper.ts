@@ -60,9 +60,7 @@ export function mapChatMessageToTextMessage(
 					text: chatMessage.replyTo.text || '',
 					read: MarkerStatus.READ,
 					// Map the boolean deleted to deletedInfo
-					deletedInfo: chatMessage.replyTo.deleted
-						? { deletedBy: '', deletedAt: '' }
-						: undefined
+					deletedInfo: chatMessage.replyTo.deleted ? { deletedBy: '', deletedAt: '' } : undefined
 				}
 			: undefined,
 		attachment: chatMessage.attachment
@@ -188,9 +186,8 @@ export function mapTimelineItemToMessage(
 ): Message {
 	if (item.itemType === 'message') {
 		return mapChatMessageToTextMessage(item.message, currentUserId);
-	} else {
-		return mapSystemEventToConfigurationMessage(item.systemEvent, roomId);
 	}
+	return mapSystemEventToConfigurationMessage(item.systemEvent, roomId);
 }
 
 /**

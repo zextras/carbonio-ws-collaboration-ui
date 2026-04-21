@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { fetchAPI } from '../../utils/FetchUtils';
+import RoomsApi from './RoomsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { IChatApi } from '../../types/network/apis/IChatApi';
 import {
@@ -17,7 +17,7 @@ import {
 	RoomReadMarkers,
 	TimelineResponse
 } from '../../types/network/models/chatTypes';
-import RoomsApi from './RoomsApi';
+import { fetchAPI } from '../../utils/FetchUtils';
 
 class ChatApi implements IChatApi {
 	private static instance: ChatApi;

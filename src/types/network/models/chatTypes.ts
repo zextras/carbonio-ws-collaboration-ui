@@ -123,6 +123,7 @@ export type InboxConversation = {
 	lastEvent?: SystemEvent;
 	unreadCount: number;
 	muted: boolean;
+	markers?: ReadMarker[];
 };
 
 export type InboxResponse = {

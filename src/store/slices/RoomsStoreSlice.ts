@@ -242,7 +242,8 @@ export const useRoomsStoreSlice: StateCreator<
 					unread: 0,
 					backfillQueue: [],
 					hasMoreBefore: true,
-					hasMoreAfter: false
+					hasMoreAfter: false,
+					isLoadingTimeline: false
 				};
 			}),
 			false,

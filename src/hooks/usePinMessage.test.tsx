@@ -163,7 +163,6 @@ describe('usePinMessage', () => {
 				id: 'messageId',
 				stanzaId: 'originalStanzaId',
 				editedStanzaId: 'editedStanzaId',
-				edited: true,
 				roomId: room.id
 			});
 
@@ -327,7 +326,6 @@ describe('usePinMessage', () => {
 				id: 'messageId',
 				stanzaId: 'originalStanzaId',
 				editedStanzaId: 'editedStanzaId',
-				edited: true,
 				roomId: room.id
 			});
 
@@ -357,7 +355,6 @@ describe('usePinMessage', () => {
 			const editedMessage = createMockTextMessage({
 				id: 'messageId',
 				stanzaId: 'originalStanzaId',
-				edited: true,
 				roomId: room.id
 			});
 

@@ -10,12 +10,12 @@ import { gte } from 'semver';
 import { normalizeEventType } from './normalizedEventType';
 import { wsChatEventsHandler } from './wsChatEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
-import ChatApi from '../../network/apis/ChatApi';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
+import ChatApi from '../apis/ChatApi';
 
 enum WsReadyState {
 	CONNECTING = 0,

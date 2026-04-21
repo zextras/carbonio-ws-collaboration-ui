@@ -8,4 +8,5 @@
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getWsClient = (store: RootStore): IWebSocketClient => store.connections.wsClient;
+export const getWsClient = (store: RootStore): IWebSocketClient | undefined =>
+	store.connections.wsClient;
