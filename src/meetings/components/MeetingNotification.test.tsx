@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { chatWsClient } from '../../network/websocket/ChatWebSocketClient';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
@@ -52,7 +52,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
-		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
+		const spyOnSendMessage = vi.spyOn(chatWsClient, 'sendMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -64,11 +64,11 @@ describe('MeetingNotification', () => {
 		);
 		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello');
 		await userEvent.click(screen.getByTestId('icon: Navigation2'));
-		expect(spyOnSendChatMessage).toHaveBeenCalled();
+		expect(spyOnSendMessage).toHaveBeenCalled();
 	});
 
 	test('User can send a message clicking Enter', async () => {
-		const spyOnSendChatMessage = vi.spyOn(xmppClient, 'sendChatMessage');
+		const spyOnSendMessage = vi.spyOn(chatWsClient, 'sendMessage');
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -79,7 +79,7 @@ describe('MeetingNotification', () => {
 			/>
 		);
 		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
-		expect(spyOnSendChatMessage).toHaveBeenCalled();
+		expect(spyOnSendMessage).toHaveBeenCalled();
 	});
 
 	test('Declining a meeting removes the notification', async () => {

@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { chatWsClient } from '../network/websocket/ChatWebSocketClient';
+import ChatApi from '../network/apis/ChatApi';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
@@ -44,9 +44,7 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 	);
 
 	const canMessageBePinned = useMemo(
-		() =>
-			chatWsClient.features.includes('zextras:iq:pin') &&
-			(roomType === RoomType.ONE_TO_ONE || amIModerator),
+		() => roomType === RoomType.ONE_TO_ONE || amIModerator,
 		[amIModerator, roomType]
 	);
 
@@ -66,7 +64,9 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
 				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
-					chatWsClient.pinMessage(message.roomId, stanzaIdToPin);
+					ChatApi.pinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+						console.error('[usePinMessage] pinMessage failed:', err);
+					});
 					closeModal(modalId);
 					useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 				},
@@ -86,11 +86,15 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 		}
 
 		if (isMessagePinned) {
-			chatWsClient.unpinMessage(message.roomId, stanzaIdToPin);
+			ChatApi.unpinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+				console.error('[usePinMessage] unpinMessage failed:', err);
+			});
 			useStore.getState().removePinnedMessage(message.roomId);
 			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		} else {
-			chatWsClient.pinMessage(message.roomId, stanzaIdToPin);
+			ChatApi.pinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+				console.error('[usePinMessage] pinMessage failed:', err);
+			});
 			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		}
 	}, [pinnedMessage, isMessagePinned, createModal, t, message.roomId, stanzaIdToPin, closeModal]);

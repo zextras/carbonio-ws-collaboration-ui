@@ -16,7 +16,7 @@ import {
 	mapReadMarkersToMarkers,
 	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
-} from '../../../network/sse/utilities/messageMapper';
+} from '../../../network/utils/messageMapper';
 import { MessageFastening } from '../../../types/store/ChatsRegistryTypes';
 import {
 	getHistoryIsLoadedDisabled,

@@ -64,6 +64,11 @@ export type WsChatEvent =
 			timestamp: string;
 			replyToId?: string;
 			attachments?: WsAttachment[];
+			// Flat attachment fields (alternative to the attachments array)
+			attachmentId?: string;
+			attachmentName?: string;
+			attachmentMime?: string;
+			attachmentSize?: number;
 	  }
 	| {
 			type: 'message-sent';
@@ -122,6 +127,20 @@ export type WsChatEvent =
 			timestamp: string;
 	  }
 	| {
+			type: 'message-pinned';
+			roomId: string;
+			messageId: string;
+			pinnedBy: string;
+			timestamp: string;
+	  }
+	| {
+			type: 'message-unpinned';
+			roomId: string;
+			messageId: string;
+			unpinnedBy: string;
+			timestamp: string;
+	  }
+	| {
 			type: 'error';
 			requestId?: string;
 			code: string;
@@ -139,6 +158,8 @@ export function isChatEvent(eventType: string): boolean {
 		'message-edited',
 		'message-deleted',
 		'message-forwarded',
+		'message-pinned',
+		'message-unpinned',
 		'reaction-changed',
 		'read-updated',
 		'presence-changed',

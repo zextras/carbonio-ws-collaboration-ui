@@ -42,15 +42,6 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/SET_WEBSOCKET_STATUS'
 		);
 	},
-	setChatConnectionId: (connectionId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.connections.chatConnectionId = connectionId;
-			}),
-			false,
-			'CONNECTIONS/SET_CHAT_CONNECTION_ID'
-		);
-	},
 	resetChatData: (): void => {
 		set(
 			produce((draft: RootStore) => {

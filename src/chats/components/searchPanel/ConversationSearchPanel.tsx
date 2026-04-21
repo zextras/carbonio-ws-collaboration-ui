@@ -23,7 +23,7 @@ import SearchResultMessage from './SearchResultMessage';
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ChatApi from '../../../network/apis/ChatApi';
-import { mapChatMessageToTextMessage } from '../../../network/sse/utilities/messageMapper';
+import { mapChatMessageToTextMessage } from '../../../network/utils/messageMapper';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';

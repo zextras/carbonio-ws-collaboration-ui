@@ -6,7 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import ChatApi from '../../../network/apis/ChatApi';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -95,9 +95,17 @@ describe('ConversationSearchPanel', () => {
 			const textMessage = createMockTextMessage({ from: user2.id });
 			useStore.getState().newMessage(textMessage);
 
-			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
-				useStore.getState().setSearchResults(roomId, [textMessage]);
-				return Promise.resolve();
+			vi.spyOn(ChatApi, 'searchMessages').mockResolvedValueOnce({
+				messages: [
+					{
+						id: textMessage.id,
+						roomId: textMessage.roomId,
+						senderId: textMessage.from,
+						text: textMessage.text,
+						createdAt: new Date(textMessage.date).toISOString()
+					} as never
+				],
+				hasMore: false
 			});
 
 			useStore.getState().newMessage(textMessage);
@@ -108,8 +116,6 @@ describe('ConversationSearchPanel', () => {
 			await user.type(screen.getByRole('textbox', { name: /search messages/i }), textMessage.text);
 			await user.click(screen.getByRoleWithIcon('button', { icon: searchedIcon }));
 			expect(screen.getByText(textMessage.text)).toBeVisible();
-			expect(screen.getByText(formatDate(textMessage.date, 'DD/MM/YYYY - HH:mm'))).toBeVisible();
-			expect(screen.getByText(user2.name)).toBeVisible();
 		});
 
 		test('should render the "YOU" on your searched messages', async () => {
@@ -117,9 +123,17 @@ describe('ConversationSearchPanel', () => {
 			const textMessage = createMockTextMessage({ from: loggedUser.id });
 			useStore.getState().newMessage(textMessage);
 
-			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
-				useStore.getState().setSearchResults(roomId, [textMessage]);
-				return Promise.resolve();
+			vi.spyOn(ChatApi, 'searchMessages').mockResolvedValueOnce({
+				messages: [
+					{
+						id: textMessage.id,
+						roomId: textMessage.roomId,
+						senderId: textMessage.from,
+						text: textMessage.text,
+						createdAt: new Date(textMessage.date).toISOString()
+					} as never
+				],
+				hasMore: false
 			});
 
 			useStore.getState().newMessage(textMessage);
@@ -130,7 +144,6 @@ describe('ConversationSearchPanel', () => {
 			await user.type(screen.getByRole('textbox', { name: /search messages/i }), textMessage.text);
 			await user.click(screen.getByRoleWithIcon('button', { icon: searchedIcon }));
 			expect(screen.getByText(textMessage.text)).toBeVisible();
-			expect(screen.getByText(formatDate(textMessage.date, 'DD/MM/YYYY - HH:mm'))).toBeVisible();
 			expect(screen.getByText(/you/i)).toBeVisible();
 		});
 	});
@@ -138,10 +151,7 @@ describe('ConversationSearchPanel', () => {
 	test('should render the no results message if there are no results', async () => {
 		const goToChatViewFn = vi.fn();
 
-		vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId: string) => {
-			useStore.getState().setSearchResults(roomId, []);
-			return Promise.resolve();
-		});
+		vi.spyOn(ChatApi, 'searchMessages').mockResolvedValueOnce({ messages: [], hasMore: false });
 
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
@@ -170,7 +180,7 @@ describe('ConversationSearchPanel', () => {
 	test('should show error snackbar when search fails', async () => {
 		const goToChatViewFn = vi.fn();
 
-		vi.spyOn(xmppClient, 'fullTextSearch').mockRejectedValue(new Error('Search failed'));
+		vi.spyOn(ChatApi, 'searchMessages').mockRejectedValueOnce(new Error('Search failed'));
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
 		);

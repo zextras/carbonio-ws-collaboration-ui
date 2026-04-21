@@ -16,6 +16,7 @@ import {
 import { WsChatEvent, isChatEvent } from './types';
 import { wsDebug } from '../../utils/debug';
 import useStore from '../../store/Store';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 
 /** Tracks per-room per-user auto-clear timers for typing state */
 const typingClearTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -69,6 +70,30 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 		case 'presence-changed':
 			handleWsPresenceChanged(chatEvent);
 			break;
+
+		case 'message-pinned': {
+			const { roomId, messageId } = chatEvent;
+			const { chatsRegistry, setPinnedMessage } = useStore.getState();
+			const messages = chatsRegistry[roomId]?.messages ?? [];
+			const pinned = messages.find(
+				(m) =>
+					m.type === MessageType.TEXT_MSG &&
+					(m.id === messageId || (m as TextMessage).stanzaId === messageId)
+			);
+			if (pinned && pinned.type === MessageType.TEXT_MSG) {
+				setPinnedMessage(roomId, pinned as TextMessage);
+			} else {
+				console.warn('[wsChatEventsHandler] message-pinned: message not found in store for id', messageId);
+			}
+			break;
+		}
+
+		case 'message-unpinned': {
+			const { roomId } = chatEvent;
+			useStore.getState().removePinnedMessage(roomId);
+			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
+			break;
+		}
 
 		case 'typing': {
 			const { roomId, userId } = chatEvent;

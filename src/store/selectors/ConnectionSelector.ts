@@ -9,6 +9,3 @@ import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getWsClient = (store: RootStore): IWebSocketClient => store.connections.wsClient;
-
-export const getChatConnectionId = (store: RootStore): string | undefined =>
-	store.connections.chatConnectionId;

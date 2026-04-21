@@ -11,7 +11,6 @@ export type ConnectionsStoreSlice = {
 	connections: Connections;
 	setChatsBeStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
-	setChatConnectionId: (connectionId: string) => void;
 	resetChatData: () => void;
 	setUserPresence: (userId: string, online: boolean, lastActivityAt?: string) => void;
 	updateReadMarker: (roomId: string, userId: string, messageId: string) => void;
@@ -21,7 +20,6 @@ export type ConnectionsStoreSlice = {
 
 export type Connections = {
 	wsClient: IWebSocketClient;
-	chatConnectionId?: string;
 	status: {
 		chats_be?: boolean;
 		websocket?: boolean;

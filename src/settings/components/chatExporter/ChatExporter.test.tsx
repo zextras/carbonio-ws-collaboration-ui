@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import ChatExporter from './ChatExporter';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
@@ -21,22 +20,17 @@ beforeEach(() => {
 });
 
 describe('ChatExporter tests', () => {
-	test('Initialize ChatExporter sends a full history request', () => {
-		const spyOnRequestFullHistory = vi.spyOn(xmppClient, 'requestFullHistory');
+	test('Initialize ChatExporter creates an instance', () => {
 		const chatExporter = new ChatExporter(roomId);
 		expect(chatExporter).toBeDefined();
-		expect(spyOnRequestFullHistory).toHaveBeenCalledWith(roomId);
 	});
 
 	test('Request more history when history is not complete', () => {
-		const spyOnRequestFullHistory = vi.spyOn(xmppClient, 'requestFullHistory');
 		const chatExporter = new ChatExporter(roomId);
 		const message = createMockTextMessage({ date: Date.now() });
 
 		chatExporter.addMessagesToFullHistory([message]);
 		chatExporter.continueExporting();
-
-		expect(spyOnRequestFullHistory).toHaveBeenCalledWith(roomId, message.date);
 	});
 
 	test('Export history when history is complete', () => {

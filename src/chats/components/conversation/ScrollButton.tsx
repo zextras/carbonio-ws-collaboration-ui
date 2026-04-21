@@ -17,7 +17,7 @@ import {
 	mapReadMarkersToMarkers,
 	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
-} from '../../../network/sse/utilities/messageMapper';
+} from '../../../network/utils/messageMapper';
 import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';

@@ -8,7 +8,7 @@ import { screen, renderHook } from '@testing-library/react';
 import { forEach } from 'lodash';
 
 import useBubbleReactions, { ReactionType } from './useBubbleReactions';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import ChatApi from '../../../../../network/apis/ChatApi';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMessageFastening,
@@ -73,7 +73,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Send a reaction', async () => {
-		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
+		const spyOnSendChatMessageReaction = vi.spyOn(ChatApi, 'addReaction');
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
@@ -91,7 +91,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 
 	test('Sent reaction is highlight', async () => {
 		const store = useStore.getState();
-		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
+		const spyOnSendChatMessageReaction = vi.spyOn(ChatApi, 'removeReaction');
 
 		store.addFastening([reactionToSimpleTextMessage]);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {

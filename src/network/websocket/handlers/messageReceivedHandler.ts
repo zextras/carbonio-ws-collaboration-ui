@@ -5,7 +5,12 @@
  */
 
 import useStore from '../../../store/Store';
-import { MarkerStatus, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import {
+	AttachmentMessageType,
+	MarkerStatus,
+	MessageType,
+	TextMessage
+} from '../../../types/store/ChatsRegistryTypes';
 
 /**
  * Handles incoming message-received events from the WebSocket.
@@ -22,6 +27,10 @@ export function handleWsMessageReceived(event: {
 	timestamp: string;
 	replyToId?: string;
 	attachments?: Array<{ id: string; name: string; mimeType: string; size: number }>;
+	attachmentId?: string;
+	attachmentName?: string;
+	attachmentMime?: string;
+	attachmentSize?: number;
 }): void {
 	const {
 		newMessage,
@@ -40,6 +49,25 @@ export function handleWsMessageReceived(event: {
 		return;
 	}
 
+	// Resolve attachment: prefer the array form, fall back to flat fields
+	let resolvedAttachment: AttachmentMessageType | undefined;
+	if (event.attachments && event.attachments.length > 0) {
+		const first = event.attachments[0];
+		resolvedAttachment = {
+			id: first.id,
+			name: first.name,
+			mimeType: first.mimeType,
+			size: first.size
+		};
+	} else if (event.attachmentId) {
+		resolvedAttachment = {
+			id: event.attachmentId,
+			name: event.attachmentName ?? '',
+			mimeType: event.attachmentMime ?? 'application/octet-stream',
+			size: event.attachmentSize ?? 0
+		};
+	}
+
 	// Build TextMessage for the store
 	const textMessage: TextMessage = {
 		id: messageId,
@@ -51,15 +79,7 @@ export function handleWsMessageReceived(event: {
 		text,
 		read: MarkerStatus.UNREAD,
 		replyTo: event.replyToId,
-		attachment:
-			event.attachments && event.attachments.length > 0
-				? {
-						id: event.attachments[0].id,
-						name: event.attachments[0].name,
-						mimeType: event.attachments[0].mimeType,
-						size: event.attachments[0].size
-					}
-				: undefined
+		attachment: resolvedAttachment
 	};
 
 	// Check if we're viewing a historical page

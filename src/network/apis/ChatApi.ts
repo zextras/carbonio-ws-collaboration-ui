@@ -99,6 +99,14 @@ class ChatApi implements IChatApi {
 		return fetchAPI(`rooms/${roomId}/message/${messageId}`, RequestType.DELETE);
 	}
 
+	public pinMessage(roomId: string, messageId: string): Promise<void> {
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}/pin`, RequestType.PUT);
+	}
+
+	public unpinMessage(roomId: string, messageId: string): Promise<void> {
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}/pin`, RequestType.DELETE);
+	}
+
 	public getMessagesByIds(roomId: string, messageIds: string[]): Promise<ChatMessage[]> {
 		return fetchAPI(`rooms/${roomId}/message/batch`, RequestType.POST, { messageIds });
 	}

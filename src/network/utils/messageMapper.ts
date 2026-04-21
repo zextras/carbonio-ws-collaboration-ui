@@ -11,7 +11,7 @@ import {
 	TimelineItem,
 	SystemEvent,
 	SystemEventType
-} from '../../../types/network/models/chatTypes';
+} from '../../types/network/models/chatTypes';
 import {
 	TextMessage,
 	ConfigurationMessage,
@@ -22,7 +22,7 @@ import {
 	OperationType,
 	FasteningAction,
 	Marker
-} from '../../../types/store/ChatsRegistryTypes';
+} from '../../types/store/ChatsRegistryTypes';
 
 /**
  * Maps a ChatMessage from the REST API to a TextMessage for the store.
@@ -90,6 +90,7 @@ export function mapReactionsToFastenings(
 		group.userIds.forEach((userId) => {
 			fastenings.push({
 				id: `${messageId}-${userId}-${group.reaction}`,
+				stanzaId: `${messageId}-${userId}-${group.reaction}`,
 				roomId,
 				type: MessageType.FASTENING,
 				date: Date.now(),

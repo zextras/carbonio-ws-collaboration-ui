@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce, DebouncedFunc, includes } from 'lodash';
+import { debounce, DebouncedFunc, includes, uniq, flatMap } from 'lodash';
 import { gte } from 'semver';
 
 import { normalizeEventType } from './normalizedEventType';
 import { wsChatEventsHandler } from './wsChatEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
+import ChatApi from '../../network/apis/ChatApi';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
@@ -81,11 +82,35 @@ export class WebSocketClient {
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
 
-		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
+		const { setWebsocketStatus, session, setApiVersion, rooms, setUserPresence } =
+			useStore.getState();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
+		}
+
+		// Fetch initial presence for all known room members in batches of 500
+		const allUserIds = uniq(
+			flatMap(Object.values(rooms), (room) => room.members.map((m) => m.userId))
+		);
+		if (allUserIds.length > 0) {
+			const BATCH_SIZE = 500;
+			const batches: string[][] = [];
+			for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+				batches.push(allUserIds.slice(i, i + BATCH_SIZE));
+			}
+			Promise.all(batches.map((batch) => ChatApi.getPresenceBatch(batch)))
+				.then((results) => {
+					results.forEach((result) => {
+						result.presences.forEach(({ userId, online, lastActivityAt }) => {
+							setUserPresence(userId, online, lastActivityAt);
+						});
+					});
+				})
+				.catch((err) => {
+					wsDebug('Presence batch fetch failed:', err);
+				});
 		}
 	};
 

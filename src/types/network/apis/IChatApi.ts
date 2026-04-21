@@ -70,6 +70,16 @@ export interface IChatApi {
 	deleteMessage(roomId: string, messageId: string): Promise<void>;
 
 	/**
+	 * Pins a message in a room
+	 */
+	pinMessage(roomId: string, messageId: string): Promise<void>;
+
+	/**
+	 * Unpins the pinned message in a room
+	 */
+	unpinMessage(roomId: string, messageId: string): Promise<void>;
+
+	/**
 	 * Gets specific messages by their IDs
 	 */
 	getMessagesByIds(roomId: string, messageIds: string[]): Promise<ChatMessage[]>;

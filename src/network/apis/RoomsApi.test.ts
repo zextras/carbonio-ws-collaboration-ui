@@ -14,7 +14,6 @@ import {
 	deleteRoomMember,
 	deleteRoomPicture,
 	demotesRoomMember,
-	forwardMessages,
 	getRoom,
 	getRoomAttachments,
 	getRoomMembers,
@@ -30,7 +29,6 @@ import {
 } from './RoomsApi';
 import { QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import useStore from '../../store/Store';
-import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
 	createMockMeeting,
@@ -44,10 +42,7 @@ import {
 	mockSendFileFetchAPI,
 	mockUploadFileFetchAPI
 } from '../../utils/__mocks__/FetchUtils';
-import { dateToISODate } from '../../utils/dateUtils';
 import { RequestType } from '../../utils/FetchUtils';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -431,120 +426,6 @@ describe('Rooms API', () => {
 			const { signal } = new AbortController();
 			await expect(addRoomAttachment(roomId, testFile, { area: '0x0' }, signal)).rejects.toThrow();
 			expect(dispatchSpy).not.toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-	});
-
-	test('forwardMessages is called correctly', async () => {
-		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-		const message = createMockTextMessage();
-		const xmlMessage = buildTextMessageFromHistory({
-			roomId: message.roomId,
-			from: message.from,
-			text: message.text
-		});
-		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
-
-		await forwardMessages(['roomId'], [message]);
-		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			{
-				originalMessage: insideMessage.outerHTML,
-				originalMessageSentAt: dateToISODate(message.date)
-			}
-		]);
-	});
-
-	test('forwardMessages - edited message - is called correctly', async () => {
-		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-		const message = createMockTextMessage({ text: 'edited' });
-		const xmlMessage = buildTextMessageFromHistory({
-			roomId: message.roomId,
-			from: message.from,
-			text: 'originalMessage'
-		});
-		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
-
-		await forwardMessages(['roomId'], [message]);
-		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
-			{
-				originalMessage: expect.stringContaining(message.text),
-				originalMessageSentAt: dateToISODate(message.date)
-			}
-		]);
-	});
-
-	describe('forwardMessages dispatches quota changed event', () => {
-		test('dispatches event when forwarded messages have attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage({
-				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
-			});
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
-				() => insideMessage
-			);
-
-			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-
-		test('does not dispatch event when forwarded messages have no attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage();
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
-				() => insideMessage
-			);
-
-			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).not.toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-
-		test('dispatches event even when some rooms fail (partial success)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage({
-				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
-			});
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementation(() => insideMessage);
-
-			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
-
-			await expect(forwardMessages(['room1', 'room2'], [message])).rejects.toThrow();
-			expect(dispatchSpy).toHaveBeenCalledWith(
 				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
 			);
 			dispatchSpy.mockRestore();

@@ -129,31 +129,6 @@ class ChatWebSocketClient {
 		return requestId;
 	}
 
-	// ==================== Pin message stubs ====================
-	// These are XMPP-era features that will be migrated to REST.
-	// For now, provide no-op stubs so existing code compiles.
-
-	/**
-	 * @deprecated Pin message will be migrated to REST API
-	 */
-	pinMessage(_roomId: string, _stanzaId: string): void {
-		console.warn('[ChatWebSocketClient] pinMessage not yet implemented via WS');
-	}
-
-	/**
-	 * @deprecated Unpin message will be migrated to REST API
-	 */
-	unpinMessage(_roomId: string, _stanzaId: string): void {
-		console.warn('[ChatWebSocketClient] unpinMessage not yet implemented via WS');
-	}
-
-	/**
-	 * @deprecated Get message pin will be migrated to REST API
-	 */
-	getMessagePin(_roomId: string): void {
-		console.warn('[ChatWebSocketClient] getMessagePin not yet implemented via WS');
-	}
-
 	/**
 	 * @deprecated History navigation will use REST timeline API
 	 */

@@ -17,7 +17,7 @@ import {
 	mapReadMarkersToMarkers,
 	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
-} from '../../../network/sse/utilities/messageMapper';
+} from '../../../network/utils/messageMapper';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored

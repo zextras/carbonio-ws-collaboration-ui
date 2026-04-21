@@ -9,7 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ReactionChip from './ReactionChip';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import ChatApi from '../../../../network/apis/ChatApi';
 import useStore from '../../../../store/Store';
 import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -88,7 +88,7 @@ describe('ReactionChip', () => {
 	});
 
 	test('Clicking on the chip sends a reaction if session user does not previous send id', async () => {
-		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
+		const spyOnAddReaction = vi.spyOn(ChatApi, 'addReaction');
 		const { user } = setup(
 			<ReactionChip
 				reaction={'\uD83D\uDC4D'}
@@ -99,11 +99,11 @@ describe('ReactionChip', () => {
 		);
 		const container = screen.getByTestId(chipTestId);
 		await user.click(container);
-		expect(spyOnSendChatMessageReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '\uD83D\uDC4D');
+		expect(spyOnAddReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '\uD83D\uDC4D');
 	});
 
 	test('Clicking on the chip that the user sent remove it', async () => {
-		const spyOnSendChatMessageReaction = vi.spyOn(xmppClient, 'sendChatMessageReaction');
+		const spyOnRemoveReaction = vi.spyOn(ChatApi, 'removeReaction');
 		const { user } = setup(
 			<ReactionChip
 				reaction={'\uD83D\uDC4D'}
@@ -114,7 +114,7 @@ describe('ReactionChip', () => {
 		);
 		const container = screen.getByTestId(chipTestId);
 		await user.click(container);
-		expect(spyOnSendChatMessageReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '');
+		expect(spyOnRemoveReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '\uD83D\uDC4D');
 	});
 
 	test('Chip changes color when a new reaction is received', async () => {

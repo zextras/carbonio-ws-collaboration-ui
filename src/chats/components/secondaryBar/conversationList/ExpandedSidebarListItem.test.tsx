@@ -9,10 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
-import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
 	createMockConfigurationMessage,
@@ -299,26 +296,12 @@ describe('Expanded sidebar list item', () => {
 			store.setInboxMessages([mockedTextMessageSentByMeIntoGroup]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
-						roomId: mockedGroup.id,
-						from: user4Be.id,
-						isWriting: true
-					})
-				);
+				store.setIsWriting(mockedGroup.id, user4Be.id, true);
 			});
 			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
 			vi.advanceTimersByTime(3000);
 			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
-						roomId: mockedGroup.id,
-						from: user4Be.id,
-						isWriting: false
-					})
-				);
+				store.setIsWriting(mockedGroup.id, user4Be.id, false);
 			});
 			vi.advanceTimersByTime(7000);
 			expect(screen.getByTestId(iconDoneAll)).toBeVisible();

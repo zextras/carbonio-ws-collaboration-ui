@@ -15,7 +15,7 @@ import {
 	mapReadMarkersToMarkers,
 	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
-} from '../../../network/sse/utilities/messageMapper';
+} from '../../../network/utils/messageMapper';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MessageFastening } from '../../../types/store/ChatsRegistryTypes';
