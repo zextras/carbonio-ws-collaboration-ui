@@ -10,6 +10,9 @@ import { screen } from '@testing-library/react';
 import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
 import * as api from '../../../network/apis/MeetingsApi';
 import { setup } from '../../../tests/test-utils';
+import * as UserMediaManager from '../../../utils/UserMediaManager';
+
+const videoOff = 'icon: VideoOff';
 
 describe('MeetingExternalAccessMobilePage tests', () => {
 	test('Meeting name is displayed correctly', async () => {
@@ -29,5 +32,39 @@ describe('MeetingExternalAccessMobilePage tests', () => {
 		const readyButton = await screen.findByText('Ready to participate');
 		await user.click(readyButton);
 		expect(spyCreateGuest).toHaveBeenCalled();
+	});
+
+	test('Camera button is initially off and enabling it requests the front camera stream', async () => {
+		const fakeStream = {
+			getTracks: () => []
+		} as unknown as MediaStream;
+		const spyOnFrontCamera = vi
+			.spyOn(UserMediaManager, 'getFrontCameraStream')
+			.mockResolvedValue(fakeStream);
+		const { user } = setup(<MeetingExternalAccessMobilePage />);
+
+		const videoOffButton = await screen.findByTestId(videoOff);
+		await user.click(videoOffButton);
+
+		expect(spyOnFrontCamera).toHaveBeenCalled();
+		expect(await screen.findByTestId('icon: Video')).toBeInTheDocument();
+	});
+
+	test('Toggling the camera off releases the media stream', async () => {
+		const stopTrack = vi.fn();
+		const fakeStream = {
+			getTracks: () => [{ stop: stopTrack }]
+		} as unknown as MediaStream;
+		vi.spyOn(UserMediaManager, 'getFrontCameraStream').mockResolvedValue(fakeStream);
+
+		const { user } = setup(<MeetingExternalAccessMobilePage />);
+		const videoOffButton = await screen.findByTestId(videoOff);
+		await user.click(videoOffButton);
+
+		const videoOnButton = await screen.findByTestId('icon: Video');
+		await user.click(videoOnButton);
+
+		expect(stopTrack).toHaveBeenCalled();
+		expect(await screen.findByTestId(videoOff)).toBeInTheDocument();
 	});
 });
