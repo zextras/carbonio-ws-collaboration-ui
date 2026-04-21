@@ -50,18 +50,16 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);
 
 	const toggleVideoStream = useCallback(() => {
-		if (!videoStatus) {
-			if (!videoOutConn?.peerConn) {
-				videoOutConn?.startVideo();
-			} else {
-				getFrontCameraStream().then((stream) => {
-					videoOutConn
-						?.updateLocalStreamTrack(stream)
-						.then(() => updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-				});
-			}
-		} else {
+		if (videoStatus) {
 			videoOutConn?.stopVideo();
+		} else if (videoOutConn?.peerConn) {
+			getFrontCameraStream().then((stream) => {
+				videoOutConn
+					?.updateLocalStreamTrack(stream)
+					.then(() => updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+			});
+		} else {
+			videoOutConn?.startVideo();
 		}
 	}, [videoStatus, videoOutConn, meetingId]);
 
