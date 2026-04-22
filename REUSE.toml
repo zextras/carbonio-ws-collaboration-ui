@@ -3,7 +3,7 @@ SPDX-PackageName = "carbonio-ws-collaboration-ui"
 SPDX-PackageSupplier = "Zextras <https://www.zextras.com>"
 
 [[annotations]]
-path = [".idea/**", ".vscode/**", ".husky/**", ".nvmrc", "package.json", "package-lock.json", "tsconfig.json", "CHANGELOG.md",
+path = [".idea/**", ".vscode/**", ".husky/**", ".nvmrc", "package.json", "pnpm-lock.yaml", ".npmrc", "tsconfig.json", "CHANGELOG.md",
 ".github/**", "THIRDPARTIES", "README.md", ".gitignore", ".prettierrc.js", "src/chats/assets/**", "src/meetings/assets/**", "Dockerfile",
 "src/network/API_VERSIONING.md"]
 precedence = "aggregate"

@@ -116,7 +116,7 @@ const MeetingSidebar = (): ReactElement => {
 			mainAlignment="flex-end"
 			data-testid="meeting_sidebar"
 		>
-			<Container height="100%" mainAlignment="space-between">
+			<Container height="100%" mainAlignment="space-between" style={{ overflow: 'hidden' }}>
 				<Container
 					height="fit"
 					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}

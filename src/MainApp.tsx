@@ -28,7 +28,6 @@ import {
 	OperationType
 } from './types/store/ChatsRegistryTypes';
 import { SystemEventType } from './types/network/models/chatTypes';
-import { UserType } from './types/store/UserTypes';
 import { setDateDefault, dateToTimestamp, isBefore } from './utils/dateUtils';
 import { Marker } from './types/store/ChatsRegistryTypes';
 
