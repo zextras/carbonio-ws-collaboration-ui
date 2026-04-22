@@ -410,7 +410,7 @@ export const useActiveMeetingSlice: StateCreator<
 						// for each participant change tile TileAvatarComponent to TileVideoComponent when enabling video subscriptions to show their video instead of a profile picture
 						subsToRequest.forEach((sub) => {
 							const participant = draft.meetings[meetingId].participants[sub.userId];
-							if (participant) {
+							if (participant && sub.type === STREAM_TYPE.VIDEO) {
 								participant.hideVideoStream = false;
 							}
 						});
@@ -426,11 +426,12 @@ export const useActiveMeetingSlice: StateCreator<
 					const myUserId = draft.session.id;
 					const participants = draft.meetings[meetingId]?.participants;
 					if (participants) {
+						const subsToMaintain: Subscription[] = [];
 						const subsToDelete = Object.values(participants).flatMap((p) => {
 							const subs: Subscription[] = [];
 							if (p.userId !== myUserId) {
 								if (p.videoStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.VIDEO });
-								if (p.screenStreamOn) subs.push({ userId: p.userId, type: STREAM_TYPE.SCREEN });
+								if (p.screenStreamOn) subsToMaintain.push({ userId: p.userId, type: STREAM_TYPE.SCREEN });
 							}
 							return subs;
 						});
@@ -441,12 +442,12 @@ export const useActiveMeetingSlice: StateCreator<
 						});
 
 						if (subsToDelete.length > 0) {
-							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription([]);
+							draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToMaintain);
 						}
 
 						subsToDelete.forEach((sub) => {
 							const participant = draft.meetings[meetingId].participants[sub.userId];
-							if (participant) {
+							if (participant && sub.type === STREAM_TYPE.VIDEO) {
 								participant.hideVideoStream = true;
 							}
 						});
