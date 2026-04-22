@@ -76,7 +76,7 @@ const NetworkQualityIndicator: FC = () => {
 				<Snackbar
 					label={t(
 						'meeting.networkQuality.poorConnection',
-						'Your network connection is poor, which may affect the meeting experience.'
+						'Your network connection is poor, which may affect the meeting experience. Other participants video stream will be turned off temporarily to save bandwidth.'
 					)}
 					severity="warning"
 					data-testid="network_quality_snackbar"
