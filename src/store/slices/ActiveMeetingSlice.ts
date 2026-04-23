@@ -289,7 +289,7 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				if (!draft.activeMeeting.videoSubscriptionsEnabled) return;
+				if (subToAdd.type === STREAM_TYPE.VIDEO && !draft.activeMeeting.videoSubscriptionsEnabled) return;
 				draft.activeMeeting.videoScreenIn?.subscriptionManager?.addSubscription(subToAdd);
 			}),
 			false,

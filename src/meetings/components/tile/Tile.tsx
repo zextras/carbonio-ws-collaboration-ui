@@ -22,6 +22,7 @@ import {
 import {
 	getParticipantAudioStatus,
 	getParticipantHideVideoStream,
+	getParticipantScreenStatus,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
@@ -91,6 +92,7 @@ const VideoEl = styled.video<{
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
+	const screenStatus  = useStore((store) => getParticipantScreenStatus(store, meetingId, userId));
 	const hideVideoStream = useStore((store) =>
 		getParticipantHideVideoStream(store, meetingId, userId)
 	);
@@ -127,9 +129,9 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		if (modalProps) {
 			return modalProps.videoStreamEnabled && !hideVideoStream;
 		}
-		if (isScreenShare) return !hideVideoStream;
+		if (isScreenShare) return screenStatus;
 		return videoStatus && !hideVideoStream;
-	}, [isScreenShare, modalProps, videoStatus, hideVideoStream]);
+	}, [isScreenShare, modalProps, videoStatus, hideVideoStream, screenStatus]);
 
 	const showHoverContainer = useMemo(
 		() => !modalProps && !isPip && (canUsePinFeature || muteForAllHasToAppear),

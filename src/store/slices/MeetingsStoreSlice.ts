@@ -105,13 +105,15 @@ export const useMeetingsStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const meeting = draft.meetings[meetingId];
+				const videoSubscriptionsEnabled = draft.activeMeeting?.videoSubscriptionsEnabled ?? false;
 				if (meeting) {
 					meeting.participants[participant.userId] = {
 						userId: participant.userId,
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false,
-						joinedAt: participant.joinedAt
+						joinedAt: participant.joinedAt,
+						hideVideoStream: participant.hideVideoStream || !videoSubscriptionsEnabled
 					};
 				}
 			}),
