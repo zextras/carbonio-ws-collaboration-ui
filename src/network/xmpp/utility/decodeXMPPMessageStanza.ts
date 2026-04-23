@@ -131,7 +131,8 @@ export function decodeXMPPMessageStanza(
 					break;
 				}
 				case OperationType.MEETING_STARTED:
-				case OperationType.MEETING_ENDED: {
+				case OperationType.MEETING_ENDED:
+				case OperationType.MEETING_DECLINED: {
 					value = Strophe.getText(getRequiredTagElement(x, 'timestamp'));
 					break;
 				}

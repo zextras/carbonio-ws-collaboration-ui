@@ -19,6 +19,7 @@ import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelecto
 import useStore from '../store/Store';
 import { ConfigurationMessage, OperationType } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
+import { formatDate } from '../utils/dateUtils';
 
 export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage
@@ -181,6 +182,44 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
+	const meetingTime = useMemo(
+		() => (message.value ? formatDate(parseInt(message.value, 10), 'HH:mm') : ''),
+		[message.value]
+	);
+
+	const meetingStartedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingStarted', 'You called at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t('configurationMessages.member.meetingStarted', '{{name}} called you at {{time}}', {
+			name: actionMakerUsername,
+			time: meetingTime
+		});
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
+	const meetingEndedLabel = useMemo(
+		() =>
+			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
+				time: meetingTime
+			}),
+		[meetingTime, t]
+	);
+
+	const meetingDeclinedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingDeclined', 'You declined the call at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t(
+			'configurationMessages.member.meetingDeclined',
+			'{{name}} declined the call at {{time}}',
+			{ name: actionMakerUsername, time: meetingTime }
+		);
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
 	const clearHistoryLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
 			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
@@ -218,6 +257,12 @@ export const useConfigurationMessageLabel = (
 			return unpinMessageLabel;
 		case OperationType.CLEARED_HISTORY:
 			return clearHistoryLabel;
+		case OperationType.MEETING_STARTED:
+			return meetingStartedLabel;
+		case OperationType.MEETING_ENDED:
+			return meetingEndedLabel;
+		case OperationType.MEETING_DECLINED:
+			return meetingDeclinedLabel;
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;
