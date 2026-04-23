@@ -6,6 +6,7 @@
 
 import { meetingAudioAnsweredEventHandler } from './MeetingAudioAnsweredEventHandler';
 import { meetingAudioStreamChangedEventHandler } from './MeetingAudioStreamChangedEventHandler';
+import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
 import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';
@@ -127,6 +128,10 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
 			// event for mobile apps
+			break;
+		}
+		case WsEventType.MEETING_DECLINED: {
+			meetingDeclinedEventHandler(event);
 			break;
 		}
 		default: {

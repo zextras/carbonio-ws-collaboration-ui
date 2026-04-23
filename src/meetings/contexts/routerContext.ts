@@ -22,7 +22,8 @@ export enum PAGE_INFO_TYPE {
 	MEETING_NOT_FOUND = 'meeting_not_found',
 	UNAUTHENTICATED = 'unauthenticated',
 	INVALID_WAITING_ROOM = 'invalid_waiting_room',
-	GENERAL_ERROR = 'general_error'
+	GENERAL_ERROR = 'general_error',
+	MEETING_DECLINED = 'meeting_declined'
 }
 
 export type RouterContextType = {

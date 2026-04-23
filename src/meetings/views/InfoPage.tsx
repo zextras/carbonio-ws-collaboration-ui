@@ -115,6 +115,14 @@ const InfoPage = (): ReactElement => {
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
 			break;
+		case PAGE_INFO_TYPE.MEETING_DECLINED:
+			titleLabel = t('meeting.infoPage.title.meetingDeclined', 'Call Declined');
+			sloganLabel = t('meeting.infoPage.slogan.meetingDeclined', 'The call was declined');
+			descriptionLabel = t(
+				'meeting.infoPage.description.meetingDeclined',
+				'The other participant declined your call'
+			);
+			break;
 		case PAGE_INFO_TYPE.UNAUTHENTICATED:
 			titleLabel = t('meeting.infoPage.title.notAuthenticatedUser', 'You are not authenticated');
 			sloganLabel = t(

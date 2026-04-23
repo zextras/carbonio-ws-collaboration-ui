@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import useEventListener, {
 	EventName,
+	MeetingDeclinedUseEvent,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
 import usePiPWindow from './usePipWindow';
@@ -122,6 +123,17 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
+
+	// Redirect to info page when callee declines the call
+	const meetingDeclinedHandler = useCallback(
+		(event: CustomEvent<MeetingDeclinedUseEvent['data']> | undefined) => {
+			meetingDisconnection(event?.detail.meetingId ?? '');
+			closePipWindow();
+			goToInfoPage(PAGE_INFO_TYPE.MEETING_DECLINED);
+		},
+		[closePipWindow, goToInfoPage, meetingDisconnection]
+	);
+	useEventListener(EventName.MEETING_DECLINED, meetingDeclinedHandler);
 
 	// Display snackbar when user is muted by moderator
 	const handleMutedEvent = useCallback(() => {
