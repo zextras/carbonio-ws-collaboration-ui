@@ -15,8 +15,9 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { MeetingsApi, InfoApi } from './network';
+import { MeetingsApi } from './network';
 import ChatApi from './network/apis/ChatApi';
+import { getToken } from './network/apis/InfoApi';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -64,7 +65,7 @@ export default function MainApp(): React.JSX.Element {
 
 	// NETWORKS: init SSE and WebSocket clients (for meetings)
 	const connect = useCallback(() => {
-		InfoApi.getToken()
+		getToken()
 			.then(() => {
 				Promise.all([ChatApi.getInbox(), MeetingsApi.listMeetings()])
 					.then(([inboxResponse]) => {
