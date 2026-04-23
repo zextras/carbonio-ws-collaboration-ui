@@ -31,8 +31,8 @@ class UsersApi implements IUsersApi {
 
 	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
 		const { setUserInfo } = useStore.getState();
-		return fetchAPI(`users`, RequestType.POST, { userIds }).then((resp: GetUsersResponse) => {
-			// setUserInfo now handles presence data (online, lastActivityAt) automatically
+		const params = userIds.map((id) => `userIds=${id}`).join('&');
+		return fetchAPI(`users?${params}`, RequestType.GET).then((resp: GetUsersResponse) => {
 			setUserInfo(resp);
 			return resp;
 		});
