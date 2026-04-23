@@ -30,8 +30,8 @@ const VideoSubscriptionToggleButton: FC = () => {
 	}, [setVideoSubscriptionsEnabled, setManualVideoSubEnabled, videoSubscriptionsEnabled]);
 
 	const tooltipLabel = videoSubscriptionsEnabled
-		? t('meeting.videoSubscriptions.unsubscribe', 'Unsubscribe from all video streams')
-		: t('meeting.videoSubscriptions.subscribe', 'Subscribe to all video streams');
+		? t('meeting.videoSubscriptions.unsubscribe', 'Disable all webcam video streams')
+		: t('meeting.videoSubscriptions.subscribe', 'Enable all webcam video streams');
 
 	return (
 		<Tooltip label={tooltipLabel} placement="top">
