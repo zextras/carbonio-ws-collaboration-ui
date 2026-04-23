@@ -18,7 +18,7 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
-import { addRoom } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import { getMeetingIdFromRoom } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { MemberBe } from '../../../../types/network/models/roomBeTypes';
@@ -85,7 +85,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 			owner: true
 		}));
 
-		addRoom({
+		RoomsApi.addRoom({
 			name: textRef.current?.value ?? '',
 			type: RoomType.TEMPORARY,
 			members: newOwnersToAdd

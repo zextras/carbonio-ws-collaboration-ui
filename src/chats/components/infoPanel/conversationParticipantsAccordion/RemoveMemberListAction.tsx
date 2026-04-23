@@ -10,7 +10,7 @@ import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import DeleteUserModal from './DeleteUserModal';
-import { deleteRoomMember } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 
 type RemoveMemberProps = {
 	roomId: string;
@@ -26,7 +26,7 @@ const RemoveMemberListAction: FC<RemoveMemberProps> = ({ roomId, memberId }) => 
 		setDeleteUserModalOpen(false);
 	}, []);
 
-	const deleteUser = useCallback(() => deleteRoomMember(roomId, memberId), [roomId, memberId]);
+	const deleteUser = useCallback(() => RoomsApi.deleteRoomMember(roomId, memberId), [roomId, memberId]);
 
 	return (
 		<>

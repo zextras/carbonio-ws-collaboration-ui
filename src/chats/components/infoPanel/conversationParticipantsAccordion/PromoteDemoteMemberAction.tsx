@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { demotesRoomMember, promoteRoomMember } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 
 type PromoteDemoteMemberProps = {
 	owner: boolean;
@@ -30,9 +30,9 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 
 	const tooltipLabel = owner ? demoteModeratorLabel : promoteModeratorLabel;
 
-	const promoteMember = useCallback(() => promoteRoomMember(roomId, memberId), [memberId, roomId]);
+	const promoteMember = useCallback(() => RoomsApi.promoteRoomMember(roomId, memberId), [memberId, roomId]);
 
-	const demoteMember = useCallback(() => demotesRoomMember(roomId, memberId), [memberId, roomId]);
+	const demoteMember = useCallback(() => RoomsApi.demotesRoomMember(roomId, memberId), [memberId, roomId]);
 
 	const iconColor = useMemo(() => {
 		if (isInsideMeeting) return 'gray0';

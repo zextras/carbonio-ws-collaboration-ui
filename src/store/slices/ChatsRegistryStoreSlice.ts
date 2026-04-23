@@ -143,6 +143,9 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/NEW_MESSAGE'
 		);
 	},
+	newInboxMessage: (message: Message): void => {
+		get().setInboxMessages([message]);
+	},
 	setInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {

@@ -7,7 +7,7 @@
 import { concat, debounce, difference, find, forEach, map, size, slice } from 'lodash';
 import { validate } from 'uuid';
 
-import { getUser, getUsers } from '../network';
+import { UsersApi } from '../network';
 import { getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 
@@ -32,7 +32,7 @@ class UserDataRetriever {
 		this.usersToRequest = difference(this.usersToRequest, requestingUsers);
 		this.requestingUsers = concat(this.requestingUsers, requestingUsers);
 
-		getUsers(requestingUsers)
+		UsersApi.getUsers(requestingUsers)
 			.then((response) => {
 				const responseUsers = map(response, (user) => user.id);
 				const unknownUsers = difference(requestingUsers, responseUsers);
@@ -78,7 +78,7 @@ class UserDataRetriever {
 			if (useStore.getState().users[userId]) {
 				resolve(getUserName(useStore.getState(), userId));
 			} else {
-				getUser(userId)
+				UsersApi.getUser(userId)
 					.then((response) => resolve(response.name || response.email || ''))
 					.catch(() => resolve(''));
 			}

@@ -15,9 +15,7 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { MeetingsApi } from './network';
-import ChatApi from './network/apis/ChatApi';
-import { getToken } from './network/apis/InfoApi';
+import { ChatApi, getToken, listMeetings } from './network';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -67,7 +65,7 @@ export default function MainApp(): React.JSX.Element {
 	const connect = useCallback(() => {
 		getToken()
 			.then(() => {
-				Promise.all([ChatApi.getInbox(), MeetingsApi.listMeetings()])
+				Promise.all([ChatApi.getInbox(), listMeetings()])
 					.then(([inboxResponse]) => {
 						// Process inbox response - extract rooms and add them
 						const { addRooms, newInboxMessage, setUnreadCount } = useStore.getState();

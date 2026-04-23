@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
-import { MeetingsApi, RoomsApi } from '../index';
+import { getMeeting, RoomsApi } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -64,7 +64,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
 					state.addRooms([response]);
 					if (response.meetingId) {
-						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
+						getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
 							state.addMeetings([meetingResponse])
 						);
 					}

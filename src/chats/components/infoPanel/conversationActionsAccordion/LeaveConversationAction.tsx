@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import ActionComponent from './ActionComponent';
 import LeaveConversationModal from './LeaveConversationModal';
 import useRouting from '../../../../hooks/useRouting';
-import { deleteRoomMember } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
@@ -44,7 +44,7 @@ const LeaveConversationAction: FC<LeaveProps> = ({ roomId, type, iAmOneOfOwner }
 
 	const leaveConversation = useCallback(() => {
 		if (sessionId) {
-			deleteRoomMember(roomId, sessionId).then(goToMainPage);
+			RoomsApi.deleteRoomMember(roomId, sessionId).then(goToMainPage);
 		}
 	}, [goToMainPage, roomId, sessionId]);
 

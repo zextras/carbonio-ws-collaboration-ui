@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import RoomPictureHandler from './RoomPictureHandler';
-import { deleteRoomPicture, getURLRoomPicture, updateRoomPicture } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import {
 	getOwnershipOfTheRoom,
 	getNumbersOfRoomMembers,
@@ -104,7 +104,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 
 	const picture = useMemo(() => {
 		if (roomPictureUpdatedAt) {
-			return `${getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
+			return `${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
 		}
 		return undefined;
 	}, [roomId, roomPictureUpdatedAt]);
@@ -125,7 +125,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 			const inputElement = e.target as HTMLInputElement;
 			const files = inputElement?.files;
 			if (files) {
-				updateRoomPicture(roomId, files[0])
+				RoomsApi.updateRoomPicture(roomId, files[0])
 					.then(() => {
 						createSnackbar({
 							key: new Date().toLocaleString(),
@@ -160,7 +160,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	);
 
 	const onDeleteGroupImage = useCallback(() => {
-		deleteRoomPicture(roomId)
+		RoomsApi.deleteRoomPicture(roomId)
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),

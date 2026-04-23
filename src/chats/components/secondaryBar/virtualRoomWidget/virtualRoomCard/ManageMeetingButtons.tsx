@@ -22,7 +22,7 @@ import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
 import EditVirtualRoomModal from './EditVirtualRoomModal';
-import { deleteRoomMember } from '../../../../../network';
+import { RoomsApi } from '../../../../../network';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;
@@ -67,7 +67,7 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 	const { openMeeting, copyMeetingLink } = useRoomMeeting(roomId);
 
 	const leaveConversation = useCallback(() => {
-		if (sessionId) deleteRoomMember(roomId, sessionId);
+		if (sessionId) RoomsApi.deleteRoomMember(roomId, sessionId);
 	}, [roomId, sessionId]);
 
 	const handleCopyLink = useCallback(() => {

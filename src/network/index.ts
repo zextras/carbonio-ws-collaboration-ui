@@ -3,11 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import AttachmentsApi from './apis/AttachmentsApi';
-import ChatApi from './apis/ChatApi';
-import InfoApi from './apis/InfoApi';
-import MeetingsApi from './apis/MeetingsApi';
-import RoomsApi from './apis/RoomsApi';
-import UsersApi from './apis/UsersApi';
 
-export { RoomsApi, UsersApi, AttachmentsApi, InfoApi, MeetingsApi, ChatApi };
+// Named function APIs — same pattern as devel
+export * from './apis/InfoApi';
+export * from './apis/MeetingsApi';
+export * from './apis/AttachmentsApi';
+
+// Singleton class APIs — common-socket refactoring
+export { default as RoomsApi } from './apis/RoomsApi';
+export { default as UsersApi } from './apis/UsersApi';
+export { default as ChatApi } from './apis/ChatApi';

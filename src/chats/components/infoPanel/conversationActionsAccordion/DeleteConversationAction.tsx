@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import ActionComponent from './ActionComponent';
 import DeleteConversationModal from './DeleteConversationModal';
 import useRouting from '../../../../hooks/useRouting';
-import { deleteRoomAndMeeting } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 type DeleteProps = {
@@ -35,7 +35,7 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type, numberOfMembe
 	const { goToMainPage } = useRouting();
 
 	const deleteConversation = useCallback(
-		() => deleteRoomAndMeeting(roomId).then(goToMainPage),
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(goToMainPage),
 		[goToMainPage, roomId]
 	);
 

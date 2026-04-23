@@ -15,7 +15,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { updateRoom } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import {
 	getRoomDescriptionSelector,
 	getRoomNameSelector
@@ -104,7 +104,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 
 	const editAction = useCallback(() => {
 		setLoading(true);
-		updateRoom(roomId, { name: newName, description: newDescription })
+		RoomsApi.updateRoom(roomId, { name: newName, description: newDescription })
 			.then(() => closeModal())
 			.catch(() => {
 				createSnackbar({

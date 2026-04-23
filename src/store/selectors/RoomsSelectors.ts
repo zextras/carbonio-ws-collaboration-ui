@@ -19,7 +19,7 @@ import {
 } from 'lodash';
 
 import { getUserName } from './UsersSelectors';
-import { getURLRoomPicture } from '../../network';
+import { RoomsApi } from '../../network';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -137,7 +137,7 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 	if (room.type === RoomType.ONE_TO_ONE) {
 		return undefined;
 	}
-	return room.pictureUpdatedAt && getURLRoomPicture(room.id);
+	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };
 
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>

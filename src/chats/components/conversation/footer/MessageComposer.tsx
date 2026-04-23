@@ -33,7 +33,7 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { AttachmentsApi, RoomsApi } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
@@ -196,7 +196,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		let area;
 		if (isAttachmentImage(file.file.type)) {
 			try {
-				const imageSize = await AttachmentsApi.getImageSize(file.localUrl);
+				const imageSize = await getImageSize(file.localUrl);
 				area = `${imageSize.width}x${imageSize.height}`;
 			} catch (err) {
 				return Promise.reject(err);

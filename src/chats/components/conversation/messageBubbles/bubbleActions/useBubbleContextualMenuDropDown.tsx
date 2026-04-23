@@ -18,7 +18,7 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import usePreview from '../../../../../hooks/usePreview';
-import { AttachmentsApi } from '../../../../../network';
+import { deleteAttachment, getURLAttachment } from '../../../../../network';
 import { chatWsClient } from '../../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
@@ -111,7 +111,7 @@ const useBubbleContextualMenuDropDown = (
 
 	const deleteMessageAction = useCallback(() => {
 		if (message.attachment) {
-			AttachmentsApi.deleteAttachment(message.attachment.id).then(() => {
+			deleteAttachment(message.attachment.id).then(() => {
 				chatWsClient.deleteMessage(message.roomId, message.stanzaId);
 			});
 		} else {
@@ -121,7 +121,7 @@ const useBubbleContextualMenuDropDown = (
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
-			const downloadUrl = AttachmentsApi.getURLAttachment(message.attachment.id);
+			const downloadUrl = getURLAttachment(message.attachment.id);
 			const linkTag: HTMLAnchorElement = document.createElement('a');
 			document.body.appendChild(linkTag);
 			linkTag.href = downloadUrl;

@@ -41,7 +41,7 @@ import {
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
-import { MeetingsApi, ChatApi } from '../index';
+import { createMeeting, deleteMeeting, ChatApi } from '../index';
 
 class RoomsApi implements IRoomsApi {
 	// Singleton design pattern
@@ -74,7 +74,7 @@ class RoomsApi implements IRoomsApi {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			await MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
+			await createMeeting(response.id, meetingType, response.name ?? '');
 			return response;
 		});
 	}
@@ -97,7 +97,7 @@ class RoomsApi implements IRoomsApi {
 	public deleteRoomAndMeeting(roomId: string): Promise<DeleteRoomResponse> {
 		const meetingId = useStore.getState().rooms[roomId]?.meetingId;
 		if (meetingId) {
-			return MeetingsApi.deleteMeeting(meetingId)
+			return deleteMeeting(meetingId)
 				.then(() => this.deleteRoom(roomId))
 				.catch(() => this.deleteRoom(roomId));
 		}

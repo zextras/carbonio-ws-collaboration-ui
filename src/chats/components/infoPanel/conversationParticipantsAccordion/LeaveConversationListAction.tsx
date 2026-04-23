@@ -10,7 +10,7 @@ import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
-import { deleteRoomAndMeeting, deleteRoomMember } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import DeleteConversationModal from '../conversationActionsAccordion/DeleteConversationModal';
@@ -56,12 +56,12 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 
 	const leaveConversation = useCallback(() => {
 		if (sessionUserId) {
-			deleteRoomMember(roomId, sessionUserId).then(goToMainPage);
+			RoomsApi.deleteRoomMember(roomId, sessionUserId).then(goToMainPage);
 		}
 	}, [goToMainPage, roomId, sessionUserId]);
 
 	const deleteConversation = useCallback(
-		() => deleteRoomAndMeeting(roomId).then(goToMainPage),
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(goToMainPage),
 		[goToMainPage, roomId]
 	);
 

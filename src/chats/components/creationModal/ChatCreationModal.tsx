@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
-import { addRoom } from '../../../network';
+import { RoomsApi } from '../../../network';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -131,7 +131,7 @@ const ChatCreationModal = ({
 	const onCreateGroup = useCallback(
 		(ids: MemberBe[]) => {
 			setIsPending(true);
-			addRoom({
+			RoomsApi.addRoom({
 				name: title,
 				description: topic,
 				type: RoomType.GROUP,

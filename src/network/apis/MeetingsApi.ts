@@ -20,7 +20,7 @@ import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { fetchAPI, RequestType } from '../../utils/FetchUtils';
-import { deleteRoomMember } from '../index';
+import { RoomsApi } from '../index';
 import { PeerConnConfig } from '../webRTC/PeerConnConfig';
 import { fetchTurnIceServers } from '../webRTC/TurnCredentials';
 
@@ -137,7 +137,7 @@ export const leaveMeeting = (meetingId: string): Promise<Response> => {
 			//  * Remove once support for v1.6.2 is officially dropped.
 			const version = useStore.getState().session.apiVersion;
 			if ((!version || lte(version, '1.6.2')) && room?.type === RoomType.TEMPORARY && iAmNotOwner) {
-				deleteRoomMember(room.id, useStore.getState().session.id ?? '');
+				RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 			}
 			if (isExternal) BrowserUtils.clearAuthCookies();
 			return resp;

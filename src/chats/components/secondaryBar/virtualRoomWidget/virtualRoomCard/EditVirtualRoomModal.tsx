@@ -16,12 +16,7 @@ import {
 import { filter, forEach, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import {
-	addRoomMembers,
-	deleteRoomMember,
-	updateRoom,
-	updateRoomOwners
-} from '../../../../../network';
+import { RoomsApi } from '../../../../../network';
 import { getMeetingParticipantsByRoomId } from '../../../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
@@ -111,22 +106,22 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 
 	const handleEditRoom = useCallback(() => {
 		const promises = [];
-		if (newName !== roomName) promises.push(updateRoom(roomId, { name: newName }));
+		if (newName !== roomName) promises.push(RoomsApi.updateRoom(roomId, { name: newName }));
 		if (size(ownersToAdd) > 0) {
 			const members = map(ownersToAdd, (userId) => ({
 				userId,
 				owner: true,
 				historyCleared: false
 			}));
-			promises.push(addRoomMembers(roomId, members));
+			promises.push(RoomsApi.addRoomMembers(roomId, members));
 		}
 		if (size(ownersToRemove) > 0) {
 			forEach(ownersToRemove, (userId) => {
-				promises.push(deleteRoomMember(roomId, userId));
+				promises.push(RoomsApi.deleteRoomMember(roomId, userId));
 			});
 		}
 		if (size(ownersToModify) > 0) {
-			promises.push(updateRoomOwners(roomId, ownersToModify));
+			promises.push(RoomsApi.updateRoomOwners(roomId, ownersToModify));
 		}
 
 		Promise.all(promises)

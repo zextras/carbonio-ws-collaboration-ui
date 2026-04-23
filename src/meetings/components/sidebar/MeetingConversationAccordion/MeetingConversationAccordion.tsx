@@ -27,7 +27,7 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import { PinMessage } from '../../../../chats/components/conversation/PinMessage';
 import useDarkReader from '../../../../hooks/useDarkReader';
-import { clearRoomHistory } from '../../../../network';
+import { RoomsApi } from '../../../../network';
 import { getPinnedMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
@@ -233,7 +233,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 						color="error"
 						label={t('modal.clearHistoryConfirm', 'Yes, clear history')}
 						onClick={() => {
-							clearRoomHistory(roomId).then(() => {
+							RoomsApi.clearRoomHistory(roomId).then(() => {
 								closeModal(modalId);
 								createSnackbar({
 									key: new Date().toLocaleString(),

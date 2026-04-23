@@ -21,7 +21,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
-import { addRoom } from '../../network';
+import { RoomsApi } from '../../network';
 import { getDuplicatedRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { MemberBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -167,7 +167,7 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 	}, [duplicatedRoom, navigate]);
 
 	const onClickModalButton = useCallback(() => {
-		addRoom({
+		RoomsApi.addRoom({
 			type: RoomType.GROUP,
 			name,
 			description: topic ?? '',
