@@ -71,7 +71,8 @@ export default function MainApp(): React.JSX.Element {
 						const { addRooms, newInboxMessage, setUnreadCount } = useStore.getState();
 
 						// Extract rooms from inbox conversations and add to store
-						const rooms = inboxResponse.conversations.map((conv) => conv.room);
+						const conversations = inboxResponse?.conversations ?? [];
+						const rooms = conversations.map((conv) => conv.room);
 						addRooms(rooms);
 
 						// Helper to map SystemEventType to OperationType
@@ -165,7 +166,7 @@ export default function MainApp(): React.JSX.Element {
 						const sessionId = session.id;
 
 						// Process last messages/events and unread counts
-						inboxResponse.conversations.forEach((conv) => {
+						conversations.forEach((conv) => {
 							// Set unread count for each room
 							setUnreadCount(conv.roomId, conv.unreadCount);
 
