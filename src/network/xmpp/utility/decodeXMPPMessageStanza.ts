@@ -130,6 +130,11 @@ export function decodeXMPPMessageStanza(
 					value = Strophe.getText(getRequiredTagElement(x, 'body'));
 					break;
 				}
+				case OperationType.MEETING_STARTED:
+				case OperationType.MEETING_ENDED: {
+					value = Strophe.getText(getRequiredTagElement(x, 'timestamp'));
+					break;
+				}
 				default:
 					break;
 			}

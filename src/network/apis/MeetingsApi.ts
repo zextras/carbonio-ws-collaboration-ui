@@ -151,6 +151,9 @@ export const leaveMeeting = (meetingId: string): Promise<Response> => {
 export const stopMeeting = (meetingId: string): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
 
+export const declineMeeting = (meetingId: string): Promise<Response> =>
+	fetchAPI(`meetings/${meetingId}/decline`, RequestType.POST);
+
 export const deleteMeeting = (meetingId: string): Promise<Response> =>
 	fetchAPI<Response>(`meetings/${meetingId}`, RequestType.DELETE).then((resp) => {
 		useStore.getState().meetingDisconnection(meetingId);
