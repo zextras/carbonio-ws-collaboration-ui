@@ -31,6 +31,8 @@ export function handleWsMessageReceived(event: {
 	attachmentName?: string;
 	attachmentMime?: string;
 	attachmentSize?: number;
+	forwardedFrom?: string;
+	forwardedAt?: string;
 }): void {
 	const {
 		newMessage,
@@ -68,6 +70,31 @@ export function handleWsMessageReceived(event: {
 		};
 	}
 
+	// Resolve repliedMessage: try to find the referenced message already in the store,
+	// otherwise build a minimal stub so Bubble.tsx can render the reply block.
+	const existingReplyTarget = event.replyToId
+		? (chatsRegistry[roomId]?.messages ?? []).find(
+				(m) =>
+					m.type === MessageType.TEXT_MSG &&
+					(m.id === event.replyToId || (m as TextMessage).stanzaId === event.replyToId)
+		  )
+		: undefined;
+
+	const repliedMessage: TextMessage | undefined = existingReplyTarget
+		? (existingReplyTarget as TextMessage)
+		: event.replyToId
+		? ({
+				id: event.replyToId,
+				stanzaId: event.replyToId,
+				roomId,
+				from: '',
+				text: '',
+				type: MessageType.TEXT_MSG,
+				date: 0,
+				read: MarkerStatus.READ
+		  } as TextMessage)
+		: undefined;
+
 	// Build TextMessage for the store
 	const textMessage: TextMessage = {
 		id: messageId,
@@ -79,7 +106,14 @@ export function handleWsMessageReceived(event: {
 		text,
 		read: MarkerStatus.UNREAD,
 		replyTo: event.replyToId,
-		attachment: resolvedAttachment
+		repliedMessage,
+		attachment: resolvedAttachment,
+		forwardedInfo: event.forwardedFrom
+			? {
+					originalSenderId: event.forwardedFrom,
+					originalSentAt: event.forwardedAt ?? new Date().toISOString()
+			  }
+			: undefined
 	};
 
 	// Check if we're viewing a historical page

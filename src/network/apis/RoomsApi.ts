@@ -5,7 +5,6 @@
  */
 
 import { gte } from 'semver';
-import { v4 as uuidGenerator } from 'uuid';
 
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -200,35 +199,16 @@ class RoomsApi implements IRoomsApi {
 			);
 		}
 
-		const { setPlaceholderMessage } = useStore.getState();
-		const uuid = uuidGenerator();
-		// Set a placeholder message into the store
-		setPlaceholderMessage({
-			roomId,
-			id: uuid,
-			text: optionalFields.description ?? '',
-			replyTo: optionalFields.replyId,
-			attachment: {
-				id: 'placeholderFileId',
-				name: file.name,
-				mimeType: file.type,
-				size: file.size,
-				area: optionalFields.area
-			}
-		});
-
 		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
-			const { session, removePlaceholderMessage } = useStore.getState();
+			const { session } = useStore.getState();
 			const sizeLimit = session.attributes?.maxAttachmentSize;
 			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
-				removePlaceholderMessage(roomId, uuid);
 				reject(new Error('file_too_large'));
 			} else {
 				const optional = {
 					description: optionalFields.description,
 					replyId: optionalFields.replyId,
-					area: optionalFields.area,
-					messageId: uuid
+					area: optionalFields.area
 				};
 				// DEPRECATED: This check exists for backward compatibility with previous versions.
 				//  * Remove once support for v1.6.0 is officially dropped.
@@ -239,7 +219,6 @@ class RoomsApi implements IRoomsApi {
 							resolve(resp);
 						})
 						.catch((error) => {
-							removePlaceholderMessage(roomId, uuid);
 							reject(new Error(error));
 						});
 				} else {
@@ -255,7 +234,6 @@ class RoomsApi implements IRoomsApi {
 							resolve(resp);
 						})
 						.catch((error) => {
-							removePlaceholderMessage(roomId, uuid);
 							reject(new Error(error));
 						});
 				}

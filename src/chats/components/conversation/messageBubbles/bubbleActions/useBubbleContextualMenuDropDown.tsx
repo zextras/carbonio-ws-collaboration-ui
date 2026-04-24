@@ -18,6 +18,7 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import usePreview from '../../../../../hooks/usePreview';
+import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import { deleteAttachment, getURLAttachment } from '../../../../../network';
 import { chatWsClient } from '../../../../../network/websocket/ChatWebSocketClient';
 import {
@@ -169,6 +170,8 @@ const useBubbleContextualMenuDropDown = (
 
 	const canBeDownloaded = useMemo(() => message.attachment, [message.attachment]);
 
+	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
+
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropdownItem[] = [];
 
@@ -232,6 +235,11 @@ const useBubbleContextualMenuDropDown = (
 			});
 		}
 
+		// Pin functionality
+		if (canMessageBePinned) {
+			actions.push({ id: 'Pin', label: pinActionLabel, onClick: pinAction });
+		}
+
 		return actions;
 	}, [
 		canBeEdited,
@@ -253,7 +261,10 @@ const useBubbleContextualMenuDropDown = (
 		previewActionLabel,
 		onPreviewClick,
 		downloadActionLabel,
-		downloadAction
+		downloadAction,
+		canMessageBePinned,
+		pinActionLabel,
+		pinAction
 	]);
 
 	const MenuDropdown = useMemo(

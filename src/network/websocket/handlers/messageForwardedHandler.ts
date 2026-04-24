@@ -17,6 +17,12 @@ export function handleWsMessageForwarded(event: {
 	originalRoomId: string;
 	senderId: string;
 	text: string;
+	forwardedFrom?: string;
+	forwardedAt?: string;
+	attachmentId?: string;
+	attachmentName?: string;
+	attachmentMime?: string;
+	attachmentSize?: number;
 }): void {
 	const { newMessage, incrementUnreadCount, rooms, session } = useStore.getState();
 	const { roomId, messageId, senderId, text, originalRoomId } = event;
@@ -36,10 +42,20 @@ export function handleWsMessageForwarded(event: {
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
-		forwardedInfo: {
-			originalSenderId: senderId,
-			originalSentAt: new Date().toISOString()
-		}
+		forwardedInfo: event.forwardedFrom
+			? {
+					originalSenderId: event.forwardedFrom,
+					originalSentAt: event.forwardedAt ?? new Date().toISOString()
+			  }
+			: undefined,
+		attachment: event.attachmentId
+			? {
+					id: event.attachmentId,
+					name: event.attachmentName ?? '',
+					mimeType: event.attachmentMime ?? 'application/octet-stream',
+					size: event.attachmentSize ?? 0
+			  }
+			: undefined
 	};
 
 	newMessage(textMessage);

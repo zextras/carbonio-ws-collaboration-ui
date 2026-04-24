@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { produce } from 'immer';
+
 import {
 	handleWsMessageReceived,
 	handleWsMessageEdited,
@@ -15,7 +17,13 @@ import {
 } from './handlers';
 import { WsChatEvent, isChatEvent } from './types';
 import useStore from '../../store/Store';
-import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import {
+	ConfigurationMessage,
+	MarkerStatus,
+	MessageType,
+	OperationType,
+	TextMessage
+} from '../../types/store/ChatsRegistryTypes';
 import { wsDebug } from '../../utils/debug';
 
 /** Tracks per-room per-user auto-clear timers for typing state */
@@ -41,11 +49,29 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			handleWsMessageReceived(chatEvent);
 			break;
 
-		case 'message-sent':
-			// message-sent is the acknowledgment to the sender; the message was already
-			// added to the store as a placeholder when sent. We can use this to confirm it.
-			wsDebug(`Message sent confirmed: ${chatEvent.requestId}`);
+		case 'message-sent': {
+			const { requestId, messageId, roomId, timestamp } = chatEvent;
+			wsDebug(`Message sent confirmed: ${requestId} -> ${messageId}`);
+			// Promote the provisional placeholder (id=requestId) to the server-assigned id.
+			// We mutate in-place so React re-renders with the confirmed message.
+			useStore.setState(
+				produce((draft) => {
+					const registry = draft.chatsRegistry[roomId];
+					if (!registry) return;
+					const msg = registry.messages.find(
+						(m: TextMessage) => m.id === requestId
+					) as TextMessage | undefined;
+					if (msg && msg.type === MessageType.TEXT_MSG) {
+						msg.id = messageId;
+						msg.stanzaId = messageId;
+						msg.date = new Date(timestamp).getTime();
+						msg.read = MarkerStatus.UNREAD;
+					}
+				}),
+				false
+			);
 			break;
+		}
 
 		case 'message-edited':
 			handleWsMessageEdited(chatEvent);
@@ -72,8 +98,8 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 
 		case 'message-pinned': {
-			const { roomId, messageId } = chatEvent;
-			const { chatsRegistry, setPinnedMessage } = useStore.getState();
+			const { roomId, messageId, pinnedBy, timestamp } = chatEvent;
+			const { chatsRegistry, setPinnedMessage, newMessage } = useStore.getState();
 			const messages = chatsRegistry[roomId]?.messages ?? [];
 			const pinned = messages.find(
 				(m) =>
@@ -88,13 +114,36 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 					messageId
 				);
 			}
+			const pinEvt: ConfigurationMessage = {
+				id: `pin-${messageId}-${typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime()}`,
+				roomId,
+				date: typeof timestamp === 'number' ? timestamp : Date.parse(timestamp as string),
+				type: MessageType.CONFIGURATION_MSG,
+				operation: OperationType.MESSAGE_PINNED,
+				value: messageId,
+				from: pinnedBy,
+				read: MarkerStatus.READ
+			};
+			newMessage(pinEvt);
 			break;
 		}
 
 		case 'message-unpinned': {
-			const { roomId } = chatEvent;
-			useStore.getState().removePinnedMessage(roomId);
-			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
+			const { roomId, messageId, unpinnedBy, timestamp } = chatEvent;
+			const { removePinnedMessage, setSelectedPinnedMessage, newMessage } = useStore.getState();
+			removePinnedMessage(roomId);
+			setSelectedPinnedMessage(roomId, undefined);
+			const unpinEvt: ConfigurationMessage = {
+				id: `unpin-${messageId}-${typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime()}`,
+				roomId,
+				date: typeof timestamp === 'number' ? timestamp : Date.parse(timestamp as string),
+				type: MessageType.CONFIGURATION_MSG,
+				operation: OperationType.MESSAGE_UNPINNED,
+				value: messageId,
+				from: unpinnedBy,
+				read: MarkerStatus.READ
+			};
+			newMessage(unpinEvt);
 			break;
 		}
 

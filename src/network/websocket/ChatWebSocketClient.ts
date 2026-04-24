@@ -7,7 +7,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { WsAction, WsAttachment } from './types';
-import { wsClient } from './WebSocketClient';
+import { WebSocketClient } from './WebSocketClient';
+import useStore from '../../store/Store';
 
 /**
  * Higher-level client for chat messaging operations over the existing /events WebSocket.
@@ -33,8 +34,9 @@ class ChatWebSocketClient {
 	 * Send a raw WS action JSON through the existing WebSocket connection.
 	 */
 	private sendAction(action: WsAction): void {
-		if (wsClient._webSocket?.readyState === WebSocket.OPEN) {
-			wsClient._webSocket.send(JSON.stringify(action));
+		const storeWsClient = useStore.getState().connections.wsClient as WebSocketClient | undefined;
+		if (storeWsClient?._webSocket?.readyState === WebSocket.OPEN) {
+			storeWsClient._webSocket.send(JSON.stringify(action));
 		} else {
 			console.warn('[ChatWS] sendAction dropped — socket not OPEN');
 		}
@@ -58,6 +60,15 @@ class ChatWebSocketClient {
 			text,
 			replyToId,
 			attachmentId: attachments?.[0]?.id
+		});
+		// Optimistically add the message to the store so the sender sees it immediately.
+		// The message-sent ack will update the provisional id/date to the server-assigned values.
+		useStore.getState().setPlaceholderMessage({
+			id: requestId,
+			roomId,
+			text,
+			replyTo: replyToId,
+			attachment: attachments?.[0]
 		});
 		return requestId;
 	}

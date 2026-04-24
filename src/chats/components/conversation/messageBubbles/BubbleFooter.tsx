@@ -124,7 +124,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				</Container>
 			</Row>
 			<Row orientation="horizontal" width="fit" gap="0.25rem">
-				{message.edited && (
+				{(message.editedInfo || message.edited) && (
 					<Container width="fit">
 						<ItalicText color="secondary" size="extrasmall">
 							{editedLabel}

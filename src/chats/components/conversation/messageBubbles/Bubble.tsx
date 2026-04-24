@@ -260,16 +260,12 @@ const Bubble: FC<BubbleProps> = ({
 					<MessageReactionsList roomId={message.roomId} stanzaId={message.stanzaId} />
 				)}
 				<BubbleFooter
+					message={message}
 					isMyMessage={isMyMessage}
-					date={message.date}
-					messageRead={message.read}
-					isEdited={!!message?.editedInfo}
 					messageExtension={extension}
 					messageSize={size}
 					canSeeMessageReads={showMessageReads}
 					showReactions={!messageAttachment}
-					roomId={message.roomId}
-					stanzaId={message.stanzaId}
 				/>
 			</BubbleContainer>
 			{checkboxShouldBeVisible && (

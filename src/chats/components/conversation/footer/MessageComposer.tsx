@@ -300,11 +300,26 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return copyOfFile;
 			});
 
+			// Capture reference message before clearing it below
+			const capturedReferenceMessage = referenceMessage;
+
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
 				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
-					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
+					acc.then(() =>
+						uploadAttachmentPromise(file, abortControllerList[i]).then((resp) => {
+							// After upload, send the real message over WS with the server-assigned attachment id
+							const isFirstFile = file.fileId === copyOfFilesToUploadArray[0].fileId;
+							chatWsClient.sendMessage(
+								roomId,
+								file.description ?? '',
+								isFirstFile ? capturedReferenceMessage?.stanzaId : undefined,
+								[{ id: resp.id, name: file.file.name, mimeType: file.file.type, size: file.file.size }]
+							);
+							return resp;
+						})
+					),
 				Promise.resolve()
 			);
 

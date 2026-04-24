@@ -141,7 +141,9 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 			ChatApi.getPinnedMessage(roomId)
 				.then((pins) => {
 					if (pins.length > 0) {
-						const pin = pins[0];
+						const pin = [...pins].sort(
+							(a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime()
+						)[0];
 						setPinnedMessage(roomId, {
 							id: pin.messageId,
 							stanzaId: pin.messageId,

@@ -69,6 +69,9 @@ export type WsChatEvent =
 			attachmentName?: string;
 			attachmentMime?: string;
 			attachmentSize?: number;
+			// Present when this message-received is actually a forwarded message echoed back
+			forwardedFrom?: string; // original sender's userId
+			forwardedAt?: string; // ISO timestamp of original send
 	  }
 	| {
 			type: 'message-sent';
@@ -99,6 +102,12 @@ export type WsChatEvent =
 			originalRoomId: string;
 			senderId: string;
 			text: string;
+			forwardedFrom?: string; // original sender's userId
+			forwardedAt?: string; // ISO timestamp of original send
+			attachmentId?: string;
+			attachmentName?: string;
+			attachmentMime?: string;
+			attachmentSize?: number;
 	  }
 	| {
 			type: 'reaction-changed';

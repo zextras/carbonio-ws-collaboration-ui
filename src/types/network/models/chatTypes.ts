@@ -77,7 +77,12 @@ export type MessageSearchResponse = {
 
 // ==================== TIMELINE TYPES ====================
 
-export type SystemEventType = 'ROOM_CREATED' | 'MEMBER_ADDED' | 'MEMBER_REMOVED';
+export type SystemEventType =
+	| 'ROOM_CREATED'
+	| 'MEMBER_ADDED'
+	| 'MEMBER_REMOVED'
+	| 'MESSAGE_PINNED'
+	| 'MESSAGE_UNPINNED';
 
 export type SystemEvent = {
 	id: string;

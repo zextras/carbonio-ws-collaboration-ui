@@ -50,19 +50,29 @@ export function mapChatMessageToTextMessage(
 		deletedInfo: chatMessage.deletedInfo,
 		replyTo: chatMessage.replyToId,
 		repliedMessage: chatMessage.replyTo
-			? {
+			? ({
 					id: chatMessage.replyTo.id,
 					stanzaId: chatMessage.replyTo.id,
 					roomId: chatMessage.roomId,
 					type: MessageType.TEXT_MSG,
 					date: 0, // We don't have the original date
-					from: chatMessage.replyTo.senderId,
-					text: chatMessage.replyTo.text || '',
+					from: chatMessage.replyTo.senderId ?? '',
+					text: chatMessage.replyTo.text ?? '',
 					read: MarkerStatus.READ,
-					// Map the boolean deleted to deletedInfo
-					deletedInfo: chatMessage.replyTo.deleted ? { deletedBy: '', deletedAt: '' } : undefined
-				}
-			: undefined,
+					...(chatMessage.replyTo.deleted ? { deletedInfo: { deletedBy: '', deletedAt: '' } } : {})
+				} as TextMessage)
+			: chatMessage.replyToId
+				? ({
+						id: chatMessage.replyToId,
+						stanzaId: chatMessage.replyToId,
+						roomId: chatMessage.roomId,
+						type: MessageType.TEXT_MSG,
+						date: 0,
+						from: '',
+						text: '',
+						read: MarkerStatus.READ
+					} as TextMessage)
+				: undefined,
 		attachment: chatMessage.attachment
 			? {
 					id: chatMessage.attachment.id,
@@ -114,6 +124,10 @@ function mapSystemEventTypeToOperation(eventType: SystemEventType): OperationTyp
 			return OperationType.MEMBER_ADDED;
 		case 'MEMBER_REMOVED':
 			return OperationType.MEMBER_REMOVED;
+		case 'MESSAGE_PINNED':
+			return OperationType.MESSAGE_PINNED;
+		case 'MESSAGE_UNPINNED':
+			return OperationType.MESSAGE_UNPINNED;
 		default:
 			return OperationType.ROOM_CREATION;
 	}
@@ -146,6 +160,16 @@ function extractEventActorAndMember(
 			return {
 				actorId: (content.removedByUserId as string) || '',
 				memberId: (content.removedUserId as string) || ''
+			};
+		case 'MESSAGE_PINNED':
+			return {
+				actorId: (content?.pinnedBy as string) ?? '',
+				memberId: (content?.messageId as string) ?? ''
+			};
+		case 'MESSAGE_UNPINNED':
+			return {
+				actorId: (content?.unpinnedBy as string) ?? '',
+				memberId: (content?.messageId as string) ?? ''
 			};
 		default:
 			return { actorId: '', memberId: '' };

@@ -23,19 +23,16 @@ interface UsePinMessageReturnType {
 	isMessagePinned: boolean;
 }
 
-export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => {
+export const usePinMessage = (message: TextMessage | undefined): UsePinMessageReturnType => {
 	const [t] = useTranslation();
 	const { createModal, closeModal } = useModal();
-	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
-	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, message.roomId));
-	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
+	const roomId = message?.roomId ?? '';
+	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId));
+	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
 
 	const stanzaIdToPin = useMemo(() => {
-		if (message.editedStanzaId) {
-			return message.editedStanzaId;
-		}
-
-		return message.stanzaId;
+		return message?.editedStanzaId ?? message?.stanzaId ?? '';
 	}, [message]);
 
 	const isMessagePinned = useMemo(
@@ -56,6 +53,7 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 	}, [isMessagePinned, t]);
 
 	const pinAction = useCallback(() => {
+		if (!roomId) return;
 		if (pinnedMessage && !isMessagePinned) {
 			const modalId = 'pin-modal';
 			createModal({
@@ -64,11 +62,11 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
 				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
-					ChatApi.pinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+					ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
 						console.error('[usePinMessage] pinMessage failed:', err);
 					});
 					closeModal(modalId);
-					useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
+					useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 				},
 				onSecondaryAction: () => {
 					closeModal(modalId);
@@ -86,18 +84,18 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 		}
 
 		if (isMessagePinned) {
-			ChatApi.unpinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+			ChatApi.unpinMessage(roomId, stanzaIdToPin).catch((err) => {
 				console.error('[usePinMessage] unpinMessage failed:', err);
 			});
-			useStore.getState().removePinnedMessage(message.roomId);
-			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
+			useStore.getState().removePinnedMessage(roomId);
+			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		} else {
-			ChatApi.pinMessage(message.roomId, stanzaIdToPin).catch((err) => {
+			ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
 				console.error('[usePinMessage] pinMessage failed:', err);
 			});
-			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
+			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		}
-	}, [pinnedMessage, isMessagePinned, createModal, t, message.roomId, stanzaIdToPin, closeModal]);
+	}, [pinnedMessage, isMessagePinned, createModal, t, roomId, stanzaIdToPin, closeModal]);
 
 	return {
 		canMessageBePinned,
