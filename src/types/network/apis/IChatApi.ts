@@ -8,6 +8,7 @@ import {
 	ChatMessage,
 	MessageHistoryResponse,
 	MessageSearchResponse,
+	PinnedMessageResponse,
 	RoomReadMarkers,
 	InboxResponse,
 	PresenceBatchResponse,
@@ -78,6 +79,11 @@ export interface IChatApi {
 	 * Unpins the pinned message in a room
 	 */
 	unpinMessage(roomId: string, messageId: string): Promise<void>;
+
+	/**
+	 * Gets the currently pinned message for a room, if any
+	 */
+	getPinnedMessage(roomId: string): Promise<PinnedMessageResponse[]>;
 
 	/**
 	 * Gets specific messages by their IDs

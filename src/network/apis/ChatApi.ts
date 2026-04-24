@@ -13,6 +13,7 @@ import {
 	InboxResponse,
 	MessageHistoryResponse,
 	MessageSearchResponse,
+	PinnedMessageResponse,
 	PresenceBatchResponse,
 	RoomReadMarkers,
 	TimelineResponse
@@ -105,6 +106,10 @@ class ChatApi implements IChatApi {
 
 	public unpinMessage(roomId: string, messageId: string): Promise<void> {
 		return fetchAPI(`rooms/${roomId}/messages/${messageId}/pin`, RequestType.DELETE);
+	}
+
+	public getPinnedMessage(roomId: string): Promise<PinnedMessageResponse[]> {
+		return fetchAPI(`rooms/${roomId}/pin`, RequestType.GET);
 	}
 
 	// TODO: backend does not expose POST /rooms/{roomId}/messages/batch — endpoint not in OpenAPI spec

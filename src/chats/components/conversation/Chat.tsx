@@ -31,9 +31,11 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import ChatApi from '../../../network/apis/ChatApi';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -48,6 +50,7 @@ type ChatsProps = {
 const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
+	const setPinnedMessage = useStore((store) => store.setPinnedMessage);
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
@@ -133,7 +136,29 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_PROMOTED, promoteMemberHandler);
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
-	// Pin state is managed server-side via REST and pushed via WS events (message-pinned/message-unpinned)
+	useEffect(() => {
+		if (roomId) {
+			ChatApi.getPinnedMessage(roomId)
+				.then((pins) => {
+					if (pins.length > 0) {
+						const pin = pins[0];
+						setPinnedMessage(roomId, {
+							id: pin.messageId,
+							stanzaId: pin.messageId,
+							roomId: pin.roomId,
+							from: pin.senderId,
+							text: pin.text,
+							date: Date.parse(pin.pinnedAt),
+							type: MessageType.TEXT_MSG,
+							read: MarkerStatus.READ
+						});
+					}
+				})
+				.catch(() => {
+					// No pinned message or error — ignore
+				});
+		}
+	}, [roomId, setPinnedMessage]);
 
 	return (
 		<CustomContainer

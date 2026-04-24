@@ -50,6 +50,17 @@ export type ReactionGroup = {
 	userIds: string[];
 };
 
+// ==================== PIN TYPES ====================
+
+export type PinnedMessageResponse = {
+	messageId: string;
+	roomId: string;
+	pinnedBy: string;
+	pinnedAt: string;
+	text: string;
+	senderId: string;
+};
+
 // ==================== HISTORY/SEARCH TYPES ====================
 
 export type MessageHistoryResponse = {
