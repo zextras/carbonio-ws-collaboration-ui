@@ -107,9 +107,10 @@ export class WebSocketClient {
 			}
 			Promise.all(batches.map((batch) => ChatApi.getPresenceBatch(batch)))
 				.then((results) => {
+					// Backend returns a map { [userId]: { online, lastActivity } }
 					results.forEach((result) => {
-						result.presences.forEach(({ userId, online, lastActivityAt }) => {
-							setUserPresence(userId, online, lastActivityAt);
+						Object.entries(result).forEach(([userId, { online, lastActivity }]) => {
+							setUserPresence(userId, online, lastActivity);
 						});
 					});
 				})

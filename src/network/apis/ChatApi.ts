@@ -92,7 +92,7 @@ class ChatApi implements IChatApi {
 	}
 
 	public editMessage(roomId: string, messageId: string, text: string): Promise<ChatMessage> {
-		return fetchAPI(`rooms/${roomId}/messages/${messageId}`, RequestType.PUT, { text });
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}/edit`, RequestType.PUT, { text });
 	}
 
 	public deleteMessage(roomId: string, messageId: string): Promise<void> {
@@ -107,6 +107,7 @@ class ChatApi implements IChatApi {
 		return fetchAPI(`rooms/${roomId}/messages/${messageId}/pin`, RequestType.DELETE);
 	}
 
+	// TODO: backend does not expose POST /rooms/{roomId}/messages/batch — endpoint not in OpenAPI spec
 	public getMessagesByIds(roomId: string, messageIds: string[]): Promise<ChatMessage[]> {
 		return fetchAPI(`rooms/${roomId}/messages/batch`, RequestType.POST, { messageIds });
 	}
@@ -166,6 +167,7 @@ class ChatApi implements IChatApi {
 
 	// ==================== CONTACTS ====================
 
+	// TODO: backend does not expose GET /contacts — endpoint not in OpenAPI spec
 	public getContacts(): Promise<ContactsResponse> {
 		return fetchAPI('contacts', RequestType.GET);
 	}

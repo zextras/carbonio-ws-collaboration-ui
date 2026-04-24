@@ -132,15 +132,15 @@ export type InboxResponse = {
 
 // ==================== PRESENCE TYPES ====================
 
-export type PresenceStatus = {
-	userId: string;
+// Backend returns { online: boolean, lastActivity?: string } per userId key
+export type PresenceStatusEntry = {
 	online: boolean;
-	lastActivityAt?: string;
+	lastActivity?: string;
 };
 
-export type PresenceBatchResponse = {
-	presences: PresenceStatus[];
-};
+// Backend /presence/batch returns a map: { [userId: string]: PresenceStatusEntry }
+// (additionalProperties in OpenAPI spec, NOT an array)
+export type PresenceBatchResponse = Record<string, PresenceStatusEntry>;
 
 // ==================== CONTACTS TYPES ====================
 
