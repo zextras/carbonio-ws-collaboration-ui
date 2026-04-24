@@ -35,6 +35,8 @@ class ChatWebSocketClient {
 	private sendAction(action: WsAction): void {
 		if (wsClient._webSocket?.readyState === WebSocket.OPEN) {
 			wsClient._webSocket.send(JSON.stringify(action));
+		} else {
+			console.warn('[ChatWS] sendAction dropped — socket not OPEN');
 		}
 	}
 
@@ -55,7 +57,7 @@ class ChatWebSocketClient {
 			roomId,
 			text,
 			replyToId,
-			attachments
+			attachmentId: attachments?.[0]?.id
 		});
 		return requestId;
 	}

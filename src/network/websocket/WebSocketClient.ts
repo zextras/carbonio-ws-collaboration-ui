@@ -67,6 +67,11 @@ export class WebSocketClient {
 	send(message: WsMessage): void {
 		if (this._webSocket?.readyState === WsReadyState.OPEN) {
 			this._webSocket.send(JSON.stringify(message));
+		} else {
+			console.warn(
+				'[WS] send() dropped — socket not OPEN, readyState:',
+				this._webSocket?.readyState
+			);
 		}
 	}
 

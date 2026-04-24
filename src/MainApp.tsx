@@ -65,6 +65,11 @@ export default function MainApp(): React.JSX.Element {
 	const connect = useCallback(() => {
 		getToken()
 			.then(() => {
+				// Connect WS immediately after auth — independent of inbox/meetings
+				const { wsClient } = useStore.getState().connections;
+				wsClient?.connect();
+
+				// Load inbox/meetings in parallel; failures here must NOT kill the WS connection
 				Promise.all([ChatApi.getInbox(), listMeetings()])
 					.then(([inboxResponse]) => {
 						// Process inbox response - extract rooms and add them
@@ -128,7 +133,7 @@ export default function MainApp(): React.JSX.Element {
 							senderId: string,
 							apiMarkers: Array<{ userId: string; messageId: string; readAt: string }> | undefined,
 							members: Array<{ userId: string }> | undefined,
-							sessionId: string
+							sessionId: string | undefined
 						): MarkerStatus => {
 							// Only show checkmarks for messages sent by the current user
 							if (senderId !== sessionId) {
@@ -245,14 +250,14 @@ export default function MainApp(): React.JSX.Element {
 						});
 
 						setChatsBeStatus(true);
-						// Init WebSocket after inbox request to avoid missing data
-						// Presence is handled by WebSocket connection lifecycle (no polling needed)
-						const { wsClient } = useStore.getState().connections;
-						wsClient.connect();
 					})
-					.catch(() => setChatsBeStatus(false));
+					.catch((err) => {
+						console.error('[MainApp] inbox/meetings init failed', err);
+						setChatsBeStatus(false);
+					});
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.error('[MainApp] getToken failed', err);
 				setChatsBeStatus(false);
 			});
 	}, [setChatsBeStatus]);
@@ -265,7 +270,7 @@ export default function MainApp(): React.JSX.Element {
 		// Cleanup: disconnect WebSocket when leaving
 		const handleBeforeUnload = (): void => {
 			const { wsClient: ws } = useStore.getState().connections;
-			ws.disconnect();
+			ws?.disconnect();
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
@@ -274,7 +279,7 @@ export default function MainApp(): React.JSX.Element {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 			if (authenticated) {
 				const { wsClient: ws } = useStore.getState().connections;
-				ws.disconnect();
+				ws?.disconnect();
 			}
 		};
 	}, [authenticated, connect]);

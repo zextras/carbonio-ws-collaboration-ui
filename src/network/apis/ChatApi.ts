@@ -62,7 +62,7 @@ class ChatApi implements IChatApi {
 		if (limit) params.append('limit', limit.toString());
 		const queryString = params.toString() ? `?${params.toString()}` : '';
 
-		return fetchAPI(`rooms/${roomId}/message${queryString}`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/messages${queryString}`, RequestType.GET);
 	}
 
 	public sendMessage(
@@ -84,19 +84,19 @@ class ChatApi implements IChatApi {
 		if (messageId) body.messageId = messageId;
 		if (replyToId) body.replyToId = replyToId;
 
-		return fetchAPI(`rooms/${roomId}/message`, RequestType.POST, body);
+		return fetchAPI(`rooms/${roomId}/messages`, RequestType.POST, body);
 	}
 
 	public getMessage(roomId: string, messageId: string): Promise<ChatMessage> {
-		return fetchAPI(`rooms/${roomId}/message/${messageId}`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}`, RequestType.GET);
 	}
 
 	public editMessage(roomId: string, messageId: string, text: string): Promise<ChatMessage> {
-		return fetchAPI(`rooms/${roomId}/message/${messageId}`, RequestType.PUT, { text });
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}`, RequestType.PUT, { text });
 	}
 
 	public deleteMessage(roomId: string, messageId: string): Promise<void> {
-		return fetchAPI(`rooms/${roomId}/message/${messageId}`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}/messages/${messageId}`, RequestType.DELETE);
 	}
 
 	public pinMessage(roomId: string, messageId: string): Promise<void> {
@@ -108,7 +108,7 @@ class ChatApi implements IChatApi {
 	}
 
 	public getMessagesByIds(roomId: string, messageIds: string[]): Promise<ChatMessage[]> {
-		return fetchAPI(`rooms/${roomId}/message/batch`, RequestType.POST, { messageIds });
+		return fetchAPI(`rooms/${roomId}/messages/batch`, RequestType.POST, { messageIds });
 	}
 
 	public searchMessages(
@@ -122,21 +122,21 @@ class ChatApi implements IChatApi {
 		if (before) params.append('before', before);
 		if (limit) params.append('limit', limit.toString());
 
-		return fetchAPI(`rooms/${roomId}/message/search?${params.toString()}`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/messages/search?${params.toString()}`, RequestType.GET);
 	}
 
 	// ==================== REACTIONS ====================
 
 	public addReaction(roomId: string, messageId: string, reaction: string): Promise<void> {
-		return fetchAPI(`rooms/${roomId}/message/${messageId}/reaction`, RequestType.POST, {
-			reaction
-		});
+		return fetchAPI(
+			`rooms/${roomId}/messages/${messageId}/reactions/${encodeURIComponent(reaction)}`,
+			RequestType.POST
+		);
 	}
 
 	public removeReaction(roomId: string, messageId: string, reaction: string): Promise<void> {
-		const encodedReaction = encodeURIComponent(reaction);
 		return fetchAPI(
-			`rooms/${roomId}/message/${messageId}/reaction/${encodedReaction}`,
+			`rooms/${roomId}/messages/${messageId}/reactions/${encodeURIComponent(reaction)}`,
 			RequestType.DELETE
 		);
 	}

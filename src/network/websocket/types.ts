@@ -12,7 +12,7 @@ export type WsAction =
 			roomId: string;
 			text: string;
 			replyToId?: string;
-			attachments?: WsAttachment[];
+			attachmentId?: string;
 	  }
 	| {
 			action: 'edit-message';
@@ -106,7 +106,7 @@ export type WsChatEvent =
 			roomId: string;
 			userId: string;
 			reaction: string;
-			added: boolean;
+			operation: 'added' | 'removed';
 	  }
 	| {
 			type: 'read-updated';

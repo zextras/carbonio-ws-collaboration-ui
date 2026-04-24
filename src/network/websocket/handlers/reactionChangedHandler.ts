@@ -20,15 +20,15 @@ export function handleWsReactionChanged(event: {
 	roomId: string;
 	userId: string;
 	reaction: string;
-	added: boolean;
+	operation: 'added' | 'removed';
 }): void {
 	const { addFastening, removeFastening, incrementUnreadCount, decrementUnreadCount, session } =
 		useStore.getState();
-	const { roomId, messageId, userId, reaction, added } = event;
+	const { roomId, messageId, userId, reaction, operation } = event;
 
 	const fasteningId = `${messageId}-${userId}-${reaction}`;
 
-	if (added) {
+	if (operation === 'added') {
 		const fastening: MessageFastening = {
 			id: fasteningId,
 			roomId,
@@ -46,7 +46,7 @@ export function handleWsReactionChanged(event: {
 		if (session.id && userId !== session.id) {
 			incrementUnreadCount(roomId, 1);
 		}
-	} else {
+	} else if (operation === 'removed') {
 		removeFastening(roomId, messageId, fasteningId);
 
 		if (session.id && userId !== session.id) {
