@@ -7,6 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 
+import moment from 'moment-timezone';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -182,10 +183,7 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
-	const meetingTime = useMemo(
-		() => (message.value ? formatDate(parseInt(message.value, 10), 'HH:mm') : ''),
-		[message.value]
-	);
+	const meetingTime = useMemo(() => formatDate(message.date, 'HH:mm'), [message.date]);
 
 	const meetingStartedLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
@@ -199,13 +197,13 @@ export const useConfigurationMessageLabel = (
 		});
 	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
 
-	const meetingEndedLabel = useMemo(
-		() =>
-			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
-				time: meetingTime
-			}),
-		[meetingTime, t]
-	);
+	const meetingEndedLabel = useMemo(() => {
+		const duration = message.value ? moment.duration(message.value, 'seconds').humanize() : 0;
+		return t('configurationMessages.meetingEnded', 'Call ended at {{time}} - {{duration}}', {
+			time: meetingTime,
+			duration
+		});
+	}, [meetingTime, message.value, t]);
 
 	const meetingDeclinedLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
