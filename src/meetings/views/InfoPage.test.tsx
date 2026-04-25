@@ -66,6 +66,12 @@ const pagesToCheckGuest = [
 		'Ouch! You left the meeting.',
 		'PLEASE, TRY TO JOIN AGAIN',
 		'Something went wrong.'
+	],
+	[
+		PAGE_INFO_TYPE.MEETING_DECLINED,
+		'Call Declined',
+		'The call was declined',
+		'The other participant declined your call'
 	]
 ];
 

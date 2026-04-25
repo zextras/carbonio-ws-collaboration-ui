@@ -5,10 +5,12 @@
  */
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { buildReactionStanza } from '../../../tests/buildXmppStanza';
+import { buildConfigurationStanza, buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
+	ConfigurationMessage,
 	MessageFastening,
 	MessageType,
+	OperationType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
 import { retractedMessage } from '../xmppMessageExamples';
@@ -83,5 +85,35 @@ describe('Test decode message function', () => {
 		expect(messageParsed.roomId).toBe('testRoomId');
 		expect(messageParsed.originalStanzaId).toBe('testOriginalStanzaId');
 		expect(messageParsed.from).toBe('testUserId');
+	});
+
+	describe('Meeting configuration messages', () => {
+		const timestamp = '1745397215000';
+		const duration = (5 * 60 * 1000).toString();
+
+		test('meetingStarted is decoded correctly', () => {
+			const stanza = buildConfigurationStanza({ operation: 'meetingStarted', timestamp });
+			const msg = decodeXMPPMessageStanza(stanza) as ConfigurationMessage;
+			expect(msg.type).toBe(MessageType.CONFIGURATION_MSG);
+			expect(msg.operation).toBe(OperationType.MEETING_STARTED);
+			expect(msg.value).toBe('');
+			expect(msg.from).toBe('caller-id');
+		});
+
+		test('meetingEnded is decoded correctly', () => {
+			const stanza = buildConfigurationStanza({ operation: 'meetingEnded', timestamp, duration });
+			const msg = decodeXMPPMessageStanza(stanza) as ConfigurationMessage;
+			expect(msg.type).toBe(MessageType.CONFIGURATION_MSG);
+			expect(msg.operation).toBe(OperationType.MEETING_ENDED);
+			expect(msg.value).toBe(duration);
+		});
+
+		test('meetingDeclined is decoded correctly', () => {
+			const stanza = buildConfigurationStanza({ operation: 'meetingDeclined', timestamp });
+			const msg = decodeXMPPMessageStanza(stanza) as ConfigurationMessage;
+			expect(msg.type).toBe(MessageType.CONFIGURATION_MSG);
+			expect(msg.operation).toBe(OperationType.MEETING_DECLINED);
+			expect(msg.value).toBe('');
+		});
 	});
 });

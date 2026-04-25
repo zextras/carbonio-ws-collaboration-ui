@@ -306,6 +306,76 @@ describe('useConfigurationMessageLabel', () => {
 		});
 	});
 
+	describe('Meeting labels', () => {
+		// epoch ms for 10:32 on a known date — formatted as HH:mm
+		const timestamp = String(new Date('2024-01-15T10:32:00.000Z').getTime());
+
+		test('meetingStarted — logged user is the caller', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_STARTED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/You called at/i);
+		});
+
+		test('meetingStarted — another user is the caller', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_STARTED,
+				from: user1.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/User 1 called you at/i);
+		});
+
+		test('meetingEnded — label is the same for all participants', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/Call ended at/i);
+		});
+
+		test('meetingDeclined — logged user declined', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_DECLINED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/You declined the call at/i);
+		});
+
+		test('meetingDeclined — another user declined', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_DECLINED,
+				from: user1.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/User 1 declined the call at/i);
+		});
+	});
+
 	test('Undefined operation type', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const configurationMessage = createMockConfigurationMessage({
