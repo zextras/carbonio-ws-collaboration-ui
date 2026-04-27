@@ -129,20 +129,6 @@ class ChatWebSocketClient {
 	}
 
 	/**
-	 * Mark a room as read up to a given message.
-	 */
-	markRead(roomId: string, messageId: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'mark-read',
-			requestId,
-			roomId,
-			messageId
-		});
-		return requestId;
-	}
-
-	/**
 	 * @deprecated History navigation will use REST timeline API
 	 */
 	requestMessageResultHistoryToId(_roomId: string, _stanzaId: string): Promise<void> {

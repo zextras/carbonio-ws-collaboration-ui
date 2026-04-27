@@ -34,12 +34,6 @@ export type WsAction =
 			messageId: string;
 			toRoomId: string;
 	  }
-	| {
-			action: 'mark-read';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-	  }
 	| { action: 'ping' }
 	| {
 			action: 'typing';
