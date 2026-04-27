@@ -71,7 +71,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
-	const setUnreadCount = useStore((store) => store.setUnreadCount);
+	const decrementUnreadCount = useStore((store) => store.decrementUnreadCount);
 
 	// Track the previous last message to detect new messages from me
 	const prevLastMessageIdRef = useRef<string | undefined>(undefined);
@@ -91,18 +91,28 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		const hasMoreAfter = registry?.hasMoreAfter ?? false;
 		if (hasMoreAfter) return;
 
+		// Snapshot the last visible message to mark up to this point
+		const msgs = registry?.messages ?? [];
+		const lastMsg = msgs[msgs.length - 1];
+		if (!lastMsg) return;
+		const targetMessageId = (lastMsg as any).stanzaId ?? (lastMsg as any).id;
+		if (!targetMessageId) return;
+		const unreadAtStart = currentUnread;
+
 		isMarkingAsReadRef.current = true;
-		ChatApi.setReadMarker(roomId)
+		ChatApi.setReadMarker(roomId, targetMessageId)
 			.then(() => {
-				setUnreadCount(roomId, 0);
+				// Only decrement what we covered — messages arriving during
+				// the round-trip retain their unread count for next pass
+				decrementUnreadCount(roomId, unreadAtStart);
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				console.error('[MessagesList] Failed to mark room as read:', err);
 			})
 			.finally(() => {
 				isMarkingAsReadRef.current = false;
 			});
-	}, [roomId, setUnreadCount]);
+	}, [roomId, decrementUnreadCount]);
 
 	// Called when scroll position changes - mark as read if at bottom
 	const onScrollPositionChange = useCallback(

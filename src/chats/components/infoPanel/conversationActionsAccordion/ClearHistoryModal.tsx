@@ -40,9 +40,15 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 
 	const clearHistory = useCallback(() => {
 		if (unreadMessagesCount > 0) {
-			ChatApi.setReadMarker(roomId).catch((err) => {
-				console.error('[ClearHistoryModal] Failed to set read marker:', err);
-			});
+			const registry = useStore.getState().chatsRegistry[roomId];
+			const msgs = registry?.messages ?? [];
+			const lastMsg = msgs[msgs.length - 1];
+			const lastMsgId = (lastMsg as any)?.stanzaId ?? (lastMsg as any)?.id;
+			if (lastMsgId) {
+				ChatApi.setReadMarker(roomId, lastMsgId).catch((err) => {
+					console.error('[ClearHistoryModal] Failed to set read marker:', err);
+				});
+			}
 		}
 		RoomsApi.clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();

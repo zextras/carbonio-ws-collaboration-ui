@@ -59,78 +59,53 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/RESET_CHAT_DATA'
 		);
 	},
-	setUserPresence: (userId: string, online: boolean, lastActivityAt?: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.users[userId]) {
-					draft.users[userId].online = online;
-					if (lastActivityAt) {
-						draft.users[userId].lastActivity = new Date(lastActivityAt).getTime();
-					}
-				}
-			}),
-			false,
-			'CONNECTIONS/SET_USER_PRESENCE'
-		);
-	},
 	updateReadMarker: (roomId: string, userId: string, messageId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
-				console.log('[updateReadMarker] Called with:', { roomId, userId, messageId });
+				if (!registry) return;
+				if (!registry.markers) registry.markers = {};
 
-				if (registry && registry.messages) {
-					// Update the marker in the markers map
-					if (!registry.markers) {
-						registry.markers = {};
-					}
-					registry.markers[userId] = {
-						from: userId,
-						messageId,
-						markerDate: Date.now(),
-						type: 'displayed'
-					};
+				const markerDate = Date.now();
+				const existing = registry.markers[userId];
+				if (existing && existing.markerDate >= markerDate) return;
+				registry.markers[userId] = { from: userId, messageId, markerDate, type: 'displayed' };
 
-					// Find the target message to get its date
-					const targetMessage = registry.messages.find(
-						(m) =>
-							m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
-					);
+				// Resolve target date — prefer exact message match, fall back to lastMessage, then current time
+				const targetMessage = (registry.messages ?? []).find(
+					(m) =>
+						m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
+				);
+				const targetDate: number =
+					targetMessage?.date ??
+					(registry.lastMessage &&
+					((registry.lastMessage as any).id === messageId ||
+						(registry.lastMessage as any).stanzaId === messageId)
+						? registry.lastMessage.date
+						: markerDate);
 
-					if (targetMessage) {
-						const targetDate = targetMessage.date;
-						const myId = draft.session.id;
-
-						// Create new array with updated read status to ensure re-render
-						registry.messages = registry.messages.map((msg) => {
-							if (
-								msg.type === MessageType.TEXT_MSG &&
-								msg.from === myId &&
-								msg.date <= targetDate &&
-								msg.read === MarkerStatus.UNREAD
-							) {
-								// Return new object with updated read status
-								return { ...msg, read: MarkerStatus.READ };
-							}
-							return msg;
-						});
-
-						// Also update lastMessage.read for sidebar display
+				const myId = draft.session.id;
+				if (registry.messages?.length && myId) {
+					registry.messages = registry.messages.map((msg) => {
 						if (
-							registry.lastMessage &&
-							registry.lastMessage.type === MessageType.TEXT_MSG &&
-							(registry.lastMessage as any).from === myId &&
-							registry.lastMessage.date <= targetDate &&
-							registry.lastMessage.read === MarkerStatus.UNREAD
+							msg.type === MessageType.TEXT_MSG &&
+							msg.from === myId &&
+							msg.date <= targetDate &&
+							msg.read === MarkerStatus.UNREAD
 						) {
-							registry.lastMessage = {
-								...registry.lastMessage,
-								read: MarkerStatus.READ
-							};
+							return { ...msg, read: MarkerStatus.READ };
 						}
-
-						console.log('[updateReadMarker] Messages updated with READ status');
-					}
+						return msg;
+					});
+				}
+				if (
+					registry.lastMessage &&
+					registry.lastMessage.type === MessageType.TEXT_MSG &&
+					(registry.lastMessage as any).from === myId &&
+					registry.lastMessage.date <= targetDate &&
+					registry.lastMessage.read === MarkerStatus.UNREAD
+				) {
+					registry.lastMessage = { ...registry.lastMessage, read: MarkerStatus.READ };
 				}
 			}),
 			false,
@@ -149,6 +124,13 @@ export const useConnectionsStoreSlice: StateCreator<
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.text = text;
 						msg.editedInfo = { editedAt };
+					}
+				}
+				// Also update lastMessage if it refers to the same message
+				if (registry?.lastMessage) {
+					const lm = registry.lastMessage as any;
+					if (lm.id === messageId || lm.stanzaId === messageId) {
+						registry.lastMessage = { ...registry.lastMessage, text, editedInfo: { editedAt } } as any;
 					}
 				}
 			}),
@@ -173,6 +155,17 @@ export const useConnectionsStoreSlice: StateCreator<
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.deletedInfo = { deletedBy, deletedAt };
 						msg.text = '';
+					}
+				}
+				// Also update lastMessage if it refers to the same message
+				if (registry?.lastMessage) {
+					const lm = registry.lastMessage as any;
+					if (lm.id === messageId || lm.stanzaId === messageId) {
+						registry.lastMessage = {
+							...registry.lastMessage,
+							text: '',
+							deletedInfo: { deletedBy, deletedAt }
+						} as any;
 					}
 				}
 			}),

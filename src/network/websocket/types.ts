@@ -96,6 +96,7 @@ export type WsChatEvent =
 			originalRoomId: string;
 			senderId: string;
 			text: string;
+			timestamp?: string;
 			forwardedFrom?: string; // original sender's userId
 			forwardedAt?: string; // ISO timestamp of original send
 			attachmentId?: string;

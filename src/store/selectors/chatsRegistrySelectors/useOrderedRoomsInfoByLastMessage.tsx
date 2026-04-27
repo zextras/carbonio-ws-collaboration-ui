@@ -22,7 +22,12 @@ export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
 			);
 
 			return filteredRooms.map((room) => {
-				const lastMessageDate = state.chatsRegistry[room.id]?.lastMessage?.date ?? 0;
+				const registry = state.chatsRegistry[room.id];
+				const lastMessageDate = registry?.lastMessage?.date ?? 0;
+				// lastMessageForInbox is set when the user is viewing historical messages and a new
+				// message arrives — use it as a candidate so the inbox sort reflects the real latest
+				// activity even when hasMoreAfter === true.
+				const lastMessageForInboxDate = registry?.lastMessageForInbox?.date ?? 0;
 				const draftMessageDate = state.activeConversations[room.id]?.draftMessage?.date ?? 0;
 
 				return {
@@ -30,7 +35,7 @@ export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
 					name: room.name || '',
 					roomType: room.type,
 					members: room.members,
-					lastMessageTimestamp: Math.max(lastMessageDate, draftMessageDate)
+					lastMessageTimestamp: Math.max(lastMessageDate, lastMessageForInboxDate, draftMessageDate)
 				};
 			});
 		},

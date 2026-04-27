@@ -470,16 +470,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/DECREMENT_UNREAD'
 		);
 	},
-	setUnreadCount: (roomId: string, count: number): void => {
-		set(
-			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
-				draft.chatsRegistry[roomId].unread = count;
-			}),
-			false,
-			'CHAT/SET_UNREAD_COUNT'
-		);
-	},
 	setSearchResults: (roomId: string, results: TextMessage[]): void => {
 		set(
 			produce((draft: RootStore) => {

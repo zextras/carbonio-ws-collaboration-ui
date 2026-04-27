@@ -10,7 +10,7 @@ import { GetMeetingResponse } from '../../types/network/responses/meetingsRespon
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { getMeeting, RoomsApi } from '../index';
+import { ChatApi, getMeeting, RoomsApi } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -18,10 +18,25 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) =>
-				state.addRooms([response])
-			);
-			// Presence is now managed via WebSocket connection lifecycle (no REST call needed)
+			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
+				useStore.getState().addRooms([response]);
+				const memberIds = (response.members ?? [])
+					.map((m) => m.userId)
+					.filter((id): id is string => Boolean(id));
+				if (memberIds.length > 0) {
+					// Fetch presence for all room members so we don't start with everyone offline
+					ChatApi.getPresenceBatch(memberIds)
+						.then((result) => {
+							const { setUserPresence } = useStore.getState();
+							Object.entries(result).forEach(([uid, { online, lastActivity }]) => {
+								setUserPresence(uid, online, lastActivity);
+							});
+						})
+						.catch(() => {
+							/* swallow — presence is best-effort */
+						});
+				}
+			});
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {

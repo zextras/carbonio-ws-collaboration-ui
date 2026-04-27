@@ -11,7 +11,6 @@ export type ConnectionsStoreSlice = {
 	setChatsBeStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
 	resetChatData: () => void;
-	setUserPresence: (userId: string, online: boolean, lastActivityAt?: string) => void;
 	updateReadMarker: (roomId: string, userId: string, messageId: string) => void;
 	editMessage: (roomId: string, messageId: string, text: string, editedAt: string) => void;
 	deleteMessage: (roomId: string, messageId: string, deletedBy: string, deletedAt: string) => void;

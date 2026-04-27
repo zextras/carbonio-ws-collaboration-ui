@@ -119,7 +119,7 @@ export interface IChatApi {
 	 * Only messages received by the user (not sent by the user) are processed.
 	 * In group chats, a message shows as "read" only when all members have read it.
 	 */
-	setReadMarker(roomId: string): Promise<void>;
+	setReadMarker(roomId: string, messageId: string): Promise<void>;
 
 	/**
 	 * Gets all read markers for a room
