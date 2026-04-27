@@ -67,6 +67,20 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 						msg.date = new Date(timestamp).getTime();
 						msg.read = MarkerStatus.UNREAD;
 					}
+					// Update lastMessage so inbox reflects the confirmed message
+					if (
+						registry.lastMessage &&
+						registry.lastMessage.type === MessageType.TEXT_MSG &&
+						(registry.lastMessage.id === requestId || registry.lastMessage.stanzaId === `placeholder_${requestId}`)
+					) {
+						registry.lastMessage = {
+							...registry.lastMessage,
+							id: messageId,
+							stanzaId: messageId,
+							date: new Date(timestamp).getTime(),
+							read: MarkerStatus.UNREAD
+						};
+					}
 				}),
 				false
 			);

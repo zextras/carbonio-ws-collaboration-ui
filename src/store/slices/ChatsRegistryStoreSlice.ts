@@ -138,6 +138,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				} else {
 					messages.push(message);
 				}
+				// Update lastMessage for inbox display
+				const registry = draft.chatsRegistry[message.roomId];
+				if (
+					registry &&
+					(message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG)
+				) {
+					if (!registry.lastMessage || message.date >= registry.lastMessage.date) {
+						registry.lastMessage = message;
+					}
+				}
 			}),
 			false,
 			'CHAT/NEW_MESSAGE'
@@ -327,6 +337,14 @@ export const useChatsRegistryStoreSlice: StateCreator<
 
 				// Add message to the end of list or replace a placeholder message
 				messages.push(placeholderMessage);
+
+				// Update lastMessage for inbox display
+				const registry = draft.chatsRegistry[roomId];
+				if (registry) {
+					if (!registry.lastMessage || placeholderMessage.date >= registry.lastMessage.date) {
+						registry.lastMessage = placeholderMessage;
+					}
+				}
 
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),

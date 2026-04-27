@@ -80,6 +80,38 @@ export default function MainApp(): React.JSX.Element {
 						const rooms = conversations.map((conv) => conv.room);
 						addRooms(rooms);
 
+						// Fetch initial presence now that rooms are loaded
+						// (WS _onOpen fires before rooms are available, so this is the earliest reliable point)
+						const allMemberIds: string[] = [];
+						rooms.forEach((room) => {
+							if (room.members) {
+								room.members.forEach((m: { userId: string }) => {
+									if (!allMemberIds.includes(m.userId)) {
+										allMemberIds.push(m.userId);
+									}
+								});
+							}
+						});
+						if (allMemberIds.length > 0) {
+							const { setUserPresence } = useStore.getState();
+							const BATCH_SIZE = 500;
+							const presenceBatches: string[][] = [];
+							for (let i = 0; i < allMemberIds.length; i += BATCH_SIZE) {
+								presenceBatches.push(allMemberIds.slice(i, i + BATCH_SIZE));
+							}
+							Promise.all(presenceBatches.map((batch) => ChatApi.getPresenceBatch(batch)))
+								.then((results) => {
+									results.forEach((result) => {
+										Object.entries(result).forEach(([userId, { online, lastActivity }]) => {
+											setUserPresence(userId, online, lastActivity);
+										});
+									});
+								})
+								.catch((err) => {
+									console.error('[MainApp] Presence batch fetch failed:', err);
+								});
+						}
+
 						// Helper to map SystemEventType to OperationType
 						const mapEventTypeToOperation = (
 							eventType: SystemEventType

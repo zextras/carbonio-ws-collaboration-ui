@@ -115,6 +115,20 @@ export const useConnectionsStoreSlice: StateCreator<
 							return msg;
 						});
 
+						// Also update lastMessage.read for sidebar display
+						if (
+							registry.lastMessage &&
+							registry.lastMessage.type === MessageType.TEXT_MSG &&
+							(registry.lastMessage as any).from === myId &&
+							registry.lastMessage.date <= targetDate &&
+							registry.lastMessage.read === MarkerStatus.UNREAD
+						) {
+							registry.lastMessage = {
+								...registry.lastMessage,
+								read: MarkerStatus.READ
+							};
+						}
+
 						console.log('[updateReadMarker] Messages updated with READ status');
 					}
 				}
