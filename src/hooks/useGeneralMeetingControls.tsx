@@ -129,8 +129,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingDeclinedHandler = useCallback(() => {
 		isDeclined.current = true;
 		closePipWindow();
-		goToInfoPage(PAGE_INFO_TYPE.MEETING_DECLINED);
-	}, [closePipWindow, goToInfoPage]);
+		goToInfoPage(PAGE_INFO_TYPE.MEETING_DECLINED, meetingId);
+	}, [closePipWindow, goToInfoPage, meetingId]);
 	useEventListener(EventName.MEETING_DECLINED, meetingDeclinedHandler);
 
 	// Display snackbar when user is muted by moderator

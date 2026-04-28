@@ -67,12 +67,7 @@ const pagesToCheckGuest = [
 		'PLEASE, TRY TO JOIN AGAIN',
 		'Something went wrong.'
 	],
-	[
-		PAGE_INFO_TYPE.MEETING_DECLINED,
-		'Call Declined',
-		'The call was declined',
-		'The other participant declined your call'
-	]
+	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', 'Call ended', 'declined the call']
 ];
 
 describe('Info page', () => {

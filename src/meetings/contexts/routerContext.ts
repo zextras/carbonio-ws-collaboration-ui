@@ -47,7 +47,7 @@ export const useRouterContextSetup = (): RouterContextType => {
 		setRoute(route);
 		if (infoType) {
 			setInfoType(infoType);
-			setMeetingId(undefined);
+			setMeetingId(meetingId);
 		} else if (meetingId) {
 			setMeetingId(meetingId);
 			setInfoType(undefined);
