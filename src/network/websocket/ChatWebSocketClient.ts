@@ -6,7 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { WsAction, WsAttachment } from './types';
+import { WsAction } from './types';
 import { WebSocketClient } from './WebSocketClient';
 import useStore from '../../store/Store';
 
@@ -46,20 +46,14 @@ class ChatWebSocketClient {
 	 * Send a chat message to a room.
 	 * Returns the requestId for correlating the message-sent response.
 	 */
-	sendMessage(
-		roomId: string,
-		text: string,
-		replyToId?: string,
-		attachments?: WsAttachment[]
-	): string {
+	sendMessage(roomId: string, text: string, replyToId?: string): string {
 		const requestId = uuidv4();
 		this.sendAction({
 			action: 'send-message',
 			requestId,
 			roomId,
 			text,
-			replyToId,
-			attachmentId: attachments?.[0]?.id
+			replyToId
 		});
 		// Optimistically add the message to the store so the sender sees it immediately.
 		// The message-sent ack will update the provisional id/date to the server-assigned values.
@@ -67,8 +61,7 @@ class ChatWebSocketClient {
 			id: requestId,
 			roomId,
 			text,
-			replyTo: replyToId,
-			attachment: attachments?.[0]
+			replyTo: replyToId
 		});
 		return requestId;
 	}

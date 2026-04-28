@@ -65,6 +65,8 @@ interface IRoomsApi {
 			description?: string;
 			replyId?: string;
 			area?: string;
+			text?: string;
+			replyToId?: string;
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse>;

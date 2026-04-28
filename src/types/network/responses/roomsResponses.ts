@@ -5,6 +5,7 @@
  */
 
 import { Attachment } from '../models/attachmentTypes';
+import { ChatMessage } from '../models/chatTypes';
 import { MemberBe, RoomBe } from '../models/roomBeTypes';
 
 export type ListRoomsResponse = RoomBe[];
@@ -47,8 +48,10 @@ export type GetRoomAttachmentsResponse = {
 	attachments: Attachment[];
 };
 
-export type AddRoomAttachmentResponse = {
-	id: string;
-};
+/**
+ * PUT /rooms/{roomId}/attachments now returns a full message DTO.
+ * The backend atomically creates the Message row and broadcasts the WS event.
+ */
+export type AddRoomAttachmentResponse = ChatMessage;
 
 export type ForwardMessagesResponse = Response[];

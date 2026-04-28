@@ -12,7 +12,6 @@ export type WsAction =
 			roomId: string;
 			text: string;
 			replyToId?: string;
-			attachmentId?: string;
 	  }
 	| {
 			action: 'edit-message';

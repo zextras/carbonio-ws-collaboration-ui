@@ -34,6 +34,7 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
+import { mapChatMessageToTextMessage } from '../../../../network/utils/messageMapper';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
@@ -185,7 +186,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
-		controller: AbortController
+		controller: AbortController,
+		capturedReplyToId?: string
 	): Promise<AddRoomAttachmentResponse> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
@@ -207,8 +209,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			file.file,
 			{
 				description: file.description,
-				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined,
-				area
+				replyId: sendAsReply ? capturedReplyToId : undefined,
+				area,
+				text: file.description,
+				replyToId: sendAsReply ? capturedReplyToId : undefined
 			},
 			signal
 		).catch((reason: DOMException) => {
@@ -300,25 +304,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return copyOfFile;
 			});
 
-			// Capture reference message before clearing it below
-			const capturedReferenceMessage = referenceMessage;
+			// Capture reply stanzaId before clearing it below
+			const capturedReplyToId = referenceMessage?.stanzaId;
+			const currentUserId = useStore.getState().session.id ?? '';
 
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
 				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
 					acc.then(() =>
-						uploadAttachmentPromise(file, abortControllerList[i]).then((resp) => {
-							// After upload, send the real message over WS with the server-assigned attachment id
-							const isFirstFile = file.fileId === copyOfFilesToUploadArray[0].fileId;
-							chatWsClient.sendMessage(
-								roomId,
-								file.description ?? '',
-								isFirstFile ? capturedReferenceMessage?.stanzaId : undefined,
-								[{ id: resp.id, name: file.file.name, mimeType: file.file.type, size: file.file.size }]
-							);
-							return resp;
-						})
+						uploadAttachmentPromise(file, abortControllerList[i], capturedReplyToId).then(
+							(resp) => {
+								// The backend returns a full message DTO — add it to the store directly.
+								// No separate WS send-message call is needed (backend broadcasts it).
+								const textMessage = mapChatMessageToTextMessage(resp, currentUserId);
+								useStore.getState().newMessage(textMessage);
+								return resp;
+							}
+						)
 					),
 				Promise.resolve()
 			);

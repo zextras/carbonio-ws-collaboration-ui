@@ -97,6 +97,8 @@ export const sendFileFetchAPI = (
 	optionalFields?.messageId && formData.append('messageId', optionalFields.messageId);
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
+	optionalFields?.text && formData.append('text', optionalFields.text);
+	optionalFields?.replyToId && formData.append('replyToId', optionalFields.replyToId);
 
 	return fetch(BASE_PATH + endpoint, {
 		method,

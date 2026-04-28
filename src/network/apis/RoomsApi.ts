@@ -188,6 +188,8 @@ class RoomsApi implements IRoomsApi {
 			description?: string;
 			replyId?: string;
 			area?: string;
+			text?: string;
+			replyToId?: string;
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
@@ -208,7 +210,9 @@ class RoomsApi implements IRoomsApi {
 				const optional = {
 					description: optionalFields.description,
 					replyId: optionalFields.replyId,
-					area: optionalFields.area
+					area: optionalFields.area,
+					text: optionalFields.text,
+					replyToId: optionalFields.replyToId
 				};
 				// DEPRECATED: This check exists for backward compatibility with previous versions.
 				//  * Remove once support for v1.6.0 is officially dropped.
