@@ -45,8 +45,9 @@ const ReturnToLatestButton = ({
 		const store = useStore.getState();
 		const currentUserId = getUserId(store) || '';
 
-		// Clear current messages and reset pagination state
+		// Clear current messages, pagination state, and search highlight
 		store.clearMessages(roomId);
+		store.setSelectedSearchResult(roomId, undefined);
 
 		// Load fresh latest messages (no cursor = most recent)
 		ChatApi.getTimeline(roomId, { limit: 50 })

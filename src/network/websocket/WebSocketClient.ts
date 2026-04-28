@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce, DebouncedFunc, includes, uniq, flatMap } from 'lodash';
+import { debounce, DebouncedFunc, includes } from 'lodash';
 import { gte } from 'semver';
 
 import { normalizeEventType } from './normalizedEventType';
@@ -15,7 +15,6 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
-import ChatApi from '../apis/ChatApi';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -87,37 +86,12 @@ export class WebSocketClient {
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
 
-		const { setWebsocketStatus, session, setApiVersion, rooms, setUserPresence } =
-			useStore.getState();
-		// Set WebSocket connection status on store
+		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		setWebsocketStatus(true);
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
 		}
-
-		// Fetch initial presence for all known room members in batches of 500
-		const allUserIds = uniq(
-			flatMap(Object.values(rooms), (room) => room.members.map((m) => m.userId))
-		);
-		if (allUserIds.length > 0) {
-			const BATCH_SIZE = 500;
-			const batches: string[][] = [];
-			for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
-				batches.push(allUserIds.slice(i, i + BATCH_SIZE));
-			}
-			Promise.all(batches.map((batch) => ChatApi.getPresenceBatch(batch)))
-				.then((results) => {
-					// Backend returns a map { [userId]: { online, lastActivity } }
-					results.forEach((result) => {
-						Object.entries(result).forEach(([userId, { online, lastActivity }]) => {
-							setUserPresence(userId, online, lastActivity);
-						});
-					});
-				})
-				.catch((err) => {
-					wsDebug('Presence batch fetch failed:', err);
-				});
-		}
+		// Presence batch is fetched in MainApp after addRooms (rooms aren't loaded yet at WS open)
 	};
 
 	_onClose = (): void => {

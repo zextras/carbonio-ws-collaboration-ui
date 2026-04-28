@@ -218,16 +218,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const messagesSize = useMemo(() => size(roomMessages), [roomMessages]);
 
 	// Manage scroll position when messages size changes
-	// Note: Scroll anchoring for pagination (before/after) is now handled directly in the loaders
-	// This useEffect only handles the initial load case
 	useEffect(() => {
 		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
 
 		if (!actualPosition) {
-			// When the chat is loaded for the first time keep scroll to the bottom
 			scrollToEnd(MessagesListWrapperRef);
+		} else {
+			scrollToMessage(actualPosition);
 		}
-		// Scroll anchoring for pagination is handled in MessageHistoryLoader and HistoryLoaderAfter
 	}, [messagesSize, roomId]);
 
 	const dateMessageWrapped = useMemo(
@@ -360,14 +358,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader
 						roomId={roomId}
 						messageListRef={messageListRef}
-						scrollContainerRef={MessagesListWrapperRef}
 					/>
 				)}
 					{messagesWrapped}
 				<HistoryLoaderAfter
 					roomId={roomId}
 					messageListRef={messageListRef}
-					scrollContainerRef={MessagesListWrapperRef}
 				/>
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}

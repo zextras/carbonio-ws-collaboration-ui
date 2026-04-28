@@ -71,8 +71,9 @@ const SearchResultMessage = ({
 		store.setHistoryLoadDisabled(message.roomId, true);
 
 		// Clear existing messages and load around the search result
-		// This ensures we have a clean contiguous block of messages
 		store.clearMessages(message.roomId);
+		// clearMessages sets hasMoreAfter=true — reset it to hide the bottom loader
+		store.setHasMoreAfter(message.roomId, false);
 
 		const aroundDate = new Date(message.date).toISOString();
 		const currentUserId = getUserId(store) || '';
@@ -119,24 +120,13 @@ const SearchResultMessage = ({
 				store.setHasMoreBefore(message.roomId, response.hasMoreBefore);
 				store.setHasMoreAfter(message.roomId, response.hasMoreAfter);
 
-				// Re-enable history loader if there are more messages before
-				// (otherwise keep it disabled to prevent duplicate loads)
-				if (response.hasMoreBefore) {
-					store.setHistoryLoadDisabled(message.roomId, false);
-				}
-
-				// Scroll to the searched message after DOM update
-				// IMPORTANT: Keep isLoadingTimeline=true until scroll is complete and DOM is stable
-				// This prevents HistoryLoaderAfter from triggering immediately
+				// scrollToMessage is handled by MessagesList's useEffect on messagesSize.
+				// historyLoadDisabled stays true — it will be re-enabled once the
+				// user scrolls and the loader enters viewport naturally.
+				// We only need to re-enable after the scroll position is set by React.
 				requestAnimationFrame(() => {
-					scrollToMessage(message.id);
-
-					// Wait for scroll to complete and DOM to stabilize before allowing loaders
-					// Use a longer delay to ensure IntersectionObserver debounce (500ms) doesn't
-					// trigger with stale state
-					setTimeout(() => {
-						store.setIsLoadingTimeline(message.roomId, false);
-					}, 600);
+					store.setHistoryLoadDisabled(message.roomId, false);
+					store.setIsLoadingTimeline(message.roomId, false);
 				});
 			})
 			.catch((err) => {

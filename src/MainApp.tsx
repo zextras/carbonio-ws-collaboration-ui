@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
 
@@ -38,6 +38,7 @@ export default function MainApp(): React.JSX.Element {
 
 	const authenticated = useAuthenticated();
 	const { prefs, attrs } = useUserSettings();
+	const hasConnectedRef = useRef(false);
 
 	useEffect(() => {
 		setSupportedVersions(['1.6.5', '1.6.4', '1.6.3', '1.6.2', '1.6.1', '1.6.0']);
@@ -295,7 +296,8 @@ export default function MainApp(): React.JSX.Element {
 	}, [setChatsBeStatus]);
 
 	useEffect(() => {
-		if (authenticated) {
+		if (authenticated && !hasConnectedRef.current) {
+			hasConnectedRef.current = true;
 			connect();
 		}
 
