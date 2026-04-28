@@ -105,7 +105,7 @@ describe('Conversation view', () => {
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		expect(screen.getByText('Info')).toBeVisible();
 		const searchIcons = screen.getAllByTestId('icon: Search');
-		expect(searchIcons).toHaveLength(2);
+		expect(searchIcons).toHaveLength(1);
 		await user.click(searchIcons[0]);
 		expect(screen.queryByText('Info')).not.toBeInTheDocument();
 		expect(screen.getByRole('textbox', { name: /search messages/i })).toBeVisible();
@@ -118,12 +118,12 @@ describe('Conversation view', () => {
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			await user.click(screen.getByTestId(InfoIconTestId));
 			expect(screen.getByText('Info')).toBeInTheDocument();
-			const userName = screen.getByText(/User 2/i);
-			expect(userName).toBeInTheDocument();
 			const roomName = screen.getByText(/Name of the group/i);
 			expect(roomName).toBeInTheDocument();
 			const roomDescription = screen.getByText(/A description/i);
 			expect(roomDescription).toBeInTheDocument();
+			await user.click(screen.getByText('Members'));
+			expect(screen.getByText(/User 2/i)).toBeInTheDocument();
 		});
 
 		test('Leave a group and check everything is shown correctly', async () => {
@@ -160,7 +160,7 @@ describe('Conversation view', () => {
 
 		test('Add moderator and check everything is shown correctly', async () => {
 			mockUseMediaQueryCheck.mockReturnValue(true);
-			setup(<Conversation roomId={testRoom.id} />);
+			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			act(() => {
 				useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);
 				wsEventsHandler({
@@ -170,6 +170,7 @@ describe('Conversation view', () => {
 					userId: user1Info.id
 				} as RoomOwnerPromotedEvent);
 			});
+			await user.click(screen.getByText('Members'));
 			const crownCounter = await screen.findAllByTestId('icon: Crown');
 			expect(crownCounter).toHaveLength(2);
 			const snackbar = await screen.findByText(
