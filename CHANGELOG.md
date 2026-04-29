@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.0...v0.10.1) (2026-04-29)
+
+### Bug Fixes
+
+* **deps:** update dependency moment-timezone to v0.6.2 ([#700](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/700)) ([739e35e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/739e35e1b09446d88155f96c9e42a25f95bab850))
+* **deps:** update dependency uuid to v14 [security] ([#697](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/697)) ([25a79f1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/25a79f149b1afed684125f3291c2f53a47c4a2e1))
+
 ## [0.10.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.20...v0.10.0) (2026-04-27)
 
 ### Features
