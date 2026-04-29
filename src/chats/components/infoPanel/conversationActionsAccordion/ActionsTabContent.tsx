@@ -36,7 +36,13 @@ export const ActionsTabContent: FC<ActionsTabContentProps> = ({ roomId }) => {
 	const emptyRoom: boolean = useStore((state) => roomIsEmpty(state, roomId));
 
 	return (
-		<Container data-testid="actionsTabContent" background="gray5" mainAlignment="flex-start">
+		<Container
+			data-testid="actionsTabContent"
+			background="gray6"
+			mainAlignment="flex-start"
+			height="fit"
+			padding={{ left: 'large', right: 'small' }}
+		>
 			<MuteConversationAction roomId={roomId} roomType={roomType} emptyRoom={emptyRoom} />
 			{iAmOwner && roomType !== RoomType.ONE_TO_ONE && <EditConversationAction roomId={roomId} />}
 			{iAmOwner && roomType !== RoomType.ONE_TO_ONE && <AddNewMemberAction roomId={roomId} />}

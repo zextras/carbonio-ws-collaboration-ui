@@ -53,26 +53,29 @@ const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) 
 	);
 
 	return (
-		<Container>
+		<Container mainAlignment="flex-start">
 			<ConversationInfo roomId={roomId} roomType={roomType} goToChatView={goToChatView} />
-			<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
-				<ConversationInfoDetails roomId={roomId} roomType={roomType} />
-				{!isPlaceholderRoom && (
-					<>
-						<TabBar
-							data-testid="infoPanelTabBar"
-							items={tabs}
-							selected={selectedInfoTab}
-							onChange={handleTabChange}
-							background="gray6"
-							forceWidthEquallyDistributed
-						/>
+			<ConversationInfoDetails roomId={roomId} roomType={roomType} />
+			{!isPlaceholderRoom && (
+				<>
+					<TabBar
+						data-testid="infoPanelTabBar"
+						items={tabs}
+						selected={selectedInfoTab}
+						onChange={handleTabChange}
+						background="gray6"
+						height="3rem"
+						minHeight="3rem"
+						flexShrink={0}
+						forceWidthEquallyDistributed
+					/>
+					<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
 						{selectedInfoTab === InfoPanelTab.ACTIONS && <ActionsTabContent roomId={roomId} />}
 						{selectedInfoTab === InfoPanelTab.MEMBERS && <MemberList roomId={roomId} />}
 						{selectedInfoTab === InfoPanelTab.MEDIA_GALLERY && <MediaGalleryTab roomId={roomId} />}
-					</>
-				)}
-			</Container>
+					</Container>
+				</>
+			)}
 		</Container>
 	);
 };
