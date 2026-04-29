@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { produce } from 'immer';
-
 import {
 	handleWsMessageReceived,
 	handleWsMessageEdited,
@@ -48,44 +46,6 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 		case 'message-received':
 			handleWsMessageReceived(chatEvent);
 			break;
-
-		case 'message-sent': {
-			const { requestId, messageId, roomId, timestamp } = chatEvent;
-			wsDebug(`Message sent confirmed: ${requestId} -> ${messageId}`);
-			// Promote the provisional placeholder (id=requestId) to the server-assigned id.
-			// We mutate in-place so React re-renders with the confirmed message.
-			useStore.setState(
-				produce((draft) => {
-					const registry = draft.chatsRegistry[roomId];
-					if (!registry) return;
-					const msg = registry.messages.find(
-						(m: TextMessage) => m.id === requestId
-					) as TextMessage | undefined;
-					if (msg && msg.type === MessageType.TEXT_MSG) {
-						msg.id = messageId;
-						msg.stanzaId = messageId;
-						msg.date = new Date(timestamp).getTime();
-						msg.read = MarkerStatus.UNREAD;
-					}
-					// Update lastMessage so inbox reflects the confirmed message
-					if (
-						registry.lastMessage &&
-						registry.lastMessage.type === MessageType.TEXT_MSG &&
-						(registry.lastMessage.id === requestId || registry.lastMessage.stanzaId === `placeholder_${requestId}`)
-					) {
-						registry.lastMessage = {
-							...registry.lastMessage,
-							id: messageId,
-							stanzaId: messageId,
-							date: new Date(timestamp).getTime(),
-							read: MarkerStatus.UNREAD
-						};
-					}
-				}),
-				false
-			);
-			break;
-		}
 
 		case 'message-edited':
 			handleWsMessageEdited(chatEvent);

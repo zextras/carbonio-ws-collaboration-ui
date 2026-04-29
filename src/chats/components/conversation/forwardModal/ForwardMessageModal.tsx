@@ -46,7 +46,7 @@ import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -185,10 +185,12 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const forwardMessage = useCallback(() => {
 		const roomsId = map(selected, (key, value) => value);
 		const messages = messagesToForward || [];
-		// Send each message to each target room via WS
+		// Send each message to each target room via REST
 		roomsId.forEach((toRoomId) => {
 			messages.forEach((message) => {
-				chatWsClient.forwardMessage(message.roomId, message.stanzaId, toRoomId);
+				ChatApi.forwardMessage(message.roomId, message.stanzaId, toRoomId).catch((err) => {
+					console.error('[ForwardModal] forwardMessage failed', err);
+				});
 			});
 		});
 		if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {

@@ -31,6 +31,11 @@ import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
 import { isBefore } from '../../utils/dateUtils';
 
+function compareMessages(a: { date: number; id: string }, b: { date: number; id: string }): number {
+	if (a.date !== b.date) return a.date - b.date;
+	return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
 	const result: T[] = [];
 	let i = 0;
@@ -48,6 +53,20 @@ function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => n
 	while (j < arr2.length) result.push(arr2[j++]);
 
 	return result;
+}
+
+function sortedInsert(messages: Message[], message: Message): void {
+	let lo = 0;
+	let hi = messages.length;
+	while (lo < hi) {
+		const mid = (lo + hi) >>> 1;
+		if (compareMessages(messages[mid], message) <= 0) {
+			lo = mid + 1;
+		} else {
+			hi = mid;
+		}
+	}
+	messages.splice(lo, 0, message);
 }
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
@@ -132,11 +151,10 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, message.roomId);
 				const alreadyExists = find(messages, { id: message.id });
-				// Replace message if it already exists (placeholder message)
 				if (alreadyExists) {
 					Object.assign(alreadyExists, message);
 				} else {
-					messages.push(message);
+					sortedInsert(messages, message);
 				}
 				// Update lastMessage for inbox display
 				const registry = draft.chatsRegistry[message.roomId];
@@ -198,8 +216,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages, markers: existingMarkers } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const newMessages = orderBy(messageArray, ['date'], ['asc']);
-					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
+					const newMessages = orderBy(messageArray, ['date', 'id'], ['asc', 'asc']);
+					const merged = mergeSortedArrays(newMessages, messages, compareMessages);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}

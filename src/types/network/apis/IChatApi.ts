@@ -28,6 +28,8 @@ export interface IChatApi {
 		roomId: string,
 		options?: {
 			before?: string;
+			/** Message ID that anchors composite cursor pagination together with `before` (BUG-12) */
+			beforeId?: string;
 			after?: string;
 			around?: string;
 			limit?: number;
@@ -46,14 +48,20 @@ export interface IChatApi {
 	): Promise<MessageHistoryResponse>;
 
 	/**
-	 * Sends a new message to a room
+	 * Sends a new message to a room.
+	 * Calls are serialized per room via an internal queue.
 	 */
 	sendMessage(
 		roomId: string,
 		text: string,
-		messageId?: string,
 		replyToId?: string
 	): Promise<ChatMessage>;
+
+	/**
+	 * Forwards a message to another room.
+	 * Calls are serialized per source room via an internal queue.
+	 */
+	forwardMessage(sourceRoomId: string, messageId: string, toRoomId: string): Promise<ChatMessage>;
 
 	/**
 	 * Gets a specific message by ID

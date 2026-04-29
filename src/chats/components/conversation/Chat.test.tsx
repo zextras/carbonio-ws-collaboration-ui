@@ -11,7 +11,7 @@ import { now } from 'moment';
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
 import ChatApi from '../../../network/apis/ChatApi';
-import { chatWsClient } from '../../../network/websocket/ChatWebSocketClient';
+import { ChatMessage } from '../../../types/network/models/chatTypes';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -401,14 +401,14 @@ describe('Chat', () => {
 			store.newMessage(mockedTextMessage);
 			store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 
-			// Mock chatWsClient.pinMessage and deleteMessage to update the store
+			// Mock ChatApi.pinMessage and deleteMessage to update the store
 			vi.spyOn(ChatApi, 'pinMessage').mockImplementation(() => {
 				store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 				return Promise.resolve();
 			});
-			vi.spyOn(chatWsClient, 'deleteMessage').mockImplementation(() => {
+			vi.spyOn(ChatApi, 'deleteMessage').mockImplementation(() => {
 				store.removePinnedMessage(mockedRoom.id);
-				return '';
+				return Promise.resolve();
 			});
 
 			const { user } = setup(
@@ -484,11 +484,11 @@ describe('Chat', () => {
 					return Promise.resolve();
 				});
 
-				// Mock chatWsClient.editMessage to update the pinned message text
-				vi.spyOn(chatWsClient, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
+				// Mock ChatApi.editMessage to update the pinned message text
+				vi.spyOn(ChatApi, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
 					const updatedMessage = { ...mockedTextMessage, text: newText, edited: true };
 					store.setPinnedMessage(mockedRoom.id, updatedMessage);
-					return '';
+					return Promise.resolve(updatedMessage as unknown as ChatMessage);
 				});
 
 				const updatedText = 'updated text';
@@ -537,8 +537,8 @@ describe('Chat', () => {
 					return Promise.resolve();
 				});
 
-				// Mock chatWsClient.editMessage to update the pinned message text
-				vi.spyOn(chatWsClient, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
+				// Mock ChatApi.editMessage to update the pinned message text
+				vi.spyOn(ChatApi, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
 					const updatedMessage = {
 						...mockedEditedMessage,
 						text: newText,
@@ -546,7 +546,7 @@ describe('Chat', () => {
 						editedStanzaId: 'editedStanzaId2'
 					};
 					store.setPinnedMessage(mockedRoom.id, updatedMessage);
-					return '';
+					return Promise.resolve(updatedMessage as unknown as ChatMessage);
 				});
 
 				const secondModification = ' again';
@@ -603,8 +603,8 @@ describe('Chat', () => {
 
 				const updatedText = 'updated text';
 
-				// Mock chatWsClient.editMessage to update the message via fastening
-				vi.spyOn(chatWsClient, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
+				// Mock ChatApi.editMessage to update the message via fastening
+				vi.spyOn(ChatApi, 'editMessage').mockImplementation((_roomId, _messageId, newText) => {
 					const fastening = createMockMessageFastening({
 						roomId: mockedRoom.id,
 						originalStanzaId: mockedTextMsgWithAttachment.stanzaId,
@@ -612,7 +612,7 @@ describe('Chat', () => {
 						value: newText
 					});
 					store.addFastening([fastening]);
-					return '';
+					return Promise.resolve(mockedTextMsgWithAttachment as unknown as ChatMessage);
 				});
 
 				// Mock xmppClient.pinMessage to update the store with the edited message including attachment

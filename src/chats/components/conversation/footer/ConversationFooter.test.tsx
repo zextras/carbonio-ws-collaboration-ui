@@ -11,6 +11,7 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
+import ChatApi from '../../../../network/apis/ChatApi';
 import * as api from '../../../../network/apis/RoomsApi';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import useStore from '../../../../store/Store';
@@ -326,7 +327,7 @@ describe('ConversationFooter', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
-		const spySendChatMessageReply = vi.spyOn(chatWsClient, 'sendMessage');
+		const spySendChatMessageReply = vi.spyOn(ChatApi, 'sendMessage').mockResolvedValue({} as any);
 		const textToSend = 'hi!';
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -347,7 +348,7 @@ describe('ConversationFooter', () => {
 	});
 
 	test('User can edit a message and send it', async () => {
-		const spySendChatMessageEdit = vi.spyOn(chatWsClient, 'editMessage');
+		const spySendChatMessageEdit = vi.spyOn(ChatApi, 'editMessage').mockResolvedValue({} as any);
 		const store = useStore.getState();
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 

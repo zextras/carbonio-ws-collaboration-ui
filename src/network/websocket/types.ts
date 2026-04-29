@@ -5,34 +5,8 @@
  */
 
 // Inbound actions (client -> server)
+// Message writes (send, edit, delete, forward) are now REST calls — not WS actions.
 export type WsAction =
-	| {
-			action: 'send-message';
-			requestId: string;
-			roomId: string;
-			text: string;
-			replyToId?: string;
-	  }
-	| {
-			action: 'edit-message';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-			text: string;
-	  }
-	| {
-			action: 'delete-message';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-	  }
-	| {
-			action: 'forward-message';
-			requestId: string;
-			roomId: string;
-			messageId: string;
-			toRoomId: string;
-	  }
 	| { action: 'ping' }
 	| {
 			action: 'typing';
@@ -65,13 +39,6 @@ export type WsChatEvent =
 			// Present when this message-received is actually a forwarded message echoed back
 			forwardedFrom?: string; // original sender's userId
 			forwardedAt?: string; // ISO timestamp of original send
-	  }
-	| {
-			type: 'message-sent';
-			requestId: string;
-			messageId: string;
-			roomId: string;
-			timestamp: string;
 	  }
 	| {
 			type: 'message-edited';
@@ -157,7 +124,6 @@ export type WsChatEventType = WsChatEvent['type'];
 export function isChatEvent(eventType: string): boolean {
 	const chatEventTypes: string[] = [
 		'message-received',
-		'message-sent',
 		'message-edited',
 		'message-deleted',
 		'message-forwarded',

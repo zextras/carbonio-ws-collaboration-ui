@@ -33,6 +33,7 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { RoomsApi } from '../../../../network';
 import { mapChatMessageToTextMessage } from '../../../../network/utils/messageMapper';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
@@ -260,7 +261,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					chatWsClient.sendMessage(roomId, message, referenceMessage.stanzaId);
+					ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
+						console.error('[MessageComposer] sendMessage failed', err);
+					});
 					unsetReferenceMessage(roomId);
 					break;
 				}
@@ -269,8 +272,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					if (message === '' && !referenceMessage.attachment) {
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
-						// Avoid to send correction if text doesn't change
-						chatWsClient.editMessage(roomId, referenceMessage.stanzaId, message);
+						// Avoid sending correction if text doesn't change
+						ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
+							console.error('[MessageComposer] editMessage failed', err);
+						});
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -346,15 +351,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			// Handle placeholder rooms: create room first, then send via WS
-			const placeholderRoom = roomId.split('placeholder-');
-			if (placeholderRoom[1]) {
-				RoomsApi.replacePlaceholderRoom(placeholderRoom[1]).then((response) => {
-					chatWsClient.sendMessage(response.id, message);
-				});
-			} else {
-				chatWsClient.sendMessage(roomId, message);
-			}
+			// ChatApi.sendMessage handles placeholder rooms internally
+			ChatApi.sendMessage(roomId, message).catch((err) => {
+				console.error('[MessageComposer] sendMessage failed', err);
+			});
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}

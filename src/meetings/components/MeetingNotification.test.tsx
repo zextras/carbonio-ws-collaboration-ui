@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
-import { chatWsClient } from '../../network/websocket/ChatWebSocketClient';
+import ChatApi from '../../network/apis/ChatApi';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
@@ -52,7 +52,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
-		const spyOnSendMessage = vi.spyOn(chatWsClient, 'sendMessage');
+		const spyOnSendMessage = vi.spyOn(ChatApi, 'sendMessage').mockResolvedValue({} as any);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -68,7 +68,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking Enter', async () => {
-		const spyOnSendMessage = vi.spyOn(chatWsClient, 'sendMessage');
+		const spyOnSendMessage = vi.spyOn(ChatApi, 'sendMessage').mockResolvedValue({} as any);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}

@@ -11,7 +11,7 @@ import { now } from 'moment';
 
 import Bubble from './Bubble';
 import * as api from '../../../../network/apis/AttachmentsApi';
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import ChatApi from '../../../../network/apis/ChatApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -365,7 +365,7 @@ describe('Actions', () => {
 		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		const spySendChatMessageDeletion = vi.spyOn(chatWsClient, 'deleteMessage');
+		const spySendChatMessageDeletion = vi.spyOn(ChatApi, 'deleteMessage').mockResolvedValue();
 
 		useStore.getState().newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(

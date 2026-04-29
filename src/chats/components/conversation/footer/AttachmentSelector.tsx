@@ -20,7 +20,7 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import {
 	getRoomNameSelector,
@@ -107,7 +107,9 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			if (functionCheck) {
 				getLink({ node: nodes[0], type: 'createLink', description: myDescription })
 					.then((result: { url: string }) => {
-						chatWsClient.sendMessage(roomId, result.url);
+						ChatApi.sendMessage(roomId, result.url).catch((err) => {
+						console.error('[AttachmentSelector] sendMessage failed', err);
+					});
 					})
 					.catch(() => {
 						createSnackbar({

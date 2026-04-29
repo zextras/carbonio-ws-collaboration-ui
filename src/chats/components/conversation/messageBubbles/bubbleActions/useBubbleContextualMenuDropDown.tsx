@@ -19,8 +19,8 @@ import { useTranslation } from 'react-i18next';
 
 import usePreview from '../../../../../hooks/usePreview';
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
+import ChatApi from '../../../../../network/apis/ChatApi';
 import { deleteAttachment, getURLAttachment } from '../../../../../network';
-import { chatWsClient } from '../../../../../network/websocket/ChatWebSocketClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
@@ -111,12 +111,15 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		if (message.attachment) {
-			deleteAttachment(message.attachment.id).then(() => {
-				chatWsClient.deleteMessage(message.roomId, message.stanzaId);
+		const doDelete = (): void => {
+			ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
+				console.error('[BubbleMenu] deleteMessage failed', err);
 			});
+		};
+		if (message.attachment) {
+			deleteAttachment(message.attachment.id).then(doDelete).catch(doDelete);
 		} else {
-			chatWsClient.deleteMessage(message.roomId, message.stanzaId);
+			doDelete();
 		}
 	}, [message.attachment, message.stanzaId, message.roomId]);
 

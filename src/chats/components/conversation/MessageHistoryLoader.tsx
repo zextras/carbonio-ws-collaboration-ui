@@ -113,6 +113,7 @@ export const HistoryLoaderBefore = ({
 	);
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setHasMoreBefore = useStore((store) => store.setHasMoreBefore);
+	const setHistoryIsFullyLoaded = useStore((store) => store.setHistoryIsFullyLoaded);
 	const hasMoreBefore = useStore((store) => store.chatsRegistry[roomId]?.hasMoreBefore ?? true);
 	const currentUserId = useStore(getUserId);
 
@@ -127,22 +128,26 @@ export const HistoryLoaderBefore = ({
 
 		const oldestMessage = first(roomMessages);
 		const beforeDate = oldestMessage ? new Date(oldestMessage.date).toISOString() : undefined;
+		// BUG-12: pass composite cursor to avoid skipping messages with identical timestamps
+		const beforeMessageId = oldestMessage?.id;
 
 		setHistoryLoadDisabled(roomId, true);
 
-		ChatApi.getTimeline(roomId, { before: beforeDate, limit: 50 })
+		ChatApi.getTimeline(roomId, { before: beforeDate, beforeId: beforeMessageId, limit: 50 })
 			.then((response) => {
 				processTimelineResponse(response, roomId, currentUserId || '');
 				setHasMoreBefore(roomId, response.hasMoreBefore);
 				if (response.hasMoreBefore) {
 					setHistoryLoadDisabled(roomId, false);
+				} else {
+					setHistoryIsFullyLoaded(roomId);
 				}
 			})
 			.catch((err) => {
 				console.error('[HistoryLoaderBefore] Failed to load:', err);
 				setHistoryLoadDisabled(roomId, false);
 			});
-	}, [roomId, historyLoadDisabled, hasMoreBefore, currentUserId, setHistoryLoadDisabled, setHasMoreBefore]);
+	}, [roomId, historyLoadDisabled, hasMoreBefore, currentUserId, setHistoryLoadDisabled, setHasMoreBefore, setHistoryIsFullyLoaded]);
 
 	useEffect(() => {
 		if (messageListRef?.current && loaderRef?.current) {
@@ -256,6 +261,7 @@ const MessageHistoryLoader = ({
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInitialTimelineLoaded = useStore((store) => store.setInitialTimelineLoaded);
 	const setHasMoreBefore = useStore((store) => store.setHasMoreBefore);
+	const setHistoryIsFullyLoaded = useStore((store) => store.setHistoryIsFullyLoaded);
 	const currentUserId = useStore(getUserId);
 
 	const handleHistoryLoader = useCallback(() => {
@@ -265,16 +271,19 @@ const MessageHistoryLoader = ({
 		if (roomId.startsWith('placeholder-')) return;
 
 		let beforeDate: string | undefined;
+		let beforeMessageId: string | undefined;
 		if (roomMessages && roomMessages.length > 0) {
-			const oldestMessageDate = first(roomMessages)?.date;
-			if (oldestMessageDate) {
-				beforeDate = new Date(oldestMessageDate).toISOString();
+			const oldestMessage = first(roomMessages);
+			if (oldestMessage?.date) {
+				beforeDate = new Date(oldestMessage.date).toISOString();
+				// BUG-12: pass composite cursor anchor to avoid skipping messages with identical timestamps
+				beforeMessageId = oldestMessage.id;
 			}
 		}
 
 		if (!historyLoadedDisabled) {
 			setHistoryLoadDisabled(roomId, true);
-			ChatApi.getTimeline(roomId, { before: beforeDate, limit: 50 })
+			ChatApi.getTimeline(roomId, { before: beforeDate, beforeId: beforeMessageId, limit: 50 })
 				.then((response) => {
 					processTimelineResponse(response, roomId, currentUserId || '');
 
@@ -286,6 +295,8 @@ const MessageHistoryLoader = ({
 
 					if (response.hasMoreBefore) {
 						setHistoryLoadDisabled(roomId, false);
+					} else {
+						setHistoryIsFullyLoaded(roomId);
 					}
 				})
 				.catch((err) => {
@@ -293,7 +304,7 @@ const MessageHistoryLoader = ({
 					setHistoryLoadDisabled(roomId, false);
 				});
 		}
-	}, [roomId, historyLoadedDisabled, currentUserId, setHistoryLoadDisabled, setInitialTimelineLoaded, setHasMoreBefore]);
+	}, [roomId, historyLoadedDisabled, currentUserId, setHistoryLoadDisabled, setInitialTimelineLoaded, setHasMoreBefore, setHistoryIsFullyLoaded]);
 
 	useEffect(() => {
 		if (messageListRef?.current && messageHistoryLoaderRef?.current) {

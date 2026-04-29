@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { WsAction } from './types';
 import { WebSocketClient } from './WebSocketClient';
 import useStore from '../../store/Store';
@@ -40,74 +38,6 @@ class ChatWebSocketClient {
 		} else {
 			console.warn('[ChatWS] sendAction dropped — socket not OPEN');
 		}
-	}
-
-	/**
-	 * Send a chat message to a room.
-	 * Returns the requestId for correlating the message-sent response.
-	 */
-	sendMessage(roomId: string, text: string, replyToId?: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'send-message',
-			requestId,
-			roomId,
-			text,
-			replyToId
-		});
-		// Optimistically add the message to the store so the sender sees it immediately.
-		// The message-sent ack will update the provisional id/date to the server-assigned values.
-		useStore.getState().setPlaceholderMessage({
-			id: requestId,
-			roomId,
-			text,
-			replyTo: replyToId
-		});
-		return requestId;
-	}
-
-	/**
-	 * Edit an existing message.
-	 */
-	editMessage(roomId: string, messageId: string, text: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'edit-message',
-			requestId,
-			roomId,
-			messageId,
-			text
-		});
-		return requestId;
-	}
-
-	/**
-	 * Delete (retract) a message.
-	 */
-	deleteMessage(roomId: string, messageId: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'delete-message',
-			requestId,
-			roomId,
-			messageId
-		});
-		return requestId;
-	}
-
-	/**
-	 * Forward a message to another room.
-	 */
-	forwardMessage(roomId: string, messageId: string, toRoomId: string): string {
-		const requestId = uuidv4();
-		this.sendAction({
-			action: 'forward-message',
-			requestId,
-			roomId,
-			messageId,
-			toRoomId
-		});
-		return requestId;
 	}
 
 	/**

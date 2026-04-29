@@ -6,10 +6,10 @@
 
 import React, { FC, useCallback } from 'react';
 
-import { Container, Modal, Text } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, Modal, Text, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -30,15 +30,26 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 	);
 	const deleteActionLabel = t('action.delete', 'Delete');
 	const closeLabel = t('action.close', 'Close');
+	const deleteErrorLabel = t('feedback.deleteMessageError', 'Failed to delete message');
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const onClose = useCallback(() => setModalStatus(false), [setModalStatus]);
 
 	const deleteMessage = useCallback(() => {
 		if (referenceMessage) {
-			chatWsClient.deleteMessage(roomId, referenceMessage.stanzaId);
+			ChatApi.deleteMessage(roomId, referenceMessage.stanzaId).catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: deleteErrorLabel,
+					hideButton: true,
+					autoHideTimeout: 3000
+				});
+			});
 		}
 		onClose();
-	}, [onClose, referenceMessage, roomId]);
+	}, [onClose, referenceMessage, roomId, createSnackbar, deleteErrorLabel]);
 
 	return (
 		<Modal
