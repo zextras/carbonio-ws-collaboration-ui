@@ -8,10 +8,39 @@ import React, { FC } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
+import { AttachmentList } from './AttachmentList';
+import { AttachmentListSkeleton } from './AttachmentListSkeleton';
+import { EmptyAttachmentList } from './EmptyAttachmentList';
+import { useMediaGalleryAttachments } from '../../../../hooks/useMediaGalleryAttachments';
+
 type MediaGalleryTabProps = {
 	roomId: string;
 };
 
-export const MediaGalleryTab: FC<MediaGalleryTabProps> = () => (
-	<Container data-testid="mediaGalleryTab" mainAlignment="flex-start" />
-);
+export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
+	const { attachments, isInitialized, isLoading, hasMore, loadMore } =
+		useMediaGalleryAttachments(roomId);
+
+	const showInitialSkeleton = !isInitialized && isLoading;
+	const showEmptyState = isInitialized && attachments.length === 0;
+
+	return (
+		<Container
+			data-testid="mediaGalleryTab"
+			mainAlignment="flex-start"
+			crossAlignment="stretch"
+			height="100%"
+		>
+			{showInitialSkeleton && <AttachmentListSkeleton />}
+			{showEmptyState && <EmptyAttachmentList />}
+			{!showInitialSkeleton && !showEmptyState && (
+				<AttachmentList
+					attachments={attachments}
+					hasMore={hasMore}
+					isLoading={isLoading}
+					loadMore={loadMore}
+				/>
+			)}
+		</Container>
+	);
+};

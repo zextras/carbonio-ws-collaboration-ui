@@ -23,3 +23,5 @@ export enum RequestType {
 	PUT = 'PUT',
 	DELETE = 'DELETE'
 }
+
+export { buildQueryString } from '../FetchUtils';
