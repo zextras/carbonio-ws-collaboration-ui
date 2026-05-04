@@ -270,7 +270,7 @@ const InfoPage = (): ReactElement => {
 								{renderStars}
 							</Container>
 						)}
-						<Container width="fit" height=" fit">
+						<Container width="fit" height="fit">
 							<Text color="gray6">{opinionLabel}</Text>
 							<Text color="gray6">{improveLabel}</Text>
 						</Container>
