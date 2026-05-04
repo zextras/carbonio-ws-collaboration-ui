@@ -182,14 +182,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
-		controller: AbortController,
-		description: string
+		controller: AbortController
 	): Promise<{ id: string }> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
-		// Send as reply only the first file of the array
-		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
+		const lastFileId =
+			filesToUploadArray && filesToUploadArray[filesToUploadArray.length - 1].fileId;
+		const isLastFile = filesToUploadArray && file.fileId === lastFileId;
 
 		let area;
 		if (isAttachmentImage(file.file.type)) {
@@ -204,8 +204,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			roomId,
 			file.file,
 			{
-				description,
-				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined,
+				description: isLastFile ? textMessage.trim() : '',
+				replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
 				area
 			},
 			signal
@@ -282,19 +282,16 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const sendMessage = useCallback((): void => {
 		sendStopWriting();
 		const message = textMessage.trim();
-		if (filesToUploadArray) {
+		if (filesToUploadArray && filesToUploadArray.length > 0) {
 			const abortControllerList: AbortController[] = filesToUploadArray.map(
 				() => new AbortController()
 			);
-			const lastIndex = filesToUploadArray.length - 1;
 
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = filesToUploadArray.reduce(
 				(acc: Promise<{ id: string } | void>, file, i) =>
-					acc.then(() =>
-						uploadAttachmentPromise(file, abortControllerList[i], i === lastIndex ? message : '')
-					),
+					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);
 
