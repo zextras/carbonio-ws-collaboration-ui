@@ -479,7 +479,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		() =>
 			!isUserGuest &&
 			!isUploading &&
-			!filesToUploadArray &&
+			(!filesToUploadArray || filesToUploadArray.length === 0) &&
 			(!referenceMessage || referenceMessage.actionType === messageActionType.REPLY),
 		[filesToUploadArray, isUploading, isUserGuest, referenceMessage]
 	);
