@@ -48,7 +48,6 @@ const PreviewContainer = styled(Container)`
 	margin-left: 0.25rem;
 	margin-right: 0.25rem;
 	position: relative;
-	cursor: pointer;
 	box-sizing: content-box;
 	&:hover {
 		${HoverActions} {
