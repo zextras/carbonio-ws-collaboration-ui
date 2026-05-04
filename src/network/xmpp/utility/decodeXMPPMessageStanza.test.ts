@@ -89,7 +89,7 @@ describe('Test decode message function', () => {
 
 	describe('Meeting configuration messages', () => {
 		const timestamp = '1745397215000';
-		const duration = (5 * 60 * 1000).toString();
+		const duration = (5 * 60).toString();
 
 		test('meetingStarted is decoded correctly', () => {
 			const stanza = buildConfigurationStanza({ operation: 'meetingStarted', timestamp });
