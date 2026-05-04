@@ -198,7 +198,19 @@ export const useConfigurationMessageLabel = (
 	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
 
 	const meetingEndedLabel = useMemo(() => {
-		const duration = message.value ? moment.duration(message.value, 'seconds').humanize() : 0;
+		let duration = '';
+		if (message.value) {
+			const totalSeconds = Number(message.value);
+			const hours = Math.floor(totalSeconds / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			if (totalSeconds < 60) {
+				duration = moment.duration(totalSeconds, 'seconds').humanize();
+			} else if (hours < 1) {
+				duration = `${Math.floor(totalSeconds / 60)} min`;
+			} else {
+				duration = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			}
+		}
 		return (
 			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
 				time: meetingTime

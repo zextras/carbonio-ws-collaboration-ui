@@ -349,6 +349,72 @@ describe('useConfigurationMessageLabel', () => {
 			expect(result.current).toMatch(/Call ended at/i);
 		});
 
+		test('meetingEnded — no duration when value is missing', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: ''
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).not.toContain(' - ');
+		});
+
+		test('meetingEnded — duration under 1 minute uses humanize', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '30'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/a few seconds/i);
+		});
+
+		test('meetingEnded — duration under 1 hour shows minutes', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '2700'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('45 min');
+		});
+
+		test('meetingEnded — duration over 1 hour shows "Xh Ym"', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '5400'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('1h 30m');
+		});
+
+		test('meetingEnded — duration exactly 1 hour shows "1h"', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '3600'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('1h');
+			expect(result.current).not.toContain('0m');
+		});
+
 		test('meetingDeclined — logged user declined', () => {
 			const msg = createMockConfigurationMessage({
 				roomId: oneToOneRoom.id,
