@@ -199,10 +199,11 @@ export const useConfigurationMessageLabel = (
 
 	const meetingEndedLabel = useMemo(() => {
 		const duration = message.value ? moment.duration(message.value, 'seconds').humanize() : 0;
-		return t('configurationMessages.meetingEnded', 'Call ended at {{time}} - {{duration}}', {
-			time: meetingTime,
-			duration
-		});
+		return (
+			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
+				time: meetingTime
+			}) + (duration ? ` - ${duration}` : '')
+		);
 	}, [meetingTime, message.value, t]);
 
 	const meetingDeclinedLabel = useMemo(() => {
