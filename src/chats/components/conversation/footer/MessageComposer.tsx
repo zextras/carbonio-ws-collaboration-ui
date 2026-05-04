@@ -187,8 +187,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		const fileName = file.file.name;
 		const { signal } = controller;
 
-		const lastFileId =
-			filesToUploadArray && filesToUploadArray[filesToUploadArray.length - 1].fileId;
+		const lastFileId = filesToUploadArray?.at(-1)?.fileId;
 		const isLastFile = filesToUploadArray && file.fileId === lastFileId;
 
 		let area;
