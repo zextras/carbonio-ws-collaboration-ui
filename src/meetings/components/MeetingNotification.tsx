@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { Avatar, Button, Container, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
+import { gte } from 'semver';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
@@ -97,7 +98,8 @@ const MeetingNotification = ({
 	}, [disableSendMessage, meeting, message, stopMeetingSound]);
 
 	const handleDeclineMeeting = useCallback(() => {
-		if (meeting) declineMeeting(meeting.id);
+		const version = useStore.getState().session.apiVersion;
+		if (meeting && version && gte(version, '1.6.10')) declineMeeting(meeting.id);
 		removeNotification(id);
 	}, [id, meeting, removeNotification]);
 

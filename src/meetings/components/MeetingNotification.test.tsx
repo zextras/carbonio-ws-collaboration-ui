@@ -99,6 +99,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('Declining a meeting calls the decline API', async () => {
+		useStore.getState().setApiVersion('1.6.10');
 		const spyDeclineMeeting = vi
 			.spyOn(MeetingsApi, 'declineMeeting')
 			.mockResolvedValue(new Response());
