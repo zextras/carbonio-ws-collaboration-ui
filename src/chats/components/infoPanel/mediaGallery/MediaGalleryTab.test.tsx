@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { MediaGalleryTab } from './MediaGalleryTab';
 import { getRoomAttachments } from '../../../../network';
+import useStore from '../../../../store/Store';
 import { screen, setup, triggerObserver } from '../../../../tests/test-utils';
 import { Attachment } from '../../../../types/network/models/attachmentTypes';
 
@@ -20,6 +21,7 @@ vi.mock('../../../../network/apis/RoomsApi', () => ({
 const mockedGetRoomAttachments = vi.mocked(getRoomAttachments);
 
 const roomId = 'room-1';
+const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
 	id,
@@ -71,7 +73,7 @@ describe('MediaGalleryTab', () => {
 
 	test('hides the load-more trigger when no further pages are available', async () => {
 		mockedGetRoomAttachments.mockResolvedValue({
-			attachments: [buildAttachment('a1', '2024-01-01T10:00:00Z')],
+			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
 			cursor: undefined
 		});
 
@@ -81,9 +83,37 @@ describe('MediaGalleryTab', () => {
 		expect(screen.queryByTestId('list-bottom-element')).not.toBeInTheDocument();
 	});
 
+	test('switching to "My attachments" refetches with userId of the logged user', async () => {
+		const myUserId = 'me';
+		useStore.getState().setLoginInfo({ id: myUserId, name: 'Me' });
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
+			cursor: undefined
+		});
+
+		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+		await screen.findByTestId('mediaGalleryAttachment-a1');
+
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('mine-1', '2024-02-01T10:00:00Z')],
+			cursor: undefined
+		});
+
+		await user.click(screen.getByTestId('mediaGalleryFilter-mine'));
+
+		await waitFor(() => {
+			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
+		});
+		expect(mockedGetRoomAttachments).toHaveBeenLastCalledWith(
+			roomId,
+			expect.objectContaining({ userId: myUserId, cursor: undefined })
+		);
+		expect(await screen.findByTestId('mediaGalleryAttachment-mine-1')).toBeInTheDocument();
+	});
+
 	test('fetches the next page when the bottom element intersects the viewport', async () => {
 		mockedGetRoomAttachments.mockResolvedValueOnce({
-			attachments: [buildAttachment('a1', '2024-01-01T10:00:00Z')],
+			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
 			cursor: 'next-cursor'
 		});
 

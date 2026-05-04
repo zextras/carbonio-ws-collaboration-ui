@@ -11,10 +11,14 @@ import { StateCreator } from 'zustand';
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import {
 	DEFAULT_MEDIA_GALLERY_FILTER,
+	MediaGalleryFilter,
 	MediaGalleryRoomState,
 	MediaGalleryStoreSlice
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+
+const isSameFilter = (a: MediaGalleryFilter, b: MediaGalleryFilter): boolean =>
+	a.userId === b.userId && a.sortBy === b.sortBy && a.order === b.order;
 
 const initMediaGalleryRoom = (draft: RootStore, roomId: string): MediaGalleryRoomState => {
 	if (!draft.mediaGallery[roomId]) {
@@ -64,6 +68,22 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			}),
 			false,
 			'MG/APPEND_PAGE'
+		);
+	},
+	setMediaGalleryFilter: (roomId: string, filter: MediaGalleryFilter): void => {
+		set(
+			produce((draft: RootStore) => {
+				const state = initMediaGalleryRoom(draft, roomId);
+				if (isSameFilter(state.filter, filter)) return;
+				state.filter = filter;
+				state.attachments = [];
+				state.nextCursor = undefined;
+				state.hasMore = true;
+				state.isInitialized = false;
+				state.isLoading = false;
+			}),
+			false,
+			'MG/SET_FILTER'
 		);
 	}
 });

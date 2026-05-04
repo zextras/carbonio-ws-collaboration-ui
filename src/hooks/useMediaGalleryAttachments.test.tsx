@@ -10,6 +10,7 @@ import { MEDIA_GALLERY_PAGE_SIZE, useMediaGalleryAttachments } from './useMediaG
 import { getRoomAttachments } from '../network';
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../types/store/MediaGalleryTypes';
 
 vi.mock('../network/apis/RoomsApi', () => ({
 	getRoomAttachments: vi.fn()
@@ -111,6 +112,44 @@ describe('useMediaGalleryAttachments', () => {
 			result.current.loadMore();
 		});
 		expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(callsBefore);
+	});
+
+	test('refetches the first page when the filter changes', async () => {
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('a1')],
+			cursor: 'cursor-1'
+		});
+
+		const { result } = renderHook(() => useMediaGalleryAttachments(roomId));
+		await waitFor(() => expect(result.current.attachments).toHaveLength(1));
+
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('mine-1')],
+			cursor: undefined
+		});
+
+		await act(async () => {
+			useStore
+				.getState()
+				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+		});
+
+		await waitFor(() => {
+			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
+		});
+
+		expect(mockedGetRoomAttachments).toHaveBeenLastCalledWith(roomId, {
+			limit: MEDIA_GALLERY_PAGE_SIZE,
+			cursor: undefined,
+			userId: 'me',
+			sortBy: 'created_at',
+			order: 'desc'
+		});
+
+		await waitFor(() => {
+			const state = useStore.getState().mediaGallery[roomId];
+			expect(state.attachments.map((a) => a.id)).toEqual(['mine-1']);
+		});
 	});
 
 	test('keeps loading=false on fetch error and logs to console', async () => {
