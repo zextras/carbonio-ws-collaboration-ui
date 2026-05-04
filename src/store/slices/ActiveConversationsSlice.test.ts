@@ -210,30 +210,14 @@ describe('Active conversations slice', () => {
 	describe('filesToAttach', () => {
 		test('Add files to attach', () => {
 			const file = new File([''], 'file.txt');
-			const files = [
-				{
-					file,
-					fileId: 'fileId',
-					hasFocus: true,
-					description: '',
-					localUrl: URL.createObjectURL(file)
-				}
-			];
+			const files = [{ file, fileId: 'fileId', localUrl: URL.createObjectURL(file) }];
 			useStore.getState().addFilesToAttach(mockedRoom.id, files);
 			expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toEqual(files);
 		});
 
 		test('Remove files to attach', () => {
 			const file = new File([''], 'file.txt');
-			const files = [
-				{
-					file,
-					fileId: 'fileId',
-					hasFocus: true,
-					description: '',
-					localUrl: URL.createObjectURL(file)
-				}
-			];
+			const files = [{ file, fileId: 'fileId', localUrl: URL.createObjectURL(file) }];
 			useStore.getState().addFilesToAttach(mockedRoom.id, files);
 			useStore.getState().removeFilesToAttach(mockedRoom.id, 'fileId');
 			expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toEqual([]);
