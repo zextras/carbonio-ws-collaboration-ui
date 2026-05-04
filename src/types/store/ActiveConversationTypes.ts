@@ -6,6 +6,12 @@
 
 import { AttachmentMessageType, TextMessage } from './ChatsRegistryTypes';
 
+export enum InfoPanelTab {
+	ACTIONS = 'actions',
+	MEMBERS = 'members',
+	MEDIA_GALLERY = 'media_gallery'
+}
+
 export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
 	setScrollPosition: (roomId: string, messageId: string) => void;
@@ -27,6 +33,7 @@ export type ActiveConversationsSlice = {
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setSelectedInfoTab: (roomId: string, tab: InfoPanelTab) => void;
 	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
 	removeFilesToAttach: (roomId: string, fileId?: string) => void;
 	setFileFocus: (roomId: string, fileId: string, active: boolean) => void;
@@ -79,6 +86,7 @@ export type ReferenceMessage = {
 type InfoPanelStatus = {
 	participantsAccordionIsOpened: boolean;
 	actionsAccordionIsOpened: boolean;
+	selectedInfoTab: InfoPanelTab;
 };
 
 export type FileToUpload = {

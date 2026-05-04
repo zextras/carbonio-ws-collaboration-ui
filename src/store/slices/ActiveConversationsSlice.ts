@@ -13,6 +13,7 @@ import {
 	ActiveConversation,
 	ActiveConversationsSlice,
 	FileToUpload,
+	InfoPanelTab,
 	messageActionType
 } from '../../types/store/ActiveConversationTypes';
 import {
@@ -27,7 +28,8 @@ const initActiveConversation = (draft: RootStore, roomId: string): ActiveConvers
 		draft.activeConversations[roomId] = {
 			infoPanelStatus: {
 				actionsAccordionIsOpened: true,
-				participantsAccordionIsOpened: true
+				participantsAccordionIsOpened: true,
+				selectedInfoTab: InfoPanelTab.ACTIONS
 			}
 		};
 	}
@@ -383,6 +385,16 @@ export const useActiveConversationsSlice: StateCreator<
 			}),
 			false,
 			'AC/SET_SELECTED_PINNED_MESSAGE'
+		);
+	},
+	setSelectedInfoTab: (roomId: string, tab: InfoPanelTab): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.infoPanelStatus.selectedInfoTab = tab;
+			}),
+			false,
+			'AC/SET_SELECTED_INFO_TAB'
 		);
 	}
 });
