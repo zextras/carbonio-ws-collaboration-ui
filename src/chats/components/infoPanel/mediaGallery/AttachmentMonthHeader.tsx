@@ -17,6 +17,7 @@ export const AttachmentMonthHeader: FC<AttachmentMonthHeaderProps> = ({ label })
 		data-testid={`mediaGalleryMonthHeader-${label}`}
 		mainAlignment="center"
 		padding={{ vertical: 'small' }}
+		height="fit"
 	>
 		<Text size="small" color="gray1">
 			{label}

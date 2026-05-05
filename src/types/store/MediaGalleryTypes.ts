@@ -41,4 +41,5 @@ export type MediaGalleryStoreSlice = {
 		nextCursor: string | undefined
 	) => void;
 	setMediaGalleryFilter: (roomId: string, filter: MediaGalleryFilter) => void;
+	removeMediaGalleryAttachment: (roomId: string, attachmentId: string) => void;
 };

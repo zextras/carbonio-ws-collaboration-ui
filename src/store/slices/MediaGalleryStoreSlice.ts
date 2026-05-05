@@ -85,5 +85,18 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			false,
 			'MG/SET_FILTER'
 		);
+	},
+	removeMediaGalleryAttachment: (roomId: string, attachmentId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const state = draft.mediaGallery[roomId];
+				if (!state) return;
+				const index = state.attachments.findIndex((a) => a.id === attachmentId);
+				if (index === -1) return;
+				state.attachments.splice(index, 1);
+			}),
+			false,
+			'MG/REMOVE_ATTACHMENT'
+		);
 	}
 });

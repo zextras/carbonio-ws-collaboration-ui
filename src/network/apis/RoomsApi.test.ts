@@ -8,6 +8,7 @@ import {
 	addRoom,
 	addRoomAttachment,
 	addRoomMembers,
+	bulkDeleteRoomAttachments,
 	clearRoomHistory,
 	deleteRoom,
 	deleteRoomAndMeeting,
@@ -311,6 +312,14 @@ describe('Rooms API', () => {
 			`rooms/roomId/attachments?limit=20&sortBy=size`,
 			RequestType.GET
 		);
+	});
+
+	test('bulkDeleteRoomAttachments is called with the attachmentIds body', async () => {
+		await bulkDeleteRoomAttachments('roomId', ['file-1', 'file-2']);
+
+		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/attachments`, RequestType.DELETE, {
+			attachmentIds: ['file-1', 'file-2']
+		});
 	});
 
 	describe('addRoomAttachments', () => {

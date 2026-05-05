@@ -75,4 +75,35 @@ describe('Media gallery slice', () => {
 		expect(state.nextCursor).toBe('cur-1');
 		expect(state.isInitialized).toBe(true);
 	});
+
+	test('removeMediaGalleryAttachment drops the attachment by id and preserves pagination', () => {
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				[
+					buildAttachment({ id: 'a1' }),
+					buildAttachment({ id: 'a2' }),
+					buildAttachment({ id: 'a3' })
+				],
+				'cur-1'
+			);
+		useStore.getState().removeMediaGalleryAttachment(roomId, 'a2');
+		const state = useStore.getState().mediaGallery[roomId];
+		expect(state.attachments.map((a) => a.id)).toEqual(['a1', 'a3']);
+		expect(state.nextCursor).toBe('cur-1');
+		expect(state.hasMore).toBe(true);
+	});
+
+	test('removeMediaGalleryAttachment is a no-op when the id is unknown', () => {
+		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+		useStore.getState().removeMediaGalleryAttachment(roomId, 'missing');
+		const state = useStore.getState().mediaGallery[roomId];
+		expect(state.attachments.map((a) => a.id)).toEqual(['a1']);
+	});
+
+	test('removeMediaGalleryAttachment is a no-op when the room is uninitialised', () => {
+		useStore.getState().removeMediaGalleryAttachment('unknown-room', 'a1');
+		expect(useStore.getState().mediaGallery['unknown-room']).toBeUndefined();
+	});
 });

@@ -11,6 +11,7 @@ import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import {
+	BulkDeleteRoomAttachmentsResponse,
 	GetRoomAttachmentsParams,
 	GetRoomAttachmentsResponse
 } from '../../types/network/models/attachmentTypes';
@@ -128,6 +129,12 @@ export const getRoomAttachments = (
 	params: GetRoomAttachmentsParams
 ): Promise<GetRoomAttachmentsResponse> =>
 	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+
+export const bulkDeleteRoomAttachments = (
+	roomId: string,
+	attachmentIds: Array<string>
+): Promise<BulkDeleteRoomAttachmentsResponse> =>
+	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds });
 
 export const replacePlaceholderRoom = (
 	userId: string,
