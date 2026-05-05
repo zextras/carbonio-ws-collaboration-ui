@@ -352,3 +352,33 @@ export const buildEndRequestHistoryStanza = ({
     </fin>
 </iq>`);
 };
+
+type ConfigStanzaParams = {
+	roomId?: string;
+	from?: string;
+	msgId?: string;
+	operation: string;
+	timestamp?: string;
+	duration?: string;
+};
+
+export const buildConfigurationStanza = ({
+	roomId = 'room-id@muclight.carbonio',
+	from = 'room-id@muclight.carbonio/caller-id@carbonio',
+	msgId = 'msg-001',
+	operation,
+	timestamp,
+	duration
+}: ConfigStanzaParams): Element => {
+	const timestampElement = timestamp ? `<timestamp>${timestamp}</timestamp>` : '';
+	const durationElement = duration ? `<duration>${duration}</duration>` : '';
+	const xml = `<message xmlns='jabber:client' to='${roomId}' from='${from}' type='groupchat' id='${msgId}'>
+			<x xmlns='urn:xmpp:muclight:0#configuration'>
+				<operation>${operation}</operation>
+				${timestampElement}
+				${durationElement}
+			</x>
+			<body/>
+		</message>`;
+	return new DOMParser().parseFromString(xml, 'application/xml').getElementsByTagName('message')[0];
+};

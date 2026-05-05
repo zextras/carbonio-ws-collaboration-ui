@@ -66,7 +66,8 @@ const pagesToCheckGuest = [
 		'Ouch! You left the meeting.',
 		'PLEASE, TRY TO JOIN AGAIN',
 		'Something went wrong.'
-	]
+	],
+	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', 'Call ended', 'declined the call']
 ];
 
 describe('Info page', () => {

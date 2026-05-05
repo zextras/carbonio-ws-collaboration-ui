@@ -41,6 +41,7 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.MEETING_PARTICIPANT_LEFT:
 		case WsEventType.MEETING_STOPPED:
 		case WsEventType.MEETING_DELETED:
+		case WsEventType.MEETING_DECLINED:
 		case WsEventType.MEETING_AUDIO_STREAM_CHANGED:
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED:
 		case WsEventType.MEETING_AUDIO_ANSWERED:

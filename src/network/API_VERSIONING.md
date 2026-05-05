@@ -2,6 +2,19 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.10
+### Changes
+- **API**: New `POST /meetings/${meetingId}/decline` endpoint to allow users to decline meeting invitations
+
+### Affected Files
+- 'src/meetings/components/MeetingNotification.tsx' on function `handleDeclineMeeting`
+
+---
+## Version 1.6.9
+### Changes
+- **API**: New `GET /meetings/${meetingId}/turnCredentials` endpoint to retrieve TURN credentials for a meeting
+
+---
 ## Version 1.6.8
 ### Changes
 - **API**: New `GET /users/capabilities` endpoint to retrieve user capabilities directly from WSC (replaces LDAP/Mailbox lookup for clients >= 1.6.8)

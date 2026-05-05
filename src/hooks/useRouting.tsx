@@ -20,7 +20,7 @@ export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
-	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
+	goToInfoPage: (infoType: PAGE_INFO_TYPE, meetingId?: string) => void;
 	goToExternalLoginPage: () => void;
 	goToMeetingAccessPage: () => void;
 };
@@ -46,7 +46,8 @@ const useRouting = (): UseRoutingHook => {
 	);
 
 	const goToInfoPage = useCallback(
-		(infoType: PAGE_INFO_TYPE): void => contextNavigate({ route: MEETINGS_ROUTES.INFO, infoType }),
+		(infoType: PAGE_INFO_TYPE, meetingId?: string): void =>
+			contextNavigate({ route: MEETINGS_ROUTES.INFO, infoType, meetingId }),
 		[contextNavigate]
 	);
 
