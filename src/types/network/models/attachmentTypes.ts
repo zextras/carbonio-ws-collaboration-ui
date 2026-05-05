@@ -12,6 +12,8 @@ export type Attachment = {
 	userId: string;
 	roomId: string;
 	createdAt: string;
+	messageId?: string;
+	stanzaId?: string;
 };
 
 export type AdditionalHeaders = {
@@ -41,4 +43,9 @@ export type GetRoomAttachmentsParams = {
 export type GetRoomAttachmentsResponse = {
 	attachments: Array<Attachment>;
 	cursor?: string;
+};
+
+export type BulkDeleteRoomAttachmentsResponse = {
+	successIds: Array<string>;
+	failedIds: Array<string>;
 };

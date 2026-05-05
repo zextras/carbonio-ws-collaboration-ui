@@ -4,12 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import styled from '@emotion/styled';
-import { Avatar, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Button,
+	Container,
+	Row,
+	Text,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { DeleteAttachmentModal } from './DeleteAttachmentModal';
+import { bulkDeleteRoomAttachments } from '../../../../network';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -41,13 +52,57 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
+	const deleteTooltip = t('action.delete', 'Delete');
+	const successLabel = t('feedback.attachmentDeleted', 'Attachment deleted');
+	const errorLabel = t('feedback.attachmentDeleteError', 'Could not delete the attachment');
 
 	const sessionId = useStore(getUserId);
 	const senderName = useStore((store) => getUserName(store, attachment.userId));
+	const removeMediaGalleryAttachment = useStore((store) => store.removeMediaGalleryAttachment);
+	const createSnackbar = useSnackbar();
+
+	const [modalOpen, setModalOpen] = useState(false);
 
 	const senderLabel = sessionId === attachment.userId ? youLabel : senderName || unknownUserLabel;
 	const sizeLabel = getAttachmentSize(attachment.size);
 	const subline = sizeLabel ? `${senderLabel} • ${sizeLabel}` : senderLabel;
+	const canDelete = sessionId === attachment.userId;
+
+	const openModal = useCallback(() => setModalOpen(true), []);
+	const closeModal = useCallback(() => setModalOpen(false), []);
+
+	const confirmDelete = useCallback(() => {
+		setModalOpen(false);
+		const showSnackbar = (severity: 'success' | 'error', label: string): void => {
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				severity,
+				label,
+				hideButton: true
+			});
+		};
+		bulkDeleteRoomAttachments(attachment.roomId, [attachment.id])
+			.then((response) => {
+				if (response.failedIds?.includes(attachment.id)) {
+					showSnackbar('error', errorLabel);
+					return;
+				}
+				removeMediaGalleryAttachment(attachment.roomId, attachment.id);
+				if (attachment.stanzaId) {
+					xmppClient.sendChatMessageDeletion(attachment.roomId, attachment.stanzaId);
+				}
+				showSnackbar('success', successLabel);
+			})
+			.catch(() => showSnackbar('error', errorLabel));
+	}, [
+		attachment.id,
+		attachment.roomId,
+		attachment.stanzaId,
+		createSnackbar,
+		errorLabel,
+		removeMediaGalleryAttachment,
+		successLabel
+	]);
 
 	return (
 		<Container
@@ -57,6 +112,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 			crossAlignment="center"
 			padding={{ horizontal: 'small', vertical: 'small' }}
 			gap="0.5rem"
+			height="fit"
 			minHeight="2.75rem"
 		>
 			<FileAvatar
@@ -86,6 +142,21 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 					</Tooltip>
 				</Container>
 			</Row>
+			{canDelete && (
+				<Tooltip label={deleteTooltip} placement="top">
+					<Button
+						data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+						size="large"
+						icon="Trash2Outline"
+						type="ghost"
+						color="error"
+						onClick={openModal}
+					/>
+				</Tooltip>
+			)}
+			{modalOpen && (
+				<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
+			)}
 		</Container>
 	);
 };
