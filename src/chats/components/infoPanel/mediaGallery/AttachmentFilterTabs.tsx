@@ -64,11 +64,17 @@ const SegmentedTabItemBody: FC<SegmentedTabItemProps & { position: 'left' | 'rig
 			mainAlignment="center"
 			crossAlignment="center"
 			height="fit"
+			minWidth={0}
 			role="tab"
 			aria-selected={selected}
 			aria-disabled={disabled}
 		>
-			<Text size="medium" weight="regular" color={selected ? 'gray6' : 'primary'}>
+			<Text
+				size="medium"
+				weight="regular"
+				color={selected ? 'gray6' : 'primary'}
+				overflow="ellipsis"
+			>
 				{item.label}
 			</Text>
 		</SegmentedItem>

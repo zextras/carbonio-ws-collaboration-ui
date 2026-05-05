@@ -11,6 +11,8 @@ import {
 } from '../network';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
+const PDF_MIME_TYPE = 'application/pdf';
+
 export enum AttachmentType {
 	JPEG = 'jpeg',
 	PNG = 'png',
@@ -70,7 +72,7 @@ export const extensionsSupported = [
 	},
 	{
 		extension: AttachmentType.PDF,
-		mimeType: 'application/pdf',
+		mimeType: PDF_MIME_TYPE,
 		preview: AttachmentType.JPEG
 	},
 	{
@@ -291,7 +293,7 @@ export const getPinAttachmentIcon = (fileType: string): string => {
 export const getPinAttachmentColor = (fileType: string): string => {
 	const mainType = fileType.split('/')[0];
 
-	if (fileType === 'application/pdf' || mainType === 'image' || mainType === 'video') {
+	if (fileType === PDF_MIME_TYPE || mainType === 'image' || mainType === 'video') {
 		return 'error';
 	}
 	if (spreadsheetMimeTypes.has(fileType)) {

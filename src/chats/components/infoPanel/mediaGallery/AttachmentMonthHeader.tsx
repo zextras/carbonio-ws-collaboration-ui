@@ -18,7 +18,7 @@ export const AttachmentMonthHeader: FC<AttachmentMonthHeaderProps> = ({ label })
 		mainAlignment="center"
 		padding={{ vertical: 'small' }}
 	>
-		<Text size="small" color="secondary" weight="bold">
+		<Text size="small" color="gray1">
 			{label}
 		</Text>
 	</Container>

@@ -22,6 +22,8 @@ const mockedGetRoomAttachments = vi.mocked(getRoomAttachments);
 
 const roomId = 'room-1';
 const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
+const AUG_CREATED_AT = '2021-08-15T10:00:00Z';
+const AUG_TEST_ID = 'mediaGalleryAttachment-aug';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
 	id,
@@ -57,7 +59,7 @@ describe('MediaGalleryTab', () => {
 	test('renders attachments grouped by month-year header', async () => {
 		mockedGetRoomAttachments.mockResolvedValue({
 			attachments: [
-				buildAttachment('aug', '2021-08-15T10:00:00Z'),
+				buildAttachment('aug', AUG_CREATED_AT),
 				buildAttachment('may', '2021-05-10T10:00:00Z')
 			],
 			cursor: undefined
@@ -65,10 +67,38 @@ describe('MediaGalleryTab', () => {
 
 		setup(<MediaGalleryTab roomId={roomId} />);
 
-		expect(await screen.findByTestId('mediaGalleryAttachment-aug')).toBeInTheDocument();
+		expect(await screen.findByTestId(AUG_TEST_ID)).toBeInTheDocument();
 		expect(screen.getByTestId('mediaGalleryAttachment-may')).toBeInTheDocument();
 		expect(screen.getByTestId('mediaGalleryMonthHeader-August 2021')).toBeInTheDocument();
 		expect(screen.getByTestId('mediaGalleryMonthHeader-May 2021')).toBeInTheDocument();
+	});
+
+	test('renders a divider between consecutive month groups but not before the first', async () => {
+		mockedGetRoomAttachments.mockResolvedValue({
+			attachments: [
+				buildAttachment('aug', AUG_CREATED_AT),
+				buildAttachment('may', '2021-05-10T10:00:00Z')
+			],
+			cursor: undefined
+		});
+
+		setup(<MediaGalleryTab roomId={roomId} />);
+
+		await screen.findByTestId(AUG_TEST_ID);
+		const dividers = screen.getAllByTestId(/^mediaGalleryMonthDivider-/);
+		expect(dividers).toHaveLength(1);
+	});
+
+	test('does not render any month divider when there is a single group', async () => {
+		mockedGetRoomAttachments.mockResolvedValue({
+			attachments: [buildAttachment('aug', AUG_CREATED_AT)],
+			cursor: undefined
+		});
+
+		setup(<MediaGalleryTab roomId={roomId} />);
+
+		await screen.findByTestId(AUG_TEST_ID);
+		expect(screen.queryAllByTestId(/^mediaGalleryMonthDivider-/)).toHaveLength(0);
 	});
 
 	test('hides the load-more trigger when no further pages are available', async () => {

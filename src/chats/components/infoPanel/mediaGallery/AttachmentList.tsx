@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Container, List, ListItem, Spinner } from '@zextras/carbonio-design-system';
+import { Container, Divider, List, Spinner } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { AttachmentMonthHeader } from './AttachmentMonthHeader';
@@ -28,25 +28,30 @@ export const AttachmentList: FC<AttachmentListProps> = ({
 }) => {
 	const items = useMemo(() => {
 		const groups = groupAttachmentsByMonth(attachments);
-		const rows = groups.flatMap((group) => [
-			<ListItem key={`header-${group.key}`}>
-				{(_isVisible) => <AttachmentMonthHeader label={group.label} />}
-			</ListItem>,
-			...group.items.map((attachment) => (
-				<ListItem key={attachment.id}>
-					{(_isVisible) => <AttachmentListItem attachment={attachment} />}
-				</ListItem>
-			))
-		]);
+		const rows = groups.flatMap((group, index) => {
+			const groupRows: Array<React.JSX.Element> = [
+				<AttachmentMonthHeader key={`header-${group.key}`} label={group.label} />,
+				...group.items.map((attachment) => (
+					<AttachmentListItem key={attachment.id} attachment={attachment} />
+				))
+			];
+			if (index > 0) {
+				groupRows.unshift(
+					<Divider
+						key={`divider-${group.key}`}
+						data-testid={`mediaGalleryMonthDivider-${group.key}`}
+						color="gray3"
+						style={{ marginInline: '0.5rem', width: 'auto' }}
+					/>
+				);
+			}
+			return groupRows;
+		});
 		if (isLoading && hasMore) {
 			rows.push(
-				<ListItem key="load-more-spinner">
-					{() => (
-						<Container padding={{ all: 'small' }} mainAlignment="center">
-							<Spinner color="gray1" />
-						</Container>
-					)}
-				</ListItem>
+				<Container key="load-more-spinner" padding={{ all: 'small' }} mainAlignment="center">
+					<Spinner color="gray1" />
+				</Container>
 			);
 		}
 		return rows;
@@ -56,8 +61,6 @@ export const AttachmentList: FC<AttachmentListProps> = ({
 		<List
 			data-testid="mediaGalleryList"
 			onListBottom={hasMore ? loadMore : undefined}
-			// month headers are inert items; CDS keyboard nav would land on them oddly
-			keyboardShortcutsIsDisabled
 			height="100%"
 		>
 			{items}
