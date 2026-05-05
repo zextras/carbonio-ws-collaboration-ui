@@ -29,8 +29,6 @@ export type ActiveConversationsSlice = {
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
 	removeFilesToAttach: (roomId: string, fileId?: string) => void;
-	setFileFocus: (roomId: string, fileId: string, active: boolean) => void;
-	setFileDescription: (roomId: string, fileId: string | undefined, description?: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
@@ -85,8 +83,6 @@ export type FileToUpload = {
 	file: File;
 	fileId: string;
 	localUrl: string;
-	description: string;
-	hasFocus: boolean;
 };
 
 type NewReaction = {

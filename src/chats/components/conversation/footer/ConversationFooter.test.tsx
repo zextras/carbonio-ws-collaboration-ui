@@ -33,7 +33,6 @@ import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
 
 const iconNavigator2 = 'icon: Navigation2';
-const borderColor = 'border-color: #8bc34a';
 const initText = 'we are gonna se';
 const iconAttach = 'icon: Attach';
 
@@ -209,7 +208,6 @@ describe('ConversationFooter', () => {
 		const uploadManager = screen.queryByTestId('upload_attachment_manager');
 		expect(uploadManager).toBeInTheDocument();
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('User copy/paste multiple images in the text input', async () => {
@@ -238,7 +236,6 @@ describe('ConversationFooter', () => {
 		const uploadManager = screen.queryByTestId('upload_attachment_manager');
 		expect(uploadManager).toBeInTheDocument();
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('input has text and user paste an image => upload manger will display the image selected with the input focused with the text', async () => {
@@ -267,7 +264,6 @@ describe('ConversationFooter', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('input has text and user paste more images => upload manger will display the first image selected with the input focused with the text', async () => {
@@ -296,7 +292,6 @@ describe('ConversationFooter', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('User can reply to a message attaching a file', async () => {
@@ -500,8 +495,6 @@ describe('Send message', () => {
 			`previewFileUpload-${file.name}-${filesToAttach?.[0].fileId}`
 		);
 		await user.click(filePreview);
-		const storedFile = useStore.getState().activeConversations[mockedRoom.id].filesToAttach?.[0];
-		expect(storedFile?.description).toBe('text');
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
@@ -582,7 +575,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('Paste single attachment at the end of the text present in the composer', async () => {
@@ -611,7 +603,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('Paste single attachment in the middle of the text present in the composer', async () => {
@@ -641,7 +632,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('Paste more attachments at the beginning of the text present in the composer', async () => {
@@ -671,7 +661,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('Paste more attachments at the end of the text present in the composer', async () => {
@@ -700,7 +689,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 
 	test('Paste more attachments in the middle of the text present in the composer', async () => {
@@ -730,7 +718,6 @@ describe('Paste on textbox', () => {
 			}`
 		);
 		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
 	});
 });
 
