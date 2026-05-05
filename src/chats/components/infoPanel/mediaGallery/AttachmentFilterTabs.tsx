@@ -70,7 +70,7 @@ const SegmentedTabItemBody: FC<SegmentedTabItemProps & { position: 'left' | 'rig
 			aria-disabled={disabled}
 		>
 			<Text
-				size="medium"
+				size="small"
 				weight="regular"
 				color={selected ? 'gray6' : 'primary'}
 				overflow="ellipsis"
@@ -131,7 +131,7 @@ export const AttachmentFilterTabs: FC<AttachmentFilterTabsProps> = ({ roomId }) 
 		<Container
 			data-testid="attachmentFilterTabs"
 			orientation="horizontal"
-			padding={{ vertical: 'medium', horizontal: '4rem' }}
+			padding={{ top: 'large', bottom: 'medium', horizontal: '2rem' }}
 			height="fit"
 			flexShrink={0}
 		>

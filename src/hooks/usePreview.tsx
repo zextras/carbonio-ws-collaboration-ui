@@ -9,9 +9,9 @@ import { useCallback, useContext, useMemo } from 'react';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 
-import { getURLAttachment } from '../network';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 import {
+	downloadAttachment,
 	getAttachmentExtension,
 	getAttachmentSize,
 	getAttachmentType,
@@ -36,16 +36,10 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 		[attachment.id, attachment.mimeType]
 	);
 
-	const download = useCallback(() => {
-		const downloadUrl = getURLAttachment(attachment.id);
-		const linkTag: HTMLAnchorElement = document.createElement('a');
-		document.body.appendChild(linkTag);
-		linkTag.href = downloadUrl;
-		linkTag.download = attachment.name;
-		linkTag.target = '_blank';
-		linkTag.click();
-		linkTag.remove();
-	}, [attachment.id, attachment.name]);
+	const download = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	const onPreviewClick = useCallback(() => {
 		if (attachmentURL) {

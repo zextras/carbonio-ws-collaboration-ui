@@ -26,6 +26,7 @@ import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import {
+	downloadAttachment,
 	getAttachmentSize,
 	getPinAttachmentColor,
 	getPinAttachmentIcon
@@ -36,15 +37,15 @@ type AttachmentListItemProps = {
 };
 
 const FileAvatar = styled(Avatar)`
-	min-width: 2.25rem;
-	min-height: 2.25rem;
-	width: 2.25rem;
-	height: 2.25rem;
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	width: 2.5rem;
+	height: 2.5rem;
 	svg {
-		width: 1.25rem;
-		min-width: 1.25rem;
-		height: 1.25rem;
-		min-height: 1.25rem;
+		width: 1.5rem;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		min-height: 1.5rem;
 	}
 `;
 
@@ -53,6 +54,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
 	const deleteTooltip = t('action.delete', 'Delete');
+	const downloadTooltip = t('action.download', 'Download');
 	const successLabel = t('feedback.attachmentDeleted', 'Attachment deleted');
 	const errorLabel = t('feedback.attachmentDeleteError', 'Could not delete the attachment');
 
@@ -70,6 +72,11 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
+
+	const handleDownload = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	const confirmDelete = useCallback(() => {
 		setModalOpen(false);
@@ -110,10 +117,9 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			crossAlignment="center"
-			padding={{ horizontal: 'small', vertical: 'small' }}
+			padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
 			gap="0.5rem"
 			height="fit"
-			minHeight="2.75rem"
 		>
 			<FileAvatar
 				data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
@@ -142,6 +148,17 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 					</Tooltip>
 				</Container>
 			</Row>
+			<Tooltip label={downloadTooltip} placement="top">
+				<Button
+					data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
+					aria-label={downloadTooltip}
+					size="large"
+					icon="DownloadOutline"
+					type="ghost"
+					color="gray0"
+					onClick={handleDownload}
+				/>
+			</Tooltip>
 			{canDelete && (
 				<Tooltip label={deleteTooltip} placement="top">
 					<Button
