@@ -43,7 +43,8 @@ export enum WsEventType {
 	MEETING_RECORDING_STARTED = 'MeetingRecordingStarted',
 	MEETING_RECORDING_STOPPED = 'MeetingRecordingStopped',
 	MEETING_PARTICIPANT_HAND_RAISED = 'MeetingParticipantHandRaised',
-	MEETING_PARTICIPANT_HAND_RAISED_LIST = 'MeetingParticipantHandRaisedList'
+	MEETING_PARTICIPANT_HAND_RAISED_LIST = 'MeetingParticipantHandRaisedList',
+	MEETING_DECLINED = 'MeetingDeclined'
 }
 
 export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | WsMeetingEvent;

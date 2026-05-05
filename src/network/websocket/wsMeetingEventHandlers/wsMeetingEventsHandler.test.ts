@@ -5,6 +5,7 @@
  */
 import * as MeetingAudioAnsweredEventHandler from './MeetingAudioAnsweredEventHandler';
 import * as MeetingAudioStreamChangedEventHandler from './MeetingAudioStreamChangedEventHandler';
+import * as MeetingDeclinedEventHandler from './MeetingDeclinedEventHandler';
 import * as MeetingJoinedEventHandler from './MeetingJoinedEventHandler';
 import * as MeetingLeftEventHandler from './MeetingLeftEventHandler';
 import * as MeetingMediaStreamChangedEventHandler from './MeetingMediaStreamChangedEventHandler';
@@ -206,6 +207,13 @@ describe('wsMeetingEventsHandler', () => {
 			MeetingRecordingStoppedEventHandler,
 			'meetingRecordingStoppedEventHandler'
 		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_DECLINED event is handled', () => {
+		const event = { type: WsEventType.MEETING_DECLINED };
+		const handler = vi.spyOn(MeetingDeclinedEventHandler, 'meetingDeclinedEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);
 	});

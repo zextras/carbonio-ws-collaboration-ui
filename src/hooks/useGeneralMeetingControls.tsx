@@ -54,9 +54,11 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
+	const isDeclined = useRef(false);
+
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
-		if (!isMeetingActive) {
+		if (!isMeetingActive && !isDeclined.current) {
 			meetingDisconnection(meetingId);
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
@@ -122,6 +124,14 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
+
+	// Redirect to info page when callee declines the call
+	const meetingDeclinedHandler = useCallback(() => {
+		isDeclined.current = true;
+		closePipWindow();
+		goToInfoPage(PAGE_INFO_TYPE.MEETING_DECLINED, meetingId);
+	}, [closePipWindow, goToInfoPage, meetingId]);
+	useEventListener(EventName.MEETING_DECLINED, meetingDeclinedHandler);
 
 	// Display snackbar when user is muted by moderator
 	const handleMutedEvent = useCallback(() => {

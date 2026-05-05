@@ -11,6 +11,7 @@ import {
 	createAudioOffer,
 	createMediaAnswer,
 	createMeeting,
+	declineMeeting,
 	deleteMeeting,
 	enterMeeting,
 	getMeeting,
@@ -348,6 +349,15 @@ describe('Meetings API', () => {
 		await stopMeeting('meetingId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/stop`, RequestType.POST);
+	});
+
+	test('declineMeeting is called correctly', async () => {
+		await declineMeeting(meetingMock.id);
+
+		expect(mockFetchAPI).toHaveBeenCalledWith(
+			`meetings/${meetingMock.id}/decline`,
+			RequestType.POST
+		);
 	});
 
 	test('deleteMeeting is called correctly', async () => {

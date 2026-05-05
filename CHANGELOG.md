@@ -1,3 +1,9 @@
+## [0.11.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.1...v0.11.0) (2026-05-05)
+
+### Features
+
+* chats call state awareness and active conversation visibility in carbonio chats [CO-2834] ([#701](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/701)) ([492ff24](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/492ff24b6a05a29e8cbf7aa5d54ca16a5b6f53cd))
+
 ## [0.10.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.0...v0.10.1) (2026-04-29)
 
 ### Bug Fixes

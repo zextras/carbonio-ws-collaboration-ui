@@ -306,6 +306,142 @@ describe('useConfigurationMessageLabel', () => {
 		});
 	});
 
+	describe('Meeting labels', () => {
+		// epoch ms for 10:32 on a known date — formatted as HH:mm
+		const timestamp = String(new Date('2024-01-15T10:32:00.000Z').getTime());
+
+		test('meetingStarted — logged user is the caller', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_STARTED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/You called at/i);
+		});
+
+		test('meetingStarted — another user is the caller', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_STARTED,
+				from: user1.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/User 1 called you at/i);
+		});
+
+		test('meetingEnded — label is the same for all participants', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/Call ended at/i);
+		});
+
+		test('meetingEnded — no duration when value is missing', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: ''
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).not.toContain(' - ');
+		});
+
+		test('meetingEnded — duration under 1 minute uses humanize', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '30'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/a few seconds/i);
+		});
+
+		test('meetingEnded — duration under 1 hour shows minutes', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '2700'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('45 min');
+		});
+
+		test('meetingEnded — duration over 1 hour shows "Xh Ym"', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '5400'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('1h 30m');
+		});
+
+		test('meetingEnded — duration exactly 1 hour shows "1h"', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_ENDED,
+				from: loggedUser.id,
+				value: '3600'
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toContain('1h');
+			expect(result.current).not.toContain('0m');
+		});
+
+		test('meetingDeclined — logged user declined', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_DECLINED,
+				from: loggedUser.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/You declined the call at/i);
+		});
+
+		test('meetingDeclined — another user declined', () => {
+			const msg = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.MEETING_DECLINED,
+				from: user1.id,
+				value: timestamp
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(msg), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toMatch(/User 1 declined the call at/i);
+		});
+	});
+
 	test('Undefined operation type', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const configurationMessage = createMockConfigurationMessage({
