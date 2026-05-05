@@ -14,14 +14,31 @@ export type Attachment = {
 	createdAt: string;
 };
 
-export type AttachmentsPagination = {
-	filter: string;
-	attachments: Attachment[];
-};
-
 export type AdditionalHeaders = {
 	description?: string;
 	messageId?: string;
 	replyId?: string;
 	area?: string;
+};
+
+export type AttachmentsSortBy = 'created_at' | 'size';
+
+export type AttachmentsSortOrder = 'asc' | 'desc';
+
+export type GetRoomAttachmentsParams = {
+	limit: number;
+	cursor?: string;
+	userId?: string;
+	mimeType?: string;
+	createdAfter?: string;
+	createdBefore?: string;
+	minSize?: number;
+	maxSize?: number;
+	sortBy?: AttachmentsSortBy;
+	order?: AttachmentsSortOrder;
+};
+
+export type GetRoomAttachmentsResponse = {
+	attachments: Array<Attachment>;
+	cursor?: string;
 };

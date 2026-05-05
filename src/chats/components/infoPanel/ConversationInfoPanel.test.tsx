@@ -14,6 +14,10 @@ import { createMockMember, createMockRoom, createMockUser } from '../../../tests
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 
+vi.mock('./mediaGallery/MediaGalleryTab', () => ({
+	MediaGalleryTab: (): React.ReactElement => <div data-testid="mediaGalleryTab" />
+}));
+
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',
 	name: '',
