@@ -51,4 +51,28 @@ describe('Media gallery slice', () => {
 		useStore.getState().setMediaGalleryLoading(roomId, false);
 		expect(useStore.getState().mediaGallery[roomId].isLoading).toBe(false);
 	});
+
+	test('setMediaGalleryFilter applies the new filter and resets pagination state', () => {
+		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+		useStore
+			.getState()
+			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+		const state = useStore.getState().mediaGallery[roomId];
+		expect(state.filter.userId).toBe('me');
+		expect(state.attachments).toEqual([]);
+		expect(state.nextCursor).toBeUndefined();
+		expect(state.hasMore).toBe(true);
+		expect(state.isInitialized).toBe(false);
+		expect(state.isLoading).toBe(false);
+	});
+
+	test('setMediaGalleryFilter is a no-op when the filter is unchanged', () => {
+		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+		useStore.getState().setMediaGalleryFilter(roomId, DEFAULT_MEDIA_GALLERY_FILTER);
+		const state = useStore.getState().mediaGallery[roomId];
+		// pagination state was preserved because the filter did not change
+		expect(state.attachments).toHaveLength(1);
+		expect(state.nextCursor).toBe('cur-1');
+		expect(state.isInitialized).toBe(true);
+	});
 });

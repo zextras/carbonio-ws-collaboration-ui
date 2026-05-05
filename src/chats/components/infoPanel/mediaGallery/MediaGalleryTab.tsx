@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
+import { AttachmentFilterTabs } from './AttachmentFilterTabs';
 import { AttachmentList } from './AttachmentList';
 import { AttachmentListSkeleton } from './AttachmentListSkeleton';
 import { EmptyAttachmentList } from './EmptyAttachmentList';
@@ -30,17 +31,21 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 			mainAlignment="flex-start"
 			crossAlignment="stretch"
 			height="100%"
+			minHeight={0}
 		>
-			{showInitialSkeleton && <AttachmentListSkeleton />}
-			{showEmptyState && <EmptyAttachmentList />}
-			{!showInitialSkeleton && !showEmptyState && (
-				<AttachmentList
-					attachments={attachments}
-					hasMore={hasMore}
-					isLoading={isLoading}
-					loadMore={loadMore}
-				/>
-			)}
+			<AttachmentFilterTabs roomId={roomId} />
+			<Container mainAlignment="flex-start" crossAlignment="stretch" minHeight={0}>
+				{showInitialSkeleton && <AttachmentListSkeleton />}
+				{showEmptyState && <EmptyAttachmentList />}
+				{!showInitialSkeleton && !showEmptyState && (
+					<AttachmentList
+						attachments={attachments}
+						hasMore={hasMore}
+						isLoading={isLoading}
+						loadMore={loadMore}
+					/>
+				)}
+			</Container>
 		</Container>
 	);
 };

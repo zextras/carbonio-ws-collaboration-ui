@@ -5,9 +5,11 @@
  */
 
 import { Attachment } from '../../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
 import useStore from '../Store';
 import {
 	getMediaGalleryAttachments,
+	getMediaGalleryFilter,
 	getMediaGalleryHasMore,
 	getMediaGalleryIsInitialized,
 	getMediaGalleryIsLoading
@@ -32,6 +34,7 @@ describe('Media gallery selectors', () => {
 		expect(getMediaGalleryHasMore(store, 'missing')).toBe(true);
 		expect(getMediaGalleryIsLoading(store, 'missing')).toBe(false);
 		expect(getMediaGalleryIsInitialized(store, 'missing')).toBe(false);
+		expect(getMediaGalleryFilter(store, 'missing')).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
 	});
 
 	test('reflect the populated room state', () => {
@@ -41,5 +44,14 @@ describe('Media gallery selectors', () => {
 		expect(getMediaGalleryAttachments(store, roomId)).toEqual([att]);
 		expect(getMediaGalleryHasMore(store, roomId)).toBe(true);
 		expect(getMediaGalleryIsInitialized(store, roomId)).toBe(true);
+		expect(getMediaGalleryFilter(store, roomId)).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
+	});
+
+	test('getMediaGalleryFilter returns the room filter once it has been set', () => {
+		useStore
+			.getState()
+			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+		const store = useStore.getState();
+		expect(getMediaGalleryFilter(store, roomId).userId).toBe('me');
 	});
 });
