@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './DeleteAttachmentModal';
-import { bulkDeleteRoomAttachments } from '../../../../network';
+import { bulkDeleteRoomAttachments, getURLAttachment } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -53,6 +53,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
 	const deleteTooltip = t('action.delete', 'Delete');
+	const downloadTooltip = t('action.download', 'Download');
 	const successLabel = t('feedback.attachmentDeleted', 'Attachment deleted');
 	const errorLabel = t('feedback.attachmentDeleteError', 'Could not delete the attachment');
 
@@ -70,6 +71,17 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
+
+	const handleDownload = useCallback(() => {
+		const downloadUrl = getURLAttachment(attachment.id);
+		const linkTag: HTMLAnchorElement = document.createElement('a');
+		document.body.appendChild(linkTag);
+		linkTag.href = downloadUrl;
+		linkTag.download = attachment.name;
+		linkTag.target = '_blank';
+		linkTag.click();
+		linkTag.remove();
+	}, [attachment.id, attachment.name]);
 
 	const confirmDelete = useCallback(() => {
 		setModalOpen(false);
@@ -142,6 +154,17 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 					</Tooltip>
 				</Container>
 			</Row>
+			<Tooltip label={downloadTooltip} placement="top">
+				<Button
+					data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
+					aria-label={downloadTooltip}
+					size="large"
+					icon="DownloadOutline"
+					type="ghost"
+					color="gray0"
+					onClick={handleDownload}
+				/>
+			</Tooltip>
 			{canDelete && (
 				<Tooltip label={deleteTooltip} placement="top">
 					<Button

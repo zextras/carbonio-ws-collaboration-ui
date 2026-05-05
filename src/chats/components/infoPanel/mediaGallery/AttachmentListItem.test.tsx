@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
+import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
@@ -171,5 +172,29 @@ describe('AttachmentListItem', () => {
 			expect(mockedBulkDelete).toHaveBeenCalled();
 		});
 		expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(1);
+	});
+
+	test('renders the download button for attachments uploaded by other users', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ userId: otherUserId })} />);
+		expect(screen.getByRole('button', { name: /download/i })).toBeInTheDocument();
+	});
+
+	test('renders the download button for attachments uploaded by the current user', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ userId: myUserId })} />);
+		expect(screen.getByRole('button', { name: /download/i })).toBeInTheDocument();
+	});
+
+	test('clicking the download button triggers an authenticated download for the attachment id', async () => {
+		const spyGetURL = vi.spyOn(attachmentsApi, 'getURLAttachment');
+		const clickSpy = vi
+			.spyOn(HTMLAnchorElement.prototype, 'click')
+			.mockImplementation(() => undefined);
+
+		const { user } = setup(<AttachmentListItem attachment={buildAttachment()} />);
+		await user.click(screen.getByRole('button', { name: /download/i }));
+
+		expect(spyGetURL).toHaveBeenCalledWith('att-1');
+		expect(clickSpy).toHaveBeenCalled();
+		clickSpy.mockRestore();
 	});
 });
