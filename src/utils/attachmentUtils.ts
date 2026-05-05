@@ -7,7 +7,8 @@ import {
 	getImagePreviewURL,
 	getImageThumbnailURL,
 	getPdfPreviewURL,
-	getPdfThumbnailURL
+	getPdfThumbnailURL,
+	getURLAttachment
 } from '../network';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
@@ -171,6 +172,17 @@ export const getAttachmentThumbnailURL = (
 		getPreviewType(mimeType),
 		ImageShape.RECTANGULAR
 	);
+};
+
+export const downloadAttachment = (attachmentId: string, fileName: string): void => {
+	const downloadUrl = getURLAttachment(attachmentId);
+	const linkTag: HTMLAnchorElement = document.createElement('a');
+	document.body.appendChild(linkTag);
+	linkTag.href = downloadUrl;
+	linkTag.download = fileName;
+	linkTag.target = '_blank';
+	linkTag.click();
+	linkTag.remove();
 };
 
 export const getImageSize = (url: string): Promise<{ width: number; height: number }> =>

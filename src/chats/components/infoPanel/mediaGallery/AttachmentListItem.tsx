@@ -19,13 +19,14 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './DeleteAttachmentModal';
-import { bulkDeleteRoomAttachments, getURLAttachment } from '../../../../network';
+import { bulkDeleteRoomAttachments } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import {
+	downloadAttachment,
 	getAttachmentSize,
 	getPinAttachmentColor,
 	getPinAttachmentIcon
@@ -72,16 +73,10 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
 
-	const handleDownload = useCallback(() => {
-		const downloadUrl = getURLAttachment(attachment.id);
-		const linkTag: HTMLAnchorElement = document.createElement('a');
-		document.body.appendChild(linkTag);
-		linkTag.href = downloadUrl;
-		linkTag.download = attachment.name;
-		linkTag.target = '_blank';
-		linkTag.click();
-		linkTag.remove();
-	}, [attachment.id, attachment.name]);
+	const handleDownload = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	const confirmDelete = useCallback(() => {
 		setModalOpen(false);
