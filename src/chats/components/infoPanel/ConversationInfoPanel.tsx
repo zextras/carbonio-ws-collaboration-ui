@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Container, TabBar } from '@zextras/carbonio-design-system';
+import { Container, Divider, TabBar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { ActionsTabContent } from './conversationActionsAccordion/ActionsTabContent';
@@ -69,6 +69,7 @@ const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) 
 						flexShrink={0}
 						forceWidthEquallyDistributed
 					/>
+					<Divider />
 					<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
 						{selectedInfoTab === InfoPanelTab.ACTIONS && <ActionsTabContent roomId={roomId} />}
 						{selectedInfoTab === InfoPanelTab.MEMBERS && <MemberList roomId={roomId} />}

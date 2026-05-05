@@ -37,15 +37,15 @@ type AttachmentListItemProps = {
 };
 
 const FileAvatar = styled(Avatar)`
-	min-width: 2.25rem;
-	min-height: 2.25rem;
-	width: 2.25rem;
-	height: 2.25rem;
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	width: 2.5rem;
+	height: 2.5rem;
 	svg {
-		width: 1.25rem;
-		min-width: 1.25rem;
-		height: 1.25rem;
-		min-height: 1.25rem;
+		width: 1.5rem;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		min-height: 1.5rem;
 	}
 `;
 
@@ -117,10 +117,9 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			crossAlignment="center"
-			padding={{ horizontal: 'small', vertical: 'small' }}
+			padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
 			gap="0.5rem"
 			height="fit"
-			minHeight="2.75rem"
 		>
 			<FileAvatar
 				data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
