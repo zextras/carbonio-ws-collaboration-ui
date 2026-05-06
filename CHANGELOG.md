@@ -1,3 +1,15 @@
+## [0.12.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.11.0...v0.12.0) (2026-05-05)
+
+### Features
+
+* change chat input behavior when managing attachments [CO-3396] [CO-3445] ([#706](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/706)) ([0e12fb7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0e12fb70631c54dc1890c3c410422379af4453f2))
+
+## [0.11.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.1...v0.11.0) (2026-05-05)
+
+### Features
+
+* chats call state awareness and active conversation visibility in carbonio chats [CO-2834] ([#701](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/701)) ([492ff24](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/492ff24b6a05a29e8cbf7aa5d54ca16a5b6f53cd))
+
 ## [0.10.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.0...v0.10.1) (2026-04-29)
 
 ### Bug Fixes

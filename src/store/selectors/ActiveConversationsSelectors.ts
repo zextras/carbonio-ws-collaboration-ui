@@ -53,11 +53,6 @@ export const getFilesToUploadArray = (
 	roomId: string
 ): FileToUpload[] | undefined => store.activeConversations[roomId]?.filesToAttach;
 
-export const getFocusedFile = (store: RootStore, roomId: string): string | undefined => {
-	const files = store.activeConversations[roomId]?.filesToAttach;
-	return files?.find((file) => file.hasFocus)?.fileId;
-};
-
 export const getForwardList = (store: RootStore, roomId: string): TextMessage[] | undefined =>
 	store.activeConversations[roomId]?.forwardMessageList;
 

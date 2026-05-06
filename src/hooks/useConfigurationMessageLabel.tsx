@@ -7,6 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 
+import moment from 'moment-timezone';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -19,6 +20,7 @@ import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelecto
 import useStore from '../store/Store';
 import { ConfigurationMessage, OperationType } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
+import { formatDate } from '../utils/dateUtils';
 
 export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage
@@ -181,6 +183,54 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
+	const meetingTime = useMemo(() => formatDate(message.date, 'HH:mm'), [message.date]);
+
+	const meetingStartedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingStarted', 'You called at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t('configurationMessages.member.meetingStarted', '{{name}} called you at {{time}}', {
+			name: actionMakerUsername,
+			time: meetingTime
+		});
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
+	const meetingEndedLabel = useMemo(() => {
+		let duration = '';
+		if (message.value) {
+			const totalSeconds = Number(message.value);
+			const hours = Math.floor(totalSeconds / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			if (totalSeconds < 60) {
+				duration = moment.duration(totalSeconds, 'seconds').humanize();
+			} else if (hours < 1) {
+				duration = `${Math.floor(totalSeconds / 60)} min`;
+			} else {
+				duration = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			}
+		}
+		return (
+			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
+				time: meetingTime
+			}) + (duration ? ` - ${duration}` : '')
+		);
+	}, [meetingTime, message.value, t]);
+
+	const meetingDeclinedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingDeclined', 'You declined the call at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t(
+			'configurationMessages.member.meetingDeclined',
+			'{{name}} declined the call at {{time}}',
+			{ name: actionMakerUsername, time: meetingTime }
+		);
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
 	const clearHistoryLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
 			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
@@ -218,6 +268,12 @@ export const useConfigurationMessageLabel = (
 			return unpinMessageLabel;
 		case OperationType.CLEARED_HISTORY:
 			return clearHistoryLabel;
+		case OperationType.MEETING_STARTED:
+			return meetingStartedLabel;
+		case OperationType.MEETING_ENDED:
+			return meetingEndedLabel;
+		case OperationType.MEETING_DECLINED:
+			return meetingDeclinedLabel;
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

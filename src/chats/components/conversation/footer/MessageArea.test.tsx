@@ -26,7 +26,6 @@ const setupMessageArea = (text?: string): { rerender: (ui: React.ReactElement) =
 			handleKeyDownTextarea={vi.fn()}
 			handleKeyUpTextarea={vi.fn()}
 			handleOnPaste={vi.fn}
-			isDisabled={false}
 		/>
 	);
 	return { rerender };
@@ -52,7 +51,6 @@ describe('MessageArea', () => {
 				handleKeyDownTextarea={vi.fn()}
 				handleKeyUpTextarea={vi.fn()}
 				handleOnPaste={vi.fn}
-				isDisabled={false}
 			/>
 		);
 		rerender(
@@ -65,7 +63,6 @@ describe('MessageArea', () => {
 				handleKeyDownTextarea={vi.fn()}
 				handleKeyUpTextarea={vi.fn()}
 				handleOnPaste={vi.fn}
-				isDisabled={false}
 			/>
 		);
 		const textArea = screen.getByRole('textbox');
@@ -92,7 +89,6 @@ describe('MessageArea', () => {
 				handleKeyDownTextarea={vi.fn()}
 				handleKeyUpTextarea={vi.fn()}
 				handleOnPaste={vi.fn}
-				isDisabled={false}
 			/>
 		);
 		expect(textarea).toHaveStyle('height: 35px');
@@ -111,7 +107,6 @@ describe('MessageArea', () => {
 				handleKeyDownTextarea={vi.fn()}
 				handleKeyUpTextarea={vi.fn()}
 				handleOnPaste={vi.fn}
-				isDisabled={false}
 			/>
 		);
 		expect(textarea).toHaveStyle(defaultHeightMessageArea);
@@ -129,7 +124,6 @@ describe('MessageArea', () => {
 				handleKeyDownTextarea={vi.fn()}
 				handleKeyUpTextarea={vi.fn()}
 				handleOnPaste={vi.fn}
-				isDisabled={false}
 			/>
 		);
 		const textarea = screen.getByTestId('textAreaComposer');

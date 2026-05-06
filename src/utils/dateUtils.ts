@@ -44,9 +44,7 @@ export const datesAreFromTheSameDay = (date1: DateType, date2: DateType): boolea
 	formatDate(date1, 'YYYY-MM-DD') === formatDate(date2, 'YYYY-MM-DD');
 
 // it transforms a ms date to a string one
-export const dateString = (actualDate: DateType): string => {
-	// date of today
-	const today = moment();
+export const dateString = (actualDate: DateType, today: Date = new Date()): string => {
 	// date in exam
 	const dateDay = moment(actualDate);
 	// date of six days before today

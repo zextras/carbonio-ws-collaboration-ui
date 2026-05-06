@@ -99,7 +99,10 @@ export enum OperationType {
 	MESSAGE_PINNED = 'messagePinned',
 	MESSAGE_UNPINNED = 'messageUnpinned',
 	MESSAGE_PIN_UPDATED = 'messagePinUpdated',
-	CLEARED_HISTORY = 'roomHistoryCleared'
+	CLEARED_HISTORY = 'roomHistoryCleared',
+	MEETING_STARTED = 'meetingStarted',
+	MEETING_ENDED = 'meetingEnded',
+	MEETING_DECLINED = 'meetingDeclined'
 }
 
 export enum MarkerStatus {
