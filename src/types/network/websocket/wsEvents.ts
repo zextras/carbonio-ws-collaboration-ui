@@ -10,6 +10,16 @@ import { WsMeetingEvent } from './wsMeetingEvents';
 export enum WsEventType {
 	INITIALIZATION = 'WebsocketConnected',
 	PONG = 'Pong',
+	MESSAGE_RECEIVED = 'MessageReceived',
+	MESSAGE_EDITED = 'MessageEdited',
+	MESSAGE_DELETED = 'MessageDeleted',
+	MESSAGE_FORWARDED = 'MessageForwarded',
+	MESSAGE_PINNED = 'MessagePinned',
+	MESSAGE_UNPINNED = 'MessageUnpinned',
+	REACTION_CHANGED = 'ReactionChanged',
+	READ_UPDATED = 'ReadUpdated',
+	PRESENCE_CHANGED = 'PresenceChanged',
+	TYPING = 'Typing',
 	ROOM_CREATED = 'RoomCreated',
 	ROOM_UPDATED = 'RoomUpdated',
 	ROOM_DELETED = 'RoomDeleted',
@@ -43,7 +53,8 @@ export enum WsEventType {
 	MEETING_RECORDING_STARTED = 'MeetingRecordingStarted',
 	MEETING_RECORDING_STOPPED = 'MeetingRecordingStopped',
 	MEETING_PARTICIPANT_HAND_RAISED = 'MeetingParticipantHandRaised',
-	MEETING_PARTICIPANT_HAND_RAISED_LIST = 'MeetingParticipantHandRaisedList'
+	MEETING_PARTICIPANT_HAND_RAISED_LIST = 'MeetingParticipantHandRaisedList',
+	MEETING_DECLINED = 'MeetingDeclined'
 }
 
 export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | WsMeetingEvent;

@@ -221,6 +221,18 @@ export const useConfigurationMessageLabel = (
 			return unpinMessageLabel;
 		case OperationType.CLEARED_HISTORY:
 			return clearHistoryLabel;
+		case OperationType.MEETING_DECLINED:
+			if (loggedUserId === message.from) {
+				return t(
+					'configurationMessages.user.meetingDeclined',
+					'You declined the call'
+				);
+			}
+			return t(
+				'configurationMessages.member.meetingDeclined',
+				'{{name}} declined the call',
+				{ name: actionMakerUsername }
+			);
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

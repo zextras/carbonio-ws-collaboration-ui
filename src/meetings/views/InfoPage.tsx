@@ -142,6 +142,14 @@ const InfoPage = (): ReactElement => {
 			sloganLabel = t('meeting.infoPage.slogan.generalError', 'PLEASE, TRY TO JOIN AGAIN');
 			descriptionLabel = t('meeting.infoPage.description.generalError', 'Something went wrong.');
 			break;
+		case PAGE_INFO_TYPE.MEETING_DECLINED:
+			titleLabel = t('meeting.infoPage.title.meetingDeclined', 'Call Declined');
+			sloganLabel = t('meeting.infoPage.slogan.meetingDeclined', 'Maybe next time');
+			descriptionLabel = t(
+				'meeting.infoPage.description.meetingDeclined',
+				'You declined the call'
+			);
+			break;
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 		default: {
 			titleLabel = t(

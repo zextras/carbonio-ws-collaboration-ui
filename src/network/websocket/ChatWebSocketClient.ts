@@ -46,7 +46,7 @@ class ChatWebSocketClient {
 	 */
 	sendTyping(roomId: string): void {
 		this.sendAction({
-			action: 'typing',
+			action: 'Typing',
 			roomId
 		});
 	}

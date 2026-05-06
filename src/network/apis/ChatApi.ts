@@ -187,6 +187,13 @@ class ChatApi implements IChatApi {
 		);
 	}
 
+	public forwardMessages(
+		toRoomId: string,
+		messages: { sourceRoomId: string; messageId: string }[]
+	): Promise<{ id: string; createdAt: string }[]> {
+		return fetchAPI(`rooms/${toRoomId}/forward`, RequestType.POST, { messages });
+	}
+
 	public pinMessage(roomId: string, messageId: string): Promise<void> {
 		return fetchAPI(`rooms/${roomId}/messages/${messageId}/pin`, RequestType.PUT);
 	}

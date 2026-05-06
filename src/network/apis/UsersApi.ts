@@ -23,7 +23,7 @@ class UsersApi implements IUsersApi {
 
 	public getUser(userId: string): Promise<GetUserResponse> {
 		const { setUserInfo } = useStore.getState();
-		return fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
+		return fetchAPI<GetUserResponse>(`users/${userId}`, RequestType.GET).then((resp) => {
 			setUserInfo([resp]);
 			return resp;
 		});
@@ -32,7 +32,7 @@ class UsersApi implements IUsersApi {
 	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
 		const { setUserInfo } = useStore.getState();
 		const params = userIds.map((id) => `userIds=${id}`).join('&');
-		return fetchAPI(`users?${params}`, RequestType.GET).then((resp: GetUsersResponse) => {
+		return fetchAPI<GetUsersResponse>(`users?${params}`, RequestType.GET).then((resp) => {
 			setUserInfo(resp);
 			return resp;
 		});

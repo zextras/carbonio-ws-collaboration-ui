@@ -14,6 +14,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
 import ChatApi from '../../network/apis/ChatApi';
+import { declineMeeting } from '../../network/apis/MeetingsApi';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -97,7 +98,14 @@ const MeetingNotification = ({
 		}
 	}, [disableSendMessage, meeting, message, stopMeetingSound]);
 
-	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
+	const handleDeclineMeeting = useCallback(() => {
+		if (meeting) {
+			declineMeeting(meeting.id).catch((err) => {
+				console.error('[MeetingNotification] declineMeeting failed', err);
+			});
+		}
+		removeNotification(id);
+	}, [id, meeting, removeNotification]);
 
 	const { openMeeting } = useRoomMeeting(meeting?.roomId ?? '');
 
@@ -140,7 +148,7 @@ const MeetingNotification = ({
 				</CustomTooltip>
 			</Container>
 			<Container orientation="horizontal" gap="0.5rem">
-				<Button width="fill" label={declineLabel} color="secondary" onClick={declineMeeting} />
+				<Button width="fill" label={declineLabel} color="secondary" onClick={handleDeclineMeeting} />
 				<Button width="fill" label={joinMeetingLabel} onClick={joinMeeting} />
 			</Container>
 		</NotificationContainer>

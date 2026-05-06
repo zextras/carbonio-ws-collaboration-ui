@@ -184,19 +184,23 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const forwardMessage = useCallback(() => {
 		const roomsId = map(selected, (key, value) => value);
-		const messages = messagesToForward || [];
-		// Send each message to each target room via REST
-		roomsId.forEach((toRoomId) => {
-			messages.forEach((message) => {
-				ChatApi.forwardMessage(message.roomId, message.stanzaId, toRoomId).catch((err) => {
-					console.error('[ForwardModal] forwardMessage failed', err);
-				});
-			});
+		const messageBatch = (messagesToForward || []).map((message) => ({
+			sourceRoomId: message.roomId,
+			messageId: message.stanzaId
+		}));
+		// Forward all messages to each target room via a single batch call per room
+		Promise.allSettled(
+			roomsId.map((toRoomId) =>
+				ChatApi.forwardMessages(toRoomId, messageBatch).catch((err) => {
+					console.error('[ForwardModal] forwardMessages failed', err);
+				})
+			)
+		).then(() => {
+			if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
+				goToRoomPage(roomsId[0]);
+			}
+			onClose();
 		});
-		if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
-			goToRoomPage(roomsId[0]);
-		}
-		onClose();
 	}, [goToRoomPage, messagesToForward, onClose, selected]);
 
 	const disabledForwardButton = useMemo(() => size(selected) === 0, [selected]);

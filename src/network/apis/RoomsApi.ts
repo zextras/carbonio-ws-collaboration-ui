@@ -57,7 +57,7 @@ class RoomsApi implements IRoomsApi {
 		// Returns basic room data without members or settings (RESTful approach)
 		// For initial load, use ChatApi.getInbox() which includes room data with last messages
 		// Members and settings should be fetched separately when needed via getRoomMembers/getRoom
-		return fetchAPI('rooms', RequestType.GET).then((resp: ListRoomsResponse) => {
+		return fetchAPI<ListRoomsResponse>('rooms', RequestType.GET).then((resp) => {
 			const { addRooms } = useStore.getState();
 			addRooms(resp, true);
 			return resp;
@@ -65,7 +65,7 @@ class RoomsApi implements IRoomsApi {
 	}
 
 	public async addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
-		return fetchAPI('rooms', RequestType.POST, room).then(async (response: AddRoomResponse) => {
+		return fetchAPI<AddRoomResponse>('rooms', RequestType.POST, room).then(async (response) => {
 			// Add the newly created room to the store
 			const { addRooms } = useStore.getState();
 			addRooms([response]);

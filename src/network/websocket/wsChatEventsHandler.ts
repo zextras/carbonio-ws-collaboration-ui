@@ -43,35 +43,35 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 	const chatEvent = event as unknown as WsChatEvent;
 
 	switch (chatEvent.type) {
-		case 'message-received':
+		case 'MessageReceived':
 			handleWsMessageReceived(chatEvent);
 			break;
 
-		case 'message-edited':
+		case 'MessageEdited':
 			handleWsMessageEdited(chatEvent);
 			break;
 
-		case 'message-deleted':
+		case 'MessageDeleted':
 			handleWsMessageDeleted(chatEvent);
 			break;
 
-		case 'message-forwarded':
+		case 'MessageForwarded':
 			handleWsMessageForwarded(chatEvent);
 			break;
 
-		case 'reaction-changed':
+		case 'ReactionChanged':
 			handleWsReactionChanged(chatEvent);
 			break;
 
-		case 'read-updated':
+		case 'ReadUpdated':
 			handleWsReadUpdated(chatEvent);
 			break;
 
-		case 'presence-changed':
+		case 'PresenceChanged':
 			handleWsPresenceChanged(chatEvent);
 			break;
 
-		case 'message-pinned': {
+		case 'MessagePinned': {
 			const { roomId, messageId, pinnedBy, timestamp } = chatEvent;
 			const { chatsRegistry, setPinnedMessage, newMessage } = useStore.getState();
 			const messages = chatsRegistry[roomId]?.messages ?? [];
@@ -102,7 +102,7 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 		}
 
-		case 'message-unpinned': {
+		case 'MessageUnpinned': {
 			const { roomId, messageId, unpinnedBy, timestamp } = chatEvent;
 			const { removePinnedMessage, setSelectedPinnedMessage, newMessage } = useStore.getState();
 			removePinnedMessage(roomId);
@@ -121,7 +121,7 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 		}
 
-		case 'typing': {
+		case 'Typing': {
 			const { roomId, userId } = chatEvent;
 			const { setIsWriting } = useStore.getState();
 			// Set user as writing
@@ -139,11 +139,11 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 		}
 
-		case 'pong':
+		case 'Pong':
 			// Already handled by WebSocketClient._onMessage — this is a fallback
 			break;
 
-		case 'error':
+		case 'Error':
 			console.error('[wsChatEventsHandler] Server error:', chatEvent.code, chatEvent.message);
 			break;
 

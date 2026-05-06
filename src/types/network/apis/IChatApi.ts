@@ -64,6 +64,14 @@ export interface IChatApi {
 	forwardMessage(sourceRoomId: string, messageId: string, toRoomId: string): Promise<ChatMessage>;
 
 	/**
+	 * Forwards multiple messages to a target room in a single batch call.
+	 */
+	forwardMessages(
+		toRoomId: string,
+		messages: { sourceRoomId: string; messageId: string }[]
+	): Promise<{ id: string; createdAt: string }[]>;
+
+	/**
 	 * Gets a specific message by ID
 	 */
 	getMessage(roomId: string, messageId: string): Promise<ChatMessage>;

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import useEventListener, {
 	EventName,
+	MeetingDeclinedUseEvent,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
 import usePiPWindow from './usePipWindow';
@@ -23,6 +24,7 @@ import {
 	getMeetingActiveByMeetingId,
 	getMeetingParticipants
 } from '../store/selectors/MeetingSelectors';
+import { getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
@@ -111,6 +113,27 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		}
 		// eslint-disable-next-line
 	}, [setPinnedTile]);
+
+	// Handle meeting declined notification
+	const meetingDeclinedHandler = useCallback(
+		(event: CustomEvent<MeetingDeclinedUseEvent['data']> | undefined) => {
+			const declinedUserName = getUserName(
+				useStore.getState(),
+				event?.detail.userId ?? ''
+			);
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				severity: 'info',
+				label: t('meeting.declined.snackbar', '{{name}} declined the call', {
+					name: declinedUserName || event?.detail.userId
+				}),
+				actionLabel: okLabel,
+				disableAutoHide: true
+			});
+		},
+		[createSnackbar, okLabel, t]
+	);
+	useEventListener(EventName.MEETING_DECLINED, meetingDeclinedHandler);
 
 	// Disconnect user if he joins the meeting with other session
 	const meetingParticipantClashedHandler = useCallback(

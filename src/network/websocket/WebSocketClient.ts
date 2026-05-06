@@ -109,8 +109,8 @@ export class WebSocketClient {
 		if (typeof e.data === 'string') {
 			const rowEvent = JSON.parse(e.data);
 
-			// Handle pong from either legacy or new protocol
-			if (rowEvent.type === WsEventType.PONG || rowEvent.type === 'pong') {
+			// Handle pong
+			if (rowEvent.type === WsEventType.PONG) {
 				this._disconnectionCheckFunction.cancel();
 				return;
 			}

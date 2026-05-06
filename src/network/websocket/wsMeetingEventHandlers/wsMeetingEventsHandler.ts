@@ -5,6 +5,7 @@
  */
 
 import { meetingAudioAnsweredEventHandler } from './MeetingAudioAnsweredEventHandler';
+import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
 import { meetingAudioStreamChangedEventHandler } from './MeetingAudioStreamChangedEventHandler';
 import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
@@ -26,6 +27,7 @@ import { meetingWaitingParticipantJoinedEventHandler } from './MeetingWaitingPar
 import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEvent, WsEventType } from '../../../types/network/websocket/wsEvents';
+import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 
 export const wsMeetingEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -127,6 +129,10 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
 			// event for mobile apps
+			break;
+		}
+		case WsEventType.MEETING_DECLINED: {
+			meetingDeclinedEventHandler(event as MeetingDeclinedEvent);
 			break;
 		}
 		default: {

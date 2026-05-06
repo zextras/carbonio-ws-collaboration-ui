@@ -9,7 +9,7 @@
 export type WsAction =
 	| { action: 'ping' }
 	| {
-			action: 'typing';
+			action: 'Typing';
 			roomId: string;
 	  };
 
@@ -23,7 +23,7 @@ export interface WsAttachment {
 // Outbound events (server -> client)
 export type WsChatEvent =
 	| {
-			type: 'message-received';
+			type: 'MessageReceived';
 			messageId: string;
 			roomId: string;
 			senderId: string;
@@ -41,7 +41,7 @@ export type WsChatEvent =
 			forwardedAt?: string; // ISO timestamp of original send
 	  }
 	| {
-			type: 'message-edited';
+			type: 'MessageEdited';
 			messageId: string;
 			roomId: string;
 			senderId: string;
@@ -49,14 +49,14 @@ export type WsChatEvent =
 			editedAt: string;
 	  }
 	| {
-			type: 'message-deleted';
+			type: 'MessageDeleted';
 			messageId: string;
 			roomId: string;
 			senderId: string;
 			deletedAt: string;
 	  }
 	| {
-			type: 'message-forwarded';
+			type: 'MessageForwarded';
 			messageId: string;
 			roomId: string;
 			originalRoomId: string;
@@ -71,7 +71,7 @@ export type WsChatEvent =
 			attachmentSize?: number;
 	  }
 	| {
-			type: 'reaction-changed';
+			type: 'ReactionChanged';
 			messageId: string;
 			roomId: string;
 			userId: string;
@@ -79,39 +79,39 @@ export type WsChatEvent =
 			operation: 'added' | 'removed';
 	  }
 	| {
-			type: 'read-updated';
+			type: 'ReadUpdated';
 			roomId: string;
 			userId: string;
 			messageId: string;
 	  }
 	| {
-			type: 'presence-changed';
+			type: 'PresenceChanged';
 			userId: string;
 			online: boolean;
 	  }
-	| { type: 'pong' }
+	| { type: 'Pong' }
 	| {
-			type: 'typing';
+			type: 'Typing';
 			roomId: string;
 			userId: string;
 			timestamp: string;
 	  }
 	| {
-			type: 'message-pinned';
+			type: 'MessagePinned';
 			roomId: string;
 			messageId: string;
 			pinnedBy: string;
 			timestamp: string;
 	  }
 	| {
-			type: 'message-unpinned';
+			type: 'MessageUnpinned';
 			roomId: string;
 			messageId: string;
 			unpinnedBy: string;
 			timestamp: string;
 	  }
 	| {
-			type: 'error';
+			type: 'Error';
 			requestId?: string;
 			code: string;
 			message: string;
@@ -123,18 +123,18 @@ export type WsChatEventType = WsChatEvent['type'];
 /** Check if a raw WS event is a chat-related event type */
 export function isChatEvent(eventType: string): boolean {
 	const chatEventTypes: string[] = [
-		'message-received',
-		'message-edited',
-		'message-deleted',
-		'message-forwarded',
-		'message-pinned',
-		'message-unpinned',
-		'reaction-changed',
-		'read-updated',
-		'presence-changed',
-		'typing',
-		'pong',
-		'error'
+		'MessageReceived',
+		'MessageEdited',
+		'MessageDeleted',
+		'MessageForwarded',
+		'MessagePinned',
+		'MessageUnpinned',
+		'ReactionChanged',
+		'ReadUpdated',
+		'PresenceChanged',
+		'Typing',
+		'Pong',
+		'Error'
 	];
 	return chatEventTypes.includes(eventType);
 }
