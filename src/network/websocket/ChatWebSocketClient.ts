@@ -41,13 +41,26 @@ class ChatWebSocketClient {
 	}
 
 	/**
-	 * Send a typing notification for a room.
-	 * Call this (debounced, at most once per second) on every keystroke.
+	 * Send a typing:started notification for a room.
+	 * Throttled at 3000ms by the caller (MongooseIM parity).
 	 */
 	sendTyping(roomId: string): void {
 		this.sendAction({
 			action: 'Typing',
-			roomId
+			roomId,
+			status: 'started'
+		});
+	}
+
+	/**
+	 * Send an explicit typing:stopped notification for a room.
+	 * Called on message send and after 3500ms of inactivity (MongooseIM parity).
+	 */
+	sendTypingStopped(roomId: string): void {
+		this.sendAction({
+			action: 'Typing',
+			roomId,
+			status: 'stopped'
 		});
 	}
 

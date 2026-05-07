@@ -122,20 +122,24 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 		}
 
 		case 'Typing': {
-			const { roomId, userId } = chatEvent;
+			const { roomId, userId, status } = chatEvent;
 			const { setIsWriting } = useStore.getState();
-			// Set user as writing
-			setIsWriting(roomId, userId, true);
-			// Cancel any existing auto-clear timer for this user+room
 			const timerKey = `${roomId}:${userId}`;
-			const existing = typingClearTimers.get(timerKey);
-			if (existing) clearTimeout(existing);
-			// Auto-clear after 3 seconds
-			const timer = setTimeout(() => {
-				useStore.getState().setIsWriting(roomId, userId, false);
+			const existingTimer = typingClearTimers.get(timerKey);
+			if (existingTimer) clearTimeout(existingTimer);
+
+			if (status === 'stopped') {
+				setIsWriting(roomId, userId, false);
 				typingClearTimers.delete(timerKey);
-			}, 3000);
-			typingClearTimers.set(timerKey, timer);
+			} else {
+				setIsWriting(roomId, userId, true);
+				// Safety net: auto-clear after 7000ms if no new started/stopped arrives
+				const timer = setTimeout(() => {
+					useStore.getState().setIsWriting(roomId, userId, false);
+					typingClearTimers.delete(timerKey);
+				}, 7000);
+				typingClearTimers.set(timerKey, timer);
+			}
 			break;
 		}
 

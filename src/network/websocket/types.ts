@@ -11,6 +11,7 @@ export type WsAction =
 	| {
 			action: 'Typing';
 			roomId: string;
+			status?: 'started' | 'stopped';
 	  };
 
 export interface WsAttachment {
@@ -94,6 +95,7 @@ export type WsChatEvent =
 			type: 'Typing';
 			roomId: string;
 			userId: string;
+			status?: 'started' | 'stopped';
 			timestamp: string;
 	  }
 	| {

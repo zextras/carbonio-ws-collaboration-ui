@@ -225,39 +225,42 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		});
 	};
 
-	// Debounced typing notification via WS (at most 1 call per second)
-	const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const lastTypingSentRef = useRef<number>(0);
-	const TYPING_DEBOUNCE_MS = 1000;
+	const isPlaceholderRoom = roomId.startsWith('placeholder-');
 
-	const sendTypingWs = useCallback(() => {
-		// Skip typing indicator for placeholder rooms (room doesn't exist yet)
-		if (roomId.startsWith('placeholder-')) return;
-		const now = Date.now();
-		if (now - lastTypingSentRef.current >= TYPING_DEBOUNCE_MS) {
-			lastTypingSentRef.current = now;
-			chatWsClient.sendTyping(roomId);
-		} else {
-			if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
-			typingDebounceRef.current = setTimeout(
-				() => {
-					lastTypingSentRef.current = Date.now();
-					chatWsClient.sendTyping(roomId);
-				},
-				TYPING_DEBOUNCE_MS - (now - lastTypingSentRef.current)
-			);
-		}
-	}, [roomId]);
+	// WS typing: throttled started (3000ms) + debounced stopped (3500ms) — MongooseIM parity
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendThrottleTypingWs = useCallback(
+		throttle(
+			() => {
+				if (!isPlaceholderRoom) chatWsClient.sendTyping(roomId);
+			},
+			3000,
+			{ trailing: false }
+		),
+		[roomId, isPlaceholderRoom]
+	);
 
-	// Cleanup debounce timer on unmount or room change
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendDebouncedStopWs = useCallback(
+		debounce(() => {
+			if (!isPlaceholderRoom) chatWsClient.sendTypingStopped(roomId);
+		}, 3500),
+		[roomId, isPlaceholderRoom]
+	);
+
+	const sendWsStopWriting = useCallback(() => {
+		sendThrottleTypingWs.cancel();
+		sendDebouncedStopWs.cancel();
+		if (!isPlaceholderRoom) chatWsClient.sendTypingStopped(roomId);
+	}, [sendThrottleTypingWs, sendDebouncedStopWs, roomId, isPlaceholderRoom]);
+
+	// Cleanup on unmount or room change
 	useEffect(
 		() => () => {
-			if (typingDebounceRef.current) {
-				clearTimeout(typingDebounceRef.current);
-				typingDebounceRef.current = null;
-			}
+			sendThrottleTypingWs.cancel();
+			sendDebouncedStopWs.cancel();
 		},
-		[roomId]
+		[sendThrottleTypingWs, sendDebouncedStopWs]
 	);
 
 	// XMPP typing notifications: throttled isWriting + debounced paused
@@ -338,10 +341,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		if (isMongooseIM) {
 			// XMPP: cancel throttle/debounce and send paused stanza
 			sendStopWriting();
-		} else if (typingDebounceRef.current) {
-			// REST/WS: cancel any pending typing debounce
-			clearTimeout(typingDebounceRef.current);
-			typingDebounceRef.current = null;
+		} else {
+			// WS: cancel throttle/debounce and send explicit typing:stopped
+			sendWsStopWriting();
 		}
 		const message = textMessage.trim();
 		if (filesToUploadArray) {
@@ -415,6 +417,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		textMessage,
 		isMongooseIM,
 		sendStopWriting,
+		sendWsStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray
@@ -507,7 +510,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				sendThrottleIsWriting();
 				sendDebouncedPause();
 			} else {
-				sendTypingWs();
+				sendThrottleTypingWs();
+				sendDebouncedStopWs();
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
