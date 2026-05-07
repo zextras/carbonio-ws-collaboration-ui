@@ -75,21 +75,210 @@ export default function MainApp(): React.JSX.Element {
 		if (authenticated) setDateDefault(prefs?.zimbraPrefLocale);
 	}, [prefs, authenticated]);
 
-	// NETWORKS: detect backend type, then load inbox accordingly
+	// NETWORKS: detect backend type via /inbox, then load accordingly
 	const connect = useCallback(() => {
 		getToken()
 			.then((resp) => {
-				// Detect backend type: attempt XMPP connection with a 3 s timeout.
-				// CONNECTED  → MongooseIM backend (devel mode)
-				// CONNFAIL / AUTHFAIL / ERROR / timeout → common-socket backend
-				xmppClient.connectAsync(resp.zmToken, 3000).then((isMongoose: boolean) => {
-					useStore.getState().setIsMongooseIM(isMongoose);
+				// Detect backend type: try /inbox first.
+				// 200 → common-socket backend (inbox data reused, XMPP never touched)
+				// 404 / network error → MongooseIM backend
+				ChatApi.getInbox()
+					.then((inboxResponse) => {
+						// ===== COMMON-SOCKET PATH =====
+						useStore.getState().setIsMongooseIM(false);
 
-					if (isMongoose) {
+						const { wsClient } = useStore.getState().connections;
+						wsClient?.connect();
+
+						const { addRooms, newInboxMessage, setUnreadCount } = useStore.getState();
+
+						const conversations = inboxResponse?.conversations ?? [];
+						const rooms = conversations.map((conv) => conv.room);
+						addRooms(rooms);
+
+						const { setUserPresence } = useStore.getState();
+						rooms.forEach((room) => {
+							room.members?.forEach((m) => {
+								if (m.online !== undefined) {
+									setUserPresence(m.userId, m.online, m.lastActivity);
+								}
+							});
+						});
+
+						const mapEventTypeToOperation = (eventType: SystemEventType): OperationType => {
+							switch (eventType) {
+								case 'ROOM_CREATED':
+									return OperationType.ROOM_CREATION;
+								case 'MEMBER_ADDED':
+									return OperationType.MEMBER_ADDED;
+								case 'MEMBER_REMOVED':
+									return OperationType.MEMBER_REMOVED;
+								case 'MEETING_STARTED':
+									return OperationType.MEETING_STARTED;
+								case 'MEETING_ENDED':
+									return OperationType.MEETING_ENDED;
+								case 'MEETING_DECLINED':
+									return OperationType.MEETING_DECLINED;
+								default:
+									return OperationType.ROOM_CREATION;
+							}
+						};
+
+						const extractEventActorAndMember = (
+							eventType: SystemEventType,
+							content: Record<string, unknown> | undefined
+						): { actorId: string; memberId: string } => {
+							if (!content) return { actorId: '', memberId: '' };
+							switch (eventType) {
+								case 'ROOM_CREATED':
+									return {
+										actorId: (content.creatorId as string) || '',
+										memberId: ''
+									};
+								case 'MEMBER_ADDED': {
+									const addedUserIds = content.addedUserIds as string[] | undefined;
+									return {
+										actorId: (content.addedByUserId as string) || '',
+										memberId: addedUserIds?.[0] || ''
+									};
+								}
+								case 'MEMBER_REMOVED':
+									return {
+										actorId: (content.removedByUserId as string) || '',
+										memberId: (content.removedUserId as string) || ''
+									};
+								case 'MEETING_STARTED':
+									return {
+										actorId: (content.startedBy as string) || '',
+										memberId: ''
+									};
+								case 'MEETING_ENDED':
+									return {
+										actorId: (content.endedBy as string) || '',
+										memberId: String(content.durationSec ?? '')
+									};
+								case 'MEETING_DECLINED':
+									return {
+										actorId: (content.declinedBy as string) || '',
+										memberId: ''
+									};
+								default:
+									return { actorId: '', memberId: '' };
+							}
+						};
+
+						const calcReadStatusFromMarkers = (
+							messageId: string,
+							messageDate: number,
+							senderId: string,
+							apiMarkers:
+								| Array<{
+										userId: string;
+										messageId: string;
+										readAt: string;
+								  }>
+								| undefined,
+							members: Array<{ userId: string }> | undefined,
+							sessionId: string | undefined
+						): MarkerStatus => {
+							if (senderId !== sessionId) return MarkerStatus.UNREAD;
+							if (!apiMarkers || apiMarkers.length === 0 || !members) return MarkerStatus.UNREAD;
+
+							const readByCount = apiMarkers.filter((marker) => {
+								if (marker.userId === sessionId) return false;
+								const markerDate = dateToTimestamp(marker.readAt);
+								return isBefore(messageDate, markerDate) || marker.messageId === messageId;
+							}).length;
+
+							const otherMembersCount = members.filter((m) => m.userId !== sessionId).length;
+
+							if (readByCount >= otherMembersCount && otherMembersCount > 0)
+								return MarkerStatus.READ;
+							if (readByCount > 0) return MarkerStatus.READ_BY_SOMEONE;
+							return MarkerStatus.UNREAD;
+						};
+
+						const { session } = useStore.getState();
+						const sessionId = session.id;
+
+						conversations.forEach((conv) => {
+							setUnreadCount(conv.roomId, conv.unreadCount);
+
+							if (conv.markers && conv.markers.length > 0) {
+								const { updateReadStatus } = useStore.getState();
+								const storeMarkers: Marker[] = conv.markers.map((m) => ({
+									from: m.userId,
+									messageId: m.messageId,
+									markerDate: dateToTimestamp(m.readAt),
+									type: 'displayed' as const
+								}));
+								updateReadStatus(conv.roomId, storeMarkers);
+							}
+
+							const msgDate = conv.lastMessage ? dateToTimestamp(conv.lastMessage.createdAt) : 0;
+							const eventDate = conv.lastEvent ? dateToTimestamp(conv.lastEvent.createdAt) : 0;
+
+							if (msgDate >= eventDate && conv.lastMessage) {
+								const msg = conv.lastMessage;
+								const readStatus = calcReadStatusFromMarkers(
+									msg.id,
+									dateToTimestamp(msg.createdAt),
+									msg.senderId,
+									conv.markers,
+									conv.room.members,
+									sessionId
+								);
+								const textMessage: TextMessage = {
+									id: msg.id,
+									stanzaId: msg.id,
+									roomId: msg.roomId,
+									date: dateToTimestamp(msg.createdAt),
+									type: MessageType.TEXT_MSG,
+									from: msg.senderId,
+									text: msg.text || msg.attachment?.name || '',
+									read: readStatus,
+									forwardedInfo: msg.forwardedInfo,
+									editedInfo: msg.editedInfo,
+									deletedInfo: msg.deletedInfo,
+									attachment: msg.attachment
+										? {
+												id: msg.attachment.id,
+												name: msg.attachment.name,
+												mimeType: msg.attachment.mimeType,
+												size: msg.attachment.size
+											}
+										: undefined
+								};
+								newInboxMessage(textMessage);
+							} else if (conv.lastEvent) {
+								const evt = conv.lastEvent;
+								const { actorId, memberId } = extractEventActorAndMember(
+									evt.type,
+									evt.content as Record<string, unknown> | undefined
+								);
+								const configMessage: ConfigurationMessage = {
+									id: evt.id,
+									roomId: conv.roomId,
+									date: dateToTimestamp(evt.createdAt),
+									type: MessageType.CONFIGURATION_MSG,
+									operation: mapEventTypeToOperation(evt.type),
+									value: memberId,
+									from: actorId,
+									read: MarkerStatus.UNREAD
+								};
+								newInboxMessage(configMessage);
+							}
+						});
+
+						listMeetings().catch(() => {});
+						setChatsBeStatus(true);
+					})
+					.catch(() => {
 						// ===== MONGOOSEIM PATH =====
-						// Rooms loaded via REST; XMPP already connected above and will fill
-						// the inbox via setInbox() inside XMPPConnection.connectionEstablish().
-						// WebSocket carries room-level events (typing, markers, etc.).
+						useStore.getState().setIsMongooseIM(true);
+
+						xmppClient.connect(resp.zmToken);
+
 						Promise.all([listRooms(), listMeetings()])
 							.then(() => {
 								setChatsBeStatus(true);
@@ -97,211 +286,7 @@ export default function MainApp(): React.JSX.Element {
 								wsClient?.connect();
 							})
 							.catch(() => setChatsBeStatus(false));
-					} else {
-						// ===== COMMON-SOCKET PATH =====
-						// Connect WS immediately — independent of inbox/meetings loading
-						const { wsClient } = useStore.getState().connections;
-						wsClient?.connect();
-
-						// Load inbox and meetings in parallel; failures must NOT kill WS connection
-						Promise.all([ChatApi.getInbox(), listMeetings()])
-							.then(([inboxResponse]) => {
-								const { addRooms, newInboxMessage, setUnreadCount } = useStore.getState();
-
-								const conversations = inboxResponse?.conversations ?? [];
-								const rooms = conversations.map((conv) => conv.room);
-								addRooms(rooms);
-
-								// Extract presence from inbox-enriched members (no separate API call needed)
-								const { setUserPresence } = useStore.getState();
-								rooms.forEach((room) => {
-									room.members?.forEach((m) => {
-										if (m.online !== undefined) {
-											setUserPresence(m.userId, m.online, m.lastActivity);
-										}
-									});
-								});
-
-								// Helper: SystemEventType → OperationType
-								const mapEventTypeToOperation = (eventType: SystemEventType): OperationType => {
-									switch (eventType) {
-										case 'ROOM_CREATED':
-											return OperationType.ROOM_CREATION;
-										case 'MEMBER_ADDED':
-											return OperationType.MEMBER_ADDED;
-										case 'MEMBER_REMOVED':
-											return OperationType.MEMBER_REMOVED;
-										case 'MEETING_STARTED':
-											return OperationType.MEETING_STARTED;
-										case 'MEETING_ENDED':
-											return OperationType.MEETING_ENDED;
-										case 'MEETING_DECLINED':
-											return OperationType.MEETING_DECLINED;
-										default:
-											return OperationType.ROOM_CREATION;
-									}
-								};
-
-								// Helper: extract actorId / memberId from event content
-								const extractEventActorAndMember = (
-									eventType: SystemEventType,
-									content: Record<string, unknown> | undefined
-								): { actorId: string; memberId: string } => {
-									if (!content) return { actorId: '', memberId: '' };
-									switch (eventType) {
-										case 'ROOM_CREATED':
-											return {
-												actorId: (content.creatorId as string) || '',
-												memberId: ''
-											};
-										case 'MEMBER_ADDED': {
-											const addedUserIds = content.addedUserIds as string[] | undefined;
-											return {
-												actorId: (content.addedByUserId as string) || '',
-												memberId: addedUserIds?.[0] || ''
-											};
-										}
-										case 'MEMBER_REMOVED':
-											return {
-												actorId: (content.removedByUserId as string) || '',
-												memberId: (content.removedUserId as string) || ''
-											};
-										case 'MEETING_STARTED':
-											return {
-												actorId: (content.startedBy as string) || '',
-												memberId: ''
-											};
-										case 'MEETING_ENDED':
-											return {
-												actorId: (content.endedBy as string) || '',
-												memberId: String(content.durationSec ?? '')
-											};
-										case 'MEETING_DECLINED':
-											return {
-												actorId: (content.declinedBy as string) || '',
-												memberId: ''
-											};
-										default:
-											return { actorId: '', memberId: '' };
-									}
-								};
-
-								// Helper: compute read status from API markers
-								const calcReadStatusFromMarkers = (
-									messageId: string,
-									messageDate: number,
-									senderId: string,
-									apiMarkers:
-										| Array<{
-												userId: string;
-												messageId: string;
-												readAt: string;
-										  }>
-										| undefined,
-									members: Array<{ userId: string }> | undefined,
-									sessionId: string | undefined
-								): MarkerStatus => {
-									if (senderId !== sessionId) return MarkerStatus.UNREAD;
-									if (!apiMarkers || apiMarkers.length === 0 || !members)
-										return MarkerStatus.UNREAD;
-
-									const readByCount = apiMarkers.filter((marker) => {
-										if (marker.userId === sessionId) return false;
-										const markerDate = dateToTimestamp(marker.readAt);
-										return isBefore(messageDate, markerDate) || marker.messageId === messageId;
-									}).length;
-
-									const otherMembersCount = members.filter((m) => m.userId !== sessionId).length;
-
-									if (readByCount >= otherMembersCount && otherMembersCount > 0)
-										return MarkerStatus.READ;
-									if (readByCount > 0) return MarkerStatus.READ_BY_SOMEONE;
-									return MarkerStatus.UNREAD;
-								};
-
-								const { session } = useStore.getState();
-								const sessionId = session.id;
-
-								// Process conversations: unread counts, markers, last message/event
-								conversations.forEach((conv) => {
-									setUnreadCount(conv.roomId, conv.unreadCount);
-
-									if (conv.markers && conv.markers.length > 0) {
-										const { updateReadStatus } = useStore.getState();
-										const storeMarkers: Marker[] = conv.markers.map((m) => ({
-											from: m.userId,
-											messageId: m.messageId,
-											markerDate: dateToTimestamp(m.readAt),
-											type: 'displayed' as const
-										}));
-										updateReadStatus(conv.roomId, storeMarkers);
-									}
-
-									const msgDate = conv.lastMessage
-										? dateToTimestamp(conv.lastMessage.createdAt)
-										: 0;
-									const eventDate = conv.lastEvent ? dateToTimestamp(conv.lastEvent.createdAt) : 0;
-
-									if (msgDate >= eventDate && conv.lastMessage) {
-										const msg = conv.lastMessage;
-										const readStatus = calcReadStatusFromMarkers(
-											msg.id,
-											dateToTimestamp(msg.createdAt),
-											msg.senderId,
-											conv.markers,
-											conv.room.members,
-											sessionId
-										);
-										const textMessage: TextMessage = {
-											id: msg.id,
-											stanzaId: msg.id,
-											roomId: msg.roomId,
-											date: dateToTimestamp(msg.createdAt),
-											type: MessageType.TEXT_MSG,
-											from: msg.senderId,
-											text: msg.text || msg.attachment?.name || '',
-											read: readStatus,
-											forwardedInfo: msg.forwardedInfo,
-											editedInfo: msg.editedInfo,
-											deletedInfo: msg.deletedInfo,
-											attachment: msg.attachment
-												? {
-														id: msg.attachment.id,
-														name: msg.attachment.name,
-														mimeType: msg.attachment.mimeType,
-														size: msg.attachment.size
-													}
-												: undefined
-										};
-										newInboxMessage(textMessage);
-									} else if (conv.lastEvent) {
-										const evt = conv.lastEvent;
-										const { actorId, memberId } = extractEventActorAndMember(
-											evt.type,
-											evt.content as Record<string, unknown> | undefined
-										);
-										const configMessage: ConfigurationMessage = {
-											id: evt.id,
-											roomId: conv.roomId,
-											date: dateToTimestamp(evt.createdAt),
-											type: MessageType.CONFIGURATION_MSG,
-											operation: mapEventTypeToOperation(evt.type),
-											value: memberId,
-											from: actorId,
-											read: MarkerStatus.UNREAD
-										};
-										newInboxMessage(configMessage);
-									}
-								});
-
-								setChatsBeStatus(true);
-							})
-							.catch((err) => {
-								console.error('[MainApp] inbox/meetings init failed', err);
-								setChatsBeStatus(false);
-							});
-					}
-				});
+					});
 			})
 			.catch((err) => {
 				console.error('[MainApp] getToken failed', err);
@@ -310,12 +295,20 @@ export default function MainApp(): React.JSX.Element {
 	}, [setChatsBeStatus]);
 
 	useEffect(() => {
-		if (authenticated && !hasConnectedRef.current) {
+		if (!authenticated) {
+			hasConnectedRef.current = false;
+			const { wsClient: ws } = useStore.getState().connections;
+			ws?.disconnect();
+			useStore.getState().reset();
+			localStorage.removeItem('carbonio-ws-collaboration-storage');
+			return undefined;
+		}
+
+		if (!hasConnectedRef.current) {
 			hasConnectedRef.current = true;
 			connect();
 		}
 
-		// Cleanup: disconnect WebSocket when leaving
 		const handleBeforeUnload = (): void => {
 			const { wsClient: ws } = useStore.getState().connections;
 			ws?.disconnect();

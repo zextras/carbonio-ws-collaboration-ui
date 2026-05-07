@@ -159,6 +159,12 @@ class XMPPConnection {
 		this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
 	}
 
+	public disconnect(): void {
+		if (this.connectionStatus === Strophe.Status.CONNECTED) {
+			this.connection.disconnect('Session closed');
+		}
+	}
+
 	public send(request: XMPPRequest): void {
 		if (this.connection && this.connectionStatus === Strophe.Status.CONNECTED) {
 			switch (request.type) {

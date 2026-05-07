@@ -56,22 +56,6 @@ const useStore = create<RootStore>()(
 							const { online, lastActivity, ...persistentUser } = user;
 							return [userId, persistentUser];
 						})
-					),
-					rooms: state.rooms,
-					chatsRegistry: Object.fromEntries(
-						Object.entries(state.chatsRegistry).map(([roomId, chat]) => [
-							roomId,
-							{
-								unread: 0,
-								inboxMessageId: chat.inboxMessageId,
-								lastMessage: chat.lastMessage,
-								messages: [],
-								fastenings: {},
-								markers: {},
-								searchResults: [],
-								backfillQueue: []
-							}
-						])
 					)
 				})
 			}
