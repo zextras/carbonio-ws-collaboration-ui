@@ -42,4 +42,5 @@ export type MediaGalleryStoreSlice = {
 	) => void;
 	setMediaGalleryFilter: (roomId: string, filter: MediaGalleryFilter) => void;
 	removeMediaGalleryAttachment: (roomId: string, attachmentId: string) => void;
+	prependMediaGalleryAttachment: (roomId: string, attachment: Attachment) => void;
 };

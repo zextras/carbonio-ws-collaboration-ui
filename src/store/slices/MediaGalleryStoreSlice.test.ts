@@ -9,6 +9,7 @@ import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryType
 import useStore from '../Store';
 
 const roomId = 'room-1';
+const UNKNOWN_ROOM_ID = 'unknown-room';
 
 const buildAttachment = (overrides: Partial<Attachment> = {}): Attachment => ({
 	id: 'att-id',
@@ -103,7 +104,46 @@ describe('Media gallery slice', () => {
 	});
 
 	test('removeMediaGalleryAttachment is a no-op when the room is uninitialised', () => {
-		useStore.getState().removeMediaGalleryAttachment('unknown-room', 'a1');
-		expect(useStore.getState().mediaGallery['unknown-room']).toBeUndefined();
+		useStore.getState().removeMediaGalleryAttachment(UNKNOWN_ROOM_ID, 'a1');
+		expect(useStore.getState().mediaGallery[UNKNOWN_ROOM_ID]).toBeUndefined();
+	});
+
+	describe('prependMediaGalleryAttachment', () => {
+		const NEW_ID = 'new';
+
+		test('prepends a new attachment when the gallery is initialised', () => {
+			useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID }));
+			const state = useStore.getState().mediaGallery[roomId];
+			expect(state.attachments.map((a) => a.id)).toEqual([NEW_ID, 'a1']);
+			expect(state.nextCursor).toBe('cur-1');
+		});
+
+		test('skips when the room state is missing or not yet initialised', () => {
+			useStore.getState().prependMediaGalleryAttachment(UNKNOWN_ROOM_ID, buildAttachment());
+			expect(useStore.getState().mediaGallery[UNKNOWN_ROOM_ID]).toBeUndefined();
+
+			useStore.getState().setMediaGalleryLoading(roomId, true);
+			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID }));
+			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
+		});
+
+		test('skips when the userId filter does not match the attachment sender', () => {
+			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
+			useStore
+				.getState()
+				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID, userId: 'someone' }));
+			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
+		});
+
+		test('skips when the attachment id is already in the list', () => {
+			useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: 'a1' }));
+			expect(useStore.getState().mediaGallery[roomId].attachments.map((a) => a.id)).toEqual(['a1']);
+		});
 	});
 });

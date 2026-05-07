@@ -8,6 +8,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { Container, Divider, TabBar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import { gte } from 'semver';
 
 import { ActionsTabContent } from './conversationActionsAccordion/ActionsTabContent';
 import ConversationInfo from './conversationInfo/ConversationInfo';
@@ -19,6 +20,8 @@ import { getRoomTypeSelector, getIsPlaceholderRoom } from '../../../store/select
 import useStore from '../../../store/Store';
 import { InfoPanelTab } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+
+const MEDIA_GALLERY_MIN_API_VERSION = '1.6.11';
 
 type ConversationProps = {
 	roomId: string;
@@ -35,15 +38,20 @@ const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) 
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 	const selectedInfoTab = useStore((state) => getSelectedInfoTab(state, roomId));
 	const setSelectedInfoTab = useStore((state) => state.setSelectedInfoTab);
+	const apiVersion = useStore((state) => state.session.apiVersion);
+
+	const isMediaGallerySupported = !!apiVersion && gte(apiVersion, MEDIA_GALLERY_MIN_API_VERSION);
 
 	const tabs = useMemo(() => {
 		const items = [{ id: InfoPanelTab.ACTIONS, label: actionsTabLabel }];
 		if (roomType !== RoomType.ONE_TO_ONE) {
 			items.push({ id: InfoPanelTab.MEMBERS, label: membersTabLabel });
 		}
-		items.push({ id: InfoPanelTab.MEDIA_GALLERY, label: mediaGalleryTabLabel });
+		if (isMediaGallerySupported) {
+			items.push({ id: InfoPanelTab.MEDIA_GALLERY, label: mediaGalleryTabLabel });
+		}
 		return items;
-	}, [actionsTabLabel, mediaGalleryTabLabel, membersTabLabel, roomType]);
+	}, [actionsTabLabel, isMediaGallerySupported, mediaGalleryTabLabel, membersTabLabel, roomType]);
 
 	const handleTabChange = useCallback(
 		(_ev: React.MouseEvent<HTMLDivElement> | KeyboardEvent, tabId: string) => {
@@ -73,7 +81,9 @@ const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) 
 					<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
 						{selectedInfoTab === InfoPanelTab.ACTIONS && <ActionsTabContent roomId={roomId} />}
 						{selectedInfoTab === InfoPanelTab.MEMBERS && <MemberList roomId={roomId} />}
-						{selectedInfoTab === InfoPanelTab.MEDIA_GALLERY && <MediaGalleryTab roomId={roomId} />}
+						{isMediaGallerySupported && selectedInfoTab === InfoPanelTab.MEDIA_GALLERY && (
+							<MediaGalleryTab roomId={roomId} />
+						)}
 					</Container>
 				</>
 			)}
