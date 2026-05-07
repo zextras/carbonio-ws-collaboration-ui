@@ -103,7 +103,7 @@ export const useMediaGalleryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const state = draft.mediaGallery[roomId];
-				if (!state || !state.isInitialized) return;
+				if (!state?.isInitialized) return;
 				const { filter } = state;
 				if (filter.userId && filter.userId !== attachment.userId) return;
 				if (filter.sortBy !== 'created_at' || filter.order !== 'desc') return;
