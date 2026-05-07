@@ -98,5 +98,20 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			false,
 			'MG/REMOVE_ATTACHMENT'
 		);
+	},
+	prependMediaGalleryAttachment: (roomId: string, attachment: Attachment): void => {
+		set(
+			produce((draft: RootStore) => {
+				const state = draft.mediaGallery[roomId];
+				if (!state || !state.isInitialized) return;
+				const { filter } = state;
+				if (filter.userId && filter.userId !== attachment.userId) return;
+				if (filter.sortBy !== 'created_at' || filter.order !== 'desc') return;
+				if (state.attachments.some((a) => a.id === attachment.id)) return;
+				state.attachments.unshift(attachment);
+			}),
+			false,
+			'MG/PREPEND_ATTACHMENT'
+		);
 	}
 });
