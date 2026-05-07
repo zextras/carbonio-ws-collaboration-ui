@@ -186,8 +186,6 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
-	// FUTURE: backend must emit MEETING_STARTED/MEETING_ENDED events in common-socket mode too.
-	// For now, these labels are kept for MongooseIM compatibility.
 	const meetingTime = useMemo(() => formatDate(message.date, 'HH:mm'), [message.date]);
 
 	const meetingStartedLabel = useMemo(() => {
@@ -263,8 +261,6 @@ export const useConfigurationMessageLabel = (
 			return unpinMessageLabel;
 		case OperationType.CLEARED_HISTORY:
 			return clearHistoryLabel;
-		// FUTURE: backend must emit MEETING_STARTED/MEETING_ENDED events in common-socket mode too.
-		// For now, these cases are kept for MongooseIM compatibility.
 		case OperationType.MEETING_STARTED:
 			return meetingStartedLabel;
 		case OperationType.MEETING_ENDED:

@@ -152,6 +152,12 @@ export default function MainApp(): React.JSX.Element {
 											return OperationType.MEMBER_ADDED;
 										case 'MEMBER_REMOVED':
 											return OperationType.MEMBER_REMOVED;
+										case 'MEETING_STARTED':
+											return OperationType.MEETING_STARTED;
+										case 'MEETING_ENDED':
+											return OperationType.MEETING_ENDED;
+										case 'MEETING_DECLINED':
+											return OperationType.MEETING_DECLINED;
 										default:
 											return OperationType.ROOM_CREATION;
 									}
@@ -180,6 +186,21 @@ export default function MainApp(): React.JSX.Element {
 											return {
 												actorId: (content.removedByUserId as string) || '',
 												memberId: (content.removedUserId as string) || ''
+											};
+										case 'MEETING_STARTED':
+											return {
+												actorId: (content.startedBy as string) || '',
+												memberId: ''
+											};
+										case 'MEETING_ENDED':
+											return {
+												actorId: (content.endedBy as string) || '',
+												memberId: String(content.durationSec ?? '')
+											};
+										case 'MEETING_DECLINED':
+											return {
+												actorId: (content.declinedBy as string) || '',
+												memberId: ''
 											};
 										default:
 											return { actorId: '', memberId: '' };

@@ -135,6 +135,12 @@ function mapSystemEventTypeToOperation(eventType: SystemEventType): OperationTyp
 			return OperationType.MESSAGE_PINNED;
 		case 'MESSAGE_UNPINNED':
 			return OperationType.MESSAGE_UNPINNED;
+		case 'MEETING_STARTED':
+			return OperationType.MEETING_STARTED;
+		case 'MEETING_ENDED':
+			return OperationType.MEETING_ENDED;
+		case 'MEETING_DECLINED':
+			return OperationType.MEETING_DECLINED;
 		default:
 			return OperationType.ROOM_CREATION;
 	}
@@ -177,6 +183,21 @@ function extractEventActorAndMember(
 			return {
 				actorId: (content?.unpinnedBy as string) ?? '',
 				memberId: (content?.messageId as string) ?? ''
+			};
+		case 'MEETING_STARTED':
+			return {
+				actorId: (content.startedBy as string) || '',
+				memberId: ''
+			};
+		case 'MEETING_ENDED':
+			return {
+				actorId: (content.endedBy as string) || '',
+				memberId: String(content.durationSec ?? '')
+			};
+		case 'MEETING_DECLINED':
+			return {
+				actorId: (content.declinedBy as string) || '',
+				memberId: ''
 			};
 		default:
 			return { actorId: '', memberId: '' };

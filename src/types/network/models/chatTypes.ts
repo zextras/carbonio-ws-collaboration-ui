@@ -82,7 +82,10 @@ export type SystemEventType =
 	| 'MEMBER_ADDED'
 	| 'MEMBER_REMOVED'
 	| 'MESSAGE_PINNED'
-	| 'MESSAGE_UNPINNED';
+	| 'MESSAGE_UNPINNED'
+	| 'MEETING_STARTED'
+	| 'MEETING_ENDED'
+	| 'MEETING_DECLINED';
 
 export type SystemEvent = {
 	id: string;
