@@ -30,8 +30,8 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 					ChatApi.getPresenceBatch(memberIds)
 						.then((result) => {
 							const { setUserPresence } = useStore.getState();
-							Object.entries(result).forEach(([uid, { online, lastActivity }]) => {
-								setUserPresence(uid, online, lastActivity);
+							result.forEach(({ userId, online, lastActivity }) => {
+								setUserPresence(userId, online, lastActivity);
 							});
 						})
 						.catch(() => {

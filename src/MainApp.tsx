@@ -133,7 +133,7 @@ export default function MainApp(): React.JSX.Element {
 									Promise.all(presenceBatches.map((batch) => ChatApi.getPresenceBatch(batch)))
 										.then((results) => {
 											results.forEach((result) => {
-												Object.entries(result).forEach(([userId, { online, lastActivity }]) => {
+												result.forEach(({ userId, online, lastActivity }) => {
 													setUserPresence(userId, online, lastActivity);
 												});
 											});
