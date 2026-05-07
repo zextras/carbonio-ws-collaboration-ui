@@ -119,7 +119,18 @@ class ChatApi implements IChatApi {
 
 		return this.enqueue(roomId, () =>
 			fetchAPI<ChatMessage>(`rooms/${roomId}/messages`, RequestType.POST, body).then((response) => {
-				// Promote the placeholder: replace provisional id/timestamp with server-assigned values.
+				// Guard against WS-before-REST race: if the WS echo arrived before this
+				// REST response and already inserted the real message, just remove the
+				// stale placeholder instead of promoting it (which would be a no-op or
+				// leave a duplicate).
+				const existingMessages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
+				const wsAlreadyDelivered = existingMessages.some((m) => m.id === response.id);
+				if (wsAlreadyDelivered) {
+					useStore.getState().removePlaceholderMessage(roomId, stableId);
+					return response;
+				}
+
+				// Normal flow: promote the placeholder with server-assigned id/timestamp.
 				const confirmedDate = new Date(response.createdAt ?? Date.now()).getTime();
 				useStore.setState(
 					produce((draft) => {

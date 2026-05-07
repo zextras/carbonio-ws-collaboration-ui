@@ -45,15 +45,6 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 
 	switch (chatEvent.type) {
 		case 'MessageReceived':
-			// Skip the actor's own echo: sendMessage() already inserts an optimistic
-			// placeholder into the store, processing the WS echo would duplicate it.
-			// Other events (MessageEdited / MessageDeleted / MessageForwarded /
-			// ReactionChanged) intentionally fall through to their handlers because
-			// the local action does NOT optimistically update the store — the WS echo
-			// is the only mechanism that mutates state, so it must reach self.
-			if (chatEvent.senderId === sessionId) {
-				break;
-			}
 			handleWsMessageReceived(chatEvent);
 			break;
 
