@@ -20,6 +20,16 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
+			// Self-filter: the backend now broadcasts every event to all members (including
+			// the actor) so the frontend owns dedup. The RoomCreated payload has no actor
+			// field, so we detect "this is our own echo" by checking whether the room is
+			// already in the store — if it is, the optimistic addRooms() call from the
+			// POST /rooms response handler already registered it and there is nothing to
+			// do here. This also prevents the spurious pin/getRoom side-effects for the
+			// creator (the cause of the pin 404 race).
+			if (state.rooms[event.roomId]) {
+				break;
+			}
 			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
 				useStore.getState().addRooms([response]);
 				const memberIds = (response.members ?? [])

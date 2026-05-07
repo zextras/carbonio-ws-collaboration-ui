@@ -437,22 +437,29 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					return msg;
 				});
 
-				// Recalculate unread count
-				const myId = draft.session.id;
-				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
-				const lastMarkedDate = myMarker
-					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
-					: undefined;
+				// Recalculate unread count only when we actually have local messages to
+				// count from. When `messages` is empty (e.g. right after the inbox
+				// response is processed on a hard refresh, before any history page is
+				// fetched), the count produced here would be 0 and would clobber the
+				// authoritative `unreadCount` set by `setUnreadCount` from the inbox
+				// payload — leaving the badge invisible until a WS event arrives.
+				if (messages.length > 0) {
+					const myId = draft.session.id;
+					const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
+					const lastMarkedDate = myMarker
+						? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
+						: undefined;
 
-				const unreadMessages = messages.filter((msg) => {
-					const isConfigOrFromOthers =
-						msg.type === MessageType.CONFIGURATION_MSG ||
-						(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
-					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
-					return isConfigOrFromOthers && isAfterMarker;
-				});
+					const unreadMessages = messages.filter((msg) => {
+						const isConfigOrFromOthers =
+							msg.type === MessageType.CONFIGURATION_MSG ||
+							(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
+						const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
+						return isConfigOrFromOthers && isAfterMarker;
+					});
 
-				draft.chatsRegistry[roomId].unread = unreadMessages.length;
+					draft.chatsRegistry[roomId].unread = unreadMessages.length;
+				}
 			}),
 			false,
 			'CHAT/UPDATE_READ_STATUS'

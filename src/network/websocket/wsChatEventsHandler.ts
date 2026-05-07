@@ -41,9 +41,19 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 	}
 
 	const chatEvent = event as unknown as WsChatEvent;
+	const sessionId = useStore.getState().session.id;
 
 	switch (chatEvent.type) {
 		case 'MessageReceived':
+			// Skip the actor's own echo: sendMessage() already inserts an optimistic
+			// placeholder into the store, processing the WS echo would duplicate it.
+			// Other events (MessageEdited / MessageDeleted / MessageForwarded /
+			// ReactionChanged) intentionally fall through to their handlers because
+			// the local action does NOT optimistically update the store — the WS echo
+			// is the only mechanism that mutates state, so it must reach self.
+			if (chatEvent.senderId === sessionId) {
+				break;
+			}
 			handleWsMessageReceived(chatEvent);
 			break;
 
@@ -64,6 +74,9 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 			break;
 
 		case 'ReadUpdated':
+			// Do NOT self-skip here: handleWsReadUpdated() relies on the self-echo
+			// to clear the unread count for the room. It already branches internally
+			// on userId === session.id.
 			handleWsReadUpdated(chatEvent);
 			break;
 
@@ -123,6 +136,10 @@ export function wsChatEventsHandler(event: Record<string, unknown>): boolean {
 
 		case 'Typing': {
 			const { roomId, userId, status } = chatEvent;
+			// Don't render our own typing indicator on our own client.
+			if (userId === sessionId) {
+				break;
+			}
 			const { setIsWriting } = useStore.getState();
 			const timerKey = `${roomId}:${userId}`;
 			const existingTimer = typingClearTimers.get(timerKey);
