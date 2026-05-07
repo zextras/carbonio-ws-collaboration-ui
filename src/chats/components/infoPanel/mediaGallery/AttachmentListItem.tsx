@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './DeleteAttachmentModal';
+import usePreview from '../../../../hooks/usePreview';
 import { bulkDeleteRoomAttachments } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
@@ -29,7 +30,8 @@ import {
 	downloadAttachment,
 	getAttachmentSize,
 	getPinAttachmentColor,
-	getPinAttachmentIcon
+	getPinAttachmentIcon,
+	isPreviewSupported
 } from '../../../../utils/attachmentUtils';
 
 type AttachmentListItemProps = {
@@ -55,6 +57,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
 	const deleteTooltip = t('action.delete', 'Delete');
 	const downloadTooltip = t('action.download', 'Download');
+	const previewTooltip = t('action.preview', 'Preview');
 	const successLabel = t('feedback.attachmentDeleted', 'Attachment deleted');
 	const errorLabel = t('feedback.attachmentDeleteError', 'Could not delete the attachment');
 
@@ -69,6 +72,9 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const sizeLabel = getAttachmentSize(attachment.size);
 	const subline = sizeLabel ? `${senderLabel} • ${sizeLabel}` : senderLabel;
 	const canDelete = sessionId === attachment.userId;
+	const canPreview = isPreviewSupported(attachment.mimeType);
+
+	const { onPreviewClick } = usePreview(attachment);
 
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
@@ -111,6 +117,46 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 		successLabel
 	]);
 
+	const fileInfoRow = (
+		<Row
+			data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
+			takeAvailableSpace
+			wrap="nowrap"
+			mainAlignment="flex-start"
+			crossAlignment="center"
+			background="gray6"
+			gap="0.5rem"
+			onClick={canPreview ? onPreviewClick : undefined}
+			style={{ cursor: canPreview ? 'pointer' : 'default' }}
+		>
+			<FileAvatar
+				data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
+				icon={getPinAttachmentIcon(attachment.mimeType)}
+				label={attachment.name}
+				shape="square"
+				background="gray3"
+				color={getPinAttachmentColor(attachment.mimeType)}
+			/>
+			<Container
+				orientation="vertical"
+				mainAlignment="center"
+				crossAlignment="flex-start"
+				minWidth={0}
+			>
+				<Tooltip overflowTooltip label={attachment.name}>
+					<Text size="small" overflow="ellipsis" lineHeight={1}>
+						{attachment.name}
+					</Text>
+				</Tooltip>
+				<Tooltip overflowTooltip label={subline}>
+					<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
+						{subline}
+					</Text>
+				</Tooltip>
+			</Container>
+		</Row>
+	);
+
 	return (
 		<Container
 			data-testid={`mediaGalleryAttachment-${attachment.id}`}
@@ -121,33 +167,13 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 			gap="0.5rem"
 			height="fit"
 		>
-			<FileAvatar
-				data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
-				icon={getPinAttachmentIcon(attachment.mimeType)}
-				label={attachment.name}
-				shape="square"
-				background="gray3"
-				color={getPinAttachmentColor(attachment.mimeType)}
-			/>
-			<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
-				<Container
-					orientation="vertical"
-					mainAlignment="center"
-					crossAlignment="flex-start"
-					minWidth={0}
-				>
-					<Tooltip overflowTooltip label={attachment.name}>
-						<Text size="small" overflow="ellipsis" lineHeight={1}>
-							{attachment.name}
-						</Text>
-					</Tooltip>
-					<Tooltip overflowTooltip label={subline}>
-						<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
-							{subline}
-						</Text>
-					</Tooltip>
-				</Container>
-			</Row>
+			{canPreview ? (
+				<Tooltip label={previewTooltip} placement="top">
+					{fileInfoRow}
+				</Tooltip>
+			) : (
+				fileInfoRow
+			)}
 			<Tooltip label={downloadTooltip} placement="top">
 				<Button
 					data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
