@@ -34,10 +34,13 @@ const oneToOneRoom: RoomBe = createMockRoom({
 
 const user1 = createMockUser({ id: 'user1Id', name: 'User 1' });
 
+const MEDIA_GALLERY_API_VERSION = '1.6.11';
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([oneToOneRoom, groupRoom]);
 	store.setPlaceholderRoom(user1.id);
+	store.setApiVersion(MEDIA_GALLERY_API_VERSION);
 });
 
 const tabBarTestId = 'infoPanelTabBar';
@@ -76,5 +79,18 @@ describe('Conversation info panel', () => {
 	test('Tab bar is not shown when the room is a placeholder', async () => {
 		setup(<ConversationInfoPanel roomId={`placeholder-${user1.id}`} goToChatView={vi.fn()} />);
 		expect(screen.queryByTestId(tabBarTestId)).not.toBeInTheDocument();
+	});
+
+	test('Media Gallery tab is hidden when the API version is below 1.6.11', () => {
+		useStore.getState().setApiVersion('1.6.10');
+		setup(<ConversationInfoPanel roomId={groupRoom.id} goToChatView={vi.fn()} />);
+		expect(screen.getByTestId(tabBarTestId)).toBeInTheDocument();
+		expect(screen.queryByText(mediaGalleryTabLabel)).not.toBeInTheDocument();
+	});
+
+	test('Media Gallery tab is hidden when the API version is unknown', () => {
+		useStore.setState((state) => ({ session: { ...state.session, apiVersion: undefined } }));
+		setup(<ConversationInfoPanel roomId={groupRoom.id} goToChatView={vi.fn()} />);
+		expect(screen.queryByText(mediaGalleryTabLabel)).not.toBeInTheDocument();
 	});
 });
