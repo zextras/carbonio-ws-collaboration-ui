@@ -50,6 +50,8 @@ export type MemberBe = {
 	owner: boolean;
 	temporary?: boolean;
 	external?: boolean;
+	online?: boolean;
+	lastActivity?: string;
 };
 
 export type AddMemberFields = {

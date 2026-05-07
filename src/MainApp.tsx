@@ -112,36 +112,15 @@ export default function MainApp(): React.JSX.Element {
 								const rooms = conversations.map((conv) => conv.room);
 								addRooms(rooms);
 
-								// Fetch initial presence for all room members
-								const allMemberIds: string[] = [];
+								// Extract presence from inbox-enriched members (no separate API call needed)
+								const { setUserPresence } = useStore.getState();
 								rooms.forEach((room) => {
-									if (room.members) {
-										room.members.forEach((m: { userId: string }) => {
-											if (!allMemberIds.includes(m.userId)) {
-												allMemberIds.push(m.userId);
-											}
-										});
-									}
+									room.members?.forEach((m) => {
+										if (m.online !== undefined) {
+											setUserPresence(m.userId, m.online, m.lastActivity);
+										}
+									});
 								});
-								if (allMemberIds.length > 0) {
-									const { setUserPresence } = useStore.getState();
-									const BATCH_SIZE = 500;
-									const presenceBatches: string[][] = [];
-									for (let i = 0; i < allMemberIds.length; i += BATCH_SIZE) {
-										presenceBatches.push(allMemberIds.slice(i, i + BATCH_SIZE));
-									}
-									Promise.all(presenceBatches.map((batch) => ChatApi.getPresenceBatch(batch)))
-										.then((results) => {
-											results.forEach((result) => {
-												result.forEach(({ userId, online, lastActivity }) => {
-													setUserPresence(userId, online, lastActivity);
-												});
-											});
-										})
-										.catch((err) => {
-											console.error('[MainApp] Presence batch fetch failed:', err);
-										});
-								}
 
 								// Helper: SystemEventType → OperationType
 								const mapEventTypeToOperation = (eventType: SystemEventType): OperationType => {
