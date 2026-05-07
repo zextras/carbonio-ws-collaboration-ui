@@ -7,6 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 
+import moment from 'moment-timezone';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -19,6 +20,10 @@ import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelecto
 import useStore from '../store/Store';
 import { ConfigurationMessage, OperationType } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
+import { formatDate } from '../utils/dateUtils';
+
+const ONE_TO_ONE_CREATED_KEY = 'affiliationMessages.oneToOneCreated';
+const NEW_CHAT_CREATED_DEFAULT = 'New Chat created!';
 
 export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage
@@ -120,7 +125,7 @@ export const useConfigurationMessageLabel = (
 
 	const memberAddedLabel = useMemo(() => {
 		if (roomType === RoomType.ONE_TO_ONE)
-			return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+			return t(ONE_TO_ONE_CREATED_KEY, NEW_CHAT_CREATED_DEFAULT);
 		if (isAffiliatedUserAnonymous || !affiliatedUsername) return undefined;
 		if (loggedUserId === message.value) {
 			return t('affiliationMessages.user.Added', 'You have been added to {{roomName}}.', {
@@ -181,6 +186,43 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [actionMakerUsername, loggedUserId, message.from, t]);
 
+	// FUTURE: backend must emit MEETING_STARTED/MEETING_ENDED events in common-socket mode too.
+	// For now, these labels are kept for MongooseIM compatibility.
+	const meetingTime = useMemo(() => formatDate(message.date, 'HH:mm'), [message.date]);
+
+	const meetingStartedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingStarted', 'You called at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t('configurationMessages.member.meetingStarted', '{{name}} called you at {{time}}', {
+			name: actionMakerUsername,
+			time: meetingTime
+		});
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
+	const meetingEndedLabel = useMemo(() => {
+		let duration = '';
+		if (message.value) {
+			const totalSeconds = Number(message.value);
+			const hours = Math.floor(totalSeconds / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			if (totalSeconds < 60) {
+				duration = moment.duration(totalSeconds, 'seconds').humanize();
+			} else if (hours < 1) {
+				duration = `${Math.floor(totalSeconds / 60)} min`;
+			} else {
+				duration = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+			}
+		}
+		return (
+			t('configurationMessages.meetingEnded', 'Call ended at {{time}}', {
+				time: meetingTime
+			}) + (duration ? ` - ${duration}` : '')
+		);
+	}, [meetingTime, message.value, t]);
+
 	const clearHistoryLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
 			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
@@ -194,7 +236,7 @@ export const useConfigurationMessageLabel = (
 				}
 			);
 		}
-		return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+		return t(ONE_TO_ONE_CREATED_KEY, NEW_CHAT_CREATED_DEFAULT);
 	}, [actionMakerUsername, amIModerator, loggedUserId, message.from, t]);
 
 	switch (message.operation) {
@@ -212,7 +254,7 @@ export const useConfigurationMessageLabel = (
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
 			if (roomType === RoomType.ONE_TO_ONE) {
-				return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+				return t(ONE_TO_ONE_CREATED_KEY, NEW_CHAT_CREATED_DEFAULT);
 			}
 			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
 		case OperationType.MESSAGE_PINNED:
@@ -221,18 +263,19 @@ export const useConfigurationMessageLabel = (
 			return unpinMessageLabel;
 		case OperationType.CLEARED_HISTORY:
 			return clearHistoryLabel;
+		// FUTURE: backend must emit MEETING_STARTED/MEETING_ENDED events in common-socket mode too.
+		// For now, these cases are kept for MongooseIM compatibility.
+		case OperationType.MEETING_STARTED:
+			return meetingStartedLabel;
+		case OperationType.MEETING_ENDED:
+			return meetingEndedLabel;
 		case OperationType.MEETING_DECLINED:
 			if (loggedUserId === message.from) {
-				return t(
-					'configurationMessages.user.meetingDeclined',
-					'You declined the call'
-				);
+				return t('configurationMessages.user.meetingDeclined', 'You declined the call');
 			}
-			return t(
-				'configurationMessages.member.meetingDeclined',
-				'{{name}} declined the call',
-				{ name: actionMakerUsername }
-			);
+			return t('configurationMessages.member.meetingDeclined', '{{name}} declined the call', {
+				name: actionMakerUsername
+			});
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

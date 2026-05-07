@@ -29,8 +29,14 @@ export function handleWsMessageForwarded(event: {
 	attachmentMime?: string;
 	attachmentSize?: number;
 }): void {
-	const { newMessage, setLastMessageForInbox, incrementUnreadCount, rooms, session, chatsRegistry } =
-		useStore.getState();
+	const {
+		newMessage,
+		setLastMessageForInbox,
+		incrementUnreadCount,
+		rooms,
+		session,
+		chatsRegistry
+	} = useStore.getState();
 	const { roomId, messageId, senderId, text } = event;
 
 	const room = rooms[roomId];
@@ -51,11 +57,13 @@ export function handleWsMessageForwarded(event: {
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
-		forwardedInfo: event.forwardedFrom
+		forwarded: event.forwardedFrom
 			? {
-					originalSenderId: event.forwardedFrom,
-					originalSentAt: event.forwardedAt ?? new Date().toISOString()
-			  }
+					from: event.forwardedFrom,
+					date: event.forwardedAt ? new Date(event.forwardedAt).getTime() : Date.now(),
+					id: messageId,
+					count: 1
+				}
 			: undefined,
 		attachment: event.attachmentId
 			? {
@@ -63,7 +71,7 @@ export function handleWsMessageForwarded(event: {
 					name: event.attachmentName ?? '',
 					mimeType: event.attachmentMime ?? 'application/octet-stream',
 					size: event.attachmentSize ?? 0
-			  }
+				}
 			: undefined
 	};
 

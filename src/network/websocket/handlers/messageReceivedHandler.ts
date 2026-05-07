@@ -77,23 +77,23 @@ export function handleWsMessageReceived(event: {
 				(m) =>
 					m.type === MessageType.TEXT_MSG &&
 					(m.id === event.replyToId || (m as TextMessage).stanzaId === event.replyToId)
-		  )
+			)
 		: undefined;
 
 	const repliedMessage: TextMessage | undefined = existingReplyTarget
 		? (existingReplyTarget as TextMessage)
 		: event.replyToId
-		? ({
-				id: event.replyToId,
-				stanzaId: event.replyToId,
-				roomId,
-				from: '',
-				text: '',
-				type: MessageType.TEXT_MSG,
-				date: 0,
-				read: MarkerStatus.READ
-		  } as TextMessage)
-		: undefined;
+			? ({
+					id: event.replyToId,
+					stanzaId: event.replyToId,
+					roomId,
+					from: '',
+					text: '',
+					type: MessageType.TEXT_MSG,
+					date: 0,
+					read: MarkerStatus.READ
+				} as TextMessage)
+			: undefined;
 
 	// Build TextMessage for the store
 	const textMessage: TextMessage = {
@@ -112,7 +112,7 @@ export function handleWsMessageReceived(event: {
 			? {
 					originalSenderId: event.forwardedFrom,
 					originalSentAt: event.forwardedAt ?? new Date().toISOString()
-			  }
+				}
 			: undefined
 	};
 

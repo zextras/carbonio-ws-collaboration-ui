@@ -11,7 +11,6 @@ import { now } from 'moment';
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
 import ChatApi from '../../../network/apis/ChatApi';
-import { ChatMessage } from '../../../types/network/models/chatTypes';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -23,6 +22,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
+import { ChatMessage } from '../../../types/network/models/chatTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import {
 	FasteningAction,

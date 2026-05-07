@@ -32,8 +32,7 @@ import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
 	createMockMeeting,
-	createMockRoom,
-	createMockTextMessage
+	createMockRoom
 } from '../../tests/createMock';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -57,12 +56,9 @@ describe('Rooms API', () => {
 		// Send listRooms request
 		const room = createMockRoom({ id: 'room0' });
 		mockFetchAPI.mockResolvedValueOnce([room]);
-		await listRooms(true, true);
+		await listRooms();
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(
-			'rooms?extraFields=members&extraFields=settings',
-			RequestType.GET
-		);
+		expect(mockFetchAPI).toHaveBeenCalledWith('rooms', RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.rooms[room.id]).toEqual(room);
@@ -432,84 +428,11 @@ describe('Rooms API', () => {
 		});
 	});
 
-	describe('forwardMessages dispatches quota changed event', () => {
-		test('dispatches event when forwarded messages have attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage({
-				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
-			});
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
-				() => insideMessage
-			);
-
-			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-
-		test('does not dispatch event when forwarded messages have no attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage();
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
-				() => insideMessage
-			);
-
-			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).not.toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-
-		test('dispatches event even when some rooms fail (partial success)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
-
-			const message = createMockTextMessage({
-				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
-			});
-			const xmlMessage = buildTextMessageFromHistory({
-				roomId: message.roomId,
-				from: message.from,
-				text: message.text
-			});
-			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementation(() => insideMessage);
-
-			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
-
-			await expect(forwardMessages(['room1', 'room2'], [message])).rejects.toThrow();
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-	});
-
 	test('replacePlaceholderRoom is called correctly', async () => {
 		// Send replacePlaceholderRoom request
 		const room = createMockRoom({ id: 'room0' });
-		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		mockFetchAPI.mockResolvedValueOnce(room);
-		await replacePlaceholderRoom('userId', 'text', testFile);
+		await replacePlaceholderRoom('userId');
 
 		expect(mockFetchAPI).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
 			type: RoomType.ONE_TO_ONE,

@@ -6,12 +6,14 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
+import ChatApi from '../../../network/apis/ChatApi';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
-import ChatApi from '../../../network/apis/ChatApi';
 
 export interface IChatExporter {
 	addMessagesToFullHistory(messages: Message[]): void;
@@ -28,7 +30,13 @@ class ChatExporter implements IChatExporter {
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
-		this.loadFullHistory();
+		const isMongooseIM = getIsMongooseIM(useStore.getState());
+		if (isMongooseIM) {
+			// XMPP: request history via MAM; results come back via addMessagesToFullHistory
+			xmppClient.requestFullHistory(this.roomId);
+		} else {
+			this.loadFullHistory();
+		}
 	}
 
 	private async loadFullHistory(): Promise<void> {
@@ -53,6 +61,14 @@ class ChatExporter implements IChatExporter {
 	}
 
 	public async continueExporting(): Promise<void> {
+		const isMongooseIM = getIsMongooseIM(useStore.getState());
+		if (isMongooseIM) {
+			// XMPP: delegate to xmppClient MAM pagination; it will call back into addMessagesToFullHistory
+			const from = last(this.fullHistory)?.date ?? 0;
+			xmppClient.requestFullHistory(this.roomId, from);
+			return;
+		}
+
 		const lastMessage = last(this.fullHistory);
 		if (!lastMessage) {
 			this.exportHistory();
@@ -108,8 +124,9 @@ class ChatExporter implements IChatExporter {
 	private messageFormatter(message: TextMessage): string {
 		const senderName = useStore.getState().users[message.from]?.name || message.from;
 		const header = `[${formatDate(message.date, 'YYYY-MM-DD HH:mm:ss')}] ${senderName}: `;
-		if (message.deletedInfo) {
-			const deletedMessage = t('message.deletedInfoMessage', 'Deleted message');
+		// Support both MongooseIM (deleted boolean) and common-socket (deletedInfo object)
+		if (message.deleted || message.deletedInfo) {
+			const deletedMessage = t('message.deletedMessage', 'Deleted message');
 			return `${header}[${deletedMessage}]\n`;
 		}
 		if (message.attachment) {

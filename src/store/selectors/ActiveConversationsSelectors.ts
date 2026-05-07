@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, includes, last, map } from "lodash";
+import { filter, find, includes, last, map } from 'lodash';
 
-import { FileToUpload, ReferenceMessage } from "../../types/store/ActiveConversationTypes";
-import { MessageType, TextMessage } from "../../types/store/ChatsRegistryTypes";
-import { RootStore } from "../../types/store/StoreTypes";
+import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 export const getReferenceMessage = (
 	store: RootStore,
@@ -54,8 +54,8 @@ export const getFilesToUploadArray = (
 ): FileToUpload[] | undefined => store.activeConversations[roomId]?.filesToAttach;
 
 export const getFocusedFile = (store: RootStore, roomId: string): string | undefined => {
-    const files = store.activeConversations[roomId]?.filesToAttach;
-    return files?.find(file => file.hasFocus)?.fileId;
+	const files = store.activeConversations[roomId]?.filesToAttach;
+	return files?.find((file) => file.hasFocus)?.fileId;
 };
 
 export const getForwardList = (store: RootStore, roomId: string): TextMessage[] | undefined =>
@@ -108,13 +108,22 @@ export const getLastNewReaction = (store: RootStore, roomId: string): string | u
 };
 
 export const getIsMessageSelected = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-    store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
+	store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
 
-export const getIsMessageSelectedAlreadyStored = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-!!store.chatsRegistry[roomId]?.messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
+export const getIsMessageSelectedAlreadyStored = (
+	store: RootStore,
+	roomId: string,
+	stanzaId: string
+): boolean =>
+	!!store.chatsRegistry[roomId]?.messages.find(
+		(msg) => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId
+	);
 
 export const getPinnedMessage = (store: RootStore, roomId: string): TextMessage | undefined =>
 	store.activeConversations[roomId]?.messagePinned;
 
-export const getIsPinnedMessageSelected = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-	store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;
+export const getIsPinnedMessageSelected = (
+	store: RootStore,
+	roomId: string,
+	stanzaId: string
+): boolean => store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;

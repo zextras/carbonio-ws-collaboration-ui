@@ -47,7 +47,9 @@ import ForwardMessageConversationListItem from './ForwardMessageConversationList
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import ChatApi from '../../../../network/apis/ChatApi';
+import { xmppForwardMessages } from '../../../../network/apis/RoomsApi';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
@@ -75,6 +77,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	roomId,
 	messagesToForward
 }): ReactElement => {
+	const isMongooseIM = getIsMongooseIM(useStore.getState());
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomsNotOrdered = useStore(getRoomIdsWithLastMessage);
 	const rooms = useMemo(
@@ -184,24 +187,36 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const forwardMessage = useCallback(() => {
 		const roomsId = map(selected, (key, value) => value);
-		const messageBatch = (messagesToForward || []).map((message) => ({
-			sourceRoomId: message.roomId,
-			messageId: message.stanzaId
-		}));
-		// Forward all messages to each target room via a single batch call per room
-		Promise.allSettled(
-			roomsId.map((toRoomId) =>
-				ChatApi.forwardMessages(toRoomId, messageBatch).catch((err) => {
-					console.error('[ForwardModal] forwardMessages failed', err);
+		if (isMongooseIM) {
+			// XMPP backend: use XMPP stanza-based forward
+			xmppForwardMessages(roomsId, messagesToForward || [])
+				.then(() => {
+					if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
+						goToRoomPage(roomsId[0]);
+					}
+					onClose();
 				})
-			)
-		).then(() => {
-			if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
-				goToRoomPage(roomsId[0]);
-			}
-			onClose();
-		});
-	}, [goToRoomPage, messagesToForward, onClose, selected]);
+				.catch(() => onClose());
+		} else {
+			// REST backend: forward via ChatApi (one batch call per target room)
+			const messageBatch = (messagesToForward || []).map((message) => ({
+				sourceRoomId: message.roomId,
+				messageId: message.stanzaId
+			}));
+			Promise.allSettled(
+				roomsId.map((toRoomId) =>
+					ChatApi.forwardMessages(toRoomId, messageBatch).catch((err) => {
+						console.error('[ForwardModal] forwardMessages failed', err);
+					})
+				)
+			).then(() => {
+				if (roomsId.length === 1 && !window.location.pathname.includes(MEETINGS_PATH)) {
+					goToRoomPage(roomsId[0]);
+				}
+				onClose();
+			});
+		}
+	}, [goToRoomPage, isMongooseIM, messagesToForward, onClose, selected]);
 
 	const disabledForwardButton = useMemo(() => size(selected) === 0, [selected]);
 

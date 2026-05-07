@@ -355,16 +355,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
-					<MessageHistoryLoader
-						roomId={roomId}
-						messageListRef={messageListRef}
-					/>
+					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
-					{messagesWrapped}
-				<HistoryLoaderAfter
-					roomId={roomId}
-					messageListRef={messageListRef}
-				/>
+				{messagesWrapped}
+				<HistoryLoaderAfter roomId={roomId} messageListRef={messageListRef} />
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>

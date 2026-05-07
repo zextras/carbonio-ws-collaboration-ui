@@ -26,7 +26,10 @@ const RemoveMemberListAction: FC<RemoveMemberProps> = ({ roomId, memberId }) => 
 		setDeleteUserModalOpen(false);
 	}, []);
 
-	const deleteUser = useCallback(() => RoomsApi.deleteRoomMember(roomId, memberId), [roomId, memberId]);
+	const deleteUser = useCallback(
+		() => RoomsApi.deleteRoomMember(roomId, memberId),
+		[roomId, memberId]
+	);
 
 	return (
 		<>

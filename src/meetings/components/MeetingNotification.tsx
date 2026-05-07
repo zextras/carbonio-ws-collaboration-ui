@@ -148,7 +148,12 @@ const MeetingNotification = ({
 				</CustomTooltip>
 			</Container>
 			<Container orientation="horizontal" gap="0.5rem">
-				<Button width="fill" label={declineLabel} color="secondary" onClick={handleDeclineMeeting} />
+				<Button
+					width="fill"
+					label={declineLabel}
+					color="secondary"
+					onClick={handleDeclineMeeting}
+				/>
 				<Button width="fill" label={joinMeetingLabel} onClick={joinMeeting} />
 			</Container>
 		</NotificationContainer>

@@ -30,9 +30,15 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 
 	const tooltipLabel = owner ? demoteModeratorLabel : promoteModeratorLabel;
 
-	const promoteMember = useCallback(() => RoomsApi.promoteRoomMember(roomId, memberId), [memberId, roomId]);
+	const promoteMember = useCallback(
+		() => RoomsApi.promoteRoomMember(roomId, memberId),
+		[memberId, roomId]
+	);
 
-	const demoteMember = useCallback(() => RoomsApi.demotesRoomMember(roomId, memberId), [memberId, roomId]);
+	const demoteMember = useCallback(
+		() => RoomsApi.demotesRoomMember(roomId, memberId),
+		[memberId, roomId]
+	);
 
 	const iconColor = useMemo(() => {
 		if (isInsideMeeting) return 'gray0';

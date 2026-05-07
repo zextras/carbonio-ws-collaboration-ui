@@ -51,11 +51,7 @@ export interface IChatApi {
 	 * Sends a new message to a room.
 	 * Calls are serialized per room via an internal queue.
 	 */
-	sendMessage(
-		roomId: string,
-		text: string,
-		replyToId?: string
-	): Promise<ChatMessage>;
+	sendMessage(roomId: string, text: string, replyToId?: string): Promise<ChatMessage>;
 
 	/**
 	 * Forwards a message to another room.

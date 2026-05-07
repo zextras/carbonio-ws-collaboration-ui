@@ -32,7 +32,9 @@ import useEventListener, {
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ChatApi from '../../../network/apis/ChatApi';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
@@ -51,6 +53,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const setPinnedMessage = useStore((store) => store.setPinnedMessage);
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
@@ -137,7 +140,11 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
 	useEffect(() => {
-		if (roomId) {
+		if (!roomId) return;
+		if (isMongooseIM) {
+			// XMPP: pin is loaded via IQ stanza; no REST call needed
+			xmppClient.getMessagePin(roomId);
+		} else {
 			ChatApi.getPinnedMessage(roomId)
 				.then((pins) => {
 					if (pins.length > 0) {
@@ -160,7 +167,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 					// No pinned message or error — ignore
 				});
 		}
-	}, [roomId, setPinnedMessage]);
+	}, [isMongooseIM, roomId, setPinnedMessage]);
 
 	return (
 		<CustomContainer

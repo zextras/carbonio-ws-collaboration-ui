@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { find, forEach, map } from 'lodash';
+import { debounce, find, forEach, map, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -33,15 +33,17 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import ChatApi from '../../../../network/apis/ChatApi';
 import { RoomsApi } from '../../../../network';
+import ChatApi from '../../../../network/apis/ChatApi';
 import { mapChatMessageToTextMessage } from '../../../../network/utils/messageMapper';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -86,6 +88,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	textMessage,
 	setTextMessage
 }) => {
+	const isMongooseIM = getIsMongooseIM(useStore.getState());
 
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
@@ -236,22 +239,45 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			chatWsClient.sendTyping(roomId);
 		} else {
 			if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
-			typingDebounceRef.current = setTimeout(() => {
-				lastTypingSentRef.current = Date.now();
-				chatWsClient.sendTyping(roomId);
-			}, TYPING_DEBOUNCE_MS - (now - lastTypingSentRef.current));
+			typingDebounceRef.current = setTimeout(
+				() => {
+					lastTypingSentRef.current = Date.now();
+					chatWsClient.sendTyping(roomId);
+				},
+				TYPING_DEBOUNCE_MS - (now - lastTypingSentRef.current)
+			);
 		}
 	}, [roomId]);
 
 	// Cleanup debounce timer on unmount or room change
-	useEffect(() => {
-		return () => {
+	useEffect(
+		() => () => {
 			if (typingDebounceRef.current) {
 				clearTimeout(typingDebounceRef.current);
 				typingDebounceRef.current = null;
 			}
-		};
-	}, [roomId]);
+		},
+		[roomId]
+	);
+
+	// XMPP typing notifications: throttled isWriting + debounced paused
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendThrottleIsWriting = useCallback(
+		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
+		[roomId]
+	);
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendDebouncedPause = useCallback(
+		debounce(() => xmppClient.sendPaused(roomId), 3500),
+		[roomId]
+	);
+
+	const sendStopWriting = useCallback(() => {
+		sendThrottleIsWriting.cancel();
+		sendDebouncedPause.cancel();
+		xmppClient.sendPaused(roomId);
+	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -261,9 +287,18 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
-						console.error('[MessageComposer] sendMessage failed', err);
-					});
+					if (isMongooseIM) {
+						xmppClient.sendChatMessageReply(
+							roomId,
+							message,
+							referenceMessage.senderId,
+							referenceMessage.stanzaId
+						);
+					} else {
+						ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
+							console.error('[MessageComposer] sendMessage failed', err);
+						});
+					}
 					unsetReferenceMessage(roomId);
 					break;
 				}
@@ -273,9 +308,18 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid sending correction if text doesn't change
-						ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
-							console.error('[MessageComposer] editMessage failed', err);
-						});
+						if (isMongooseIM) {
+							xmppClient.sendChatMessageEdit(
+								roomId,
+								message,
+								referenceMessage.stanzaId,
+								completeReferenceMessage.editedStanzaId ?? referenceMessage.stanzaId
+							);
+						} else {
+							ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
+								console.error('[MessageComposer] editMessage failed', err);
+							});
+						}
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -287,12 +331,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage]
+		[roomId, isMongooseIM, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
-		// Cancel any pending typing debounce when message is sent
-		if (typingDebounceRef.current) {
+		if (isMongooseIM) {
+			// XMPP: cancel throttle/debounce and send paused stanza
+			sendStopWriting();
+		} else if (typingDebounceRef.current) {
+			// REST/WS: cancel any pending typing debounce
 			clearTimeout(typingDebounceRef.current);
 			typingDebounceRef.current = null;
 		}
@@ -351,10 +398,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			// ChatApi.sendMessage handles placeholder rooms internally
-			ChatApi.sendMessage(roomId, message).catch((err) => {
-				console.error('[MessageComposer] sendMessage failed', err);
-			});
+			if (isMongooseIM) {
+				xmppClient.sendChatMessage(roomId, message);
+			} else {
+				// ChatApi.sendMessage handles placeholder rooms internally
+				ChatApi.sendMessage(roomId, message).catch((err) => {
+					console.error('[MessageComposer] sendMessage failed', err);
+				});
+			}
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
@@ -362,6 +413,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [
 		roomId,
 		textMessage,
+		isMongooseIM,
+		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray
@@ -430,18 +483,34 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
+			} else if (isMongooseIM) {
+				// XMPP typing: throttled isWriting + debounced pause per keystroke
+				sendThrottleIsWriting();
+				sendDebouncedPause();
 			}
-			// Typing ping is handled by useEffect watching textMessage
+			// REST/WS typing ping is handled by useEffect watching textMessage
 		},
-		[sendDisabled, carbonioLanguage, sendMessage]
+		[
+			sendDisabled,
+			carbonioLanguage,
+			isMongooseIM,
+			sendMessage,
+			sendThrottleIsWriting,
+			sendDebouncedPause
+		]
 	);
 
-	// Send typing WS notification on keystroke (debounced, at most once per second)
+	// Send typing notification on keystroke
 	useEffect(() => {
 		if (textMessage.trim().length > 0) {
-			sendTypingWs();
+			if (isMongooseIM) {
+				sendThrottleIsWriting();
+				sendDebouncedPause();
+			} else {
+				sendTypingWs();
+			}
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [textMessage]);
 
 	useEffect(() => {

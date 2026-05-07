@@ -10,7 +10,9 @@ import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import ChatApi from '../network/apis/ChatApi';
+import { xmppClient } from '../network/xmpp/XMPPClient';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
+import { getIsMongooseIM } from '../store/selectors/ConnectionSelector';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
 import { TextMessage } from '../types/store/ChatsRegistryTypes';
@@ -27,23 +29,29 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 	const [t] = useTranslation();
 	const { createModal, closeModal } = useModal();
 	const roomId = message?.roomId ?? '';
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId));
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
 
-	const stanzaIdToPin = useMemo(() => {
-		return message?.editedStanzaId ?? message?.stanzaId ?? '';
-	}, [message]);
+	const stanzaIdToPin = useMemo(
+		() => message?.editedStanzaId ?? message?.stanzaId ?? '',
+		[message]
+	);
 
 	const isMessagePinned = useMemo(
 		() => (pinnedMessage?.editedStanzaId ?? pinnedMessage?.stanzaId) === stanzaIdToPin,
 		[pinnedMessage?.editedStanzaId, pinnedMessage?.stanzaId, stanzaIdToPin]
 	);
 
-	const canMessageBePinned = useMemo(
-		() => roomType === RoomType.ONE_TO_ONE || amIModerator,
-		[amIModerator, roomType]
-	);
+	const canMessageBePinned = useMemo(() => {
+		const baseCondition = roomType === RoomType.ONE_TO_ONE || amIModerator;
+		if (isMongooseIM) {
+			// On MongooseIM, also require the pin feature to be advertised
+			return xmppClient.features.includes('zextras:iq:pin') && baseCondition;
+		}
+		return baseCondition;
+	}, [isMongooseIM, amIModerator, roomType]);
 
 	const pinActionLabel = useMemo(() => {
 		if (!isMessagePinned) {
@@ -62,9 +70,13 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
 				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
-					ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
-						console.error('[usePinMessage] pinMessage failed:', err);
-					});
+					if (isMongooseIM) {
+						xmppClient.pinMessage(roomId, stanzaIdToPin);
+					} else {
+						ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
+							console.error('[usePinMessage] pinMessage failed:', err);
+						});
+					}
 					closeModal(modalId);
 					useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 				},
@@ -84,18 +96,35 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 		}
 
 		if (isMessagePinned) {
-			ChatApi.unpinMessage(roomId, stanzaIdToPin).catch((err) => {
-				console.error('[usePinMessage] unpinMessage failed:', err);
-			});
+			if (isMongooseIM) {
+				xmppClient.unpinMessage(roomId, stanzaIdToPin);
+			} else {
+				ChatApi.unpinMessage(roomId, stanzaIdToPin).catch((err) => {
+					console.error('[usePinMessage] unpinMessage failed:', err);
+				});
+			}
 			useStore.getState().removePinnedMessage(roomId);
 			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		} else {
-			ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
-				console.error('[usePinMessage] pinMessage failed:', err);
-			});
+			if (isMongooseIM) {
+				xmppClient.pinMessage(roomId, stanzaIdToPin);
+			} else {
+				ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
+					console.error('[usePinMessage] pinMessage failed:', err);
+				});
+			}
 			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		}
-	}, [pinnedMessage, isMessagePinned, createModal, t, roomId, stanzaIdToPin, closeModal]);
+	}, [
+		isMongooseIM,
+		pinnedMessage,
+		isMessagePinned,
+		createModal,
+		t,
+		roomId,
+		stanzaIdToPin,
+		closeModal
+	]);
 
 	return {
 		canMessageBePinned,

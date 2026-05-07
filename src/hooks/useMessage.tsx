@@ -10,6 +10,7 @@ import {
 	getEditAndDeleteFasteningSelector,
 	getMessageSelector
 } from '../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../store/selectors/ConnectionSelector';
 import useStore from '../store/Store';
 import {
 	FasteningAction,
@@ -20,6 +21,7 @@ import {
 } from '../types/store/ChatsRegistryTypes';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const message = useStore<Message | undefined>((store) =>
 		getMessageSelector(store, roomId, messageId)
 	);
@@ -32,32 +34,59 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	return useMemo((): Message | undefined => {
 		if (message) {
 			if (fastening) {
-				switch (fastening.action) {
-					case FasteningAction.EDIT: {
-						return {
-							...message,
-							editedInfo: { editedAt: new Date().toISOString() },
-							text: fastening.value ?? ''
-						} as TextMessage;
+				if (isMongooseIM) {
+					// XMPP: fastenings carry the delta; apply as deprecated boolean flags
+					switch (fastening.action) {
+						case FasteningAction.EDIT: {
+							return {
+								...message,
+								edited: true,
+								text: fastening.value ?? '',
+								editedStanzaId: fastening.stanzaId
+							} as TextMessage;
+						}
+						case FasteningAction.DELETE: {
+							return {
+								...message,
+								deleted: true,
+								text: '',
+								attachment: undefined,
+								replyTo: undefined
+							} as TextMessage;
+						}
+						default: {
+							return message;
+						}
 					}
-					case FasteningAction.DELETE: {
-						return {
-							...message,
-							deletedInfo: { deletedBy: '', deletedAt: new Date().toISOString() },
-							text: '',
-							attachment: undefined,
-							replyTo: undefined
-						} as TextMessage;
-					}
-					default: {
-						return message;
+				} else {
+					// REST+WS: use structured editedInfo/deletedInfo objects
+					switch (fastening.action) {
+						case FasteningAction.EDIT: {
+							return {
+								...message,
+								editedInfo: { editedAt: new Date().toISOString() },
+								text: fastening.value ?? ''
+							} as TextMessage;
+						}
+						case FasteningAction.DELETE: {
+							return {
+								...message,
+								deletedInfo: { deletedBy: '', deletedAt: new Date().toISOString() },
+								text: '',
+								attachment: undefined,
+								replyTo: undefined
+							} as TextMessage;
+						}
+						default: {
+							return message;
+						}
 					}
 				}
 			}
 			return message;
 		}
 		return undefined;
-	}, [message, fastening]);
+	}, [isMongooseIM, message, fastening]);
 };
 
 export default useMessage;

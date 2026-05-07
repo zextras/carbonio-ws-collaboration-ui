@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { getIsMongooseIM } from '../../store/selectors/ConnectionSelector';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
@@ -11,6 +12,7 @@ import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { ChatApi, getMeeting, RoomsApi } from '../index';
+import { xmppClient } from '../xmpp/XMPPClient';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -37,6 +39,10 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 						});
 				}
 			});
+			// Only call XMPP setOnline on MongooseIM infra; on common-socket this is a no-op.
+			if (getIsMongooseIM(useStore.getState())) {
+				xmppClient.setOnline();
+			}
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {

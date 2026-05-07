@@ -37,6 +37,8 @@ const StarIcon = styled(Icon)`
 	cursor: pointer;
 `;
 
+const MAYBE_NEXT_TIME_DEFAULT = 'Maybe next time';
+
 const InfoPage = (): ReactElement => {
 	const { infoType } = useContext(RouterContext);
 
@@ -93,7 +95,7 @@ const InfoPage = (): ReactElement => {
 			break;
 		case PAGE_INFO_TYPE.HANG_UP_PAGE:
 			titleLabel = t('meeting.infoPage.title.hangUp', 'You left the waiting room');
-			sloganLabel = t('meeting.infoPage.slogan.hangUp', 'Maybe next time');
+			sloganLabel = t('meeting.infoPage.slogan.hangUp', MAYBE_NEXT_TIME_DEFAULT);
 			descriptionLabel = t(
 				'meeting.infoPage.description.hangUp',
 				'We look forward to seeing you participate in future meetings'
@@ -101,7 +103,7 @@ const InfoPage = (): ReactElement => {
 			break;
 		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
 			titleLabel = t('meeting.infoPage.title.rejected', 'Your access has been refused');
-			sloganLabel = t('meeting.infoPage.slogan.rejected', 'Maybe next time');
+			sloganLabel = t('meeting.infoPage.slogan.rejected', MAYBE_NEXT_TIME_DEFAULT);
 			descriptionLabel = t(
 				'meeting.infoPage.description.rejected',
 				'The moderators have decided to deny your access to the meeting'
@@ -144,11 +146,8 @@ const InfoPage = (): ReactElement => {
 			break;
 		case PAGE_INFO_TYPE.MEETING_DECLINED:
 			titleLabel = t('meeting.infoPage.title.meetingDeclined', 'Call Declined');
-			sloganLabel = t('meeting.infoPage.slogan.meetingDeclined', 'Maybe next time');
-			descriptionLabel = t(
-				'meeting.infoPage.description.meetingDeclined',
-				'You declined the call'
-			);
+			sloganLabel = t('meeting.infoPage.slogan.meetingDeclined', MAYBE_NEXT_TIME_DEFAULT);
+			descriptionLabel = t('meeting.infoPage.description.meetingDeclined', 'You declined the call');
 			break;
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 		default: {

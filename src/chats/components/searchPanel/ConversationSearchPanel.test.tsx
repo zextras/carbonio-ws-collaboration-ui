@@ -17,7 +17,6 @@ import {
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
-import { formatDate } from '../../../utils/dateUtils';
 
 const loggedUser: User = createMockUser({
 	id: 'user1',

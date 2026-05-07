@@ -13,7 +13,7 @@ import { find } from 'lodash';
 import useRouting from '../../../../hooks/useRouting';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest'
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const ListItem = styled(Container)`

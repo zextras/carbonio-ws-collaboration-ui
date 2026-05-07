@@ -24,7 +24,8 @@ export const create =
 				...initialState,
 				connections: {
 					wsClient: new WebSocketClient(),
-					status: {}
+					status: {},
+					isMongooseIM: undefined
 				}
 			};
 			store.setState(resetStore, true);

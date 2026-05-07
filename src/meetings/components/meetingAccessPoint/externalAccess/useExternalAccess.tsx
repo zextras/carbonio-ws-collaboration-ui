@@ -11,7 +11,10 @@ import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { getScheduledMeetingName, createGuestAccount } from '../../../../network';
+import {
+	getScheduledMeetingName,
+	createGuestAccount as createGuestAccountApi
+} from '../../../../network';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -55,7 +58,7 @@ const useExternalAccess = (): {
 	const createGuestAccount = useCallback(
 		(guestName: string) => {
 			const { setLoginInfo, setChatsBeStatus, setAttributes } = useStore.getState();
-			createGuestAccount(guestName)
+			createGuestAccountApi(guestName)
 				.then((res) => {
 					document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 					document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
@@ -63,7 +66,7 @@ const useExternalAccess = (): {
 
 					setChatsBeStatus(true);
 					const { wsClient } = useStore.getState().connections;
-					wsClient.connect();
+					wsClient?.connect();
 
 					setAttributes({
 						carbonioWscShowMessageReads: 'TRUE',

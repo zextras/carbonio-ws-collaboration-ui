@@ -17,15 +17,17 @@ import {
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import usePreview from '../../../../../hooks/usePreview';
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
-import ChatApi from '../../../../../network/apis/ChatApi';
+import usePreview from '../../../../../hooks/usePreview';
 import { deleteAttachment, getURLAttachment } from '../../../../../network';
+import ChatApi from '../../../../../network/apis/ChatApi';
+import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
+import { getIsMongooseIM } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -42,7 +44,6 @@ const useBubbleContextualMenuDropDown = (
 	menuDropdownActive: boolean;
 	menuDropdownRef: React.RefObject<HTMLDivElement>;
 } => {
-
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.deleteForAll', 'Delete for all');
@@ -69,6 +70,7 @@ const useBubbleContextualMenuDropDown = (
 	const forwardList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
 
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -111,17 +113,27 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		const doDelete = (): void => {
-			ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
-				console.error('[BubbleMenu] deleteMessage failed', err);
-			});
-		};
-		if (message.attachment) {
-			deleteAttachment(message.attachment.id).then(doDelete).catch(doDelete);
+		if (isMongooseIM) {
+			if (message.attachment) {
+				deleteAttachment(message.attachment.id).then(() =>
+					xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
+				);
+			} else {
+				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
+			}
 		} else {
-			doDelete();
+			const doDelete = (): void => {
+				ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
+					console.error('[BubbleMenu] deleteMessage failed', err);
+				});
+			};
+			if (message.attachment) {
+				deleteAttachment(message.attachment.id).then(doDelete).catch(doDelete);
+			} else {
+				doDelete();
+			}
 		}
-	}, [message.attachment, message.stanzaId, message.roomId]);
+	}, [isMongooseIM, message.attachment, message.stanzaId, message.roomId]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

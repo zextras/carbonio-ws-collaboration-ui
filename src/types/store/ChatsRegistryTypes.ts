@@ -119,6 +119,10 @@ export enum OperationType {
 	MESSAGE_UNPINNED = 'messageUnpinned',
 	MESSAGE_PIN_UPDATED = 'messagePinUpdated',
 	CLEARED_HISTORY = 'roomHistoryCleared',
+	// FUTURE: backend must emit MEETING_STARTED/MEETING_ENDED events in common-socket mode too.
+	// For now, these values are kept for MongooseIM compatibility.
+	MEETING_STARTED = 'meetingStarted',
+	MEETING_ENDED = 'meetingEnded',
 	MEETING_DECLINED = 'meetingDeclined'
 }
 

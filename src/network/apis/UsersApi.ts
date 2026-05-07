@@ -6,37 +6,31 @@
 
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
-import IUsersApi from '../../types/network/apis/IUsersApi';
 import { GetUserResponse, GetUsersResponse } from '../../types/network/responses/usersResponses';
 import { fetchAPI } from '../../utils/FetchUtils';
 
-class UsersApi implements IUsersApi {
-	// Singleton design pattern
-	private static instance: IUsersApi;
+export const getUser = (userId: string): Promise<GetUserResponse> => {
+	const { setUserInfo } = useStore.getState();
+	return fetchAPI<GetUserResponse>(`users/${userId}`, RequestType.GET).then((resp) => {
+		setUserInfo([resp]);
+		return resp;
+	});
+};
 
-	public static getInstance(): IUsersApi {
-		if (!UsersApi.instance) {
-			UsersApi.instance = new UsersApi();
-		}
-		return UsersApi.instance;
-	}
+export const getUsers = (userIds: string[]): Promise<GetUsersResponse> => {
+	const { setUserInfo } = useStore.getState();
+	const params = userIds.map((id) => `userIds=${id}`).join('&');
+	return fetchAPI<GetUsersResponse>(`users?${params}`, RequestType.GET).then((resp) => {
+		setUserInfo(resp);
+		return resp;
+	});
+};
 
-	public getUser(userId: string): Promise<GetUserResponse> {
-		const { setUserInfo } = useStore.getState();
-		return fetchAPI<GetUserResponse>(`users/${userId}`, RequestType.GET).then((resp) => {
-			setUserInfo([resp]);
-			return resp;
-		});
-	}
+// Default export: namespace object for backward-compat with jest.spyOn in test mocks.
+// Callers should prefer the named exports above.
+const usersApiNamespace = {
+	getUser,
+	getUsers
+};
 
-	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
-		const { setUserInfo } = useStore.getState();
-		const params = userIds.map((id) => `userIds=${id}`).join('&');
-		return fetchAPI<GetUsersResponse>(`users?${params}`, RequestType.GET).then((resp) => {
-			setUserInfo(resp);
-			return resp;
-		});
-	}
-}
-
-export default UsersApi.getInstance();
+export default usersApiNamespace;

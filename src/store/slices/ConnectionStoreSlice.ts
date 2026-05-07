@@ -22,7 +22,8 @@ export const useConnectionsStoreSlice: StateCreator<
 > = (set) => ({
 	connections: {
 		wsClient: new WebSocketClient(),
-		status: {}
+		status: {},
+		isMongooseIM: undefined
 	},
 	setChatsBeStatus: (status: boolean): void => {
 		set(
@@ -33,6 +34,15 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/SET_CHATS_BE_STATUS'
 		);
 	},
+	setXmppStatus: (status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.connections.status.xmpp = status;
+			}),
+			false,
+			'CONNECTIONS/SET_XMPP_STATUS'
+		);
+	},
 	setWebsocketStatus: (status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -40,6 +50,32 @@ export const useConnectionsStoreSlice: StateCreator<
 			}),
 			false,
 			'CONNECTIONS/SET_WEBSOCKET_STATUS'
+		);
+	},
+	setIsMongooseIM: (isMongooseIM: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.connections.isMongooseIM = isMongooseIM;
+			}),
+			false,
+			'CONNECTIONS/SET_IS_MONGOOSE_IM'
+		);
+	},
+	resetXmppData: (): void => {
+		set(
+			produce((draft: RootStore) => {
+				forEach(draft.users, (user) => {
+					draft.users[user.id] = {
+						...draft.users[user.id],
+						online: undefined,
+						lastActivity: undefined
+					};
+				});
+				draft.chatsRegistry = {};
+				draft.activeConversations = {};
+			}),
+			false,
+			'CONNECTIONS/RESET_XMPP_DATA'
 		);
 	},
 	resetChatData: (): void => {
@@ -73,8 +109,7 @@ export const useConnectionsStoreSlice: StateCreator<
 
 				// Resolve target date — prefer exact message match, fall back to lastMessage, then current time
 				const targetMessage = (registry.messages ?? []).find(
-					(m) =>
-						m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
+					(m) => m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
 				);
 				const targetDate: number =
 					targetMessage?.date ??
@@ -123,14 +158,14 @@ export const useConnectionsStoreSlice: StateCreator<
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.text = text;
-						msg.editedInfo = { editedAt };
+						msg.edited = true;
 					}
 				}
 				// Also update lastMessage if it refers to the same message
 				if (registry?.lastMessage) {
 					const lm = registry.lastMessage as any;
 					if (lm.id === messageId || lm.stanzaId === messageId) {
-						registry.lastMessage = { ...registry.lastMessage, text, editedInfo: { editedAt } } as any;
+						registry.lastMessage = { ...registry.lastMessage, text, edited: true } as any;
 					}
 				}
 			}),
@@ -153,7 +188,7 @@ export const useConnectionsStoreSlice: StateCreator<
 							m.id === messageId || (m.type === MessageType.TEXT_MSG && m.stanzaId === messageId)
 					);
 					if (msg && msg.type === MessageType.TEXT_MSG) {
-						msg.deletedInfo = { deletedBy, deletedAt };
+						msg.deleted = true;
 						msg.text = '';
 					}
 				}
@@ -164,7 +199,7 @@ export const useConnectionsStoreSlice: StateCreator<
 						registry.lastMessage = {
 							...registry.lastMessage,
 							text: '',
-							deletedInfo: { deletedBy, deletedAt }
+							deleted: true
 						} as any;
 					}
 				}

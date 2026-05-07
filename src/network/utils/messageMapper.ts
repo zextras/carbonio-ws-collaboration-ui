@@ -43,11 +43,18 @@ export function mapChatMessageToTextMessage(
 		type: MessageType.TEXT_MSG,
 		date: new Date(chatMessage.createdAt).getTime(),
 		from: chatMessage.senderId,
-		text: chatMessage.text,
+		text: chatMessage.deletedInfo ? '' : chatMessage.text,
 		read: readStatus,
-		forwardedInfo: chatMessage.forwardedInfo,
-		editedInfo: chatMessage.editedInfo,
-		deletedInfo: chatMessage.deletedInfo,
+		deleted: chatMessage.deletedInfo ? true : undefined,
+		edited: chatMessage.editedInfo ? true : undefined,
+		forwarded: chatMessage.forwardedInfo
+			? {
+					from: chatMessage.forwardedInfo.originalSenderId,
+					date: new Date(chatMessage.forwardedInfo.originalSentAt).getTime(),
+					id: chatMessage.id,
+					count: 1
+				}
+			: undefined,
 		replyTo: chatMessage.replyToId,
 		repliedMessage: chatMessage.replyTo
 			? ({
@@ -57,9 +64,9 @@ export function mapChatMessageToTextMessage(
 					type: MessageType.TEXT_MSG,
 					date: 0, // We don't have the original date
 					from: chatMessage.replyTo.senderId ?? '',
-					text: chatMessage.replyTo.text ?? '',
+					text: chatMessage.replyTo.deleted ? '' : (chatMessage.replyTo.text ?? ''),
 					read: MarkerStatus.READ,
-					...(chatMessage.replyTo.deleted ? { deletedInfo: { deletedBy: '', deletedAt: '' } } : {})
+					...(chatMessage.replyTo.deleted ? { deleted: true } : {})
 				} as TextMessage)
 			: chatMessage.replyToId
 				? ({

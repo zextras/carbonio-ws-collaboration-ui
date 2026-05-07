@@ -8,7 +8,7 @@ import useStore from '../../../store/Store';
 
 /**
  * Handles message-edited events from the WebSocket.
- * Updates the message text and sets the editedInfo.
+ * Updates the message text and sets edited=true.
  */
 export function handleWsMessageEdited(event: {
 	messageId: string;

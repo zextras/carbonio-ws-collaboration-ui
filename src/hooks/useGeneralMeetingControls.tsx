@@ -117,10 +117,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Handle meeting declined notification
 	const meetingDeclinedHandler = useCallback(
 		(event: CustomEvent<MeetingDeclinedUseEvent['data']> | undefined) => {
-			const declinedUserName = getUserName(
-				useStore.getState(),
-				event?.detail.userId ?? ''
-			);
+			const declinedUserName = getUserName(useStore.getState(), event?.detail.userId ?? '');
 			createSnackbar({
 				key: new Date().toLocaleString(),
 				severity: 'info',

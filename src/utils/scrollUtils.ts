@@ -12,7 +12,10 @@ export const scrollToEnd = (element?: RefObject<HTMLDivElement>): void => {
 	}
 };
 
-export const scrollToMessage = (messageId?: string, block: ScrollLogicalPosition = 'center'): void => {
+export const scrollToMessage = (
+	messageId?: string,
+	block: ScrollLogicalPosition = 'center'
+): void => {
 	if (messageId) {
 		const message = window.document.getElementById(`message-${messageId}`);
 		message?.scrollIntoView({ block });

@@ -5,8 +5,8 @@
  */
 
 import { meetingAudioAnsweredEventHandler } from './MeetingAudioAnsweredEventHandler';
-import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
 import { meetingAudioStreamChangedEventHandler } from './MeetingAudioStreamChangedEventHandler';
+import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
 import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';

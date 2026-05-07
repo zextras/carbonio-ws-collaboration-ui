@@ -5,10 +5,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { type MockInstance, vi } from 'vitest';
 
-import attachmentsApi from '../../network/apis/AttachmentsApi';
+import * as attachmentsApi from '../../network/apis/AttachmentsApi';
 import chatApi from '../../network/apis/ChatApi';
-import meetingsApi from '../../network/apis/MeetingsApi';
+import * as meetingsApi from '../../network/apis/MeetingsApi';
 import roomsApi from '../../network/apis/RoomsApi';
 import usersApi from '../../network/apis/UsersApi';
 
@@ -71,22 +72,24 @@ export enum ChatApiToSpy {
 	SET_PRESENCE = 'setPresence'
 }
 
-export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
+export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => MockInstance = (
 	apiToSpy: AttachmentsApiToSpy
-) => jest.spyOn(attachmentsApi, apiToSpy);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => vi.spyOn(attachmentsApi, apiToSpy as any);
 
-export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => jest.SpyInstance = (
+export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => MockInstance = (
 	apiToSpy: RoomsApiToSpy
-) => jest.spyOn(roomsApi, apiToSpy);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => vi.spyOn(roomsApi, apiToSpy as any);
 
-export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance = (
+export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => MockInstance = (
 	apiToSpy: MeetingsApiToSpy
-) => jest.spyOn(meetingsApi, apiToSpy);
+) => vi.spyOn(meetingsApi, apiToSpy);
 
-export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
-	apiToSpy: UsersApiToSpy
-) => jest.spyOn(usersApi, apiToSpy);
+export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => MockInstance = (apiToSpy: UsersApiToSpy) =>
+	vi.spyOn(usersApi, apiToSpy);
 
-export const spyOnChatApi: (apiToSpy: ChatApiToSpy) => jest.SpyInstance = (
+export const spyOnChatApi: (apiToSpy: ChatApiToSpy) => MockInstance = (
 	apiToSpy: ChatApiToSpy
-) => jest.spyOn(chatApi, apiToSpy);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => vi.spyOn(chatApi, apiToSpy as any);

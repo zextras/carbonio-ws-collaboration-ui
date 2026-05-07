@@ -59,7 +59,7 @@ function sortedInsert(messages: Message[], message: Message): void {
 	let lo = 0;
 	let hi = messages.length;
 	while (lo < hi) {
-		const mid = (lo + hi) >>> 1;
+		const mid = Math.floor((lo + hi) / 2);
 		if (compareMessages(messages[mid], message) <= 0) {
 			lo = mid + 1;
 		} else {
@@ -160,11 +160,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const registry = draft.chatsRegistry[message.roomId];
 				if (
 					registry &&
-					(message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG)
+					(message.type === MessageType.TEXT_MSG ||
+						message.type === MessageType.CONFIGURATION_MSG) &&
+					(!registry.lastMessage || message.date >= registry.lastMessage.date)
 				) {
-					if (!registry.lastMessage || message.date >= registry.lastMessage.date) {
-						registry.lastMessage = message;
-					}
+					registry.lastMessage = message;
 				}
 			}),
 			false,
@@ -238,10 +238,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						draft.chatsRegistry[roomId].messages,
 						(msg) => {
 							if (
-								(msg.type === MessageType.TEXT_MSG ||
-									msg.type === MessageType.CONFIGURATION_MSG) &&
-								(msg.read === MarkerStatus.UNREAD ||
-									msg.read === MarkerStatus.READ_BY_SOMEONE)
+								(msg.type === MessageType.TEXT_MSG || msg.type === MessageType.CONFIGURATION_MSG) &&
+								(msg.read === MarkerStatus.UNREAD || msg.read === MarkerStatus.READ_BY_SOMEONE)
 							) {
 								msg.read = calcReads(msg.date, roomId, updatedMarkers);
 							}
@@ -358,10 +356,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 
 				// Update lastMessage for inbox display
 				const registry = draft.chatsRegistry[roomId];
-				if (registry) {
-					if (!registry.lastMessage || placeholderMessage.date >= registry.lastMessage.date) {
-						registry.lastMessage = placeholderMessage;
-					}
+				if (
+					registry &&
+					(!registry.lastMessage || placeholderMessage.date >= registry.lastMessage.date)
+				) {
+					registry.lastMessage = placeholderMessage;
 				}
 
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });

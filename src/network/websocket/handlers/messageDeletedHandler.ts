@@ -8,7 +8,7 @@ import useStore from '../../../store/Store';
 
 /**
  * Handles message-deleted events from the WebSocket.
- * Marks the message as deleted with deletedInfo and clears its text.
+ * Marks the message as deleted (sets deleted=true) and clears its text.
  */
 export function handleWsMessageDeleted(event: {
 	messageId: string;

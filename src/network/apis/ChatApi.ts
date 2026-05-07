@@ -7,7 +7,8 @@
 import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 
-import RoomsApi from './RoomsApi';
+import { replacePlaceholderRoom } from './RoomsApi';
+import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { IChatApi } from '../../types/network/apis/IChatApi';
 import {
@@ -21,7 +22,6 @@ import {
 	RoomReadMarkers,
 	TimelineResponse
 } from '../../types/network/models/chatTypes';
-import useStore from '../../store/Store';
 import { MarkerStatus, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { fetchAPI } from '../../utils/FetchUtils';
 
@@ -44,7 +44,10 @@ class ChatApi implements IChatApi {
 		const prev = this.sendQueues.get(roomId) ?? Promise.resolve();
 		const next = prev.then(fn, fn); // run fn even if the previous task failed
 		// Store a non-rejecting tail so the chain never gets "stuck" on a rejection
-		this.sendQueues.set(roomId, next.catch(() => undefined));
+		this.sendQueues.set(
+			roomId,
+			next.catch(() => undefined)
+		);
 		return next;
 	}
 
@@ -94,14 +97,10 @@ class ChatApi implements IChatApi {
 		return fetchAPI(`rooms/${roomId}/messages${queryString}`, RequestType.GET);
 	}
 
-	public sendMessage(
-		roomId: string,
-		text: string,
-		replyToId?: string
-	): Promise<ChatMessage> {
+	public sendMessage(roomId: string, text: string, replyToId?: string): Promise<ChatMessage> {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
-			return RoomsApi.replacePlaceholderRoom(placeholderRoom[1]).then((response) =>
+			return replacePlaceholderRoom(placeholderRoom[1]).then((response) =>
 				this.sendMessage(response.id, text, replyToId)
 			);
 		}
@@ -126,9 +125,9 @@ class ChatApi implements IChatApi {
 					produce((draft) => {
 						const registry = draft.chatsRegistry[roomId];
 						if (!registry) return;
-						const msg = registry.messages.find(
-							(m: TextMessage) => m.id === stableId
-						) as TextMessage | undefined;
+						const msg = registry.messages.find((m: TextMessage) => m.id === stableId) as
+							| TextMessage
+							| undefined;
 						if (msg && msg.type === MessageType.TEXT_MSG) {
 							msg.id = response.id;
 							msg.stanzaId = response.id;
@@ -179,11 +178,9 @@ class ChatApi implements IChatApi {
 		toRoomId: string
 	): Promise<ChatMessage> {
 		return this.enqueue(sourceRoomId, () =>
-			fetchAPI(
-				`rooms/${sourceRoomId}/messages/${messageId}/forward`,
-				RequestType.POST,
-				{ toRoomId }
-			)
+			fetchAPI(`rooms/${sourceRoomId}/messages/${messageId}/forward`, RequestType.POST, {
+				toRoomId
+			})
 		);
 	}
 

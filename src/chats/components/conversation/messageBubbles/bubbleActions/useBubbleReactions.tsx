@@ -13,7 +13,9 @@ import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
 import ChatApi from '../../../../../network/apis/ChatApi';
+import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
@@ -55,6 +57,7 @@ const useBubbleReactions = (
 	const reactionsLabel = t('tooltip.reactions', 'Reactions');
 	const moreReactionsLabel = t('tooltip.moreReactions', 'More reactions');
 
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const myReaction = useStore((store) =>
 		getMyLastReaction(store, message.roomId, message.stanzaId)
 	);
@@ -71,14 +74,21 @@ const useBubbleReactions = (
 
 	const sendReaction = useCallback(
 		(emoji: string) => {
-			if (myReaction !== emoji) {
+			if (isMongooseIM) {
+				// XMPP: toggle with empty string to remove
+				if (myReaction !== emoji) {
+					xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, emoji);
+				} else {
+					xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, '');
+				}
+			} else if (myReaction !== emoji) {
 				ChatApi.addReaction(message.roomId, message.stanzaId, emoji);
 			} else {
 				ChatApi.removeReaction(message.roomId, message.stanzaId, emoji);
 			}
 			setPopoverActive(false);
 		},
-		[message.roomId, message.stanzaId, myReaction]
+		[isMongooseIM, message.roomId, message.stanzaId, myReaction]
 	);
 
 	const openEmojiPicker = useCallback(
