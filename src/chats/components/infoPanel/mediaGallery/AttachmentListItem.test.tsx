@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
@@ -21,12 +21,13 @@ vi.mock('../../../../network/apis/RoomsApi', () => ({
 	bulkDeleteRoomAttachments: vi.fn()
 }));
 
-const { mockOnPreviewClick } = vi.hoisted(() => ({
-	mockOnPreviewClick: vi.fn()
+const { mockOnPreviewClick, mockUsePreview } = vi.hoisted(() => ({
+	mockOnPreviewClick: vi.fn(),
+	mockUsePreview: vi.fn()
 }));
 
 vi.mock('../../../../hooks/usePreview', () => ({
-	default: (): { onPreviewClick: () => void } => ({ onPreviewClick: mockOnPreviewClick })
+	default: mockUsePreview
 }));
 
 const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
@@ -66,6 +67,8 @@ beforeEach(() => {
 		.setUserInfo([createMockUser({ id: otherUserId, name: 'Matteo Perdon', email: 'mp@x.com' })]);
 	mockedBulkDelete.mockReset();
 	mockOnPreviewClick.mockReset();
+	mockUsePreview.mockReset();
+	mockUsePreview.mockImplementation(() => ({ onPreviewClick: mockOnPreviewClick }));
 });
 
 describe('AttachmentListItem', () => {
@@ -282,5 +285,34 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.hover(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(screen.queryByText('Preview')).not.toBeInTheDocument();
+	});
+
+	test('passes a delete callback to usePreview when the current user owns the attachment', () => {
+		const attachment = buildAttachment({ userId: myUserId });
+		setup(<AttachmentListItem attachment={attachment} />);
+		expect(mockUsePreview).toHaveBeenCalledWith(
+			attachment,
+			expect.objectContaining({ onDelete: expect.any(Function) })
+		);
+	});
+
+	test('does not pass a delete callback to usePreview when the attachment belongs to another user', () => {
+		const attachment = buildAttachment({ userId: otherUserId });
+		setup(<AttachmentListItem attachment={attachment} />);
+		expect(mockUsePreview).toHaveBeenCalledWith(
+			attachment,
+			expect.objectContaining({ onDelete: undefined })
+		);
+	});
+
+	test('the onDelete callback passed to usePreview opens the confirmation modal', async () => {
+		const attachment = buildAttachment({ userId: myUserId });
+		setup(<AttachmentListItem attachment={attachment} />);
+		const lastCall = mockUsePreview.mock.calls[mockUsePreview.mock.calls.length - 1];
+		const previewOnDelete = lastCall[1]?.onDelete as () => void;
+
+		expect(screen.queryByTestId('deleteAttachmentModal')).not.toBeInTheDocument();
+		act(() => previewOnDelete());
+		expect(await screen.findByTestId('deleteAttachmentModal')).toBeInTheDocument();
 	});
 });

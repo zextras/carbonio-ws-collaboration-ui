@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -13,12 +13,14 @@ type DeleteAttachmentModalProps = {
 	open: boolean;
 	onConfirm: () => void;
 	onClose: () => void;
+	onCancel?: () => void;
 };
 
 export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	open,
 	onConfirm,
-	onClose
+	onClose,
+	onCancel
 }) => {
 	const [t] = useTranslation();
 	const title = t('mediaGallery.deleteAttachmentTitle', 'Delete attachment');
@@ -31,6 +33,11 @@ export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	const cancelLabel = t('mediaGallery.deleteAttachmentCancel', 'No, cancel');
 	const closeLabel = t('action.close', 'Close');
 
+	const onSecondaryAction = useCallback(() => {
+		onClose();
+		onCancel && onCancel();
+	}, [onClose, onCancel]);
+
 	return (
 		<Modal
 			size="small"
@@ -40,7 +47,7 @@ export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 			confirmColor="error"
 			onConfirm={onConfirm}
 			secondaryActionLabel={cancelLabel}
-			onSecondaryAction={onClose}
+			onSecondaryAction={onSecondaryAction}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
 			onClose={onClose}

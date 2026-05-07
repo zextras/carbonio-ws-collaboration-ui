@@ -22,9 +22,18 @@ export type UsePreviewHook = {
 	onPreviewClick: () => void;
 };
 
-const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
+export type UsePreviewOptions = {
+	onDelete?: () => void;
+};
+
+const usePreview = (
+	attachment: AttachmentMessageType,
+	options?: UsePreviewOptions
+): UsePreviewHook => {
 	const [t] = useTranslation();
 	const { createPreview } = useContext(PreviewsManagerContext);
+
+	const onDelete = options?.onDelete;
 
 	const attachmentType = getAttachmentType(attachment.mimeType);
 
@@ -43,19 +52,25 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 
 	const onPreviewClick = useCallback(() => {
 		if (attachmentURL) {
+			const downloadAction = {
+				icon: 'DownloadOutline',
+				tooltipLabel: t('action.download', 'Download'),
+				id: 'DownloadOutline',
+				onClick: (): void => download()
+			};
+			const deleteAction = onDelete && {
+				icon: 'Trash2Outline',
+				tooltipLabel: t('action.delete', 'Delete'),
+				id: 'Trash2Outline',
+				onClick: (): void => onDelete()
+			};
+			const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
 			createPreview({
 				previewType: attachmentType,
 				filename: attachment.name,
 				extension: extension?.toUpperCase(),
 				size,
-				actions: [
-					{
-						icon: 'DownloadOutline',
-						tooltipLabel: t('action.download', 'Download'),
-						id: 'DownloadOutline',
-						onClick: (): void => download()
-					}
-				],
+				actions,
 				closeAction: {
 					id: 'close-action',
 					icon: 'ArrowBackOutline',
@@ -64,7 +79,17 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 				src: attachmentURL
 			});
 		}
-	}, [attachment.name, attachmentURL, createPreview, download, extension, size, t, attachmentType]);
+	}, [
+		attachment.name,
+		attachmentURL,
+		createPreview,
+		download,
+		extension,
+		size,
+		t,
+		attachmentType,
+		onDelete
+	]);
 
 	return { onPreviewClick };
 };
