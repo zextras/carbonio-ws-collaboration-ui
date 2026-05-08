@@ -116,12 +116,12 @@ export function handleWsMessageReceived(event: {
 			: undefined
 	};
 
-	// Self-echo guard: the REST response from sendMessage already promoted the
-	// placeholder into the real message. Calling newMessage again with the WS echo
-	// triggers an Object.assign that re-sets every property, causing a visible flash.
-	const isMyMessage = senderId === session.id;
-	const alreadyInStore = (chatsRegistry[roomId]?.messages ?? []).some((m) => m.id === messageId);
-	if (isMyMessage && alreadyInStore) {
+	// Self-echo guard: the REST sendMessage flow inserts a placeholder and then
+	// promotes it when the response arrives. If the WS echo wins the race, it
+	// would insert a second copy next to the still-live placeholder, causing a
+	// visible flash until the REST handler cleans up. Skip all self-echoes —
+	// the REST handler is authoritative for messages I sent.
+	if (senderId === session.id) {
 		return;
 	}
 
@@ -129,13 +129,8 @@ export function handleWsMessageReceived(event: {
 
 	if (hasMoreAfter) {
 		setLastMessageForInbox(roomId, textMessage);
-		if (!isMyMessage) {
-			incrementUnreadCount(roomId, 1);
-		}
 	} else {
 		newMessage(textMessage);
-		if (!isMyMessage) {
-			incrementUnreadCount(roomId, 1);
-		}
 	}
+	incrementUnreadCount(roomId, 1);
 }
