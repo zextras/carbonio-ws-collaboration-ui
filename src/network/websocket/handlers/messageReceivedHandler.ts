@@ -116,19 +116,25 @@ export function handleWsMessageReceived(event: {
 			: undefined
 	};
 
-	// Check if we're viewing a historical page
+	// Self-echo guard: the REST response from sendMessage already promoted the
+	// placeholder into the real message. Calling newMessage again with the WS echo
+	// triggers an Object.assign that re-sets every property, causing a visible flash.
+	const isMyMessage = senderId === session.id;
+	const alreadyInStore = (chatsRegistry[roomId]?.messages ?? []).some((m) => m.id === messageId);
+	if (isMyMessage && alreadyInStore) {
+		return;
+	}
+
 	const hasMoreAfter = chatsRegistry[roomId]?.hasMoreAfter ?? false;
 
 	if (hasMoreAfter) {
-		// User is viewing historical messages - update inbox only
 		setLastMessageForInbox(roomId, textMessage);
-		if (senderId !== session.id) {
+		if (!isMyMessage) {
 			incrementUnreadCount(roomId, 1);
 		}
 	} else {
-		// User is at the latest page - add message normally
 		newMessage(textMessage);
-		if (senderId !== session.id) {
+		if (!isMyMessage) {
 			incrementUnreadCount(roomId, 1);
 		}
 	}
