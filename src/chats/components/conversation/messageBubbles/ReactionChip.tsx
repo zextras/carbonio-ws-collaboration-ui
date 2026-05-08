@@ -12,7 +12,9 @@ import { includes, size } from 'lodash';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import ChatApi from '../../../../network/apis/ChatApi';
+import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';
 import useStore from '../../../../store/Store';
@@ -59,6 +61,7 @@ type ReactionChipProps = {
 
 const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): ReactElement => {
 	const sessionId = useStore(getUserId);
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
 	const userNameList = useUserNameList(from);
 
@@ -96,13 +99,16 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 
 	const changeReaction = useCallback(() => {
 		setIsAnimating(true);
-		if (includes(from, sessionId)) {
+		if (isMongooseIM) {
+			const reactionToSend = includes(from, sessionId) ? '' : reaction;
+			xmppClient.sendChatMessageReaction(roomId, stanzaId, reactionToSend);
+		} else if (includes(from, sessionId)) {
 			ChatApi.removeReaction(roomId, stanzaId, reaction);
 		} else {
 			ChatApi.addReaction(roomId, stanzaId, reaction);
 		}
 		setTimeout(() => setIsAnimating(false), 500);
-	}, [from, reaction, roomId, sessionId, stanzaId]);
+	}, [from, isMongooseIM, reaction, roomId, sessionId, stanzaId]);
 
 	return (
 		<Tooltip label={tooltipLabel}>

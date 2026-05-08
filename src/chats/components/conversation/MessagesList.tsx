@@ -17,6 +17,7 @@ import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import ChatApi from '../../../network/apis/ChatApi';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getHistoryIsFullyLoaded,
 	getIdMessageWhereScrollIsStopped,
@@ -27,6 +28,7 @@ import {
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
@@ -100,18 +102,22 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		const unreadAtStart = currentUnread;
 
 		isMarkingAsReadRef.current = true;
-		ChatApi.setReadMarker(roomId, targetMessageId)
-			.then(() => {
-				// Only decrement what we covered — messages arriving during
-				// the round-trip retain their unread count for next pass
-				decrementUnreadCount(roomId, unreadAtStart);
-			})
-			.catch((err: unknown) => {
-				console.error('[MessagesList] Failed to mark room as read:', err);
-			})
-			.finally(() => {
-				isMarkingAsReadRef.current = false;
-			});
+		if (getIsMongooseIM(useStore.getState())) {
+			xmppClient.readMessage(roomId, targetMessageId);
+			decrementUnreadCount(roomId, unreadAtStart);
+			isMarkingAsReadRef.current = false;
+		} else {
+			ChatApi.setReadMarker(roomId, targetMessageId)
+				.then(() => {
+					decrementUnreadCount(roomId, unreadAtStart);
+				})
+				.catch((err: unknown) => {
+					console.error('[MessagesList] Failed to mark room as read:', err);
+				})
+				.finally(() => {
+					isMarkingAsReadRef.current = false;
+				});
+		}
 	}, [roomId, decrementUnreadCount]);
 
 	// Called when scroll position changes - mark as read if at bottom

@@ -15,6 +15,8 @@ import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
 import ChatApi from '../../network/apis/ChatApi';
 import { declineMeeting } from '../../network/apis/MeetingsApi';
+import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { getIsMongooseIM } from '../../store/selectors/ConnectionSelector';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -50,6 +52,7 @@ const MeetingNotification = ({
 }: MeetingNotificationProps): ReactElement => {
 	const userName: string = useStore((store) => getUserName(store, from));
 	const meeting = useStore((store) => getMeeting(store, meetingId));
+	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 
 	const [t] = useTranslation();
 	const userIsInvitingYouLabel = (
@@ -90,22 +93,26 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			ChatApi.sendMessage(meeting.roomId, message).catch((err) => {
-				console.error('[MeetingNotification] sendMessage failed', err);
-			});
+			if (isMongooseIM) {
+				xmppClient.sendChatMessage(meeting.roomId, message);
+			} else {
+				ChatApi.sendMessage(meeting.roomId, message).catch((err) => {
+					console.error('[MeetingNotification] sendMessage failed', err);
+				});
+			}
 			setMessage('');
 			stopMeetingSound();
 		}
-	}, [disableSendMessage, meeting, message, stopMeetingSound]);
+	}, [disableSendMessage, isMongooseIM, meeting, message, stopMeetingSound]);
 
 	const handleDeclineMeeting = useCallback(() => {
-		if (meeting) {
+		if (meeting && !isMongooseIM) {
 			declineMeeting(meeting.id).catch((err) => {
 				console.error('[MeetingNotification] declineMeeting failed', err);
 			});
 		}
 		removeNotification(id);
-	}, [id, meeting, removeNotification]);
+	}, [id, isMongooseIM, meeting, removeNotification]);
 
 	const { openMeeting } = useRoomMeeting(meeting?.roomId ?? '');
 

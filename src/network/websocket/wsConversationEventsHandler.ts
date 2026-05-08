@@ -31,8 +31,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				const memberIds = (response.members ?? [])
 					.map((m) => m.userId)
 					.filter((id): id is string => Boolean(id));
-				if (memberIds.length > 0) {
-					// Fetch presence for all room members so we don't start with everyone offline
+				if (memberIds.length > 0 && !getIsMongooseIM(useStore.getState())) {
 					ChatApi.getPresenceBatch(memberIds)
 						.then((result) => {
 							const { setUserPresence } = useStore.getState();

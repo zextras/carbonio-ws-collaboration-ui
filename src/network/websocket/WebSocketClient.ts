@@ -10,6 +10,7 @@ import { gte } from 'semver';
 import { normalizeEventType } from './normalizedEventType';
 import { wsChatEventsHandler } from './wsChatEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
+import { getIsMongooseIM } from '../../store/selectors/ConnectionSelector';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
@@ -115,8 +116,7 @@ export class WebSocketClient {
 				return;
 			}
 
-			// Try the new chat event handler first (messaging, presence, reactions, read markers)
-			if (wsChatEventsHandler(rowEvent)) {
+			if (!getIsMongooseIM(useStore.getState()) && wsChatEventsHandler(rowEvent)) {
 				return;
 			}
 

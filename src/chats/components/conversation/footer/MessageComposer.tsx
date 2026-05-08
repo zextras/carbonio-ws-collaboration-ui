@@ -231,27 +231,27 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const sendThrottleTypingWs = useCallback(
 		throttle(
 			() => {
-				if (!isPlaceholderRoom) chatWsClient.sendTyping(roomId);
+				if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTyping(roomId);
 			},
 			3000,
 			{ trailing: false }
 		),
-		[roomId, isPlaceholderRoom]
+		[roomId, isPlaceholderRoom, isMongooseIM]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendDebouncedStopWs = useCallback(
 		debounce(() => {
-			if (!isPlaceholderRoom) chatWsClient.sendTypingStopped(roomId);
+			if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTypingStopped(roomId);
 		}, 3500),
-		[roomId, isPlaceholderRoom]
+		[roomId, isPlaceholderRoom, isMongooseIM]
 	);
 
 	const sendWsStopWriting = useCallback(() => {
 		sendThrottleTypingWs.cancel();
 		sendDebouncedStopWs.cancel();
-		if (!isPlaceholderRoom) chatWsClient.sendTypingStopped(roomId);
-	}, [sendThrottleTypingWs, sendDebouncedStopWs, roomId, isPlaceholderRoom]);
+		if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTypingStopped(roomId);
+	}, [sendThrottleTypingWs, sendDebouncedStopWs, roomId, isPlaceholderRoom, isMongooseIM]);
 
 	// Cleanup on unmount or room change
 	useEffect(

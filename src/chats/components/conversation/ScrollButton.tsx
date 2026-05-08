@@ -19,6 +19,7 @@ import {
 	mapTimelineItemsToMessages
 } from '../../../network/utils/messageMapper';
 import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySelectors';
+import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -94,18 +95,20 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 			return;
 		}
 
-		// Fragmented state - reload from latest
+		// Fragmented state - reload from latest (only on common-socket)
+		if (getIsMongooseIM(useStore.getState())) {
+			onClickCb();
+			return;
+		}
+
 		const store = useStore.getState();
 		const currentUserId = getUserId(store) || '';
 
-		// Set loading flags BEFORE clearing messages to prevent loaders from triggering
 		store.setIsLoadingTimeline(roomId, true);
 		store.setHistoryLoadDisabled(roomId, true);
 
-		// Clear current messages and reset pagination state
 		store.clearMessages(roomId);
 
-		// Load fresh latest messages (no cursor = most recent)
 		ChatApi.getTimeline(roomId, { limit: 50 })
 			.then((response) => {
 				const markers =

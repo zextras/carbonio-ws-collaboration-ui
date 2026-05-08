@@ -16,6 +16,7 @@ import {
 	mapReactionsToFastenings,
 	mapTimelineItemsToMessages
 } from '../../../network/utils/messageMapper';
+import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MessageFastening } from '../../../types/store/ChatsRegistryTypes';
@@ -42,14 +43,14 @@ const ReturnToLatestButton = ({
 	const hasMoreAfter = useStore((store) => store.chatsRegistry[roomId]?.hasMoreAfter ?? false);
 
 	const handleClick = useCallback(() => {
+		if (getIsMongooseIM(useStore.getState())) return;
+
 		const store = useStore.getState();
 		const currentUserId = getUserId(store) || '';
 
-		// Clear current messages, pagination state, and search highlight
 		store.clearMessages(roomId);
 		store.setSelectedSearchResult(roomId, undefined);
 
-		// Load fresh latest messages (no cursor = most recent)
 		ChatApi.getTimeline(roomId, { limit: 50 })
 			.then((response) => {
 				const markers =
