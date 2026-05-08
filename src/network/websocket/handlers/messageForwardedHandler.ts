@@ -75,20 +75,16 @@ export function handleWsMessageForwarded(event: {
 			: undefined
 	};
 
-	// Check if we're viewing a historical page
 	const hasMoreAfter = chatsRegistry[roomId]?.hasMoreAfter ?? false;
 
 	if (hasMoreAfter) {
-		// User is viewing historical messages - update inbox sidebar only
 		setLastMessageForInbox(roomId, textMessage);
-		if (senderId !== session.id) {
-			incrementUnreadCount(roomId, 1);
-		}
 	} else {
-		// User is at the latest page - add message to timeline normally
 		newMessage(textMessage);
-		if (senderId !== session.id) {
-			incrementUnreadCount(roomId, 1);
-		}
+	}
+	// Forward REST is fire-and-forget — WS echo is the only source of truth.
+	// Don't increment unread for messages I forwarded myself.
+	if (senderId !== session.id) {
+		incrementUnreadCount(roomId, 1);
 	}
 }

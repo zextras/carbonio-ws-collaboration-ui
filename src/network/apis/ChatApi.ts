@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { replacePlaceholderRoom } from './RoomsApi';
@@ -22,8 +21,11 @@ import {
 	RoomReadMarkers,
 	TimelineResponse
 } from '../../types/network/models/chatTypes';
-import { MarkerStatus, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { fetchAPI } from '../../utils/FetchUtils';
+
+// Maps server-assigned messageId → client placeholder stableId.
+// Used by the WS MessageReceived handler to promote pending placeholders.
+export const pendingMessageIds = new Map<string, string>();
 
 class ChatApi implements IChatApi {
 	private static instance: ChatApi;
@@ -97,6 +99,11 @@ class ChatApi implements IChatApi {
 		return fetchAPI(`rooms/${roomId}/messages${queryString}`, RequestType.GET);
 	}
 
+	// sendMessage is the only REST call that renders before server confirmation:
+	// a PENDING placeholder is shown immediately in the chat. The WS MessageReceived
+	// echo is the single source of truth for delivery confirmation — it promotes the
+	// placeholder to a confirmed message (checkmark). The REST response only provides
+	// the server-assigned ID mapping; on error it removes the placeholder.
 	public sendMessage(roomId: string, text: string, replyToId?: string): Promise<ChatMessage> {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
@@ -118,52 +125,15 @@ class ChatApi implements IChatApi {
 		if (replyToId) body.replyToId = replyToId;
 
 		return this.enqueue(roomId, () =>
-			fetchAPI<ChatMessage>(`rooms/${roomId}/messages`, RequestType.POST, body).then((response) => {
-				// Guard against WS-before-REST race: if the WS echo arrived before this
-				// REST response and already inserted the real message, just remove the
-				// stale placeholder instead of promoting it (which would be a no-op or
-				// leave a duplicate).
-				const existingMessages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
-				const wsAlreadyDelivered = existingMessages.some((m) => m.id === response.id);
-				if (wsAlreadyDelivered) {
-					useStore.getState().removePlaceholderMessage(roomId, stableId);
+			fetchAPI<ChatMessage>(`rooms/${roomId}/messages`, RequestType.POST, body)
+				.then((response) => {
+					pendingMessageIds.set(response.id, stableId);
 					return response;
-				}
-
-				// Normal flow: promote the placeholder with server-assigned id/timestamp.
-				const confirmedDate = new Date(response.createdAt ?? Date.now()).getTime();
-				useStore.setState(
-					produce((draft) => {
-						const registry = draft.chatsRegistry[roomId];
-						if (!registry) return;
-						const msg = registry.messages.find((m: TextMessage) => m.id === stableId) as
-							| TextMessage
-							| undefined;
-						if (msg && msg.type === MessageType.TEXT_MSG) {
-							msg.id = response.id;
-							msg.stanzaId = response.id;
-							msg.date = confirmedDate;
-							msg.read = MarkerStatus.UNREAD;
-						}
-						if (
-							registry.lastMessage &&
-							registry.lastMessage.type === MessageType.TEXT_MSG &&
-							(registry.lastMessage.id === stableId ||
-								registry.lastMessage.stanzaId === `placeholder_${stableId}`)
-						) {
-							registry.lastMessage = {
-								...registry.lastMessage,
-								id: response.id,
-								stanzaId: response.id,
-								date: confirmedDate,
-								read: MarkerStatus.UNREAD
-							};
-						}
-					}),
-					false
-				);
-				return response;
-			})
+				})
+				.catch((err) => {
+					useStore.getState().removePlaceholderMessage(roomId, stableId);
+					throw err;
+				})
 		);
 	}
 

@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { produce } from 'immer';
+
+import { pendingMessageIds } from '../../apis/ChatApi';
 import useStore from '../../../store/Store';
 import {
 	AttachmentMessageType,
@@ -14,10 +17,10 @@ import {
 
 /**
  * Handles incoming message-received events from the WebSocket.
- * Adds the new message to the store and increments unread count for others' messages.
  *
- * If the user is viewing a historical page (hasMoreAfter === true),
- * the message is NOT added to the chat view to prevent fragmented display.
+ * For OTHER users' messages: adds the message to the store and increments unread.
+ * For MY OWN messages: promotes the PENDING placeholder to a confirmed message.
+ * This is the single source of truth for delivery confirmation — REST is fire-and-forget.
  */
 export function handleWsMessageReceived(event: {
 	messageId: string;
@@ -44,7 +47,6 @@ export function handleWsMessageReceived(event: {
 	} = useStore.getState();
 	const { roomId, messageId, senderId, text, timestamp } = event;
 
-	// Check if room exists
 	const room = rooms[roomId];
 	if (!room) {
 		console.warn('[handleWsMessageReceived] Room not found:', roomId);
@@ -70,8 +72,7 @@ export function handleWsMessageReceived(event: {
 		};
 	}
 
-	// Resolve repliedMessage: try to find the referenced message already in the store,
-	// otherwise build a minimal stub so Bubble.tsx can render the reply block.
+	// Resolve repliedMessage
 	const existingReplyTarget = event.replyToId
 		? (chatsRegistry[roomId]?.messages ?? []).find(
 				(m) =>
@@ -95,13 +96,76 @@ export function handleWsMessageReceived(event: {
 				} as TextMessage)
 			: undefined;
 
-	// Build TextMessage for the store
+	const confirmedDate = new Date(timestamp).getTime();
+
+	// ─── Self-echo: promote pending placeholder to confirmed message ───
+	// sendMessage is the only REST call that renders before server confirmation
+	// (PENDING placeholder). This WS echo is the delivery confirmation that
+	// switches the placeholder to a real message with a checkmark.
+	if (senderId === session.id) {
+		const messages = chatsRegistry[roomId]?.messages ?? [];
+
+		// Already in store (e.g. attachment upload inserted from REST response) — skip
+		if (messages.some((m) => m.id === messageId)) {
+			return;
+		}
+
+		// Try ID-based match first (REST response stored serverId → stableId mapping)
+		let placeholderId = pendingMessageIds.get(messageId);
+		pendingMessageIds.delete(messageId);
+
+		// Fallback: WS arrived before REST response — find oldest PENDING placeholder
+		if (!placeholderId) {
+			const placeholder = messages.find(
+				(m) => m.type === MessageType.TEXT_MSG && (m as TextMessage).read === MarkerStatus.PENDING
+			);
+			placeholderId = placeholder?.id;
+		}
+
+		if (placeholderId) {
+			const pid = placeholderId;
+			useStore.setState(
+				produce((draft) => {
+					const registry = draft.chatsRegistry[roomId];
+					if (!registry) return;
+					const msg = registry.messages.find((m: TextMessage) => m.id === pid);
+					if (msg && msg.type === MessageType.TEXT_MSG) {
+						msg.id = messageId;
+						msg.stanzaId = messageId;
+						msg.date = confirmedDate;
+						msg.text = text;
+						msg.read = MarkerStatus.UNREAD;
+						msg.attachment = resolvedAttachment;
+						msg.repliedMessage = repliedMessage;
+						msg.replyTo = event.replyToId;
+					}
+					if (
+						registry.lastMessage &&
+						(registry.lastMessage.id === pid ||
+							(registry.lastMessage as TextMessage).stanzaId === `placeholder_${pid}`)
+					) {
+						registry.lastMessage = {
+							...registry.lastMessage,
+							id: messageId,
+							stanzaId: messageId,
+							date: confirmedDate,
+							read: MarkerStatus.UNREAD
+						} as TextMessage;
+					}
+				}),
+				false
+			);
+		}
+		return;
+	}
+
+	// ─── Other user's message ───
 	const textMessage: TextMessage = {
 		id: messageId,
 		stanzaId: messageId,
 		roomId,
 		type: MessageType.TEXT_MSG,
-		date: new Date(timestamp).getTime(),
+		date: confirmedDate,
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
@@ -115,15 +179,6 @@ export function handleWsMessageReceived(event: {
 				}
 			: undefined
 	};
-
-	// Self-echo guard: the REST sendMessage flow inserts a placeholder and then
-	// promotes it when the response arrives. If the WS echo wins the race, it
-	// would insert a second copy next to the still-live placeholder, causing a
-	// visible flash until the REST handler cleans up. Skip all self-echoes —
-	// the REST handler is authoritative for messages I sent.
-	if (senderId === session.id) {
-		return;
-	}
 
 	const hasMoreAfter = chatsRegistry[roomId]?.hasMoreAfter ?? false;
 

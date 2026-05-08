@@ -35,7 +35,6 @@ import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
 import ChatApi from '../../../../network/apis/ChatApi';
-import { mapChatMessageToTextMessage } from '../../../../network/utils/messageMapper';
 import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
@@ -357,24 +356,16 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return copyOfFile;
 			});
 
-			// Capture reply stanzaId before clearing it below
 			const capturedReplyToId = referenceMessage?.stanzaId;
-			const currentUserId = useStore.getState().session.id ?? '';
 
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
+			// Fire-and-forget: the WS MessageReceived echo will insert the
+			// message into the store. No store update from the REST response.
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
 				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
 					acc.then(() =>
-						uploadAttachmentPromise(file, abortControllerList[i], capturedReplyToId).then(
-							(resp) => {
-								// The backend returns a full message DTO — add it to the store directly.
-								// No separate WS send-message call is needed (backend broadcasts it).
-								const textMessage = mapChatMessageToTextMessage(resp, currentUserId);
-								useStore.getState().newMessage(textMessage);
-								return resp;
-							}
-						)
+						uploadAttachmentPromise(file, abortControllerList[i], capturedReplyToId)
 					),
 				Promise.resolve()
 			);

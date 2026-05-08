@@ -107,10 +107,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			decrementUnreadCount(roomId, unreadAtStart);
 			isMarkingAsReadRef.current = false;
 		} else {
+			// Fire-and-forget: WS ReadUpdated echo is the single source of truth
+			// for clearing unread count — no store update here.
 			ChatApi.setReadMarker(roomId, targetMessageId)
-				.then(() => {
-					decrementUnreadCount(roomId, unreadAtStart);
-				})
 				.catch((err: unknown) => {
 					console.error('[MessagesList] Failed to mark room as read:', err);
 				})
