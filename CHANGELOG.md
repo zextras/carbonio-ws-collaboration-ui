@@ -1,3 +1,9 @@
+## [0.12.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.1...v0.12.2) (2026-05-08)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-ui-preview to v5 ([#714](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/714)) ([3f79a85](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3f79a855a05e78672f8c814494fb21875cb6b31c))
+
 ## [0.12.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.0...v0.12.1) (2026-05-07)
 
 ### Bug Fixes
