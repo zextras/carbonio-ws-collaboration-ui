@@ -45,15 +45,20 @@ import { createMeeting, deleteMeeting } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
 
-export const listRooms = (): Promise<ListRoomsResponse> =>
-	// Returns basic room data without members or settings (RESTful approach)
-	// For initial load, use ChatApi.getInbox() which includes room data with last messages
-	// Members and settings should be fetched separately when needed via getRoomMembers/getRoom
-	fetchAPI<ListRoomsResponse>('rooms', RequestType.GET).then((resp) => {
+export const listRooms = (members = false, settings = false): Promise<ListRoomsResponse> => {
+	let paramsStr = '';
+	if (members || settings) {
+		const array = [];
+		if (members) array.push('extraFields=members');
+		if (settings) array.push('extraFields=settings');
+		paramsStr = `?${array.join('&')}`;
+	}
+	return fetchAPI<ListRoomsResponse>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
 		const { addRooms } = useStore.getState();
 		addRooms(resp, true);
 		return resp;
 	});
+};
 
 export const addRoom = async (room: RoomCreationFields): Promise<AddRoomResponse> =>
 	fetchAPI<AddRoomResponse>('rooms', RequestType.POST, room).then(async (response) => {

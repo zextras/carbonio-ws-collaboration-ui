@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
+import { gte } from 'semver';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -15,7 +16,7 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { ChatApi, getToken, listMeetings, listRooms } from './network';
+import { ChatApi, getCapabilities, getToken, listMeetings, listRooms } from './network';
 import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
@@ -278,11 +279,18 @@ export default function MainApp(): React.JSX.Element {
 						// ===== MONGOOSEIM PATH =====
 						useStore.getState().setIsMongooseIM(true);
 
-						xmppClient.connect(resp.zmToken);
-
-						Promise.all([listRooms(), listMeetings()])
+						Promise.all([listRooms(true, true), listMeetings()])
 							.then(() => {
+								const version = useStore.getState().session.apiVersion;
+								if (version && gte(version, '1.6.8')) {
+									getCapabilities().catch(() => {
+										setAttributes(attrs);
+									});
+								} else {
+									setAttributes(attrs);
+								}
 								setChatsBeStatus(true);
+								xmppClient.connect(resp.zmToken);
 								const { wsClient } = useStore.getState().connections;
 								wsClient?.connect();
 							})
@@ -293,7 +301,7 @@ export default function MainApp(): React.JSX.Element {
 				console.error('[MainApp] getToken failed', err);
 				setChatsBeStatus(false);
 			});
-	}, [setChatsBeStatus]);
+	}, [setChatsBeStatus, setAttributes, attrs]);
 
 	useEffect(() => {
 		if (!authenticated) {
