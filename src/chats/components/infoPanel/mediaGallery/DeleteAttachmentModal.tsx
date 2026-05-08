@@ -41,6 +41,7 @@ export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	return (
 		<Modal
 			size="small"
+			zIndex={9000}
 			open={open}
 			title={title}
 			confirmLabel={confirmLabel}

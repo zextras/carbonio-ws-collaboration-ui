@@ -56,13 +56,19 @@ const usePreview = (
 				icon: 'DownloadOutline',
 				tooltipLabel: t('action.download', 'Download'),
 				id: 'DownloadOutline',
-				onClick: (): void => download()
+				onClick: (ev: React.MouseEvent<HTMLButtonElement> | KeyboardEvent): void => {
+					ev.preventDefault();
+					download();
+				}
 			};
 			const deleteAction = onDelete && {
 				icon: 'Trash2Outline',
 				tooltipLabel: t('action.delete', 'Delete'),
 				id: 'Trash2Outline',
-				onClick: (): void => onDelete()
+				onClick: (ev: React.MouseEvent<HTMLButtonElement> | KeyboardEvent): void => {
+					ev.preventDefault();
+					onDelete();
+				}
 			};
 			const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
 			createPreview({
