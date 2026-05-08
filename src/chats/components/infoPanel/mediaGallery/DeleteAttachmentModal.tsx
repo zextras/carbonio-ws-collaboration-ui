@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC } from 'react';
 
-import { Container, Modal, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Modal, Row, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 type DeleteAttachmentModalProps = {
@@ -33,22 +33,29 @@ export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	const cancelLabel = t('mediaGallery.deleteAttachmentCancel', 'No, cancel');
 	const closeLabel = t('action.close', 'Close');
 
-	const onSecondaryAction = useCallback(() => {
-		onClose();
-		onCancel && onCancel();
-	}, [onClose, onCancel]);
+	const titleNode = (
+		<Row mainAlignment="flex-start" crossAlignment="center" gap="0.5rem">
+			<Icon icon="AlertCircleOutline" color="error" size="large" />
+			<Text size="medium" weight="bold">
+				{title}
+			</Text>
+		</Row>
+	);
+
+	const customFooter = (
+		<Container orientation="horizontal" mainAlignment="flex-end" gap="0.5rem">
+			<Button label={cancelLabel} type="outlined" color="secondary" onClick={onClose} />
+			<Button label={confirmLabel} color="error" onClick={onConfirm} />
+		</Container>
+	);
 
 	return (
 		<Modal
 			size="small"
 			zIndex={9000}
 			open={open}
-			title={title}
-			confirmLabel={confirmLabel}
-			confirmColor="error"
-			onConfirm={onConfirm}
-			secondaryActionLabel={cancelLabel}
-			onSecondaryAction={onSecondaryAction}
+			title={titleNode}
+			customFooter={customFooter}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
 			onClose={onClose}
