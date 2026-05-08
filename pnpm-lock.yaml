@@ -25,10 +25,10 @@ importers:
         version: 12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@zextras/carbonio-shell-ui':
         specifier: 14.0.1
-        version: 14.0.1(57d1b1aae667960ba4e84c80cb8e1d33)
+        version: 14.0.1(69097fcdd1bf93857bb4280616708608)
       '@zextras/carbonio-ui-preview':
-        specifier: 4.0.2
-        version: 4.0.2(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 5.0.1
+        version: 5.0.1(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@zextras/carbonio-ui-soap-lib':
         specifier: 1.0.4
         version: 1.0.4
@@ -2549,10 +2549,11 @@ packages:
     peerDependencies:
       typescript: ^5.4
 
-  '@zextras/carbonio-ui-preview@4.0.2':
-    resolution: {integrity: sha512-nHIBIWVVwsOCip0TwWgz7PuP+n6lpYVSWhEjfpb7lErrWEP2T1uRg/mTAAvLXNn8jE0pPkmv92/QUJjcUoroSw==}
+  '@zextras/carbonio-ui-preview@5.0.1':
+    resolution: {integrity: sha512-krr27Uy6vrWDhX5tgyw4B4vGSubscUBzsizgnvLJfUPuW0Wwm11ha/W4amHXVA6F4iSFod0URNJbe9TJ29KgLw==}
+    engines: {node: v22, pnpm: '>=10'}
     peerDependencies:
-      '@zextras/carbonio-design-system': ^8.0.0 || ^9.0.0-devel || ^10.0.0-devel || ^11.0.0-devel || ^12.0.0
+      '@zextras/carbonio-design-system': ^11.0.0-devel || ^12.0.0
       react: ^18.3.1
       react-dom: ^18.3.1
 
@@ -9446,7 +9447,7 @@ snapshots:
       react-datepicker: 7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
-  '@zextras/carbonio-shell-ui@14.0.1(57d1b1aae667960ba4e84c80cb8e1d33)':
+  '@zextras/carbonio-shell-ui@14.0.1(69097fcdd1bf93857bb4280616708608)':
     dependencies:
       '@fontsource/roboto': 5.2.10
       '@zextras/carbonio-ui-soap-lib': 1.0.4
@@ -9463,7 +9464,7 @@ snapshots:
       '@emotion/react': 11.14.0(@types/react@18.3.28)(react@18.3.1)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1)
       '@zextras/carbonio-design-system': 12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@zextras/carbonio-ui-preview': 4.0.2(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@zextras/carbonio-ui-preview': 5.0.1(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lodash: 4.18.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -9505,7 +9506,7 @@ snapshots:
       - supports-color
       - svelte-eslint-parser
 
-  '@zextras/carbonio-ui-preview@4.0.2(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@zextras/carbonio-ui-preview@5.0.1(@types/react@18.3.28)(@zextras/carbonio-design-system@12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@zextras/carbonio-design-system': 12.0.4(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(date-fns@4.1.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       core-js: 3.49.0
