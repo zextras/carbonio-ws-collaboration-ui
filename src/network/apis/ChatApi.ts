@@ -23,10 +23,6 @@ import {
 } from '../../types/network/models/chatTypes';
 import { fetchAPI } from '../../utils/FetchUtils';
 
-// Maps server-assigned messageId → client placeholder stableId.
-// Used by the WS MessageReceived handler to promote pending placeholders.
-export const pendingMessageIds = new Map<string, string>();
-
 class ChatApi implements IChatApi {
 	private static instance: ChatApi;
 
@@ -125,15 +121,10 @@ class ChatApi implements IChatApi {
 		if (replyToId) body.replyToId = replyToId;
 
 		return this.enqueue(roomId, () =>
-			fetchAPI<ChatMessage>(`rooms/${roomId}/messages`, RequestType.POST, body)
-				.then((response) => {
-					pendingMessageIds.set(response.id, stableId);
-					return response;
-				})
-				.catch((err) => {
-					useStore.getState().removePlaceholderMessage(roomId, stableId);
-					throw err;
-				})
+			fetchAPI<ChatMessage>(`rooms/${roomId}/messages`, RequestType.POST, body).catch((err) => {
+				useStore.getState().removePlaceholderMessage(roomId, stableId);
+				throw err;
+			})
 		);
 	}
 

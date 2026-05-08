@@ -6,7 +6,6 @@
 
 import { produce } from 'immer';
 
-import { pendingMessageIds } from '../../apis/ChatApi';
 import useStore from '../../../store/Store';
 import {
 	AttachmentMessageType,
@@ -102,28 +101,22 @@ export function handleWsMessageReceived(event: {
 	// sendMessage is the only REST call that renders before server confirmation
 	// (PENDING placeholder). This WS echo is the delivery confirmation that
 	// switches the placeholder to a real message with a checkmark.
+	// Matching is by PENDING status, not by ID — the placeholder has a client-
+	// generated ID, the echo has the server-assigned ID. Order is guaranteed
+	// because enqueue serializes REST calls per room and WS echoes arrive in order.
 	if (senderId === session.id) {
 		const messages = chatsRegistry[roomId]?.messages ?? [];
 
-		// Already in store (e.g. attachment upload inserted from REST response) — skip
 		if (messages.some((m) => m.id === messageId)) {
 			return;
 		}
 
-		// Try ID-based match first (REST response stored serverId → stableId mapping)
-		let placeholderId = pendingMessageIds.get(messageId);
-		pendingMessageIds.delete(messageId);
+		const placeholder = messages.find(
+			(m) => m.type === MessageType.TEXT_MSG && (m as TextMessage).read === MarkerStatus.PENDING
+		);
 
-		// Fallback: WS arrived before REST response — find oldest PENDING placeholder
-		if (!placeholderId) {
-			const placeholder = messages.find(
-				(m) => m.type === MessageType.TEXT_MSG && (m as TextMessage).read === MarkerStatus.PENDING
-			);
-			placeholderId = placeholder?.id;
-		}
-
-		if (placeholderId) {
-			const pid = placeholderId;
+		if (placeholder) {
+			const pid = placeholder.id;
 			useStore.setState(
 				produce((draft) => {
 					const registry = draft.chatsRegistry[roomId];
