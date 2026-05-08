@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { debounce, find, forEach, map, throttle } from 'lodash';
+import { debounce, forEach, map, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -104,7 +104,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
-	const setFileDescription = useStore((store) => store.setFileDescription);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const messageEditTimeLimit = useStore((store) =>
 		getAttribute(store, 'messageEditTimeLimit')
@@ -433,12 +432,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {
 			setTextMessage(e.target.value);
-			const focusedFile = filesToUploadArray?.find((file) => file.hasFocus);
-			if (focusedFile) {
-				setFileDescription(roomId, focusedFile.fileId, e.target.value);
-			}
 		},
-		[setTextMessage, filesToUploadArray, roomId, setFileDescription]
+		[setTextMessage]
 	);
 
 	const handleKeyUp = useCallback(
@@ -593,18 +588,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		};
 	}, [roomId, setTextMessage]);
 
-	const isDisabledWhileAttachingFile = useMemo(() => {
-		if (filesToUploadArray) {
-			return !find(filesToUploadArray, (file) => file.hasFocus);
-		}
-		return false;
-	}, [filesToUploadArray]);
-
 	const showAttachFileButton = useMemo(
 		() =>
 			!isUserGuest &&
 			!isUploading &&
-			!filesToUploadArray &&
+			(!filesToUploadArray || filesToUploadArray.length === 0) &&
 			(!referenceMessage || referenceMessage.actionType === messageActionType.REPLY),
 		[filesToUploadArray, isUploading, isUserGuest, referenceMessage]
 	);
@@ -627,7 +615,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				handleKeyDownTextarea={handleKeyDown}
 				handleKeyUpTextarea={handleKeyUp}
 				handleOnPaste={handlePaste}
-				isDisabled={isDisabledWhileAttachingFile}
 			/>
 			{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
 			{isUploading && (

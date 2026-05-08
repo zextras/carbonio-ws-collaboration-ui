@@ -214,9 +214,9 @@ describe('Active conversations slice', () => {
 				{
 					file,
 					fileId: 'fileId',
-					hasFocus: true,
+					localUrl: URL.createObjectURL(file),
 					description: '',
-					localUrl: URL.createObjectURL(file)
+					hasFocus: false
 				}
 			];
 			useStore.getState().addFilesToAttach(mockedRoom.id, files);
@@ -229,9 +229,9 @@ describe('Active conversations slice', () => {
 				{
 					file,
 					fileId: 'fileId',
-					hasFocus: true,
+					localUrl: URL.createObjectURL(file),
 					description: '',
-					localUrl: URL.createObjectURL(file)
+					hasFocus: false
 				}
 			];
 			useStore.getState().addFilesToAttach(mockedRoom.id, files);

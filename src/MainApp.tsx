@@ -44,6 +44,7 @@ export default function MainApp(): React.JSX.Element {
 	useEffect(() => {
 		setSupportedVersions([
 			'1.7.0',
+			'1.6.10',
 			'1.6.9',
 			'1.6.8',
 			'1.6.7',

@@ -8,29 +8,27 @@ import { useCallback } from 'react';
 
 import { map } from 'lodash';
 
-import { getFilesToUploadArray } from '../store/selectors/ActiveConversationsSelectors';
 import useStore from '../store/Store';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { uid } from '../utils/attachmentUtils';
 
 const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
-	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const addFilesToAttach = useStore((store) => store.addFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
 	return useCallback(
 		(files: FileList) => {
-			const listOfFiles: FileToUpload[] = map(files, (file, index) => ({
+			const listOfFiles: FileToUpload[] = map(files, (file) => ({
 				file,
 				fileId: uid(),
-				hasFocus: index === 0 && !filesToUploadArray,
+				localUrl: URL.createObjectURL(file),
 				description: '',
-				localUrl: URL.createObjectURL(file)
+				hasFocus: false
 			}));
 			addFilesToAttach(roomId, listOfFiles);
 			setInputHasFocus(roomId, true);
 		},
-		[filesToUploadArray, roomId, addFilesToAttach, setInputHasFocus]
+		[roomId, addFilesToAttach, setInputHasFocus]
 	);
 };
 

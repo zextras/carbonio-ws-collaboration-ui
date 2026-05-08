@@ -4,19 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
 
 import styled from '@emotion/styled';
 import { Button, Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
-import { find, map } from 'lodash';
+import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useUploadFile from '../../../../hooks/useLoadFiles';
-import {
-	getFilesToUploadArray,
-	getFocusedFile
-} from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import {
@@ -29,8 +26,6 @@ import {
 
 type UploadAttachmentManagerViewProps = {
 	roomId: string;
-	textMessage: string;
-	setTextMessage: (message: string) => void;
 };
 
 const AttachmentsPreview = styled(Container)`
@@ -53,7 +48,6 @@ const PreviewContainer = styled(Container)`
 	margin-left: 0.25rem;
 	margin-right: 0.25rem;
 	position: relative;
-	cursor: pointer;
 	box-sizing: content-box;
 	&:hover {
 		${HoverActions} {
@@ -62,16 +56,12 @@ const PreviewContainer = styled(Container)`
 	}
 `;
 
-const LocalFile = styled(Container)<{ $hasFocus: boolean }>`
+const LocalFile = styled(Container)`
 	border-radius: 0.625rem;
-	border: 0.125rem solid
-		${({ $hasFocus, theme }): string => ($hasFocus ? theme.palette.success.regular : 'transparent')};
 `;
 
-const PreviewLocalFile = styled(Container)<{ $hasFocus: boolean; $bkgUrl: string }>`
+const PreviewLocalFile = styled(Container)<{ $bkgUrl: string }>`
 	border-radius: 0.625rem;
-	border: 0.125rem solid
-		${({ $hasFocus, theme }): string => ($hasFocus ? theme.palette.success.regular : 'transparent')};
 	background: ${({ $bkgUrl, theme }): string =>
 		`center / contain no-repeat url('${$bkgUrl}'), ${theme.palette.gray0.regular}`};
 `;
@@ -106,11 +96,7 @@ const CustomIcon = styled(Icon)<{ title?: string }>`
 	width: 2.625rem;
 `;
 
-const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = ({
-	roomId,
-	textMessage,
-	setTextMessage
-}) => {
+const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const closeTooltip = t('tooltip.close', 'Close');
 	const addAttachmentLabel = t('action.addAttachment', 'Add attachment');
@@ -118,45 +104,11 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	const removeActionLabel = t('action.removeUser', 'Remove');
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const focusedFile = useStore((store) => getFocusedFile(store, roomId));
-	const setFileFocus = useStore((store) => store.setFileFocus);
 	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
-	const setFileDescription = useStore((store) => store.setFileDescription);
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 	const { createPreview } = useContext(PreviewsManagerContext);
-
-	const setDescriptionAsTextMessage = useCallback(
-		(fileId: string | undefined) => {
-			const fileSelected = find(filesToUploadArray, (file) => file.fileId === fileId);
-			if (fileSelected) {
-				setTextMessage(fileSelected.description);
-			}
-		},
-		[filesToUploadArray, setTextMessage]
-	);
-
-	// Set inputTest as description of the first file and clear it on unmount
-	useEffect(() => {
-		setFileDescription(roomId, undefined, textMessage);
-		return () => {
-			setTextMessage('');
-		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [setTextMessage]);
-
-	useEffect(() => {
-		setDescriptionAsTextMessage(focusedFile);
-	}, [focusedFile, setDescriptionAsTextMessage]);
-
-	const focusFile = useCallback(
-		(fileId: string) => {
-			setFileFocus(roomId, fileId, true);
-			setInputHasFocus(roomId, true);
-		},
-		[roomId, setFileFocus, setInputHasFocus]
-	);
 
 	const removeFile = useCallback(
 		(ev: { stopPropagation: () => void }, fileId: string) => {
@@ -203,7 +155,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
 						height="6.25rem"
 						width="6.25rem"
-						onClick={(): void => focusFile(file.fileId)}
 					>
 						<HoverActions>
 							<Tooltip label={removeActionLabel} placement="top">
@@ -240,7 +191,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 								height="6.25rem"
 								width="6.25rem"
 								background={'gray2'}
-								$hasFocus={file.hasFocus}
 							>
 								<CustomIcon
 									icon={getAttachmentIcon(file.file.type)}
@@ -258,7 +208,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 								minHeight="6.25rem"
 								minWidth="6.25rem"
 								$bkgUrl={file.localUrl}
-								$hasFocus={file.hasFocus}
 							/>
 						)}
 					</PreviewContainer>
@@ -267,14 +216,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 			filePreviews.push(previewFile);
 		});
 		return filePreviews;
-	}, [
-		filesToUploadArray,
-		removeActionLabel,
-		previewActionLabel,
-		focusFile,
-		removeFile,
-		previewClick
-	]);
+	}, [filesToUploadArray, removeActionLabel, previewActionLabel, removeFile, previewClick]);
 
 	const closeUploadAttachmentManagerView = useCallback(() => {
 		removeFilesToAttach(roomId);

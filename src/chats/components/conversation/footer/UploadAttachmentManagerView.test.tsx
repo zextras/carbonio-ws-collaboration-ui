@@ -15,7 +15,6 @@ import {
 	createMockFileToUpload,
 	createMockMember,
 	createMockRoom,
-	imageFile,
 	pdfFile
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -29,8 +28,6 @@ import ConversationFooter from './ConversationFooter';
 const add1Attachment = 'Add 1 attachment';
 const add2Attachments = 'Add 2 attachments';
 const genericDescription = 'generic description';
-const borderColor = 'border-color: #8bc34a';
-const localhostGenericUrl = 'localhost/generic/url';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
@@ -113,223 +110,85 @@ describe('Upload attachment view', () => {
 		const previewFileAction = screen.queryByTestId('icon: EyeOutline');
 		expect(previewFileAction).not.toBeInTheDocument();
 	});
-	test('input has text in it and user decides to upload one file from picker => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
+	test('input has text in it and user decides to upload one file from picker => file is shown and input text is preserved', async () => {
 		const { user } = storeSetupAdvanced();
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
-		const textMessage = screen.queryByText(inputText);
-		expect(textMessage).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
 		const attachmentToUpload = new File(['hello'], 'hello.png', { type: 'image/png' });
 		const inputSelector: HTMLInputElement = screen.getByTestId('inputSelector');
-		expect(inputSelector).not.toBeNull();
-		expect(inputSelector.files).toHaveLength(0);
 		await user.upload(inputSelector, attachmentToUpload);
 		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 		const fileWithPreview = await screen.findByTestId(/previewImage-/);
 		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle(borderColor);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(1);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[0].file.name).toBe('hello.png');
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
 	});
-	test('input has text in it and user decides to upload more file from picker => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
+	test('input has text in it and user decides to upload more files from picker => files are shown and input text is preserved', async () => {
 		const { user } = storeSetupAdvanced();
 		const inputText = genericDescription;
 		const composerTextArea = await screen.findByTestId('textAreaComposer');
 		await user.type(composerTextArea, inputText);
-		const textMessage = await screen.findByText(/generic description/i);
-		expect(textMessage).toBeInTheDocument();
-		const attachmentToUploadOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		const attachmentToUploadTwo = new File(['there'], 'there', { type: 'image/png' });
-		const attachmentToUploadThree = new File(['General'], 'General', { type: 'image/png' });
-		const attachmentToUploadFour = new File(['Kenobi'], 'Kenobi', { type: 'image/png' });
+		expect(await screen.findByText(/generic description/i)).toBeInTheDocument();
+		const attachments = [
+			new File(['Hello'], 'Hello', { type: 'image/png' }),
+			new File(['there'], 'there', { type: 'image/png' }),
+			new File(['General'], 'General', { type: 'image/png' }),
+			new File(['Kenobi'], 'Kenobi', { type: 'image/png' })
+		];
 		const inputSelector: HTMLInputElement = screen.getByTestId('inputSelector');
-		expect(inputSelector).not.toBeNull();
-		expect(inputSelector.files).toHaveLength(0);
-		await user.upload(inputSelector, [
-			attachmentToUploadOne,
-			attachmentToUploadTwo,
-			attachmentToUploadThree,
-			attachmentToUploadFour
-		]);
+		await user.upload(inputSelector, attachments);
 		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(4);
-		const titleCounter = screen.queryByText('Add 4 attachments');
-		expect(titleCounter).toBeInTheDocument();
-		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
-		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle(borderColor);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(inputText);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(4);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[2].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[3].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[0].file.name).toBe('Hello');
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
+		expect(screen.getByText('Add 4 attachments')).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
 	});
-	test('input has text in it and user decides to upload one file with drag&drop => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
+	test('input has text in it and user decides to upload one file with drag&drop => file is shown and input text is preserved', async () => {
 		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), inputText);
 		const chatComponent = await screen.findByTestId('conversationCollapsedView');
 		const imgToDrag = new File(['Hello'], 'Hello', { type: 'image/png' });
 		fireEvent.dragOver(chatComponent, { dataTransfer: { files: [imgToDrag] } });
 		const dropContainer = await screen.findByTestId('dropZoneView');
-		expect(dropContainer).toBeVisible();
 		fireEvent.drop(dropContainer, { dataTransfer: { files: [imgToDrag] } });
-		const uploadManager = await screen.findByTestId('upload_attachment_manager');
-		expect(uploadManager).toBeInTheDocument();
-		const titleCounter = screen.queryByText(add1Attachment);
-		expect(titleCounter).toBeInTheDocument();
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
-		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
-		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle(borderColor);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(1);
+		expect(await screen.findByTestId('upload_attachment_manager')).toBeInTheDocument();
+		expect(screen.getByText(add1Attachment)).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 	});
-	test('a file is selected with the description set in the input, user add a new file with picker => new file is added but the focus remains to the previous selected and description stay in the input', async () => {
+	test('text is preserved when a single file is removed via the remove button', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileToUpload = {
-			file: imageFile,
-			fileId: 'genericImageId',
-			localUrl: localhostGenericUrl,
-			description: '',
-			hasFocus: true
-		};
+		const fileToUpload = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const addFromManager = await screen.findByTestId('addMoreFilesFromManager');
-		expect(addFromManager).toBeInTheDocument();
-		const inputSelector: HTMLInputElement = screen.getByTestId('addMoreFilesInput');
-		expect(inputSelector).not.toBeNull();
-		const attachmentToUploadOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		await user.upload(inputSelector, [attachmentToUploadOne]);
-		expect(inputSelector.files).toHaveLength(1);
-		const titleCounter = screen.queryByText(add2Attachments);
-		expect(titleCounter).toBeInTheDocument();
-		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
-		expect(fileWithPreview).toBeInTheDocument();
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(2);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		const fileWithFocus = await screen.findByTestId(
-			`previewImage-${imageFile.name}-${fileToUpload.fileId}`
-		);
-		expect(fileWithFocus).toBeInTheDocument();
-		expect(fileWithFocus).toHaveStyle(borderColor);
-		const textMessage = screen.queryByText(inputText);
-		expect(textMessage).toBeInTheDocument();
-	});
-	test('a file is selected with the description set in the input, user add more files with picker => new files are added but the focus remains to the previous selected and description stay in the input', async () => {
-		const { user, store } = storeSetupAdvanced();
-		const fileToUpload = {
-			file: imageFile,
-			fileId: 'genericImageId',
-			localUrl: localhostGenericUrl,
-			description: '',
-			hasFocus: true
-		};
-		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
-		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const addFromManager = await screen.findByTestId('addMoreFilesFromManager');
-		expect(addFromManager).toBeInTheDocument();
-		const inputSelector: HTMLInputElement = screen.getByTestId('addMoreFilesInput');
-		expect(inputSelector).not.toBeNull();
-		const attOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		const attTwo = new File(['there'], 'there', { type: 'image/png' });
-		const attThree = new File(['General'], 'General', { type: 'image/png' });
-		const attFour = new File(['Kenobi'], 'Kenobi', { type: 'image/png' });
-		await user.upload(inputSelector, [attOne, attTwo, attThree, attFour]);
-		expect(inputSelector.files).toHaveLength(4);
-		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
-		expect(fileWithPreview).toBeInTheDocument();
-		const titleCounter = screen.queryByText('Add 5 attachments');
-		expect(titleCounter).toBeInTheDocument();
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(5);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[2].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[3].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[4].hasFocus).toBeFalsy();
-		const fileWithFocus = await screen.findByTestId(
-			`previewImage-${imageFile.name}-${fileToUpload.fileId}`
-		);
-		expect(fileWithFocus).toBeInTheDocument();
-		expect(fileWithFocus).toHaveStyle(borderColor);
-		const textMessage = screen.queryByText(inputText);
-		expect(textMessage).toBeInTheDocument();
-	});
-	test('there is a file with description in the attachmentViewManager and user remove it with preview action => the widget will become closed and the input get cleared', async () => {
-		const { user, store } = storeSetupAdvanced();
-		const fileToUpload = {
-			file: imageFile,
-			fileId: 'genericImageId',
-			localUrl: localhostGenericUrl,
-			description: '',
-			hasFocus: true
-		};
-		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
-		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), inputText);
 		const file = await screen.findByTestId(
 			`previewFileUpload-${fileToUpload.file.name}-${fileToUpload.fileId}`
 		);
-		expect(file).toBeVisible();
 		await user.hover(file);
 		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileToUpload.fileId}`);
-		expect(removeFileButton).toBeInTheDocument();
 		await user.click(removeFileButton);
 		expect(screen.queryByTestId('upload_attachment_manager')).not.toBeInTheDocument();
 		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(0);
+		expect((composer as HTMLTextAreaElement).value).toBe(inputText);
 	});
-	test('there is a file with description in the attachmentViewManager and user close the widget => the widget will become closed and the input get cleared and the file removed', async () => {
+	test('text is preserved when the attachment manager is closed with the close button', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), inputText);
 		expect(screen.queryByTestId('upload_attachment_manager')).toBeVisible();
-		const closeFilesManagerBtn = await screen.findByTestId('closeFilesManager');
-		await user.click(closeFilesManagerBtn);
+		await user.click(await screen.findByTestId('closeFilesManager'));
 		expect(screen.queryByTestId('upload_attachment_manager')).not.toBeInTheDocument();
 		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBeUndefined();
+		expect((composer as HTMLTextAreaElement).value).toBe(inputText);
 	});
-	test('there is a file selected with description and other files in the attachmentViewManager and user removes the selected one with preview action => the file selected will be removed, the input will be cleared and set as selected the file at the right of the deleted one if present otherwise set selected the one at the left and if present set the description of that file in the input', async () => {
+	test('text is preserved when one of multiple files is removed', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		const fileTwo = createMockFileToUpload({
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
@@ -339,60 +198,38 @@ describe('Upload attachment view', () => {
 			file: createMockFile({ name: 'there!', options: { type: 'image/png' } })
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
-		const inputText = genericDescription;
-		const titleCounter = screen.queryByText('Add 3 attachments');
-		expect(titleCounter).toBeInTheDocument();
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		expect(screen.getByText('Add 3 attachments')).toBeInTheDocument();
+		await user.type(screen.getByRole('textbox'), genericDescription);
 		const file = await screen.findByTestId(
 			`previewFileUpload-${fileOne.file.name}-${fileOne.fileId}`
 		);
-		expect(file).toBeVisible();
 		await user.hover(file);
-		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileOne.fileId}`);
-		await user.click(removeFileButton);
-		const newFileSelected = await screen.findByTestId(
-			`previewImage-${fileTwo.file.name}-${fileTwo.fileId}`
-		);
-		expect(newFileSelected).toBeInTheDocument();
-		const titleCounterUpdated = screen.queryByText(add2Attachments);
-		expect(titleCounterUpdated).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle(borderColor);
+		await user.click(await screen.findByTestId(`removeSingleFile-${fileOne.fileId}`));
+		expect(screen.getByText(add2Attachments)).toBeInTheDocument();
 		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
+		expect((composer as HTMLTextAreaElement).value).toBe(genericDescription);
 	});
-	test('there is a file selected with description and other files in the attachmentViewManager and user removes the selected one with preview action => the file selected will be removed, the input will be cleared and set selected the one at the left and if present set the description of that file in the input', async () => {
+	test('text is preserved when multiple files are removed leaving just one', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ fileId: 'fileOne', hasFocus: true });
+		const fileOne = createMockFileToUpload({ fileId: 'fileOne' });
 		const fileTwo = createMockFileToUpload({
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-		await user.type(screen.getByRole('textbox'), 'file one description');
-
+		await user.type(screen.getByRole('textbox'), genericDescription);
 		const file = await screen.findByTestId(
 			`previewFileUpload-${fileTwo.file.name}-${fileTwo.fileId}`
 		);
-		expect(file).toBeVisible();
-		await user.click(file);
-		await user.type(screen.getByRole('textbox'), 'file two description');
 		await user.hover(file);
-		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileTwo.fileId}`);
-		await user.click(removeFileButton);
-		const titleCounter = screen.queryByText(add1Attachment);
-		expect(titleCounter).toBeInTheDocument();
-		const newFileSelected = await screen.findByTestId(
-			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
-		);
-		expect(newFileSelected).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle(borderColor);
+		await user.click(await screen.findByTestId(`removeSingleFile-${fileTwo.fileId}`));
+		expect(screen.getByText(add1Attachment)).toBeInTheDocument();
 		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('file one description');
+		expect((composer as HTMLTextAreaElement).value).toBe(genericDescription);
 	});
-	test('there is a file selected with description and other files in the attachmentViewManager and user close the widget => the widget will become closed and the input get cleared and the file removed', async () => {
+	test('text is preserved when multiple files and attachment manager is closed', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		const fileTwo = createMockFileToUpload({
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello' })
@@ -402,198 +239,68 @@ describe('Upload attachment view', () => {
 			file: createMockFile({ name: 'there!' })
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
-		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), genericDescription);
 		expect(screen.queryByTestId('upload_attachment_manager')).toBeVisible();
-		const closeFilesManagerBtn = await screen.findByTestId('closeFilesManager');
-		await user.click(closeFilesManagerBtn);
+		await user.click(await screen.findByTestId('closeFilesManager'));
 		expect(screen.queryByTestId('upload_attachment_manager')).not.toBeInTheDocument();
 		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBeUndefined();
+		expect((composer as HTMLTextAreaElement).value).toBe(genericDescription);
 	});
-	test('input has text in it and user decides to upload more file with drag&drop => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
+	test('input has text in it and user decides to upload more files with drag&drop => files are added and text is preserved', async () => {
 		const { user } = setup(<Chat roomId={mockedRoom.id} />);
 		const inputText = genericDescription;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const aA = screen.queryByText(inputText);
-		expect(aA).toBeInTheDocument();
+		await user.type(screen.getByRole('textbox'), inputText);
+		expect(screen.getByText(inputText)).toBeInTheDocument();
 		const chatComponent = await screen.findByTestId('conversationCollapsedView');
-		const imgOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		const imgTwo = new File(['there'], 'there', { type: 'image/png' });
-		const imgThree = new File(['General'], 'General', { type: 'image/png' });
-		const imgFour = new File(['Kenobi'], 'Kenobi', { type: 'image/png' });
-		const filesArray = [imgOne, imgTwo, imgThree, imgFour];
+		const filesArray = [
+			new File(['Hello'], 'Hello', { type: 'image/png' }),
+			new File(['there'], 'there', { type: 'image/png' }),
+			new File(['General'], 'General', { type: 'image/png' }),
+			new File(['Kenobi'], 'Kenobi', { type: 'image/png' })
+		];
 		fireEvent.dragOver(chatComponent, { dataTransfer: { files: filesArray } });
 		const dropContainer = await screen.findByTestId('dropZoneView');
-		expect(dropContainer).toBeVisible();
 		fireEvent.drop(dropContainer, { dataTransfer: { files: filesArray } });
-		const titleCounter = screen.queryByText('Add 4 attachments');
-		expect(titleCounter).toBeInTheDocument();
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
-		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
-		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle(borderColor);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(4);
-		expect((filesToAttachUpdated as FileToUpload[])[0].file.name).toBe('Hello');
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[2].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[3].hasFocus).toBeFalsy();
+		expect(screen.getByText('Add 4 attachments')).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(4);
 	});
-	test('a file is selected with the description set in the input, user add a new file with drag&drop => new file is added but the focus remains to the previous selected and description stay in the input', async () => {
-		const store = useStore.getState();
-		const { user } = setup(<Chat roomId={mockedRoom.id} />);
-		const inputText = genericDescription;
-		const fileOne = createMockFileToUpload({
-			fileId: 'fileOne',
-			hasFocus: true,
-			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
-		});
-		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const titleCounter = screen.queryByText(add1Attachment);
-		expect(titleCounter).toBeInTheDocument();
-		const chatComponent = await screen.findByTestId('conversationCollapsedView');
-		const imgOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		fireEvent.dragOver(chatComponent, { dataTransfer: { files: [imgOne] } });
-		const dropContainer = await screen.findByTestId('dropZoneView');
-		expect(dropContainer).toBeVisible();
-		fireEvent.drop(dropContainer, { dataTransfer: { files: [imgOne] } });
-		const uploadManager = await screen.findByTestId('upload_attachment_manager');
-		expect(uploadManager).toBeInTheDocument();
-		const titleCounterUpdated = screen.queryByText(add2Attachments);
-		expect(titleCounterUpdated).toBeInTheDocument();
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
-	});
-	test('a file is selected with the description set in the input, user add more files with drag&drop => new files are added but the focus remains to the previous selected and description stay in the input', async () => {
-		const store = useStore.getState();
-		const { user } = setup(<Chat roomId={mockedRoom.id} />);
-		const inputText = genericDescription;
-		const fileOne = createMockFileToUpload({
-			fileId: 'fileOne',
-			hasFocus: true,
-			file: createMockFile({ name: 'sunrise', options: { type: 'image/png' } })
-		});
-		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
-		const titleCounter = screen.queryByText(add1Attachment);
-		expect(titleCounter).toBeInTheDocument();
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const chatComponent = await screen.findByTestId('conversationCollapsedView');
-		const imgOne = new File(['Hello'], 'Hello', { type: 'image/png' });
-		const imgTwo = new File(['there'], 'there', { type: 'image/png' });
-		const imgThree = new File(['General'], 'General', { type: 'image/png' });
-		const imgFour = new File(['Kenobi'], 'Kenobi', { type: 'image/png' });
-		const filesArray = [imgOne, imgTwo, imgThree, imgFour];
-		fireEvent.dragOver(chatComponent, { dataTransfer: { files: filesArray } });
-		const dropContainer = await screen.findByTestId('dropZoneView');
-		expect(dropContainer).toBeVisible();
-		fireEvent.drop(dropContainer, { dataTransfer: { files: filesArray } });
-		const uploadManager = await screen.findByTestId('upload_attachment_manager');
-		expect(uploadManager).toBeInTheDocument();
-		const titleCounterUpdated = screen.queryByText('Add 5 attachments');
-		expect(titleCounterUpdated).toBeInTheDocument();
-		const composerText = screen.queryByText(inputText);
-		expect(composerText).toBeInTheDocument();
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(5);
-		expect((filesToAttachUpdated as FileToUpload[])[0].file.name).toBe('sunrise');
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[2].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[3].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[4].hasFocus).toBeFalsy();
-	});
-	test('Save description - input has text, file is selected and user click in another file => description of the file will be saved', async () => {
+	test('adding a new file from picker while composing does not clear the text', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
-		const fileTwo = createMockFileToUpload({
-			fileId: 'fileTwo',
-			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
-		});
-		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-		const inputText = 'description fileOne';
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const fileTwoToFocus = await screen.findByTestId(
-			`previewFileUpload-${fileTwo.file.name}-${fileTwo.fileId}`
-		);
-		await user.click(fileTwoToFocus);
-		const newFileSelected = await screen.findByTestId(
-			`previewImage-${fileTwo.file.name}-${fileTwo.fileId}`
-		);
-		expect(newFileSelected).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle(borderColor);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect((filesToAttachUpdated as FileToUpload[])[0].description).toBe(inputText);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeFalsy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeTruthy();
-	});
-	test('Keep description - input has text, file is selected and user add new file from picker => description of the file will be kept in the input and the old file will stay focused', async () => {
-		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
-		const inputText = 'description fileOne';
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		const inputText = genericDescription;
+		await user.type(screen.getByRole('textbox'), inputText);
 		const inputSelector: HTMLInputElement = screen.getByTestId('addMoreFilesInput');
-		const lastFileUploaded = createMockFile({ name: 'Hello', options: { type: 'image/png' } });
-		await user.upload(inputSelector, [lastFileUploaded]);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(inputText);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBe(2);
-		expect((filesToAttachUpdated as FileToUpload[])[0].description).toBe(inputText);
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
-		const fileOld = await screen.findByTestId(
-			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
-		);
-		expect(fileOld).toBeInTheDocument();
-		expect(fileOld).toHaveStyle(borderColor);
+		await user.upload(inputSelector, [
+			createMockFile({ name: 'Hello', options: { type: 'image/png' } })
+		]);
+		expect(screen.getByText(add2Attachments)).toBeInTheDocument();
+		expect(screen.getByText(inputText)).toBeInTheDocument();
 	});
-	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
+	test('input has text, file is present, user presses ENTER => message sent and input cleared', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
-		const inputText = 'description fileOne{enter}';
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await user.type(screen.getByRole('textbox'), 'description fileOne{enter}');
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBeUndefined();
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
-	test('Save description - input has text, file is selected and user click send button => description of the file will be saved, and message sent', async () => {
+	test('input has text, file is present, user clicks send button => message sent and input cleared', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
 		await user.click(sendButton);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect(filesToAttachUpdated?.length).toBeUndefined();
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
-	test('Remove description - file is selected and so the input has the description and user clean the input manually => description will be removed', async () => {
+	test('input has text, user manually clears it => input is empty', async () => {
 		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
+		const fileOne = createMockFileToUpload();
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'hello';
 		const composerTextArea = screen.getByRole('textbox');
@@ -602,28 +309,25 @@ describe('Upload attachment view', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 	});
-	test('Focused file does not change when user clicks on "Show preview"', async () => {
-		const { user, store } = storeSetupAdvanced();
+	test('no green border is shown on any file in the attachment manager', async () => {
+		const { store } = storeSetupAdvanced();
+		const borderColor = 'border-color: #8bc34a';
 		const fileOne = createMockFileToUpload({
-			fileId: 'fileOne',
 			file: createMockFile({ name: 'First', options: { type: 'image/png' } }),
-			hasFocus: true
+			fileId: 'fileOne'
 		});
 		const fileTwo = createMockFileToUpload({
-			fileId: 'fileTwo',
-			file: createMockFile({ name: 'Second', options: { type: 'image/png' } })
+			file: createMockFile({ name: 'Second', options: { type: 'image/png' } }),
+			fileId: 'fileTwo'
 		});
 		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-
-		const previewButton = await screen.findByTestId(`previewSingleFile-${fileTwo.fileId}`);
-		await user.click(previewButton);
 		const firstFilePreview = await screen.findByTestId(
 			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
 		);
-		expect(firstFilePreview).toHaveStyle(borderColor);
-		const updatedStore = useStore.getState();
-		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
-		expect((filesToAttachUpdated as FileToUpload[])[0].hasFocus).toBeTruthy();
-		expect((filesToAttachUpdated as FileToUpload[])[1].hasFocus).toBeFalsy();
+		expect(firstFilePreview).not.toHaveStyle(borderColor);
+		const secondFilePreview = await screen.findByTestId(
+			`previewImage-${fileTwo.file.name}-${fileTwo.fileId}`
+		);
+		expect(secondFilePreview).not.toHaveStyle(borderColor);
 	});
 });

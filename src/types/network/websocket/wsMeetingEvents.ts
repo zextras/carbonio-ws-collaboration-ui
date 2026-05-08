@@ -10,6 +10,7 @@ import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 export type WsMeetingEvent =
 	| MeetingCreatedEvent
 	| MeetingStartedEvent
+	| MeetingDeclinedEvent
 	| MeetingJoinedEvent
 	| MeetingLeftEvent
 	| MeetingStoppedEvent

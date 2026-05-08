@@ -5,7 +5,10 @@
  */
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingDeclinedEventHandler = (event: MeetingDeclinedEvent): void => {
-	sendCustomEvent({ name: EventName.MEETING_DECLINED, data: event });
+	if (isMeetingActive(event.meetingId)) {
+		sendCustomEvent({ name: EventName.MEETING_DECLINED, data: event });
+	}
 };

@@ -1,3 +1,44 @@
+## [0.12.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.11.0...v0.12.0) (2026-05-05)
+
+### Features
+
+* change chat input behavior when managing attachments [CO-3396] [CO-3445] ([#706](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/706)) ([0e12fb7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0e12fb70631c54dc1890c3c410422379af4453f2))
+
+## [0.11.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.1...v0.11.0) (2026-05-05)
+
+### Features
+
+* chats call state awareness and active conversation visibility in carbonio chats [CO-2834] ([#701](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/701)) ([492ff24](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/492ff24b6a05a29e8cbf7aa5d54ca16a5b6f53cd))
+
+## [0.10.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.10.0...v0.10.1) (2026-04-29)
+
+### Bug Fixes
+
+* **deps:** update dependency moment-timezone to v0.6.2 ([#700](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/700)) ([739e35e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/739e35e1b09446d88155f96c9e42a25f95bab850))
+* **deps:** update dependency uuid to v14 [security] ([#697](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/697)) ([25a79f1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/25a79f149b1afed684125f3291c2f53a47c4a2e1))
+
+## [0.10.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.20...v0.10.0) (2026-04-27)
+
+### Features
+
+* add turn server support ([#691](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/691)) ([0538934](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/053893465bbb287f43f25fe40c63c170efa42e72))
+* dispatch quota-changed event after attachment upload and refresh storages quota  ([78b045e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/78b045eeda9b35e85bc52d8180bc968f91215bf3)), closes [#692](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/692)
+* enable camera and add video stream controls for guests on using webpage on mobile phone [CO-3527] ([#695](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/695)) ([11222ca](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/11222caf6ebe954d276498ab195436c69eedc548))
+* implement capabilities api ([57876a6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/57876a66a38f317c4c9d87e638a6d21325caf532)), closes [#680](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/680)
+
+### Bug Fixes
+
+* enhance addRooms function to support full synchronization ([#694](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/694)) ([d157a8d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d157a8dc0a08280f019b0e05ccc3de9f6c253914))
+* ensure disconnection after closing meeting ([#689](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/689)) ([aa7daf1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/aa7daf12604f512e4f4b9a0d699e93baf87e41bd))
+* hide pin message when sidebar is collapsed ([b0a5cf5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b0a5cf57a4e3a6131850bd4142627a34eb8bdb8d)), closes [#683](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/683)
+
+### Other changes
+
+* api network layer [CO-3209] ([#677](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/677)) ([ccfe77b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ccfe77bc1a808206e0434d85995d08e090d17aad))
+* change rooms data to improve initial loading performances [CO-3327] ([#688](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/688)) ([501eb83](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/501eb8373f1a723256bccbc31b597f5e3db0c375))
+* migrate from npm to pnpm ([#696](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/696)) ([061cb9a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/061cb9af5a5b420f29435cc213a3da11bcb1521a))
+* **release:** migrate to semantic-release ([#698](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/698)) ([bddeb80](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bddeb804a07c5a06bd98aa144ff4e38a33f0be36))
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.

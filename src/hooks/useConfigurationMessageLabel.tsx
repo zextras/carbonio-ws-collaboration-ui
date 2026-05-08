@@ -221,6 +221,19 @@ export const useConfigurationMessageLabel = (
 		);
 	}, [meetingTime, message.value, t]);
 
+	const meetingDeclinedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t('configurationMessages.user.meetingDeclined', 'You declined the call at {{time}}', {
+				time: meetingTime
+			});
+		}
+		return t(
+			'configurationMessages.member.meetingDeclined',
+			'{{name}} declined the call at {{time}}',
+			{ name: actionMakerUsername, time: meetingTime }
+		);
+	}, [actionMakerUsername, loggedUserId, meetingTime, message.from, t]);
+
 	const clearHistoryLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
 			return t('configurationMessages.user.clearHistory', 'You have cleared the chat history');
@@ -266,12 +279,7 @@ export const useConfigurationMessageLabel = (
 		case OperationType.MEETING_ENDED:
 			return meetingEndedLabel;
 		case OperationType.MEETING_DECLINED:
-			if (loggedUserId === message.from) {
-				return t('configurationMessages.user.meetingDeclined', 'You declined the call');
-			}
-			return t('configurationMessages.member.meetingDeclined', '{{name}} declined the call', {
-				name: actionMakerUsername
-			});
+			return meetingDeclinedLabel;
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

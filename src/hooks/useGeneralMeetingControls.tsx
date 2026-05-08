@@ -56,9 +56,11 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
+	const isDeclined = useRef(false);
+
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
-		if (!isMeetingActive) {
+		if (!isMeetingActive && !isDeclined.current) {
 			meetingDisconnection(meetingId);
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
