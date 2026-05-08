@@ -20,6 +20,7 @@ import {
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
+	closePreview: () => void;
 };
 
 export type UsePreviewOptions = {
@@ -31,7 +32,7 @@ const usePreview = (
 	options?: UsePreviewOptions
 ): UsePreviewHook => {
 	const [t] = useTranslation();
-	const { createPreview } = useContext(PreviewsManagerContext);
+	const { createPreview, emptyPreview } = useContext(PreviewsManagerContext);
 
 	const onDelete = options?.onDelete;
 
@@ -97,7 +98,9 @@ const usePreview = (
 		onDelete
 	]);
 
-	return { onPreviewClick };
+	const closePreview = useCallback(() => emptyPreview(), [emptyPreview]);
+
+	return { onPreviewClick, closePreview };
 };
 
 export default usePreview;

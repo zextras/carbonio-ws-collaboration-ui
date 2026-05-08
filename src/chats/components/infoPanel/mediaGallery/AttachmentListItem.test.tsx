@@ -21,8 +21,9 @@ vi.mock('../../../../network/apis/RoomsApi', () => ({
 	bulkDeleteRoomAttachments: vi.fn()
 }));
 
-const { mockOnPreviewClick, mockUsePreview } = vi.hoisted(() => ({
+const { mockOnPreviewClick, mockClosePreview, mockUsePreview } = vi.hoisted(() => ({
 	mockOnPreviewClick: vi.fn(),
+	mockClosePreview: vi.fn(),
 	mockUsePreview: vi.fn()
 }));
 
@@ -67,8 +68,12 @@ beforeEach(() => {
 		.setUserInfo([createMockUser({ id: otherUserId, name: 'Matteo Perdon', email: 'mp@x.com' })]);
 	mockedBulkDelete.mockReset();
 	mockOnPreviewClick.mockReset();
+	mockClosePreview.mockReset();
 	mockUsePreview.mockReset();
-	mockUsePreview.mockImplementation(() => ({ onPreviewClick: mockOnPreviewClick }));
+	mockUsePreview.mockImplementation(() => ({
+		onPreviewClick: mockOnPreviewClick,
+		closePreview: mockClosePreview
+	}));
 });
 
 describe('AttachmentListItem', () => {
@@ -314,5 +319,26 @@ describe('AttachmentListItem', () => {
 		expect(screen.queryByTestId('deleteAttachmentModal')).not.toBeInTheDocument();
 		act(() => previewOnDelete());
 		expect(await screen.findByTestId('deleteAttachmentModal')).toBeInTheDocument();
+	});
+
+	test('confirming the deletion also closes the preview', async () => {
+		mockedBulkDelete.mockResolvedValue({ successIds: ['att-1'], failedIds: [] });
+		const attachment = buildAttachment({ userId: myUserId });
+		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+
+		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
+		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
+
+		expect(mockClosePreview).toHaveBeenCalledTimes(1);
+	});
+
+	test('canceling the deletion does not close the preview', async () => {
+		const attachment = buildAttachment({ userId: myUserId });
+		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
+		await user.click(screen.getByRole('button', { name: /no, cancel/i }));
+
+		expect(mockClosePreview).not.toHaveBeenCalled();
 	});
 });

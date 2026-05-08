@@ -61,9 +61,14 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const subline = sizeLabel ? `${senderLabel} • ${sizeLabel}` : senderLabel;
 	const canPreview = isPreviewSupported(attachment.mimeType);
 
-	const { onPreviewClick } = usePreview(attachment, {
+	const { onPreviewClick, closePreview } = usePreview(attachment, {
 		onDelete: canDelete ? openModal : undefined
 	});
+
+	const handleConfirmDelete = useCallback(() => {
+		confirmDelete();
+		closePreview();
+	}, [closePreview, confirmDelete]);
 
 	const handleDownload = useCallback(
 		() => downloadAttachment(attachment.id, attachment.name),
@@ -151,7 +156,11 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 				</Tooltip>
 			)}
 			{modalOpen && (
-				<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
+				<DeleteAttachmentModal
+					open={modalOpen}
+					onConfirm={handleConfirmDelete}
+					onClose={closeModal}
+				/>
 			)}
 		</Container>
 	);
