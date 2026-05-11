@@ -135,12 +135,13 @@ const CameraButton = ({
 
 	const tooltipLabel = useMemo(() => {
 		if (permission !== 'granted') return giveMediaPermissionSnackbar;
-		if (!websocketNetworkStatus) return disableButtonLabel;
+		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return videoStatus ? disableCamLabel : enableCamLabel;
 	}, [
 		permission,
 		giveMediaPermissionSnackbar,
 		websocketNetworkStatus,
+		messageBrokerStatus,
 		disableButtonLabel,
 		videoStatus,
 		disableCamLabel,

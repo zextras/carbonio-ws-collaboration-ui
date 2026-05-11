@@ -40,10 +40,11 @@ const ScreenShareButton = (): ReactElement => {
 	}, [screenOutConn, screenStatus]);
 
 	const tooltipLabel = useMemo(() => {
-		if (!websocketNetworkStatus) return disableButtonLabel;
+		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return screenStatus ? disableScreenLabel : enableScreenLabel;
 	}, [
 		websocketNetworkStatus,
+		messageBrokerStatus,
 		disableButtonLabel,
 		screenStatus,
 		disableScreenLabel,
