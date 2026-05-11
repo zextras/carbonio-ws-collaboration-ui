@@ -15,7 +15,7 @@ import {
 import useStore from '../Store';
 
 describe('Connections slice', () => {
-	test('XmppClient', () => {
+	test('XmppClient status', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setXmppStatus(true));
@@ -25,23 +25,34 @@ describe('Connections slice', () => {
 		expect(result.current.connections.status.xmpp).toBe(false);
 	});
 
-	test('WobSocketClient', () => {
+	test('WebSocketClient status', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setWebsocketStatus(true));
 		expect(result.current.connections.status.websocket).toBe(true);
+		expect(result.current.connections.status.messageBroker).toBe(true);
 
 		act(() => result.current.setWebsocketStatus(false));
 		expect(result.current.connections.status.websocket).toBe(false);
+		expect(result.current.connections.status.messageBroker).toBe(false);
 	});
 
-	test('ChatsBe', () => {
+	test('ChatsBe status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setChatsBeStatus(true));
 		expect(result.current.connections.status.chats_be).toBe(true);
 
 		act(() => result.current.setChatsBeStatus(false));
 		expect(result.current.connections.status.chats_be).toBe(false);
+	});
+
+	test('MessageBroker status', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setMessageBrokerStatus(true));
+		expect(result.current.connections.status.messageBroker).toBe(true);
+
+		act(() => result.current.setMessageBrokerStatus(false));
+		expect(result.current.connections.status.messageBroker).toBe(false);
 	});
 
 	test('Reset XMPP data', () => {

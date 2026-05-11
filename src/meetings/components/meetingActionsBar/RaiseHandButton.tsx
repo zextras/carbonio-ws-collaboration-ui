@@ -32,6 +32,8 @@ const RaiseHandButton = (): ReactElement | null => {
 
 	const iAmTalking = useStore((store) => getUserIsTalking(store, sessionId ?? ''));
 	const iHaveHandRaised = useStore((store) => getUserHasHandRaised(store, sessionId ?? ''));
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+	const messageBrokerStatus = useStore(({ connections }) => connections.status.messageBroker);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -76,6 +78,7 @@ const RaiseHandButton = (): ReactElement | null => {
 				labelColor="gray6"
 				icon={iHaveHandRaised ? 'Hand' : 'HandOutline'}
 				onClick={toggleRaiseHand}
+				disabled={!websocketNetworkStatus || !messageBrokerStatus}
 			/>
 		</Tooltip>
 	);

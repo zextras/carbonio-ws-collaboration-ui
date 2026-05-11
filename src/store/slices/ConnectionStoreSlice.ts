@@ -43,9 +43,19 @@ export const useConnectionsStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				draft.connections.status.websocket = status;
+				draft.connections.status.messageBroker = status;
 			}),
 			false,
 			'CONNECTIONS/SET_WEBSOCKET_STATUS'
+		);
+	},
+	setMessageBrokerStatus: (status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.connections.status.messageBroker = status;
+			}),
+			false,
+			'CONNECTIONS/SET_MESSAGE_BROKER_STATUS'
 		);
 	},
 	resetXmppData: (): void => {

@@ -63,9 +63,11 @@ export const meetingEvents = [
 
 describe('eventHandlersUtilities tests', () => {
 	describe('getEventArea tests', () => {
-		test('Event area is GENERAL for initialization and pong events', () => {
+		test('Event area is GENERAL for initialization, pong and messageBroker events', () => {
 			expect(getEventArea(WsEventType.INITIALIZATION)).toBe(EventArea.GENERAL);
 			expect(getEventArea(WsEventType.PONG)).toBe(EventArea.GENERAL);
+			expect(getEventArea(WsEventType.MESSAGE_BROKER_DISCONNECTED)).toBe(EventArea.GENERAL);
+			expect(getEventArea(WsEventType.MESSAGE_BROKER_RESTORED)).toBe(EventArea.GENERAL);
 		});
 
 		test.each(conversationEvents)('Event area is CONVERSATION for %s', (event) => {
