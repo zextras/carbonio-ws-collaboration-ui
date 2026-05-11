@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import {
@@ -29,12 +29,19 @@ import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import {
 	downloadAttachment,
 	getAttachmentSize,
+	getAttachmentThumbnailURL,
 	getPinAttachmentColor,
 	getPinAttachmentIcon
 } from '../../../../utils/attachmentUtils';
 
 type AttachmentListItemProps = {
 	attachment: Attachment;
+	listRef?: React.RefObject<HTMLDivElement>;
+};
+
+type AttachmentListItemContentProps = {
+	attachment: Attachment;
+	visible: boolean;
 };
 
 const FileAvatar = styled(Avatar)`
@@ -50,7 +57,7 @@ const FileAvatar = styled(Avatar)`
 	}
 `;
 
-export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) => {
+const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
@@ -70,6 +77,14 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const sizeLabel = getAttachmentSize(attachment.size);
 	const subline = sizeLabel ? `${senderLabel} • ${sizeLabel}` : senderLabel;
 	const canDelete = sessionId === attachment.userId;
+
+	const thumbnailUrl = getAttachmentThumbnailURL(attachment.id, attachment.mimeType);
+
+	const [hasBeenVisible, setHasBeenVisible] = useState(false);
+	useEffect(() => {
+		if (visible) setHasBeenVisible(true);
+	}, [visible]);
+	const pictureUrl = hasBeenVisible ? thumbnailUrl : undefined;
 
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
@@ -113,76 +128,77 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	]);
 
 	return (
-		<ListItem key={attachment.id} background="gray6">
-			{(): React.ReactElement => (
+		<Container
+			data-testid={`mediaGalleryAttachment-${attachment.id}`}
+			orientation="horizontal"
+			mainAlignment="flex-start"
+			crossAlignment="center"
+			padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
+			gap="0.5rem"
+			height="fit"
+		>
+			<FileAvatar
+				data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
+				icon={getPinAttachmentIcon(attachment.mimeType)}
+				label={attachment.name}
+				shape="square"
+				background="gray3"
+				color={getPinAttachmentColor(attachment.mimeType)}
+				picture={pictureUrl}
+			/>
+			<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
 				<Container
-					data-testid={`mediaGalleryAttachment-${attachment.id}`}
-					orientation="horizontal"
-					mainAlignment="flex-start"
-					crossAlignment="center"
-					padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
-					gap="0.5rem"
-					height="fit"
+					orientation="vertical"
+					mainAlignment="center"
+					crossAlignment="flex-start"
+					minWidth={0}
 				>
-					<FileAvatar
-						data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
-						icon={getPinAttachmentIcon(attachment.mimeType)}
-						label={attachment.name}
-						shape="square"
-						background="gray3"
-						color={getPinAttachmentColor(attachment.mimeType)}
-					/>
-					<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
-						<Container
-							orientation="vertical"
-							mainAlignment="center"
-							crossAlignment="flex-start"
-							minWidth={0}
-						>
-							<Tooltip overflowTooltip label={attachment.name}>
-								<Text size="small" overflow="ellipsis" lineHeight={1}>
-									{attachment.name}
-								</Text>
-							</Tooltip>
-							<Tooltip overflowTooltip label={subline}>
-								<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
-									{subline}
-								</Text>
-							</Tooltip>
-						</Container>
-					</Row>
-					{canDelete && (
-						<Tooltip label={deleteTooltip} placement="top">
-							<Button
-								data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
-								size="large"
-								icon="Trash2Outline"
-								type="ghost"
-								color="error"
-								onClick={openModal}
-							/>
-						</Tooltip>
-					)}
-					<Tooltip label={downloadTooltip} placement="top">
-						<Button
-							data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
-							aria-label={downloadTooltip}
-							size="large"
-							icon="DownloadOutline"
-							type="ghost"
-							color="gray0"
-							onClick={handleDownload}
-						/>
+					<Tooltip overflowTooltip label={attachment.name}>
+						<Text size="small" overflow="ellipsis" lineHeight={1}>
+							{attachment.name}
+						</Text>
 					</Tooltip>
-					{modalOpen && (
-						<DeleteAttachmentModal
-							open={modalOpen}
-							onConfirm={confirmDelete}
-							onClose={closeModal}
-						/>
-					)}
+					<Tooltip overflowTooltip label={subline}>
+						<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
+							{subline}
+						</Text>
+					</Tooltip>
 				</Container>
+			</Row>
+			{canDelete && (
+				<Tooltip label={deleteTooltip} placement="top">
+					<Button
+						data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+						size="large"
+						icon="Trash2Outline"
+						type="ghost"
+						color="error"
+						onClick={openModal}
+					/>
+				</Tooltip>
 			)}
-		</ListItem>
+			<Tooltip label={downloadTooltip} placement="top">
+				<Button
+					data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
+					aria-label={downloadTooltip}
+					size="large"
+					icon="DownloadOutline"
+					type="ghost"
+					color="gray0"
+					onClick={handleDownload}
+				/>
+			</Tooltip>
+			{modalOpen && (
+				<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
+			)}
+		</Container>
 	);
 };
+
+export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment, listRef }) => (
+	<ListItem key={attachment.id} background="gray6" listRef={listRef}>
+		{(visible: boolean): React.ReactElement => (
+			<AttachmentListItemContent attachment={attachment} visible={visible} />
+		)}
+	</ListItem>
+);
