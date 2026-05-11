@@ -23,7 +23,7 @@ const mockedGetRoomAttachments = vi.mocked(getRoomAttachments);
 const roomId = 'room-1';
 const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
 const AUG_CREATED_AT = '2021-08-15T10:00:00Z';
-const AUG_TEST_ID = 'mediaGalleryAttachment-aug';
+const AUG_TEST_ID = 'mediaGalleryAttachmentClickArea-aug';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
 	id,
@@ -68,7 +68,7 @@ describe('MediaGalleryTab', () => {
 		setup(<MediaGalleryTab roomId={roomId} />);
 
 		expect(await screen.findByTestId(AUG_TEST_ID)).toBeInTheDocument();
-		expect(screen.getByTestId('mediaGalleryAttachment-may')).toBeInTheDocument();
+		expect(screen.getByTestId('mediaGalleryAttachmentClickArea-may')).toBeInTheDocument();
 		expect(screen.getByTestId('mediaGalleryMonthHeader-August 2021')).toBeInTheDocument();
 		expect(screen.getByTestId('mediaGalleryMonthHeader-May 2021')).toBeInTheDocument();
 	});
@@ -109,7 +109,7 @@ describe('MediaGalleryTab', () => {
 
 		setup(<MediaGalleryTab roomId={roomId} />);
 
-		await screen.findByTestId('mediaGalleryAttachment-a1');
+		await screen.findByTestId('mediaGalleryAttachmentClickArea-a1');
 		expect(screen.queryByTestId('list-bottom-element')).not.toBeInTheDocument();
 	});
 
@@ -122,7 +122,7 @@ describe('MediaGalleryTab', () => {
 		});
 
 		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
-		await screen.findByTestId('mediaGalleryAttachment-a1');
+		await screen.findByTestId('mediaGalleryAttachmentClickArea-a1');
 
 		mockedGetRoomAttachments.mockResolvedValueOnce({
 			attachments: [buildAttachment('mine-1', '2024-02-01T10:00:00Z')],
@@ -138,7 +138,7 @@ describe('MediaGalleryTab', () => {
 			roomId,
 			expect.objectContaining({ userId: myUserId, cursor: undefined })
 		);
-		expect(await screen.findByTestId('mediaGalleryAttachment-mine-1')).toBeInTheDocument();
+		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-mine-1')).toBeInTheDocument();
 	});
 
 	test('fetches the next page when the bottom element intersects the viewport', async () => {
@@ -162,6 +162,6 @@ describe('MediaGalleryTab', () => {
 			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
 		});
 
-		expect(await screen.findByTestId('mediaGalleryAttachment-a2')).toBeInTheDocument();
+		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-a2')).toBeInTheDocument();
 	});
 });
