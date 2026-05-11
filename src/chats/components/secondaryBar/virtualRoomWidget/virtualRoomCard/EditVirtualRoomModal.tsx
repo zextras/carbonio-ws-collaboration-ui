@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Container,
@@ -71,6 +71,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		'Something went wrong. Please retry'
 	);
 
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [newName, setNewName] = useState<string>(roomName);
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 
@@ -166,6 +167,12 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		[changeSomething, nameError]
 	);
 
+	useEffect(() => {
+		if (showModal) {
+			inputRef.current?.focus();
+		}
+	}, [showModal]);
+
 	return (
 		<Modal
 			ref={modalRef}
@@ -182,6 +189,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 			<Container gap="1rem">
 				<Text overflow="break-word">{editNameDescription}</Text>
 				<Input
+					inputRef={inputRef}
 					label={`${namePlaceholder}*`}
 					value={newName}
 					onChange={onNameChange}
