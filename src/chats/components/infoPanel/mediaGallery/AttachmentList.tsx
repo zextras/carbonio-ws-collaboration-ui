@@ -18,13 +18,15 @@ type AttachmentListProps = {
 	hasMore: boolean;
 	isLoading: boolean;
 	loadMore: () => void;
+	onPreviewClick: (attachment: Attachment) => void;
 };
 
 export const AttachmentList: FC<AttachmentListProps> = ({
 	attachments,
 	hasMore,
 	isLoading,
-	loadMore
+	loadMore,
+	onPreviewClick
 }) => {
 	const items = useMemo(() => {
 		const groups = groupAttachmentsByMonth(attachments);
@@ -32,7 +34,11 @@ export const AttachmentList: FC<AttachmentListProps> = ({
 			const groupRows: Array<React.JSX.Element> = [
 				<AttachmentMonthHeader key={`header-${group.key}`} label={group.label} />,
 				...group.items.map((attachment) => (
-					<AttachmentListItem key={attachment.id} attachment={attachment} />
+					<AttachmentListItem
+						key={attachment.id}
+						attachment={attachment}
+						onPreviewClick={onPreviewClick}
+					/>
 				))
 			];
 			if (index > 0) {
@@ -55,7 +61,7 @@ export const AttachmentList: FC<AttachmentListProps> = ({
 			);
 		}
 		return rows;
-	}, [attachments, isLoading, hasMore]);
+	}, [attachments, isLoading, hasMore, onPreviewClick]);
 
 	return (
 		<List

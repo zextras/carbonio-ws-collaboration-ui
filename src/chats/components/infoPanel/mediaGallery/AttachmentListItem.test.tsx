@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
@@ -19,16 +19,6 @@ import type { Attachment } from '../../../../types/network/models/attachmentType
 
 vi.mock('../../../../network/apis/RoomsApi', () => ({
 	bulkDeleteRoomAttachments: vi.fn()
-}));
-
-const { mockOnPreviewClick, mockClosePreview, mockUsePreview } = vi.hoisted(() => ({
-	mockOnPreviewClick: vi.fn(),
-	mockClosePreview: vi.fn(),
-	mockUsePreview: vi.fn()
-}));
-
-vi.mock('../../../../hooks/usePreview', () => ({
-	default: mockUsePreview
 }));
 
 const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
@@ -60,6 +50,16 @@ const buildAttachment = (overrides?: Partial<Attachment>): Attachment => ({
 	...overrides
 });
 
+const renderItem = (
+	attachment: Attachment,
+	onPreviewClick = vi.fn()
+): ReturnType<typeof setup> & { onPreviewClick: ReturnType<typeof vi.fn> } => {
+	const utils = setup(
+		<AttachmentListItem attachment={attachment} onPreviewClick={onPreviewClick} />
+	);
+	return { ...utils, onPreviewClick };
+};
+
 beforeEach(() => {
 	useStore.setState({ users: {}, mediaGallery: {} });
 	useStore.getState().setLoginInfo({ id: myUserId, name: 'Me' });
@@ -67,61 +67,52 @@ beforeEach(() => {
 		.getState()
 		.setUserInfo([createMockUser({ id: otherUserId, name: 'Matteo Perdon', email: 'mp@x.com' })]);
 	mockedBulkDelete.mockReset();
-	mockOnPreviewClick.mockReset();
-	mockClosePreview.mockReset();
-	mockUsePreview.mockReset();
-	mockUsePreview.mockImplementation(() => ({
-		onPreviewClick: mockOnPreviewClick,
-		closePreview: mockClosePreview
-	}));
 });
 
 describe('AttachmentListItem', () => {
 	test('renders the filename', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ name: 'report.pdf' })} />);
+		renderItem(buildAttachment({ name: 'report.pdf' }));
 		expect(screen.getByText('report.pdf')).toBeInTheDocument();
 	});
 
 	test('renders the file-type icon based on mime type', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ id: 'att-icon' })} />);
+		renderItem(buildAttachment({ id: 'att-icon' }));
 		expect(screen.getByTestId('mediaGalleryAttachmentIcon-att-icon')).toBeInTheDocument();
 	});
 
 	test('shows the sender display name and formatted size when sender is a known user', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: otherUserId, size: 2048 })} />);
+		renderItem(buildAttachment({ userId: otherUserId, size: 2048 }));
 		expect(screen.getByText('Matteo Perdon • 2.00KB')).toBeInTheDocument();
 	});
 
 	test('shows "You" when the sender is the current session user', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: myUserId, size: 500 })} />);
+		renderItem(buildAttachment({ userId: myUserId, size: 500 }));
 		expect(screen.getByText('You • 500B')).toBeInTheDocument();
 	});
 
 	test('falls back to "Unknown user" when the sender cannot be resolved', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: ghostUserId, size: 2048 })} />);
+		renderItem(buildAttachment({ userId: ghostUserId, size: 2048 }));
 		expect(screen.getByText('Unknown user • 2.00KB')).toBeInTheDocument();
 	});
 
 	test('omits the size separator when the size is zero', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: myUserId, size: 0 })} />);
+		renderItem(buildAttachment({ userId: myUserId, size: 0 }));
 		expect(screen.getByText('You')).toBeInTheDocument();
 		expect(screen.queryByText(/•/)).not.toBeInTheDocument();
 	});
 
 	test('hides the delete button for attachments uploaded by other users', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: otherUserId })} />);
+		renderItem(buildAttachment({ userId: otherUserId }));
 		expect(screen.queryByTestId(DELETE_BUTTON_TEST_ID)).not.toBeInTheDocument();
 	});
 
 	test('shows the delete button for attachments uploaded by the current user', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: myUserId })} />);
+		renderItem(buildAttachment({ userId: myUserId }));
 		expect(screen.getByTestId(DELETE_BUTTON_TEST_ID)).toBeInTheDocument();
 	});
 
 	test('opens the confirmation modal with the warning copy on delete click', async () => {
-		const { user } = setup(
-			<AttachmentListItem attachment={buildAttachment({ userId: myUserId })} />
-		);
+		const { user } = renderItem(buildAttachment({ userId: myUserId }));
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		expect(screen.getByTestId('deleteAttachmentModal')).toBeInTheDocument();
 		expect(screen.getByText('This action cannot be undone.')).toBeInTheDocument();
@@ -136,7 +127,7 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
 
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
@@ -158,7 +149,7 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: undefined });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
 
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
@@ -174,7 +165,7 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
 
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
@@ -190,7 +181,7 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
 
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
@@ -201,12 +192,12 @@ describe('AttachmentListItem', () => {
 	});
 
 	test('renders the download button for attachments uploaded by other users', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: otherUserId })} />);
+		renderItem(buildAttachment({ userId: otherUserId }));
 		expect(screen.getByRole('button', { name: /download/i })).toBeInTheDocument();
 	});
 
 	test('renders the download button for attachments uploaded by the current user', () => {
-		setup(<AttachmentListItem attachment={buildAttachment({ userId: myUserId })} />);
+		renderItem(buildAttachment({ userId: myUserId }));
 		expect(screen.getByRole('button', { name: /download/i })).toBeInTheDocument();
 	});
 
@@ -216,7 +207,7 @@ describe('AttachmentListItem', () => {
 			.spyOn(HTMLAnchorElement.prototype, 'click')
 			.mockImplementation(() => undefined);
 
-		const { user } = setup(<AttachmentListItem attachment={buildAttachment()} />);
+		const { user } = renderItem(buildAttachment());
 		await user.click(screen.getByRole('button', { name: /download/i }));
 
 		expect(spyGetURL).toHaveBeenCalledWith('att-1');
@@ -224,121 +215,73 @@ describe('AttachmentListItem', () => {
 		clickSpy.mockRestore();
 	});
 
-	test('clicking the row opens the inline preview for an image attachment', async () => {
+	test('clicking the row calls onPreviewClick with the attachment for an image', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.JPEG });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user, onPreviewClick } = renderItem(attachment);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+		expect(onPreviewClick).toHaveBeenCalledTimes(1);
+		expect(onPreviewClick).toHaveBeenCalledWith(attachment);
 	});
 
-	test('clicking the row opens the inline preview for a PDF attachment', async () => {
+	test('clicking the row calls onPreviewClick with the attachment for a PDF', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user, onPreviewClick } = renderItem(attachment);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+		expect(onPreviewClick).toHaveBeenCalledTimes(1);
+		expect(onPreviewClick).toHaveBeenCalledWith(attachment);
 	});
 
 	test('clicking the row is a no-op for an unsupported MIME type', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.X_ZIP });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user, onPreviewClick } = renderItem(attachment);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(onPreviewClick).not.toHaveBeenCalled();
 	});
 
-	test('clicking the download button does not open the inline preview', async () => {
+	test('clicking the download button does not call onPreviewClick', async () => {
 		const clickSpy = vi
 			.spyOn(HTMLAnchorElement.prototype, 'click')
 			.mockImplementation(() => undefined);
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user, onPreviewClick } = renderItem(attachment);
 		await user.click(screen.getByRole('button', { name: /download/i }));
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(onPreviewClick).not.toHaveBeenCalled();
 		clickSpy.mockRestore();
 	});
 
-	test('clicking the delete button does not open the inline preview', async () => {
+	test('clicking the delete button does not call onPreviewClick', async () => {
 		const attachment = buildAttachment({ userId: myUserId, mimeType: MimeTypes.PDF });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user, onPreviewClick } = renderItem(attachment);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		expect(screen.getByTestId('deleteAttachmentModal')).toBeInTheDocument();
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(onPreviewClick).not.toHaveBeenCalled();
 	});
 
 	test('the row has a pointer cursor for previewable attachments', () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
-		setup(<AttachmentListItem attachment={attachment} />);
+		renderItem(attachment);
 		const row = screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`);
 		expect(row).toHaveStyle({ cursor: 'pointer' });
 	});
 
 	test('the row has a default cursor for unsupported attachments', () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.X_ZIP });
-		setup(<AttachmentListItem attachment={attachment} />);
+		renderItem(attachment);
 		const row = screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`);
 		expect(row).toHaveStyle({ cursor: 'default' });
 	});
 
 	test('hovering a previewable row shows the Preview tooltip', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.hover(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(await screen.findByText('Preview')).toBeInTheDocument();
 	});
 
 	test('hovering an unsupported row does not show the Preview tooltip', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.X_ZIP });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		const { user } = renderItem(attachment);
 		await user.hover(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(screen.queryByText('Preview')).not.toBeInTheDocument();
-	});
-
-	test('passes a delete callback to usePreview when the current user owns the attachment', () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		expect(mockUsePreview).toHaveBeenCalledWith(
-			attachment,
-			expect.objectContaining({ onDelete: expect.any(Function) })
-		);
-	});
-
-	test('does not pass a delete callback to usePreview when the attachment belongs to another user', () => {
-		const attachment = buildAttachment({ userId: otherUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		expect(mockUsePreview).toHaveBeenCalledWith(
-			attachment,
-			expect.objectContaining({ onDelete: undefined })
-		);
-	});
-
-	test('the onDelete callback passed to usePreview opens the confirmation modal', async () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		const lastCall = mockUsePreview.mock.calls[mockUsePreview.mock.calls.length - 1];
-		const previewOnDelete = lastCall[1]?.onDelete as () => void;
-
-		expect(screen.queryByTestId('deleteAttachmentModal')).not.toBeInTheDocument();
-		act(() => previewOnDelete());
-		expect(await screen.findByTestId('deleteAttachmentModal')).toBeInTheDocument();
-	});
-
-	test('confirming the deletion also closes the preview', async () => {
-		mockedBulkDelete.mockResolvedValue({ successIds: ['att-1'], failedIds: [] });
-		const attachment = buildAttachment({ userId: myUserId });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
-
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
-		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
-		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
-
-		expect(mockClosePreview).toHaveBeenCalledTimes(1);
-	});
-
-	test('canceling the deletion does not close the preview', async () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
-		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
-		await user.click(screen.getByRole('button', { name: /no, cancel/i }));
-
-		expect(mockClosePreview).not.toHaveBeenCalled();
 	});
 });

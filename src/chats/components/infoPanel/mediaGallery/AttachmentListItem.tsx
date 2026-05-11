@@ -20,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './DeleteAttachmentModal';
 import useDeleteAttachment from './useDeleteAttachment';
-import usePreview from '../../../../hooks/usePreview';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -35,6 +34,7 @@ import {
 
 type AttachmentListItemProps = {
 	attachment: Attachment;
+	onPreviewClick: (attachment: Attachment) => void;
 };
 
 const FileAvatar = styled(Avatar)`
@@ -54,7 +54,7 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 	cursor: ${(props): string => (props.clickable ? 'pointer' : 'default')};
 `;
 
-export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) => {
+export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment, onPreviewClick }) => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
@@ -73,9 +73,9 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 	const subline = sizeLabel ? `${senderLabel} • ${sizeLabel}` : senderLabel;
 	const canPreview = isPreviewSupported(attachment.mimeType);
 
-	const { onPreviewClick, closePreview } = usePreview(attachment, {
-		onDelete: canDelete ? openModal : undefined
-	});
+	const handlePreviewClick = useCallback(() => {
+		onPreviewClick(attachment);
+	}, [attachment, onPreviewClick]);
 
 	const onDeleteClick = useCallback(
 		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -93,11 +93,6 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 		[attachment.id, attachment.name]
 	);
 
-	const onConfirmDelete = useCallback(() => {
-		confirmDelete();
-		closePreview();
-	}, [closePreview, confirmDelete]);
-
 	return (
 		<ListItem key={attachment.id} background="gray6">
 			{(): React.ReactElement => (
@@ -111,7 +106,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 						padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
 						gap="0.5rem"
 						height="fit"
-						onClick={canPreview ? onPreviewClick : undefined}
+						onClick={canPreview ? handlePreviewClick : undefined}
 					>
 						<FileAvatar
 							data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
@@ -171,7 +166,7 @@ export const AttachmentListItem: FC<AttachmentListItemProps> = ({ attachment }) 
 						{modalOpen && (
 							<DeleteAttachmentModal
 								open={modalOpen}
-								onConfirm={onConfirmDelete}
+								onConfirm={confirmDelete}
 								onClose={closeModal}
 							/>
 						)}

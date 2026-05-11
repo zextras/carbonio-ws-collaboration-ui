@@ -3,6 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React from 'react';
+
+import { type PreviewItem } from '@zextras/carbonio-ui-preview';
+
 import {
 	getImagePreviewURL,
 	getImageThumbnailURL,
@@ -300,6 +304,70 @@ export const getPinAttachmentIcon = (fileType: string): string => {
 		return 'Music';
 	}
 	return 'FileText';
+};
+
+export type PreviewableAttachment = {
+	id: string;
+	name: string;
+	mimeType: string;
+	size: number;
+};
+
+export type BuildPreviewItemLabels = {
+	downloadLabel: string;
+	deleteLabel: string;
+	closeLabel: string;
+};
+
+export type BuildPreviewItemCallbacks = {
+	onDownload: () => void;
+	onDelete?: () => void;
+};
+
+export const buildPreviewItem = (
+	attachment: PreviewableAttachment,
+	callbacks: BuildPreviewItemCallbacks,
+	labels: BuildPreviewItemLabels
+): PreviewItem | undefined => {
+	const src = getAttachmentURL(attachment.id, attachment.mimeType);
+	if (!src) return undefined;
+
+	const { onDownload, onDelete } = callbacks;
+
+	const downloadAction = {
+		id: 'DownloadOutline',
+		icon: 'DownloadOutline',
+		tooltipLabel: labels.downloadLabel,
+		onClick: (ev: React.MouseEvent<HTMLButtonElement> | KeyboardEvent): void => {
+			ev.preventDefault();
+			onDownload();
+		}
+	};
+	const deleteAction = onDelete && {
+		id: 'Trash2Outline',
+		icon: 'Trash2Outline',
+		tooltipLabel: labels.deleteLabel,
+		onClick: (ev: React.MouseEvent<HTMLButtonElement> | KeyboardEvent): void => {
+			ev.preventDefault();
+			onDelete();
+		}
+	};
+	const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
+
+	return {
+		id: attachment.id,
+		previewType: getAttachmentType(attachment.mimeType),
+		filename: attachment.name,
+		extension: getAttachmentExtension(attachment.mimeType).toUpperCase(),
+		size: getAttachmentSize(attachment.size),
+		actions,
+		closeAction: {
+			id: 'close-action',
+			icon: 'ArrowBackOutline',
+			tooltipLabel: labels.closeLabel
+		},
+		src
+	};
 };
 
 export const getPinAttachmentColor = (fileType: string): string => {

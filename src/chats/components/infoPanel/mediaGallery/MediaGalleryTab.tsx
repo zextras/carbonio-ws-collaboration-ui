@@ -11,7 +11,9 @@ import { Container } from '@zextras/carbonio-design-system';
 import { AttachmentFilterTabs } from './AttachmentFilterTabs';
 import { AttachmentList } from './AttachmentList';
 import { AttachmentListSkeleton } from './AttachmentListSkeleton';
+import { DeleteAttachmentModal } from './DeleteAttachmentModal';
 import { EmptyAttachmentList } from './EmptyAttachmentList';
+import { useGalleryPreview } from '../../../../hooks/useGalleryPreview';
 import { useMediaGalleryAttachments } from '../../../../hooks/useMediaGalleryAttachments';
 
 type MediaGalleryTabProps = {
@@ -21,6 +23,9 @@ type MediaGalleryTabProps = {
 export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 	const { attachments, isInitialized, isLoading, hasMore, loadMore } =
 		useMediaGalleryAttachments(roomId);
+
+	const { onPreviewClick, pendingDelete, confirmPendingDelete, cancelPendingDelete } =
+		useGalleryPreview(roomId);
 
 	const showInitialSkeleton = !isInitialized && isLoading;
 	const showEmptyState = isInitialized && attachments.length === 0;
@@ -43,9 +48,17 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 						hasMore={hasMore}
 						isLoading={isLoading}
 						loadMore={loadMore}
+						onPreviewClick={onPreviewClick}
 					/>
 				)}
 			</Container>
+			{pendingDelete && (
+				<DeleteAttachmentModal
+					open
+					onConfirm={confirmPendingDelete}
+					onClose={cancelPendingDelete}
+				/>
+			)}
 		</Container>
 	);
 };
