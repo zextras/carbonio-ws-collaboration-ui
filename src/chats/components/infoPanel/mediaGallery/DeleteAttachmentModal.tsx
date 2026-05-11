@@ -13,12 +13,14 @@ type DeleteAttachmentModalProps = {
 	open: boolean;
 	onConfirm: () => void;
 	onClose: () => void;
+	onCancel?: () => void;
 };
 
 export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	open,
 	onConfirm,
-	onClose
+	onClose,
+	onCancel
 }) => {
 	const [t] = useTranslation();
 	const title = t('mediaGallery.deleteAttachmentTitle', 'Delete attachment');
@@ -50,6 +52,7 @@ export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	return (
 		<Modal
 			size="small"
+			zIndex={9000}
 			open={open}
 			title={titleNode}
 			customFooter={customFooter}
