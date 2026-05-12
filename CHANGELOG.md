@@ -1,3 +1,9 @@
+## [0.12.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.2...v0.12.3) (2026-05-12)
+
+### Other changes
+
+* **release:** update jenkins-lib-ui to 1.0.13 ([563d9c7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/563d9c7f6fe8a60751f5f56e15f72f3f6f95884a))
+
 ## [0.12.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.1...v0.12.2) (2026-05-08)
 
 ### Bug Fixes
