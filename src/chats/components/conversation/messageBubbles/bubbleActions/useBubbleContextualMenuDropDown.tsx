@@ -19,15 +19,13 @@ import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreview from '../../../../../hooks/usePreview';
-import { deleteAttachment, getURLAttachment } from '../../../../../network';
-import ChatApi from '../../../../../network/apis/ChatApi';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import { getURLAttachment } from '../../../../../network';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -70,7 +68,7 @@ const useBubbleContextualMenuDropDown = (
 	const forwardList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
 
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
+	const backend = useStore((store) => getMessagingBackend(store));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -113,27 +111,8 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		if (isMongooseIM) {
-			if (message.attachment) {
-				deleteAttachment(message.attachment.id).then(() =>
-					xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
-				);
-			} else {
-				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
-			}
-		} else {
-			const doDelete = (): void => {
-				ChatApi.deleteMessage(message.roomId, message.stanzaId).catch((err) => {
-					console.error('[BubbleMenu] deleteMessage failed', err);
-				});
-			};
-			if (message.attachment) {
-				deleteAttachment(message.attachment.id).then(doDelete).catch(doDelete);
-			} else {
-				doDelete();
-			}
-		}
-	}, [isMongooseIM, message.attachment, message.stanzaId, message.roomId]);
+		backend.deleteMessage(message.roomId, message.stanzaId, message.attachment?.id);
+	}, [backend, message.attachment?.id, message.stanzaId, message.roomId]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

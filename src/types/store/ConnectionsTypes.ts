@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { IMessagingBackend } from '../../network/messaging/IMessagingBackend';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
 
 export type ConnectionsStoreSlice = {
@@ -12,6 +13,7 @@ export type ConnectionsStoreSlice = {
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
 	setIsMongooseIM: (isMongooseIM: boolean) => void;
+	setMessagingBackend: (backend: IMessagingBackend) => void;
 	resetXmppData: () => void;
 	resetChatData: () => void;
 	updateReadMarker: (roomId: string, userId: string, messageId: string) => void;
@@ -27,4 +29,5 @@ export type Connections = {
 		websocket?: boolean;
 	};
 	isMongooseIM: boolean | undefined; // undefined = detection not yet complete
+	messagingBackend?: IMessagingBackend;
 };

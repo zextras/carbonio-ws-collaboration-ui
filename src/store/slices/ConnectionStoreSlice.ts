@@ -23,7 +23,8 @@ export const useConnectionsStoreSlice: StateCreator<
 	connections: {
 		wsClient: new WebSocketClient(),
 		status: {},
-		isMongooseIM: undefined
+		isMongooseIM: undefined,
+		messagingBackend: undefined
 	},
 	setChatsBeStatus: (status: boolean): void => {
 		set(
@@ -59,6 +60,15 @@ export const useConnectionsStoreSlice: StateCreator<
 			}),
 			false,
 			'CONNECTIONS/SET_IS_MONGOOSE_IM'
+		);
+	},
+	setMessagingBackend: (backend): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.connections.messagingBackend = backend;
+			}),
+			false,
+			'CONNECTIONS/SET_MESSAGING_BACKEND'
 		);
 	},
 	resetXmppData: (): void => {

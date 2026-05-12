@@ -23,7 +23,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { debounce, forEach, map, throttle } from 'lodash';
+import { debounce, forEach, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSelector from './AttachmentSelector';
@@ -34,15 +34,12 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
-import ChatApi from '../../../../network/apis/ChatApi';
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -87,7 +84,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	textMessage,
 	setTextMessage
 }) => {
-	const isMongooseIM = getIsMongooseIM(useStore.getState());
+	const backend = getMessagingBackend(useStore.getState());
 
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
@@ -194,8 +191,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		const fileName = file.file.name;
 		const { signal } = controller;
 
-		// Send as reply only the first file of the array
-		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
+		const lastFileId = filesToUploadArray?.at(-1)?.fileId;
+		const isLastFile = filesToUploadArray && file.fileId === lastFileId;
 
 		let area;
 		if (isAttachmentImage(file.file.type)) {
@@ -210,11 +207,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			roomId,
 			file.file,
 			{
-				description: file.description,
-				replyId: sendAsReply ? capturedReplyToId : undefined,
+				description: isLastFile ? textMessage.trim() : '',
+				replyId: isLastFile ? capturedReplyToId : undefined,
 				area,
-				text: file.description,
-				replyToId: sendAsReply ? capturedReplyToId : undefined
+				text: isLastFile ? textMessage.trim() : '',
+				replyToId: isLastFile ? capturedReplyToId : undefined
 			},
 			signal
 		).catch((reason: DOMException) => {
@@ -225,60 +222,40 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const isPlaceholderRoom = roomId.startsWith('placeholder-');
 
-	// WS typing: throttled started (3000ms) + debounced stopped (3500ms) — MongooseIM parity
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendThrottleTypingWs = useCallback(
+	const sendThrottleTyping = useCallback(
 		throttle(
 			() => {
-				if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTyping(roomId);
+				if (!isPlaceholderRoom) backend.sendTyping(roomId);
 			},
 			3000,
 			{ trailing: false }
 		),
-		[roomId, isPlaceholderRoom, isMongooseIM]
+		[roomId, isPlaceholderRoom, backend]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendDebouncedStopWs = useCallback(
+	const sendDebouncedStopTyping = useCallback(
 		debounce(() => {
-			if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTypingStopped(roomId);
+			if (!isPlaceholderRoom) backend.sendTypingStopped(roomId);
 		}, 3500),
-		[roomId, isPlaceholderRoom, isMongooseIM]
+		[roomId, isPlaceholderRoom, backend]
 	);
 
-	const sendWsStopWriting = useCallback(() => {
-		sendThrottleTypingWs.cancel();
-		sendDebouncedStopWs.cancel();
-		if (!isPlaceholderRoom && !isMongooseIM) chatWsClient.sendTypingStopped(roomId);
-	}, [sendThrottleTypingWs, sendDebouncedStopWs, roomId, isPlaceholderRoom, isMongooseIM]);
+	const stopTyping = useCallback(() => {
+		sendThrottleTyping.cancel();
+		sendDebouncedStopTyping.cancel();
+		if (!isPlaceholderRoom) backend.sendTypingStopped(roomId);
+	}, [sendThrottleTyping, sendDebouncedStopTyping, roomId, isPlaceholderRoom, backend]);
 
 	// Cleanup on unmount or room change
 	useEffect(
 		() => () => {
-			sendThrottleTypingWs.cancel();
-			sendDebouncedStopWs.cancel();
+			sendThrottleTyping.cancel();
+			sendDebouncedStopTyping.cancel();
 		},
-		[sendThrottleTypingWs, sendDebouncedStopWs]
+		[sendThrottleTyping, sendDebouncedStopTyping]
 	);
-
-	// XMPP typing notifications: throttled isWriting + debounced paused
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendThrottleIsWriting = useCallback(
-		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
-		[roomId]
-	);
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const sendDebouncedPause = useCallback(
-		debounce(() => xmppClient.sendPaused(roomId), 3500),
-		[roomId]
-	);
-
-	const sendStopWriting = useCallback(() => {
-		sendThrottleIsWriting.cancel();
-		sendDebouncedPause.cancel();
-		xmppClient.sendPaused(roomId);
-	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
 		(
@@ -288,18 +265,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					if (isMongooseIM) {
-						xmppClient.sendChatMessageReply(
-							roomId,
-							message,
-							referenceMessage.senderId,
-							referenceMessage.stanzaId
-						);
-					} else {
-						ChatApi.sendMessage(roomId, message, referenceMessage.stanzaId).catch((err) => {
-							console.error('[MessageComposer] sendMessage failed', err);
-						});
-					}
+					backend.sendMessage(roomId, message, {
+						messageId: referenceMessage.stanzaId,
+						senderId: referenceMessage.senderId
+					});
 					unsetReferenceMessage(roomId);
 					break;
 				}
@@ -309,18 +278,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid sending correction if text doesn't change
-						if (isMongooseIM) {
-							xmppClient.sendChatMessageEdit(
-								roomId,
-								message,
-								referenceMessage.stanzaId,
-								completeReferenceMessage.editedStanzaId ?? referenceMessage.stanzaId
-							);
-						} else {
-							ChatApi.editMessage(roomId, referenceMessage.stanzaId, message).catch((err) => {
-								console.error('[MessageComposer] editMessage failed', err);
-							});
-						}
+						backend.editMessage(
+							roomId,
+							referenceMessage.stanzaId,
+							message,
+							completeReferenceMessage.editedStanzaId ?? referenceMessage.stanzaId
+						);
 						unsetReferenceMessage(roomId);
 					} else {
 						unsetReferenceMessage(roomId);
@@ -332,41 +295,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, isMongooseIM, unsetReferenceMessage]
+		[roomId, backend, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
-		if (isMongooseIM) {
-			// XMPP: cancel throttle/debounce and send paused stanza
-			sendStopWriting();
-		} else {
-			// WS: cancel throttle/debounce and send explicit typing:stopped
-			sendWsStopWriting();
-		}
+		stopTyping();
 		const message = textMessage.trim();
-		if (filesToUploadArray) {
-			const abortControllerList: AbortController[] = [];
-			const copyOfFilesToUploadArray = map(filesToUploadArray, (file) => {
-				const copyOfFile = { ...file };
-				if (copyOfFile.hasFocus) {
-					copyOfFile.description = message;
-				}
-				const controller = new AbortController();
-				abortControllerList.push(controller);
-				return copyOfFile;
-			});
+		if (filesToUploadArray && filesToUploadArray.length > 0) {
+			const abortControllerList: AbortController[] = filesToUploadArray.map(
+				() => new AbortController()
+			);
 
 			const capturedReplyToId = referenceMessage?.stanzaId;
 
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
-			// Fire-and-forget: the WS MessageReceived echo will insert the
-			// message into the store. No store update from the REST response.
-			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
+			const uploadFilesInOrder = filesToUploadArray.reduce(
 				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
-					acc.then(() =>
-						uploadAttachmentPromise(file, abortControllerList[i], capturedReplyToId)
-					),
+					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i], capturedReplyToId)),
 				Promise.resolve()
 			);
 
@@ -390,14 +336,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			if (isMongooseIM) {
-				xmppClient.sendChatMessage(roomId, message);
-			} else {
-				// ChatApi.sendMessage handles placeholder rooms internally
-				ChatApi.sendMessage(roomId, message).catch((err) => {
-					console.error('[MessageComposer] sendMessage failed', err);
-				});
-			}
+			backend.sendMessage(roomId, message);
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
@@ -405,9 +344,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [
 		roomId,
 		textMessage,
-		isMongooseIM,
-		sendStopWriting,
-		sendWsStopWriting,
+		backend,
+		stopTyping,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray
@@ -472,33 +410,19 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
-			} else if (isMongooseIM) {
-				// XMPP typing: throttled isWriting + debounced pause per keystroke
-				sendThrottleIsWriting();
-				sendDebouncedPause();
+			} else {
+				sendThrottleTyping();
+				sendDebouncedStopTyping();
 			}
-			// REST/WS typing ping is handled by useEffect watching textMessage
 		},
-		[
-			sendDisabled,
-			carbonioLanguage,
-			isMongooseIM,
-			sendMessage,
-			sendThrottleIsWriting,
-			sendDebouncedPause
-		]
+		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleTyping, sendDebouncedStopTyping]
 	);
 
 	// Send typing notification on keystroke
 	useEffect(() => {
 		if (textMessage.trim().length > 0) {
-			if (isMongooseIM) {
-				sendThrottleIsWriting();
-				sendDebouncedPause();
-			} else {
-				sendThrottleTypingWs();
-				sendDebouncedStopWs();
-			}
+			sendThrottleTyping();
+			sendDebouncedStopTyping();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [textMessage]);

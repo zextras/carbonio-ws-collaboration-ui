@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { IMessagingBackend } from '../../network/messaging/IMessagingBackend';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -14,5 +15,5 @@ export const getWsClient = (store: RootStore): IWebSocketClient | undefined =>
 export const getIsMongooseIM = (store: RootStore): boolean =>
 	store.connections.isMongooseIM === true;
 
-export const getIsMongooseIMDetected = (store: RootStore): boolean =>
-	store.connections.isMongooseIM !== undefined;
+export const getMessagingBackend = (store: RootStore): IMessagingBackend =>
+	store.connections.messagingBackend!;

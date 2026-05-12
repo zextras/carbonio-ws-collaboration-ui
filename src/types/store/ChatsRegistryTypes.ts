@@ -79,6 +79,7 @@ export type TextMessage = BasicMessage & {
 	forwardedInfo?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
 	editedStanzaId?: string;
+	tempId?: string;
 	/** @deprecated Use editedInfo instead */
 	edited?: boolean;
 	/** @deprecated Use deletedInfo instead */
@@ -194,6 +195,7 @@ export type PlaceholderFields = {
 	replyTo?: string;
 	forwardedInfo?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
+	tempId?: string;
 };
 
 export type Marker = {

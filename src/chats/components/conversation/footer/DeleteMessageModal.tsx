@@ -6,19 +6,11 @@
 
 import React, { FC, useCallback } from 'react';
 
-import {
-	Container,
-	CreateSnackbarFn,
-	Modal,
-	Text,
-	useSnackbar
-} from '@zextras/carbonio-design-system';
+import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import ChatApi from '../../../../network/apis/ChatApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
 
 type DeleteMessageModalProps = {
@@ -29,7 +21,6 @@ type DeleteMessageModalProps = {
 
 const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModalStatus }) => {
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
-	const isMongooseIM = getIsMongooseIM(useStore.getState());
 
 	const [t] = useTranslation();
 	const deleteMessageTitle = t('modal.deleteMessageTitle', 'Delete selected message?');
@@ -39,30 +30,16 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 	);
 	const deleteActionLabel = t('action.delete', 'Delete');
 	const closeLabel = t('action.close', 'Close');
-	const deleteErrorLabel = t('feedback.deleteMessageError', 'Failed to delete message');
-
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const onClose = useCallback(() => setModalStatus(false), [setModalStatus]);
 
 	const deleteMessage = useCallback(() => {
 		if (referenceMessage) {
-			if (isMongooseIM) {
-				xmppClient.sendChatMessageDeletion(roomId, referenceMessage.stanzaId);
-			} else {
-				ChatApi.deleteMessage(roomId, referenceMessage.stanzaId).catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						severity: 'error',
-						label: deleteErrorLabel,
-						hideButton: true,
-						autoHideTimeout: 3000
-					});
-				});
-			}
+			const backend = getMessagingBackend(useStore.getState());
+			backend.deleteMessage(roomId, referenceMessage.stanzaId);
 		}
 		onClose();
-	}, [onClose, referenceMessage, roomId, isMongooseIM, createSnackbar, deleteErrorLabel]);
+	}, [onClose, referenceMessage, roomId]);
 
 	return (
 		<Modal

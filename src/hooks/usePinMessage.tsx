@@ -9,10 +9,8 @@ import { useCallback, useMemo } from 'react';
 import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import ChatApi from '../network/apis/ChatApi';
-import { xmppClient } from '../network/xmpp/XMPPClient';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../store/selectors/ConnectionSelector';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
 import { TextMessage } from '../types/store/ChatsRegistryTypes';
@@ -29,7 +27,7 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 	const [t] = useTranslation();
 	const { createModal, closeModal } = useModal();
 	const roomId = message?.roomId ?? '';
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
+	const backend = useStore((store) => getMessagingBackend(store));
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId));
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, roomId));
@@ -46,12 +44,8 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 
 	const canMessageBePinned = useMemo(() => {
 		const baseCondition = roomType === RoomType.ONE_TO_ONE || amIModerator;
-		if (isMongooseIM) {
-			// On MongooseIM, also require the pin feature to be advertised
-			return xmppClient.features.includes('zextras:iq:pin') && baseCondition;
-		}
-		return baseCondition;
-	}, [isMongooseIM, amIModerator, roomType]);
+		return backend.canPin() && baseCondition;
+	}, [backend, amIModerator, roomType]);
 
 	const pinActionLabel = useMemo(() => {
 		if (!isMessagePinned) {
@@ -70,13 +64,7 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
 				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
-					if (isMongooseIM) {
-						xmppClient.pinMessage(roomId, stanzaIdToPin);
-					} else {
-						ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
-							console.error('[usePinMessage] pinMessage failed:', err);
-						});
-					}
+					backend.pinMessage(roomId, stanzaIdToPin);
 					closeModal(modalId);
 					useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 				},
@@ -91,40 +79,18 @@ export const usePinMessage = (message: TextMessage | undefined): UsePinMessageRe
 					'This conversation already has a pinned message. Only one message can be pinned at a time. Do you want to replace it with this message?'
 				)
 			});
-
 			return;
 		}
 
 		if (isMessagePinned) {
-			if (isMongooseIM) {
-				xmppClient.unpinMessage(roomId, stanzaIdToPin);
-			} else {
-				ChatApi.unpinMessage(roomId, stanzaIdToPin).catch((err) => {
-					console.error('[usePinMessage] unpinMessage failed:', err);
-				});
-			}
+			backend.unpinMessage(roomId, stanzaIdToPin);
 			useStore.getState().removePinnedMessage(roomId);
 			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		} else {
-			if (isMongooseIM) {
-				xmppClient.pinMessage(roomId, stanzaIdToPin);
-			} else {
-				ChatApi.pinMessage(roomId, stanzaIdToPin).catch((err) => {
-					console.error('[usePinMessage] pinMessage failed:', err);
-				});
-			}
+			backend.pinMessage(roomId, stanzaIdToPin);
 			useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 		}
-	}, [
-		isMongooseIM,
-		pinnedMessage,
-		isMessagePinned,
-		createModal,
-		t,
-		roomId,
-		stanzaIdToPin,
-		closeModal
-	]);
+	}, [backend, pinnedMessage, isMessagePinned, createModal, t, roomId, stanzaIdToPin, closeModal]);
 
 	return {
 		canMessageBePinned,

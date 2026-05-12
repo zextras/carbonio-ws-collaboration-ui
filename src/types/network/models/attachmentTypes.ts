@@ -26,4 +26,5 @@ export type AdditionalHeaders = {
 	area?: string;
 	text?: string;
 	replyToId?: string;
+	tempId?: string;
 };

@@ -186,7 +186,8 @@ export const useSessionStoreSlice: StateCreator<
 				draft.chatsRegistry = {};
 				draft.connections = {
 					status: {},
-					isMongooseIM: undefined
+					isMongooseIM: undefined,
+					messagingBackend: undefined
 				};
 				draft.meetings = {};
 				draft.activeMeeting = undefined;

@@ -28,6 +28,7 @@ export function handleWsMessageReceived(event: {
 	text: string;
 	timestamp: string;
 	replyToId?: string;
+	tempId?: string;
 	attachments?: Array<{ id: string; name: string; mimeType: string; size: number }>;
 	attachmentId?: string;
 	attachmentName?: string;
@@ -98,12 +99,8 @@ export function handleWsMessageReceived(event: {
 	const confirmedDate = new Date(timestamp).getTime();
 
 	// ─── Self-echo: promote pending placeholder to confirmed message ───
-	// sendMessage is the only REST call that renders before server confirmation
-	// (PENDING placeholder). This WS echo is the delivery confirmation that
-	// switches the placeholder to a real message with a checkmark.
-	// Matching is by PENDING status, not by ID — the placeholder has a client-
-	// generated ID, the echo has the server-assigned ID. Order is guaranteed
-	// because enqueue serializes REST calls per room and WS echoes arrive in order.
+	// The WS echo carries tempId (client-generated) so we can deterministically
+	// match the PENDING placeholder regardless of REST/WS arrival order.
 	if (senderId === session.id) {
 		const messages = chatsRegistry[roomId]?.messages ?? [];
 
@@ -111,9 +108,11 @@ export function handleWsMessageReceived(event: {
 			return;
 		}
 
-		const placeholder = messages.find(
-			(m) => m.type === MessageType.TEXT_MSG && (m as TextMessage).read === MarkerStatus.PENDING
-		);
+		const placeholder = event.tempId
+			? messages.find(
+					(m) => m.type === MessageType.TEXT_MSG && (m as TextMessage).tempId === event.tempId
+				)
+			: undefined;
 
 		if (placeholder) {
 			const pid = placeholder.id;
@@ -131,6 +130,7 @@ export function handleWsMessageReceived(event: {
 						msg.attachment = resolvedAttachment;
 						msg.repliedMessage = repliedMessage;
 						msg.replyTo = event.replyToId;
+						msg.tempId = undefined;
 					}
 					if (
 						registry.lastMessage &&
@@ -142,7 +142,8 @@ export function handleWsMessageReceived(event: {
 							id: messageId,
 							stanzaId: messageId,
 							date: confirmedDate,
-							read: MarkerStatus.UNREAD
+							read: MarkerStatus.UNREAD,
+							tempId: undefined
 						} as TextMessage;
 					}
 				}),

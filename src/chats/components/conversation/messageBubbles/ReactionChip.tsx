@@ -11,10 +11,8 @@ import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-sy
 import { includes, size } from 'lodash';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import ChatApi from '../../../../network/apis/ChatApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';
 import useStore from '../../../../store/Store';
@@ -61,7 +59,7 @@ type ReactionChipProps = {
 
 const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): ReactElement => {
 	const sessionId = useStore(getUserId);
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
+	const backend = useStore((store) => getMessagingBackend(store));
 	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
 	const userNameList = useUserNameList(from);
 
@@ -99,16 +97,10 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 
 	const changeReaction = useCallback(() => {
 		setIsAnimating(true);
-		if (isMongooseIM) {
-			const reactionToSend = includes(from, sessionId) ? '' : reaction;
-			xmppClient.sendChatMessageReaction(roomId, stanzaId, reactionToSend);
-		} else if (includes(from, sessionId)) {
-			ChatApi.removeReaction(roomId, stanzaId, reaction);
-		} else {
-			ChatApi.addReaction(roomId, stanzaId, reaction);
-		}
+		const shouldRemove = includes(from, sessionId);
+		backend.toggleReaction(roomId, stanzaId, reaction, shouldRemove);
 		setTimeout(() => setIsAnimating(false), 500);
-	}, [from, isMongooseIM, reaction, roomId, sessionId, stanzaId]);
+	}, [backend, from, reaction, roomId, sessionId, stanzaId]);
 
 	return (
 		<Tooltip label={tooltipLabel}>

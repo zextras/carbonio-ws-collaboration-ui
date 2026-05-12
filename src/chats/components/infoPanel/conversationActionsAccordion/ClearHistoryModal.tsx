@@ -10,13 +10,11 @@ import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
-import ChatApi from '../../../../network/apis/ChatApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getLastMessageSelector,
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
 
 type ClearHistoryModalProps = {
@@ -41,34 +39,25 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear history');
 	const closeLabel = t('action.close', 'Close');
 
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastTextMessage = useStore((store) => getLastMessageSelector(store, roomId));
 
 	const clearHistory = useCallback(() => {
 		if (unreadMessagesCount > 0) {
-			if (isMongooseIM) {
-				// XMPP: mark read via IQ stanza
-				if (lastTextMessage) {
-					xmppClient.readMessage(roomId, lastTextMessage.id);
-				}
-			} else {
-				const registry = useStore.getState().chatsRegistry[roomId];
-				const msgs = registry?.messages ?? [];
-				const lastMsg = msgs[msgs.length - 1];
-				const lastMsgId = (lastMsg as any)?.stanzaId ?? (lastMsg as any)?.id;
-				if (lastMsgId) {
-					ChatApi.setReadMarker(roomId, lastMsgId).catch((err) => {
-						console.error('[ClearHistoryModal] Failed to set read marker:', err);
-					});
-				}
+			const backend = getMessagingBackend(useStore.getState());
+			const registry = useStore.getState().chatsRegistry[roomId];
+			const msgs = registry?.messages ?? [];
+			const lastMsg = msgs[msgs.length - 1];
+			const lastMsgId = (lastMsg as any)?.stanzaId ?? lastTextMessage?.id ?? (lastMsg as any)?.id;
+			if (lastMsgId) {
+				backend.markAsRead(roomId, lastMsgId);
 			}
 		}
 		RoomsApi.clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();
 			closeModal();
 		});
-	}, [isMongooseIM, lastTextMessage, closeModal, roomId, successfulSnackbar, unreadMessagesCount]);
+	}, [lastTextMessage, closeModal, roomId, successfulSnackbar, unreadMessagesCount]);
 
 	return (
 		<Modal

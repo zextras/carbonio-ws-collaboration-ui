@@ -13,10 +13,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import ChatApi from '../../network/apis/ChatApi';
 import { declineMeeting } from '../../network/apis/MeetingsApi';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
-import { getIsMongooseIM } from '../../store/selectors/ConnectionSelector';
+import { getIsMongooseIM, getMessagingBackend } from '../../store/selectors/ConnectionSelector';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -93,17 +91,12 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			if (isMongooseIM) {
-				xmppClient.sendChatMessage(meeting.roomId, message);
-			} else {
-				ChatApi.sendMessage(meeting.roomId, message).catch((err) => {
-					console.error('[MeetingNotification] sendMessage failed', err);
-				});
-			}
+			const backend = getMessagingBackend(useStore.getState());
+			backend.sendMessage(meeting.roomId, message);
 			setMessage('');
 			stopMeetingSound();
 		}
-	}, [disableSendMessage, isMongooseIM, meeting, message, stopMeetingSound]);
+	}, [disableSendMessage, meeting, message, stopMeetingSound]);
 
 	const handleDeclineMeeting = useCallback(() => {
 		if (meeting && !isMongooseIM) {

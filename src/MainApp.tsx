@@ -17,20 +17,14 @@ import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
 import { ChatApi, getCapabilities, getToken, listMeetings, listRooms } from './network';
+import { hydrateStoreFromInbox } from './network/messaging/RestBackendBootstrap';
+import { RestMessagingBackend } from './network/messaging/RestMessagingBackend';
+import { XmppMessagingBackend } from './network/messaging/XmppMessagingBackend';
 import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
-import { SystemEventType } from './types/network/models/chatTypes';
-import {
-	MessageType,
-	MarkerStatus,
-	TextMessage,
-	ConfigurationMessage,
-	OperationType,
-	Marker
-} from './types/store/ChatsRegistryTypes';
-import { setDateDefault, dateToTimestamp, isBefore } from './utils/dateUtils';
+import { setDateDefault } from './utils/dateUtils';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -88,189 +82,12 @@ export default function MainApp(): React.JSX.Element {
 					.then((inboxResponse) => {
 						// ===== COMMON-SOCKET PATH =====
 						useStore.getState().setIsMongooseIM(false);
+						useStore.getState().setMessagingBackend(new RestMessagingBackend());
 
 						const { wsClient } = useStore.getState().connections;
 						wsClient?.connect();
 
-						const { addRooms, newInboxMessage, setUnreadCount } = useStore.getState();
-
-						const conversations = inboxResponse?.conversations ?? [];
-						const rooms = conversations.map((conv) => conv.room);
-						addRooms(rooms);
-
-						const { setUserPresence } = useStore.getState();
-						rooms.forEach((room) => {
-							room.members?.forEach((m) => {
-								if (m.online !== undefined) {
-									setUserPresence(m.userId, m.online, m.lastActivity);
-								}
-							});
-						});
-
-						const mapEventTypeToOperation = (eventType: SystemEventType): OperationType => {
-							switch (eventType) {
-								case 'ROOM_CREATED':
-									return OperationType.ROOM_CREATION;
-								case 'MEMBER_ADDED':
-									return OperationType.MEMBER_ADDED;
-								case 'MEMBER_REMOVED':
-									return OperationType.MEMBER_REMOVED;
-								case 'MEETING_STARTED':
-									return OperationType.MEETING_STARTED;
-								case 'MEETING_ENDED':
-									return OperationType.MEETING_ENDED;
-								case 'MEETING_DECLINED':
-									return OperationType.MEETING_DECLINED;
-								default:
-									return OperationType.ROOM_CREATION;
-							}
-						};
-
-						const extractEventActorAndMember = (
-							eventType: SystemEventType,
-							content: Record<string, unknown> | undefined
-						): { actorId: string; memberId: string } => {
-							if (!content) return { actorId: '', memberId: '' };
-							switch (eventType) {
-								case 'ROOM_CREATED':
-									return {
-										actorId: (content.creatorId as string) || '',
-										memberId: ''
-									};
-								case 'MEMBER_ADDED': {
-									const addedUserIds = content.addedUserIds as string[] | undefined;
-									return {
-										actorId: (content.addedByUserId as string) || '',
-										memberId: addedUserIds?.[0] || ''
-									};
-								}
-								case 'MEMBER_REMOVED':
-									return {
-										actorId: (content.removedByUserId as string) || '',
-										memberId: (content.removedUserId as string) || ''
-									};
-								case 'MEETING_STARTED':
-									return {
-										actorId: (content.startedBy as string) || '',
-										memberId: ''
-									};
-								case 'MEETING_ENDED':
-									return {
-										actorId: (content.endedBy as string) || '',
-										memberId: String(content.durationSec ?? '')
-									};
-								case 'MEETING_DECLINED':
-									return {
-										actorId: (content.declinedBy as string) || '',
-										memberId: ''
-									};
-								default:
-									return { actorId: '', memberId: '' };
-							}
-						};
-
-						const calcReadStatusFromMarkers = (
-							messageId: string,
-							messageDate: number,
-							senderId: string,
-							apiMarkers:
-								| Array<{
-										userId: string;
-										messageId: string;
-										readAt: string;
-								  }>
-								| undefined,
-							members: Array<{ userId: string }> | undefined,
-							sessionId: string | undefined
-						): MarkerStatus => {
-							if (senderId !== sessionId) return MarkerStatus.UNREAD;
-							if (!apiMarkers || apiMarkers.length === 0 || !members) return MarkerStatus.UNREAD;
-
-							const readByCount = apiMarkers.filter((marker) => {
-								if (marker.userId === sessionId) return false;
-								const markerDate = dateToTimestamp(marker.readAt);
-								return isBefore(messageDate, markerDate) || marker.messageId === messageId;
-							}).length;
-
-							const otherMembersCount = members.filter((m) => m.userId !== sessionId).length;
-
-							if (readByCount >= otherMembersCount && otherMembersCount > 0)
-								return MarkerStatus.READ;
-							if (readByCount > 0) return MarkerStatus.READ_BY_SOMEONE;
-							return MarkerStatus.UNREAD;
-						};
-
-						const { session } = useStore.getState();
-						const sessionId = session.id;
-
-						conversations.forEach((conv) => {
-							setUnreadCount(conv.roomId, conv.unreadCount);
-
-							if (conv.markers && conv.markers.length > 0) {
-								const { updateReadStatus } = useStore.getState();
-								const storeMarkers: Marker[] = conv.markers.map((m) => ({
-									from: m.userId,
-									messageId: m.messageId,
-									markerDate: dateToTimestamp(m.readAt),
-									type: 'displayed' as const
-								}));
-								updateReadStatus(conv.roomId, storeMarkers);
-							}
-
-							const msgDate = conv.lastMessage ? dateToTimestamp(conv.lastMessage.createdAt) : 0;
-							const eventDate = conv.lastEvent ? dateToTimestamp(conv.lastEvent.createdAt) : 0;
-
-							if (msgDate >= eventDate && conv.lastMessage) {
-								const msg = conv.lastMessage;
-								const readStatus = calcReadStatusFromMarkers(
-									msg.id,
-									dateToTimestamp(msg.createdAt),
-									msg.senderId,
-									conv.markers,
-									conv.room.members,
-									sessionId
-								);
-								const textMessage: TextMessage = {
-									id: msg.id,
-									stanzaId: msg.id,
-									roomId: msg.roomId,
-									date: dateToTimestamp(msg.createdAt),
-									type: MessageType.TEXT_MSG,
-									from: msg.senderId,
-									text: msg.text || msg.attachment?.name || '',
-									read: readStatus,
-									forwardedInfo: msg.forwardedInfo,
-									editedInfo: msg.editedInfo,
-									deletedInfo: msg.deletedInfo,
-									attachment: msg.attachment
-										? {
-												id: msg.attachment.id,
-												name: msg.attachment.name,
-												mimeType: msg.attachment.mimeType,
-												size: msg.attachment.size
-											}
-										: undefined
-								};
-								newInboxMessage(textMessage);
-							} else if (conv.lastEvent) {
-								const evt = conv.lastEvent;
-								const { actorId, memberId } = extractEventActorAndMember(
-									evt.type,
-									evt.content as Record<string, unknown> | undefined
-								);
-								const configMessage: ConfigurationMessage = {
-									id: evt.id,
-									roomId: conv.roomId,
-									date: dateToTimestamp(evt.createdAt),
-									type: MessageType.CONFIGURATION_MSG,
-									operation: mapEventTypeToOperation(evt.type),
-									value: memberId,
-									from: actorId,
-									read: MarkerStatus.UNREAD
-								};
-								newInboxMessage(configMessage);
-							}
-						});
+						hydrateStoreFromInbox(inboxResponse, useStore.getState().session.id);
 
 						listMeetings().catch(() => {});
 						setChatsBeStatus(true);
@@ -278,6 +95,7 @@ export default function MainApp(): React.JSX.Element {
 					.catch(() => {
 						// ===== MONGOOSEIM PATH =====
 						useStore.getState().setIsMongooseIM(true);
+						useStore.getState().setMessagingBackend(new XmppMessagingBackend());
 
 						Promise.all([listRooms(true, true), listMeetings()])
 							.then(() => {

@@ -20,10 +20,8 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
-import ChatApi from '../../../../network/apis/ChatApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -48,7 +46,6 @@ const InputSelector = styled.input`
 `;
 
 const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
-	const isMongooseIM = getIsMongooseIM(useStore.getState());
 	const [t] = useTranslation();
 	const uploadAttachmentTooltip = t('tooltip.uploadAttachment', 'Upload an attachment');
 	const attachLinkLabel = t('attachments.attachLinkFiles', 'Attach public link from Files');
@@ -110,13 +107,8 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			if (functionCheck) {
 				getLink({ node: nodes[0], type: 'createLink', description: myDescription })
 					.then((result: { url: string }) => {
-						if (isMongooseIM) {
-							xmppClient.sendChatMessage(roomId, result.url);
-						} else {
-							ChatApi.sendMessage(roomId, result.url).catch((err) => {
-								console.error('[AttachmentSelector] sendMessage failed', err);
-							});
-						}
+						const backend = getMessagingBackend(useStore.getState());
+						backend.sendMessage(roomId, result.url);
 					})
 					.catch(() => {
 						createSnackbar({
@@ -127,16 +119,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 					});
 			}
 		},
-		[
-			createSnackbar,
-			errorSnackbar,
-			functionCheck,
-			getLink,
-			isMongooseIM,
-			roomId,
-			roomName,
-			roomType
-		]
+		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType]
 	);
 
 	const actionTarget = useMemo(

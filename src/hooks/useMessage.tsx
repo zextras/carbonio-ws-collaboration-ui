@@ -10,7 +10,7 @@ import {
 	getEditAndDeleteFasteningSelector,
 	getMessageSelector
 } from '../store/selectors/ChatsRegistrySelectors';
-import { getIsMongooseIM } from '../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../store/selectors/ConnectionSelector';
 import useStore from '../store/Store';
 import {
 	FasteningAction,
@@ -21,7 +21,7 @@ import {
 } from '../types/store/ChatsRegistryTypes';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
+	const backend = useStore((store) => getMessagingBackend(store));
 	const message = useStore<Message | undefined>((store) =>
 		getMessageSelector(store, roomId, messageId)
 	);
@@ -32,61 +32,31 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	});
 
 	return useMemo((): Message | undefined => {
-		if (message) {
-			if (fastening) {
-				if (isMongooseIM) {
-					// XMPP: fastenings carry the delta; apply as deprecated boolean flags
-					switch (fastening.action) {
-						case FasteningAction.EDIT: {
-							return {
-								...message,
-								edited: true,
-								text: fastening.value ?? '',
-								editedStanzaId: fastening.stanzaId
-							} as TextMessage;
-						}
-						case FasteningAction.DELETE: {
-							return {
-								...message,
-								deleted: true,
-								text: '',
-								attachment: undefined,
-								replyTo: undefined
-							} as TextMessage;
-						}
-						default: {
-							return message;
-						}
-					}
-				} else {
-					// REST+WS: use structured editedInfo/deletedInfo objects
-					switch (fastening.action) {
-						case FasteningAction.EDIT: {
-							return {
-								...message,
-								editedInfo: { editedAt: new Date().toISOString() },
-								text: fastening.value ?? ''
-							} as TextMessage;
-						}
-						case FasteningAction.DELETE: {
-							return {
-								...message,
-								deletedInfo: { deletedBy: '', deletedAt: new Date().toISOString() },
-								text: '',
-								attachment: undefined,
-								replyTo: undefined
-							} as TextMessage;
-						}
-						default: {
-							return message;
-						}
-					}
-				}
+		if (message && fastening) {
+			const fasteningProps = backend.applyFastening(
+				fastening.action === FasteningAction.EDIT ? 'edit' : 'delete',
+				fastening.value
+			);
+			if (fastening.action === FasteningAction.EDIT) {
+				return {
+					...message,
+					...fasteningProps,
+					text: fastening.value ?? '',
+					editedStanzaId: fastening.stanzaId
+				} as TextMessage;
 			}
-			return message;
+			if (fastening.action === FasteningAction.DELETE) {
+				return {
+					...message,
+					...fasteningProps,
+					text: '',
+					attachment: undefined,
+					replyTo: undefined
+				} as TextMessage;
+			}
 		}
-		return undefined;
-	}, [isMongooseIM, message, fastening]);
+		return message;
+	}, [backend, message, fastening]);
 };
 
 export default useMessage;

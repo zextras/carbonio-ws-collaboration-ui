@@ -31,13 +31,10 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import ChatApi from '../../../network/apis/ChatApi';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -53,7 +50,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const setPinnedMessage = useStore((store) => store.setPinnedMessage);
-	const isMongooseIM = useStore((store) => getIsMongooseIM(store));
+	const backend = useStore((store) => getMessagingBackend(store));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
@@ -140,34 +137,11 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
 	useEffect(() => {
-		if (!roomId) return;
-		if (isMongooseIM) {
-			// XMPP: pin is loaded via IQ stanza; no REST call needed
-			xmppClient.getMessagePin(roomId);
-		} else {
-			ChatApi.getPinnedMessage(roomId)
-				.then((pins) => {
-					if (pins.length > 0) {
-						const pin = [...pins].sort(
-							(a, b) => new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime()
-						)[0];
-						setPinnedMessage(roomId, {
-							id: pin.messageId,
-							stanzaId: pin.messageId,
-							roomId: pin.roomId,
-							from: pin.senderId,
-							text: pin.text,
-							date: Date.parse(pin.pinnedAt),
-							type: MessageType.TEXT_MSG,
-							read: MarkerStatus.READ
-						});
-					}
-				})
-				.catch(() => {
-					// No pinned message or error — ignore
-				});
-		}
-	}, [isMongooseIM, roomId, setPinnedMessage]);
+		if (!roomId || !backend) return;
+		backend.getPinnedMessage(roomId).then((pin) => {
+			if (pin) setPinnedMessage(roomId, pin);
+		});
+	}, [backend, roomId, setPinnedMessage]);
 
 	return (
 		<CustomContainer

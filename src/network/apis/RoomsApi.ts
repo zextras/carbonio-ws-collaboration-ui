@@ -5,6 +5,7 @@
  */
 
 import { gte } from 'semver';
+import { v4 as uuidv4 } from 'uuid';
 
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -215,10 +216,27 @@ export const addRoomAttachment = (
 		);
 	}
 
+	const tempId = uuidv4();
+
+	useStore.getState().setPlaceholderMessage({
+		id: tempId,
+		roomId,
+		text: optionalFields.description ?? file.name,
+		replyTo: optionalFields.replyId,
+		attachment: {
+			id: tempId,
+			name: file.name,
+			mimeType: file.type || 'application/octet-stream',
+			size: file.size
+		},
+		tempId
+	});
+
 	return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
 		const { session } = useStore.getState();
 		const sizeLimit = session.attributes?.maxAttachmentSize;
 		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
+			useStore.getState().removePlaceholderMessage(roomId, tempId);
 			reject(new Error('file_too_large'));
 		} else {
 			const optional = {
@@ -226,7 +244,8 @@ export const addRoomAttachment = (
 				replyId: optionalFields.replyId,
 				area: optionalFields.area,
 				text: optionalFields.text,
-				replyToId: optionalFields.replyToId
+				replyToId: optionalFields.replyToId,
+				tempId
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.0 is officially dropped.
@@ -237,6 +256,7 @@ export const addRoomAttachment = (
 						resolve(resp);
 					})
 					.catch((error) => {
+						useStore.getState().removePlaceholderMessage(roomId, tempId);
 						reject(new Error(error));
 					});
 			} else {
@@ -246,6 +266,7 @@ export const addRoomAttachment = (
 						resolve(resp);
 					})
 					.catch((error) => {
+						useStore.getState().removePlaceholderMessage(roomId, tempId);
 						reject(new Error(error));
 					});
 			}

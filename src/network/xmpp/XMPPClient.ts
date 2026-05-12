@@ -74,66 +74,6 @@ class XMPPClient {
 	}
 
 	/**
-	 * Attempts an XMPP connection with a timeout.
-	 * Resolves true if the XMPP server accepted the connection (MongooseIM backend),
-	 * false on connection failure, authentication failure, or timeout (common-socket backend).
-	 *
-	 * Implementation: intercepts the Strophe status callback on the raw connection object
-	 * via a cast, wrapping it so we can observe connect/fail events while still forwarding
-	 * all statuses to XMPPConnection's internal handler. Does not modify XMPPConnection.ts.
-	 */
-	public connectAsync(token: string, timeoutMs = 3000): Promise<boolean> {
-		return new Promise<boolean>((resolve) => {
-			let settled = false;
-
-			// eslint-disable-next-line prefer-const
-			let timer: ReturnType<typeof setTimeout>;
-
-			const settle = (result: boolean): void => {
-				if (settled) return;
-				settled = true;
-				clearTimeout(timer);
-				resolve(result);
-			};
-
-			timer = setTimeout(() => settle(false), timeoutMs);
-
-			// Access the raw Strophe.Connection object via cast
-			const xmppConn = this.xmppConnection as unknown as {
-				connection: {
-					connect: (jid: string, pass: string, cb: (status: number) => void) => void;
-				};
-				token: string | undefined;
-				onConnectionStatus: (status: number) => void;
-			};
-
-			const userId = useStore.getState().session.id;
-			const jid = `${userId}@carbonio`;
-
-			// Store the token so XMPPConnection's reconnection logic can use it
-			xmppConn.token = token;
-
-			// Connect via the raw Strophe connection, forwarding all status codes to
-			// XMPPConnection's internal handler while also observing connect/fail outcomes.
-			xmppConn.connection.connect(jid, token, (statusCode: number) => {
-				// Observe: resolve the promise on terminal statuses
-				if (statusCode === Strophe.Status.CONNECTED) {
-					settle(true);
-				} else if (
-					statusCode === Strophe.Status.CONNFAIL ||
-					statusCode === Strophe.Status.AUTHFAIL ||
-					statusCode === Strophe.Status.ERROR
-				) {
-					settle(false);
-				}
-				// Forward to XMPPConnection's real handler so internal state (reconnection,
-				// handler registration, initFunction, requestsQueue flush) is maintained
-				xmppConn.onConnectionStatus(statusCode);
-			});
-		});
-	}
-
-	/**
 	 * PRESENCE:
 	 * I receive presence events only from users who are on my contact list with a bidirectional subscription.
 	 * Automatically, when one_to_one conversation with a certain user starts, this user is added to my contact list,

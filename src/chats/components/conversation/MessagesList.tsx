@@ -16,8 +16,6 @@ import MessageHistoryLoader, { HistoryLoaderAfter } from './MessageHistoryLoader
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
-import ChatApi from '../../../network/apis/ChatApi';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getHistoryIsFullyLoaded,
 	getIdMessageWhereScrollIsStopped,
@@ -28,7 +26,7 @@ import {
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
-import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
+import { getMessagingBackend } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
@@ -73,7 +71,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
-	const decrementUnreadCount = useStore((store) => store.decrementUnreadCount);
 
 	// Track the previous last message to detect new messages from me
 	const prevLastMessageIdRef = useRef<string | undefined>(undefined);
@@ -84,40 +81,23 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// Mark all messages in the room as read (single API call)
 	const markRoomAsRead = useCallback(() => {
 		const registry = useStore.getState().chatsRegistry[roomId];
-		// Check if there are unread messages and we're not already marking
 		const currentUnread = registry?.unread ?? 0;
 		if (currentUnread === 0 || isMarkingAsReadRef.current) return;
 
-		// Don't mark as read if we're viewing historical pages (hasMoreAfter=true)
-		// User hasn't actually seen the latest messages yet
 		const hasMoreAfter = registry?.hasMoreAfter ?? false;
 		if (hasMoreAfter) return;
 
-		// Snapshot the last visible message to mark up to this point
 		const msgs = registry?.messages ?? [];
 		const lastMsg = msgs[msgs.length - 1];
 		if (!lastMsg) return;
 		const targetMessageId = (lastMsg as any).stanzaId ?? (lastMsg as any).id;
 		if (!targetMessageId) return;
-		const unreadAtStart = currentUnread;
 
 		isMarkingAsReadRef.current = true;
-		if (getIsMongooseIM(useStore.getState())) {
-			xmppClient.readMessage(roomId, targetMessageId);
-			decrementUnreadCount(roomId, unreadAtStart);
-			isMarkingAsReadRef.current = false;
-		} else {
-			// Fire-and-forget: WS ReadUpdated echo is the single source of truth
-			// for clearing unread count — no store update here.
-			ChatApi.setReadMarker(roomId, targetMessageId)
-				.catch((err: unknown) => {
-					console.error('[MessagesList] Failed to mark room as read:', err);
-				})
-				.finally(() => {
-					isMarkingAsReadRef.current = false;
-				});
-		}
-	}, [roomId, decrementUnreadCount]);
+		const backend = getMessagingBackend(useStore.getState());
+		backend.markAsRead(roomId, targetMessageId);
+		isMarkingAsReadRef.current = false;
+	}, [roomId]);
 
 	// Called when scroll position changes - mark as read if at bottom
 	const onScrollPositionChange = useCallback(
@@ -150,8 +130,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (size(roomMessages) > 1) {
 				const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
 				const lastMsgRect = lastMsg?.getBoundingClientRect();
+				const containerRect = MessagesListWrapperRef.current?.getBoundingClientRect();
 				setShowScrollButton(
-					lastMsgRect != null && lastMsgRect?.bottom >= document.documentElement.clientHeight
+					lastMsgRect != null && containerRect != null && lastMsgRect.bottom > containerRect.bottom
 				);
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {

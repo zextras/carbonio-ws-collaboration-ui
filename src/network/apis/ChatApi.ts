@@ -114,10 +114,11 @@ class ChatApi implements IChatApi {
 			id: stableId,
 			roomId,
 			text,
-			replyTo: replyToId
+			replyTo: replyToId,
+			tempId: stableId
 		});
 
-		const body: Record<string, unknown> = { text };
+		const body: Record<string, unknown> = { text, tempId: stableId };
 		if (replyToId) body.replyToId = replyToId;
 
 		return this.enqueue(roomId, () =>
