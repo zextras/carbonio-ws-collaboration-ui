@@ -46,6 +46,12 @@ export function mapChatMessageToTextMessage(
 		text: chatMessage.deletedInfo ? '' : chatMessage.text,
 		read: readStatus,
 		deleted: chatMessage.deletedInfo ? true : undefined,
+		deletedInfo: chatMessage.deletedInfo
+			? {
+					deletedBy: chatMessage.deletedInfo.deletedBy,
+					deletedAt: chatMessage.deletedInfo.deletedAt
+				}
+			: undefined,
 		edited: chatMessage.editedInfo ? true : undefined,
 		forwarded: chatMessage.forwardedInfo
 			? {

@@ -200,6 +200,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.deleted = true;
 						msg.text = '';
+						msg.deletedInfo = { deletedBy, deletedAt };
 					}
 				}
 				// Also update lastMessage if it refers to the same message
@@ -209,7 +210,8 @@ export const useConnectionsStoreSlice: StateCreator<
 						registry.lastMessage = {
 							...registry.lastMessage,
 							text: '',
-							deleted: true
+							deleted: true,
+							deletedInfo: { deletedBy, deletedAt }
 						} as any;
 					}
 				}
