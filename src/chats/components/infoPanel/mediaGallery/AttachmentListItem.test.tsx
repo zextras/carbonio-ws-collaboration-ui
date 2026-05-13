@@ -70,7 +70,8 @@ const enum MimeTypes {
 	GIF = 'image/gif',
 	PDF = 'application/pdf',
 	VND_MS_EXCEL = 'application/vnd.ms-excel',
-	X_ZIP = 'application/x-zip'
+	X_ZIP = 'application/x-zip',
+	MP4 = 'video/mp4'
 }
 
 const buildAttachment = (overrides?: Partial<Attachment>): Attachment => ({
@@ -321,6 +322,20 @@ describe('AttachmentListItem', () => {
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(onPreviewClick).toHaveBeenCalledTimes(1);
 		expect(onPreviewClick).toHaveBeenCalledWith(attachment);
+	});
+
+	test('clicking the row calls onPreviewClick with the attachment for a video', async () => {
+		const attachment = buildAttachment({ id: 'att-vid', mimeType: MimeTypes.MP4 });
+		const { user, onPreviewClick } = renderItem(attachment);
+		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
+		expect(onPreviewClick).toHaveBeenCalledTimes(1);
+		expect(onPreviewClick).toHaveBeenCalledWith(attachment);
+	});
+
+	test('shows the DS Video icon for video attachments even after the row becomes visible', async () => {
+		renderInList(buildAttachment({ id: 'att-vid', mimeType: MimeTypes.MP4 }));
+		await fireListItemVisible(true);
+		expect(screen.getByTestId('icon: Video')).toBeInTheDocument();
 	});
 
 	test('clicking the row is a no-op for an unsupported MIME type', async () => {

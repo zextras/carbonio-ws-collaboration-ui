@@ -77,9 +77,13 @@ export const useAttachmentPreviewController = ({
 	const downloadLabel = t('action.download', 'Download');
 	const deleteLabel = t('action.delete', 'Delete');
 	const closeLabel = t('action.close', 'Close');
+	const videoErrorLabel = t(
+		'preview.video.errorLabel',
+		'This video cannot be played. Try to reproduce it using another browser'
+	);
 	const labels = useMemo(
-		() => ({ downloadLabel, deleteLabel, closeLabel }),
-		[downloadLabel, deleteLabel, closeLabel]
+		() => ({ downloadLabel, deleteLabel, closeLabel, videoErrorLabel }),
+		[downloadLabel, deleteLabel, closeLabel, videoErrorLabel]
 	);
 
 	const previewableItems = useMemo<PreviewItem[]>(() => {

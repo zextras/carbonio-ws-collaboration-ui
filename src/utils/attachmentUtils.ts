@@ -110,7 +110,14 @@ export const extensionsSupported = [
 	}
 ];
 
+export const isAttachmentVideo = (attachmentType: string): boolean => {
+	const type = attachmentType.split('/');
+	if (type[0]) return type[0] === 'video';
+	return false;
+};
+
 export const isPreviewSupported = (mimeType: string): boolean =>
+	isAttachmentVideo(mimeType) ||
 	extensionsSupported.some((ext) => ext.mimeType === mimeType && ext.preview);
 
 export const getPreviewType = (mimeType: string): string | undefined => {
@@ -157,6 +164,7 @@ export const getAttachmentDimensions = (
 
 export const getAttachmentURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
+	if (isAttachmentVideo(mimeType)) return getURLAttachment(attachmentId);
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
 		return getPdfPreviewURL(attachmentId);
 	return getImagePreviewURL(attachmentId, '0x0', ImageQuality.HIGH, getPreviewType(mimeType));
@@ -167,6 +175,7 @@ export const getAttachmentThumbnailURL = (
 	mimeType: string
 ): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
+	if (isAttachmentVideo(mimeType)) return undefined;
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
 		return getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
 	return getImageThumbnailURL(
@@ -217,11 +226,10 @@ export const isAttachmentImage = (attachmentType: string): boolean => {
 	return false;
 };
 
-export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' => {
-	if (!isAttachmentImage(attachmentType)) {
-		return 'pdf';
-	}
-	return 'image';
+export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' | 'video' => {
+	if (isAttachmentVideo(attachmentType)) return 'video';
+	if (isAttachmentImage(attachmentType)) return 'image';
+	return 'pdf';
 };
 
 export const getApplicationIcon = (mimeType: string): string => {
@@ -317,6 +325,7 @@ export type BuildPreviewItemLabels = {
 	downloadLabel: string;
 	deleteLabel: string;
 	closeLabel: string;
+	videoErrorLabel: string;
 };
 
 export type BuildPreviewItemCallbacks = {
@@ -354,9 +363,8 @@ export const buildPreviewItem = (
 	};
 	const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
 
-	return {
+	const common = {
 		id: attachment.id,
-		previewType: getAttachmentType(attachment.mimeType),
 		filename: attachment.name,
 		extension: getAttachmentExtension(attachment.mimeType).toUpperCase(),
 		size: getAttachmentSize(attachment.size),
@@ -368,6 +376,17 @@ export const buildPreviewItem = (
 		},
 		src
 	};
+
+	const previewType = getAttachmentType(attachment.mimeType);
+	if (previewType === 'video') {
+		return {
+			...common,
+			previewType: 'video',
+			mimeType: attachment.mimeType,
+			errorLabel: labels.videoErrorLabel
+		};
+	}
+	return { ...common, previewType };
 };
 
 export const getPinAttachmentColor = (fileType: string): string => {

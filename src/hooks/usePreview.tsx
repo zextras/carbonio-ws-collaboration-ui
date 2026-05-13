@@ -40,7 +40,11 @@ const usePreview = (
 			{
 				downloadLabel: t('action.download', 'Download'),
 				deleteLabel: t('action.delete', 'Delete'),
-				closeLabel: t('action.close', 'Close')
+				closeLabel: t('action.close', 'Close'),
+				videoErrorLabel: t(
+					'preview.video.errorLabel',
+					'This video cannot be played. Try to reproduce it using another browser'
+				)
 			}
 		);
 		if (!item) return;
