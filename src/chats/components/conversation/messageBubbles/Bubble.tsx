@@ -45,7 +45,7 @@ type BubbleProps = {
 	messageRef: React.RefObject<HTMLDivElement>;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 	isPrevMessageDeleted?: boolean;
-	onAttachmentPreviewClick?: (attachmentId: string) => void;
+	onAttachmentPreviewClick: (attachmentId: string) => void;
 };
 
 const ForwardContainer = styled(Container)<{

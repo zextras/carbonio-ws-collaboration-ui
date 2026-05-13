@@ -18,7 +18,6 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
-import usePreview from '../../../../../hooks/usePreview';
 import { deleteAttachment } from '../../../../../network';
 import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
@@ -37,7 +36,7 @@ import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 const useBubbleContextualMenuDropDown = (
 	message: TextMessage,
 	isMyMessage: boolean,
-	externalOnPreviewClick?: (attachmentId: string) => void
+	onAttachmentPreviewClick: (attachmentId: string) => void
 ): {
 	MenuDropdown: ReactElement;
 	menuDropdownActive: boolean;
@@ -76,17 +75,10 @@ const useBubbleContextualMenuDropDown = (
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
-	const { onPreviewClick: fallbackPreviewClick } = usePreview(
-		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
-	);
 	const attachmentIdForPreview = message.attachment?.id;
-	const onPreviewClick = useMemo(
-		() =>
-			externalOnPreviewClick && attachmentIdForPreview
-				? (): void => externalOnPreviewClick(attachmentIdForPreview)
-				: fallbackPreviewClick,
-		[externalOnPreviewClick, attachmentIdForPreview, fallbackPreviewClick]
-	);
+	const onPreviewClick = useCallback((): void => {
+		if (attachmentIdForPreview) onAttachmentPreviewClick(attachmentIdForPreview);
+	}, [onAttachmentPreviewClick, attachmentIdForPreview]);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);

@@ -50,7 +50,9 @@ beforeEach(() => {
 
 describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', async () => {
-		const { user } = setup(<MessagesList roomId={mockedRoom.id} />);
+		const { user } = setup(
+			<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />
+		);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedMessage.id}`);
 		expect(messageBubble).toBeVisible();
 		await user.hover(messageBubble);

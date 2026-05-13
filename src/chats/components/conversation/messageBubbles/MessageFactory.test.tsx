@@ -38,6 +38,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage={false}
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`Bubble-${message.id}`);
@@ -56,6 +57,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`Bubble-${message.id}`);
@@ -76,6 +78,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage={false}
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`BubbleDeleted-${message.id}`);
@@ -94,6 +97,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`BubbleDeleted-${message.id}`);
@@ -114,6 +118,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`configuration_msg-${message.id}`);
@@ -132,6 +137,7 @@ describe('Message Factory', () => {
 				messageRef={React.createRef()}
 				isFirstNewMessage
 				isPrevMessageDeleted
+				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const bubble = screen.getByTestId(`date_msg-${message.id}`);

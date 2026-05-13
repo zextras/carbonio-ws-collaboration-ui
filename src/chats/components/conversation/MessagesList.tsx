@@ -49,7 +49,7 @@ const MessagesListWrapper = styled(Container)`
 
 type ConversationProps = {
 	roomId: string;
-	onAttachmentPreviewClick?: (attachmentId: string) => void;
+	onAttachmentPreviewClick: (attachmentId: string) => void;
 };
 
 const MessagesList = ({ roomId, onAttachmentPreviewClick }: ConversationProps): ReactElement => {

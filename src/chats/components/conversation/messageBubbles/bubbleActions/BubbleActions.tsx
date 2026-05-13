@@ -56,7 +56,7 @@ export const BubbleActionsWrapper = styled.div<{
 type BubbleActionsProps = {
 	message: TextMessage;
 	isMyMessage: boolean;
-	onPreviewClick?: (attachmentId: string) => void;
+	onPreviewClick: (attachmentId: string) => void;
 };
 
 const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage, onPreviewClick }) => {

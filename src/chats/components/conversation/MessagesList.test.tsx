@@ -151,7 +151,7 @@ beforeEach(() => {
 
 describe('render list of messages with history loader visible for first time opening the conversation', () => {
 	test('Render the list of messages', () => {
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		// Simulate the loading of the full history
@@ -174,7 +174,7 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Render the history message loader', () => {
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		const messageHistoryLoader = screen.getByTestId('messageHistoryLoader');
@@ -188,7 +188,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(mockedTextMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
 		expect(messageBubble).toBeInTheDocument();
 	});
@@ -201,7 +201,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(mockedURLTextMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedURLTextMessage.id}`);
 		expect(messageBubble).toBeInTheDocument();
 		const anchorElement = screen.getByText('https://www.awesomeTest.com/test');
@@ -224,7 +224,7 @@ describe('render list of messages with history loader visible for first time ope
 		// Delete text message
 		act(() => result.current.addFastening([mockedDeletedMessage]));
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		const deletedMessage = screen.getByText(/Deleted message/i);
 		expect(deletedMessage).toBeInTheDocument();
@@ -247,7 +247,7 @@ describe('render list of messages with history loader visible for first time ope
 		// Edit text message
 		act(() => result.current.addFastening([mockedEditedMessage]));
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		const deletedMessage = screen.getByText(/Hello guys! I am edited message/i);
 		expect(deletedMessage).toBeInTheDocument();
@@ -269,7 +269,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() => result.current.newMessage(mockedReplyTextMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageBubble = screen.getAllByText(helloString);
 		expect(messageBubble.length).toBe(2);
 		const replyMessageBubble = screen.getByText('Hi David!');
@@ -302,7 +302,7 @@ describe('render list of messages with history loader visible for first time ope
 		// Delete first text message
 		act(() => result.current.addFastening([mockedDeletedMessage]));
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		const deletedMessage = screen.getAllByText(/Deleted message/i);
 		expect(size(deletedMessage)).toBe(2);
@@ -333,7 +333,7 @@ describe('render list of messages with history loader visible for first time ope
 		// Reply to text message
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		const deletedMessage = screen.getAllByText(/Hello guys! I am edited message/i);
 		expect(size(deletedMessage)).toBe(2);
@@ -348,7 +348,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
 			result.current.addCreateRoomMessage(room.id);
 		});
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`configuration_msg-${mockedConfigurationMessage.id}`);
@@ -367,7 +367,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.updateHistory(room.id, [mockedAddMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
 		});
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`configuration_msg-${mockedAddMemberMessage.id}`);
@@ -386,7 +386,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.updateHistory(room.id, [mockedRemoveMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
 		});
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`configuration_msg-${mockedRemoveMemberMessage.id}`);
@@ -406,7 +406,7 @@ beforeEach(() => {
 });
 describe('Scroll position', () => {
 	test('Opening a conversation for the first time sets scroll to the bottom', () => {
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		expect(scrollToEnd).toHaveBeenCalled();
 	});
 
@@ -414,7 +414,7 @@ describe('Scroll position', () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);
 		store.setScrollPosition(room.id, messages[0].id);
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		expect(scrollToMessage).toHaveBeenCalled();
 		expect(scrollToMessage).toHaveBeenCalledWith(messages[0].id);
 	});
@@ -424,7 +424,7 @@ describe('Scroll position', () => {
 		store.updateHistory(room.id, messages);
 		store.setScrollPosition(room.id, messages[0].id);
 		store.incrementUnreadCount(room.id, 1);
-		setup(<MessagesList roomId={room.id} />);
+		setup(<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />);
 		expect(scrollToEnd).toHaveBeenCalled();
 	});
 });
@@ -444,7 +444,7 @@ describe('Display group of messages', () => {
 			result.current.addRooms([mockedRoom]);
 		});
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		act(() => {
 			result.current.setHistoryIsFullyLoaded(mockedRoom.id);
@@ -474,7 +474,7 @@ describe('Display group of messages', () => {
 			result.current.setUserInfo([userA, userB, userC]);
 		});
 
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(<MessagesList roomId={mockedRoom.id} onAttachmentPreviewClick={(): void => undefined} />);
 
 		act(() => {
 			result.current.setHistoryIsFullyLoaded(mockedRoom.id);
@@ -497,7 +497,9 @@ describe('forward mode', () => {
 		act(() => {
 			result.current.updateHistory(room.id, messages);
 		});
-		const { user } = setup(<MessagesList roomId={room.id} />);
+		const { user } = setup(
+			<MessagesList roomId={room.id} onAttachmentPreviewClick={(): void => undefined} />
+		);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		const arrowButton = await screen.findAllByTestId('icon: ArrowIosDownward');

@@ -105,9 +105,12 @@ beforeEach(() => {
 describe('Bubble Contextual Menu - other user messages', () => {
 	test.each(messageTypes)('Test %s text message', async (msgType, msg) => {
 		useStore.getState().newMessage(msg);
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(msg, false), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(msg, false, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -142,9 +145,12 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, false), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, false, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -164,9 +170,12 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			attachment: simpleTextMessage.attachment
 		});
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, false), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, false, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
@@ -182,9 +191,12 @@ describe('Bubble Contextual Menu - other user messages', () => {
 
 describe('Bubble Contextual Menu - my messages', () => {
 	test.each(myMessagesTypes)('Test %s text message', async (msgType, msg) => {
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(msg, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(msg, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
@@ -229,9 +241,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 			attachment: simpleTextMessage.attachment
 		});
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -251,9 +266,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 			attachment: simpleTextMessage.attachment
 		});
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -266,9 +284,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -280,9 +301,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -300,9 +324,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
@@ -317,9 +344,12 @@ describe('Bubble Contextual Menu - my messages', () => {
 	test('Copy a message', async () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
-		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
-			wrapper: ProvidersWrapper
-		});
+		const { result } = renderHook(
+			() => useBubbleContextualMenuDropDown(simpleTextMessage, true, (): void => undefined),
+			{
+				wrapper: ProvidersWrapper
+			}
+		);
 		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);

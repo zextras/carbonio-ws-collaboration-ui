@@ -25,7 +25,7 @@ type MessageProps = {
 	isFirstNewMessage: boolean;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 	isPrevMessageDeleted: boolean;
-	onAttachmentPreviewClick?: (attachmentId: string) => void;
+	onAttachmentPreviewClick: (attachmentId: string) => void;
 };
 
 export const CustomMessage = styled(Container)`
