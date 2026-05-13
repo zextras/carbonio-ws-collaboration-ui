@@ -6,7 +6,8 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
@@ -23,12 +24,45 @@ vi.mock('../../../../network/apis/RoomsApi', () => ({
 
 const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
 
+let intersectionCallbacks: Array<IntersectionObserverCallback> = [];
+
+const installCallbackCapturingIntersectionObserver = (): void => {
+	intersectionCallbacks = [];
+	Object.defineProperty(window, 'IntersectionObserver', {
+		writable: true,
+		value: vi.fn(function intersectionObserverMock(callback: IntersectionObserverCallback) {
+			intersectionCallbacks.push(callback);
+			return {
+				observe: vi.fn(),
+				unobserve: vi.fn(),
+				disconnect: vi.fn(),
+				takeRecords: vi.fn(() => []),
+				root: null,
+				rootMargin: '',
+				thresholds: []
+			};
+		})
+	});
+};
+
+const fireListItemVisible = async (isIntersecting: boolean): Promise<void> => {
+	if (intersectionCallbacks.length === 0) {
+		throw new Error('IntersectionObserver was never instantiated by the rendered tree');
+	}
+	const callback = intersectionCallbacks[0];
+	await act(async () => {
+		callback([{ isIntersecting } as IntersectionObserverEntry], {} as IntersectionObserver);
+	});
+};
+
 const myUserId = 'me';
 const otherUserId = 'other-user';
 const ghostUserId = 'ghost-user';
 const roomId = 'room-1';
 const STANZA_ID = 'stanza-123';
 const DELETE_BUTTON_TEST_ID = 'mediaGalleryAttachmentDelete-att-1';
+const IMAGE_MIME_TYPE = 'image/png';
+const IMAGE_ICON_TEST_ID = 'icon: Image';
 
 const enum MimeTypes {
 	JPEG = 'image/jpeg',
@@ -60,7 +94,26 @@ const renderItem = (
 	return { ...utils, onPreviewClick };
 };
 
+const renderInList = (
+	attachment: Attachment,
+	onPreviewClick = vi.fn()
+): ReturnType<typeof setup> & { onPreviewClick: ReturnType<typeof vi.fn> } => {
+	const utils = setup(
+		<List>
+			{[
+				<AttachmentListItem
+					key={attachment.id}
+					attachment={attachment}
+					onPreviewClick={onPreviewClick}
+				/>
+			]}
+		</List>
+	);
+	return { ...utils, onPreviewClick };
+};
+
 beforeEach(() => {
+	installCallbackCapturingIntersectionObserver();
 	useStore.setState({ users: {}, mediaGallery: {} });
 	useStore.getState().setLoginInfo({ id: myUserId, name: 'Me' });
 	useStore
@@ -213,6 +266,45 @@ describe('AttachmentListItem', () => {
 		expect(spyGetURL).toHaveBeenCalledWith('att-1');
 		expect(clickSpy).toHaveBeenCalled();
 		clickSpy.mockRestore();
+	});
+
+	test('keeps the generic icon for unsupported attachment types even after the row becomes visible', async () => {
+		renderInList(
+			buildAttachment({
+				id: 'att-doc',
+				mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+			})
+		);
+		await fireListItemVisible(true);
+		expect(screen.getByTestId('icon: FileText')).toBeInTheDocument();
+	});
+
+	test('shows the generic image icon while the row is not yet visible', () => {
+		renderInList(buildAttachment({ id: 'att-img', mimeType: IMAGE_MIME_TYPE }));
+		expect(screen.getByTestId(IMAGE_ICON_TEST_ID)).toBeInTheDocument();
+	});
+
+	test('applies the thumbnail picture once the row becomes visible', async () => {
+		renderInList(buildAttachment({ id: 'att-img', mimeType: IMAGE_MIME_TYPE }));
+		await fireListItemVisible(true);
+		await waitFor(() => {
+			expect(screen.queryByTestId(IMAGE_ICON_TEST_ID)).not.toBeInTheDocument();
+		});
+	});
+
+	test('applies the thumbnail picture for PDF attachments once the row becomes visible', async () => {
+		renderInList(buildAttachment({ id: 'att-pdf', mimeType: 'application/pdf' }));
+		await fireListItemVisible(true);
+		await waitFor(() => {
+			expect(screen.queryByTestId('icon: FilePdf')).not.toBeInTheDocument();
+		});
+	});
+
+	test('keeps the thumbnail hidden state latched after the row scrolls back out of view', async () => {
+		renderInList(buildAttachment({ id: 'att-img', mimeType: IMAGE_MIME_TYPE }));
+		await fireListItemVisible(true);
+		await fireListItemVisible(false);
+		expect(screen.queryByTestId(IMAGE_ICON_TEST_ID)).not.toBeInTheDocument();
 	});
 
 	test('clicking the row calls onPreviewClick with the attachment for an image', async () => {
