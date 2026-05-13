@@ -15,7 +15,6 @@ import {
 } from '../store/selectors/MediaGallerySelectors';
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../types/store/MediaGalleryTypes';
 
 export const MEDIA_GALLERY_PAGE_SIZE = 20;
 
@@ -39,14 +38,12 @@ export const useMediaGalleryAttachments = (roomId: string): UseMediaGalleryAttac
 		(cursor: string | undefined): void => {
 			const state = useStore.getState().mediaGallery[roomId];
 			if (state?.isLoading) return;
-			const filter = state?.filter ?? DEFAULT_MEDIA_GALLERY_FILTER;
 			setMediaGalleryLoading(roomId, true);
 			getRoomAttachments(roomId, {
 				limit: MEDIA_GALLERY_PAGE_SIZE,
 				cursor,
-				userId: filter.userId,
-				sortBy: filter.sortBy,
-				order: filter.order
+				sortBy: 'created_at',
+				order: 'desc'
 			})
 				.then((response) => {
 					appendMediaGalleryPage(roomId, response.attachments, response.cursor);

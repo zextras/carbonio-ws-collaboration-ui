@@ -45,6 +45,7 @@ type BubbleProps = {
 	messageRef: React.RefObject<HTMLDivElement>;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 	isPrevMessageDeleted?: boolean;
+	onAttachmentPreviewClick?: (attachmentId: string) => void;
 };
 
 const ForwardContainer = styled(Container)<{
@@ -103,7 +104,8 @@ const Bubble: FC<BubbleProps> = ({
 	nextMessageIsFromSameSender,
 	messageRef,
 	messageListRef,
-	isPrevMessageDeleted = false
+	isPrevMessageDeleted = false,
+	onAttachmentPreviewClick
 }) => {
 	const [t] = useTranslation();
 	const maxNumberReached = t(
@@ -232,7 +234,11 @@ const Bubble: FC<BubbleProps> = ({
 				$messageAttachment={messageAttachment !== undefined}
 			>
 				{bubbleDropdownShouldBeVisible && (
-					<BubbleActions message={message} isMyMessage={isMyMessage} />
+					<BubbleActions
+						message={message}
+						isMyMessage={isMyMessage}
+						onPreviewClick={onAttachmentPreviewClick}
+					/>
 				)}
 				{showSenderName && (
 					<>
@@ -254,6 +260,7 @@ const Bubble: FC<BubbleProps> = ({
 							isMyMessage={isMyMessage}
 							from={message.from}
 							messageListRef={messageListRef}
+							onPreviewClick={onAttachmentPreviewClick}
 						/>
 						<Padding bottom="0.5rem" />
 					</>

@@ -53,25 +53,25 @@ describe('Media gallery slice', () => {
 		expect(useStore.getState().mediaGallery[roomId].isLoading).toBe(false);
 	});
 
-	test('setMediaGalleryFilter applies the new filter and resets pagination state', () => {
+	test('setMediaGalleryFilter updates the filter and preserves the loaded pagination state', () => {
 		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
 		useStore
 			.getState()
 			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
 		const state = useStore.getState().mediaGallery[roomId];
+		// filter is now applied client-side; the underlying paginated list is preserved
 		expect(state.filter.userId).toBe('me');
-		expect(state.attachments).toEqual([]);
-		expect(state.nextCursor).toBeUndefined();
+		expect(state.attachments.map((a) => a.id)).toEqual(['a1']);
+		expect(state.nextCursor).toBe('cur-1');
 		expect(state.hasMore).toBe(true);
-		expect(state.isInitialized).toBe(false);
+		expect(state.isInitialized).toBe(true);
 		expect(state.isLoading).toBe(false);
 	});
 
-	test('setMediaGalleryFilter is a no-op when the filter is unchanged', () => {
+	test('setMediaGalleryFilter preserves pagination when the filter is unchanged', () => {
 		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
 		useStore.getState().setMediaGalleryFilter(roomId, DEFAULT_MEDIA_GALLERY_FILTER);
 		const state = useStore.getState().mediaGallery[roomId];
-		// pagination state was preserved because the filter did not change
 		expect(state.attachments).toHaveLength(1);
 		expect(state.nextCursor).toBe('cur-1');
 		expect(state.isInitialized).toBe(true);
@@ -128,16 +128,17 @@ describe('Media gallery slice', () => {
 			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
 		});
 
-		test('skips when the userId filter does not match the attachment sender', () => {
+		test('prepends regardless of the active filter (filtering is now client-side)', () => {
 			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
 			useStore
 				.getState()
 				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
-			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
 			useStore
 				.getState()
 				.prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID, userId: 'someone' }));
-			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
+			expect(useStore.getState().mediaGallery[roomId].attachments.map((a) => a.id)).toEqual([
+				NEW_ID
+			]);
 		});
 
 		test('skips when the attachment id is already in the list', () => {

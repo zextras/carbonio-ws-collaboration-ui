@@ -25,12 +25,12 @@ const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
 const AUG_CREATED_AT = '2021-08-15T10:00:00Z';
 const AUG_TEST_ID = 'mediaGalleryAttachmentClickArea-aug';
 
-const buildAttachment = (id: string, createdAt: string): Attachment => ({
+const buildAttachment = (id: string, createdAt: string, userId = 'u'): Attachment => ({
 	id,
 	name: `${id}.txt`,
 	size: 1024,
 	mimeType: 'text/plain',
-	userId: 'u',
+	userId,
 	roomId,
 	createdAt
 });
@@ -113,32 +113,31 @@ describe('MediaGalleryTab', () => {
 		expect(screen.queryByTestId('list-bottom-element')).not.toBeInTheDocument();
 	});
 
-	test('switching to "My attachments" refetches with userId of the logged user', async () => {
+	test('switching to "My attachments" filters the displayed list client-side', async () => {
 		const myUserId = 'me';
 		useStore.getState().setLoginInfo({ id: myUserId, name: 'Me' });
 		mockedGetRoomAttachments.mockResolvedValueOnce({
-			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
+			attachments: [
+				buildAttachment('mine-1', SAMPLE_CREATED_AT, myUserId),
+				buildAttachment('theirs-1', SAMPLE_CREATED_AT, 'other-user')
+			],
 			cursor: undefined
 		});
 
 		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
-		await screen.findByTestId('mediaGalleryAttachmentClickArea-a1');
-
-		mockedGetRoomAttachments.mockResolvedValueOnce({
-			attachments: [buildAttachment('mine-1', '2024-02-01T10:00:00Z')],
-			cursor: undefined
-		});
+		await screen.findByTestId('mediaGalleryAttachmentClickArea-mine-1');
+		expect(screen.getByTestId('mediaGalleryAttachmentClickArea-theirs-1')).toBeInTheDocument();
 
 		await user.click(screen.getByTestId('mediaGalleryFilter-mine'));
 
+		// no additional API call: filtering is client-side
+		expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(1);
 		await waitFor(() => {
-			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
+			expect(
+				screen.queryByTestId('mediaGalleryAttachmentClickArea-theirs-1')
+			).not.toBeInTheDocument();
 		});
-		expect(mockedGetRoomAttachments).toHaveBeenLastCalledWith(
-			roomId,
-			expect.objectContaining({ userId: myUserId, cursor: undefined })
-		);
-		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-mine-1')).toBeInTheDocument();
+		expect(screen.getByTestId('mediaGalleryAttachmentClickArea-mine-1')).toBeInTheDocument();
 	});
 
 	test('fetches the next page when the bottom element intersects the viewport', async () => {

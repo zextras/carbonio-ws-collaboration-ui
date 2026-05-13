@@ -56,12 +56,14 @@ export const BubbleActionsWrapper = styled.div<{
 type BubbleActionsProps = {
 	message: TextMessage;
 	isMyMessage: boolean;
+	onPreviewClick?: (attachmentId: string) => void;
 };
 
-const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
+const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage, onPreviewClick }) => {
 	const { MenuDropdown, menuDropdownActive, menuDropdownRef } = useBubbleContextualMenuDropDown(
 		message,
-		isMyMessage
+		isMyMessage,
+		onPreviewClick
 	);
 
 	const { ReactionsPopover, reactionsPopoverActive, reactionsPopoverRef } =

@@ -24,6 +24,7 @@ import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useBubbleAttachmentPreview from '../../../hooks/useBubbleAttachmentPreview';
 import useEventListener, {
 	EventName,
 	MemberDemotedEvent,
@@ -35,6 +36,7 @@ import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { DeleteAttachmentModal } from '../infoPanel/mediaGallery/DeleteAttachmentModal';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -49,6 +51,13 @@ type ChatsProps = {
 const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
+
+	const {
+		onPreviewClick: onAttachmentPreviewClick,
+		pendingDelete,
+		confirmPendingDelete,
+		cancelPendingDelete
+	} = useBubbleAttachmentPreview(roomId);
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
@@ -161,8 +170,15 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 					setConversationView={setConversationView}
 				/>
 			)}
-			<MessagesList roomId={roomId} />
+			<MessagesList roomId={roomId} onAttachmentPreviewClick={onAttachmentPreviewClick} />
 			<ConversationFooter key={roomId} roomId={roomId} isInsideMeeting={isInsideMeeting} />
+			{pendingDelete && (
+				<DeleteAttachmentModal
+					open
+					onConfirm={confirmPendingDelete}
+					onClose={cancelPendingDelete}
+				/>
+			)}
 		</CustomContainer>
 	);
 };

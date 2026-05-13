@@ -36,7 +36,8 @@ import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
 const useBubbleContextualMenuDropDown = (
 	message: TextMessage,
-	isMyMessage: boolean
+	isMyMessage: boolean,
+	externalOnPreviewClick?: (attachmentId: string) => void
 ): {
 	MenuDropdown: ReactElement;
 	menuDropdownActive: boolean;
@@ -75,8 +76,16 @@ const useBubbleContextualMenuDropDown = (
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
-	const { onPreviewClick } = usePreview(
+	const { onPreviewClick: fallbackPreviewClick } = usePreview(
 		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
+	);
+	const attachmentIdForPreview = message.attachment?.id;
+	const onPreviewClick = useMemo(
+		() =>
+			externalOnPreviewClick && attachmentIdForPreview
+				? (): void => externalOnPreviewClick(attachmentIdForPreview)
+				: fallbackPreviewClick,
+		[externalOnPreviewClick, attachmentIdForPreview, fallbackPreviewClick]
 	);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);

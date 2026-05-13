@@ -17,9 +17,6 @@ import {
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-const isSameFilter = (a: MediaGalleryFilter, b: MediaGalleryFilter): boolean =>
-	a.userId === b.userId && a.sortBy === b.sortBy && a.order === b.order;
-
 const initMediaGalleryRoom = (draft: RootStore, roomId: string): MediaGalleryRoomState => {
 	if (!draft.mediaGallery[roomId]) {
 		draft.mediaGallery[roomId] = {
@@ -74,13 +71,7 @@ export const useMediaGalleryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const state = initMediaGalleryRoom(draft, roomId);
-				if (isSameFilter(state.filter, filter)) return;
 				state.filter = filter;
-				state.attachments = [];
-				state.nextCursor = undefined;
-				state.hasMore = true;
-				state.isInitialized = false;
-				state.isLoading = false;
 			}),
 			false,
 			'MG/SET_FILTER'
@@ -104,9 +95,6 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const state = draft.mediaGallery[roomId];
 				if (!state?.isInitialized) return;
-				const { filter } = state;
-				if (filter.userId && filter.userId !== attachment.userId) return;
-				if (filter.sortBy !== 'created_at' || filter.order !== 'desc') return;
 				if (state.attachments.some((a) => a.id === attachment.id)) return;
 				state.attachments.unshift(attachment);
 			}),

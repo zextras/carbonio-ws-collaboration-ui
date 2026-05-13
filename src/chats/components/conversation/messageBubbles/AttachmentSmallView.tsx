@@ -59,13 +59,18 @@ const CustomAvatar = styled(Avatar)`
 
 type AttachmentSmallViewProps = {
 	attachment: AttachmentMessageType;
+	onPreviewClick?: () => void;
 };
-const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
+const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({
+	attachment,
+	onPreviewClick: externalOnPreviewClick
+}) => {
 	const [t] = useTranslation();
 	const previewActionLabel = t('action.preview', 'Preview');
 	const downloadActionLabel = t('action.download', 'Download');
 
-	const { onPreviewClick } = usePreview(attachment);
+	const { onPreviewClick: fallbackPreviewClick } = usePreview(attachment);
+	const onPreviewClick = externalOnPreviewClick ?? fallbackPreviewClick;
 
 	const previewURL = useMemo(
 		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),

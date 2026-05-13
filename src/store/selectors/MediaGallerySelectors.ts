@@ -11,8 +11,10 @@ import {
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
+const EMPTY_ATTACHMENTS: ReadonlyArray<Attachment> = Object.freeze([]);
+
 export const getMediaGalleryAttachments = (store: RootStore, roomId: string): Array<Attachment> =>
-	store.mediaGallery[roomId]?.attachments ?? [];
+	store.mediaGallery[roomId]?.attachments ?? (EMPTY_ATTACHMENTS as Array<Attachment>);
 
 export const getMediaGalleryHasMore = (store: RootStore, roomId: string): boolean =>
 	store.mediaGallery[roomId]?.hasMore ?? true;

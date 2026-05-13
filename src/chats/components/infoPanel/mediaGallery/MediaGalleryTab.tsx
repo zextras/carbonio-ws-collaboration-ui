@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
@@ -15,6 +15,8 @@ import { DeleteAttachmentModal } from './DeleteAttachmentModal';
 import { EmptyAttachmentList } from './EmptyAttachmentList';
 import { useGalleryPreview } from '../../../../hooks/useGalleryPreview';
 import { useMediaGalleryAttachments } from '../../../../hooks/useMediaGalleryAttachments';
+import { getMediaGalleryFilter } from '../../../../store/selectors/MediaGallerySelectors';
+import useStore from '../../../../store/Store';
 
 type MediaGalleryTabProps = {
 	roomId: string;
@@ -23,12 +25,18 @@ type MediaGalleryTabProps = {
 export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 	const { attachments, isInitialized, isLoading, hasMore, loadMore } =
 		useMediaGalleryAttachments(roomId);
+	const filterUserId = useStore((store) => getMediaGalleryFilter(store, roomId).userId);
+
+	const filteredAttachments = useMemo(
+		() => (filterUserId ? attachments.filter((a) => a.userId === filterUserId) : attachments),
+		[attachments, filterUserId]
+	);
 
 	const { onPreviewClick, pendingDelete, confirmPendingDelete, cancelPendingDelete } =
 		useGalleryPreview(roomId);
 
 	const showInitialSkeleton = !isInitialized && isLoading;
-	const showEmptyState = isInitialized && attachments.length === 0;
+	const showEmptyState = isInitialized && filteredAttachments.length === 0;
 
 	return (
 		<Container
@@ -44,7 +52,7 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 				{showEmptyState && <EmptyAttachmentList />}
 				{!showInitialSkeleton && !showEmptyState && (
 					<AttachmentList
-						attachments={attachments}
+						attachments={filteredAttachments}
 						hasMore={hasMore}
 						isLoading={isLoading}
 						loadMore={loadMore}

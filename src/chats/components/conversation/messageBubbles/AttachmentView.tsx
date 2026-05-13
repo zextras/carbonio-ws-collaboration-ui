@@ -132,13 +132,15 @@ type AttachmentViewProps = {
 	isMyMessage?: boolean;
 	from: string;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
+	onPreviewClick?: (attachmentId: string) => void;
 };
 
 const AttachmentView: FC<AttachmentViewProps> = ({
 	attachment,
 	from,
 	isMyMessage = false,
-	messageListRef
+	messageListRef,
+	onPreviewClick: externalOnPreviewClick
 }) => {
 	const [t] = useTranslation();
 
@@ -201,7 +203,14 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		[attachment.id, attachment.name]
 	);
 
-	const { onPreviewClick } = usePreview(attachment);
+	const { onPreviewClick: fallbackPreviewClick } = usePreview(attachment);
+	const onPreviewClick = useMemo(
+		() =>
+			externalOnPreviewClick
+				? (): void => externalOnPreviewClick(attachment.id)
+				: fallbackPreviewClick,
+		[externalOnPreviewClick, attachment.id, fallbackPreviewClick]
+	);
 
 	const imageLabel = useMemo(
 		() => (
@@ -299,7 +308,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			$userBorderColor={isMyMessage ? undefined : userColor}
 		>
 			<Row wrap="nowrap">
-				<AttachmentSmallView attachment={attachment} />
+				<AttachmentSmallView attachment={attachment} onPreviewClick={onPreviewClick} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ vertical: 'small' }} crossAlignment="flex-start">
