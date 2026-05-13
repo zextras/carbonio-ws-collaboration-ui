@@ -53,12 +53,10 @@ export function mapChatMessageToTextMessage(
 				}
 			: undefined,
 		edited: chatMessage.editedInfo ? true : undefined,
-		forwarded: chatMessage.forwardedInfo
+		forwardedInfo: chatMessage.forwardedInfo
 			? {
-					from: chatMessage.forwardedInfo.originalSenderId,
-					date: new Date(chatMessage.forwardedInfo.originalSentAt).getTime(),
-					id: chatMessage.id,
-					count: 1
+					originalSenderId: chatMessage.forwardedInfo.originalSenderId,
+					originalSentAt: chatMessage.forwardedInfo.originalSentAt
 				}
 			: undefined,
 		replyTo: chatMessage.replyToId,

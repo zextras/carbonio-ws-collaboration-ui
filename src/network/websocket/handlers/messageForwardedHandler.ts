@@ -57,12 +57,10 @@ export function handleWsMessageForwarded(event: {
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
-		forwarded: event.forwardedFrom
+		forwardedInfo: event.forwardedFrom
 			? {
-					from: event.forwardedFrom,
-					date: event.forwardedAt ? new Date(event.forwardedAt).getTime() : Date.now(),
-					id: messageId,
-					count: 1
+					originalSenderId: event.forwardedFrom,
+					originalSentAt: event.forwardedAt ?? new Date().toISOString()
 				}
 			: undefined,
 		attachment: event.attachmentId
