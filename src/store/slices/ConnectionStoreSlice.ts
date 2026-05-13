@@ -169,13 +169,14 @@ export const useConnectionsStoreSlice: StateCreator<
 					if (msg && msg.type === MessageType.TEXT_MSG) {
 						msg.text = text;
 						msg.edited = true;
+						msg.editedInfo = { editedAt };
 					}
 				}
 				// Also update lastMessage if it refers to the same message
 				if (registry?.lastMessage) {
 					const lm = registry.lastMessage as any;
 					if (lm.id === messageId || lm.stanzaId === messageId) {
-						registry.lastMessage = { ...registry.lastMessage, text, edited: true } as any;
+						registry.lastMessage = { ...registry.lastMessage, text, edited: true, editedInfo: { editedAt } } as any;
 					}
 				}
 			}),

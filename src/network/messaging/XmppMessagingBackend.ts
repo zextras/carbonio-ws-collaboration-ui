@@ -92,8 +92,8 @@ export class XmppMessagingBackend implements IMessagingBackend {
 		deleted?: boolean;
 	} {
 		if (action === 'edit') {
-			return { edited: true };
+			return { edited: true, editedInfo: { editedAt: new Date().toISOString() } };
 		}
-		return { deleted: true };
+		return { deleted: true, deletedInfo: { deletedBy: '', deletedAt: new Date().toISOString() } };
 	}
 }

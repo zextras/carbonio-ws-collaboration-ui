@@ -198,6 +198,7 @@ class XMPPClient {
 											newLastMessage = {
 												...textOrConfig,
 												edited: true,
+												editedInfo: { editedAt: new Date(lastFastening.date).toISOString() },
 												text: lastFastening.value ?? '',
 												editedStanzaId: fastening.stanzaId
 											} as TextMessage;
@@ -206,6 +207,10 @@ class XMPPClient {
 											newLastMessage = {
 												...textOrConfig,
 												deleted: true,
+												deletedInfo: {
+													deletedBy: lastFastening.from,
+													deletedAt: new Date(lastFastening.date).toISOString()
+												},
 												text: '',
 												attachment: undefined,
 												replyTo: undefined
@@ -725,6 +730,7 @@ class XMPPClient {
 				...originalMessage,
 				text: fasteningMessage.value || '',
 				edited: true,
+				editedInfo: { editedAt: new Date(fasteningMessage.date).toISOString() },
 				editedStanzaId: fasteningMessage.stanzaId
 			} as TextMessage;
 			useStore.getState().setPinnedMessage(roomId, editedMessage);

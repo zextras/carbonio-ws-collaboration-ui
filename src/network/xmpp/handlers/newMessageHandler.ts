@@ -89,6 +89,10 @@ export function onNewMessageStanza(message: Element): true {
 					store.setLastMessage(newMessage.roomId, {
 						...lastMessage,
 						deleted: true,
+						deletedInfo: {
+							deletedBy: newMessage.from,
+							deletedAt: new Date(newMessage.date).toISOString()
+						},
 						text: '',
 						attachment: undefined,
 						replyTo: undefined
@@ -98,6 +102,7 @@ export function onNewMessageStanza(message: Element): true {
 					store.setLastMessage(newMessage.roomId, {
 						...lastMessage,
 						edited: true,
+						editedInfo: { editedAt: new Date(newMessage.date).toISOString() },
 						text: newMessage.value ?? '',
 						attachment: lastMessage.attachment
 					} as TextMessage);

@@ -169,7 +169,11 @@ export function decodeXMPPMessageStanza(
 			from: getId(resource),
 			text: '',
 			read: calcReads(messageDate, roomId),
-			deleted: true
+			deleted: true,
+			deletedInfo: {
+				deletedBy: getId(resource),
+				deletedAt: new Date(messageDate).toISOString()
+			}
 		};
 	}
 
@@ -193,6 +197,7 @@ export function decodeXMPPMessageStanza(
 
 		// Message is a forwarded message from another conversation
 		let forwarded;
+		let forwardedInfo;
 		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
 		if (forwardedElement) {
 			const forwardCount = getAttribute(forwardedElement, 'count') || '1';
@@ -202,11 +207,20 @@ export function decodeXMPPMessageStanza(
 				getRequiredTagElement(forwardedMessageElement, 'body').textContent || ''
 			);
 
+			const originalSenderId = getId(
+				getResource(getRequiredAttribute(forwardedMessageElement, 'from'))
+			);
+			const originalSentAt = getRequiredAttribute(delayElement, 'stamp');
+
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
-				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
-				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
+				date: dateToTimestamp(originalSentAt),
+				from: originalSenderId,
 				count: parseInt(forwardCount, 10)
+			};
+			forwardedInfo = {
+				originalSenderId,
+				originalSentAt
 			};
 		}
 
@@ -247,6 +261,7 @@ export function decodeXMPPMessageStanza(
 			replyTo,
 			edited: false,
 			forwarded,
+			forwardedInfo,
 			attachment
 		};
 

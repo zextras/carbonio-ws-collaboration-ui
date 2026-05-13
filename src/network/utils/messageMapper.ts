@@ -53,6 +53,9 @@ export function mapChatMessageToTextMessage(
 				}
 			: undefined,
 		edited: chatMessage.editedInfo ? true : undefined,
+		editedInfo: chatMessage.editedInfo
+			? { editedAt: chatMessage.editedInfo.editedAt }
+			: undefined,
 		forwardedInfo: chatMessage.forwardedInfo
 			? {
 					originalSenderId: chatMessage.forwardedInfo.originalSenderId,
@@ -70,7 +73,9 @@ export function mapChatMessageToTextMessage(
 					from: chatMessage.replyTo.senderId ?? '',
 					text: chatMessage.replyTo.deleted ? '' : (chatMessage.replyTo.text ?? ''),
 					read: MarkerStatus.READ,
-					...(chatMessage.replyTo.deleted ? { deleted: true } : {})
+					...(chatMessage.replyTo.deleted
+						? { deleted: true, deletedInfo: { deletedBy: '', deletedAt: '' } }
+						: {})
 				} as TextMessage)
 			: chatMessage.replyToId
 				? ({
