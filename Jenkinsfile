@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 library(
-    identifier: 'jenkins-lib-ui@1.0.13',
+    identifier: 'jenkins-lib-common@fix/uiPipeline-upload-guard',
     retriever: modernSCM([
         $class: 'GitSCMSource',
-        credentialsId: 'jenkins-integration-with-github-account',
-        remote: 'git@github.com:zextras/jenkins-lib-ui.git',
+        remote: 'git@github.com:zextras/jenkins-lib-common.git',
+        credentialsId: 'jenkins-integration-with-github-account'
     ])
 )
 
-zappPipeline()
+uiPipeline()
