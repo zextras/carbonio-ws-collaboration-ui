@@ -1,3 +1,9 @@
+## [0.12.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.3...v0.12.4) (2026-05-14)
+
+### Bug Fixes
+
+* **ci:** migrate Jenkinsfile to jenkins-lib-common ([#727](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/727)) ([7e44458](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7e44458f11004311cf266e42eb1f28c8f3a52726))
+
 ## [0.12.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.2...v0.12.3) (2026-05-12)
 
 ### Other changes
