@@ -111,5 +111,8 @@
 		"priority": 404,
 		"attrKey": "carbonioFeatureWscEnabled",
 		"type": "carbonio"
+	},
+	"engines": {
+		"node": "v22"
 	}
 }
