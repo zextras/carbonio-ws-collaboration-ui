@@ -1,3 +1,9 @@
+## [0.13.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.4...v0.13.0) (2026-05-14)
+
+### Features
+
+* add auto focus on inputs ([7d7a528](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7d7a5282d6820c737a6a81a444056f3711868fb6)), closes [#723](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/723)
+
 ## [0.12.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.3...v0.12.4) (2026-05-14)
 
 ### Bug Fixes
