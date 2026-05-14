@@ -58,7 +58,7 @@ const ContactsSelector = ({
 	customInputRef
 }: ContactsSelectorProps): ReactElement => {
 	const [t] = useTranslation();
-	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
+	const inputPlaceholder = `${t('modal.creation.inputPlaceholder', 'Start typing or pick an address')}*`;
 	const addUserLimitReachedLabel = t(
 		'modal.creation.addUserLimit.limitReached',
 		'You have selected the maximum number of members for a group'
