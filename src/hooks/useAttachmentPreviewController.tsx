@@ -110,12 +110,12 @@ export const useAttachmentPreviewController = ({
 		if (openedId === undefined) return;
 		const idx = previews.findIndex((p) => p.id === openedId);
 		if (idx === -1) {
-			if (previews.length === 0) {
+			const last = previews.at(-1);
+			if (!last) {
 				setOpenedId(undefined);
 				emptyPreview();
 				return;
 			}
-			const last = previews[previews.length - 1];
 			setOpenedId(last.id);
 			openPreview(last.id);
 			return;
