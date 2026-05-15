@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
-import { wsClient } from '../../../../network/websocket/WebSocketClient';
+import { useEvents } from '../../../../network/events/EventsProvider';
 import { useMessaging } from '../../../../network/messaging/MessagingProvider';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
@@ -34,6 +34,7 @@ const useExternalAccess = (): {
 	const { goToInfoPage } = useRouting();
 	const createSnackbar = useSnackbar();
 	const messagingService = useMessaging();
+	const eventService = useEvents();
 
 	useEffect(() => {
 		const browserLanguage = navigator.languages?.[0] || navigator.language;
@@ -66,7 +67,7 @@ const useExternalAccess = (): {
 
 					setChatsBeStatus(true);
 					messagingService.connect(res.zmToken);
-					wsClient.connect();
+					eventService.connect();
 
 					setAttributes({
 						carbonioWscShowMessageReads: 'TRUE',
@@ -85,7 +86,7 @@ const useExternalAccess = (): {
 					});
 				});
 		},
-		[createSnackbar, generalErrorSnackbar, messagingService]
+		[createSnackbar, generalErrorSnackbar, messagingService, eventService]
 	);
 
 	return { meetingName, createGuestAccount: createGuestAccountAction };

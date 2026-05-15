@@ -22,9 +22,11 @@ import { type Mock } from 'vitest';
 
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
+import { mockEventService } from './mock-event-service';
 import { mockMessagingService } from './mock-messaging-service';
 import { PiPProvider } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
+import { EventsContext } from '../network/events/EventsProvider';
 import { MessagingContext } from '../network/messaging/MessagingProvider';
 
 interface ProvidersWrapperProps {
@@ -39,15 +41,17 @@ export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Eleme
 
 	return (
 		<MessagingContext.Provider value={mockMessagingService}>
-			<I18nextProvider i18n={i18n}>
-				<ThemeProvider>
-					<ModalManager>
-						<PiPProvider>
-							<SnackbarManager>{children}</SnackbarManager>
-						</PiPProvider>
-					</ModalManager>
-				</ThemeProvider>
-			</I18nextProvider>
+			<EventsContext.Provider value={mockEventService}>
+				<I18nextProvider i18n={i18n}>
+					<ThemeProvider>
+						<ModalManager>
+							<PiPProvider>
+								<SnackbarManager>{children}</SnackbarManager>
+							</PiPProvider>
+						</ModalManager>
+					</ThemeProvider>
+				</I18nextProvider>
+			</EventsContext.Provider>
 		</MessagingContext.Provider>
 	);
 };

@@ -17,7 +17,7 @@ import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
 import { getCapabilities, getToken, listMeetings, listRooms } from './network';
-import { wsClient } from './network/websocket/WebSocketClient';
+import { EventsProvider, useEvents } from './network/events/EventsProvider';
 import { MessagingProvider, useMessaging } from './network/messaging/MessagingProvider';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
@@ -26,6 +26,7 @@ import { setDateDefault } from './utils/dateUtils';
 
 function MainAppContent(): React.JSX.Element {
 	const messagingService = useMessaging();
+	const eventService = useEvents();
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
@@ -84,14 +85,14 @@ function MainAppContent(): React.JSX.Element {
 						setChatsBeStatus(true);
 						// Init messaging service and webSocket after roomList request to avoid missing data (specially for the inbox request)
 						messagingService.connect(resp.zmToken);
-						wsClient.connect();
+						eventService.connect();
 					})
 					.catch(() => setChatsBeStatus(false));
 			})
 			.catch(() => {
 				setChatsBeStatus(false);
 			});
-	}, [messagingService, setChatsBeStatus, setAttributes, attrs]);
+	}, [messagingService, eventService, setChatsBeStatus, setAttributes, attrs]);
 
 	useEffect(() => {
 		if (authenticated) {
@@ -118,7 +119,9 @@ function MainAppContent(): React.JSX.Element {
 export default function MainApp(): React.JSX.Element {
 	return (
 		<MessagingProvider>
-			<MainAppContent />
+			<EventsProvider>
+				<MainAppContent />
+			</EventsProvider>
 		</MessagingProvider>
 	);
 }
