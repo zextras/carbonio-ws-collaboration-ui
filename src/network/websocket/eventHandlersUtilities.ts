@@ -18,7 +18,9 @@ export enum EventArea {
 export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 	switch (eventType) {
 		case WsEventType.INITIALIZATION:
-		case WsEventType.PONG: {
+		case WsEventType.PONG:
+		case WsEventType.MESSAGE_BROKER_DISCONNECTED:
+		case WsEventType.MESSAGE_BROKER_RESTORED: {
 			return EventArea.GENERAL;
 		}
 		case WsEventType.ROOM_CREATED:

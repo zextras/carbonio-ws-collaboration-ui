@@ -9,6 +9,7 @@ export type ConnectionsStoreSlice = {
 	setChatsBeStatus: (status: boolean) => void;
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
+	setMessageBrokerStatus: (status: boolean) => void;
 	resetXmppData: () => void;
 };
 
@@ -17,5 +18,6 @@ export type Connections = {
 		chats_be?: boolean;
 		xmpp?: boolean;
 		websocket?: boolean;
+		messageBroker?: boolean;
 	};
 };
