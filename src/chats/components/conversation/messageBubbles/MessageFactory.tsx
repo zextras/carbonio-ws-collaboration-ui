@@ -25,7 +25,6 @@ type MessageProps = {
 	isFirstNewMessage: boolean;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 	isPrevMessageDeleted: boolean;
-	onAttachmentPreviewClick: (attachmentId: string) => void;
 };
 
 export const CustomMessage = styled(Container)`
@@ -50,8 +49,7 @@ const MessageFactory = ({
 	messageRef,
 	isFirstNewMessage,
 	messageListRef,
-	isPrevMessageDeleted,
-	onAttachmentPreviewClick
+	isPrevMessageDeleted
 }: MessageProps): ReactElement => {
 	const [t] = useTranslation();
 	const newMessagesLabel = t('conversation.newMessages', 'New messages');
@@ -88,7 +86,6 @@ const MessageFactory = ({
 								messageRef={messageRef}
 								messageListRef={messageListRef}
 								isPrevMessageDeleted={isPrevMessageDeleted}
-								onAttachmentPreviewClick={onAttachmentPreviewClick}
 							/>
 						)}
 					</>

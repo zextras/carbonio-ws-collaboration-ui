@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
 import {
@@ -29,6 +29,7 @@ import {
 	getAttachmentThumbnailURL
 } from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
+import { BubbleAttachmentPreviewContext } from '../BubbleAttachmentPreviewContext';
 
 const HoverContainer = styled(Container)`
 	z-index: 1;
@@ -132,15 +133,13 @@ type AttachmentViewProps = {
 	isMyMessage?: boolean;
 	from: string;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
-	onPreviewClick?: (attachmentId: string) => void;
 };
 
 const AttachmentView: FC<AttachmentViewProps> = ({
 	attachment,
 	from,
 	isMyMessage = false,
-	messageListRef,
-	onPreviewClick: externalOnPreviewClick
+	messageListRef
 }) => {
 	const [t] = useTranslation();
 
@@ -203,13 +202,14 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		[attachment.id, attachment.name]
 	);
 
+	const previewContext = useContext(BubbleAttachmentPreviewContext);
 	const { onPreviewClick: fallbackPreviewClick } = usePreview(attachment);
 	const onPreviewClick = useMemo(
 		() =>
-			externalOnPreviewClick
-				? (): void => externalOnPreviewClick(attachment.id)
+			previewContext
+				? (): void => previewContext.onPreviewClick(attachment.id)
 				: fallbackPreviewClick,
-		[externalOnPreviewClick, attachment.id, fallbackPreviewClick]
+		[previewContext, attachment.id, fallbackPreviewClick]
 	);
 
 	const imageLabel = useMemo(

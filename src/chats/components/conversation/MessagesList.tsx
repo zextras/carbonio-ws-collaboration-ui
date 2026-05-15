@@ -49,10 +49,9 @@ const MessagesListWrapper = styled(Container)`
 
 type ConversationProps = {
 	roomId: string;
-	onAttachmentPreviewClick: (attachmentId: string) => void;
 };
 
-const MessagesList = ({ roomId, onAttachmentPreviewClick }: ConversationProps): ReactElement => {
+const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const roomMessages = useMemo(() => enhanceWithDateMessages(messages), [messages]);
@@ -229,7 +228,6 @@ const MessagesList = ({ roomId, onAttachmentPreviewClick }: ConversationProps): 
 						messageListRef={messageListRef}
 						isFirstNewMessage={firstNewMessage === message.id}
 						isPrevMessageDeleted={isPrevMessageDeleted}
-						onAttachmentPreviewClick={onAttachmentPreviewClick}
 					/>
 				);
 			});
@@ -245,7 +243,7 @@ const MessagesList = ({ roomId, onAttachmentPreviewClick }: ConversationProps): 
 				</Container>
 			);
 		});
-	}, [dateMessageWrapped, firstNewMessage, roomId, onAttachmentPreviewClick]);
+	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
 		scrollToEnd(MessagesListWrapperRef);

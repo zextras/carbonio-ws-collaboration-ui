@@ -179,7 +179,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const insideText = screen.getByText(
@@ -196,7 +195,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		expect(screen.getByTestId('attachmentImg')).toBeInTheDocument();
@@ -208,7 +206,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		await user.hover(screen.getByTestId('hover-container'));
@@ -242,7 +239,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const extensionFile = screen.getByText(new RegExp(evaluate, 'i'));
@@ -261,7 +257,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const ackIcon = screen.getByTestId(iconToCheck);
@@ -278,7 +273,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
@@ -294,7 +288,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
@@ -309,7 +302,6 @@ describe('Message header', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const guestLabel = screen.queryByText('Guest');
@@ -322,7 +314,6 @@ describe('Message header', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const guestLabel = screen.queryByText('Guest');
@@ -338,7 +329,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 		const spyOnAppendChild = vi.spyOn(document.body, 'appendChild');
@@ -363,7 +353,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 
@@ -385,7 +374,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				onAttachmentPreviewClick={(): void => undefined}
 			/>
 		);
 

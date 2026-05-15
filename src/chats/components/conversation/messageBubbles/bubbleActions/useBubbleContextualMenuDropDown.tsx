@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import {
 	Button,
@@ -32,11 +32,11 @@ import { messageActionType } from '../../../../../types/store/ActiveConversation
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
+import { BubbleAttachmentPreviewContext } from '../../BubbleAttachmentPreviewContext';
 
 const useBubbleContextualMenuDropDown = (
 	message: TextMessage,
-	isMyMessage: boolean,
-	onAttachmentPreviewClick: (attachmentId: string) => void
+	isMyMessage: boolean
 ): {
 	MenuDropdown: ReactElement;
 	menuDropdownActive: boolean;
@@ -75,10 +75,11 @@ const useBubbleContextualMenuDropDown = (
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
+	const previewContext = useContext(BubbleAttachmentPreviewContext);
 	const attachmentIdForPreview = message.attachment?.id;
 	const onPreviewClick = useCallback((): void => {
-		if (attachmentIdForPreview) onAttachmentPreviewClick(attachmentIdForPreview);
-	}, [onAttachmentPreviewClick, attachmentIdForPreview]);
+		if (attachmentIdForPreview) previewContext?.onPreviewClick(attachmentIdForPreview);
+	}, [previewContext, attachmentIdForPreview]);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);

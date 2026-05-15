@@ -50,7 +50,7 @@ Preview overlay is from `@zextras/carbonio-ui-preview` (`PreviewsManagerContext`
 - `useGalleryPreview(roomId)` is a thin adapter feeding the gallery's filtered list with `prefetchAt: 'end'` (newest→oldest, gallery's natural order).
 - `useBubbleAttachmentPreview(roomId)` (called once in `Chat.tsx`) reverses the same underlying list and uses `prefetchAt: 'start'` (oldest→newest, chat order). `onPreviewClick(attachmentId)` first paginates until the clicked id is loaded, then opens it.
 - The "All / My attachments" filter in the gallery is **client-side** — the API is always called unfiltered. Both flows share `MediaGalleryStoreSlice`, so pages loaded by either are reused by the other.
-- The `DeleteAttachmentModal` is rendered once at the consumer level (`MediaGalleryTab` for the gallery, `Chat.tsx` for bubbles). `onPreviewClick` is prop-drilled from `Chat.tsx → MessagesList → MessageFactory → Bubble → AttachmentView/BubbleActions`. No React context is used for this.
+- The `DeleteAttachmentModal` is rendered once at the consumer level (`MediaGalleryTab` for the gallery, `Chat.tsx` for bubbles). The bubble-side `onPreviewClick` is exposed to `BubbleActions` and `AttachmentView` via `BubbleAttachmentPreviewContext`, provided once in `Chat.tsx` — the intermediate components (`MessagesList`, `MessageFactory`, `Bubble`) do not see it. Default context value is `undefined` so the same `AttachmentView` rendered outside a chat tree (e.g. `MeetingBubble`) falls back to single-item `usePreview`.
 
 ## Testing
 

@@ -18,6 +18,7 @@ import styled from '@emotion/styled';
 import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { BubbleAttachmentPreviewContext } from './BubbleAttachmentPreviewContext';
 import { ConversationView } from './Conversation';
 import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
@@ -58,6 +59,11 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 		confirmPendingDelete,
 		cancelPendingDelete
 	} = useBubbleAttachmentPreview(roomId);
+
+	const previewContextValue = useMemo(
+		() => ({ onPreviewClick: onAttachmentPreviewClick }),
+		[onAttachmentPreviewClick]
+	);
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
@@ -170,7 +176,9 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 					setConversationView={setConversationView}
 				/>
 			)}
-			<MessagesList roomId={roomId} onAttachmentPreviewClick={onAttachmentPreviewClick} />
+			<BubbleAttachmentPreviewContext.Provider value={previewContextValue}>
+				<MessagesList roomId={roomId} />
+			</BubbleAttachmentPreviewContext.Provider>
 			<ConversationFooter key={roomId} roomId={roomId} isInsideMeeting={isInsideMeeting} />
 			{pendingDelete && (
 				<DeleteAttachmentModal
