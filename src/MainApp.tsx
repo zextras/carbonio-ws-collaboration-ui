@@ -16,7 +16,8 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { getCapabilities, getToken, listMeetings, listRooms } from './network';
+import { getCapabilities, getToken, listRooms } from './network';
+import { MeetingsApiProvider, useMeetingsApi } from './network/apis/MeetingsApiProvider';
 import { EventsProvider, useEvents } from './network/events/EventsProvider';
 import { MessagingProvider, useMessaging } from './network/messaging/MessagingProvider';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
@@ -24,9 +25,12 @@ import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
 
-function MainAppContent(): React.JSX.Element {
+// Exported for tests so the inner providers (which would override mocks
+// from the test wrapper) can be bypassed by rendering MainAppContent directly.
+export function MainAppContent(): React.JSX.Element {
 	const messagingService = useMessaging();
 	const eventService = useEvents();
+	const { listMeetings } = useMeetingsApi();
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
@@ -92,7 +96,7 @@ function MainAppContent(): React.JSX.Element {
 			.catch(() => {
 				setChatsBeStatus(false);
 			});
-	}, [messagingService, eventService, setChatsBeStatus, setAttributes, attrs]);
+	}, [messagingService, eventService, listMeetings, setChatsBeStatus, setAttributes, attrs]);
 
 	useEffect(() => {
 		if (authenticated) {
@@ -118,10 +122,12 @@ function MainAppContent(): React.JSX.Element {
 
 export default function MainApp(): React.JSX.Element {
 	return (
-		<MessagingProvider>
-			<EventsProvider>
-				<MainAppContent />
-			</EventsProvider>
-		</MessagingProvider>
+		<MeetingsApiProvider>
+			<MessagingProvider>
+				<EventsProvider>
+					<MainAppContent />
+				</EventsProvider>
+			</MessagingProvider>
+		</MeetingsApiProvider>
 	);
 }

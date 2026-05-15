@@ -6,7 +6,9 @@
 
 import { size } from 'lodash';
 
-import {
+import { meetingsApiHttp } from './meetingsApiHttp';
+
+const {
 	acceptWaitingUser,
 	createAudioOffer,
 	createMediaAnswer,
@@ -28,7 +30,7 @@ import {
 	stopRecording,
 	updateAudioStreamStatus,
 	updateMediaOffer
-} from './MeetingsApi';
+} = meetingsApiHttp;
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,

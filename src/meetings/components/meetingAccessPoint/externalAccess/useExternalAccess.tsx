@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import { useEvents } from '../../../../network/events/EventsProvider';
 import { useMessaging } from '../../../../network/messaging/MessagingProvider';
 import useStore from '../../../../store/Store';
@@ -35,6 +35,7 @@ const useExternalAccess = (): {
 	const createSnackbar = useSnackbar();
 	const messagingService = useMessaging();
 	const eventService = useEvents();
+	const { createGuestAccount, getScheduledMeetingName } = useMeetingsApi();
 
 	useEffect(() => {
 		const browserLanguage = navigator.languages?.[0] || navigator.language;
@@ -54,7 +55,7 @@ const useExternalAccess = (): {
 			.catch(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
 			});
-	}, [goToInfoPage]);
+	}, [getScheduledMeetingName, goToInfoPage]);
 
 	const createGuestAccountAction = useCallback(
 		(guestName: string) => {
@@ -86,7 +87,7 @@ const useExternalAccess = (): {
 					});
 				});
 		},
-		[createSnackbar, generalErrorSnackbar, messagingService, eventService]
+		[createGuestAccount, createSnackbar, generalErrorSnackbar, messagingService, eventService]
 	);
 
 	return { meetingName, createGuestAccount: createGuestAccountAction };

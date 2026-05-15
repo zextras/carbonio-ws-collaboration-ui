@@ -9,7 +9,6 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import RecordingAccordion from './RecordingAccordion';
-import * as api from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -17,6 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
+import { mockMeetingsApi } from '../../../../tests/mock-meetings-api';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -82,7 +82,6 @@ describe('RecordingAccordion tests', () => {
 	});
 
 	test('When user clicks on the start button the recording starts', async () => {
-		const spyOnStartRecording = vi.spyOn(api, 'startRecording');
 		useStore.getState().setMeetingSidebarStatus(MeetingAccordionType.RECORDING, true);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
@@ -90,11 +89,10 @@ describe('RecordingAccordion tests', () => {
 		vi.advanceTimersByTime(1000);
 		await user.click(startButton);
 
-		expect(spyOnStartRecording).toHaveBeenCalled();
+		expect(mockMeetingsApi.startRecording).toHaveBeenCalled();
 	});
 
 	test('Show a snackbar when the start recording request fails', async () => {
-		const spyOnStartRecording = vi.spyOn(api, 'startRecording');
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const chevron = screen.getByTestId(iconDown);
@@ -104,6 +102,6 @@ describe('RecordingAccordion tests', () => {
 		vi.advanceTimersByTime(1000);
 		await user.click(startButton);
 
-		expect(spyOnStartRecording).rejects;
+		expect(mockMeetingsApi.startRecording).rejects;
 	});
 });

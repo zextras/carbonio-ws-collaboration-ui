@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import useMediaDevices from '../../../hooks/useMediaDevices';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import { updateAudioStreamStatus, updateMediaOffer } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import {
 	getNameOfFirstTalkingUser,
 	getSelectedAudioDeviceId,
@@ -49,6 +49,7 @@ const CustomText = styled(Text)<{ $whoIsSpeaking: string | undefined }>`
 const PictureInPictureView = (): ReactElement => {
 	const { meetingId } = useContext(RouterContext);
 	const [t] = useTranslation();
+	const { updateAudioStreamStatus, updateMediaOffer } = useMeetingsApi();
 
 	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now.");
 
@@ -94,7 +95,13 @@ const PictureInPictureView = (): ReactElement => {
 				updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
-		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
+		[
+			audioStatus,
+			bidirectionalAudioConn,
+			meetingId,
+			selectedAudioDeviceId,
+			updateAudioStreamStatus
+		]
 	);
 
 	const toggleVideoStream = useCallback(
@@ -118,7 +125,7 @@ const PictureInPictureView = (): ReactElement => {
 				videoOutConn?.stopVideo();
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId, updateMediaOffer]
 	);
 
 	const { centralTile } = useTilesOrder(meetingId!);

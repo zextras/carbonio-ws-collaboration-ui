@@ -8,9 +8,9 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import MobileActionBar from './MobileActionBar';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
 import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -62,7 +62,6 @@ describe('MobileActionBar test', () => {
 	});
 
 	test('Leave meeting button', async () => {
-		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
@@ -75,11 +74,10 @@ describe('MobileActionBar test', () => {
 		expect(leaveButton).toBeInTheDocument();
 
 		await user.click(leaveButton);
-		expect(spyOnLeaveMeeting).toHaveBeenCalled();
+		expect(mockMeetingsApi.leaveMeeting).toHaveBeenCalled();
 	});
 
 	test('Toggle audio stream', async () => {
-		const spyOnUpdateAudioStreamStatus = vi.spyOn(api, 'updateAudioStreamStatus');
 		const store = useStore.getState();
 		store.setLoginInfo({ id: 'userId', name: 'User' });
 		store.addMeetings([mockMeeting]);
@@ -108,11 +106,10 @@ describe('MobileActionBar test', () => {
 		expect(audioButtonOn).toBeInTheDocument();
 
 		await user.click(audioButtonOn);
-		expect(spyOnUpdateAudioStreamStatus).toHaveBeenCalled();
+		expect(mockMeetingsApi.updateAudioStreamStatus).toHaveBeenCalled();
 	});
 
 	test('Toggle video stream: updates local stream track when peer connection already exists', async () => {
-		const spyOnUpdateMediaOffer = vi.spyOn(api, 'updateMediaOffer');
 		const fakeStream = {} as MediaStream;
 		const spyOnGetFrontCameraStream = vi
 			.spyOn(UserMediaManager, 'getFrontCameraStream')
@@ -143,7 +140,11 @@ describe('MobileActionBar test', () => {
 
 		expect(spyOnGetFrontCameraStream).toHaveBeenCalled();
 		expect(updateTrackSpy).toHaveBeenCalledWith(fakeStream);
-		expect(spyOnUpdateMediaOffer).toHaveBeenCalledWith(mockMeeting.id, STREAM_TYPE.VIDEO, true);
+		expect(mockMeetingsApi.updateMediaOffer).toHaveBeenCalledWith(
+			mockMeeting.id,
+			STREAM_TYPE.VIDEO,
+			true
+		);
 	});
 
 	test('Toggle video stream: stops the video when video is already on', async () => {

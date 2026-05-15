@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import RecordingTimer from './RecordingTimer';
 import StartRecordingUser from './StartRecordingUser';
 import StopRecordingModal from './StopRecordingModal';
-import { startRecording } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
@@ -53,6 +53,7 @@ type RecordingAccordionProps = {
 
 const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
+	const { startRecording } = useMeetingsApi();
 	const accordionTitle = t('meeting.sidebar.recording.title', 'Recording');
 	const accordionDescription = t(
 		'meeting.sidebar.recording.description',
@@ -110,7 +111,14 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 					hideButton: true
 				});
 			});
-	}, [createSnackbar, errorSnackbarLabel, folder.id, meetingId, successSnackbarLabel]);
+	}, [
+		createSnackbar,
+		errorSnackbarLabel,
+		folder.id,
+		meetingId,
+		startRecording,
+		successSnackbarLabel
+	]);
 
 	const RecordingContainer: ReactElement = useMemo(
 		() => (

@@ -9,7 +9,7 @@ import { concat, differenceWith, filter, find, forEach, isEqual, remove, size } 
 import PendingSubscriptionManager from './PendingSubscriptionManager';
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
-import { subscribeToMedia } from '../apis/MeetingsApi';
+import { getMeetingsApi } from '../apis/meetingsApiRef';
 
 class SubscriptionsManager {
 	meetingId: string;
@@ -42,7 +42,8 @@ class SubscriptionsManager {
 
 	private subscribe(subscriptionToAdd: Subscription[], subscriptionToRemove: Subscription[]): void {
 		this.pendingSubscription.subscriptionRequesting();
-		subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
+		getMeetingsApi()
+			.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
 			.then(() => {
 				this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
 				this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);

@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useMediaDevices from '../../../hooks/useMediaDevices';
-import { updateAudioStreamStatus } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -55,6 +55,7 @@ const MicrophoneButton = ({
 
 	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
+	const { updateAudioStreamStatus } = useMeetingsApi();
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
 	const selectedAudioDeviceId = useStore(getSelectedAudioDeviceId);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
@@ -107,7 +108,13 @@ const MicrophoneButton = ({
 				updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
-		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
+		[
+			audioStatus,
+			bidirectionalAudioConn,
+			meetingId,
+			selectedAudioDeviceId,
+			updateAudioStreamStatus
+		]
 	);
 
 	const tooltipLabel = useMemo(() => {

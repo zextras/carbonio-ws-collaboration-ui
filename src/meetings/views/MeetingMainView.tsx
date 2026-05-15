@@ -7,7 +7,7 @@
 import React, { lazy, ReactElement, Suspense, useContext, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
-import { getLoginConfig } from '../../network';
+import { useMeetingsApi } from '../../network/apis/MeetingsApiProvider';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
@@ -61,6 +61,7 @@ const MeetingRouter = (): ReactElement => {
 
 const MeetingMainView = (): ReactElement => {
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
+	const { getLoginConfig } = useMeetingsApi();
 
 	useEffect(() => {
 		getLoginConfig().then((data) => {
@@ -69,7 +70,7 @@ const MeetingMainView = (): ReactElement => {
 				setCustomLogo(clientLogo);
 			}
 		});
-	}, [setCustomLogo]);
+	}, [getLoginConfig, setCustomLogo]);
 
 	const routerContextSetup = useRouterContextSetup();
 	return (

@@ -9,7 +9,7 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 import { Button, Container } from '@zextras/carbonio-design-system';
 
 import useRouting from '../../../hooks/useRouting';
-import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -29,6 +29,7 @@ type MobileActionBarProps = {
 
 const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): ReactElement => {
 	const { goToInfoPage } = useRouting();
+	const { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } = useMeetingsApi();
 
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
@@ -47,7 +48,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 			bidirectionalAudioConn?.closeRtpSenderTrack();
 			updateAudioStreamStatus(meetingId, !audioStatus);
 		}
-	}, [audioStatus, bidirectionalAudioConn, meetingId]);
+	}, [audioStatus, bidirectionalAudioConn, meetingId, updateAudioStreamStatus]);
 
 	const toggleVideoStream = useCallback(() => {
 		if (videoStatus) {
@@ -61,11 +62,11 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		} else {
 			videoOutConn?.startVideo();
 		}
-	}, [videoStatus, videoOutConn, meetingId]);
+	}, [videoStatus, videoOutConn, meetingId, updateMediaOffer]);
 
 	const leaveMeetingAction = useCallback(
 		() => leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED)),
-		[meetingId, goToInfoPage]
+		[leaveMeeting, meetingId, goToInfoPage]
 	);
 
 	const toggleParticipantView = useCallback(() => {

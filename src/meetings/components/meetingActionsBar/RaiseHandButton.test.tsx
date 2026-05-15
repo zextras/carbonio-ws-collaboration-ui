@@ -10,7 +10,6 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router-dom';
 
 import RaiseHandButton from './RaiseHandButton';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -18,6 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
 import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -71,8 +71,6 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 
 describe('Raise hand button', () => {
 	test('User Raise Hand', async () => {
-		const spyOnRaiseHand = vi.spyOn(api, 'raiseHand');
-
 		const { user } = storeSetupGroupMeeting();
 
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
@@ -80,7 +78,7 @@ describe('Raise hand button', () => {
 		const handButton = await screen.findByTestId('icon: HandOutline');
 		await user.click(handButton);
 
-		expect(spyOnRaiseHand).toHaveBeenCalled();
+		expect(mockMeetingsApi.raiseHand).toHaveBeenCalled();
 	});
 
 	test('Icon button changes', async () => {

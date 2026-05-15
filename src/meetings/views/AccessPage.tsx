@@ -10,11 +10,12 @@ import { useAuthenticated } from '@zextras/carbonio-shell-ui';
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting from '../../hooks/useRouting';
-import { getScheduledMeetingName } from '../../network';
+import { useMeetingsApi } from '../../network/apis/MeetingsApiProvider';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const AccessPage = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const { getScheduledMeetingName } = useMeetingsApi();
 
 	const { goToInfoPage, goToExternalLoginPage, goToMeetingAccessPage } = useRouting();
 	const authenticated = useAuthenticated();
@@ -43,7 +44,14 @@ const AccessPage = (): ReactElement => {
 		} else {
 			goToMeetingAccessPage();
 		}
-	}, [authenticated, goToExternalLoginPage, goToInfoPage, goToMeetingAccessPage, meetingId]);
+	}, [
+		authenticated,
+		getScheduledMeetingName,
+		goToExternalLoginPage,
+		goToInfoPage,
+		goToMeetingAccessPage,
+		meetingId
+	]);
 
 	return <ShimmerEntryMeetingView />;
 };

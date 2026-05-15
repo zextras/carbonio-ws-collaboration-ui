@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getScreenStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { getMeetingsApi } from '../apis/meetingsApiRef';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -33,7 +33,12 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 					this.peerConn
 						.setLocalDescription(rtcSessionDesc)
 						.then(() => {
-							updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, true, rtcSessionDesc.sdp);
+							getMeetingsApi().updateMediaOffer(
+								this.meetingId,
+								STREAM_TYPE.SCREEN,
+								true,
+								rtcSessionDesc.sdp
+							);
 						})
 						.catch((reason) => console.warn(reason));
 				}
@@ -87,7 +92,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 
 	public stopScreenShare(): void {
 		this.closePeerConnection();
-		updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, false);
+		getMeetingsApi().updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, false);
 	}
 
 	public closePeerConnection(): void {

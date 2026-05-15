@@ -20,7 +20,7 @@ import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
-import { getMeetingByMeetingId } from '../../network';
+import { useMeetingsApi } from '../../network/apis/MeetingsApiProvider';
 import { useVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
 import { Room } from '../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
@@ -52,6 +52,7 @@ const CustomText = styled(Text)`
 
 const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, defaultValue }) => {
 	const [t] = useTranslation();
+	const { getMeetingByMeetingId } = useMeetingsApi();
 
 	const virtualRoomLabel = t('appointment.input.label', 'Virtual Room');
 	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');

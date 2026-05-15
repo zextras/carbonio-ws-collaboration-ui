@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
-import { leaveMeeting } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
@@ -45,6 +45,7 @@ const LeaveMeetingButton = ({
 	const { closePipWindow } = usePiPWindow();
 	const { goToInfoPage } = useRouting();
 	const { meetingId } = useContext(RouterContext);
+	const { leaveMeeting } = useMeetingsApi();
 
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');
@@ -68,7 +69,7 @@ const LeaveMeetingButton = ({
 				}
 			});
 		},
-		[meetingId, goToInfoPage, isPip, closePipWindow]
+		[leaveMeeting, meetingId, goToInfoPage, isPip, closePipWindow]
 	);
 
 	useEffect(() => {

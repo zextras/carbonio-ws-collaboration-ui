@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { updateAudioStreamStatus } from '../network';
+import { useMeetingsApi } from '../network/apis/MeetingsApiProvider';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -28,6 +28,7 @@ const useMuteForAll = (
 	userIdToMute: string | undefined
 ): useMuteForAllReturn => {
 	const [t] = useTranslation();
+	const { updateAudioStreamStatus } = useMeetingsApi();
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
@@ -57,7 +58,14 @@ const useMuteForAll = (
 				});
 			});
 		}
-	}, [createSnackbar, errorSnackbar, meetingId, participantAudioStatus, userIdToMute]);
+	}, [
+		createSnackbar,
+		errorSnackbar,
+		meetingId,
+		participantAudioStatus,
+		updateAudioStreamStatus,
+		userIdToMute
+	]);
 
 	return { muteForAllHasToAppear, muteForAll };
 };

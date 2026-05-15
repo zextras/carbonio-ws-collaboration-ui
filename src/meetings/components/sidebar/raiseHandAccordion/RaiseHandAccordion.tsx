@@ -24,7 +24,7 @@ import useEventListener, {
 	EventName,
 	MeetingParticipantRaiseHandEvent
 } from '../../../../hooks/useEventListener';
-import { raiseHand } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import {
 	getHandRaisedList,
 	getRaiseHandAccordionStatus
@@ -46,6 +46,7 @@ type RaiseHandAccordionProps = {
 
 const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
+	const { raiseHand } = useMeetingsApi();
 	const raiseHandList = useStore(getHandRaisedList);
 
 	const okLabel = t('action.ok', 'Ok');
@@ -108,7 +109,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 			const userId = userWithHandRaised !== myUserId ? userWithHandRaised : undefined;
 			raiseHand(meetingId, false, userId);
 		});
-	}, [meetingId, myUserId, raiseHandList]);
+	}, [meetingId, myUserId, raiseHand, raiseHandList]);
 
 	const lowerButtonComponent = useMemo(
 		() => (

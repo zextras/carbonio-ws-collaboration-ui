@@ -8,20 +8,21 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import * as shell from '@zextras/carbonio-shell-ui';
 
-import MainApp from './MainApp';
+import { MainAppContent } from './MainApp';
 import * as api from './network';
 import useStore from './store/Store';
+import { mockMeetingsApi } from './tests/mock-meetings-api';
 import { setup } from './tests/test-utils';
 
 describe('Entry point', () => {
 	test('Set app version', () => {
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		expect(useStore.getState().session.apiVersion).toBeDefined();
 	});
 
 	test('Set login info of an authenticated user', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeDefined();
 		expect(name).toBeDefined();
@@ -31,7 +32,7 @@ describe('Entry point', () => {
 
 	test('Avoid setting login info of an unauthenticated user', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(false);
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		const { id, name, displayName, userType } = useStore.getState().session;
 		expect(id).toBeUndefined();
 		expect(name).toBeUndefined();
@@ -43,15 +44,15 @@ describe('Entry point', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
-		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
-		setup(<MainApp />);
+		mockMeetingsApi.listMeetings.mockResolvedValue([]);
+		setup(<MainAppContent />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 	});
 
 	test('Connection is not established on app load if getToken do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockRejectedValueOnce(new Error('Token error'));
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
@@ -59,7 +60,7 @@ describe('Entry point', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		vi.spyOn(api, 'listRooms').mockRejectedValueOnce(new Error());
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
 
@@ -67,7 +68,7 @@ describe('Entry point', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
-		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		mockMeetingsApi.listMeetings.mockResolvedValue([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({
 			privateChatCreationEnabled: true,
 			groupChatCreationEnabled: true,
@@ -83,7 +84,7 @@ describe('Entry point', () => {
 			recordingEnabled: true,
 			virtualBackgroundEnabled: true
 		});
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 		expect(getCapabilitiesSpy).toHaveBeenCalled();
 	});
@@ -92,9 +93,9 @@ describe('Entry point', () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
-		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		mockMeetingsApi.listMeetings.mockResolvedValue([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities');
-		setup(<MainApp />);
+		setup(<MainAppContent />);
 		useStore.getState().setApiVersion('1.6.7');
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));

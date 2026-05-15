@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
 import useRouting from '../../hooks/useRouting';
-import { getMeetingByMeetingId, getScheduledMeetingName } from '../../network';
+import { useMeetingsApi } from '../../network/apis/MeetingsApiProvider';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
@@ -38,6 +38,7 @@ const CustomTextContainer = styled(Container)`
 
 const MeetingAccessPage = (): ReactElement => {
 	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
+	const { getMeetingByMeetingId, getScheduledMeetingName } = useMeetingsApi();
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId) ?? ``);
@@ -116,7 +117,7 @@ const MeetingAccessPage = (): ReactElement => {
 						});
 				});
 		}
-	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
+	}, [chatsBeNetworkStatus, getMeetingByMeetingId, getScheduledMeetingName, goToInfoPage, meetingId]);
 
 	const handleResize = useCallback(() => {
 		setPageWidth(window.innerWidth);

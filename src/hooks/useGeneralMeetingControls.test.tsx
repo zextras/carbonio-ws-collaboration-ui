@@ -10,9 +10,9 @@ import useGeneralMeetingControls from './useGeneralMeetingControls';
 import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
+import { mockMeetingsApi } from '../tests/mock-meetings-api';
 import { ProvidersWrapper } from '../tests/test-utils';
 import { mockGoToInfoPage } from './__mocks__/useRouting';
-import * as api from '../network/apis/MeetingsApi';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
 
@@ -28,8 +28,7 @@ beforeEach(() => {
 });
 describe('useGeneralMeetingControl hook', () => {
 	test('Show a snackbar when the WebSocket connection is restored and the user is still in the meeting', async () => {
-		const spyOnGetMeetingByMeetingId = vi.spyOn(api, 'getMeetingByMeetingId');
-		spyOnGetMeetingByMeetingId.mockImplementation(() => Promise.resolve(meeting));
+		mockMeetingsApi.getMeetingByMeetingId.mockImplementation(() => Promise.resolve(meeting));
 		renderHook(() => useGeneralMeetingControls(meeting.id), {
 			wrapper: ProvidersWrapper
 		});
@@ -47,8 +46,7 @@ describe('useGeneralMeetingControl hook', () => {
 	});
 
 	test('Automatically close the meeting if the WebSocket connection is restored but the user is no longer in the meeting', async () => {
-		const spyOnGetMeetingByMeetingId = vi.spyOn(api, 'getMeetingByMeetingId');
-		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+		mockMeetingsApi.getMeetingByMeetingId.mockImplementation(() =>
 			Promise.resolve({
 				...meeting,
 				participants: []

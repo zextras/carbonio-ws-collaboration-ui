@@ -17,7 +17,7 @@ import useEventListener, {
 import usePiPWindow from './usePipWindow';
 import useRouting from './useRouting';
 import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
-import { getMeetingByMeetingId, leaveMeeting } from '../network';
+import { useMeetingsApi } from '../network/apis/MeetingsApiProvider';
 import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
@@ -29,6 +29,7 @@ import { MeetingParticipantMap } from '../types/store/MeetingTypes';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();
+	const { getMeetingByMeetingId, leaveMeeting } = useMeetingsApi();
 	const mutedByModerator = t(
 		'snackbar.mutedByModerator',
 		"You've been muted by a moderator, unmute yourself to speak"
@@ -70,7 +71,10 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [goToInfoPage, isMeetingActive, meetingDisconnection, meetingId]);
 
 	// Leave meeting on window close
-	const leaveMeetingAction = useCallback(() => leaveMeeting(meetingId), [meetingId]);
+	const leaveMeetingAction = useCallback(
+		() => leaveMeeting(meetingId),
+		[leaveMeeting, meetingId]
+	);
 
 	useEffect(() => {
 		window.parent.addEventListener('beforeunload', leaveMeetingAction);
@@ -171,6 +175,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [
 		connectionReestablishedLabel,
 		createSnackbar,
+		getMeetingByMeetingId,
 		goToInfoPage,
 		goToMeetingPage,
 		meetingDisconnection,

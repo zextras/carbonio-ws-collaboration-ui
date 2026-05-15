@@ -6,7 +6,7 @@
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { createMeeting, deleteMeeting } from './MeetingsApi';
+import { getMeetingsApi } from './meetingsApiRef';
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -50,7 +50,7 @@ export const addRoom = async (room: RoomCreationFields): Promise<RoomBe> =>
 	fetchAPI<RoomBe>('rooms', RequestType.POST, room).then(async (response) => {
 		const meetingType =
 			room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-		await createMeeting(response.id, meetingType, response.name ?? '');
+		await getMeetingsApi().createMeeting(response.id, meetingType, response.name ?? '');
 		return response;
 	});
 
@@ -66,7 +66,9 @@ export const deleteRoom = (roomId: string): Promise<Response> =>
 export const deleteRoomAndMeeting = (roomId: string): Promise<Response> => {
 	const meetingId = useStore.getState().rooms[roomId]?.meetingId;
 	if (meetingId) {
-		return deleteMeeting(meetingId).finally(() => deleteRoom(roomId));
+		return getMeetingsApi()
+			.deleteMeeting(meetingId)
+			.finally(() => deleteRoom(roomId));
 	}
 	return deleteRoom(roomId);
 };

@@ -12,7 +12,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { createMediaAnswer } from '../apis/MeetingsApi';
+import { getMeetingsApi } from '../apis/meetingsApiRef';
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -44,7 +44,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							.setLocalDescription(rtcSessionDesc)
 							.then(() => {
 								if (rtcSessionDesc.sdp) {
-									createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
+									getMeetingsApi().createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
 								}
 							})
 							.catch((reason) => console.warn('setLocalDescription failed', reason));

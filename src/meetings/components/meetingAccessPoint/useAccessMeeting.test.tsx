@@ -11,9 +11,10 @@ import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/useRouting';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
+import { ProvidersWrapper } from '../../../tests/test-utils';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
 
@@ -34,10 +35,9 @@ beforeEach(() => {
 describe('useAccessMeeting tests', () => {
 	test('handleEnterMeeting redirect to meeting', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		const spyOnEnterMeeting = vi.spyOn(api, 'enterMeeting');
-		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
+		const { result } = renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		result.current.handleEnterMeeting();
-		expect(spyOnEnterMeeting).toHaveBeenCalledWith(
+		expect(mockMeetingsApi.enterMeeting).toHaveBeenCalledWith(
 			room.id,
 			{ videoStreamEnabled: true, audioStreamEnabled: true },
 			{
@@ -49,10 +49,9 @@ describe('useAccessMeeting tests', () => {
 
 	test('handleWaitingRoom use mediaStatus', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		const spyOnJoinMeeting = vi.spyOn(api, 'joinMeeting');
-		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
+		const { result } = renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		result.current.handleWaitingRoom();
-		expect(spyOnJoinMeeting).toHaveBeenCalledWith(
+		expect(mockMeetingsApi.joinMeeting).toHaveBeenCalledWith(
 			room.meetingId,
 			{ videoStreamEnabled: true, audioStreamEnabled: true },
 			{ audioDevice: 'audio-device-1', videoDevice: 'video-device-1' }
@@ -60,7 +59,7 @@ describe('useAccessMeeting tests', () => {
 	});
 
 	test('Handle MEETING_WAITING_PARTICIPANT_REJECTED event', () => {
-		renderHook(() => useAccessMeeting(mediaStatus));
+		renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		sendCustomEvent({
 			name: EventName.MEETING_WAITING_PARTICIPANT_REJECTED,
 			data: {
@@ -74,7 +73,7 @@ describe('useAccessMeeting tests', () => {
 	});
 
 	test('Handle MEETING_WAITING_PARTICIPANT_CLASHED event', () => {
-		renderHook(() => useAccessMeeting(mediaStatus));
+		renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		sendCustomEvent({
 			name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
 			data: {
@@ -88,21 +87,20 @@ describe('useAccessMeeting tests', () => {
 
 	test('handleLeave handle leaving the waiting room', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		vi.spyOn(api, 'joinMeeting').mockResolvedValueOnce({ status: 'WAITING' });
-		const spyOnLeaveWaitingRoom = vi.spyOn(api, 'leaveWaitingRoom');
-		const { result } = renderHook(() => useAccessMeeting(mediaStatus));
+		mockMeetingsApi.joinMeeting.mockResolvedValueOnce({ status: 'WAITING' });
+		const { result } = renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		result.current.handleWaitingRoom();
 		await waitFor(() => {
 			expect(result.current.userIsReady).toEqual(true);
 		});
 		await result.current.handleLeave();
-		expect(spyOnLeaveWaitingRoom).toHaveBeenCalled();
+		expect(mockMeetingsApi.leaveWaitingRoom).toHaveBeenCalled();
 	});
 
 	test('Accepted user in waiting room is redirected to meeting', async () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${room.meetingId}`;
-		vi.spyOn(api, 'joinMeeting').mockResolvedValueOnce({ status: 'ACCEPTED' });
-		renderHook(() => useAccessMeeting(mediaStatus));
+		mockMeetingsApi.joinMeeting.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		renderHook(() => useAccessMeeting(mediaStatus), { wrapper: ProvidersWrapper });
 		sendCustomEvent({
 			name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,
 			data: {

@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { getMeetingsApi } from '../apis/meetingsApiRef';
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -52,7 +52,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	public stopVideo(): void {
 		this.closePeerConnection();
-		updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
+		getMeetingsApi().updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
@@ -63,7 +63,12 @@ export default class VideoOutConnection implements IVideoOutConnection {
 				this.peerConn
 					?.setLocalDescription(rtcSessionDesc)
 					.then(() => {
-						updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, rtcSessionDesc.sdp);
+						getMeetingsApi().updateMediaOffer(
+							this.meetingId,
+							STREAM_TYPE.VIDEO,
+							true,
+							rtcSessionDesc.sdp
+						);
 					})
 					.catch((reason) => console.warn(reason));
 			})

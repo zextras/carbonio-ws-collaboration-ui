@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { acceptWaitingUser } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import GuestUserLabel from '../../GuestUserLabel';
@@ -40,6 +40,7 @@ type WaitingUserProps = {
 
 const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
+	const { acceptWaitingUser } = useMeetingsApi();
 	const waitingToEnterLabel = t('meeting.sidebar.waitingCaption', 'Waiting to enter');
 	const acceptButtonTooltip = t('meeting.sidebar.tooltip.waitingAccept', 'Let user in');
 	const rejectButtonTooltip = t('meeting.sidebar.tooltip.waitingReject', 'Reject user');
@@ -51,12 +52,12 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 
 	const acceptWaitingUserAction = useCallback(
 		() => acceptWaitingUser(meetingId, userId, true),
-		[meetingId, userId]
+		[acceptWaitingUser, meetingId, userId]
 	);
 
 	const rejectWaitingUserAction = useCallback(
 		() => acceptWaitingUser(meetingId, userId, false),
-		[meetingId, userId]
+		[acceptWaitingUser, meetingId, userId]
 	);
 
 	return (

@@ -9,10 +9,10 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
-import * as MeetingsApi from '../../network/apis/MeetingsApi';
-import { mockMessagingService } from '../../tests/mock-messaging-service';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
+import { mockMeetingsApi } from '../../tests/mock-meetings-api';
+import { mockMessagingService } from '../../tests/mock-messaging-service';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
 
@@ -84,7 +84,7 @@ describe('MeetingNotification', () => {
 	});
 
 	test('Declining a meeting removes the notification', async () => {
-		vi.spyOn(MeetingsApi, 'declineMeeting').mockResolvedValue(new Response());
+		mockMeetingsApi.declineMeeting.mockResolvedValue(new Response());
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -100,9 +100,7 @@ describe('MeetingNotification', () => {
 
 	test('Declining a meeting calls the decline API', async () => {
 		useStore.getState().setApiVersion('1.6.10');
-		const spyDeclineMeeting = vi
-			.spyOn(MeetingsApi, 'declineMeeting')
-			.mockResolvedValue(new Response());
+		mockMeetingsApi.declineMeeting.mockResolvedValue(new Response());
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -113,7 +111,7 @@ describe('MeetingNotification', () => {
 			/>
 		);
 		await userEvent.click(screen.getByText('Decline'));
-		expect(spyDeclineMeeting).toHaveBeenCalledWith(meeting.id);
+		expect(mockMeetingsApi.declineMeeting).toHaveBeenCalledWith(meeting.id);
 	});
 
 	test('Joining a meeting removes the notification', async () => {

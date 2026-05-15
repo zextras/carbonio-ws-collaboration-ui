@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { CHATS_ROUTE, MEETINGS_PATH } from '../constants/appConstants';
-import { createMeeting } from '../network';
+import { useMeetingsApi } from '../network/apis/MeetingsApiProvider';
 import {
 	getMeetingIdFromRoom,
 	getRoomNameSelector,
@@ -22,6 +22,7 @@ type RoomMeetingHookType = {
 	copyMeetingLink: () => void;
 };
 const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
+	const { createMeeting } = useMeetingsApi();
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
@@ -38,7 +39,7 @@ const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 				window.open(`${MEETINGS_PATH}${meeting.id}`)
 			);
 		}
-	}, [meetingId, meetingLink, roomId, roomName, roomType]);
+	}, [createMeeting, meetingId, meetingLink, roomId, roomName, roomType]);
 
 	const copyMeetingLink = useCallback(() => {
 		const separator = window.location.href.includes(CHATS_ROUTE) ? CHATS_ROUTE : MEETINGS_PATH;

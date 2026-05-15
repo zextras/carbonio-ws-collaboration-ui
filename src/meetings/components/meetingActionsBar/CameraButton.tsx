@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useBrowserPermission from '../../../hooks/useMediaDevices';
-import { updateMediaOffer } from '../../../network/apis/MeetingsApi';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -57,6 +57,7 @@ const CameraButton = ({
 
 	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
+	const { updateMediaOffer } = useMeetingsApi();
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const selectedVideoDeviceId = useStore(getSelectedVideoDeviceId);
@@ -129,7 +130,7 @@ const CameraButton = ({
 				videoOutConn?.stopVideo();
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId, updateMediaOffer]
 	);
 
 	const tooltipLabel = useMemo(() => {

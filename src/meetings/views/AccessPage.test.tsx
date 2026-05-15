@@ -16,7 +16,6 @@ import {
 	mockGoToExternalLoginPage,
 	mockGoToMeetingAccessPage
 } from '../../hooks/__mocks__/useRouting';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -24,6 +23,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockMeetingsApi } from '../../tests/mock-meetings-api';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -117,13 +117,12 @@ describe('Meeting access page', () => {
 	});
 
 	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
-		const spyOnGetScheduledMeetingName = vi.spyOn(api, 'getScheduledMeetingName');
 		const mockUseAuthenticated = vi.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
-		spyOnGetScheduledMeetingName.mockResolvedValueOnce(() => Promise.resolve('name'));
+		mockMeetingsApi.getScheduledMeetingName.mockResolvedValueOnce({ name: 'name' });
 		setupAccessPageNotAuthenticated();
 
 		expect(mockUseAuthenticated).toHaveBeenCalled();
-		expect(spyOnGetScheduledMeetingName).toHaveBeenCalled();
+		expect(mockMeetingsApi.getScheduledMeetingName).toHaveBeenCalled();
 		expect(await mockGoToExternalLoginPage).toHaveBeenCalled();
 	});
 

@@ -16,6 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockMeetingsApi } from '../../tests/mock-meetings-api';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -63,6 +64,9 @@ describe('SelectVirtualRoomWidget', () => {
 	});
 
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
+		// Simulate "meeting not found" so the widget marks defaultRoom as not-my-room
+		// and renders the defaultValue label (the limited-access branch).
+		mockMeetingsApi.getMeetingByMeetingId.mockRejectedValueOnce(new Error('not found'));
 		const store = useStore.getState();
 		store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 		store.setAttributes(createMockAttributesList());
@@ -75,7 +79,7 @@ describe('SelectVirtualRoomWidget', () => {
 			);
 		});
 
-		const selectedVirtualRoom = screen.getByText('Virtual Room Selected');
+		const selectedVirtualRoom = await screen.findByText('Virtual Room Selected');
 		expect(selectedVirtualRoom).toBeInTheDocument();
 	});
 });

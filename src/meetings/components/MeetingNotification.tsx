@@ -14,7 +14,7 @@ import { gte } from 'semver';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import { declineMeeting } from '../../network';
+import { useMeetingsApi } from '../../network/apis/MeetingsApiProvider';
 import { useMessaging } from '../../network/messaging/MessagingProvider';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
@@ -54,6 +54,7 @@ const MeetingNotification = ({
 
 	const [t] = useTranslation();
 	const messagingService = useMessaging();
+	const { declineMeeting } = useMeetingsApi();
 	const userIsInvitingYouLabel = (
 		<Trans
 			i18nKey="meeting.newMeetingNotification.userIsInvitingYou"
@@ -102,7 +103,7 @@ const MeetingNotification = ({
 		const version = useStore.getState().session.apiVersion;
 		if (meeting && version && gte(version, '1.6.10')) declineMeeting(meeting.id);
 		removeNotification(id);
-	}, [id, meeting, removeNotification]);
+	}, [declineMeeting, id, meeting, removeNotification]);
 
 	const { openMeeting } = useRoomMeeting(meeting?.roomId ?? '');
 

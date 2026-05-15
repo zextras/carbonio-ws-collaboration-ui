@@ -10,7 +10,6 @@ import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import { mockGoToRoomPage } from '../../../hooks/__mocks__/useRouting';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,6 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
 import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -108,13 +108,12 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting for the first time', async () => {
-		const spyOnCreateMeeting = vi.spyOn(api, 'createMeeting');
 		const { user } = setup(<ConversationHeaderMeetingButton roomId={groupRoom.id} />);
 
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		await user.click(joinMeetingButton);
 
-		expect(spyOnCreateMeeting).toHaveBeenCalled();
+		expect(mockMeetingsApi.createMeeting).toHaveBeenCalled();
 	});
 
 	test('everything is rendered correctly - meeting started', () => {

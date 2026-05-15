@@ -7,6 +7,8 @@
 import { act } from '@testing-library/react';
 
 import SubscriptionsManager from './SubscriptionsManager';
+import { meetingsApiHttp } from '../apis/meetingsApiHttp';
+import { setMeetingsApiRef } from '../apis/meetingsApiRef';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -85,6 +87,10 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const subscribeUrl = 'meetings/meetingId/media/subscribe';
 
 vi.mock('../../utils/FetchUtils');
+
+// SubscriptionsManager calls subscribeToMedia through the MeetingsApi port.
+// Route through the real http adapter so fetchAPI assertions reach the wire.
+setMeetingsApiRef(meetingsApiHttp);
 
 beforeEach(() => {
 	act(() => {

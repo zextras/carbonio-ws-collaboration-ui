@@ -8,12 +8,15 @@ import { configure } from '@testing-library/react';
 import failOnConsole from 'vitest-fail-on-console';
 
 import { mockEventService } from './mock-event-service';
+import { mockMeetingsApi } from './mock-meetings-api';
 import { mockMessagingService } from './mock-messaging-service';
+import { setMeetingsApiRef } from '../network/apis/meetingsApiRef';
 import { setEventServiceRef } from '../network/events/eventServiceRef';
 import { setMessagingServiceRef } from '../network/messaging/messagingServiceRef';
 
 setMessagingServiceRef(mockMessagingService);
 setEventServiceRef(mockEventService);
+setMeetingsApiRef(mockMeetingsApi);
 
 configure({
 	asyncUtilTimeout: 2000

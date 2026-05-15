@@ -8,7 +8,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
-import * as api from '../../../network/apis/MeetingsApi';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
 import { setup } from '../../../tests/test-utils';
 import * as UserMediaManager from '../../../utils/UserMediaManager';
 
@@ -16,7 +16,7 @@ const videoOff = 'icon: VideoOff';
 
 describe('MeetingExternalAccessMobilePage tests', () => {
 	test('Meeting name is displayed correctly', async () => {
-		vi.spyOn(api, 'getScheduledMeetingName').mockResolvedValue({
+		mockMeetingsApi.getScheduledMeetingName.mockResolvedValue({
 			name: 'Test Meeting'
 		});
 		setup(<MeetingExternalAccessMobilePage />);
@@ -25,13 +25,12 @@ describe('MeetingExternalAccessMobilePage tests', () => {
 	});
 
 	test('Create new guest from mobile', async () => {
-		const spyCreateGuest = vi.spyOn(api, 'createGuestAccount');
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const nameInput = await screen.findByPlaceholderText('Enter your name');
 		await user.type(nameInput, 'Guest User');
 		const readyButton = await screen.findByText('Ready to participate');
 		await user.click(readyButton);
-		expect(spyCreateGuest).toHaveBeenCalled();
+		expect(mockMeetingsApi.createGuestAccount).toHaveBeenCalled();
 	});
 
 	test('Camera button is initially off and enabling it requests the front camera stream', async () => {

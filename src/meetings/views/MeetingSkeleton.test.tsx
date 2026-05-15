@@ -10,7 +10,6 @@ import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
 import { mockGoToInfoPage } from '../../hooks/__mocks__/useRouting';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
@@ -19,6 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockMeetingsApi } from '../../tests/mock-meetings-api';
 import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -107,7 +107,6 @@ describe('Grid mode meeting view', () => {
 	});
 
 	test('Close the meeting', async () => {
-		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
 		await user.hover(meetingActionBar);
@@ -116,7 +115,7 @@ describe('Grid mode meeting view', () => {
 		await user.click(endMeetingButton);
 		await user.click(endMeetingButton);
 
-		expect(spyOnLeaveMeeting).toHaveBeenCalled();
+		expect(mockMeetingsApi.leaveMeeting).toHaveBeenCalled();
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 

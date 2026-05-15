@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { meetingsApiHttp } from './meetingsApiHttp';
+import { setMeetingsApiRef } from './meetingsApiRef';
 import {
 	addRoom,
 	addRoomAttachment,
@@ -57,6 +59,10 @@ const roomId = 'roomId';
 const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
 vi.mock('../../utils/FetchUtils');
+
+// RoomsApi delegates to MeetingsApi for createMeeting/deleteMeeting.
+// Route through the real http adapter so fetchAPI assertions reach the wire.
+setMeetingsApiRef(meetingsApiHttp);
 
 beforeEach(() => {
 	setMessagingServiceRef(mockMessagingService);

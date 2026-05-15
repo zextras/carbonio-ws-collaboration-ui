@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { raiseHand } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import { getUserHandRank } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
@@ -44,6 +44,7 @@ type RaiseHandUserProps = {
 
 const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
+	const { raiseHand } = useMeetingsApi();
 
 	const lowerMyHandTooltip = t('meeting.interactions.handDown', 'Lower your hand');
 
@@ -70,7 +71,7 @@ const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 
 	const lowerHand = useCallback(() => {
 		raiseHand(meetingId, false, userId);
-	}, [meetingId, userId]);
+	}, [meetingId, raiseHand, userId]);
 
 	const tooltipSelector = useMemo(() => {
 		if (userId === myUserId) {

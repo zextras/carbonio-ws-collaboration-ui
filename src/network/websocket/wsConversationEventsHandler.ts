@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { getMeetingsApi } from '../apis/meetingsApiRef';
 import { getMessagingService } from '../messaging/messagingServiceRef';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { getMeeting, getRoom } from '../index';
+import { getRoom } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -62,7 +63,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				getRoom(event.roomId).then((response) => {
 					state.addRooms([response]);
 					if (response.meetingId) {
-						getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
+						getMeetingsApi()
+						.getMeeting(response.id)
+						.then((meetingResponse) => state.addMeetings([meetingResponse]));
 					}
 				});
 			} else {

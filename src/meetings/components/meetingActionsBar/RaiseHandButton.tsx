@@ -8,7 +8,7 @@ import React, { ReactElement, useCallback, useContext, useEffect, useRef } from 
 import { Button, CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { raiseHand } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import {
 	getUserHasHandRaised,
 	getUserIsTalking
@@ -29,6 +29,7 @@ const RaiseHandButton = (): ReactElement | null => {
 
 	const { meetingId } = useContext(RouterContext);
 	const sessionId = useStore(getUserId);
+	const { raiseHand } = useMeetingsApi();
 
 	const iAmTalking = useStore((store) => getUserIsTalking(store, sessionId ?? ''));
 	const iHaveHandRaised = useStore((store) => getUserHasHandRaised(store, sessionId ?? ''));
@@ -37,7 +38,7 @@ const RaiseHandButton = (): ReactElement | null => {
 
 	const toggleRaiseHand = useCallback(() => {
 		raiseHand(meetingId!, !iHaveHandRaised);
-	}, [iHaveHandRaised, meetingId]);
+	}, [iHaveHandRaised, meetingId, raiseHand]);
 
 	const handleAutoHandDown = useCallback(() => {
 		setTimeout(() => {
@@ -51,7 +52,7 @@ const RaiseHandButton = (): ReactElement | null => {
 				});
 			});
 		}, 5000);
-	}, [autoDownSnackbar, createSnackbar, meetingId]);
+	}, [autoDownSnackbar, createSnackbar, meetingId, raiseHand]);
 
 	const refTimeout = useRef<NodeJS.Timeout>();
 

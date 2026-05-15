@@ -9,8 +9,8 @@ import { screen } from '@testing-library/react';
 import * as ReactRouter from 'react-router-dom';
 
 import LeaveMeetingButton from './LeaveMeetingButton';
-import * as api from '../../../network/apis/MeetingsApi';
 import { createMockMeeting } from '../../../tests/createMock';
+import { mockMeetingsApi } from '../../../tests/mock-meetings-api';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 
@@ -39,18 +39,16 @@ describe('LeaveMeetingButton', () => {
 	});
 
 	test('User clicks twice the button: leaveMeeting should be called', async () => {
-		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = setup(<LeaveMeetingButton isHoovering />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		await user.click(button);
-		expect(spyOnLeaveMeeting).toHaveBeenCalled();
+		expect(mockMeetingsApi.leaveMeeting).toHaveBeenCalled();
 	});
 
 	test('User leaves the meeting directly if component has the oneClickLeave prop', async () => {
-		const spyOnLeaveMeeting = vi.spyOn(api, 'leaveMeeting');
 		const { user } = setup(<LeaveMeetingButton isHoovering oneClickLeave />);
 		await user.click(screen.getByRole('button'));
-		expect(spyOnLeaveMeeting).toHaveBeenCalled();
+		expect(mockMeetingsApi.leaveMeeting).toHaveBeenCalled();
 	});
 });

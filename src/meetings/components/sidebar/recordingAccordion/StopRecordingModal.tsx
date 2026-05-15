@@ -15,7 +15,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { stopRecording } from '../../../../network';
+import { useMeetingsApi } from '../../../../network/apis/MeetingsApiProvider';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
@@ -32,6 +32,7 @@ const StopRecordingModal = ({
 	meetingId
 }: StopRecordingModalProps): ReactElement => {
 	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
+	const { stopRecording } = useMeetingsApi();
 
 	const loggedUserId = useStore(getUserId);
 	const recStartedBy = useStore((state) => state.meetings[meetingId].recUserId);
@@ -99,7 +100,8 @@ const StopRecordingModal = ({
 		meetingId,
 		recStartedBy,
 		recordingGeneral,
-		recordingStopped
+		recordingStopped,
+		stopRecording
 	]);
 
 	return (

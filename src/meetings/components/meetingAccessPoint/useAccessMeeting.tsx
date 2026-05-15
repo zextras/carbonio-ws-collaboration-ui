@@ -11,7 +11,7 @@ import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting from '../../../hooks/useRouting';
-import { enterMeeting, joinMeeting, leaveWaitingRoom } from '../../../network';
+import { useMeetingsApi } from '../../../network/apis/MeetingsApiProvider';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -34,6 +34,7 @@ const useAccessMeeting = (
 	userIsReady: boolean;
 } => {
 	const meetingId = useMemo(() => window.location.pathname.split(MEETINGS_PATH)[1], []);
+	const { enterMeeting, joinMeeting, leaveWaitingRoom } = useMeetingsApi();
 
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 
@@ -61,7 +62,7 @@ const useAccessMeeting = (
 				goToMeetingPage(meetingId);
 			})
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [meetingId, mediaStatus, enableDarkReader, goToMeetingPage]);
+	}, [meetingId, enterMeeting, mediaStatus, enableDarkReader, goToMeetingPage]);
 
 	const handleWaitingRoom = useCallback(() => {
 		joinMeeting(
@@ -83,7 +84,7 @@ const useAccessMeeting = (
 				}
 			})
 			.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
-	}, [meetingId, mediaStatus, enableDarkReader, goToMeetingPage]);
+	}, [meetingId, joinMeeting, mediaStatus, enableDarkReader, goToMeetingPage]);
 
 	// User is accepted from waiting room
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, handleWaitingRoom);
@@ -113,7 +114,7 @@ const useAccessMeeting = (
 			BrowserUtils.clearAuthCookies();
 		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
-	}, [goToInfoPage, isLoggedUserExternal, meetingId, userIsReady]);
+	}, [goToInfoPage, isLoggedUserExternal, leaveWaitingRoom, meetingId, userIsReady]);
 
 	// Leave waiting list on window close
 	useEffect(() => {
