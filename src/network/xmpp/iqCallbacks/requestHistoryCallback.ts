@@ -14,14 +14,15 @@ import {
 	MessageType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
+import { IMessagingService } from '../../../types/network/messaging/IMessagingService';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
-import { xmppClient } from '../XMPPClient';
 
 export function handleHistory(
 	queryId: string,
-	roomId: string
+	roomId: string,
+	service: IMessagingService
 ): {
 	historyMessages: (TextMessage | ConfigurationMessage | MessageFastening)[];
 	storeMessages: (TextMessage | ConfigurationMessage)[];
@@ -38,15 +39,12 @@ export function handleHistory(
 		}
 	});
 	useStore.getState().addFastening(fasteningMessages);
-
-	// Store history messages on store updating the history of the room
 	useStore.getState().updateHistory(roomId, storeMessages);
 
-	// Request message subject of reply
 	forEach(storeMessages, (message) => {
 		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
 		if (messageSubjectOfReplyId) {
-			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
+			service.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 
@@ -80,50 +78,50 @@ export function handleHistory(
  * 5- Checks for replied messages and in case request the message in the history
  * 6- Updates the last message read of all the members of a room
  * */
-export function requestHistoryCallback(stanza: Element, queryId: string, unread = 0): void {
-	const from = getRequiredAttribute(stanza, 'from');
-	const roomId = getId(from);
-	const fin = getRequiredTagElement(stanza, 'fin');
-	const isHistoryFullyLoaded = fin.getAttribute('complete');
-	const store = useStore.getState();
+export function createRequestHistoryCallback(
+	service: IMessagingService
+): (stanza: Element, queryId: string, unread?: number) => void {
+	return function requestHistoryCallback(stanza: Element, queryId: string, unread = 0): void {
+		const from = getRequiredAttribute(stanza, 'from');
+		const roomId = getId(from);
+		const fin = getRequiredTagElement(stanza, 'fin');
+		const isHistoryFullyLoaded = fin.getAttribute('complete');
+		const store = useStore.getState();
 
-	const { historyMessages, storeMessages, fasteningMessages } = handleHistory(queryId, roomId);
+		const { historyMessages, storeMessages, fasteningMessages } = handleHistory(
+			queryId,
+			roomId,
+			service
+		);
 
-	// If there are only fastening messages in the history, request more messages
-	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
-		xmppClient.requestHistory(roomId, fasteningMessages[0].date);
-	}
-
-	// History is fully loaded if the response is marked as complete
-	// or if there are no messages in the response because the history has been cleared
-	if (isHistoryFullyLoaded || size(historyMessages) === 0) {
-		store.setHistoryIsFullyLoaded(roomId);
-	}
-
-	// If unread are more than loaded text messages, request history again
-	// Do this check here to load history only when user opens conversation
-	if (size(storeMessages) > 0 && unread > 0) {
-		const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
-		const unreadNotLoaded = unread - size(textMessages);
-		if (unreadNotLoaded > 0) {
-			xmppClient.requestHistory(
-				roomId,
-				historyMessages[0].date,
-				unreadNotLoaded + 1,
-				unreadNotLoaded
-			);
+		if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
+			service.requestHistory(roomId, fasteningMessages[0].date);
 		}
-	}
 
-	// Add message of creation room at the start of the history
-	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
-	if (isHistoryFullyLoaded && !historyIsBeenCleared) {
-		store.addCreateRoomMessage(roomId);
-	}
+		if (isHistoryFullyLoaded || size(historyMessages) === 0) {
+			store.setHistoryIsFullyLoaded(roomId);
+		}
 
-	// Set history loadable again
-	store.setHistoryLoadDisabled(roomId, false);
+		if (size(storeMessages) > 0 && unread > 0) {
+			const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
+			const unreadNotLoaded = unread - size(textMessages);
+			if (unreadNotLoaded > 0) {
+				service.requestHistory(
+					roomId,
+					historyMessages[0].date,
+					unreadNotLoaded + 1,
+					unreadNotLoaded
+				);
+			}
+		}
 
-	// Update last marker
-	xmppClient.lastMarkers(roomId);
+		const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
+		if (isHistoryFullyLoaded && !historyIsBeenCleared) {
+			store.addCreateRoomMessage(roomId);
+		}
+
+		store.setHistoryLoadDisabled(roomId, false);
+
+		service.requestReadMarkers(roomId);
+	};
 }

@@ -15,7 +15,7 @@ import { gte } from 'semver';
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
 import { declineMeeting } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../network/messaging/MessagingProvider';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -53,6 +53,7 @@ const MeetingNotification = ({
 	const meeting = useStore((store) => getMeeting(store, meetingId));
 
 	const [t] = useTranslation();
+	const messagingService = useMessaging();
 	const userIsInvitingYouLabel = (
 		<Trans
 			i18nKey="meeting.newMeetingNotification.userIsInvitingYou"
@@ -91,11 +92,11 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			xmppClient.sendChatMessage(meeting.roomId, message);
+			messagingService.sendMessage(meeting.roomId, message);
 			setMessage('');
 			stopMeetingSound();
 		}
-	}, [disableSendMessage, meeting, message, stopMeetingSound]);
+	}, [disableSendMessage, meeting, message, messagingService, stopMeetingSound]);
 
 	const handleDeclineMeeting = useCallback(() => {
 		const version = useStore.getState().session.apiVersion;

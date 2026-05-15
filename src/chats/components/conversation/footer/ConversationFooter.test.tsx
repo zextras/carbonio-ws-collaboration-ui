@@ -12,7 +12,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
 import * as api from '../../../../network/apis/RoomsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { mockMessagingService } from '../../../../tests/mock-messaging-service';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -321,7 +321,7 @@ describe('ConversationFooter', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
-		const spySendChatMessageReply = vi.spyOn(xmppClient, 'sendChatMessageReply');
+		mockMessagingService.sendReply;
 		const textToSend = 'hi!';
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -338,11 +338,11 @@ describe('ConversationFooter', () => {
 		await user.type(textArea, textToSend);
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
-		await waitFor(() => expect(spySendChatMessageReply).toHaveBeenCalled());
+		await waitFor(() => expect(mockMessagingService.sendReply).toHaveBeenCalled());
 	});
 
 	test('User can edit a message and send it', async () => {
-		const spySendChatMessageEdit = vi.spyOn(xmppClient, 'sendChatMessageEdit');
+		mockMessagingService.editMessage;
 		const store = useStore.getState();
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
@@ -361,7 +361,7 @@ describe('ConversationFooter', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
-		await waitFor(() => expect(spySendChatMessageEdit).toHaveBeenCalled());
+		await waitFor(() => expect(mockMessagingService.editMessage).toHaveBeenCalled());
 	});
 
 	test('User can edit a message and send it as empty to trigger delete modal message', async () => {
@@ -723,15 +723,15 @@ describe('Paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendIsWriting is called immediately when user start writing', async () => {
-		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
+		mockMessagingService.sendTyping;
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, 'Hi');
-		expect(spySendIsWriting).toHaveBeenCalled();
+		expect(mockMessagingService.sendTyping).toHaveBeenCalled();
 	});
 
 	test('sendIsWriting is called every 3 seconds', async () => {
-		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
+		mockMessagingService.sendTyping;
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
@@ -745,31 +745,31 @@ describe('MessageComposer - isWriting events', () => {
 		await user.type(composerTextArea, 'How are you?');
 		vi.advanceTimersByTime(2000);
 		await user.type(composerTextArea, 'I am fine');
-		expect(spySendIsWriting).toHaveBeenCalledTimes(2);
+		expect(mockMessagingService.sendTyping).toHaveBeenCalledTimes(2);
 		vi.advanceTimersByTime(1000);
-		expect(spySendIsWriting).toHaveBeenCalledTimes(3);
+		expect(mockMessagingService.sendTyping).toHaveBeenCalledTimes(3);
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
-		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
+		mockMessagingService.sendTypingPaused;
 
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
 		vi.advanceTimersByTime(4000);
-		expect(spySendPaused).toHaveBeenCalledTimes(1);
+		expect(mockMessagingService.sendTypingPaused).toHaveBeenCalledTimes(1);
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
-		const spySendPaused = vi.spyOn(xmppClient, 'sendPaused');
+		mockMessagingService.sendTypingPaused;
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
-		expect(spySendPaused).toHaveBeenCalledTimes(1);
+		expect(mockMessagingService.sendTypingPaused).toHaveBeenCalledTimes(1);
 	});
 });
 

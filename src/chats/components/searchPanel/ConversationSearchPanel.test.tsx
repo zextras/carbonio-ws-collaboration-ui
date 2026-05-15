@@ -6,7 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { mockMessagingService } from '../../../tests/mock-messaging-service';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -95,7 +95,7 @@ describe('ConversationSearchPanel', () => {
 			const textMessage = createMockTextMessage({ from: user2.id });
 			useStore.getState().newMessage(textMessage);
 
-			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
+			mockMessagingService.searchMessages.mockImplementation((roomId) => {
 				useStore.getState().setSearchResults(roomId, [textMessage]);
 				return Promise.resolve();
 			});
@@ -117,7 +117,7 @@ describe('ConversationSearchPanel', () => {
 			const textMessage = createMockTextMessage({ from: loggedUser.id });
 			useStore.getState().newMessage(textMessage);
 
-			vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId) => {
+			mockMessagingService.searchMessages.mockImplementation((roomId) => {
 				useStore.getState().setSearchResults(roomId, [textMessage]);
 				return Promise.resolve();
 			});
@@ -138,7 +138,7 @@ describe('ConversationSearchPanel', () => {
 	test('should render the no results message if there are no results', async () => {
 		const goToChatViewFn = vi.fn();
 
-		vi.spyOn(xmppClient, 'fullTextSearch').mockImplementation((roomId: string) => {
+		mockMessagingService.searchMessages.mockImplementation((roomId: string) => {
 			useStore.getState().setSearchResults(roomId, []);
 			return Promise.resolve();
 		});
@@ -170,7 +170,7 @@ describe('ConversationSearchPanel', () => {
 	test('should show error snackbar when search fails', async () => {
 		const goToChatViewFn = vi.fn();
 
-		vi.spyOn(xmppClient, 'fullTextSearch').mockRejectedValue(new Error('Search failed'));
+		mockMessagingService.searchMessages.mockRejectedValue(new Error('Search failed'));
 		const { user } = setup(
 			<ConversationSearchPanel roomId={groupRoom.id} goToChatView={goToChatViewFn} />
 		);

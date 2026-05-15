@@ -7,13 +7,14 @@
 import { debounce, forEach, size } from 'lodash';
 import { Strophe } from 'strophe.js';
 
-import { onComposingMessageStanza } from './handlers/composingMessageHandler';
+import { createInboxMessageHandler } from './handlers/inboxMessageHandler';
 import { onHistoryMessageStanza } from './handlers/historyMessageHandler';
-import { onInboxMessageStanza } from './handlers/inboxMessageHandler';
-import { onNewMessageStanza } from './handlers/newMessageHandler';
-import { onPingStanza, onPresenceStanza } from './handlers/presenceHandler';
+import { createNewMessageHandler } from './handlers/newMessageHandler';
+import { createPresenceHandler, createPingHandler } from './handlers/presenceHandler';
+import { onComposingMessageStanza } from './handlers/composingMessageHandler';
 import { onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
 import { errorCallback } from './iqCallbacks/errorCallback';
+import { IMessagingService } from '../../types/network/messaging/IMessagingService';
 import useStore from '../../store/Store';
 import { xmppDebug } from '../../utils/debug';
 
@@ -43,12 +44,15 @@ class XMPPConnection {
 
 	private requestsQueue: XMPPRequest[] = [];
 
-	constructor(initFunction: VoidFunction) {
+	private service: IMessagingService;
+
+	constructor(service: IMessagingService, initFunction: VoidFunction) {
+		this.service = service;
 		this.initFunction = initFunction;
 
 		// Init XMPP connection
-		const service = `wss://${window.location.hostname}/services/messaging/ws-xmpp`;
-		this.connection = new Strophe.Connection(service);
+		const connectionService = `wss://${window.location.hostname}/services/messaging/ws-xmpp`;
+		this.connection = new Strophe.Connection(connectionService);
 
 		// Disconnect session to broadcast unavailable presence
 		window.addEventListener('beforeunload', () => {
@@ -125,13 +129,13 @@ class XMPPConnection {
 		}
 
 		// Register handlers for event stanzas on every connection
-		this.connection.addHandler(onPresenceStanza, null, 'presence');
-		this.connection.addHandler(onNewMessageStanza, null, 'message');
+		this.connection.addHandler(createPresenceHandler(this.service), null, 'presence');
+		this.connection.addHandler(createNewMessageHandler(this.service), null, 'message');
 		this.connection.addHandler(onHistoryMessageStanza, Strophe.NS.MAM, 'message');
-		this.connection.addHandler(onInboxMessageStanza, Strophe.NS.INBOX, 'message');
+		this.connection.addHandler(createInboxMessageHandler(this.service), Strophe.NS.INBOX, 'message');
 		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
-		this.connection.addHandler(onPingStanza, Strophe.NS.PING, 'iq');
+		this.connection.addHandler(createPingHandler(this.service), Strophe.NS.PING, 'iq');
 
 		this.initFunction();
 

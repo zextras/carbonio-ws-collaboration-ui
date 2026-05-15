@@ -21,7 +21,7 @@ import { useTranslation } from 'react-i18next';
 import SearchResultMessage from './SearchResultMessage';
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../network/messaging/MessagingProvider';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -44,6 +44,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const isDesktopView = useMediaQueryCheck();
 
 	const createSnackbar = useSnackbar();
+	const messagingService = useMessaging();
 
 	const [t] = useTranslation();
 	const inputLabel = t('searchPanel.inputPlaceholder', 'Search messages');
@@ -92,8 +93,8 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 			roomType,
 			searchTextLength: searchText.length
 		});
-		xmppClient
-			.fullTextSearch(roomId, searchText)
+		messagingService
+			.searchMessages(roomId, searchText)
 			.then(() => {
 				setRequestStatus(RequestStatus.SUCCESS);
 			})

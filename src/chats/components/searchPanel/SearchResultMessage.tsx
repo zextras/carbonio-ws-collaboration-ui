@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../network/messaging/MessagingProvider';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
@@ -56,18 +56,19 @@ const SearchResultMessage = ({
 	const youLabel = t('status.you', 'You');
 
 	const { avatarColor } = useAvatarUtilities(message.from);
+	const messagingService = useMessaging();
 
 	const onResultClick = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
-			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
+			messagingService.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
 				scrollToMessage(message.id);
 				useStore.getState().setScrollPosition(message.roomId, message.id);
 			});
 		} else {
 			scrollToMessage(message.id);
 		}
-	}, [isMessageSelected, isMessageSelectedAlreadyStored, message]);
+	}, [isMessageSelected, isMessageSelectedAlreadyStored, message, messagingService]);
 
 	return (
 		<CustomContainer

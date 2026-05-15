@@ -7,6 +7,11 @@ import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
 import failOnConsole from 'vitest-fail-on-console';
 
+import { mockMessagingService } from './mock-messaging-service';
+import { setMessagingServiceRef } from '../network/messaging/messagingServiceRef';
+
+setMessagingServiceRef(mockMessagingService);
+
 configure({
 	asyncUtilTimeout: 2000
 });

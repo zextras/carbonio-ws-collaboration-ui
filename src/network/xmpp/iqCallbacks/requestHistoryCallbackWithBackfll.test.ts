@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { requestHistoryWithBackfillCallback } from './requestHistoryWithBackfillCallback';
+import { createRequestHistoryWithBackfillCallback } from './requestHistoryWithBackfillCallback';
 import useStore from '../../../store/Store';
 import {
 	buildEndRequestHistoryStanza,
@@ -12,8 +12,10 @@ import {
 	buildTextMessageFromHistory
 } from '../../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import { mockMessagingService } from '../../../tests/mock-messaging-service';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
-import { xmppClient } from '../XMPPClient';
+
+const requestHistoryWithBackfillCallback = createRequestHistoryWithBackfillCallback(mockMessagingService);
 
 const room = createMockRoom({ id: 'mockRoomId' });
 const textMessage = createMockTextMessage({ id: 'testId', roomId: room.id });
@@ -50,12 +52,11 @@ describe('requestHistoryWithBackfillCallback tests', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = vi.spyOn(xmppClient, 'requestMessageSubjectOfReply');
 		requestHistoryWithBackfillCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
 			queryId
 		);
-		expect(spyOnRequestMessage).toHaveBeenCalledTimes(1);
+		expect(mockMessagingService.requestMessageSubjectOfReply).toHaveBeenCalledTimes(1);
 	});
 
 	test('Message ranges are correctly added to store', async () => {

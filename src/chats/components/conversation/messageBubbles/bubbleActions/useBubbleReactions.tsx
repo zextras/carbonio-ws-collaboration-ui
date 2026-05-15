@@ -12,7 +12,7 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../../../network/messaging/MessagingProvider';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
@@ -52,6 +52,7 @@ const useBubbleReactions = (
 	reactionsPopoverRef: React.RefObject<HTMLDivElement>;
 } => {
 	const [t] = useTranslation();
+	const messagingService = useMessaging();
 	const reactionsLabel = t('tooltip.reactions', 'Reactions');
 	const moreReactionsLabel = t('tooltip.moreReactions', 'More reactions');
 
@@ -72,13 +73,13 @@ const useBubbleReactions = (
 	const sendReaction = useCallback(
 		(emoji: string) => {
 			if (myReaction !== emoji) {
-				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, emoji);
+				messagingService.sendReaction(message.roomId, message.stanzaId, emoji);
 			} else {
-				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, '');
+				messagingService.sendReaction(message.roomId, message.stanzaId, '');
 			}
 			setPopoverActive(false);
 		},
-		[message.roomId, message.stanzaId, myReaction]
+		[message.roomId, message.stanzaId, messagingService, myReaction]
 	);
 
 	const openEmojiPicker = useCallback(

@@ -10,7 +10,7 @@ import { now } from 'moment';
 
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { mockMessagingService } from '../../../tests/mock-messaging-service';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -61,7 +61,7 @@ describe('Chat', () => {
 
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessage);
-			xmppClient.features = [];
+			mockMessagingService.features = [];
 
 			const { user } = setup(
 				<Chat
@@ -87,7 +87,7 @@ describe('Chat', () => {
 			store.newMessage(mockedTextMessage);
 
 			// Mock xmppClient.pinMessage to update the store
-			vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+			mockMessagingService.pinMessage.mockImplementation(() => {
 				store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 			});
 
@@ -130,7 +130,7 @@ describe('Chat', () => {
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
 
 			// Mock xmppClient.pinMessage to update the store with the new pinned message
-			vi.spyOn(xmppClient, 'pinMessage').mockImplementation((_roomId, stanzaId) => {
+			mockMessagingService.pinMessage.mockImplementation((_roomId, stanzaId) => {
 				if (stanzaId === secondMessage.stanzaId) {
 					store.setPinnedMessage(mockedRoom.id, secondMessage);
 				}
@@ -179,8 +179,6 @@ describe('Chat', () => {
 			store.newMessage(secondMessage);
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
 
-			const pinMessageSpy = vi.spyOn(xmppClient, 'pinMessage');
-
 			const { user } = setup(
 				<Chat
 					roomId={mockedRoom.id}
@@ -201,7 +199,7 @@ describe('Chat', () => {
 			expect(screen.getByText(replaceLabel)).toBeVisible();
 			await user.click(screen.getByText(/cancel/i));
 			expect(screen.queryByText(replaceLabel)).not.toBeInTheDocument();
-			expect(pinMessageSpy).not.toHaveBeenCalled();
+			expect(mockMessagingService.pinMessage).not.toHaveBeenCalled();
 			expect(
 				within(screen.getByTestId(pinSectionDataTestId)).getByText(firstMessage.text)
 			).toBeVisible();
@@ -218,10 +216,10 @@ describe('Chat', () => {
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 				});
-				vi.spyOn(xmppClient, 'unpinMessage').mockImplementation(() => {
+				mockMessagingService.unpinMessage.mockImplementation(() => {
 					store.removePinnedMessage(mockedRoom.id);
 				});
 
@@ -254,10 +252,10 @@ describe('Chat', () => {
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 				});
-				vi.spyOn(xmppClient, 'unpinMessage').mockImplementation(() => {
+				mockMessagingService.unpinMessage.mockImplementation(() => {
 					store.removePinnedMessage(mockedRoom.id);
 				});
 
@@ -289,7 +287,7 @@ describe('Chat', () => {
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 					store.newMessage(
 						createMockConfigurationMessage({
@@ -331,7 +329,7 @@ describe('Chat', () => {
 				store.newMessage(mockPinConfigurationMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 					store.newMessage(
 						createMockConfigurationMessage({
@@ -342,7 +340,7 @@ describe('Chat', () => {
 						})
 					);
 				});
-				vi.spyOn(xmppClient, 'unpinMessage').mockImplementation(() => {
+				mockMessagingService.unpinMessage.mockImplementation(() => {
 					store.removePinnedMessage(mockedRoom.id);
 					store.newMessage(
 						createMockConfigurationMessage({
@@ -385,10 +383,10 @@ describe('Chat', () => {
 			store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 
 			// Mock xmppClient.pinMessage and sendChatMessageDeletion to update the store
-			vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+			mockMessagingService.pinMessage.mockImplementation(() => {
 				store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 			});
-			vi.spyOn(xmppClient, 'sendChatMessageDeletion').mockImplementation(() => {
+			mockMessagingService.deleteMessage.mockImplementation(() => {
 				store.removePinnedMessage(mockedRoom.id);
 			});
 
@@ -425,7 +423,7 @@ describe('Chat', () => {
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 				});
 
@@ -459,12 +457,12 @@ describe('Chat', () => {
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
 				// Mock xmppClient.pinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
 				});
 
 				// Mock xmppClient.sendChatMessageEdit to update the pinned message text
-				vi.spyOn(xmppClient, 'sendChatMessageEdit').mockImplementation((_roomId, newText) => {
+				mockMessagingService.editMessage.mockImplementation((_roomId, newText) => {
 					const updatedMessage = { ...mockedTextMessage, text: newText, edited: true };
 					store.setPinnedMessage(mockedRoom.id, updatedMessage);
 				});
@@ -510,12 +508,12 @@ describe('Chat', () => {
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
 				// Mock xmppClient.pinMessage to update the store
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					store.setPinnedMessage(mockedRoom.id, mockedEditedMessage);
 				});
 
 				// Mock xmppClient.sendChatMessageEdit to update the pinned message text
-				vi.spyOn(xmppClient, 'sendChatMessageEdit').mockImplementation((_roomId, newText) => {
+				mockMessagingService.editMessage.mockImplementation((_roomId, newText) => {
 					const updatedMessage = {
 						...mockedEditedMessage,
 						text: newText,
@@ -580,7 +578,7 @@ describe('Chat', () => {
 				const updatedText = 'updated text';
 
 				// Mock xmppClient.sendChatMessageEdit to update the message via fastening
-				vi.spyOn(xmppClient, 'sendChatMessageEdit').mockImplementation((_roomId, newText) => {
+				mockMessagingService.editMessage.mockImplementation((_roomId, newText) => {
 					const fastening = createMockMessageFastening({
 						roomId: mockedRoom.id,
 						originalStanzaId: mockedTextMsgWithAttachment.stanzaId,
@@ -591,7 +589,7 @@ describe('Chat', () => {
 				});
 
 				// Mock xmppClient.pinMessage to update the store with the edited message including attachment
-				vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => {
+				mockMessagingService.pinMessage.mockImplementation(() => {
 					const editedMessage: TextMessage = {
 						...mockedTextMsgWithAttachment,
 						text: `Hi${updatedText}`,

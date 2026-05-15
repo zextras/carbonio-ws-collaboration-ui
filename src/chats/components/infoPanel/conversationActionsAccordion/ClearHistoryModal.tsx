@@ -10,7 +10,7 @@ import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { clearRoomHistory } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../../network/messaging/MessagingProvider';
 import {
 	getLastMessageSelector,
 	getRoomUnreadSelector
@@ -39,18 +39,19 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear history');
 	const closeLabel = t('action.close', 'Close');
 
+	const messagingService = useMessaging();
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastTextMessage = useStore((state) => getLastMessageSelector(state, roomId));
 
 	const clearHistory = useCallback(() => {
 		if (unreadMessagesCount > 0 && lastTextMessage) {
-			xmppClient.readMessage(roomId, lastTextMessage.id);
+			messagingService.markAsRead(roomId, lastTextMessage.id);
 		}
 		clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();
 			closeModal();
 		});
-	}, [closeModal, lastTextMessage, roomId, successfulSnackbar, unreadMessagesCount]);
+	}, [closeModal, lastTextMessage, messagingService, roomId, successfulSnackbar, unreadMessagesCount]);
 
 	return (
 		<Modal

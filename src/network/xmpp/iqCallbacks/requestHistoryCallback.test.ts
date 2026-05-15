@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { requestHistoryCallback } from './requestHistoryCallback';
+import { createRequestHistoryCallback } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
 import {
 	buildEndRequestHistoryStanza,
@@ -12,8 +12,10 @@ import {
 	buildTextMessageFromHistory
 } from '../../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import { mockMessagingService } from '../../../tests/mock-messaging-service';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
-import { xmppClient } from '../XMPPClient';
+
+const requestHistoryCallback = createRequestHistoryCallback(mockMessagingService);
 
 const room = createMockRoom({ id: 'mockRoomId' });
 const textMessage = createMockTextMessage({ id: 'testId', roomId: room.id });
@@ -62,7 +64,6 @@ describe('requestHistoryCallback', () => {
 	});
 
 	test('Request history again if there are only fastenings', () => {
-		const spyOnRequestHistory = vi.spyOn(xmppClient, 'requestHistory');
 		const queryId = HistoryAccumulator.getNextId();
 		HistoryAccumulator.pushToCache(
 			queryId,
@@ -74,7 +75,7 @@ describe('requestHistoryCallback', () => {
 		);
 		const store = useStore.getState();
 		expect(store.activeConversations[textMessage.roomId].isHistoryFullyLoaded).toBeTruthy();
-		expect(spyOnRequestHistory).toHaveBeenCalled();
+		expect(mockMessagingService.requestHistory).toHaveBeenCalled();
 	});
 
 	test('Fastenings are added to fastening store', () => {
@@ -104,11 +105,10 @@ describe('requestHistoryCallback', () => {
 				replyTo: 'stanzaId'
 			})
 		);
-		const spyOnRequestMessage = vi.spyOn(xmppClient, 'requestMessageSubjectOfReply');
 		requestHistoryCallback(
 			buildEndRequestHistoryStanza({ roomId: textMessage.roomId, isComplete: false }),
 			queryId
 		);
-		expect(spyOnRequestMessage).toHaveBeenCalledTimes(1);
+		expect(mockMessagingService.requestMessageSubjectOfReply).toHaveBeenCalledTimes(1);
 	});
 });

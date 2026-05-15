@@ -18,13 +18,14 @@ import MeetingNotificationHandler from './meetings/components/MeetingNotificatio
 import initMeetings from './meetings/initMeetings';
 import { getCapabilities, getToken, listMeetings, listRooms } from './network';
 import { wsClient } from './network/websocket/WebSocketClient';
-import { xmppClient } from './network/xmpp/XMPPClient';
+import { MessagingProvider, useMessaging } from './network/messaging/MessagingProvider';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
 
-export default function MainApp(): React.JSX.Element {
+function MainAppContent(): React.JSX.Element {
+	const messagingService = useMessaging();
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((state) => state.setAttributes);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
@@ -66,7 +67,7 @@ export default function MainApp(): React.JSX.Element {
 		if (authenticated) setDateDefault(prefs?.zimbraPrefLocale);
 	}, [prefs, authenticated]);
 
-	// NETWORKS: init XMPP and WebSocket clients
+	// NETWORKS: init messaging service and WebSocket clients
 	const connect = useCallback(() => {
 		getToken()
 			.then((resp) => {
@@ -81,8 +82,8 @@ export default function MainApp(): React.JSX.Element {
 							setAttributes(attrs);
 						}
 						setChatsBeStatus(true);
-						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						xmppClient.connect(resp.zmToken);
+						// Init messaging service and webSocket after roomList request to avoid missing data (specially for the inbox request)
+						messagingService.connect(resp.zmToken);
 						wsClient.connect();
 					})
 					.catch(() => setChatsBeStatus(false));
@@ -90,7 +91,7 @@ export default function MainApp(): React.JSX.Element {
 			.catch(() => {
 				setChatsBeStatus(false);
 			});
-	}, [setChatsBeStatus, setAttributes, attrs]);
+	}, [messagingService, setChatsBeStatus, setAttributes, attrs]);
 
 	useEffect(() => {
 		if (authenticated) {
@@ -111,5 +112,13 @@ export default function MainApp(): React.JSX.Element {
 			<MeetingNotificationHandler />
 			<WaitingListSnackbar />
 		</>
+	);
+}
+
+export default function MainApp(): React.JSX.Element {
+	return (
+		<MessagingProvider>
+			<MainAppContent />
+		</MessagingProvider>
 	);
 }

@@ -7,7 +7,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { usePinMessage } from './usePinMessage';
-import { xmppClient } from '../network/xmpp/XMPPClient';
+import { mockMessagingService } from '../tests/mock-messaging-service';
 import useStore from '../store/Store';
 import {
 	createMockMember,
@@ -274,8 +274,6 @@ describe('usePinMessage', () => {
 			store.addRooms([room]);
 			store.newMessage(message);
 
-			const pinMessageSpy = vi.spyOn(xmppClient, 'pinMessage');
-
 			const { result } = renderHook(() => usePinMessage(message), {
 				wrapper: ProvidersWrapper
 			});
@@ -284,7 +282,7 @@ describe('usePinMessage', () => {
 				result.current.pinAction();
 			});
 
-			expect(pinMessageSpy).toHaveBeenCalledWith(room.id, message.stanzaId);
+			expect(mockMessagingService.pinMessage).toHaveBeenCalledWith(room.id, message.stanzaId);
 		});
 
 		it('should call unpinMessage when message is already pinned', () => {
@@ -304,8 +302,6 @@ describe('usePinMessage', () => {
 			store.newMessage(message);
 			store.setPinnedMessage(room.id, message);
 
-			const unpinMessageSpy = vi.spyOn(xmppClient, 'unpinMessage');
-
 			const { result } = renderHook(() => usePinMessage(message), {
 				wrapper: ProvidersWrapper
 			});
@@ -314,7 +310,7 @@ describe('usePinMessage', () => {
 				result.current.pinAction();
 			});
 
-			expect(unpinMessageSpy).toHaveBeenCalledWith(room.id, message.stanzaId);
+			expect(mockMessagingService.unpinMessage).toHaveBeenCalledWith(room.id, message.stanzaId);
 		});
 
 		it('should use editedStanzaId for pinning when message is edited', () => {
@@ -335,8 +331,6 @@ describe('usePinMessage', () => {
 			store.addRooms([room]);
 			store.newMessage(editedMessage);
 
-			const pinMessageSpy = vi.spyOn(xmppClient, 'pinMessage');
-
 			const { result } = renderHook(() => usePinMessage(editedMessage), {
 				wrapper: ProvidersWrapper
 			});
@@ -345,7 +339,7 @@ describe('usePinMessage', () => {
 				result.current.pinAction();
 			});
 
-			expect(pinMessageSpy).toHaveBeenCalledWith(room.id, editedMessage.editedStanzaId);
+			expect(mockMessagingService.pinMessage).toHaveBeenCalledWith(room.id, editedMessage.editedStanzaId);
 		});
 
 		it('should use original stanzaId for edited message when editedStanzaId is not present', () => {
@@ -365,8 +359,6 @@ describe('usePinMessage', () => {
 			store.addRooms([room]);
 			store.newMessage(editedMessage);
 
-			const pinMessageSpy = vi.spyOn(xmppClient, 'pinMessage');
-
 			const { result } = renderHook(() => usePinMessage(editedMessage), {
 				wrapper: ProvidersWrapper
 			});
@@ -375,7 +367,7 @@ describe('usePinMessage', () => {
 				result.current.pinAction();
 			});
 
-			expect(pinMessageSpy).toHaveBeenCalledWith(room.id, editedMessage.stanzaId);
+			expect(mockMessagingService.pinMessage).toHaveBeenCalledWith(room.id, editedMessage.stanzaId);
 		});
 
 		it('should not call pinMessage directly when trying to pin a message when another message is already pinned', () => {
@@ -405,13 +397,11 @@ describe('usePinMessage', () => {
 				wrapper: ProvidersWrapper
 			});
 
-			const pinMessageSpy = vi.spyOn(xmppClient, 'pinMessage');
-
 			act(() => {
 				result.current.pinAction();
 			});
 
-			expect(pinMessageSpy).not.toHaveBeenCalled();
+			expect(mockMessagingService.pinMessage).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -6,18 +6,20 @@
 
 import { forEach } from 'lodash';
 
+import { IMessagingService } from '../../../types/network/messaging/IMessagingService';
 import { getRequiredAttribute } from '../utility/decodeStanza';
-import { xmppClient } from '../XMPPClient';
 
 /**
  * ROSTER (XEP-0012)
  * Documentation: https://xmpp.org/extensions/xep-0162.html
  */
 
-export function rosterCallback(stanza: Element): void {
-	const contacts = stanza.getElementsByTagName('item');
-	forEach(contacts, (contact) => {
-		const jid = getRequiredAttribute(contact, 'jid');
-		xmppClient.getLastActivity(jid);
-	});
+export function createRosterCallback(service: IMessagingService): (stanza: Element) => void {
+	return function rosterCallback(stanza: Element): void {
+		const contacts = stanza.getElementsByTagName('item');
+		forEach(contacts, (contact) => {
+			const jid = getRequiredAttribute(contact, 'jid');
+			service.getLastActivity(jid);
+		});
+	};
 }

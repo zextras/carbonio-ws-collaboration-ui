@@ -31,7 +31,7 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../network/messaging/MessagingProvider';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
@@ -48,6 +48,7 @@ type ChatsProps = {
 
 const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): ReactElement => {
 	const [t] = useTranslation();
+	const messagingService = useMessaging();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
@@ -135,8 +136,8 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
 	useEffect(() => {
-		xmppClient.getMessagePin(roomId);
-	}, [roomId]);
+		messagingService.getPinnedMessage(roomId);
+	}, [messagingService, roomId]);
 
 	return (
 		<CustomContainer

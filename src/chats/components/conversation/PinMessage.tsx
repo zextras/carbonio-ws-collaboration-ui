@@ -22,7 +22,7 @@ import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../network/messaging/MessagingProvider';
 import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
@@ -114,6 +114,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const isMessageInStore = useStore((state) =>
 		getIsMessageSelectedAlreadyStored(state, pinnedMessage.roomId, pinnedMessage.stanzaId)
 	);
+	const messagingService = useMessaging();
 
 	const ownerMessage = useMemo(() => {
 		if (pinnedMessage.from === loggedUserId) {
@@ -142,7 +143,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		}, 5000);
 
 		if (!isMessageInStore && !isMessageSelected) {
-			xmppClient
+			messagingService
 				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
@@ -155,6 +156,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		isClickable,
 		isMessageInStore,
 		isMessageSelected,
+		messagingService,
 		pinnedMessage.id,
 		pinnedMessage.roomId,
 		pinnedMessage.stanzaId

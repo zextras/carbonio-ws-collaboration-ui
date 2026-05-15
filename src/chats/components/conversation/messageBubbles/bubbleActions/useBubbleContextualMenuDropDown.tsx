@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreview from '../../../../../hooks/usePreview';
 import { deleteAttachment, getURLAttachment } from '../../../../../network';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../../../network/messaging/MessagingProvider';
 import {
 	getFilesToUploadArray,
 	getForwardList,
@@ -74,6 +74,7 @@ const useBubbleContextualMenuDropDown = (
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
+	const messagingService = useMessaging();
 
 	const { onPreviewClick } = usePreview(
 		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
@@ -113,12 +114,12 @@ const useBubbleContextualMenuDropDown = (
 	const deleteMessageAction = useCallback(() => {
 		if (message.attachment) {
 			deleteAttachment(message.attachment.id).then(() =>
-				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
+				messagingService.deleteMessage(message.roomId, message.stanzaId)
 			);
 		} else {
-			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
+			messagingService.deleteMessage(message.roomId, message.stanzaId);
 		}
-	}, [message.stanzaId, message.attachment, message.roomId]);
+	}, [message.stanzaId, message.attachment, message.roomId, messagingService]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {

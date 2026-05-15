@@ -11,9 +11,9 @@ import { v4 as uuidGenerator } from 'uuid';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
-import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
-import { requestHistoryWithBackfillCallback } from './iqCallbacks/requestHistoryWithBackfillCallback';
-import { rosterCallback } from './iqCallbacks/rosterCallback';
+import { createRequestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
+import { createRequestHistoryWithBackfillCallback } from './iqCallbacks/requestHistoryWithBackfillCallback';
+import { createRosterCallback } from './iqCallbacks/rosterCallback';
 import { smartMarkersCallback } from './iqCallbacks/smartMarkersCallback';
 import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
@@ -28,17 +28,18 @@ import {
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
+import { IMessagingService } from '../../types/network/messaging/IMessagingService';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
 
-class XMPPClient {
+export class XMPPClient implements IMessagingService {
 	public xmppConnection: XMPPConnection;
 
 	public features: string[] = [];
 
 	constructor() {
-		this.xmppConnection = new XMPPConnection(() => {
+		this.xmppConnection = new XMPPConnection(this, () => {
 			this.setInbox();
 			this.getContactList();
 			this.setOnline();
@@ -73,25 +74,15 @@ class XMPPClient {
 		this.xmppConnection.connect(token);
 	}
 
-	/**
-	 * PRESENCE:
-	 * I receive presence events only from users who are on my contact list with a bidirectional subscription.
-	 * Automatically, when one_to_one conversation with a certain user starts, this user is added to my contact list,
-	 * I'm subscribed to his changes, and he is subscribed to my changes.
-	 * For offline contact, request last activity.
-	 */
-
-	// Request my contact list
-	public getContactList(): void {
+	private getContactList(): void {
 		const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.ROSTER });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: rosterCallback
+			callback: createRosterCallback(this)
 		});
 	}
 
-	// Send my 'presence' event to all my contacts
 	public setOnline(): void {
 		this.xmppConnection.send({ type: XMPPRequestType.PRESENCE, elem: $pres() });
 	}
@@ -103,7 +94,6 @@ class XMPPClient {
 		});
 	}
 
-	// Request last activity date of a particular user
 	public getLastActivity(jid: string): void {
 		const iq = $iq({ type: 'get', to: jid }).c('query', { xmlns: Strophe.NS.LAST_ACTIVITY });
 		this.xmppConnection.send({
@@ -113,13 +103,7 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 *
-	 * Request XMPP active features.
-	 */
-
-	// Request the supported form
-	public getFeatures(): void {
+	private getFeatures(): void {
 		const iq = $iq({ type: 'get', to: 'carbonio' }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
@@ -133,13 +117,7 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * INBOX:
-	 * Request chat initial information like unread messages or active conversations.
-	 */
-
-	// Fetch the inbox and get initial information:
-	public setInbox(): void {
+	private setInbox(): void {
 		const queryId = HistoryAccumulator.getNextId();
 		const iq = $iq({ type: 'set', id: queryId }).c('inbox', { xmlns: Strophe.NS.INBOX });
 		this.xmppConnection.send({
@@ -183,7 +161,8 @@ class XMPPClient {
 									addFastening(fasteningMessages);
 								}
 								const textOrConfig = messages.findLast(
-									(m) => m.type === MessageType.TEXT_MSG || m.type === MessageType.CONFIGURATION_MSG
+									(m) =>
+										m.type === MessageType.TEXT_MSG || m.type === MessageType.CONFIGURATION_MSG
 								);
 
 								if (textOrConfig) {
@@ -215,7 +194,10 @@ class XMPPClient {
 									setLastMessage(newLastMessage.roomId, newLastMessage);
 									return;
 								}
-								date = messages.reduce((oldest, m) => Math.min(m.date, oldest), messages[0]?.date);
+								date = messages.reduce(
+									(oldest, m) => Math.min(m.date, oldest),
+									messages[0]?.date
+								);
 							}
 						})
 					);
@@ -224,27 +206,19 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * MESSAGE:
-	 * Control message flow sending messages and request history
-	 */
-
-	// Send a text message
-	sendChatMessage(roomId: string, message: string): void {
+	sendMessage(roomId: string, message: string): void {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
 			replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
-				this.sendChatMessage(response.id, message);
+				this.sendMessage(response.id, message);
 			});
 			return;
 		}
 
-		// Read messages before sending a new one
 		const lastMessageId = getLastUnreadMessage(roomId);
-		if (lastMessageId) this.readMessage(roomId, lastMessageId);
+		if (lastMessageId) this.markAsRead(roomId, lastMessageId);
 
 		const uuid = uuidGenerator();
-		// Set a placeholder message into the store
 		useStore.getState().setPlaceholderMessage({ roomId, id: uuid, text: message });
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
@@ -255,24 +229,13 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	/**
-	 * Reply to a message (XEP-0461)
-	 * Documentation: https://xmpp.org/extensions/xep-0461.html
-	 */
-	sendChatMessageReply(
-		roomId: string,
-		message: string,
-		replyTo: string,
-		replyMessageId: string
-	): void {
-		// Read messages before sending a new one
+	sendReply(roomId: string, message: string, replyTo: string, replyMessageId: string): void {
 		const lastMessageId = getLastUnreadMessage(roomId);
-		if (lastMessageId) this.readMessage(roomId, lastMessageId);
+		if (lastMessageId) this.markAsRead(roomId, lastMessageId);
 
 		const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
 		const uuid = uuidGenerator();
 
-		// Set a placeholder message into the store
 		useStore
 			.getState()
 			.setPlaceholderMessage({ roomId, id: uuid, text: message, replyTo: replyMessageId });
@@ -287,11 +250,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	/**
-	 * Delete a message / Message Retraction (XEP-0424)
-	 * Documentation: https://esl.github.io/MongooseDocs/latest/modules/mod_mam/#retraction-on-the-stanza-id
-	 */
-	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void {
+	deleteMessage(roomId: string, messageStanzaId: string): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
@@ -299,11 +258,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	/**
-	 * Edit a message using Message Fastening
-	 * Documentation: https://xmpp.org/extensions/xep-0422.html
-	 */
-	sendChatMessageEdit(
+	editMessage(
 		roomId: string,
 		message: string,
 		messageStanzaId: string,
@@ -326,7 +281,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	sendChatMessageReaction(roomId: string, messageStanzaId: string, reaction: string): void {
+	sendReaction(roomId: string, messageStanzaId: string, reaction: string): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
@@ -340,7 +295,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	public requestMessages(
+	private requestMessages(
 		queryId: string,
 		roomId: string,
 		endHistory: number,
@@ -389,13 +344,11 @@ class XMPPClient {
 		});
 	}
 
-	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity = 50, unread = 0): void {
 		if (!useStore.getState().rooms[roomId]) return;
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
 		const queryId = HistoryAccumulator.getNextId();
-		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: queryId })
 			.c('x', { type: 'submit', xmlns: jabberData })
@@ -423,7 +376,7 @@ class XMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => requestHistoryCallback(stanza, queryId, unread)
+			callback: (stanza) => createRequestHistoryCallback(this)(stanza, queryId, unread)
 		});
 	}
 
@@ -506,8 +459,7 @@ class XMPPClient {
 		});
 	}
 
-	// Retrieve all messages of a room with a particular text in the body
-	fullTextSearch(roomId: string, text: string): Promise<void> {
+	searchMessages(roomId: string, text: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			const queryId = HistoryAccumulator.getNextId();
 			const room = useStore.getState().rooms[roomId];
@@ -541,7 +493,7 @@ class XMPPClient {
 		});
 	}
 
-	requestHistoryBetweenTwoDates(roomId: string, afterDate: number, beforeDate: number): void {
+	requestHistoryBetweenDates(roomId: string, afterDate: number, beforeDate: number): void {
 		if (!useStore.getState().rooms[roomId]) return;
 
 		const queryId = HistoryAccumulator.getNextId();
@@ -565,7 +517,7 @@ class XMPPClient {
 		this.xmppConnection.send({
 			type: XMPPRequestType.IQ,
 			elem: iq,
-			callback: (stanza) => requestHistoryWithBackfillCallback(stanza, queryId)
+			callback: (stanza) => createRequestHistoryWithBackfillCallback(this)(stanza, queryId)
 		});
 	}
 
@@ -592,7 +544,7 @@ class XMPPClient {
 				type: XMPPRequestType.IQ,
 				elem: iq,
 				callback: (stanza) => {
-					requestHistoryWithBackfillCallback(stanza, queryId);
+					createRequestHistoryWithBackfillCallback(this)(stanza, queryId);
 					resolve();
 				},
 				errorCallback: reject
@@ -600,14 +552,7 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * CHAT STATE:
-	 * Control 'isWriting' information by sending 'composing' or 'paused' events.
-	 */
-
-	// Send "I'm typing" information to all the users on the room
-	sendIsWriting(roomId: string): void {
-		// Avoid sending isWriting events to placeholder rooms
+	sendTyping(roomId: string): void {
 		if (useStore.getState().rooms[roomId]?.placeholder) return;
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
@@ -616,9 +561,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	// Sending a paused event to all users on the room
-	sendPaused(roomId: string): void {
-		// Avoid sending paused events to placeholder rooms
+	sendTypingPaused(roomId: string): void {
 		if (useStore.getState().rooms[roomId]?.placeholder) return;
 
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
@@ -627,13 +570,7 @@ class XMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	/**
-	 * MARKERS
-	 * Functions to control the read / unread state of a message
-	 */
-
-	// Send confirmation that I read a certain message
-	readMessage(roomId: string, messageId: string): void {
+	markAsRead(roomId: string, messageId: string): void {
 		const message = find(
 			useStore.getState().chatsRegistry[roomId].messages,
 			(message) => message.id === messageId
@@ -647,8 +584,7 @@ class XMPPClient {
 		}
 	}
 
-	// Request last message read date of all the members of a room
-	lastMarkers(roomId: string): void {
+	requestReadMarkers(roomId: string): void {
 		const iq = $iq({ type: 'get' }).c('query', {
 			xmlns: Strophe.NS.SMART_MARKERS,
 			peer: carbonizeMUC(roomId)
@@ -673,7 +609,7 @@ class XMPPClient {
 		}, 500);
 	}
 
-	getMessagePin(roomId: string): void {
+	getPinnedMessage(roomId: string): void {
 		if (!this.features.includes('zextras:iq:pin') && this.features.length > 0) return;
 
 		const iq = $iq({ type: 'get', to: carbonizeMUC(roomId) }).c('pin', {
@@ -693,9 +629,6 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * Fetches a message by its stanza ID and calls the callback with the result
-	 */
 	private fetchMessageByStanzaId(
 		roomId: string,
 		stanzaId: string,
@@ -715,9 +648,6 @@ class XMPPClient {
 		});
 	}
 
-	/**
-	 * Handles setting the pinned message when it's an edited message (FASTENING type)
-	 */
 	private handleEditedPinnedMessage(roomId: string, fasteningMessage: MessageFastening): void {
 		this.fetchMessageByStanzaId(roomId, fasteningMessage.originalStanzaId, (queryId) => {
 			const originalMessage = HistoryAccumulator.getPinnedMessage(queryId);
@@ -731,7 +661,7 @@ class XMPPClient {
 		});
 	}
 
-	requestPinnedMessageContent(roomId: string, pinnedMessageStanzaId: string): void {
+	private requestPinnedMessageContent(roomId: string, pinnedMessageStanzaId: string): void {
 		if (!useStore.getState().rooms[roomId]) return;
 
 		const storeMessages = useStore.getState().chatsRegistry[roomId]?.messages;
@@ -773,5 +703,3 @@ class XMPPClient {
 		});
 	}
 }
-
-export const xmppClient = new XMPPClient();

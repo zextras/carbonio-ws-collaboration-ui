@@ -11,7 +11,7 @@ import { now } from 'moment';
 
 import Bubble from './Bubble';
 import * as api from '../../../../network/apis/AttachmentsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { mockMessagingService } from '../../../../tests/mock-messaging-service';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -365,7 +365,7 @@ describe('Actions', () => {
 		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		const spySendChatMessageDeletion = vi.spyOn(xmppClient, 'sendChatMessageDeletion');
+		
 
 		useStore.getState().newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(
@@ -383,6 +383,6 @@ describe('Actions', () => {
 		const deleteAction = await screen.findByText(/Delete for all/i);
 		await user.click(deleteAction);
 
-		expect(spySendChatMessageDeletion).toHaveBeenCalled();
+		expect(mockMessagingService.deleteMessage).toHaveBeenCalled();
 	});
 });

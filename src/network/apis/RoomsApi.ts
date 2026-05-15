@@ -30,7 +30,7 @@ import {
 } from '../../utils/FetchUtils';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
+import { getMessagingService } from '../messaging/messagingServiceRef';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -183,7 +183,7 @@ export const addRoomAttachment = (
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) getMessagingService().markAsRead(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
 	useStore.getState().setPlaceholderMessage({
@@ -248,7 +248,7 @@ export const forwardMessages = (
 
 	const promises = messages.map((message) => {
 		const queryId = HistoryAccumulator.getNextId();
-		return xmppClient
+		return getMessagingService()
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
 				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);

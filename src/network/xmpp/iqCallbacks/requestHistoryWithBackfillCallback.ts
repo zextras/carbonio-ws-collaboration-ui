@@ -7,9 +7,9 @@
 import { handleHistory } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
 import { BackfillRequest, MessageRange } from '../../../types/store/ChatsRegistryTypes';
+import { IMessagingService } from '../../../types/network/messaging/IMessagingService';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
-import { xmppClient } from '../XMPPClient';
 
 function detectGaps(messageRanges: MessageRange[]): BackfillRequest[] {
 	if (messageRanges.length < 2) return [];
@@ -44,19 +44,23 @@ function detectGaps(messageRanges: MessageRange[]): BackfillRequest[] {
  * 5- Checks for replied messages and in case request the message in the history
  * 6- Updates the last message read of all the members of a room
  * */
-export function requestHistoryWithBackfillCallback(stanza: Element, queryId: string): void {
-	const from = getRequiredAttribute(stanza, 'from');
-	const roomId = getId(from);
-	const store = useStore.getState();
+export function createRequestHistoryWithBackfillCallback(
+	service: IMessagingService
+): (stanza: Element, queryId: string) => void {
+	return function requestHistoryWithBackfillCallback(stanza: Element, queryId: string): void {
+		const from = getRequiredAttribute(stanza, 'from');
+		const roomId = getId(from);
+		const store = useStore.getState();
 
-	handleHistory(queryId, roomId);
+		handleHistory(queryId, roomId, service);
 
-	const gaps = detectGaps(useStore.getState().chatsRegistry[roomId].messageRanges ?? []);
-	store.enqueueBackfill(roomId, gaps);
+		const gaps = detectGaps(useStore.getState().chatsRegistry[roomId].messageRanges ?? []);
+		store.enqueueBackfill(roomId, gaps);
 
-	if (useStore.getState().chatsRegistry[roomId].backfillQueue.length > 0) {
-		const request = useStore.getState().chatsRegistry[roomId].backfillQueue[0];
-		store.shiftBackfillQueue(roomId);
-		xmppClient.requestHistoryBetweenTwoDates(roomId, request.afterDate, request.beforeDate);
-	}
+		if (useStore.getState().chatsRegistry[roomId].backfillQueue.length > 0) {
+			const request = useStore.getState().chatsRegistry[roomId].backfillQueue[0];
+			store.shiftBackfillQueue(roomId);
+			service.requestHistoryBetweenDates(roomId, request.afterDate, request.beforeDate);
+		}
+	};
 }

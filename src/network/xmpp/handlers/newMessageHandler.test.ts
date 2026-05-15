@@ -6,7 +6,7 @@
 
 import { size } from 'lodash';
 
-import { onNewMessageStanza } from './newMessageHandler';
+import { createNewMessageHandler } from './newMessageHandler';
 import useStore from '../../../store/Store';
 import { buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {
@@ -15,13 +15,15 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMessagingService } from '../../../tests/mock-messaging-service';
 import {
 	FasteningAction,
 	MessageFastening,
 	MessageType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
-import { xmppClient } from '../XMPPClient';
+
+const onNewMessageStanza = createNewMessageHandler(mockMessagingService);
 
 const createXMPPTextMessage = (textMessage: TextMessage): Element => {
 	const parser = new DOMParser();
@@ -77,7 +79,7 @@ describe('XMPP newMessageHandler', () => {
 		// A new text message arrives
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
-		onNewMessageStanza.call(xmppClient, messageXMPP);
+		onNewMessageStanza(messageXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -94,7 +96,7 @@ describe('XMPP newMessageHandler', () => {
 	test('New replied message arrives', () => {
 		const info = createMockTextMessage({ text: 'Hi!', replyTo: 'anotherStanzaId' });
 		const message = createXMPPTextMessage(info);
-		onNewMessageStanza.call(xmppClient, message);
+		onNewMessageStanza(message);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -116,7 +118,7 @@ describe('XMPP newMessageHandler', () => {
 			originalStanzaId: 'stanzaId'
 		});
 		const deletionFasteningXMPP = createXMPPFasteningMessage(deletionFastening);
-		onNewMessageStanza.call(xmppClient, deletionFasteningXMPP);
+		onNewMessageStanza(deletionFasteningXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -135,7 +137,7 @@ describe('XMPP newMessageHandler', () => {
 			value: 'new text'
 		});
 		const editFasteningXMPP = createXMPPFasteningMessage(editFastening);
-		onNewMessageStanza.call(xmppClient, editFasteningXMPP);
+		onNewMessageStanza(editFasteningXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -147,11 +149,10 @@ describe('XMPP newMessageHandler', () => {
 	});
 
 	test('readMessage is not called for my own text messages', () => {
-		const spyOnReadMessage = vi.spyOn(xmppClient, 'readMessage');
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
-		onNewMessageStanza.call(xmppClient, messageXMPP);
-		expect(spyOnReadMessage).not.toHaveBeenCalled();
+		onNewMessageStanza(messageXMPP);
+		expect(mockMessagingService.markAsRead).not.toHaveBeenCalled();
 	});
 
 	test('New reaction removed when input has focus', () => {
@@ -170,9 +171,7 @@ describe('XMPP newMessageHandler', () => {
 		store.newMessage(myMessage);
 		store.setInputHasFocus(room.id, true);
 
-		onNewMessageStanza.call(
-			xmppClient,
-			buildReactionStanza({
+		onNewMessageStanza(buildReactionStanza({
 				roomId: room.id,
 				originalStanzaId: myMessage.stanzaId,
 				from: otherUser.id
@@ -198,9 +197,7 @@ describe('XMPP newMessageHandler', () => {
 		});
 		store.newMessage(myMessage);
 
-		onNewMessageStanza.call(
-			xmppClient,
-			buildReactionStanza({
+		onNewMessageStanza(buildReactionStanza({
 				roomId: room.id,
 				originalStanzaId: myMessage.stanzaId,
 				from: otherUser.id

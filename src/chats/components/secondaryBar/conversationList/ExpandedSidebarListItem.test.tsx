@@ -10,7 +10,6 @@ import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
@@ -299,9 +298,7 @@ describe('Expanded sidebar list item', () => {
 			store.setInboxMessages([mockedTextMessageSentByMeIntoGroup]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
+				onComposingMessageStanza(buildComposingStanza({
 						roomId: mockedGroup.id,
 						from: user4Be.id,
 						isWriting: true
@@ -311,9 +308,7 @@ describe('Expanded sidebar list item', () => {
 			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
 			vi.advanceTimersByTime(3000);
 			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
+				onComposingMessageStanza(buildComposingStanza({
 						roomId: mockedGroup.id,
 						from: user4Be.id,
 						isWriting: false

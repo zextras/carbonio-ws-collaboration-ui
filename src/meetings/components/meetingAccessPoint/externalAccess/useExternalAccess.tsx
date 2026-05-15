@@ -13,7 +13,7 @@ import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
 import { wsClient } from '../../../../network/websocket/WebSocketClient';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { useMessaging } from '../../../../network/messaging/MessagingProvider';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -33,6 +33,7 @@ const useExternalAccess = (): {
 
 	const { goToInfoPage } = useRouting();
 	const createSnackbar = useSnackbar();
+	const messagingService = useMessaging();
 
 	useEffect(() => {
 		const browserLanguage = navigator.languages?.[0] || navigator.language;
@@ -64,7 +65,7 @@ const useExternalAccess = (): {
 					setLoginInfo({ id: res.id, name: guestName, userType: UserType.GUEST });
 
 					setChatsBeStatus(true);
-					xmppClient.connect(res.zmToken);
+					messagingService.connect(res.zmToken);
 					wsClient.connect();
 
 					setAttributes({
@@ -84,7 +85,7 @@ const useExternalAccess = (): {
 					});
 				});
 		},
-		[createSnackbar, generalErrorSnackbar]
+		[createSnackbar, generalErrorSnackbar, messagingService]
 	);
 
 	return { meetingName, createGuestAccount: createGuestAccountAction };

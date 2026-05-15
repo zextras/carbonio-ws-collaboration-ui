@@ -7,30 +7,33 @@
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
+import { IMessagingService } from '../../../types/network/messaging/IMessagingService';
 import { isMyId } from '../../websocket/eventHandlersUtilities';
-import { xmppClient } from '../XMPPClient';
 
-export function onPresenceStanza(stanza: Element): true {
-	const store = useStore.getState();
-	const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
-	const type = stanza.getAttribute('type');
+export function createPresenceHandler(
+	service: IMessagingService
+): (stanza: Element) => true {
+	return function onPresenceStanza(stanza: Element): true {
+		const store = useStore.getState();
+		const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
+		const type = stanza.getAttribute('type');
 
-	if (isMyId(from) && type === 'unavailable') {
-		// Another client of the logged user went offline
-		xmppClient.setOnline();
-	} else if (type == null) {
-		// Online presence stanza
-		store.setUserPresence(from, true);
-	} else if (type === 'unavailable') {
-		// Offline presence stanza
-		store.setUserPresence(from, false);
-		const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
-		xmppClient.getLastActivity(jid);
-	}
-	return true;
+		if (isMyId(from) && type === 'unavailable') {
+			service.setOnline();
+		} else if (type == null) {
+			store.setUserPresence(from, true);
+		} else if (type === 'unavailable') {
+			store.setUserPresence(from, false);
+			const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
+			service.getLastActivity(jid);
+		}
+		return true;
+	};
 }
 
-export function onPingStanza(stanza: Element): true {
-	xmppClient.sendPong(stanza);
-	return true;
+export function createPingHandler(service: IMessagingService): (stanza: Element) => true {
+	return function onPingStanza(stanza: Element): true {
+		service.sendPong(stanza);
+		return true;
+	};
 }
