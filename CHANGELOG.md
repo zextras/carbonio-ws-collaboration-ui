@@ -1,3 +1,9 @@
+## [0.14.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.13.0...v0.14.0) (2026-05-15)
+
+### Features
+
+* add message broker status handling and update UI components accordingly [CO-3577] ([#724](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/724)) ([d929891](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d9298918f493b47bfb58c42d9358d099ddb5d65b))
+
 ## [0.13.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.4...v0.13.0) (2026-05-14)
 
 ### Features
