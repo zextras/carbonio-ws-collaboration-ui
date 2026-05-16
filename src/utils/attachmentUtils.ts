@@ -29,8 +29,19 @@ export enum AttachmentType {
 	ODS = 'ods',
 	ODT = 'odt',
 	PPT = 'ppt',
-	XLS = 'xls'
+	XLS = 'xls',
+	MP4 = 'mp4',
+	WEBM = 'webm',
+	OGV = 'ogv',
+	MOV = 'mov'
 }
+
+export const VIDEO_MIME_TYPES = [
+	'video/mp4',
+	'video/webm',
+	'video/ogg',
+	'video/quicktime'
+] as const;
 
 export enum ImageQuality {
 	LOWEST = 'Lowest',
@@ -103,6 +114,26 @@ export const extensionsSupported = [
 	{
 		extension: AttachmentType.MPKG,
 		mimeType: 'application/vnd.apple.installer+xml'
+	},
+	{
+		extension: AttachmentType.MP4,
+		mimeType: 'video/mp4',
+		preview: AttachmentType.MP4
+	},
+	{
+		extension: AttachmentType.WEBM,
+		mimeType: 'video/webm',
+		preview: AttachmentType.WEBM
+	},
+	{
+		extension: AttachmentType.OGV,
+		mimeType: 'video/ogg',
+		preview: AttachmentType.OGV
+	},
+	{
+		extension: AttachmentType.MOV,
+		mimeType: 'video/quicktime',
+		preview: AttachmentType.MOV
 	}
 ];
 
@@ -153,6 +184,7 @@ export const getAttachmentDimensions = (
 
 export const getAttachmentURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
+	if (mimeType.startsWith('video/')) return getURLAttachment(attachmentId);
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
 		return getPdfPreviewURL(attachmentId);
 	return getImagePreviewURL(attachmentId, '0x0', ImageQuality.HIGH, getPreviewType(mimeType));
@@ -163,6 +195,7 @@ export const getAttachmentThumbnailURL = (
 	mimeType: string
 ): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
+	if (mimeType.startsWith('video/')) return undefined;
 	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
 		return getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
 	return getImageThumbnailURL(
@@ -213,11 +246,13 @@ export const isAttachmentImage = (attachmentType: string): boolean => {
 	return false;
 };
 
-export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' => {
-	if (!isAttachmentImage(attachmentType)) {
-		return 'pdf';
-	}
-	return 'image';
+export const isAttachmentVideo = (attachmentType: string): boolean =>
+	attachmentType.split('/')[0] === 'video';
+
+export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' | 'video' => {
+	if (isAttachmentImage(attachmentType)) return 'image';
+	if (isAttachmentVideo(attachmentType)) return 'video';
+	return 'pdf';
 };
 
 export const getApplicationIcon = (mimeType: string): string => {

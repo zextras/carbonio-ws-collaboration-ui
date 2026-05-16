@@ -83,7 +83,9 @@ const enum MimeTypes {
 	GIF = 'image/gif',
 	PDF = 'application/pdf',
 	VND_MS_EXCEL = 'application/vnd.ms-excel',
-	X_ZIP = 'application/x-zip'
+	X_ZIP = 'application/x-zip',
+	MP4 = 'video/mp4',
+	MKV = 'video/x-matroska'
 }
 
 const buildAttachment = (overrides?: Partial<Attachment>): Attachment => ({
@@ -313,6 +315,27 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+	});
+
+	test('clicking the row opens the inline preview for a whitelisted video attachment', async () => {
+		const attachment = buildAttachment({ id: 'att-video', mimeType: MimeTypes.MP4 });
+		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
+		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+	});
+
+	test('renders the Video icon for a video attachment and keeps it after the row becomes visible', async () => {
+		renderInList(buildAttachment({ id: 'att-video', mimeType: MimeTypes.MP4 }));
+		expect(screen.getByTestId('icon: Video')).toBeInTheDocument();
+		await fireListItemVisible(true);
+		expect(screen.getByTestId('icon: Video')).toBeInTheDocument();
+	});
+
+	test('clicking the row is a no-op for a non-whitelisted video format', async () => {
+		const attachment = buildAttachment({ mimeType: MimeTypes.MKV });
+		const { user } = setup(<AttachmentListItem attachment={attachment} />);
+		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
+		expect(mockOnPreviewClick).not.toHaveBeenCalled();
 	});
 
 	test('clicking the row is a no-op for an unsupported MIME type', async () => {

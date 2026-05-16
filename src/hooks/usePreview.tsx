@@ -72,8 +72,7 @@ const usePreview = (
 				}
 			};
 			const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
-			createPreview({
-				previewType: attachmentType,
+			const commonOptions = {
 				filename: attachment.name,
 				extension: extension?.toUpperCase(),
 				size,
@@ -84,10 +83,24 @@ const usePreview = (
 					tooltipLabel: t('action.close', 'Close')
 				},
 				src: attachmentURL
-			});
+			};
+			if (attachmentType === 'video') {
+				createPreview({
+					...commonOptions,
+					previewType: 'video',
+					mimeType: attachment.mimeType,
+					errorLabel: t(
+						'preview.video.error',
+						'This video cannot be played in your browser. Please download it.'
+					)
+				});
+			} else {
+				createPreview({ ...commonOptions, previewType: attachmentType });
+			}
 		}
 	}, [
 		attachment.name,
+		attachment.mimeType,
 		attachmentURL,
 		createPreview,
 		download,
