@@ -1,15 +1,18 @@
-/* eslint-disable prettier/prettier */
 /*
  * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, includes, last, map } from "lodash";
+import { filter, find, includes, last, map } from 'lodash';
 
-import { FileToUpload, ReferenceMessage } from "../../types/store/ActiveConversationTypes";
-import { MessageType, TextMessage } from "../../types/store/ChatsRegistryTypes";
-import { RootStore } from "../../types/store/StoreTypes";
+import {
+	FileToUpload,
+	InfoPanelTab,
+	ReferenceMessage
+} from '../../types/store/ActiveConversationTypes';
+import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 export const getReferenceMessage = (
 	store: RootStore,
@@ -100,13 +103,25 @@ export const getLastNewReaction = (store: RootStore, roomId: string): string | u
 };
 
 export const getIsMessageSelected = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-    store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
+	store.activeConversations[roomId]?.selectedSearchResult === stanzaId;
 
-export const getIsMessageSelectedAlreadyStored = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-!!store.chatsRegistry[roomId]?.messages.find(msg => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId);
+export const getIsMessageSelectedAlreadyStored = (
+	store: RootStore,
+	roomId: string,
+	stanzaId: string
+): boolean =>
+	!!store.chatsRegistry[roomId]?.messages.find(
+		(msg) => msg.type === MessageType.TEXT_MSG && msg.stanzaId === stanzaId
+	);
 
 export const getPinnedMessage = (store: RootStore, roomId: string): TextMessage | undefined =>
 	store.activeConversations[roomId]?.messagePinned;
 
-export const getIsPinnedMessageSelected = (store: RootStore, roomId: string, stanzaId: string): boolean =>
-	store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;
+export const getIsPinnedMessageSelected = (
+	store: RootStore,
+	roomId: string,
+	stanzaId: string
+): boolean => store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;
+
+export const getSelectedInfoTab = (store: RootStore, roomId: string): InfoPanelTab =>
+	store.activeConversations[roomId]?.infoPanelStatus?.selectedInfoTab ?? InfoPanelTab.ACTIONS;

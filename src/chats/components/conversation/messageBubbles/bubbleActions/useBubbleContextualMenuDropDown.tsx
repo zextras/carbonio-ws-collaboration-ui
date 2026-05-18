@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreview from '../../../../../hooks/usePreview';
-import { deleteAttachment, getURLAttachment } from '../../../../../network';
+import { deleteAttachment } from '../../../../../network';
 import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
@@ -31,7 +31,7 @@ import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
-import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
+import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
 const useBubbleContextualMenuDropDown = (
@@ -122,14 +122,7 @@ const useBubbleContextualMenuDropDown = (
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
-			const downloadUrl = getURLAttachment(message.attachment.id);
-			const linkTag: HTMLAnchorElement = document.createElement('a');
-			document.body.appendChild(linkTag);
-			linkTag.href = downloadUrl;
-			linkTag.download = message.attachment.name;
-			linkTag.target = '_blank';
-			linkTag.click();
-			linkTag.remove();
+			downloadAttachment(message.attachment.id, message.attachment.name);
 		}
 	}, [message.attachment]);
 

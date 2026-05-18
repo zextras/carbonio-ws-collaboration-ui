@@ -76,7 +76,7 @@ const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	);
 
 	return (
-		<Container padding={{ right: 'small' }}>
+		<Container background="gray6" padding={{ left: 'large', right: 'small' }} height="fit">
 			<SearchUserAction setFilteredInput={setFilteredInput} />
 			{memberList}
 		</Container>

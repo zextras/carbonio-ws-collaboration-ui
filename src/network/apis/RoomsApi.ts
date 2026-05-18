@@ -10,7 +10,11 @@ import { createMeeting, deleteMeeting } from './MeetingsApi';
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
-import { Attachment } from '../../types/network/models/attachmentTypes';
+import {
+	BulkDeleteRoomAttachmentsResponse,
+	GetRoomAttachmentsParams,
+	GetRoomAttachmentsResponse
+} from '../../types/network/models/attachmentTypes';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import {
 	AddMemberFields,
@@ -23,6 +27,7 @@ import {
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import {
+	buildQueryString,
 	fetchAPI,
 	RequestType,
 	sendFileFetchAPI,
@@ -121,18 +126,15 @@ export const updateRoomOwners = (roomId: string, userIds: string[]): Promise<Res
 
 export const getRoomAttachments = (
 	roomId: string,
-	pageNumber?: number,
-	pageFilter?: string
-): Promise<{ attachments: Attachment[] }> => {
-	let paramsStr = '';
-	if (pageNumber || pageFilter) {
-		const array = [];
-		if (pageNumber) array.push(`itemsNumber=${pageNumber}`);
-		if (pageFilter) array.push(`extraFields=${pageFilter}`);
-		paramsStr = `?${array.join('&')}`;
-	}
-	return fetchAPI(`rooms/${roomId}/attachments${paramsStr}`, RequestType.GET);
-};
+	params: GetRoomAttachmentsParams
+): Promise<GetRoomAttachmentsResponse> =>
+	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+
+export const bulkDeleteRoomAttachments = (
+	roomId: string,
+	attachmentIds: Array<string>
+): Promise<BulkDeleteRoomAttachmentsResponse> =>
+	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds });
 
 export const replacePlaceholderRoom = (
 	userId: string,

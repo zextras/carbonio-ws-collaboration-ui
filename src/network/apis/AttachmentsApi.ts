@@ -6,13 +6,7 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 
 import { Attachment } from '../../types/network/models/attachmentTypes';
-import { fetchAPI, RequestType } from '../../utils/FetchUtils';
-
-const buildParams = (obj: Record<string, string | number | undefined>): string => {
-	const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
-	if (entries.length === 0) return '';
-	return `?${entries.map(([k, v]) => `${k}=${v}`).join('&')}`;
-};
+import { buildQueryString, fetchAPI, RequestType } from '../../utils/FetchUtils';
 
 export const getAttachment = (fileId: string): Promise<Blob> =>
 	fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
@@ -32,7 +26,7 @@ export const getImagePreview = (
 	quality?: string,
 	format?: string
 ): Promise<Blob> => {
-	const params = buildParams({ quality, output_format: format });
+	const params = buildQueryString({ quality, output_format: format });
 	return fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
 };
 
@@ -42,7 +36,7 @@ export const getImagePreviewURL = (
 	quality?: string,
 	format?: string
 ): string => {
-	const params = buildParams({ quality, output_format: format });
+	const params = buildQueryString({ quality, output_format: format });
 	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
 };
 
@@ -53,7 +47,7 @@ export const getImageThumbnail = (
 	format?: string,
 	shape?: string
 ): Promise<Blob> => {
-	const params = buildParams({ quality, output_format: format, shape });
+	const params = buildQueryString({ quality, output_format: format, shape });
 	return fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
 };
 
@@ -64,7 +58,7 @@ export const getImageThumbnailURL = (
 	format?: string,
 	shape?: string
 ): string => {
-	const params = buildParams({ quality, output_format: format, shape });
+	const params = buildQueryString({ quality, output_format: format, shape });
 	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
 };
 
@@ -73,12 +67,12 @@ export const getPdfPreview = (
 	firstPage?: number,
 	lastPage?: number
 ): Promise<Blob> => {
-	const params = buildParams({ first_page: firstPage, last_page: lastPage });
+	const params = buildQueryString({ first_page: firstPage, last_page: lastPage });
 	return fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
 };
 
 export const getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
-	const params = buildParams({ first_page: firstPage, last_page: lastPage });
+	const params = buildQueryString({ first_page: firstPage, last_page: lastPage });
 	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
 };
 
@@ -89,7 +83,7 @@ export const getPdfThumbnail = (
 	shape?: string,
 	format = 'jpeg'
 ): Promise<Blob> => {
-	const params = buildParams({ shape, quality, output_format: format });
+	const params = buildQueryString({ shape, quality, output_format: format });
 	return fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
 };
 
@@ -100,6 +94,6 @@ export const getPdfThumbnailURL = (
 	shape?: string,
 	format = 'jpeg'
 ): string => {
-	const params = buildParams({ shape, quality, output_format: format });
+	const params = buildQueryString({ shape, quality, output_format: format });
 	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
 };
