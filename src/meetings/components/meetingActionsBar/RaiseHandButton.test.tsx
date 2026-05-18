@@ -18,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { routerContextSetup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -62,6 +62,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
+	store.setWebsocketStatus(true);
 	const spyUseParams = vi.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<RaiseHandButton />, { meetingId: meeting.id });
@@ -96,5 +97,17 @@ describe('Raise hand button', () => {
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([user1.id]);
 
 		expect(screen.getByTestId('icon: Hand')).toBeInTheDocument();
+	});
+
+	test('RaiseHand button is disabled when websocket is down', async () => {
+		useStore.getState().setWebsocketStatus(false);
+		setup(<RaiseHandButton />);
+		expect(await screen.findByRole('button')).toBeDisabled();
+	});
+
+	test('RaiseHand button is disabled when message broker is down', async () => {
+		useStore.getState().setMessageBrokerStatus(false);
+		setup(<RaiseHandButton />);
+		expect(await screen.findByRole('button')).toBeDisabled();
 	});
 });

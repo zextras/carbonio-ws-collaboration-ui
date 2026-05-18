@@ -1,3 +1,39 @@
+## [0.14.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.13.0...v0.14.0) (2026-05-15)
+
+### Features
+
+* add message broker status handling and update UI components accordingly [CO-3577] ([#724](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/724)) ([d929891](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d9298918f493b47bfb58c42d9358d099ddb5d65b))
+
+## [0.13.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.4...v0.13.0) (2026-05-14)
+
+### Features
+
+* add auto focus on inputs ([7d7a528](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7d7a5282d6820c737a6a81a444056f3711868fb6)), closes [#723](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/723)
+
+## [0.12.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.3...v0.12.4) (2026-05-14)
+
+### Bug Fixes
+
+* **ci:** migrate Jenkinsfile to jenkins-lib-common ([#727](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/727)) ([7e44458](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7e44458f11004311cf266e42eb1f28c8f3a52726))
+
+## [0.12.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.2...v0.12.3) (2026-05-12)
+
+### Other changes
+
+* **release:** update jenkins-lib-ui to 1.0.13 ([563d9c7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/563d9c7f6fe8a60751f5f56e15f72f3f6f95884a))
+
+## [0.12.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.1...v0.12.2) (2026-05-08)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-ui-preview to v5 ([#714](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/714)) ([3f79a85](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3f79a855a05e78672f8c814494fb21875cb6b31c))
+
+## [0.12.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.0...v0.12.1) (2026-05-07)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-design-system to v12.0.4 ([#711](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/711)) ([153b356](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/153b35672cd736ddd54096dac67b0abc9e82c6b2))
+
 ## [0.12.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.11.0...v0.12.0) (2026-05-05)
 
 ### Features
