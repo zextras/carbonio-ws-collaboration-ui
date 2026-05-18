@@ -59,7 +59,7 @@ export type IncomingMeetingEvent = {
 
 export type RemovedMeetingNotificationEvent = {
 	name: EventName.REMOVED_MEETING_NOTIFICATION;
-	data: MeetingJoinedEvent | MeetingStoppedEvent;
+	data: MeetingJoinedEvent | MeetingStoppedEvent | MeetingDeclinedEvent;
 };
 
 export type ParticipantClashedEvent = {

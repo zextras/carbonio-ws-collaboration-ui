@@ -44,4 +44,11 @@ describe('MeetingDeclinedEventHandler tests', () => {
 		meetingDeclinedEventHandler(event);
 		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
+
+	test('REMOVED_MEETING_NOTIFICATION is dispatched when I declined a ONE_TO_ONE meeting from another session', () => {
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingDeclinedEventHandler({ ...event, userId: 'myUserId' });
+		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
+		expect(call.type).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
+	});
 });
