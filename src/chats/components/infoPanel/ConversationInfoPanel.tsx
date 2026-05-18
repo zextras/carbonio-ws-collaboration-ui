@@ -21,7 +21,7 @@ import useStore from '../../../store/Store';
 import { InfoPanelTab } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-const MEDIA_GALLERY_MIN_API_VERSION = '1.6.11';
+const MEDIA_GALLERY_MIN_API_VERSION = '1.6.12';
 
 type ConversationProps = {
 	roomId: string;
