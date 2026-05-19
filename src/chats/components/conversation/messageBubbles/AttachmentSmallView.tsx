@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import usePreview from '../../../../hooks/usePreview';
+import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
 	downloadAttachment,
@@ -59,13 +59,18 @@ const CustomAvatar = styled(Avatar)`
 
 type AttachmentSmallViewProps = {
 	attachment: AttachmentMessageType;
+	roomId: string;
+	messageDate: number;
 };
-const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
+const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment, roomId, messageDate }) => {
 	const [t] = useTranslation();
 	const previewActionLabel = t('action.preview', 'Preview');
 	const downloadActionLabel = t('action.download', 'Download');
 
-	const { onPreviewClick } = usePreview(attachment);
+	const { openFromChat } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		openFromChat(roomId, attachment, messageDate);
+	}, [attachment, messageDate, openFromChat, roomId]);
 
 	const previewURL = useMemo(
 		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
