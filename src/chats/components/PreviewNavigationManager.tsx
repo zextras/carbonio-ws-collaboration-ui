@@ -146,7 +146,14 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		}
 		if (!session.hasMore || session.isLoading) return;
 		if (currentIndex === -1) return;
-		if (currentIndex + 1 < previews.length - 1) return;
+		// Cursor always advances toward older items. For gallery (rendered newest→oldest)
+		// that's the right edge; for chat (rendered oldest→newest after reverse) it's the
+		// left edge.
+		const nearLoadEdge =
+			session.source === 'chat'
+				? currentIndex <= 1
+				: currentIndex + 1 >= previews.length - 1;
+		if (!nearLoadEdge) return;
 		if (lastRequestedLength.current === previews.length) return;
 		lastRequestedLength.current = previews.length;
 
@@ -174,6 +181,27 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		session,
 		setPreviewNavigationLoading
 	]);
+
+	// Chat: items prepend to the rendered array on page append, so the library's
+	// currentIndex needs to shift to keep the same item visible.
+	const prevPreviewsRef = useRef<typeof previews>([]);
+	const prevCurrentIndexRef = useRef<number>(-1);
+	useEffect(() => {
+		const prevPreviews = prevPreviewsRef.current;
+		const prevIndex = prevCurrentIndexRef.current;
+		prevPreviewsRef.current = previews;
+		prevCurrentIndexRef.current = currentIndex;
+
+		if (!session || session.source !== 'chat') return;
+		if (prevIndex === -1 || currentIndex === -1) return;
+		const delta = previews.length - prevPreviews.length;
+		if (delta <= 0) return;
+		const shiftedItem = prevPreviews[prevIndex];
+		if (!shiftedItem) return;
+		const newIndex = previews.findIndex((p) => p.id === shiftedItem.id);
+		if (newIndex === -1 || newIndex === currentIndex) return;
+		openPreview(shiftedItem.id);
+	}, [currentIndex, openPreview, previews, session]);
 
 	const wasOpenRef = useRef(false);
 	useEffect(() => {
