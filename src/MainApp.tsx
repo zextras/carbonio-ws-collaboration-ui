@@ -10,7 +10,6 @@ import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carb
 import { gte } from 'semver';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
-import PreviewNavigationManager from './chats/components/PreviewNavigationManager';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
 import RegisterVirtualRoomCreationButton from './chats/components/RegisterVirtualRoomCreationButton';
 import initChats from './chats/initChats';
@@ -113,7 +112,6 @@ export default function MainApp(): React.JSX.Element {
 			<CounterBadgeUpdater />
 			<MeetingNotificationHandler />
 			<WaitingListSnackbar />
-			<PreviewNavigationManager />
 		</>
 	);
 }
