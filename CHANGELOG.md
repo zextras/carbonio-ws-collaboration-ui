@@ -1,3 +1,9 @@
+## [0.15.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.0...v0.15.1) (2026-05-19)
+
+### Bug Fixes
+
+* remove incoming call notification when user decline from another session ([#730](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/730)) ([2be28c8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2be28c8757489a07fc89119c50acb13ef21f7cfc))
+
 ## [0.15.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.14.0...v0.15.0) (2026-05-18)
 
 ### Features
