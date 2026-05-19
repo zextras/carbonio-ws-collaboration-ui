@@ -11,6 +11,7 @@ import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useActiveMeetingSlice } from './slices/ActiveMeetingSlice';
 import { useChatsRegistryStoreSlice } from './slices/ChatsRegistryStoreSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
+import { useMediaGalleryStoreSlice } from './slices/MediaGalleryStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
@@ -43,7 +44,8 @@ const useStore = create<RootStore>()(
 				...useChatsRegistryStoreSlice(set, get, api),
 				...useConnectionsStoreSlice(set, get, api),
 				...useMeetingsStoreSlice(set, get, api),
-				...useActiveMeetingSlice(set, get, api)
+				...useActiveMeetingSlice(set, get, api),
+				...useMediaGalleryStoreSlice(set, get, api)
 			}),
 			{
 				name: STORAGE_KEY,

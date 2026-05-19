@@ -13,6 +13,7 @@ import {
 	getAttachmentThumbnailURL,
 	canDisplayPreviewOnLoad,
 	isAttachmentImage,
+	isAttachmentVideo,
 	getAttachmentType,
 	getApplicationIcon,
 	getAttachmentIcon,
@@ -26,7 +27,12 @@ const enum MimeTypes {
 	GIF = 'image/gif',
 	PDF = 'application/pdf',
 	VND_MS_EXCEL = 'application/vnd.ms-excel',
-	X_ZIP = 'application/x-zip'
+	X_ZIP = 'application/x-zip',
+	MP4 = 'video/mp4',
+	WEBM = 'video/webm',
+	OGG = 'video/ogg',
+	QUICKTIME = 'video/quicktime',
+	MKV = 'video/x-matroska'
 }
 
 describe('attachmentUtils tests', () => {
@@ -45,6 +51,17 @@ describe('attachmentUtils tests', () => {
 
 		test('Preview is not supported for application/vnd.ms-excel', () => {
 			expect(isPreviewSupported(MimeTypes.VND_MS_EXCEL)).toBe(false);
+		});
+
+		test.each([MimeTypes.MP4, MimeTypes.WEBM, MimeTypes.OGG, MimeTypes.QUICKTIME])(
+			'Preview is supported for whitelisted video %s',
+			(mime) => {
+				expect(isPreviewSupported(mime)).toBe(true);
+			}
+		);
+
+		test('Preview is not supported for non-whitelisted video formats', () => {
+			expect(isPreviewSupported(MimeTypes.MKV)).toBe(false);
 		});
 	});
 
@@ -118,6 +135,17 @@ describe('attachmentUtils tests', () => {
 			const url = getAttachmentURL('img-id', MimeTypes.PNG);
 			expect(url).toContain('img-id');
 		});
+
+		test('returns the raw download URL for whitelisted videos', () => {
+			const url = getAttachmentURL('video-id', MimeTypes.MP4);
+			expect(url).toContain('video-id');
+			expect(url).toContain('/attachments/');
+			expect(url).toContain('/download');
+		});
+
+		test('returns undefined for non-whitelisted video formats', () => {
+			expect(getAttachmentURL('mkv-id', MimeTypes.MKV)).toBeUndefined();
+		});
 	});
 
 	describe('getAttachmentThumbnailURL', () => {
@@ -129,6 +157,10 @@ describe('attachmentUtils tests', () => {
 		test('returns the correct thumbnail URL for images', () => {
 			const url = getAttachmentThumbnailURL('img-id', MimeTypes.PNG);
 			expect(url).toContain('img-id');
+		});
+
+		test('returns undefined for videos so the icon is shown instead', () => {
+			expect(getAttachmentThumbnailURL('video-id', MimeTypes.MP4)).toBeUndefined();
 		});
 	});
 
@@ -152,12 +184,28 @@ describe('attachmentUtils tests', () => {
 		});
 	});
 
+	describe('isAttachmentVideo', () => {
+		test('returns true for any video/* mime type', () => {
+			expect(isAttachmentVideo(MimeTypes.MP4)).toBe(true);
+			expect(isAttachmentVideo(MimeTypes.MKV)).toBe(true);
+		});
+
+		test('returns false for non-video mime types', () => {
+			expect(isAttachmentVideo(MimeTypes.PNG)).toBe(false);
+			expect(isAttachmentVideo(MimeTypes.PDF)).toBe(false);
+		});
+	});
+
 	describe('getAttachmentType', () => {
 		test('returns "image" when the mime type is an image', () => {
 			expect(getAttachmentType(MimeTypes.PNG)).toBe('image');
 		});
 
-		test('returns "pdf" for all non-image types', () => {
+		test('returns "video" when the mime type is a video', () => {
+			expect(getAttachmentType(MimeTypes.MP4)).toBe('video');
+		});
+
+		test('returns "pdf" for non-image, non-video types', () => {
 			expect(getAttachmentType(MimeTypes.PDF)).toBe('pdf');
 		});
 	});

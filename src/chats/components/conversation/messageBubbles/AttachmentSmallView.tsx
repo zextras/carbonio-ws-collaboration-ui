@@ -11,9 +11,9 @@ import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-d
 import { useTranslation } from 'react-i18next';
 
 import usePreview from '../../../../hooks/usePreview';
-import { getURLAttachment } from '../../../../network';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
+	downloadAttachment,
 	getAttachmentThumbnailURL,
 	getPinAttachmentIcon,
 	isPreviewSupported
@@ -74,16 +74,10 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 
 	const previewSupported = useMemo(() => isPreviewSupported(attachment.mimeType), [attachment]);
 
-	const download = useCallback(() => {
-		const downloadUrl = getURLAttachment(attachment.id);
-		const linkTag: HTMLAnchorElement = document.createElement('a');
-		document.body.appendChild(linkTag);
-		linkTag.href = downloadUrl;
-		linkTag.download = attachment.name;
-		linkTag.target = '_blank';
-		linkTag.click();
-		linkTag.remove();
-	}, [attachment.id, attachment.name]);
+	const download = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	return (
 		<CustomPadding right="small" data-testid="hover-container">

@@ -20,11 +20,11 @@ import { useTranslation } from 'react-i18next';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
-import { getURLAttachment } from '../../../../network';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
+	downloadAttachment,
 	getAttachmentDimensions,
 	getAttachmentThumbnailURL
 } from '../../../../utils/attachmentUtils';
@@ -196,16 +196,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		[attachment.id, attachment.mimeType]
 	);
 
-	const download = useCallback(() => {
-		const downloadUrl = getURLAttachment(attachment.id);
-		const linkTag: HTMLAnchorElement = document.createElement('a');
-		document.body.appendChild(linkTag);
-		linkTag.href = downloadUrl;
-		linkTag.download = attachment.name;
-		linkTag.target = '_blank';
-		linkTag.click();
-		linkTag.remove();
-	}, [attachment.id, attachment.name]);
+	const download = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	const { onPreviewClick } = usePreview(attachment);
 

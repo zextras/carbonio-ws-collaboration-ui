@@ -13,7 +13,7 @@ import AttachmentView from './AttachmentView';
 import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
-import { extensionsSupported } from '../../../../utils/attachmentUtils';
+import { extensionsSupported, getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
 
 const fileIcon = 'icon: FileTextOutline';
 
@@ -117,7 +117,10 @@ describe('Attachment view', () => {
 		expect(extensionLabel).toBeInTheDocument();
 	});
 
-	const previewExtensionsSupported = filter(extensionsSupported, (ext) => !!ext.preview);
+	const previewExtensionsSupported = filter(
+		extensionsSupported,
+		(ext) => getAttachmentThumbnailURL('id', ext.mimeType) !== undefined
+	);
 	test.each(previewExtensionsSupported)('Display %s preview', ({ extension, mimeType }) => {
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',

@@ -1,3 +1,9 @@
+## [0.15.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.14.0...v0.15.0) (2026-05-18)
+
+### Features
+
+* chats media and document gallery ([009b9e8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/009b9e81895b2ca784bb1b04c9c09633afb68706))
+
 ## [0.14.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.13.0...v0.14.0) (2026-05-15)
 
 ### Features
