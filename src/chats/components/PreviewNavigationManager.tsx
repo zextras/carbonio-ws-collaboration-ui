@@ -126,10 +126,17 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 
 	useEffect(() => {
 		if (!session || !openTargetId) return;
-		if (!orderedItems.some((item) => item.id === openTargetId)) return;
+		if (!previews.some((item) => item.id === openTargetId)) return;
+		if (currentIndex !== -1 && previews[currentIndex]?.id === openTargetId) return;
 		openPreview(openTargetId);
+	}, [currentIndex, openPreview, openTargetId, previews, session]);
+
+	useEffect(() => {
+		if (!session || !openTargetId) return;
+		if (currentIndex === -1) return;
+		if (previews[currentIndex]?.id !== openTargetId) return;
 		clearPreviewNavigationOpenTarget();
-	}, [clearPreviewNavigationOpenTarget, openPreview, openTargetId, orderedItems, session]);
+	}, [clearPreviewNavigationOpenTarget, currentIndex, openTargetId, previews, session]);
 
 	const lastRequestedLength = useRef<number>(-1);
 	useEffect(() => {
