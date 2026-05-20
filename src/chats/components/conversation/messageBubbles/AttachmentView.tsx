@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import usePreview from '../../../../hooks/usePreview';
+import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
@@ -131,12 +131,16 @@ type AttachmentViewProps = {
 	attachment: AttachmentMessageType;
 	isMyMessage?: boolean;
 	from: string;
+	roomId: string;
+	messageDate: number;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
 
 const AttachmentView: FC<AttachmentViewProps> = ({
 	attachment,
 	from,
+	roomId,
+	messageDate,
 	isMyMessage = false,
 	messageListRef
 }) => {
@@ -201,7 +205,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		[attachment.id, attachment.name]
 	);
 
-	const { onPreviewClick } = usePreview(attachment);
+	const { openFromChat } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		openFromChat(roomId, attachment, messageDate);
+	}, [attachment, messageDate, openFromChat, roomId]);
 
 	const imageLabel = useMemo(
 		() => (
@@ -299,7 +306,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			$userBorderColor={isMyMessage ? undefined : userColor}
 		>
 			<Row wrap="nowrap">
-				<AttachmentSmallView attachment={attachment} />
+				<AttachmentSmallView attachment={attachment} roomId={roomId} messageDate={messageDate} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ vertical: 'small' }} crossAlignment="flex-start">

@@ -56,14 +56,14 @@ vi.mock('../../../../network/apis/RoomsApi', () => ({
 	bulkDeleteRoomAttachments: vi.fn()
 }));
 
-const { mockOnPreviewClick, mockClosePreview, mockUsePreview } = vi.hoisted(() => ({
-	mockOnPreviewClick: vi.fn(),
-	mockClosePreview: vi.fn(),
-	mockUsePreview: vi.fn()
+const { mockOpenFromGallery, mockOpenFromChat, mockUsePreviewNavigation } = vi.hoisted(() => ({
+	mockOpenFromGallery: vi.fn(),
+	mockOpenFromChat: vi.fn(),
+	mockUsePreviewNavigation: vi.fn()
 }));
 
-vi.mock('../../../../hooks/usePreview', () => ({
-	default: mockUsePreview
+vi.mock('../../../../hooks/usePreviewNavigation', () => ({
+	default: mockUsePreviewNavigation
 }));
 
 const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
@@ -107,12 +107,12 @@ beforeEach(() => {
 		.getState()
 		.setUserInfo([createMockUser({ id: otherUserId, name: 'Matteo Perdon', email: 'mp@x.com' })]);
 	mockedBulkDelete.mockReset();
-	mockOnPreviewClick.mockReset();
-	mockClosePreview.mockReset();
-	mockUsePreview.mockReset();
-	mockUsePreview.mockImplementation(() => ({
-		onPreviewClick: mockOnPreviewClick,
-		closePreview: mockClosePreview
+	mockOpenFromGallery.mockReset();
+	mockOpenFromChat.mockReset();
+	mockUsePreviewNavigation.mockReset();
+	mockUsePreviewNavigation.mockImplementation(() => ({
+		openFromGallery: mockOpenFromGallery,
+		openFromChat: mockOpenFromChat
 	}));
 });
 
@@ -307,21 +307,21 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.JPEG });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+		expect(mockOpenFromGallery).toHaveBeenCalledWith(attachment.roomId, attachment);
 	});
 
 	test('clicking the row opens the inline preview for a PDF attachment', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+		expect(mockOpenFromGallery).toHaveBeenCalledWith(attachment.roomId, attachment);
 	});
 
 	test('clicking the row opens the inline preview for a whitelisted video attachment', async () => {
 		const attachment = buildAttachment({ id: 'att-video', mimeType: MimeTypes.MP4 });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).toHaveBeenCalledTimes(1);
+		expect(mockOpenFromGallery).toHaveBeenCalledWith(attachment.roomId, attachment);
 	});
 
 	test('renders the Video icon for a video attachment and keeps it after the row becomes visible', async () => {
@@ -335,14 +335,14 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.MKV });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
 	});
 
 	test('clicking the row is a no-op for an unsupported MIME type', async () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.X_ZIP });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
 	});
 
 	test('clicking the download button does not open the inline preview', async () => {
@@ -352,7 +352,7 @@ describe('AttachmentListItem', () => {
 		const attachment = buildAttachment({ mimeType: MimeTypes.PDF });
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByRole('button', { name: /download/i }));
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
 		clickSpy.mockRestore();
 	});
 
@@ -361,7 +361,7 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		expect(screen.getByTestId('deleteAttachmentModal')).toBeInTheDocument();
-		expect(mockOnPreviewClick).not.toHaveBeenCalled();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
 	});
 
 	test('the row has a pointer cursor for previewable attachments', () => {
@@ -390,55 +390,5 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.hover(screen.getByTestId(`mediaGalleryAttachmentClickArea-${attachment.id}`));
 		expect(screen.queryByText('Preview')).not.toBeInTheDocument();
-	});
-
-	test('passes a delete callback to usePreview when the current user owns the attachment', () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		expect(mockUsePreview).toHaveBeenCalledWith(
-			attachment,
-			expect.objectContaining({ onDelete: expect.any(Function) })
-		);
-	});
-
-	test('does not pass a delete callback to usePreview when the attachment belongs to another user', () => {
-		const attachment = buildAttachment({ userId: otherUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		expect(mockUsePreview).toHaveBeenCalledWith(
-			attachment,
-			expect.objectContaining({ onDelete: undefined })
-		);
-	});
-
-	test('the onDelete callback passed to usePreview opens the confirmation modal', async () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		setup(<AttachmentListItem attachment={attachment} />);
-		const lastCall = mockUsePreview.mock.calls[mockUsePreview.mock.calls.length - 1];
-		const previewOnDelete = lastCall[1]?.onDelete as () => void;
-
-		expect(screen.queryByTestId('deleteAttachmentModal')).not.toBeInTheDocument();
-		act(() => previewOnDelete());
-		expect(await screen.findByTestId('deleteAttachmentModal')).toBeInTheDocument();
-	});
-
-	test('confirming the deletion also closes the preview', async () => {
-		mockedBulkDelete.mockResolvedValue({ successIds: ['att-1'], failedIds: [] });
-		const attachment = buildAttachment({ userId: myUserId });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
-
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
-		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
-		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
-
-		expect(mockClosePreview).toHaveBeenCalledTimes(1);
-	});
-
-	test('canceling the deletion does not close the preview', async () => {
-		const attachment = buildAttachment({ userId: myUserId });
-		const { user } = setup(<AttachmentListItem attachment={attachment} />);
-		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
-		await user.click(screen.getByRole('button', { name: /no, cancel/i }));
-
-		expect(mockClosePreview).not.toHaveBeenCalled();
 	});
 });
