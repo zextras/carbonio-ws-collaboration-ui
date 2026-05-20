@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './DeleteAttachmentModal';
 import useDeleteAttachment from './useDeleteAttachment';
-import usePreview from '../../../../hooks/usePreview';
+import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -88,9 +88,10 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	}, [visible]);
 	const pictureUrl = hasBeenVisible ? thumbnailUrl : undefined;
 
-	const { onPreviewClick, closePreview } = usePreview(attachment, {
-		onDelete: canDelete ? openModal : undefined
-	});
+	const { openFromGallery } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		openFromGallery(attachment.roomId, attachment);
+	}, [attachment, openFromGallery]);
 
 	const onDeleteClick = useCallback(
 		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -107,11 +108,6 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 		},
 		[attachment.id, attachment.name]
 	);
-
-	const onConfirmDelete = useCallback(() => {
-		confirmDelete();
-		closePreview();
-	}, [closePreview, confirmDelete]);
 
 	return (
 		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview}>
@@ -178,11 +174,7 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 					/>
 				</Tooltip>
 				{modalOpen && (
-					<DeleteAttachmentModal
-						open={modalOpen}
-						onConfirm={onConfirmDelete}
-						onClose={closeModal}
-					/>
+					<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
 				)}
 			</CustomContainer>
 		</Tooltip>

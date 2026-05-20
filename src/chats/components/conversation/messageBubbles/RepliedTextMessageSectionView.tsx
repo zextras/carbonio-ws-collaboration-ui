@@ -143,7 +143,11 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 			>
 				{repliedMessage.attachment && (
 					<Row wrap="nowrap">
-						<AttachmentSmallView attachment={repliedMessage.attachment} />
+						<AttachmentSmallView
+							attachment={repliedMessage.attachment}
+							roomId={repliedMessage.roomId}
+							messageDate={repliedMessage.date}
+						/>
 					</Row>
 				)}
 				<Row takeAvailableSpace wrap="nowrap">

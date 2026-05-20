@@ -179,7 +179,13 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 			)}
 			{messageAttachment && (
 				<>
-					<AttachmentView attachment={messageAttachment} isMyMessage={false} from={message.from} />
+					<AttachmentView
+						attachment={messageAttachment}
+						isMyMessage={false}
+						from={message.from}
+						roomId={message.roomId}
+						messageDate={message.date}
+					/>
 					<Padding bottom="0.5rem" />
 				</>
 			)}

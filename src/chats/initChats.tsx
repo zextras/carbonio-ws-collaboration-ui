@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
+import PreviewNavigationManager from './components/PreviewNavigationManager';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 import useEventListener, { EventName, RouteRedirectEvent } from '../hooks/useEventListener';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
@@ -31,6 +32,7 @@ const ChatsMain = (): React.JSX.Element => (
 	>
 		<ModalManager>
 			<ConnectionSnackbarManager />
+			<PreviewNavigationManager />
 			<LazyMainView />
 		</ModalManager>
 	</Suspense>

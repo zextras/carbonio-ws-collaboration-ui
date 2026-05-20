@@ -18,7 +18,7 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
-import usePreview from '../../../../../hooks/usePreview';
+import usePreviewNavigation from '../../../../../hooks/usePreviewNavigation';
 import { deleteAttachment } from '../../../../../network';
 import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
@@ -75,9 +75,12 @@ const useBubbleContextualMenuDropDown = (
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
-	const { onPreviewClick } = usePreview(
-		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
-	);
+	const { openFromChat } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		if (message.attachment) {
+			openFromChat(message.roomId, message.attachment, message.date);
+		}
+	}, [message.attachment, message.date, message.roomId, openFromChat]);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);

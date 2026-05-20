@@ -76,10 +76,14 @@ const TextExpanded = styled(Text)`
 
 const ExpandedMessageWithThumbnail = ({
 	attachment,
-	messageText
+	messageText,
+	roomId,
+	messageDate
 }: {
 	attachment: AttachmentMessageType;
 	messageText: string;
+	roomId: string;
+	messageDate: number;
 }): React.JSX.Element => (
 	<Container gap={'0.5rem'} crossAlignment="flex-start">
 		<RoundedRow
@@ -89,7 +93,7 @@ const ExpandedMessageWithThumbnail = ({
 			width={'fill'}
 			mainAlignment="flex-start"
 		>
-			<AttachmentSmallView attachment={attachment} />
+			<AttachmentSmallView attachment={attachment} roomId={roomId} messageDate={messageDate} />
 			<Text overflow="break-word" color={'gray1'} size="small">
 				{attachment.name}
 			</Text>
@@ -174,6 +178,8 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				<ExpandedMessageWithThumbnail
 					attachment={pinnedMessage.attachment}
 					messageText={pinnedMessage.text}
+					roomId={pinnedMessage.roomId}
+					messageDate={pinnedMessage.date}
 				/>
 			);
 		}

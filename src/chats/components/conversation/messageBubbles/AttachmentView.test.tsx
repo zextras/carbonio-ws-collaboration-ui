@@ -26,7 +26,14 @@ describe('Attachment view', () => {
 			mimeType: 'application/zip',
 			size: 21412
 		};
-		const { user } = setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		const { user } = setup(
+			<AttachmentView
+				attachment={genericAttachment}
+				from={'from'}
+				roomId="roomId"
+				messageDate={0}
+			/>
+		);
 		const genericIcon = await screen.findByTestId(fileIcon);
 		expect(genericIcon).toBeVisible();
 		const fileName = await screen.findByText(genericAttachment.name);
@@ -47,7 +54,14 @@ describe('Attachment view', () => {
 			mimeType: 'application/openxmlformats-officedocument.wordprocessingml.document',
 			size: 21412
 		};
-		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		setup(
+			<AttachmentView
+				attachment={genericAttachment}
+				from={'from'}
+				roomId="roomId"
+				messageDate={0}
+			/>
+		);
 		const genericIcon = screen.getByTestId(fileIcon);
 		expect(genericIcon).toBeVisible();
 		const fileName = screen.getByText(genericAttachment.name);
@@ -64,7 +78,9 @@ describe('Attachment view', () => {
 			size: 21412,
 			area: '0x0'
 		};
-		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
+		setup(
+			<AttachmentView attachment={imageAttachment} from={'from'} roomId="roomId" messageDate={0} />
+		);
 		const imageName = await screen.findByText(imageAttachment.name);
 		expect(imageName).toBeVisible();
 	});
@@ -78,7 +94,9 @@ describe('Attachment view', () => {
 			size: 21412,
 			area
 		};
-		const { user } = setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
+		const { user } = setup(
+			<AttachmentView attachment={imageAttachment} from={'from'} roomId="roomId" messageDate={0} />
+		);
 		await user.hover(screen.getByTestId('preview-container'));
 		expect(screen.getByTestId('icon: EyeOutline')).toBeInTheDocument();
 		expect(screen.getByTestId('icon: DownloadOutline')).toBeInTheDocument();
@@ -93,7 +111,9 @@ describe('Attachment view', () => {
 			size: 21412,
 			area
 		};
-		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
+		setup(
+			<AttachmentView attachment={imageAttachment} from={'from'} roomId="roomId" messageDate={0} />
+		);
 		const img = screen.getByTestId('attachmentImg');
 		fireEvent.error(img);
 		const imageName = await screen.findByText(imageAttachment.name);
@@ -109,7 +129,14 @@ describe('Attachment view', () => {
 			mimeType,
 			size: 21412
 		};
-		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		setup(
+			<AttachmentView
+				attachment={genericAttachment}
+				from={'from'}
+				roomId="roomId"
+				messageDate={0}
+			/>
+		);
 		const fileName = screen.getByText(genericAttachment.name);
 		expect(fileName).toBeVisible();
 		const match = new RegExp(`${extension}`, 'i');
@@ -128,7 +155,14 @@ describe('Attachment view', () => {
 			mimeType,
 			size: 21412
 		};
-		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		setup(
+			<AttachmentView
+				attachment={genericAttachment}
+				from={'from'}
+				roomId="roomId"
+				messageDate={0}
+			/>
+		);
 		const previewContainer = screen.getByTestId('preview-container');
 
 		expect(previewContainer).toBeVisible();
