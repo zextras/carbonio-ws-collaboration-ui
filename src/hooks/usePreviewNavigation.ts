@@ -25,7 +25,7 @@ type UsePreviewNavigation = {
 		roomId: string,
 		clickedAttachment: AttachmentMessageType,
 		messageDate: number
-	) => void;
+	) => Promise<void>;
 };
 
 const usePreviewNavigation = (): UsePreviewNavigation => {
@@ -57,7 +57,11 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 	);
 
 	const openFromChat = useCallback(
-		(roomId: string, clickedAttachment: AttachmentMessageType, messageDate: number): void => {
+		async (
+			roomId: string,
+			clickedAttachment: AttachmentMessageType,
+			messageDate: number
+		): Promise<void> => {
 			startPreviewNavigation({
 				source: 'chat',
 				roomId,
@@ -71,35 +75,37 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 			});
 
 			const anchorIso = new Date(messageDate + CHAT_ANCHOR_BUFFER_MS).toISOString();
+			let cursor: string | undefined;
+			let isFirst = true;
+			let done = false;
 
-			const fetchUntilFound = (cursor: string | undefined, isFirst: boolean): void => {
-				const params = {
-					limit: PREVIEW_NAVIGATION_PAGE_SIZE,
-					sortBy: 'created_at' as const,
-					order: 'desc' as const,
-					...(isFirst ? { createdBefore: anchorIso } : {}),
-					...(cursor ? { cursor } : {})
-				};
-				getRoomAttachments(roomId, params)
-					.then((response) => {
-						const { active } = useStore.getState().previewNavigation;
-						if (!active || active.roomId !== roomId || active.source !== 'chat') {
-							return;
-						}
-						appendPreviewNavigationPage(response.attachments, response.cursor);
-						const found = response.attachments.some((a) => a.id === clickedAttachment.id);
-						if (!found && response.cursor !== undefined) {
-							setPreviewNavigationLoading(true);
-							fetchUntilFound(response.cursor, false);
-						}
-					})
-					.catch((error) => {
-						console.error('Failed to fetch chat attachments for preview', error);
-						setPreviewNavigationLoading(false);
-					});
-			};
-
-			fetchUntilFound(undefined, true);
+			try {
+				while (!done) {
+					const params = {
+						limit: PREVIEW_NAVIGATION_PAGE_SIZE,
+						sortBy: 'created_at' as const,
+						order: 'desc' as const,
+						...(isFirst ? { createdBefore: anchorIso } : {}),
+						...(cursor ? { cursor } : {})
+					};
+					// eslint-disable-next-line no-await-in-loop
+					const response = await getRoomAttachments(roomId, params);
+					const { active } = useStore.getState().previewNavigation;
+					if (active?.roomId !== roomId || active.source !== 'chat') return;
+					appendPreviewNavigationPage(response.attachments, response.cursor);
+					const found = response.attachments.some((a) => a.id === clickedAttachment.id);
+					if (found || response.cursor === undefined) {
+						done = true;
+					} else {
+						cursor = response.cursor;
+						isFirst = false;
+						setPreviewNavigationLoading(true);
+					}
+				}
+			} catch (error) {
+				console.error('Failed to fetch chat attachments for preview', error);
+				setPreviewNavigationLoading(false);
+			}
 		},
 		[appendPreviewNavigationPage, setPreviewNavigationLoading, startPreviewNavigation]
 	);

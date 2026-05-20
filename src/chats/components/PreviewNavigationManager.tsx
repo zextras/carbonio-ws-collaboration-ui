@@ -21,7 +21,23 @@ import {
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { Attachment } from '../../types/network/models/attachmentTypes';
+import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
+
+const shouldLoadMore = (
+	session: PreviewNavigationSession,
+	currentIndex: number,
+	previewsLength: number,
+	lastRequestedLength: number
+): boolean => {
+	if (!session.hasMore || session.isLoading) return false;
+	if (currentIndex === -1) return false;
+	if (lastRequestedLength === previewsLength) return false;
+	// Cursor always advances toward older items. For gallery (rendered newest→oldest)
+	// that's the right edge; for chat (rendered oldest→newest after reverse) it's the
+	// left edge.
+	return session.source === 'chat' ? currentIndex <= 1 : currentIndex + 1 >= previewsLength - 1;
+};
 
 const PreviewNavigationManager = (): React.JSX.Element | null => {
 	const [t] = useTranslation();
@@ -115,7 +131,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		if (!session) return;
 		if (currentIndex === -1) return;
 		if (currentIndex < orderedItems.length) return;
-		const fallback = orderedItems[orderedItems.length - 1];
+		const fallback = orderedItems.at(-1);
 		if (fallback) {
 			openPreview(fallback.id);
 		} else {
@@ -144,15 +160,9 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 			lastRequestedLength.current = -1;
 			return;
 		}
-		if (!session.hasMore || session.isLoading) return;
-		if (currentIndex === -1) return;
-		// Cursor always advances toward older items. For gallery (rendered newest→oldest)
-		// that's the right edge; for chat (rendered oldest→newest after reverse) it's the
-		// left edge.
-		const nearLoadEdge =
-			session.source === 'chat' ? currentIndex <= 1 : currentIndex + 1 >= previews.length - 1;
-		if (!nearLoadEdge) return;
-		if (lastRequestedLength.current === previews.length) return;
+		if (!shouldLoadMore(session, currentIndex, previews.length, lastRequestedLength.current)) {
+			return;
+		}
 		lastRequestedLength.current = previews.length;
 
 		setPreviewNavigationLoading(true);
@@ -165,7 +175,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		})
 			.then((response) => {
 				const { active } = useStore.getState().previewNavigation;
-				if (!active || active.roomId !== session.roomId) return;
+				if (active?.roomId !== session.roomId) return;
 				appendPreviewNavigationPage(response.attachments, response.cursor);
 			})
 			.catch((error) => {
@@ -190,7 +200,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		prevPreviewsRef.current = previews;
 		prevCurrentIndexRef.current = currentIndex;
 
-		if (!session || session.source !== 'chat') return;
+		if (session?.source !== 'chat') return;
 		if (prevIndex === -1 || currentIndex === -1) return;
 		const delta = previews.length - prevPreviews.length;
 		if (delta <= 0) return;
