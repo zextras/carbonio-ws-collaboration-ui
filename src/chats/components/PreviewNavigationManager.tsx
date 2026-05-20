@@ -150,9 +150,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		// that's the right edge; for chat (rendered oldest→newest after reverse) it's the
 		// left edge.
 		const nearLoadEdge =
-			session.source === 'chat'
-				? currentIndex <= 1
-				: currentIndex + 1 >= previews.length - 1;
+			session.source === 'chat' ? currentIndex <= 1 : currentIndex + 1 >= previews.length - 1;
 		if (!nearLoadEdge) return;
 		if (lastRequestedLength.current === previews.length) return;
 		lastRequestedLength.current = previews.length;
