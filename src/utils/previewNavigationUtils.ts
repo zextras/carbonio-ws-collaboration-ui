@@ -12,19 +12,14 @@ import {
 	getAttachmentExtension,
 	getAttachmentSize,
 	getAttachmentType,
-	getAttachmentURL,
-	isPreviewSupported
+	getAttachmentURL
 } from './attachmentUtils';
 import { Attachment } from '../types/network/models/attachmentTypes';
 
-export type BuildPreviewItemOptions = {
-	onDelete?: (attachmentId: string) => void;
-};
-
 export const buildPreviewItem = (
-	attachment: Attachment | { id: string; name: string; mimeType: string; size: number },
+	attachment: Attachment,
 	t: TFunction,
-	options?: BuildPreviewItemOptions
+	options?: { onDelete?: (attachmentId: string) => void }
 ): PreviewItem | null => {
 	const attachmentURL = getAttachmentURL(attachment.id, attachment.mimeType);
 	if (!attachmentURL) return null;
@@ -83,6 +78,3 @@ export const buildPreviewItem = (
 	}
 	return { ...commonOptions, previewType: attachmentType };
 };
-
-export const getPreviewableAttachments = (list: Array<Attachment>): Array<Attachment> =>
-	list.filter((a) => isPreviewSupported(a.mimeType));

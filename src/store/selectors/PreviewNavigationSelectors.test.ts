@@ -6,11 +6,7 @@
 
 import {
 	getPreviewNavigationActive,
-	getPreviewNavigationAttachments,
-	getPreviewNavigationHasMore,
-	getPreviewNavigationIsLoading,
-	getPreviewNavigationOpenTargetId,
-	getPreviewNavigationSource
+	getPreviewNavigationOpenTargetId
 } from './PreviewNavigationSelectors';
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
@@ -46,10 +42,6 @@ describe('PreviewNavigationSelectors', () => {
 	test('return inert defaults when no active session', () => {
 		const store = useStore.getState();
 		expect(getPreviewNavigationActive(store)).toBeNull();
-		expect(getPreviewNavigationAttachments(store)).toEqual([]);
-		expect(getPreviewNavigationHasMore(store)).toBe(false);
-		expect(getPreviewNavigationIsLoading(store)).toBe(false);
-		expect(getPreviewNavigationSource(store)).toBeUndefined();
 		expect(getPreviewNavigationOpenTargetId(store)).toBeUndefined();
 	});
 
@@ -57,10 +49,6 @@ describe('PreviewNavigationSelectors', () => {
 		useStore.getState().startPreviewNavigation(session);
 		const store = useStore.getState();
 		expect(getPreviewNavigationActive(store)).toEqual(session);
-		expect(getPreviewNavigationAttachments(store)).toEqual(session.attachments);
-		expect(getPreviewNavigationHasMore(store)).toBe(true);
-		expect(getPreviewNavigationIsLoading(store)).toBe(true);
-		expect(getPreviewNavigationSource(store)).toBe('chat');
 		expect(getPreviewNavigationOpenTargetId(store)).toBe('a-1');
 	});
 });

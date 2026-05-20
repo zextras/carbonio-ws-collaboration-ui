@@ -6,7 +6,7 @@
 
 import { TFunction } from 'i18next';
 
-import { buildPreviewItem, getPreviewableAttachments } from './previewNavigationUtils';
+import { buildPreviewItem } from './previewNavigationUtils';
 import { Attachment } from '../types/network/models/attachmentTypes';
 
 const t = ((_key: string, fallback?: string): string => fallback ?? _key) as unknown as TFunction;
@@ -84,22 +84,6 @@ describe('previewNavigationUtils', () => {
 			const preventDefault = vi.fn();
 			downloadAction?.onClick({ preventDefault } as never);
 			expect(preventDefault).toHaveBeenCalled();
-		});
-	});
-
-	describe('getPreviewableAttachments', () => {
-		test('keeps only previewable MIME types', () => {
-			const list = [
-				buildAttachment({ id: 'a1', mimeType: 'image/png' }),
-				buildAttachment({ id: 'a2', mimeType: 'application/zip' }),
-				buildAttachment({ id: 'a3', mimeType: 'video/mp4' }),
-				buildAttachment({ id: 'a4', mimeType: 'application/octet-stream' })
-			];
-			expect(getPreviewableAttachments(list).map((a) => a.id)).toEqual(['a1', 'a3']);
-		});
-
-		test('returns an empty array when nothing matches', () => {
-			expect(getPreviewableAttachments([])).toEqual([]);
 		});
 	});
 });

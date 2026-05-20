@@ -109,10 +109,6 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 		[attachment.id, attachment.name]
 	);
 
-	const onConfirmDelete = useCallback(() => {
-		confirmDelete();
-	}, [confirmDelete]);
-
 	return (
 		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview}>
 			<CustomContainer
@@ -178,11 +174,7 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 					/>
 				</Tooltip>
 				{modalOpen && (
-					<DeleteAttachmentModal
-						open={modalOpen}
-						onConfirm={onConfirmDelete}
-						onClose={closeModal}
-					/>
+					<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
 				)}
 			</CustomContainer>
 		</Tooltip>

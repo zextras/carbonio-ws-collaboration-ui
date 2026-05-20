@@ -10,10 +10,8 @@ import {
 	AttachmentsSortOrder
 } from '../network/models/attachmentTypes';
 
-export type PreviewNavigationSource = 'gallery' | 'chat';
-
 export type PreviewNavigationSession = {
-	source: PreviewNavigationSource;
+	source: 'gallery' | 'chat';
 	roomId: string;
 	sortBy: AttachmentsSortBy;
 	order: AttachmentsSortOrder;
