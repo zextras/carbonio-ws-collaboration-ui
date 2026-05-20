@@ -14,8 +14,8 @@ import {
 	uploadFileFetchAPI,
 	wscApiVersionHeader
 } from './FetchUtils';
-import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
+import { charToUnicode } from 'wsc-shared';
 
 const defPath = '/services/chats/test';
 
