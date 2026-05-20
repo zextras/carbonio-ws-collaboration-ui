@@ -23,8 +23,9 @@ import {
 	OperationType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
+import { calcReads } from '../../../utils/calcReads';
 import { dateToTimestamp, now } from '../../../utils/dateUtils';
-import { calcReads, unicodeToChar } from 'wsc-shared';
+import { unicodeToChar } from '../../../utils/textUtils';
 
 type OptionalParameters = {
 	date?: number;

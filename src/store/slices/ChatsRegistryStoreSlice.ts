@@ -28,8 +28,8 @@ import {
 } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { calcReads } from '../../utils/calcReads';
 import { isBefore } from '../../utils/dateUtils';
-import { calcReads } from 'wsc-shared';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
 	const result: T[] = [];
