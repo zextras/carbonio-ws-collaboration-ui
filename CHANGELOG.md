@@ -1,3 +1,9 @@
+## [0.16.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.1...v0.16.0) (2026-05-20)
+
+### Features
+
+* navigate attachments preview ([da303b5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/da303b5ff54b741f1cdab7169042dbf4bdf39449))
+
 ## [0.15.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.0...v0.15.1) (2026-05-19)
 
 ### Bug Fixes
