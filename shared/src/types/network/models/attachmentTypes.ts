@@ -16,6 +16,11 @@ export type Attachment = {
 	stanzaId?: string;
 };
 
+export type AttachmentsPagination = {
+	filter: string;
+	attachments: Attachment[];
+};
+
 export type AdditionalHeaders = {
 	description?: string;
 	messageId?: string;

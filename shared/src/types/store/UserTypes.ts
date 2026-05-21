@@ -11,6 +11,7 @@ export type UsersStoreSlice = {
 	setUserInfo: (users: UserBe[]) => void;
 	setUserPresence: (id: string, presence: boolean) => void;
 	setUserLastActivity: (id: string, date?: number) => void;
+	resetUsersPresence: () => void;
 	setAnonymousUser: (id: string) => void;
 };
 

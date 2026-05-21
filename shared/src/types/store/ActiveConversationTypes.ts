@@ -9,7 +9,7 @@ import { AttachmentMessageType, TextMessage } from './ChatsRegistryTypes';
 export enum InfoPanelTab {
 	ACTIONS = 'actions',
 	MEMBERS = 'members',
-	MEDIA_GALLERY = 'media_gallery'
+	MEDIA_GALLERY = 'media_gallery' // [UI-ONLY] media gallery tab does not exist in mobile
 }
 
 export type ActiveConversationsSlice = {
