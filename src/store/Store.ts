@@ -10,13 +10,12 @@ import { devtools, persist } from 'zustand/middleware';
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useActiveMeetingSlice } from './slices/ActiveMeetingSlice';
 import { useChatsRegistryStoreSlice } from './slices/ChatsRegistryStoreSlice';
-import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
 import { useMediaGalleryStoreSlice } from './slices/MediaGalleryStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { usePreviewNavigationStoreSlice } from './slices/PreviewNavigationStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
-import { useSessionStoreSlice, useUsersStoreSlice } from 'wsc-shared';
+import { useConnectionsStoreSlice, useSessionStoreSlice, useUsersStoreSlice } from 'wsc-shared';
 
 const STORAGE_KEY = 'carbonio-ws-collaboration-storage';
 const TTL = 2 * 24 * 60 * 60 * 1000;

@@ -7,7 +7,7 @@
 import { size } from 'lodash';
 
 import { createMockUser } from '../../tests/createMock';
-import useStore from '../../tests/Store';
+import useStore from '../../tests/testStore';
 import { UserType } from '../../types/store/UserTypes';
 
 const user1 = createMockUser({ id: 'user1-id', email: 'user1@test.com', name: 'User 1' });

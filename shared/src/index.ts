@@ -8,6 +8,7 @@ export * from './types/store/StoreTypes';
 export * from './types/store/SessionTypes';
 
 // Store slices
+export * from './store/slices/ConnectionStoreSlice';
 export * from './store/slices/SessionStoreSlice';
 export * from './store/slices/UsersStoreSlice';
 

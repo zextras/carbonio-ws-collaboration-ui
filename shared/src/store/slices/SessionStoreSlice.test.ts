@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import useStore from '../../tests/Store';
+import useStore from '../../tests/testStore';
 import { AttributesList, Version } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 

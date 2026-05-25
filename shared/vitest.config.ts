@@ -7,7 +7,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	test: {
-		globals: true
+		globals: true,
+		environment: 'jsdom'
 	},
 	cacheDir: '../node_modules/.vite'
 });
