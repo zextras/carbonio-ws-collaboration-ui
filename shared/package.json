@@ -9,6 +9,7 @@
   "peerDependencies": {
     "immer": "*",
     "lodash": "*",
+    "semver": "*",
     "zustand": "*"
   }
 }

@@ -8,6 +8,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
+import ChatExporter from './ChatExporter';
 import ChatItem from './ChatItem';
 import useStore from '../../../store/Store';
 import {
@@ -108,7 +109,7 @@ describe('ChatItem test', () => {
 	});
 
 	test('If chat is exported, chat item displays export icon', () => {
-		useStore.getState().setChatExporting(singleRoom.id);
+		useStore.getState().setChatExporting(singleRoom.id, new ChatExporter(singleRoom.id));
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const spinner = screen.getByTestId('spinner');
 		expect(spinner).toBeInTheDocument();

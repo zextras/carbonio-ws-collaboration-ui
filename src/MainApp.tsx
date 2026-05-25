@@ -23,6 +23,7 @@ import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
+import { AccountSettings } from 'wsc-shared';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -77,10 +78,10 @@ export default function MainApp(): React.JSX.Element {
 						const version = useStore.getState().session.apiVersion;
 						if (version && gte(version, '1.6.8')) {
 							getCapabilities().catch(() => {
-								setAttributes(attrs);
+								setAttributes(attrs as AccountSettings['attrs']);
 							});
 						} else {
-							setAttributes(attrs);
+							setAttributes(attrs as AccountSettings['attrs']);
 						}
 						setChatsBeStatus(true);
 						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)

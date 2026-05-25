@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { Message } from './ChatsRegistryTypes';
 import { UserType } from './UserTypes';
-import { IChatExporter } from "../../../../src/settings/components/chatExporter/ChatExporter";
 
 export type AccountSettings = {
 	attrs: { [key: string]: string };
@@ -19,7 +19,7 @@ export type SessionStoreSlice = {
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string) => void;
-	setChatExporting: (roomId?: string) => void;
+	setChatExporting: (roomId?: string, chatExporter?: IChatExporter) => void;
 	setChatExportStatus: (status: ExportStatus) => void;
 	setApiVersion: (apiVersion: Version) => void;
 	setSupportedVersions: (versions: Version[]) => void;
@@ -70,4 +70,10 @@ export type AttributesList = {
 export enum ExportStatus {
 	EXPORTING = 'exporting',
 	DOWNLOADING = 'downloading'
+}
+
+export interface IChatExporter {
+	addMessagesToFullHistory(messages: Message[]): void;
+	continueExporting(): void;
+	exportHistory(): void;
 }

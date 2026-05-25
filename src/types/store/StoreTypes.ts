@@ -12,8 +12,8 @@ import { MediaGalleryStoreSlice } from './MediaGalleryTypes';
 import { MeetingsSlice } from './MeetingTypes';
 import { PreviewNavigationStoreSlice } from './PreviewNavigationTypes';
 import { RoomsStoreSlice } from './RoomTypes';
-import { SessionStoreSlice } from './SessionTypes';
 import { UsersStoreSlice } from './UserTypes';
+import { SessionStoreSlice } from 'wsc-shared';
 
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &

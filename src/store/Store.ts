@@ -15,9 +15,8 @@ import { useMediaGalleryStoreSlice } from './slices/MediaGalleryStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { usePreviewNavigationStoreSlice } from './slices/PreviewNavigationStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
-import { useSessionStoreSlice } from './slices/SessionStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
-import { useUsersStoreSlice } from 'wsc-shared';
+import { useSessionStoreSlice, useUsersStoreSlice } from 'wsc-shared';
 
 const STORAGE_KEY = 'carbonio-ws-collaboration-storage';
 const TTL = 2 * 24 * 60 * 60 * 1000;

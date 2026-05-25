@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AccountSettings } from '@zextras/carbonio-shell-ui';
-
 import {
 	MeetingBe,
 	MeetingParticipantBe,
@@ -26,6 +24,7 @@ import {
 	TextMessage
 } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
+import { AccountSettings } from '../types/store/SessionTypes';
 import { User, UserType } from '../types/store/UserTypes';
 
 const timeStampString = '2022-08-25T17:24:28.961+02:00';

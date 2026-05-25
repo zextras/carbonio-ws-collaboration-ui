@@ -12,12 +12,11 @@
 // import { MeetingsSlice } from './MeetingTypes';
 // import { PreviewNavigationStoreSlice } from './PreviewNavigationTypes';
 // import { RoomsStoreSlice } from './RoomTypes';
-// import { SessionStoreSlice } from './SessionTypes';
+import { SessionStoreSlice } from './SessionTypes';
 import { UsersStoreSlice } from './UserTypes';
 
-export type RootStore = UsersStoreSlice;
+export type RootStore = UsersStoreSlice & SessionStoreSlice;
 // RoomsStoreSlice &
-// SessionStoreSlice &
 // ActiveConversationsSlice &
 // ChatsRegistryStoreSlice &
 // ConnectionsStoreSlice &

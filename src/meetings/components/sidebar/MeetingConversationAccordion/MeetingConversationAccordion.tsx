@@ -28,6 +28,7 @@ import Chat from '../../../../chats/components/conversation/Chat';
 import { PinMessage } from '../../../../chats/components/conversation/PinMessage';
 import useDarkReader from '../../../../hooks/useDarkReader';
 import { clearRoomHistory } from '../../../../network';
+import ChatExporter from '../../../../settings/components/chatExporter/ChatExporter';
 import { getPinnedMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
@@ -314,7 +315,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					/>
 					<Button
 						label={t('action.exportMessages', 'Export messages')}
-						onClick={() => setChatExporting(roomId)}
+						onClick={() => setChatExporting(roomId, new ChatExporter(roomId))}
 						icon="Copy"
 						iconPlacement="left"
 					/>

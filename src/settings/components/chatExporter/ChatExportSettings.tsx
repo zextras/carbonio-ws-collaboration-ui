@@ -29,6 +29,7 @@ import { getExportedChat, getExportStatus } from '../../../store/selectors/Sessi
 import useStore from '../../../store/Store';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import SettingsCard from '../SettingsCard';
+import ChatExporter from './ChatExporter';
 
 const CustomListItem = styled(ListItem)`
 	margin: 0.2rem;
@@ -122,7 +123,7 @@ const ChatExportSettings: FC = () => {
 	);
 
 	const onExport = useCallback(() => {
-		if (selectedRoomId) setChatExporting(selectedRoomId);
+		if (selectedRoomId) setChatExporting(selectedRoomId, new ChatExporter(selectedRoomId));
 	}, [selectedRoomId, setChatExporting]);
 
 	const filterIcon = useMemo(

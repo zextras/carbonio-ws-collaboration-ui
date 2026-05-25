@@ -5,15 +5,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AccountSettings } from '@zextras/carbonio-shell-ui';
 import { produce } from 'immer';
 import { maxSatisfying } from 'semver';
 import { StateCreator } from 'zustand';
 
-import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import {
+	AccountSettings,
 	AttributesList,
 	ExportStatus,
+	IChatExporter,
 	Session,
 	SessionStoreSlice,
 	Version
@@ -124,13 +124,13 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_CUSTOM_LOGO'
 		);
 	},
-	setChatExporting: (roomId?: string): void => {
+	setChatExporting: (roomId?: string, chatExporter?: IChatExporter): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (roomId) {
+				if (roomId && chatExporter) {
 					draft.session.chatExporting = {
 						roomId,
-						exporter: new ChatExporter(roomId),
+						exporter: chatExporter,
 						status: ExportStatus.EXPORTING
 					};
 				} else {
