@@ -11,10 +11,11 @@
 		"deploy:local": "sdk deploy --container ${CONTAINER:-carbonio-advanced-carbonio-composed-ui-1}",
 		"sdk-install": "sdk install",
 		"start": "sdk watch",
-		"test": "vitest run",
+		"test": "vitest run && pnpm run test:shared",
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
+        "test:shared": "vitest run --root shared",
 		"postinstall": "is-ci || husky",
 		"prepublishOnly": "pinst --disable",
 		"postpublish": "pinst --enable",
@@ -95,6 +96,7 @@
 		"strophe.js": "1.6.2",
 		"use-sync-external-store": "1.6.0",
 		"uuid": "14.0.0",
+        "wsc-shared": "file:./shared",
 		"zustand": "5.0.9"
 	},
 	"pnpm": {

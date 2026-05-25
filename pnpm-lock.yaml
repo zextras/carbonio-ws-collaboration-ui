@@ -80,6 +80,9 @@ importers:
       uuid:
         specifier: 14.0.0
         version: 14.0.0
+      wsc-shared:
+        specifier: file:./shared
+        version: file:shared(lodash@4.18.1)
       zustand:
         specifier: 5.0.9
         version: 5.0.9(@types/react@18.3.29)(immer@10.2.0)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -6770,6 +6773,11 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  wsc-shared@file:shared:
+    resolution: {directory: shared, type: directory}
+    peerDependencies:
+      lodash: '*'
 
   wsl-utils@0.1.0:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
@@ -14114,6 +14122,10 @@ snapshots:
   ws@7.5.10: {}
 
   ws@8.20.0: {}
+
+  wsc-shared@file:shared(lodash@4.18.1):
+    dependencies:
+      lodash: 4.18.1
 
   wsl-utils@0.1.0:
     dependencies:
