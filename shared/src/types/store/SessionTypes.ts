@@ -5,7 +5,12 @@
  */
 
 import { UserType } from './UserTypes';
-import { IChatExporter } from "../../../../src/settings/components/chatExporter/ChatExporter";
+
+export interface IChatExporter {
+	addMessagesToFullHistory(messages: unknown[]): void;
+	continueExporting(): void;
+	exportHistory(): void;
+}
 
 export type AccountSettings = {
 	attrs: { [key: string]: string };

@@ -4,7 +4,9 @@
         "noUncheckedIndexedAccess": false,
         "types": ["vitest/globals"],
         "paths": {
-            "wsc-shared": ["./shared/src/index.ts"]
+            "wsc-shared": ["./shared/src/index.ts"],
+            "wsc-shared/utils": ["./shared/src/utils/index.ts"],
+            "wsc-shared/types": ["./shared/src/types/index.ts"]
         }
     },
     "exclude": [

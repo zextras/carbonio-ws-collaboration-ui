@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
+import { MemberBe, RoomBe, RoomType } from '../network/models/roomBeTypes';
+
+export { RoomType };
 
 export type RoomsStoreSlice = {
 	rooms: RoomsMap;
@@ -33,12 +35,6 @@ export type Room = {
 	meetingId?: string;
 	placeholder?: boolean;
 };
-
-export enum RoomType {
-	ONE_TO_ONE = 'one_to_one',
-	GROUP = 'group',
-	TEMPORARY = 'temporary'
-}
 
 export type Member = {
 	userId: string;
