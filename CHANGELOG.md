@@ -1,3 +1,9 @@
+## [0.16.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.0...v0.16.1) (2026-05-25)
+
+### Bug Fixes
+
+* trigger release ([5e934f8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5e934f88144747ca4da813f598f1ec536bdbec52))
+
 ## [0.16.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.1...v0.16.0) (2026-05-20)
 
 ### Features
