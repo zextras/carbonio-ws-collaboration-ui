@@ -96,7 +96,7 @@
 		"strophe.js": "1.6.2",
 		"use-sync-external-store": "1.6.0",
 		"uuid": "14.0.0",
-        "wsc-shared": "file:./shared",
+        "wsc-shared": "workspace:*",
 		"zustand": "5.0.9"
 	},
 	"pnpm": {

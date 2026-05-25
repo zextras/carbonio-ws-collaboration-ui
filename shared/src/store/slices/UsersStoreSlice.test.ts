@@ -7,8 +7,8 @@
 import { size } from 'lodash';
 
 import { createMockUser } from '../../tests/createMock';
+import useStore from '../../tests/Store';
 import { UserType } from '../../types/store/UserTypes';
-import useStore from '../Store';
 
 const user1 = createMockUser({ id: 'user1-id', email: 'user1@test.com', name: 'User 1' });
 
@@ -96,7 +96,7 @@ describe('UsersStoreSlice tests', () => {
 		});
 	});
 
-	describe('anonymous user', () => {
+	describe('Anonymous user', () => {
 		test('Set anonymous user', () => {
 			const store = useStore.getState();
 			store.setUserInfo([user1]);
