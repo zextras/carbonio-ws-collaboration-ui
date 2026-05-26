@@ -11,9 +11,9 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
+import useStore from '../../tests/testStore';
 import { messageActionType } from '../../types/store/ActiveConversationTypes';
 import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
-import useStore from '../Store';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName' });
 

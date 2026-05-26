@@ -52,18 +52,23 @@ export const useActiveMeetingSlice: StateCreator<
 				draft.activeMeeting = {
 					meetingId,
 					// Peer connections and streams
-					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
-						meetingId,
-						!!audioStream?.enabled,
-						audioStream?.deviceId
-					),
-					videoScreenIn: new VideoScreenInConnection(meetingId),
-					videoOutConn: new VideoOutConnection(
-						meetingId,
-						!!videoStream?.enabled,
-						videoStream?.deviceId
-					),
-					screenOutConn: new ScreenOutConnection(meetingId),
+					// TODO
+					// bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
+					// 	meetingId,
+					// 	!!audioStream?.enabled,
+					// 	audioStream?.deviceId
+					// ),
+					// videoScreenIn: new VideoScreenInConnection(meetingId),
+					// videoOutConn: new VideoOutConnection(
+					// 	meetingId,
+					// 	!!videoStream?.enabled,
+					// 	videoStream?.deviceId
+					// ),
+					// screenOutConn: new ScreenOutConnection(meetingId),
+					bidirectionalAudioConn: {} as any,
+					videoScreenIn: {} as any,
+					videoOutConn: {} as any,
+					screenOutConn: {} as any,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId

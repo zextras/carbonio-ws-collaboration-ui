@@ -7,8 +7,8 @@
 import { size } from 'lodash';
 
 import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
+import useStore from '../../tests/testStore';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import useStore from '../Store';
 
 const mockParticipant0 = createMockParticipants({
 	userId: 'userId0',

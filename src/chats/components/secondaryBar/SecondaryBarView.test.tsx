@@ -21,7 +21,6 @@ import {
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';
@@ -115,7 +114,7 @@ const contactUser1: ContactInfo = {
 vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setChatsBeStatus(true);
 	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.addRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
@@ -140,7 +139,7 @@ describe('SecondaryBar tests', () => {
 	});
 
 	test('User see the ShimmeringListView when network status is not ready', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setChatsBeStatus(false);
 		setup(<SecondaryBarView expanded />);
 		expect(screen.getByTestId('shimmering_list_view')).toBeInTheDocument();

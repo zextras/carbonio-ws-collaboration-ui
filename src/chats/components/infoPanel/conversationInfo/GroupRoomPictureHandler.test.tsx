@@ -19,7 +19,6 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
@@ -52,7 +51,7 @@ const testRoom2: RoomBe = createMockRoom({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user1Info, user2Info]);
 	store.addRooms([testRoom, testRoom2]);
@@ -116,7 +115,7 @@ describe('Room Picture Handler - groups', () => {
 		const spyOnUpdateRoomPicture = vi.spyOn(api, 'updateRoomPicture');
 		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '1' }));
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 

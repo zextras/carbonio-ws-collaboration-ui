@@ -13,10 +13,10 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
+import useStore from '../../tests/testStore';
 import { MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
-import useStore from '../Store';
 
 const user1 = createMockUser({ id: 'user1' });
 const user2 = createMockUser({ id: 'user2' });

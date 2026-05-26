@@ -43,7 +43,7 @@ const mockedMessage = createMockTextMessage({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
 	store.newMessage(mockedMessage);
 });
@@ -58,7 +58,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 		expect(ctxMenu).toBeDefined();
 	});
 	test('Display of reference message shows correctly', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setReferenceMessage(mockedRoom.id, {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
@@ -72,7 +72,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 		expect(closeButton).toBeInTheDocument();
 	});
 	test('Close reference message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setReferenceMessage(mockedRoom.id, {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,

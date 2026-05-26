@@ -14,6 +14,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import useStore from '../../tests/testStore';
 import {
 	BackfillRequest,
 	ConfigurationMessage,
@@ -26,7 +27,6 @@ import {
 } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import useStore from '../Store';
 
 const date1 = dateToTimestamp('2024-05-01 12:00');
 const date2 = dateToTimestamp('2024-05-01 13:00');

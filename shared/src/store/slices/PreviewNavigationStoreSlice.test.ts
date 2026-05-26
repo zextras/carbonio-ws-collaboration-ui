@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import useStore from '../../tests/testStore';
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
-import useStore from '../Store';
 
 const roomId = 'room-1';
 

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import useStore from '../../tests/testStore';
 import {
 	MeetingAccordionType,
 	MeetingChatVisibility,
@@ -11,7 +12,6 @@ import {
 	STREAM_TYPE,
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
-import useStore from '../Store';
 
 const meetingId = 'meetingId';
 

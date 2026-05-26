@@ -39,7 +39,7 @@ const reactionToSimpleTextMessage = createMockMessageFastening({
 const iconTestId = 'icon: SmileOutline';
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.addRooms([room]);
 	store.newMessage(simpleTextMessage);

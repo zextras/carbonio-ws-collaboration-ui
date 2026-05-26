@@ -97,7 +97,7 @@ const messageTypes: Array<[string, TextMessage]> = [
 ];
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
 	store.setAttributes(createMockAttributesList());
 });
@@ -138,7 +138,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('If forward mode is active, the forward action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
@@ -153,7 +153,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Reply a message after starting an edit should reset the input', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -218,7 +218,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being edited, the delete for all action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -240,7 +240,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being replied, the delete action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -262,7 +262,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if forward mode is active, the forward action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 

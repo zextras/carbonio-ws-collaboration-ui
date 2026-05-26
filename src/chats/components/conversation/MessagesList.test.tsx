@@ -186,7 +186,7 @@ describe('render list of messages with history loader visible for first time ope
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id
 		});
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedTextMessage);
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
@@ -199,7 +199,7 @@ describe('render list of messages with history loader visible for first time ope
 			roomId: 'roomTest',
 			text: 'Hi! Look at this site: https://www.awesomeTest.com/test'
 		});
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedURLTextMessage);
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedURLTextMessage.id}`);

@@ -43,7 +43,7 @@ const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomTy
 vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.setUserInfo([user1]);
 	store.addRooms([testRoom, chat, chat2, chat3]);

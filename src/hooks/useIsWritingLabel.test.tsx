@@ -11,7 +11,6 @@ import useStore from '../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../tests/createMock';
 import { RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
-import { RootStore } from '../types/store/StoreTypes';
 import { User } from '../types/store/UserTypes';
 
 vi.mock('react-i18next');
@@ -64,7 +63,7 @@ beforeEach(() => {
 
 describe('useIsWritingLabel', () => {
 	test('one user is writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 
 		const { result } = renderHook(() => useIsWritingLabel(testRoom.id));
@@ -72,7 +71,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(' status.isTyping');
 	});
 	test('two users are writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 
@@ -81,7 +80,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(',  status.areTyping');
 	});
 	test('four users are writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 		store.setIsWriting(testRoom.id, user3Info.id, true);
@@ -92,7 +91,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe('status.nameAndNumberOfPeopleAreTyping');
 	});
 	test('one user is writing - meeting view', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 
 		const { result } = renderHook(() => useIsWritingLabel(testRoom.id, true));
@@ -100,7 +99,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(' status.isTyping');
 	});
 	test('more users are writing - meeting view', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 		store.setIsWriting(testRoom.id, user3Info.id, true);

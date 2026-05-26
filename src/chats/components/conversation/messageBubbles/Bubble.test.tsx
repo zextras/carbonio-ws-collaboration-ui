@@ -164,7 +164,7 @@ const mockedTextMessagePending = createMockTextMessage({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom, mockedTempRoom]);
 	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.setUserInfo([guestUser, user1Be]);
@@ -187,7 +187,7 @@ describe('Message bubble component visualization', () => {
 		expect(insideText).toBeVisible();
 	});
 	test('Display image', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedAttachmentMessageKb);
 		setup(
 			<Bubble
@@ -231,7 +231,7 @@ const readsMessages: Array<[string, TextMessage, boolean, string]> = [
 
 describe('Attachment footer', () => {
 	test.each(sizeFormatMessages)('Display size in %s', async (format, msg, evaluate) => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(msg);
 		setup(
 			<Bubble
@@ -245,7 +245,7 @@ describe('Attachment footer', () => {
 		expect(extensionFile).toBeInTheDocument();
 	});
 	test.each(readsMessages)('Display message sent from me, %s', (format, msg, cap, iconToCheck) => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(msg);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(
@@ -263,7 +263,7 @@ describe('Attachment footer', () => {
 		expect(ackIcon).toBeInTheDocument();
 	});
 	test('Display reads for a message sent from me, me - user cannot see reads', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedTextMessageSentByMe);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
@@ -278,7 +278,7 @@ describe('Attachment footer', () => {
 		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
 	});
 	test('Display unread message sent from me - user cannot see reads', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedTextMessageUnread);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));

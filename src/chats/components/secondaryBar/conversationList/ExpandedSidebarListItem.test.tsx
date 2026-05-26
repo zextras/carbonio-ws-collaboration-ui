@@ -148,7 +148,7 @@ const mockedAttachmentMessage = createMockTextMessage({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.setUserInfo([user1Be, user2Be, user4Be]);
 	store.addRooms([mockedGroup, mockedOneToOne]);
@@ -159,7 +159,7 @@ describe('Expanded sidebar list item', () => {
 	describe('ACK status', () => {
 		describe('carbonioWscShowMessageReads = true', () => {
 			test('User sent a message', async () => {
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.setInboxMessages([mockedTextMessageUnread]);
 				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 				expect(screen.getByTestId('icon: Checkmark')).toBeVisible();
@@ -167,7 +167,7 @@ describe('Expanded sidebar list item', () => {
 			});
 
 			test('User sent a message and someone read it', async () => {
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.setInboxMessages([mockedTextMessageReadBySomeone]);
 				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 				expect(screen.getByTestId(iconDoneAll)).toBeVisible();
@@ -175,7 +175,7 @@ describe('Expanded sidebar list item', () => {
 			});
 
 			test('User sent a message and everyone read it', async () => {
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.setInboxMessages([mockedTextMessageRead]);
 				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 				expect(screen.getByTestId(iconDoneAll)).toBeVisible();
@@ -185,7 +185,7 @@ describe('Expanded sidebar list item', () => {
 
 		describe('carbonioWscShowMessageReads = false', () => {
 			test('User sent a message', async () => {
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 				store.setInboxMessages([mockedTextMessageUnread]);
 				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -194,7 +194,7 @@ describe('Expanded sidebar list item', () => {
 			});
 
 			test('User sent a message and someone read it', async () => {
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 				store.setInboxMessages([mockedTextMessageReadBySomeone]);
 				setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -206,7 +206,7 @@ describe('Expanded sidebar list item', () => {
 
 	describe('Group List Item', () => {
 		test('A user of a group sent a message', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedTextMessageSentBySomeoneElse]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			const message = `${user2Be.name}: ${mockedTextMessageSentBySomeoneElse.text}`;

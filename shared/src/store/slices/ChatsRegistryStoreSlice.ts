@@ -9,8 +9,7 @@ import { produce } from 'immer';
 import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
-import { isMyId } from '../../network/websocket/eventHandlersUtilities';
+// import { EventName, sendCustomEvent } from '../../hooks/useEventListener'; TODO
 import {
 	BackfillRequest,
 	ChatRegistry,
@@ -28,7 +27,7 @@ import {
 } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { calcReads } from '../../utils/calcReads';
+// import { calcReads } from '../../utils/calcReads'; TODO
 import { isBefore } from '../../utils/dateUtils';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
@@ -284,7 +283,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// Add message to the end of list or replace a placeholder message
 				messages.push(placeholderMessage);
 
-				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
+				// TODO
+				// sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),
 			false,
 			'CHAT/SET_PLACEHOLDER_MESSAGE'
@@ -332,7 +332,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					[MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG].includes(lastMessage.type) &&
 					[MarkerStatus.UNREAD, MarkerStatus.READ_BY_SOMEONE].includes(lastMessage.read)
 				) {
-					lastMessage.read = calcReads(lastMessage.date, roomId, markers);
+					// lastMessage.read = calcReads(lastMessage.date, roomId, markers); TODO
 				}
 
 				// Update messages' read status of TEXT and CONFIGURATION messages
@@ -341,7 +341,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						(msg.type === MessageType.TEXT_MSG || msg.type === MessageType.CONFIGURATION_MSG) &&
 						(msg.read === MarkerStatus.UNREAD || msg.read === MarkerStatus.READ_BY_SOMEONE)
 					) {
-						msg.read = calcReads(msg.date, roomId, markers);
+						// msg.read = calcReads(msg.date, roomId, markers); TODO
 					}
 					return msg;
 				});
@@ -356,7 +356,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const unreadMessages = messages.filter((msg) => {
 					const isConfigOrFromOthers =
 						msg.type === MessageType.CONFIGURATION_MSG ||
-						(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
+						(msg.type === MessageType.TEXT_MSG && msg.from !== myId);
 					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
 					return isConfigOrFromOthers && isAfterMarker;
 				});

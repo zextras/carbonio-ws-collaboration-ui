@@ -69,7 +69,7 @@ const mockedRoom: RoomBe = createMockRoom({
 vi.mock('../../../hooks/useMediaQueryCheck');
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
 	store.setPlaceholderRoom(mockPaoloUser.id);
 });
@@ -100,7 +100,7 @@ describe('Conversation header test', () => {
 	});
 
 	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(
 			<ConversationHeader
@@ -113,7 +113,7 @@ describe('Conversation header test', () => {
 	});
 
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 		setup(
 			<ConversationHeader
@@ -126,7 +126,7 @@ describe('Conversation header test', () => {
 	});
 
 	test("Meeting button isn't displayed when the room is a placeholder", async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(
 			<ConversationHeader
@@ -140,7 +140,7 @@ describe('Conversation header test', () => {
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: mockPaoloUser.id, name: mockPaoloUser.name });
 	store.setUserInfo([mockRobertoUser, mockLucaUser, mockGianniUser, mockQuintoUser]);
 	store.addRooms([mockedRoom]);
@@ -169,7 +169,7 @@ describe('isWriting functionality', () => {
 	});
 
 	test('is writing label for four or more users that are writing', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
 		store.setIsWriting(mockedRoom.id, mockGianniUser.id, true);
 		store.setIsWriting(mockedRoom.id, mockLucaUser.id, true);

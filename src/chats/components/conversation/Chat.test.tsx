@@ -28,8 +28,8 @@ import {
 	OperationType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
+import { RootStore } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const mockedRoom: RoomBe = createMockRoom({
@@ -59,7 +59,7 @@ describe('Chat', () => {
 				roomId: mockedRoom.id
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 			xmppClient.features = [];
 
@@ -83,7 +83,7 @@ describe('Chat', () => {
 				roomId: mockedRoom.id
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 
 			// Mock xmppClient.pinMessage to update the store
@@ -124,7 +124,7 @@ describe('Chat', () => {
 				text: 'Second message'
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(firstMessage);
 			store.newMessage(secondMessage);
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
@@ -174,7 +174,7 @@ describe('Chat', () => {
 				text: 'Second message'
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(firstMessage);
 			store.newMessage(secondMessage);
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
@@ -214,7 +214,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
@@ -250,7 +250,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
@@ -285,7 +285,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
@@ -326,7 +326,7 @@ describe('Chat', () => {
 					from: user1.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 				store.newMessage(mockPinConfigurationMessage);
 
