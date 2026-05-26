@@ -11,7 +11,7 @@ import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import { createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
+import { createAudioOffer, iceRestartAudio, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut
 	// eslint-disable-next-line prettier/prettier
@@ -27,6 +27,10 @@ export default class BidirectionalConnectionAudioInOut
 	initialAudioStatus: boolean;
 
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
+
+	isNegotiating = false;
+
+	pendingIceRestart = false;
 
 	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -68,6 +72,8 @@ export default class BidirectionalConnectionAudioInOut
 
 	// Create SDP offer, set it as local description and send it to the remote peer
 	onNegotiationNeeded = (): void => {
+		if (this.isNegotiating) return;
+		this.isNegotiating = true;
 		this.peerConn
 			.createOffer()
 			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
@@ -81,25 +87,65 @@ export default class BidirectionalConnectionAudioInOut
 								});
 							}
 						})
-						.catch((reason) => console.warn(reason));
+						.catch((reason) => {
+							this.isNegotiating = false;
+							console.warn(reason);
+						});
+				} else {
+					this.isNegotiating = false;
 				}
 			})
-			.catch((reason) => console.warn('createOffer failed', reason));
+			.catch((reason) => {
+				this.isNegotiating = false;
+				console.warn('createOffer failed', reason);
+			});
 	};
 
 	onIceConnectionStateChange = (ev: Event): void => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
+			this.restartIce();
 		}
 	};
+
+	restartIce(): void {
+		if (!this.peerConn) return;
+		if (this.peerConn.signalingState !== 'stable') {
+			this.pendingIceRestart = true;
+			return;
+		}
+		this.isNegotiating = true;
+		this.peerConn
+			.createOffer({ iceRestart: true })
+			.then((offer) => this.peerConn.setLocalDescription(offer))
+			.then(() => {
+				const sdp = this.peerConn.localDescription?.sdp;
+				if (sdp) iceRestartAudio(this.meetingId, sdp);
+			})
+			.catch((reason) => {
+				this.isNegotiating = false;
+				console.warn('ICE restart failed', reason);
+			});
+	}
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn.setRemoteDescription(remoteDescription);
+			this.peerConn
+				.setRemoteDescription(remoteDescription)
+				.then(() => {
+					this.isNegotiating = false;
+					if (this.pendingIceRestart && this.peerConn.signalingState === 'stable') {
+						this.pendingIceRestart = false;
+						this.restartIce();
+					}
+				})
+				.catch((reason) => {
+					this.isNegotiating = false;
+					console.warn('setRemoteDescription failed', reason);
+				});
 		}
 	}
 

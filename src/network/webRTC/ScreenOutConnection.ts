@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getScreenStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { iceRestartMedia, updateMediaOffer } from '../apis/MeetingsApi';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -17,6 +17,10 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	meetingId: string;
 
 	rtpSender: RTCRtpSender | null;
+
+	isNegotiating = false;
+
+	pendingIceRestart = false;
 
 	constructor(meetingId: string) {
 		this.peerConn = null;
@@ -26,6 +30,8 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 
 	// Create SDP offer, set it as local description and send it to the remote peer
 	private onNegotiationNeeded = (): void => {
+		if (this.isNegotiating) return;
+		this.isNegotiating = true;
 		this.peerConn
 			?.createOffer()
 			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
@@ -35,19 +41,47 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 						.then(() => {
 							updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, true, rtcSessionDesc.sdp);
 						})
-						.catch((reason) => console.warn(reason));
+						.catch((reason) => {
+							this.isNegotiating = false;
+							console.warn(reason);
+						});
+				} else {
+					this.isNegotiating = false;
 				}
 			})
-			.catch((reason) => console.warn('createOffer failed', reason));
+			.catch((reason) => {
+				this.isNegotiating = false;
+				console.warn('createOffer failed', reason);
+			});
 	};
 
 	private onIceConnectionStateChange = (ev: Event): void => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
+			this.restartIce();
 		}
 	};
+
+	private restartIce(): void {
+		if (!this.peerConn) return;
+		if (this.peerConn.signalingState !== 'stable') {
+			this.pendingIceRestart = true;
+			return;
+		}
+		this.isNegotiating = true;
+		this.peerConn
+			.createOffer({ iceRestart: true })
+			.then((offer) => this.peerConn?.setLocalDescription(offer))
+			.then(() => {
+				const sdp = this.peerConn?.localDescription?.sdp;
+				if (sdp) iceRestartMedia(this.meetingId, sdp);
+			})
+			.catch((reason) => {
+				this.isNegotiating = false;
+				console.warn('ICE restart failed', reason);
+			});
+	}
 
 	private updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
 		return new Promise((resolve) => {
@@ -82,7 +116,19 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
 		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-		this.peerConn?.setRemoteDescription(remoteDescription);
+		this.peerConn
+			?.setRemoteDescription(remoteDescription)
+			.then(() => {
+				this.isNegotiating = false;
+				if (this.pendingIceRestart && this.peerConn?.signalingState === 'stable') {
+					this.pendingIceRestart = false;
+					this.restartIce();
+				}
+			})
+			.catch((reason) => {
+				this.isNegotiating = false;
+				console.warn('setRemoteDescription failed', reason);
+			});
 	}
 
 	public stopScreenShare(): void {

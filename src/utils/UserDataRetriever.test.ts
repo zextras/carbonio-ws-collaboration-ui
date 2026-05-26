@@ -5,10 +5,10 @@
  */
 import * as uuid from 'uuid';
 
-import UserDataRetriever from './UserDataRetriever';
-import useStore from '../store/Store';
 import { mockFetchAPI } from './__mocks__/FetchUtils';
+import UserDataRetriever from './UserDataRetriever';
 import * as api from '../network/apis/UsersApi';
+import useStore from '../store/Store';
 import { UserType } from '../types/store/UserTypes';
 
 const user1 = {

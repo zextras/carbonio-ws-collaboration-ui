@@ -10,10 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 import AudioAndVideoCard from './AudioAndVideoCard';
 import JoinAsGuestCard from './JoinAsGuestCard';
+import useExternalAccess from './useExternalAccess';
 import useStore from '../../../../store/Store';
 import Logo from '../../Logo';
 import useAccessMeeting from '../useAccessMeeting';
-import useExternalAccess from './useExternalAccess';
 
 export type MediaStatus = {
 	audio: {

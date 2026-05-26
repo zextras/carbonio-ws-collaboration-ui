@@ -8,11 +8,11 @@ import { act, renderHook, waitFor, screen } from '@testing-library/react';
 
 import useGeneralMeetingControls from './useGeneralMeetingControls';
 import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
+import * as api from '../network/apis/MeetingsApi';
 import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { ProvidersWrapper } from '../tests/test-utils';
 import { mockGoToInfoPage } from './__mocks__/useRouting';
-import * as api from '../network/apis/MeetingsApi';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
 

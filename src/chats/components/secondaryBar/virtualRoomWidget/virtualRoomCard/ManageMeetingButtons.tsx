@@ -17,12 +17,12 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import EditVirtualRoomModal from './EditVirtualRoomModal';
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
+import { deleteRoomMember } from '../../../../../network';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
-import EditVirtualRoomModal from './EditVirtualRoomModal';
-import { deleteRoomMember } from '../../../../../network';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;

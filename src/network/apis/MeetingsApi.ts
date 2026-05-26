@@ -191,6 +191,12 @@ export const subscribeToMedia = (
 export const createMediaAnswer = (meetingId: string, sdpAnswer: string): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, { sdp: sdpAnswer });
 
+export const iceRestartMedia = (meetingId: string, sdp: string): Promise<Response> =>
+	fetchAPI(`meetings/${meetingId}/video/iceRestart`, RequestType.PUT, { sdp });
+
+export const iceRestartAudio = (meetingId: string, sdp: string): Promise<Response> =>
+	fetchAPI(`meetings/${meetingId}/audio/iceRestart`, RequestType.PUT, { sdp });
+
 export const getScheduledMeetingName = (meetingId: string): Promise<{ name: string }> =>
 	fetchAPI(`public/meetings/${meetingId}`, RequestType.GET);
 
