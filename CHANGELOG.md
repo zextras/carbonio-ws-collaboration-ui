@@ -1,3 +1,9 @@
+## [0.16.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.1...v0.16.2) (2026-05-26)
+
+### Bug Fixes
+
+* **ci:** update jenkins-lib-common to v2.8.5 ([#746](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/746)) ([de77c7b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/de77c7b1e4fbe3d6031b6fce8e2fea688d6dbf3b))
+
 ## [0.16.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.0...v0.16.1) (2026-05-25)
 
 ### Bug Fixes
