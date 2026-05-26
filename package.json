@@ -15,7 +15,7 @@
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
-        "test:shared": "vitest run --root shared",
+        "test:shared": "vitest run --config shared/vitest.config.ts",
 		"postinstall": "is-ci || husky",
 		"prepublishOnly": "pinst --disable",
 		"postpublish": "pinst --enable",

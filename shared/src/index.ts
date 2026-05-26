@@ -3,6 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { configureSharedCode } from './config';
+
+// Setup
+export { configureSharedCode };
+
 // Types
 export * from './types/store/StoreTypes';
 

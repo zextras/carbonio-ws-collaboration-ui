@@ -9,10 +9,7 @@ import { produce } from 'immer';
 import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
-import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
-import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
-import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
+import { getSharedCodeConfig } from '../../config';
 import {
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
@@ -49,26 +46,27 @@ export const useActiveMeetingSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
+				const {
+					BidirectionalConnectionAudioInOut,
+					VideoScreenInConnection,
+					VideoOutConnection,
+					ScreenOutConnection
+				} = getSharedCodeConfig();
 				draft.activeMeeting = {
 					meetingId,
 					// Peer connections and streams
-					// TODO
-					// bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
-					// 	meetingId,
-					// 	!!audioStream?.enabled,
-					// 	audioStream?.deviceId
-					// ),
-					// videoScreenIn: new VideoScreenInConnection(meetingId),
-					// videoOutConn: new VideoOutConnection(
-					// 	meetingId,
-					// 	!!videoStream?.enabled,
-					// 	videoStream?.deviceId
-					// ),
-					// screenOutConn: new ScreenOutConnection(meetingId),
-					bidirectionalAudioConn: {} as any,
-					videoScreenIn: {} as any,
-					videoOutConn: {} as any,
-					screenOutConn: {} as any,
+					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
+						meetingId,
+						!!audioStream?.enabled,
+						audioStream?.deviceId
+					),
+					videoScreenIn: new VideoScreenInConnection(meetingId),
+					videoOutConn: new VideoOutConnection(
+						meetingId,
+						!!videoStream?.enabled,
+						videoStream?.deviceId
+					),
+					screenOutConn: new ScreenOutConnection(meetingId),
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId

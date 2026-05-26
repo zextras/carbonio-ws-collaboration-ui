@@ -5,7 +5,14 @@
  */
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
+import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
+
+import BidirectionalConnectionAudioInOut from '../network/webRTC/BidirectionalConnectionAudioInOut';
+import ScreenOutConnection from '../network/webRTC/ScreenOutConnection';
+import VideoOutConnection from '../network/webRTC/VideoOutConnection';
+import VideoScreenInConnection from '../network/webRTC/VideoScreenInConnection';
+import { configureSharedCode } from 'wsc-shared';
 
 configure({
 	asyncUtilTimeout: 2000
@@ -206,6 +213,15 @@ beforeEach(() => {
 				play: mockPlayAudio
 			};
 		})
+	});
+});
+
+beforeAll(() => {
+	configureSharedCode({
+		BidirectionalConnectionAudioInOut,
+		VideoScreenInConnection,
+		VideoOutConnection,
+		ScreenOutConnection
 	});
 });
 
