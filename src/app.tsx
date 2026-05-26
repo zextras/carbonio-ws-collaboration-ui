@@ -11,6 +11,20 @@ import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 import { MEETINGS_PATH } from './constants/appConstants';
 import MainApp from './MainApp';
 import { getLicense } from './network';
+import BidirectionalConnectionAudioInOut from './network/webRTC/BidirectionalConnectionAudioInOut';
+import ScreenOutConnection from './network/webRTC/ScreenOutConnection';
+import VideoOutConnection from './network/webRTC/VideoOutConnection';
+import VideoScreenInConnection from './network/webRTC/VideoScreenInConnection';
+import useStore from './store/Store';
+import { configureSharedCode } from 'wsc-shared';
+
+configureSharedCode({
+	BidirectionalConnectionAudioInOut,
+	VideoScreenInConnection,
+	VideoOutConnection,
+	ScreenOutConnection,
+	useStore
+});
 
 const UnlicensedApp = (): null => {
 	useEffect(() => {

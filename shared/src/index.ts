@@ -10,6 +10,7 @@ export { configureSharedCode };
 
 // Types
 export * from './types/store/StoreTypes';
+export * from './types/store/SessionTypes';
 
 // Store slices
 export * from './store/slices/ActiveConversationsSlice';

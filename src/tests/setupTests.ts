@@ -12,6 +12,7 @@ import BidirectionalConnectionAudioInOut from '../network/webRTC/BidirectionalCo
 import ScreenOutConnection from '../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../network/webRTC/VideoScreenInConnection';
+import useStore from '../store/Store';
 import { configureSharedCode } from 'wsc-shared';
 
 configure({
@@ -221,7 +222,8 @@ beforeAll(() => {
 		BidirectionalConnectionAudioInOut,
 		VideoScreenInConnection,
 		VideoOutConnection,
-		ScreenOutConnection
+		ScreenOutConnection,
+		useStore
 	});
 });
 

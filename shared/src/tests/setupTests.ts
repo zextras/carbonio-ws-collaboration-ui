@@ -43,7 +43,8 @@ beforeAll(() => {
 		// eslint-disable-next-line object-shorthand
 		ScreenOutConnection: vi.fn().mockImplementation(function () {
 			return { closePeerConnection: vi.fn() };
-		})
+		}),
+		useStore
 	});
 });
 

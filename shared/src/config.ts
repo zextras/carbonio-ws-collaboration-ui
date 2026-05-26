@@ -1,30 +1,13 @@
 /*
- * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2026 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	IBidirectionalConnectionAudioInOut,
-	IScreenOutConnection,
-	IVideoOutConnection,
-	IVideoScreenInConnection
-} from './types/network/webRTC/webRTC';
+// TODO define type
+// export interface ISharedCodeDependencies {}
 
-export interface ISharedCodeDependencies {
-	BidirectionalConnectionAudioInOut: new (
-		meetingId: string,
-		audioEnabled: boolean,
-		audioDeviceId?: string
-	) => IBidirectionalConnectionAudioInOut;
-	VideoScreenInConnection: new (meetingId: string) => IVideoScreenInConnection;
-	VideoOutConnection: new (
-		meetingId: string,
-		videoEnabled: boolean,
-		videoDeviceId?: string
-	) => IVideoOutConnection;
-	ScreenOutConnection: new (meetingId: string) => IScreenOutConnection;
-}
+type ISharedCodeDependencies = any;
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;
 
