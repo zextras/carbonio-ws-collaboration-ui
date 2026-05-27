@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { iceRestartIncoming, updateMediaOffer } from '../apis/MeetingsApi';
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -36,7 +36,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		return new Promise((resolve, reject) => {
 			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
 			this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
@@ -73,51 +72,24 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	private onIceConnectionStateChange = (): void => {
-		console.log('onIceConnectionStateChange:', this.peerConn?.iceConnectionState);
-	};
-
 	private onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
-		console.log('onConnectionStateChange:', state);
-
-		if (state === 'disconnected') {
-			this.iceRestartInterval = setInterval(() => {
-				console.log('ICE restart attempt (disconnected)');
-				this.peerConn?.restartIce();
-			}, 2000);
-		}
-
-		if (state === 'connected') {
-			if (this.iceRestartInterval !== null) {
-				clearInterval(this.iceRestartInterval);
-				this.iceRestartInterval = null;
-			}
-		}
-
+		console.log('VIDEO OUT onConnectionStateChange:', state);
 		if (state === 'failed') {
-			if (this.iceRestartInterval !== null) {
-				clearInterval(this.iceRestartInterval);
-				this.iceRestartInterval = null;
-			}
 			this.peerConn
 				?.createOffer({ iceRestart: true })
 				.then((rtcSessionDesc) => {
 					this.peerConn
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
-							updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, rtcSessionDesc.sdp);
+							const localDesc = this.peerConn?.localDescription;
+							if (localDesc?.sdp) {
+								iceRestartIncoming(this.meetingId, localDesc.sdp);
+							}
 						})
 						.catch((reason) => console.warn('setLocalDescription failed', reason));
 				})
 				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
-		}
-
-		if (state === 'closed') {
-			if (this.iceRestartInterval !== null) {
-				clearInterval(this.iceRestartInterval);
-				this.iceRestartInterval = null;
-			}
 		}
 	};
 

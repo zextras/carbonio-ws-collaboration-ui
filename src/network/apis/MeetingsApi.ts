@@ -283,3 +283,8 @@ export const getLoginConfig = (): Promise<LoginV3ConfigResponse> =>
 		})
 		.then((resp) => resp.json())
 		.catch((err: Error) => console.error(err));
+
+export const iceRestartIncoming = (meetingId: string, sdp?: string): Promise<Response> => {
+	const body = { ...(sdp && { sdp }) };
+	return fetchAPI(`meetings/${meetingId}/video/iceRestart`, RequestType.PUT, body);
+};

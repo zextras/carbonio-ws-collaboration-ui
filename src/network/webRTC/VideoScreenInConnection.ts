@@ -12,7 +12,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { createMediaAnswer } from '../apis/MeetingsApi';
+import { createMediaAnswer, iceRestartIncoming } from '../apis/MeetingsApi';
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -26,10 +26,19 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 		this.meetingId = meetingId;
 		this.subscriptionManager = new SubscriptionsManager(meetingId);
 		this.streamsMap = {};
 	}
+
+	private onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		console.log('VIDEOIN onConnectionStateChange:', state);
+		if (state === 'failed') {
+			iceRestartIncoming(this.meetingId);
+		}
+	};
 
 	// Handle remote offer creating an answer and sending it to the remote peer
 	public handleRemoteOffer(sdp: string): void {
