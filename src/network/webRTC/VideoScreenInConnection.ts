@@ -32,7 +32,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.streamsMap = {};
 	}
 
-	private onConnectionStateChange = (): void => {
+	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
 		console.log('VIDEOIN onConnectionStateChange:', state);
 		if (state === 'failed') {

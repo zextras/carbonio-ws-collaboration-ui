@@ -9,7 +9,7 @@ import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getScreenStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { iceRestartIncoming, updateMediaOffer } from '../apis/MeetingsApi';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -25,7 +25,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
-	private onNegotiationNeeded = (): void => {
+	private readonly onNegotiationNeeded = (): void => {
 		this.peerConn
 			?.createOffer()
 			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
@@ -39,14 +39,6 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 				}
 			})
 			.catch((reason) => console.warn('createOffer failed', reason));
-	};
-
-	private onIceConnectionStateChange = (ev: Event): void => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
-		}
 	};
 
 	private updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
@@ -71,13 +63,34 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	public startScreenShare(): void {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 		getScreenStream().then((stream) => {
 			this.updateLocalStreamTrack(stream);
 			useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, stream);
 		});
 	}
+
+	private readonly onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		console.log('SCREEN OUT onConnectionStateChange:', state);
+		if (state === 'failed') {
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							const localDesc = this.peerConn?.localDescription;
+							if (localDesc?.sdp) {
+								iceRestartIncoming(this.meetingId, localDesc.sdp);
+							}
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		}
+	};
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {

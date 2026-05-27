@@ -20,8 +20,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	selectedVideoDeviceId: string | undefined;
 
-	private iceRestartInterval: ReturnType<typeof setInterval> | null = null;
-
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
 		this.meetingId = meetingId;
@@ -72,7 +70,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	private onConnectionStateChange = (): void => {
+	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
 		console.log('VIDEO OUT onConnectionStateChange:', state);
 		if (state === 'failed') {
@@ -126,10 +124,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		if (this.iceRestartInterval !== null) {
-			clearInterval(this.iceRestartInterval);
-			this.iceRestartInterval = null;
-		}
 		useStore.getState().removeLocalStreams(STREAM_TYPE.VIDEO);
 		useStore.getState().removeBackgroundStream();
 		this.rtpSender?.track?.stop();
