@@ -11,11 +11,13 @@ import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import { createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
+import {
+	createAudioOffer,
+	sendConfigureWithOffer,
+	updateAudioStreamStatus
+} from '../apis/MeetingsApi';
 
-export default class BidirectionalConnectionAudioInOut
-	// eslint-disable-next-line prettier/prettier
-	implements IBidirectionalConnectionAudioInOut {
+export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;
 
 	meetingId: string;
@@ -32,7 +34,7 @@ export default class BidirectionalConnectionAudioInOut
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 		this.meetingId = meetingId;
 		this.rtpSender = null;
@@ -87,11 +89,24 @@ export default class BidirectionalConnectionAudioInOut
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	onIceConnectionStateChange = (ev: Event): void => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
+	onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		console.log('AUDIO IN/OUT onConnectionStateChange:', state);
+		if (state === 'failed') {
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							const localDesc = this.peerConn?.localDescription;
+							if (localDesc?.sdp) {
+								sendConfigureWithOffer(this.meetingId, localDesc.sdp);
+							}
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
 		}
 	};
 
