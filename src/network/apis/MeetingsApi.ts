@@ -284,12 +284,17 @@ export const getLoginConfig = (): Promise<LoginV3ConfigResponse> =>
 		.then((resp) => resp.json())
 		.catch((err: Error) => console.error(err));
 
-export const sendConfigureWithOffer = (meetingId: string, sdpOffer: string): Promise<Response> =>
+export const audioIceRestart = (meetingId: string, sdpOffer: string): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/audio/iceRestart`, RequestType.PUT, {
 		sdp: sdpOffer
 	});
 
-export const iceRestartIncoming = (meetingId: string, sdp?: string): Promise<Response> => {
+export const videoIceRestart = (meetingId: string, sdp?: string): Promise<Response> => {
 	const body = { ...(sdp && { sdp }) };
 	return fetchAPI(`meetings/${meetingId}/video/iceRestart`, RequestType.PUT, body);
+};
+
+export const screenIceRestart = (meetingId: string, sdp?: string): Promise<Response> => {
+	const body = { ...(sdp && { sdp }) };
+	return fetchAPI(`meetings/${meetingId}/screen/iceRestart`, RequestType.PUT, body);
 };

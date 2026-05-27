@@ -5,17 +5,14 @@
  */
 
 import { first } from 'lodash';
+import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import {
-	createAudioOffer,
-	sendConfigureWithOffer,
-	updateAudioStreamStatus
-} from '../apis/MeetingsApi';
+import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;
@@ -100,8 +97,9 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							const localDesc = this.peerConn?.localDescription;
-							if (localDesc?.sdp) {
-								sendConfigureWithOffer(this.meetingId, localDesc.sdp);
+							const version = useStore.getState().session.apiVersion;
+							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
+								audioIceRestart(this.meetingId, localDesc.sdp);
 							}
 						})
 						.catch((reason) => console.warn('setLocalDescription failed', reason));
@@ -115,22 +113,6 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
 			this.peerConn.setRemoteDescription(remoteDescription);
-		}
-	}
-
-	// TODO check its usage
-	handleOfferCreated(rtcSessDesc: RTCSessionDescriptionInit): void {
-		if (this.peerConn.signalingState === 'stable' && this.peerConn.localDescription == null) {
-			this.peerConn
-				.setLocalDescription(rtcSessDesc)
-				.then(() => {
-					if (rtcSessDesc.sdp) {
-						createAudioOffer(this.meetingId, rtcSessDesc.sdp).then(() => {
-							updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
-						});
-					}
-				})
-				.catch((reason) => console.warn(reason));
 		}
 	}
 

@@ -5,6 +5,7 @@
  */
 
 import { filter, forEach, keyBy } from 'lodash';
+import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
@@ -12,7 +13,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { createMediaAnswer, iceRestartIncoming } from '../apis/MeetingsApi';
+import { createMediaAnswer, videoIceRestart } from '../apis/MeetingsApi';
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -35,8 +36,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
 		console.log('VIDEOIN onConnectionStateChange:', state);
-		if (state === 'failed') {
-			iceRestartIncoming(this.meetingId);
+		const version = useStore.getState().session.apiVersion;
+		if (state === 'failed' && version && gte(version, '1.6.6')) {
+			videoIceRestart(this.meetingId);
 		}
 	};
 

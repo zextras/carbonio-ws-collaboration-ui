@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { gte } from 'semver';
+
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getScreenStream } from '../../utils/UserMediaManager';
-import { iceRestartIncoming, updateMediaOffer } from '../apis/MeetingsApi';
+import { updateMediaOffer, screenIceRestart } from '../apis/MeetingsApi';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -82,8 +84,9 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							const localDesc = this.peerConn?.localDescription;
-							if (localDesc?.sdp) {
-								iceRestartIncoming(this.meetingId, localDesc.sdp);
+							const version = useStore.getState().session.apiVersion;
+							if (localDesc?.sdp && version && gte(version, '1.6.13')) {
+								screenIceRestart(this.meetingId, localDesc.sdp);
 							}
 						})
 						.catch((reason) => console.warn('setLocalDescription failed', reason));
