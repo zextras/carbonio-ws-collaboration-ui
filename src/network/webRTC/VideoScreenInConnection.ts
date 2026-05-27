@@ -35,7 +35,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
-		console.log('VIDEOIN onConnectionStateChange:', state);
 		const version = useStore.getState().session.apiVersion;
 		if (state === 'failed' && version && gte(version, '1.6.6')) {
 			videoIceRestart(this.meetingId);

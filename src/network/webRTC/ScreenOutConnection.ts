@@ -75,7 +75,6 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 
 	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
-		console.log('SCREEN OUT onConnectionStateChange:', state);
 		if (state === 'failed') {
 			this.peerConn
 				?.createOffer({ iceRestart: true })

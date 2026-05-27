@@ -74,7 +74,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
-		console.log('VIDEO OUT onConnectionStateChange:', state);
 		if (state === 'failed') {
 			this.peerConn
 				?.createOffer({ iceRestart: true })
