@@ -20,7 +20,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	selectedVideoDeviceId: string | undefined;
 
-	private iceRestartTimeout: ReturnType<typeof setTimeout> | null = null;
+	private iceRestartInterval: ReturnType<typeof setInterval> | null = null;
 
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
@@ -37,7 +37,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
-			this.peerConn.onconnectionstatechange = this.onStateChange;
+			this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
@@ -74,50 +74,49 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	private onIceConnectionStateChange = (): void => {
-		const state = this.peerConn?.iceConnectionState;
-		console.log(state);
-		if (state === 'disconnected') {
-			// Give the browser time to self-recover before forcing a restart
-			this.iceRestartTimeout = setTimeout(() => {
-				console.log('ice restarting');
-				this.peerConn?.restartIce();
-			}, 5000);
-		}
-
-		if (state === 'connected' || state === 'completed') {
-			if (this.iceRestartTimeout !== null) {
-				clearTimeout(this.iceRestartTimeout);
-				this.iceRestartTimeout = null;
-			}
-		}
-
-		if (state === 'failed') {
-			if (this.iceRestartTimeout !== null) {
-				clearTimeout(this.iceRestartTimeout);
-				this.iceRestartTimeout = null;
-			}
-			this.onNegotiationNeeded();
-		}
+		console.log('onIceConnectionStateChange:', this.peerConn?.iceConnectionState);
 	};
 
-	private onStateChange = (ev): void => {
-		const state = ev.target.connectionState;
-		if (state === 'failed') {
-			console.log('FAILEDDDDDDDD');
-			if (this.iceRestartTimeout !== null) {
-				clearTimeout(this.iceRestartTimeout);
-				this.iceRestartTimeout = null;
-			}
-			this.iceRestartTimeout = setTimeout(() => {
-				console.log('ice restarting');
+	private onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		console.log('onConnectionStateChange:', state);
+
+		if (state === 'disconnected') {
+			this.iceRestartInterval = setInterval(() => {
+				console.log('ICE restart attempt (disconnected)');
 				this.peerConn?.restartIce();
-			}, 5000);
+			}, 2000);
 		}
+
+		if (state === 'connected') {
+			if (this.iceRestartInterval !== null) {
+				clearInterval(this.iceRestartInterval);
+				this.iceRestartInterval = null;
+			}
+		}
+
+		if (state === 'failed') {
+			if (this.iceRestartInterval !== null) {
+				clearInterval(this.iceRestartInterval);
+				this.iceRestartInterval = null;
+			}
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, rtcSessionDesc.sdp);
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		}
+
 		if (state === 'closed') {
-			console.log('CLOSEDDDDDD');
-			if (this.iceRestartTimeout !== null) {
-				clearTimeout(this.iceRestartTimeout);
-				this.iceRestartTimeout = null;
+			if (this.iceRestartInterval !== null) {
+				clearInterval(this.iceRestartInterval);
+				this.iceRestartInterval = null;
 			}
 		}
 	};
@@ -155,9 +154,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		if (this.iceRestartTimeout !== null) {
-			clearTimeout(this.iceRestartTimeout);
-			this.iceRestartTimeout = null;
+		if (this.iceRestartInterval !== null) {
+			clearInterval(this.iceRestartInterval);
+			this.iceRestartInterval = null;
 		}
 		useStore.getState().removeLocalStreams(STREAM_TYPE.VIDEO);
 		useStore.getState().removeBackgroundStream();
