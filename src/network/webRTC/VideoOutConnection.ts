@@ -20,6 +20,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	selectedVideoDeviceId: string | undefined;
 
+	private iceRestartTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
 		this.meetingId = meetingId;
@@ -35,6 +37,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+			this.peerConn.onconnectionstatechange = this.onStateChange;
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
@@ -70,11 +73,52 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	private onIceConnectionStateChange = (ev: Event): void => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ev.target.iceConnectionState === 'failed') {
+	private onIceConnectionStateChange = (): void => {
+		const state = this.peerConn?.iceConnectionState;
+		console.log(state);
+		if (state === 'disconnected') {
+			// Give the browser time to self-recover before forcing a restart
+			this.iceRestartTimeout = setTimeout(() => {
+				console.log('ice restarting');
+				this.peerConn?.restartIce();
+			}, 5000);
+		}
+
+		if (state === 'connected' || state === 'completed') {
+			if (this.iceRestartTimeout !== null) {
+				clearTimeout(this.iceRestartTimeout);
+				this.iceRestartTimeout = null;
+			}
+		}
+
+		if (state === 'failed') {
+			if (this.iceRestartTimeout !== null) {
+				clearTimeout(this.iceRestartTimeout);
+				this.iceRestartTimeout = null;
+			}
 			this.onNegotiationNeeded();
+		}
+	};
+
+	private onStateChange = (ev): void => {
+		const state = ev.target.connectionState;
+		if (state === 'failed') {
+			console.log('FAILEDDDDDDDD');
+			if (this.iceRestartTimeout !== null) {
+				clearTimeout(this.iceRestartTimeout);
+				this.iceRestartTimeout = null;
+			}
+			this.iceRestartTimeout = setTimeout(() => {
+				console.log('ice restarting');
+				this.peerConn?.restartIce();
+			}, 5000);
+		}
+		if (state === 'closed') {
+			console.log('CLOSEDDDDDD');
+			if (this.iceRestartTimeout !== null) {
+				clearTimeout(this.iceRestartTimeout);
+				this.iceRestartTimeout = null;
+			}
 		}
 	};
 
@@ -111,6 +155,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
+		if (this.iceRestartTimeout !== null) {
+			clearTimeout(this.iceRestartTimeout);
+			this.iceRestartTimeout = null;
+		}
 		useStore.getState().removeLocalStreams(STREAM_TYPE.VIDEO);
 		useStore.getState().removeBackgroundStream();
 		this.rtpSender?.track?.stop();
