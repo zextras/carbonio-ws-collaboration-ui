@@ -44,7 +44,8 @@ beforeAll(() => {
 		ScreenOutConnection: vi.fn().mockImplementation(function () {
 			return { closePeerConnection: vi.fn() };
 		}),
-		useStore
+		useStore,
+		sendCustomEvent: vi.fn()
 	});
 });
 

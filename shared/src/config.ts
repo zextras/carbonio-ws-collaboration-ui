@@ -4,10 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// TODO define type
-// export interface ISharedCodeDependencies {}
+import { useStore } from 'zustand/react';
 
-type ISharedCodeDependencies = any;
+import { EventName, EventPayloads } from './types/AppEvents';
+
+export interface ISharedCodeDependencies {
+	BidirectionalConnectionAudioInOut: any;
+	VideoScreenInConnection: any;
+	VideoOutConnection: any;
+	ScreenOutConnection: any;
+	useStore: ReturnType<typeof useStore>;
+	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
+}
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;
 

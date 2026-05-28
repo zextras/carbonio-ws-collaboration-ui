@@ -9,7 +9,8 @@ import { produce } from 'immer';
 import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
-// import { EventName, sendCustomEvent } from '../../hooks/useEventListener'; TODO
+import { getSharedCodeConfig } from '../../config';
+import { EventName } from '../../types/AppEvents';
 import {
 	BackfillRequest,
 	ChatRegistry,
@@ -283,8 +284,10 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// Add message to the end of list or replace a placeholder message
 				messages.push(placeholderMessage);
 
-				// TODO
-				// sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
+				getSharedCodeConfig().sendCustomEvent({
+					name: EventName.NEW_MESSAGE,
+					data: placeholderMessage
+				});
 			}),
 			false,
 			'CHAT/SET_PLACEHOLDER_MESSAGE'

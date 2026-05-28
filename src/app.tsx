@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { MEETINGS_PATH } from './constants/appConstants';
+import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
 import { getLicense } from './network';
 import BidirectionalConnectionAudioInOut from './network/webRTC/BidirectionalConnectionAudioInOut';
@@ -23,7 +24,8 @@ configureSharedCode({
 	VideoScreenInConnection,
 	VideoOutConnection,
 	ScreenOutConnection,
-	useStore
+	useStore,
+	sendCustomEvent
 });
 
 const UnlicensedApp = (): null => {
