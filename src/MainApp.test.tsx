@@ -9,9 +9,9 @@ import { waitFor } from '@testing-library/react';
 import * as shell from '@zextras/carbonio-shell-ui';
 
 import MainApp from './MainApp';
-import * as api from './network';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
+import * as api from 'wsc-shared';
 
 describe('Entry point', () => {
 	test('Set app version', () => {

@@ -4,17 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useStore } from 'zustand/react';
-
 import { EventName, EventPayloads } from './types/AppEvents';
+import { RequestType } from './types/network/fetch';
 
 export interface ISharedCodeDependencies {
 	BidirectionalConnectionAudioInOut: any;
 	VideoScreenInConnection: any;
 	VideoOutConnection: any;
 	ScreenOutConnection: any;
-	useStore: ReturnType<typeof useStore>;
+	useStore: any;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
+	fetchAPI: <T>(
+		endpoint: string,
+		method: RequestType,
+		data?: Record<string, unknown> | Array<Record<string, unknown>>,
+		retryCount?: number
+	) => Promise<T>;
 }
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;
@@ -31,3 +36,8 @@ export const getSharedCodeConfig = (): ISharedCodeDependencies => {
 	}
 	return sharedCodeDependencies;
 };
+
+export const sharedConfig = new Proxy({} as ISharedCodeDependencies, {
+	get: (_target, key: string): ISharedCodeDependencies[keyof ISharedCodeDependencies] =>
+		getSharedCodeConfig()[key as keyof ISharedCodeDependencies]
+});

@@ -3,8 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export * from './apis/InfoApi';
-export * from './apis/UsersApi';
 export * from './apis/RoomsApi';
 export * from './apis/MeetingsApi';
 export * from './apis/AttachmentsApi';

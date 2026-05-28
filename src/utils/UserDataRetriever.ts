@@ -7,9 +7,9 @@
 import { concat, debounce, difference, find, forEach, map, size, slice } from 'lodash';
 import { validate } from 'uuid';
 
-import { getUser, getUsers } from '../network';
 import { getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
+import { getUser, getUsers } from 'wsc-shared';
 
 class UserDataRetriever {
 	private static instance: UserDataRetriever;

@@ -45,7 +45,8 @@ beforeAll(() => {
 			return { closePeerConnection: vi.fn() };
 		}),
 		useStore,
-		sendCustomEvent: vi.fn()
+		sendCustomEvent: vi.fn(),
+		fetchAPI: () => Promise.resolve()
 	});
 });
 

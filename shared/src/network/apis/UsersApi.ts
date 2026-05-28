@@ -6,20 +6,22 @@
 
 import { join, map } from 'lodash';
 
-import useStore from '../../store/Store';
+import { sharedConfig } from '../../config';
+import { RequestType } from '../../types/network/fetch';
 import { UserBe } from '../../types/network/models/userBeTypes';
-import { fetchAPI, RequestType } from '../../utils/FetchUtils';
 
 export const getUser = (userId: string): Promise<UserBe> =>
-	fetchAPI<UserBe>(`users/${userId}`, RequestType.GET).then((resp) => {
-		useStore.getState().setUserInfo([resp]);
+	sharedConfig.fetchAPI<UserBe>(`users/${userId}`, RequestType.GET).then((resp) => {
+		sharedConfig.useStore.getState().setUserInfo([resp]);
 		return resp;
 	});
 
 export const getUsers = (userIds: string[]): Promise<UserBe[]> => {
 	const ids = map(userIds, (id) => `userIds=${id}`);
-	return fetchAPI<UserBe[]>(`users?${join(ids, '&')}`, RequestType.GET).then((resp) => {
-		useStore.getState().setUserInfo(resp);
-		return resp;
-	});
+	return sharedConfig
+		.fetchAPI<UserBe[]>(`users?${join(ids, '&')}`, RequestType.GET)
+		.then((resp) => {
+			sharedConfig.useStore.getState().setUserInfo(resp);
+			return resp;
+		});
 };

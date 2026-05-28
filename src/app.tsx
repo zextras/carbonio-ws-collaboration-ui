@@ -11,13 +11,13 @@ import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 import { MEETINGS_PATH } from './constants/appConstants';
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
-import { getLicense } from './network';
 import BidirectionalConnectionAudioInOut from './network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from './network/webRTC/ScreenOutConnection';
 import VideoOutConnection from './network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from './network/webRTC/VideoScreenInConnection';
 import useStore from './store/Store';
-import { configureSharedCode } from 'wsc-shared';
+import { fetchAPI } from './utils/FetchUtils';
+import { configureSharedCode, getLicense } from 'wsc-shared';
 
 configureSharedCode({
 	BidirectionalConnectionAudioInOut,
@@ -25,7 +25,8 @@ configureSharedCode({
 	VideoOutConnection,
 	ScreenOutConnection,
 	useStore,
-	sendCustomEvent
+	sendCustomEvent,
+	fetchAPI
 });
 
 const UnlicensedApp = (): null => {

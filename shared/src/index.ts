@@ -25,5 +25,8 @@ export * from './store/slices/SessionStoreSlice';
 export * from './store/slices/UsersStoreSlice';
 export * from './store/slices/RoomsStoreSlice';
 
+// Network
+export * from './network';
+
 // Utils
 export * from './utils/textUtils';

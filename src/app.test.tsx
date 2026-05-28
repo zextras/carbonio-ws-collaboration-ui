@@ -10,8 +10,8 @@ import * as shell from '@zextras/carbonio-shell-ui';
 
 import App from './app';
 import { MEETINGS_PATH } from './constants/appConstants';
-import * as api from './network/apis/InfoApi';
 import { setup } from './tests/test-utils';
+import * as api from 'wsc-shared';
 
 describe('App tests', () => {
 	test('App is rendered when license is enabled', async () => {

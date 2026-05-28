@@ -8,13 +8,14 @@ import { configure } from '@testing-library/react';
 import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
+import { sendCustomEvent } from '../hooks/useEventListener';
 import BidirectionalConnectionAudioInOut from '../network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from '../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../network/webRTC/VideoScreenInConnection';
 import useStore from '../store/Store';
+import { fetchAPI } from '../utils/FetchUtils';
 import { configureSharedCode } from 'wsc-shared';
-import { sendCustomEvent } from "../hooks/useEventListener";
 
 configure({
 	asyncUtilTimeout: 2000
@@ -225,7 +226,8 @@ beforeAll(() => {
 		VideoOutConnection,
 		ScreenOutConnection,
 		useStore,
-		sendCustomEvent
+		sendCustomEvent,
+		fetchAPI
 	});
 });
 
