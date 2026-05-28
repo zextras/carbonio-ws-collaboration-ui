@@ -7,4 +7,4 @@ export * from './apis/InfoApi';
 export * from './apis/UsersApi';
 // export * from './apis/RoomsApi';
 // export * from './apis/MeetingsApi';
-// export * from './apis/AttachmentsApi';
+export * from './apis/AttachmentsApi';

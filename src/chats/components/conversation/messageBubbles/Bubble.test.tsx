@@ -10,7 +10,6 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
-import * as api from '../../../../network/apis/AttachmentsApi';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
@@ -26,6 +25,7 @@ import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistry
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
+import * as api from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';

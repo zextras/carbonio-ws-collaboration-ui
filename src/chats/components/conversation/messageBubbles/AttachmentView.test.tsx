@@ -10,10 +10,10 @@ import { fireEvent, screen } from '@testing-library/react';
 import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
-import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported, getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
+import * as api from 'wsc-shared';
 
 const fileIcon = 'icon: FileTextOutline';
 

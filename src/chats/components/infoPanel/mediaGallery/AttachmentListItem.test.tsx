@@ -11,12 +11,12 @@ import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
-import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
 import type { Attachment } from '../../../../types/network/models/attachmentTypes';
+import * as attachmentsApi from 'wsc-shared';
 
 let intersectionCallbacks: Array<IntersectionObserverCallback> = [];
 

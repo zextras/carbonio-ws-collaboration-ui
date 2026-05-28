@@ -13,6 +13,11 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'jsdom',
+		environmentOptions: {
+			jsdom: {
+				url: 'http://localhost/'
+			}
+		},
 		setupFiles: [resolve(sharedDir, 'src/tests/setupTests.ts')],
 		include: [resolve(sharedDir, 'src/**/*.test.{ts,tsx}')]
 	},

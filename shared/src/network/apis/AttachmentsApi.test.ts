@@ -5,9 +5,9 @@
  */
 
 import * as api from './AttachmentsApi';
-import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
+import { mockFetchAPI } from '../../tests/setupTests';
+import { RequestType } from '../../types/network/fetch';
 import { AttachmentType, ImageQuality, ImageShape } from '../../utils/attachmentUtils';
-import { RequestType } from '../../utils/FetchUtils';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -29,8 +29,6 @@ const pdfPreviewURLCases: Array<[string, Array<number | undefined>, string]> = [
 	['first only', [2, undefined], '?first_page=2'],
 	['last only', [undefined, 5], '?last_page=5']
 ];
-
-vi.mock('../../utils/FetchUtils');
 
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {

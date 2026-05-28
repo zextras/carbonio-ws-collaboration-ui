@@ -5,4 +5,3 @@
  */
 export * from './apis/RoomsApi';
 export * from './apis/MeetingsApi';
-export * from './apis/AttachmentsApi';

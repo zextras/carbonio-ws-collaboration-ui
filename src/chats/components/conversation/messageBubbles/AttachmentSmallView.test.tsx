@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
+import * as api from 'wsc-shared';
 
 vi.mock('../../../../hooks/usePreviewNavigation', () => ({
 	default: (): { openFromGallery: () => void; openFromChat: () => void } => ({

@@ -11,6 +11,8 @@ import { configureSharedCode } from '../config';
 
 const initialState = useStore.getState();
 
+export const mockFetchAPI = vi.fn();
+
 Object.defineProperty(window, 'MediaStream', {
 	value: vi.fn(function MediaStreamMock() {
 		return {
@@ -46,10 +48,11 @@ beforeAll(() => {
 		}),
 		useStore,
 		sendCustomEvent: vi.fn(),
-		fetchAPI: () => Promise.resolve()
+		fetchAPI: mockFetchAPI
 	});
 });
 
 beforeEach(() => {
 	useStore.setState(initialState, true);
+	mockFetchAPI.mockReset().mockResolvedValue({});
 });
