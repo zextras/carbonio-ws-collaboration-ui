@@ -15,8 +15,11 @@ import BidirectionalConnectionAudioInOut from './network/webRTC/BidirectionalCon
 import ScreenOutConnection from './network/webRTC/ScreenOutConnection';
 import VideoOutConnection from './network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from './network/webRTC/VideoScreenInConnection';
+import HistoryAccumulator from './network/xmpp/utility/HistoryAccumulator';
+import { xmppClient } from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import { fetchAPI } from './utils/FetchUtils';
+import { BrowserUtils } from './utils/BrowserUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
 import { configureSharedCode, getLicense } from 'wsc-shared';
 
 configureSharedCode({
@@ -26,7 +29,12 @@ configureSharedCode({
 	ScreenOutConnection,
 	useStore,
 	sendCustomEvent,
-	fetchAPI
+	fetchAPI,
+	sendFileFetchAPI,
+	uploadFileFetchAPI,
+	BrowserUtils,
+	xmppClient,
+	HistoryAccumulator
 });
 
 const UnlicensedApp = (): null => {

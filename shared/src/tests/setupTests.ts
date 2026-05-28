@@ -12,6 +12,8 @@ import { configureSharedCode } from '../config';
 const initialState = useStore.getState();
 
 export const mockFetchAPI = vi.fn();
+export const mockSendFileFetchAPI = vi.fn();
+export const mockUploadFileFetchAPI = vi.fn();
 
 Object.defineProperty(window, 'MediaStream', {
 	value: vi.fn(function MediaStreamMock() {
@@ -48,7 +50,17 @@ beforeAll(() => {
 		}),
 		useStore,
 		sendCustomEvent: vi.fn(),
-		fetchAPI: mockFetchAPI
+		fetchAPI: mockFetchAPI,
+		sendFileFetchAPI: mockSendFileFetchAPI,
+		uploadFileFetchAPI: mockUploadFileFetchAPI,
+		BrowserUtils: {
+			clearAuthCookies: (): void => {
+				document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+				document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+			},
+		},
+		xmppClient: {},
+		HistoryAccumulator: {}
 	});
 });
 

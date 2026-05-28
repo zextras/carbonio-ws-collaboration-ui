@@ -9,7 +9,6 @@ import React from 'react';
 import { act, renderHook, screen } from '@testing-library/react';
 
 import ClearHistoryAction from './ClearHistoryAction';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockRoom,
@@ -19,6 +18,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
+import * as api from 'wsc-shared';
 
 const user1Info: User = createMockUser();
 

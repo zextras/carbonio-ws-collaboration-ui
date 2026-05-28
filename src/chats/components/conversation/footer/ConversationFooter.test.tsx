@@ -11,7 +11,6 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import * as api from '../../../../network/apis/RoomsApi';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
@@ -31,6 +30,7 @@ import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
 import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
+import * as api from 'wsc-shared';
 
 const iconNavigator2 = 'icon: Navigation2';
 const initText = 'we are gonna se';

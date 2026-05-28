@@ -29,7 +29,6 @@ import {
 	updateAudioStreamStatus,
 	updateMediaOffer
 } from './MeetingsApi';
-import useStore from '../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
@@ -37,14 +36,15 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockFetchAPI } from '../../tests/setupTests';
+import useStore from '../../tests/testStore';
+import { RequestType } from '../../types/network/fetch';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User, UserType } from '../../types/store/UserTypes';
-import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
-import { RequestType } from '../../utils/FetchUtils';
 
 const meetingMock = createMockMeeting();
 const meetingNotActiveMock = createMockMeeting({ active: false });

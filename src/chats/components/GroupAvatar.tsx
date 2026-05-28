@@ -10,7 +10,6 @@ import styled from '@emotion/styled';
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
-import { getURLRoomPicture } from '../../network';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import {
 	getPictureUpdatedAt,
@@ -19,6 +18,7 @@ import {
 } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { calcAvatarMeetingColor, calculateAvatarColor } from '../../utils/styleUtils';
+import { getURLRoomPicture } from 'wsc-shared';
 
 type UserAvatarProps = {
 	roomId: string;

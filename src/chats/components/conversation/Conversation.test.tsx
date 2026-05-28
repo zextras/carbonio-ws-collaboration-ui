@@ -12,7 +12,6 @@ import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
-import * as api from '../../../network/apis/RoomsApi';
 import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
@@ -24,6 +23,7 @@ import {
 } from '../../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
+import * as api from 'wsc-shared';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

@@ -6,6 +6,7 @@
 
 import { EventName, EventPayloads } from './types/AppEvents';
 import { RequestType } from './types/network/fetch';
+import { AdditionalHeaders } from './types/network/models/attachmentTypes';
 
 export interface ISharedCodeDependencies {
 	BidirectionalConnectionAudioInOut: any;
@@ -20,6 +21,23 @@ export interface ISharedCodeDependencies {
 		data?: Record<string, unknown> | Array<Record<string, unknown>>,
 		retryCount?: number
 	) => Promise<T>;
+	sendFileFetchAPI: (
+		endpoint: string,
+		method: RequestType,
+		file: File,
+		signal?: AbortSignal,
+		optionalFields?: AdditionalHeaders
+	) => Promise<any>;
+	uploadFileFetchAPI: (
+		endpoint: string,
+		requestType: RequestType,
+		file: File,
+		signal?: AbortSignal,
+		optionalFields?: AdditionalHeaders
+	) => Promise<any>;
+	BrowserUtils: any;
+	xmppClient: any;
+	HistoryAccumulator: any;
 }
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;

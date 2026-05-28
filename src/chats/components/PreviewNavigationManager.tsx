@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachmentModal';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
-import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
 import { xmppClient } from '../../network/xmpp/XMPPClient';
 import {
 	getPreviewNavigationActive,
@@ -23,6 +22,7 @@ import useStore from '../../store/Store';
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
+import { bulkDeleteRoomAttachments, getRoomAttachments } from 'wsc-shared';
 
 const shouldLoadMore = (
 	session: PreviewNavigationSession,

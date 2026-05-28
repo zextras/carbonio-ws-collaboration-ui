@@ -10,7 +10,6 @@ import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
 import { mockGoToRoomPage } from '../../../../hooks/__mocks__/useRouting';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMember,
@@ -21,6 +20,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'id', name: 'Name' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });

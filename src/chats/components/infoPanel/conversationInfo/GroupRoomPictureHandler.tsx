@@ -19,7 +19,6 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import RoomPictureHandler from './RoomPictureHandler';
-import { deleteRoomPicture, getURLRoomPicture, updateRoomPicture } from '../../../../network';
 import {
 	getOwnershipOfTheRoom,
 	getNumbersOfRoomMembers,
@@ -28,6 +27,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+import { deleteRoomPicture, getURLRoomPicture, updateRoomPicture } from 'wsc-shared';
 
 type RoomPictureProps = {
 	roomId: string;

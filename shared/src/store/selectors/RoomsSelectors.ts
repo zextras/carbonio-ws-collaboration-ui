@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { RootStore } from 'wsc-shared';
+import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.meetingId;

@@ -29,8 +29,8 @@ import {
 	updateRoom,
 	updateRoomPicture
 } from './RoomsApi';
-import { QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
-import useStore from '../../store/Store';
+import { sharedConfig } from '../../config';
+import { QUOTA_CHANGED_EVENT } from '../../constants';
 import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
@@ -38,17 +38,12 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import { mockFetchAPI, mockSendFileFetchAPI, mockUploadFileFetchAPI } from '../../tests/setupTests';
+import useStore from '../../tests/testStore';
+import { RequestType } from '../../types/network/fetch';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import {
-	mockFetchAPI,
-	mockSendFileFetchAPI,
-	mockUploadFileFetchAPI
-} from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
-import { RequestType } from '../../utils/FetchUtils';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -478,7 +473,9 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages is called correctly', async () => {
-		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+		vi.spyOn(sharedConfig.xmppClient, 'requestMessageToForward').mockImplementation(() =>
+			Promise.resolve()
+		);
 
 		const message = createMockTextMessage();
 		const xmlMessage = buildTextMessageFromHistory({
@@ -487,7 +484,9 @@ describe('Rooms API', () => {
 			text: message.text
 		});
 		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
+		vi.spyOn(sharedConfig.HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+			() => insideMessage
+		);
 
 		await forwardMessages(['roomId'], [message]);
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
@@ -499,7 +498,9 @@ describe('Rooms API', () => {
 	});
 
 	test('forwardMessages - edited message - is called correctly', async () => {
-		vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+		vi.spyOn(sharedConfig.xmppClient, 'requestMessageToForward').mockImplementation(() =>
+			Promise.resolve()
+		);
 
 		const message = createMockTextMessage({ text: 'edited' });
 		const xmlMessage = buildTextMessageFromHistory({
@@ -508,7 +509,9 @@ describe('Rooms API', () => {
 			text: 'originalMessage'
 		});
 		const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-		vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(() => insideMessage);
+		vi.spyOn(sharedConfig.HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+			() => insideMessage
+		);
 
 		await forwardMessages(['roomId'], [message]);
 		expect(mockFetchAPI).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
@@ -522,7 +525,9 @@ describe('Rooms API', () => {
 	describe('forwardMessages dispatches quota changed event', () => {
 		test('dispatches event when forwarded messages have attachments', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+			vi.spyOn(sharedConfig.xmppClient, 'requestMessageToForward').mockImplementation(() =>
+				Promise.resolve()
+			);
 
 			const message = createMockTextMessage({
 				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
@@ -533,7 +538,7 @@ describe('Rooms API', () => {
 				text: message.text
 			});
 			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+			vi.spyOn(sharedConfig.HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
 				() => insideMessage
 			);
 
@@ -546,7 +551,9 @@ describe('Rooms API', () => {
 
 		test('does not dispatch event when forwarded messages have no attachments', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+			vi.spyOn(sharedConfig.xmppClient, 'requestMessageToForward').mockImplementation(() =>
+				Promise.resolve()
+			);
 
 			const message = createMockTextMessage();
 			const xmlMessage = buildTextMessageFromHistory({
@@ -555,7 +562,7 @@ describe('Rooms API', () => {
 				text: message.text
 			});
 			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
+			vi.spyOn(sharedConfig.HistoryAccumulator, 'getForwardedMessage').mockImplementationOnce(
 				() => insideMessage
 			);
 
@@ -568,7 +575,9 @@ describe('Rooms API', () => {
 
 		test('dispatches event even when some rooms fail (partial success)', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
+			vi.spyOn(sharedConfig.xmppClient, 'requestMessageToForward').mockImplementation(() =>
+				Promise.resolve()
+			);
 
 			const message = createMockTextMessage({
 				attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
@@ -579,7 +588,9 @@ describe('Rooms API', () => {
 				text: message.text
 			});
 			const insideMessage = xmlMessage.getElementsByTagName('message')[0];
-			vi.spyOn(HistoryAccumulator, 'getForwardedMessage').mockImplementation(() => insideMessage);
+			vi.spyOn(sharedConfig.HistoryAccumulator, 'getForwardedMessage').mockImplementation(
+				() => insideMessage
+			);
 
 			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
 

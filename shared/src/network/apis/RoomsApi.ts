@@ -7,9 +7,9 @@ import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { createMeeting, deleteMeeting } from './MeetingsApi';
-import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
-import { sendCustomEvent } from '../../hooks/useEventListener';
-import useStore from '../../store/Store';
+import { sharedConfig } from '../../config';
+import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants';
+import { RequestType } from '../../types/network/fetch';
 import {
 	BulkDeleteRoomAttachmentsResponse,
 	GetRoomAttachmentsParams,
@@ -26,16 +26,8 @@ import {
 } from '../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import {
-	buildQueryString,
-	fetchAPI,
-	RequestType,
-	sendFileFetchAPI,
-	uploadFileFetchAPI
-} from '../../utils/FetchUtils';
-import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
+import { buildQueryString } from '../../utils/fetchUtils';
+import { getLastUnreadMessage } from '../../utils/getLastUnreadMessage';
 import { EventName } from 'wsc-shared';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
@@ -46,14 +38,14 @@ export const listRooms = (members = false, settings = false): Promise<RoomBe[]> 
 		if (settings) array.push('extraFields=settings');
 		paramsStr = `?${array.join('&')}`;
 	}
-	return fetchAPI<RoomBe[]>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
-		useStore.getState().addRooms(resp, true);
+	return sharedConfig.fetchAPI<RoomBe[]>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
+		sharedConfig.useStore.getState().addRooms(resp, true);
 		return resp;
 	});
 };
 
 export const addRoom = async (room: RoomCreationFields): Promise<RoomBe> =>
-	fetchAPI<RoomBe>('rooms', RequestType.POST, room).then(async (response) => {
+	sharedConfig.fetchAPI<RoomBe>('rooms', RequestType.POST, room).then(async (response) => {
 		const meetingType =
 			room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
 		await createMeeting(response.id, meetingType, response.name ?? '');
@@ -61,16 +53,16 @@ export const addRoom = async (room: RoomCreationFields): Promise<RoomBe> =>
 	});
 
 export const getRoom = (roomId: string): Promise<RoomBe> =>
-	fetchAPI(`rooms/${roomId}`, RequestType.GET);
+	sharedConfig.fetchAPI(`rooms/${roomId}`, RequestType.GET);
 
 export const updateRoom = (roomId: string, editableFields: RoomEditableFields): Promise<RoomBe> =>
-	fetchAPI(`rooms/${roomId}`, RequestType.PUT, editableFields);
+	sharedConfig.fetchAPI(`rooms/${roomId}`, RequestType.PUT, editableFields);
 
 export const deleteRoom = (roomId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+	sharedConfig.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
 
 export const deleteRoomAndMeeting = (roomId: string): Promise<Response> => {
-	const meetingId = useStore.getState().rooms[roomId]?.meetingId;
+	const meetingId = sharedConfig.useStore.getState().rooms[roomId]?.meetingId;
 	if (meetingId) {
 		return deleteMeeting(meetingId).finally(() => deleteRoom(roomId));
 	}
@@ -81,68 +73,72 @@ export const getURLRoomPicture = (roomId: string): string =>
 	`${window.document.location.origin}/services/chats/rooms/${roomId}/picture`;
 
 export const getRoomPicture = (roomId: string): Promise<Blob> =>
-	fetchAPI(`rooms/${roomId}/picture`, RequestType.GET);
+	sharedConfig.fetchAPI(`rooms/${roomId}/picture`, RequestType.GET);
 
 export const updateRoomPicture = (roomId: string, file: File): Promise<Response> =>
 	new Promise((resolve, reject) => {
-		const sizeLimit = useStore.getState().session.attributes?.maxRoomPictureSize;
+		const sizeLimit = sharedConfig.useStore.getState().session.attributes?.maxRoomPictureSize;
 		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 			reject(new Error('File too large'));
 		} else {
-			uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
+			sharedConfig
+				.uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
 				.then((resp) => resolve(resp))
 				.catch((error) => reject(new Error(error)));
 		}
 	});
 
 export const deleteRoomPicture = (roomId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/picture`, RequestType.DELETE);
+	sharedConfig.fetchAPI(`rooms/${roomId}/picture`, RequestType.DELETE);
 
 export const muteRoomNotification = (roomId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/mute`, RequestType.PUT);
+	sharedConfig.fetchAPI(`rooms/${roomId}/mute`, RequestType.PUT);
 
 export const unmuteRoomNotification = (roomId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/mute`, RequestType.DELETE);
+	sharedConfig.fetchAPI(`rooms/${roomId}/mute`, RequestType.DELETE);
 
 export const clearRoomHistory = (roomId: string): Promise<{ clearedAt: string }> =>
-	fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
+	sharedConfig.fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
 
 export const getRoomMembers = (roomId: string): Promise<MemberBe[]> =>
-	fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
+	sharedConfig.fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
 
 export const addRoomMembers = (roomId: string, member: AddMemberFields[]): Promise<MemberBe[]> =>
-	fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
+	sharedConfig.fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
 
 export const deleteRoomMember = (roomId: string, userId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/members/${userId}`, RequestType.DELETE);
+	sharedConfig.fetchAPI(`rooms/${roomId}/members/${userId}`, RequestType.DELETE);
 
 export const promoteRoomMember = (roomId: string, userId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.PUT);
+	sharedConfig.fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.PUT);
 
 export const demotesRoomMember = (roomId: string, userId: string): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
+	sharedConfig.fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
 
 export const updateRoomOwners = (roomId: string, userIds: string[]): Promise<Response> =>
-	fetchAPI(`rooms/${roomId}/members/owners`, RequestType.PUT, { Members: userIds });
+	sharedConfig.fetchAPI(`rooms/${roomId}/members/owners`, RequestType.PUT, { Members: userIds });
 
 export const getRoomAttachments = (
 	roomId: string,
 	params: GetRoomAttachmentsParams
 ): Promise<GetRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+	sharedConfig.fetchAPI(
+		`rooms/${roomId}/attachments${buildQueryString({ ...params })}`,
+		RequestType.GET
+	);
 
 export const bulkDeleteRoomAttachments = (
 	roomId: string,
 	attachmentIds: Array<string>
 ): Promise<BulkDeleteRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds });
+	sharedConfig.fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds });
 
 export const replacePlaceholderRoom = (
 	userId: string,
 	text: string,
 	file?: File
 ): Promise<RoomBe> => {
-	const { setPlaceholderMessage, removePlaceholderRoom } = useStore.getState();
+	const { setPlaceholderMessage, removePlaceholderRoom } = sharedConfig.useStore.getState();
 	setPlaceholderMessage({
 		roomId: `placeholder-${userId}`,
 		id: uuidGenerator(),
@@ -157,7 +153,7 @@ export const replacePlaceholderRoom = (
 		members: [{ userId, owner: true }]
 	}).then((response) => {
 		removePlaceholderRoom(userId);
-		sendCustomEvent({
+		sharedConfig.sendCustomEvent({
 			name: EventName.ROUTE_REDIRECT,
 			data: { path: `/${CHATS_ROUTE}/${response.id}` }
 		});
@@ -186,10 +182,10 @@ export const addRoomAttachment = (
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) sharedConfig.xmppClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
-	useStore.getState().setPlaceholderMessage({
+	sharedConfig.useStore.getState().setPlaceholderMessage({
 		roomId,
 		id: uuid,
 		text: optionalFields.description ?? '',
@@ -204,7 +200,7 @@ export const addRoomAttachment = (
 	});
 
 	return new Promise<{ id: string }>((resolve, reject) => {
-		const { session, removePlaceholderMessage } = useStore.getState();
+		const { session, removePlaceholderMessage } = sharedConfig.useStore.getState();
 		const sizeLimit = session.attributes?.maxAttachmentSize;
 		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 			removePlaceholderMessage(roomId, uuid);
@@ -219,7 +215,8 @@ export const addRoomAttachment = (
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.0 is officially dropped.
 			if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
-				sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
+				sharedConfig
+					.sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
 					.then((resp: { id: string }) => {
 						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 						resolve(resp);
@@ -229,7 +226,14 @@ export const addRoomAttachment = (
 						reject(new Error(error));
 					});
 			} else {
-				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
+				sharedConfig
+					.uploadFileFetchAPI(
+						`rooms/${roomId}/attachments`,
+						RequestType.POST,
+						file,
+						signal,
+						optional
+					)
 					.then((resp: { id: string }) => {
 						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 						resolve(resp);
@@ -250,11 +254,11 @@ export const forwardMessages = (
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {
-		const queryId = HistoryAccumulator.getNextId();
-		return xmppClient
+		const queryId = sharedConfig.HistoryAccumulator.getNextId();
+		return sharedConfig.xmppClient
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
-				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
+				const historyMessage = sharedConfig.HistoryAccumulator.getForwardedMessage(queryId);
 				if (historyMessage) {
 					historyMessage.getElementsByTagName('body')[0].textContent = message.text;
 					listOfMessages[message.stanzaId] = historyMessage.outerHTML;
@@ -270,7 +274,11 @@ export const forwardMessages = (
 		const hasAttachments = messages.some((message) => message.attachment);
 		return Promise.allSettled(
 			roomsId.map((roomId) =>
-				fetchAPI<Response>(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
+				sharedConfig.fetchAPI<Response>(
+					`rooms/${roomId}/forward`,
+					RequestType.POST,
+					messagesToForward
+				)
 			)
 		).then((results) => {
 			const fulfilled = results.filter(

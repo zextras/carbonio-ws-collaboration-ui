@@ -11,6 +11,7 @@
     "immer": "*",
     "lodash": "*",
     "semver": "*",
+    "uuid": "*",
     "zustand": "*"
   }
 }

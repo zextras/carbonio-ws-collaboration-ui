@@ -12,13 +12,13 @@ import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import AddNewMemberModal from './AddNewMemberModal';
-import { addRoomMembers } from '../../../../network';
 import { getRoomMembers, getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
 import { Member } from '../../../../types/store/RoomTypes';
 import { ContactsSelected } from '../../contactSelector/ContactsSelector';
+import { addRoomMembers } from 'wsc-shared';
 
 type AddNewMemberProps = {
 	roomId: string;
