@@ -1,3 +1,9 @@
+## [0.16.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.2...v0.16.3) (2026-05-28)
+
+### Bug Fixes
+
+* **meeting:** restore video/audio stream on temporary TURN server disconnection [CO-3707] ([#754](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/754)) ([5703a7d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5703a7de7df9375bc41dcd38bc2f7826cc1d4b37))
+
 ## [0.16.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.1...v0.16.2) (2026-05-26)
 
 ### Bug Fixes
