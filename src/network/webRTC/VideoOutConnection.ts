@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { gte } from 'semver';
+
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer } from '../apis/MeetingsApi';
+import { videoIceRestart, updateMediaOffer } from '../apis/MeetingsApi';
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -34,7 +36,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		return new Promise((resolve, reject) => {
 			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+			this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
@@ -70,11 +72,24 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	private onIceConnectionStateChange = (ev: Event): void => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
+	private readonly onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		if (state === 'failed') {
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							const localDesc = this.peerConn?.localDescription;
+							const version = useStore.getState().session.apiVersion;
+							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
+								videoIceRestart(this.meetingId, localDesc.sdp);
+							}
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
 		}
 	};
 

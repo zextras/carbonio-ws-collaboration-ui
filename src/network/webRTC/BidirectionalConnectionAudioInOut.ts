@@ -5,17 +5,16 @@
  */
 
 import { first } from 'lodash';
+import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import { createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
+import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
-export default class BidirectionalConnectionAudioInOut
-	// eslint-disable-next-line prettier/prettier
-	implements IBidirectionalConnectionAudioInOut {
+export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;
 
 	meetingId: string;
@@ -32,7 +31,7 @@ export default class BidirectionalConnectionAudioInOut
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 		this.meetingId = meetingId;
 		this.rtpSender = null;
@@ -87,11 +86,24 @@ export default class BidirectionalConnectionAudioInOut
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
-	onIceConnectionStateChange = (ev: Event): void => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ev.target.iceConnectionState === 'failed') {
-			this.onNegotiationNeeded();
+	private readonly onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		if (state === 'failed') {
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							const localDesc = this.peerConn?.localDescription;
+							const version = useStore.getState().session.apiVersion;
+							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
+								audioIceRestart(this.meetingId, localDesc.sdp);
+							}
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
 		}
 	};
 
@@ -100,22 +112,6 @@ export default class BidirectionalConnectionAudioInOut
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
 			this.peerConn.setRemoteDescription(remoteDescription);
-		}
-	}
-
-	// TODO check its usage
-	handleOfferCreated(rtcSessDesc: RTCSessionDescriptionInit): void {
-		if (this.peerConn.signalingState === 'stable' && this.peerConn.localDescription == null) {
-			this.peerConn
-				.setLocalDescription(rtcSessDesc)
-				.then(() => {
-					if (rtcSessDesc.sdp) {
-						createAudioOffer(this.meetingId, rtcSessDesc.sdp).then(() => {
-							updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
-						});
-					}
-				})
-				.catch((reason) => console.warn(reason));
 		}
 	}
 
