@@ -13,7 +13,6 @@ import useStore from '../../../../store/Store';
 import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId', name: 'User' });
 

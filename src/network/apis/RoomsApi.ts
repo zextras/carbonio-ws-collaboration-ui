@@ -8,7 +8,7 @@ import { v4 as uuidGenerator } from 'uuid';
 
 import { createMeeting, deleteMeeting } from './MeetingsApi';
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import {
 	BulkDeleteRoomAttachmentsResponse,
@@ -36,6 +36,7 @@ import {
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
+import { EventName } from 'wsc-shared';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';

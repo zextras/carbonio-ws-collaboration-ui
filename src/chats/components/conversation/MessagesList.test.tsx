@@ -28,7 +28,6 @@ import {
 	OperationType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
 import { scrollToEnd, scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
 

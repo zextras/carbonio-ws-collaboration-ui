@@ -7,7 +7,6 @@
 import { meetingWaitingParticipantJoinedEventHandler } from './MeetingWaitingParticipantJoinedEventHandler';
 import { mockNotify } from '../../../../__mocks__/@zextras/carbonio-shell-ui';
 import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants/appConstants';
-import { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -18,6 +17,7 @@ import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingWaitingParticipantJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const room = createMockRoom({
 	type: RoomType.TEMPORARY,

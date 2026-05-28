@@ -27,7 +27,7 @@ import {
 } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-// import { calcReads } from '../../utils/calcReads'; TODO
+import { calcReads } from '../../utils/calcReads';
 import { isBefore } from '../../utils/dateUtils';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
@@ -332,7 +332,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					[MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG].includes(lastMessage.type) &&
 					[MarkerStatus.UNREAD, MarkerStatus.READ_BY_SOMEONE].includes(lastMessage.read)
 				) {
-					// lastMessage.read = calcReads(lastMessage.date, roomId, markers); TODO
+					lastMessage.read = calcReads(lastMessage.date, roomId, markers);
 				}
 
 				// Update messages' read status of TEXT and CONFIGURATION messages
@@ -341,7 +341,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						(msg.type === MessageType.TEXT_MSG || msg.type === MessageType.CONFIGURATION_MSG) &&
 						(msg.read === MarkerStatus.UNREAD || msg.read === MarkerStatus.READ_BY_SOMEONE)
 					) {
-						// msg.read = calcReads(msg.date, roomId, markers); TODO
+						msg.read = calcReads(msg.date, roomId, markers);
 					}
 					return msg;
 				});

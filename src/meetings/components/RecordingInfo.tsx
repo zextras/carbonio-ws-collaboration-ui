@@ -10,13 +10,10 @@ import styled from '@emotion/styled';
 import { Container, CreateSnackbarFn, Text, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, {
-	EventName,
-	RecordingStartedEvent,
-	RecordingStoppedEvent
-} from '../../hooks/useEventListener';
+import useEventListener from '../../hooks/useEventListener';
 import { getIsMeetingRecording } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
+import { EventName, EventPayloads } from 'wsc-shared';
 
 const RecordingContainer = styled(Container)`
 	position: absolute;
@@ -37,9 +34,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleRecordingStarted = useCallback(
-		(event: CustomEvent<RecordingStartedEvent['data']> | undefined) => {
-			if (event?.detail.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event?.detail.userId ?? ''];
+		(event: EventPayloads[EventName.MEETING_RECORDING_STARTED]) => {
+			if (event.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStarted = t(
 					'meeting.recordingStart.successSnackbar.participants',
@@ -62,9 +59,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	useEventListener(EventName.MEETING_RECORDING_STARTED, handleRecordingStarted);
 
 	const handleRecordingStopped = useCallback(
-		(event: CustomEvent<RecordingStoppedEvent['data']> | undefined) => {
-			if (event?.detail.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event?.detail.userId ?? ''];
+		(event: EventPayloads[EventName.MEETING_RECORDING_STOPPED]) => {
+			if (event.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStopped = t(
 					'meeting.recordingStop.successSnackbar.participants',

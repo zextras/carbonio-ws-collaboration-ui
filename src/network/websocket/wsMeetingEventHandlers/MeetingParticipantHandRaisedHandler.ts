@@ -5,10 +5,11 @@
  */
 
 import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../constants/appConstants';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
+import { EventName } from 'wsc-shared';
 
 export const meetingParticipantHandRaisedHandler = (
 	event: MeetingParticipantHandRaisedEvent

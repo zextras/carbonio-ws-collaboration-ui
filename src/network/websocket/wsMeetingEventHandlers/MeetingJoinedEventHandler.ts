@@ -6,13 +6,14 @@
 import { find, throttle } from 'lodash';
 
 import { LARGE_MEETING_THRESHOLD } from '../../../constants/appConstants';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
+import { EventName } from 'wsc-shared';
 
 const playJoinNotification = throttle(
 	() => sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),

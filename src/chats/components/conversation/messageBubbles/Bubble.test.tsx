@@ -24,7 +24,6 @@ import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
 

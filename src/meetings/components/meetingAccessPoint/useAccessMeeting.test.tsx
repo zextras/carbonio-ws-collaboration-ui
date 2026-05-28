@@ -10,12 +10,13 @@ import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import useAccessMeeting from './useAccessMeeting';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/useRouting';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
+import { EventName } from 'wsc-shared';
 
 const mediaStatus: MediaStatus = {
 	audio: { enabled: true, selectedDeviceId: 'audio-device-1' },

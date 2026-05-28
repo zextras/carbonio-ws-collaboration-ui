@@ -9,7 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import RaiseHandAccordion from './RaiseHandAccordion';
-import { EventName, sendCustomEvent } from '../../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../../hooks/useEventListener';
 import { wsEventsHandler } from '../../../../network/websocket/wsEventsHandler';
 import useStore from '../../../../store/Store';
 import {
@@ -24,6 +24,7 @@ import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../../../types/network/websocket/wsEvents';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });

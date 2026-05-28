@@ -11,6 +11,7 @@ export { configureSharedCode };
 // Types
 export * from './types/store/StoreTypes';
 export * from './types/store/SessionTypes';
+export * from './types/AppEvents';
 
 // Store slices
 export * from './store/slices/ActiveConversationsSlice';

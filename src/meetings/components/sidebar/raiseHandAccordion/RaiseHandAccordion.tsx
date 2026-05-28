@@ -20,10 +20,7 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import RaiseHandUser from './RaiseHandUser';
-import useEventListener, {
-	EventName,
-	MeetingParticipantRaiseHandEvent
-} from '../../../../hooks/useEventListener';
+import useEventListener from '../../../../hooks/useEventListener';
 import { raiseHand } from '../../../../network';
 import {
 	getHandRaisedList,
@@ -34,6 +31,7 @@ import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelector
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
+import { EventName, EventPayloads } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -76,8 +74,8 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	}, [raiseHandList]);
 
 	const handleRaiseHandEvent = useCallback(
-		(event: CustomEvent<MeetingParticipantRaiseHandEvent['data']> | undefined) => {
-			const { raised, userId, moderatorId } = event?.detail ?? {};
+		(event: EventPayloads[EventName.MEETING_PARTICIPANT_RAISE_HAND]) => {
+			const { raised, userId, moderatorId } = event ?? {};
 			const isSomeoneElseRaising = raised && amIModerator && userId !== myUserId;
 			const isMyHandLoweredByModerator = !raised && userId === myUserId && moderatorId;
 

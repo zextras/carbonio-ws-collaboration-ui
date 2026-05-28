@@ -5,10 +5,11 @@
  */
 import { find } from 'lodash';
 
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 export const meetingStoppedEventHandler = (event: MeetingStoppedEvent): void => {
 	const state = useStore.getState();

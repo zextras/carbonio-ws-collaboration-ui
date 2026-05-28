@@ -5,7 +5,6 @@
  */
 
 import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
-import { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -16,6 +15,7 @@ import { mockPlayAudio } from '../../../tests/setupTests';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const room = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ id: 'oneToOneMeeting', roomId: room.id });

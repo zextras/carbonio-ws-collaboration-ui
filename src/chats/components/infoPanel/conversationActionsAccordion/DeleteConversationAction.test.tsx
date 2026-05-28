@@ -14,7 +14,6 @@ import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
 const user1Info: User = createMockUser();

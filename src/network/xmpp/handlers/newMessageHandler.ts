@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import type { Attachment } from '../../../types/network/models/attachmentTypes';
 import {
@@ -18,6 +18,7 @@ import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 import { xmppClient } from '../XMPPClient';
+import { EventName } from 'wsc-shared';
 
 const toGalleryAttachment = (message: TextMessage): Attachment | undefined => {
 	if (!message.attachment) return undefined;

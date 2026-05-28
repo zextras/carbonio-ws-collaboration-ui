@@ -11,12 +11,13 @@ import { Badge, Button, Container, Padding } from '@zextras/carbonio-design-syst
 import { debounce } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import useEventListener from '../../../hooks/useEventListener';
 import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
+import { EventName, EventPayloads } from 'wsc-shared';
 
 type ScrollButtonProps = {
 	roomId: string;
@@ -59,11 +60,11 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 	);
 
 	const newMessageEventHandler = useCallback(
-		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
+		(event: EventPayloads[EventName.NEW_MESSAGE]) => {
 			if (
-				event?.detail.roomId === roomId &&
-				event?.detail.type === MessageType.TEXT_MSG &&
-				event?.detail.from !== myUserId
+				event.roomId === roomId &&
+				event.type === MessageType.TEXT_MSG &&
+				event.from !== myUserId
 			) {
 				setShowNewMessageBadge(true);
 				debouncedNewMessagesBadgeSetter();

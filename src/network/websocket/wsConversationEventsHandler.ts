@@ -3,13 +3,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { sendCustomEvent } from '../../hooks/useEventListener';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { getMeeting, getRoom } from '../index';
 import { xmppClient } from '../xmpp/XMPPClient';
+import { EventName } from 'wsc-shared';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();

@@ -3,12 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingAudioStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
+import { EventName } from 'wsc-shared';
 
 export const meetingAudioStreamChangedEventHandler = (
 	event: MeetingAudioStreamChangedEvent

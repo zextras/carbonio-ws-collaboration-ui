@@ -6,13 +6,13 @@
 
 import { meetingUserAcceptedEventHandler } from './MeetingUserAcceptedEventHandler';
 import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants/appConstants';
-import { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingUserAcceptedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const room = createMockRoom({ type: RoomType.TEMPORARY });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });

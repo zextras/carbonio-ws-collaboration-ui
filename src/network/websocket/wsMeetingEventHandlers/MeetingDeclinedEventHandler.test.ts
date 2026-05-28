@@ -5,12 +5,12 @@
  */
 
 import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
-import { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const room = createMockRoom({ type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ roomId: room.id });

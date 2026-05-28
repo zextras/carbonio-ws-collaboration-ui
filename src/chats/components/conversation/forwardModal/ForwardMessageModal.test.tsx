@@ -21,7 +21,6 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 
 const sessionUser = createMockUser({ id: 'id', name: 'Name' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });

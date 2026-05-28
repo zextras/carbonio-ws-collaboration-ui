@@ -20,7 +20,6 @@ import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
 
 const mockedRoom: RoomBe = createMockRoom({

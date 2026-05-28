@@ -15,7 +15,7 @@ import MessageFactory from './messageBubbles/MessageFactory';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
-import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import useEventListener from '../../../hooks/useEventListener';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getHistoryIsFullyLoaded,
@@ -32,6 +32,7 @@ import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
+import { EventName, EventPayloads } from 'wsc-shared';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -255,12 +256,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// checking to be actually at the bottom and also if last message it's mine
 		// since we want to go always at the bottom when we send a message, no matter
 		// if we scrolled up in the history
-		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
+		(event: EventPayloads[EventName.NEW_MESSAGE]) => {
 			if (
 				size(roomMessages) > 0 &&
-				event?.detail.roomId === roomId &&
+				event.roomId === roomId &&
 				(actualScrollPosition === last(roomMessages)?.id ||
-					(event?.detail.roomId === MessageType.TEXT_MSG && event?.detail.roomId === myUserId))
+					(event.roomId === MessageType.TEXT_MSG && event.roomId === myUserId))
 			) {
 				setTimeout(() => {
 					scrollToEnd(MessagesListWrapperRef);

@@ -10,7 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router-dom';
 
 import BubblesWrapper from './BubblesWrapper';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -30,6 +30,7 @@ import {
 import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
+import { EventName } from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });

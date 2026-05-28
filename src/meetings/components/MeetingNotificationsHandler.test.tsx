@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, act } from '@testing-library/react';
 
 import MeetingNotificationsHandler from './MeetingNotificationsHandler';
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
@@ -21,6 +21,7 @@ import {
 	MeetingStartedEvent
 } from '../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../types/store/RoomTypes';
+import { EventName } from 'wsc-shared';
 
 const declineAll = 'Decline all';
 

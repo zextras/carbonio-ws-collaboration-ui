@@ -9,7 +9,7 @@ import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Snackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, { EventName, NewWaitingUserEvent } from '../../hooks/useEventListener';
+import useEventListener from '../../hooks/useEventListener';
 import {
 	getMeeting,
 	getWaitingListSizeForMyVirtualMeeting
@@ -20,6 +20,7 @@ import {
 	LOCAL_STORAGE_NAMES,
 	NotificationsSettingsType
 } from '../../utils/localStorageUtils';
+import { EventName, EventPayloads } from 'wsc-shared';
 
 const WaitingListSnackbar = (): ReactElement | null => {
 	const [t] = useTranslation();
@@ -41,12 +42,9 @@ const WaitingListSnackbar = (): ReactElement | null => {
 		{ roomName: meeting?.name }
 	);
 
-	const waitingSnackbarHandler = useCallback(
-		(event: CustomEvent<NewWaitingUserEvent['data']> | undefined) => {
-			setMeetingId(event?.detail.meetingId ?? '');
-		},
-		[]
-	);
+	const waitingSnackbarHandler = useCallback((event: EventPayloads[EventName.NEW_WAITING_USER]) => {
+		setMeetingId(event.meetingId ?? '');
+	}, []);
 
 	useEffect(() => {
 		if (ChatsNotificationsSettings.WaitingRoomAccessNotifications && meeting !== undefined) {
