@@ -5,7 +5,6 @@
  */
 
 import SubscriptionsManager from './SubscriptionsManager';
-import useStore from '../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
@@ -13,13 +12,15 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import useStore from '../../tests/testStore';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 import * as api from 'wsc-shared';
-import { MeetingMediaStreamChangedEvent, WsEventType } from "wsc-shared";
 
 const user1Info: User = createMockUser({
 	id: 'user1',

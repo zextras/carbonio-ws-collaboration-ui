@@ -11,9 +11,7 @@ import { configureSharedCode } from '../config';
 
 const initialState = useStore.getState();
 
-export const mockFetchAPI = vi.fn();
-export const mockSendFileFetchAPI = vi.fn();
-export const mockUploadFileFetchAPI = vi.fn();
+export const mockPlayAudio = vi.fn(() => Promise.resolve());
 
 Object.defineProperty(window, 'MediaStream', {
 	value: vi.fn(function MediaStreamMock() {
@@ -29,6 +27,19 @@ Object.defineProperty(window, 'MediaStream', {
 		};
 	})
 });
+
+Object.defineProperty(global, 'Audio', {
+	writable: true,
+	value: vi.fn(function AudioMock() {
+		return {
+			play: mockPlayAudio
+		};
+	})
+});
+
+export const mockFetchAPI = vi.fn();
+export const mockSendFileFetchAPI = vi.fn();
+export const mockUploadFileFetchAPI = vi.fn();
 
 beforeAll(() => {
 	configureSharedCode({
@@ -57,7 +68,7 @@ beforeAll(() => {
 			clearAuthCookies: (): void => {
 				document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 				document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-			},
+			}
 		},
 		xmppClient: {
 			readMessage: vi.fn(),

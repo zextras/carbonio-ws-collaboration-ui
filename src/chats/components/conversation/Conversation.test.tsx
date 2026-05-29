@@ -17,13 +17,9 @@ import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import {
-	RoomOwnerDemotedEvent,
-	RoomOwnerPromotedEvent
-} from '../../../types/network/websocket/wsConversationEvents';
-import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
 import * as api from 'wsc-shared';
+import { RoomOwnerDemotedEvent, RoomOwnerPromotedEvent, WsEventType } from "wsc-shared";
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

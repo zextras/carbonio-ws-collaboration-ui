@@ -13,6 +13,10 @@ export * from './types/store/StoreTypes';
 export * from './types/store/SessionTypes';
 export * from './types/AppEvents';
 
+export * from './types/websocket/wsEvents';
+export * from './types/websocket/wsConversationEvents';
+export * from './types/websocket/wsMeetingEvents';
+
 // Store slices
 export * from './store/slices/ActiveConversationsSlice';
 export * from './store/slices/ActiveMeetingSlice';
@@ -25,7 +29,7 @@ export * from './store/slices/SessionStoreSlice';
 export * from './store/slices/UsersStoreSlice';
 export * from './store/slices/RoomsStoreSlice';
 
-// Network
+// Apis, WebSocket
 export * from './network';
 
 // Utils

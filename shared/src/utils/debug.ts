@@ -5,6 +5,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// Debug WebSocket events
+import { WsEvent } from '../types/network/websocket/wsEvents';
+
+export const wsDebug = (text: string, object?: WsEvent): void => {
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(
+			`%c CHATS WS [${new Date().toISOString().slice(11, -5)}]: ${text}`,
+			'color: Green',
+			object || ''
+		);
+	}
+};
+
 // Debug XMPP events
 export const xmppDebug = (text: string, object?: Element): void => {
 	if (process.env.NODE_ENV !== 'test') {

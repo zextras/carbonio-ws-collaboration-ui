@@ -16,13 +16,19 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { wsClient } from './network/websocket/WebSocketClient';
 import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
-import { AccountSettings, getToken, getCapabilities, listRooms, listMeetings } from 'wsc-shared';
+import {
+	AccountSettings,
+	getToken,
+	getCapabilities,
+	listRooms,
+	listMeetings,
+	wsClient
+} from 'wsc-shared';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);

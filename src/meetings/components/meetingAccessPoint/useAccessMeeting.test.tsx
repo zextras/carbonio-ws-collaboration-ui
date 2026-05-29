@@ -13,9 +13,9 @@ import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/
 import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
 import * as api from 'wsc-shared';
+import { WsEventType } from "wsc-shared";
 
 const mediaStatus: MediaStatus = {
 	audio: { enabled: true, selectedDeviceId: 'audio-device-1' },
