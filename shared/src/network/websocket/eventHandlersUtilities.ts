@@ -6,7 +6,6 @@
 
 import { sharedConfig } from '../../config';
 import { MEETINGS_PATH } from '../../constants';
-import { getUserId } from '../../store/selectors/SessionSelectors';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
 export enum EventArea {
@@ -68,8 +67,7 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 	}
 };
 
-export const isMyId = (userId: string): boolean =>
-	userId === getUserId(sharedConfig.useStore.getState());
+export const isMyId = (userId: string): boolean => userId === sharedConfig.useStore.getState().session.id;
 
 export const isMeetingActive = (meetingId: string): boolean =>
 	sharedConfig.useStore.getState().activeMeeting?.meetingId === meetingId;

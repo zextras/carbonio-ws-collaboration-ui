@@ -18,7 +18,6 @@ import {
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
-import { getMeetingIdFromRoom } from '../selectors/RoomsSelectors';
 
 export const useRoomsStoreSlice: StateCreator<
 	RootStore,
@@ -35,7 +34,7 @@ export const useRoomsStoreSlice: StateCreator<
 					const incomingIds = new Set(roomsBe.map((r) => r.id));
 					forEach(Object.keys(draft.rooms), (roomId) => {
 						if (!incomingIds.has(roomId) && !draft.rooms[roomId]?.placeholder) {
-							const meetingId = getMeetingIdFromRoom(draft, roomId);
+							const meetingId = draft.rooms[roomId]?.meetingId;
 							if (meetingId) delete draft.meetings[meetingId];
 
 							delete draft.rooms[roomId];
@@ -87,7 +86,7 @@ export const useRoomsStoreSlice: StateCreator<
 				delete draft.activeConversations[roomId];
 				delete draft.chatsRegistry[roomId];
 
-				const meetingId = getMeetingIdFromRoom(draft, roomId);
+				const meetingId = draft.rooms[roomId]?.meetingId;
 				if (meetingId) delete draft.meetings[meetingId];
 			}),
 			false,

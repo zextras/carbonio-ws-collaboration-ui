@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { sharedConfig } from '../../config';
-import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { EventName, getMeeting, getRoom } from 'wsc-shared';
@@ -73,7 +72,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
 			if (isMyId(event.userId)) {
-				const meetingId = getMeetingIdFromRoom(sharedConfig.useStore.getState(), event.roomId);
+				const meetingId = sharedConfig.useStore.getState().rooms[event.roomId]?.meetingId;
 				if (meetingId) {
 					state.deleteMeeting(meetingId);
 				}
