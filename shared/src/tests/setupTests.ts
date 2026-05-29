@@ -13,6 +13,16 @@ const initialState = useStore.getState();
 
 export const mockPlayAudio = vi.fn(() => Promise.resolve());
 
+Object.defineProperty(window, 'location', {
+	value: {
+		href: 'https://localhost/carbonio/chats',
+		pathname: 'https://localhost/carbonio/chats',
+		replace: vi.fn(),
+		includes: vi.fn(),
+		assign: vi.fn()
+	}
+});
+
 Object.defineProperty(window, 'MediaStream', {
 	value: vi.fn(function MediaStreamMock() {
 		return {
@@ -45,22 +55,52 @@ beforeAll(() => {
 	configureSharedCode({
 		// eslint-disable-next-line object-shorthand
 		BidirectionalConnectionAudioInOut: vi.fn().mockImplementation(function () {
-			return { closePeerConnection: vi.fn() };
+			return {
+				closePeerConnection: vi.fn(),
+				handleRemoteAnswer: vi.fn(),
+				updateLocalStreamTrack: vi.fn(),
+				updateRemoteStreamAudio: vi.fn(),
+				closeRtpSenderTrack: vi.fn()
+			};
 		}),
 		// eslint-disable-next-line object-shorthand
 		VideoScreenInConnection: vi.fn().mockImplementation(function () {
-			return { closePeerConnection: vi.fn() };
+			return {
+				closePeerConnection: vi.fn(),
+				handleRemoteOffer: vi.fn(),
+				handleParticipantsSubscribed: vi.fn(),
+				removeStream: vi.fn(),
+				subscriptionManager: {
+					addSubscription: vi.fn(),
+					removeSubscription: vi.fn(),
+					deleteSubscription: vi.fn(),
+					updateSubscription: vi.fn()
+				}
+			};
 		}),
 		// eslint-disable-next-line object-shorthand
 		VideoOutConnection: vi.fn().mockImplementation(function () {
-			return { closePeerConnection: vi.fn() };
+			return {
+				closePeerConnection: vi.fn(),
+				startVideo: vi.fn(),
+				stopVideo: vi.fn(),
+				handleRemoteAnswer: vi.fn(),
+				updateLocalStreamTrack: vi.fn()
+			};
 		}),
 		// eslint-disable-next-line object-shorthand
 		ScreenOutConnection: vi.fn().mockImplementation(function () {
-			return { closePeerConnection: vi.fn() };
+			return {
+				closePeerConnection: vi.fn(),
+				startScreenShare: vi.fn(),
+				handleRemoteAnswer: vi.fn(),
+				stopScreenShare: vi.fn()
+			};
 		}),
 		useStore,
-		sendCustomEvent: vi.fn(),
+		sendCustomEvent: (event) => {
+			window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
+		},
 		fetchAPI: mockFetchAPI,
 		sendFileFetchAPI: mockSendFileFetchAPI,
 		uploadFileFetchAPI: mockUploadFileFetchAPI,
@@ -71,6 +111,7 @@ beforeAll(() => {
 			}
 		},
 		xmppClient: {
+			setOnline: vi.fn(),
 			readMessage: vi.fn(),
 			requestMessageToForward: vi.fn()
 		},

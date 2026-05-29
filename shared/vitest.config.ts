@@ -18,6 +18,8 @@ export default defineConfig({
 				url: 'http://localhost/'
 			}
 		},
+		restoreMocks: true,
+		clearMocks: true,
 		setupFiles: [resolve(sharedDir, 'src/tests/setupTests.ts')],
 		include: [resolve(sharedDir, 'src/**/*.test.{ts,tsx}')]
 	},
