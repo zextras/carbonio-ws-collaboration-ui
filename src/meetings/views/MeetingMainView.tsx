@@ -7,11 +7,11 @@
 import React, { lazy, ReactElement, Suspense, useContext, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
-import { getLoginConfig } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
 import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts/routerContext';
+import { getLoginConfig } from 'wsc-shared';
 
 const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')

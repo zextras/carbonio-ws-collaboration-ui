@@ -10,11 +10,11 @@ import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
-import { deleteRoomAndMeeting, deleteRoomMember } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import DeleteConversationModal from '../conversationActionsAccordion/DeleteConversationModal';
 import LeaveConversationModal from '../conversationActionsAccordion/LeaveConversationModal';
+import { deleteRoomAndMeeting, deleteRoomMember } from 'wsc-shared';
 
 type LeaveConversationProps = {
 	iAmOwner: boolean;

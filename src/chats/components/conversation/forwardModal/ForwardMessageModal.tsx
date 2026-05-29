@@ -46,12 +46,12 @@ import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { forwardMessages } from '../../../../network';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { forwardMessages } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

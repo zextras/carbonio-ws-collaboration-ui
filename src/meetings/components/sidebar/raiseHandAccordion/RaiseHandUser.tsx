@@ -19,7 +19,6 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { raiseHand } from '../../../../network';
 import { getUserHandRank } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
@@ -27,6 +26,7 @@ import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import GuestUserLabel from '../../GuestUserLabel';
+import { raiseHand } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

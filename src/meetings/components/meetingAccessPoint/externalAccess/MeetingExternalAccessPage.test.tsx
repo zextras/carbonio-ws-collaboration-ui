@@ -8,8 +8,8 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
-import * as api from '../../../../network/apis/MeetingsApi';
 import { setup } from '../../../../tests/test-utils';
+import * as api from 'wsc-shared';
 
 describe('MeetingExternalAccessPage tests', () => {
 	test('Meeting name is displayed correctly', async () => {

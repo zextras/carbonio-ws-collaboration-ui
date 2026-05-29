@@ -10,7 +10,6 @@ import { act, screen } from '@testing-library/react';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import { mockGoToRoomPage } from '../../../hooks/__mocks__/useRouting';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -23,6 +22,7 @@ import {
 import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import * as api from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 

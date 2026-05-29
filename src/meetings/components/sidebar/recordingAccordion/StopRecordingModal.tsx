@@ -15,10 +15,10 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { stopRecording } from '../../../../network';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
+import { stopRecording } from 'wsc-shared';
 
 type StopRecordingModalProps = {
 	isOpen: boolean;

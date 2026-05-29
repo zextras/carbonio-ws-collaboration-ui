@@ -9,7 +9,6 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,6 +19,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
+import * as api from 'wsc-shared';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 

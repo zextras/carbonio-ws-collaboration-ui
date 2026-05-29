@@ -19,7 +19,6 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useMediaDevices from '../../../hooks/useMediaDevices';
-import { updateAudioStreamStatus } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -27,6 +26,7 @@ import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
+import { updateAudioStreamStatus } from 'wsc-shared';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;

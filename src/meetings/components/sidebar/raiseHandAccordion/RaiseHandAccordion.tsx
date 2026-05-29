@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next';
 
 import RaiseHandUser from './RaiseHandUser';
 import useEventListener from '../../../../hooks/useEventListener';
-import { raiseHand } from '../../../../network';
 import {
 	getHandRaisedList,
 	getRaiseHandAccordionStatus
@@ -31,7 +30,7 @@ import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelector
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, raiseHand } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

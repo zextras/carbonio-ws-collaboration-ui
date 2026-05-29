@@ -8,11 +8,11 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import WaitingUser from './WaitingUser';
-import * as api from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { UserType } from '../../../../types/store/UserTypes';
+import * as api from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const guestUser = createMockUser({ id: 'guestUserId', type: UserType.GUEST });

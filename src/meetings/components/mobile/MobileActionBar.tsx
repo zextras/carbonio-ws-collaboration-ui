@@ -9,7 +9,6 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 import { Button, Container } from '@zextras/carbonio-design-system';
 
 import useRouting from '../../../hooks/useRouting';
-import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } from '../../../network';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -20,6 +19,7 @@ import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getFrontCameraStream } from '../../../utils/UserMediaManager';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
+import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } from 'wsc-shared';
 
 type MobileActionBarProps = {
 	meetingId: string;

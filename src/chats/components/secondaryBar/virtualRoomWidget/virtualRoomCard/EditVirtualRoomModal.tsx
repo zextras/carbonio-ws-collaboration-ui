@@ -16,18 +16,13 @@ import {
 import { filter, forEach, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import {
-	addRoomMembers,
-	deleteRoomMember,
-	updateRoom,
-	updateRoomOwners
-} from '../../../../../network';
 import { getMeetingParticipantsByRoomId } from '../../../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserEmail, getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import ContactsSelector, { ContactsSelected } from '../../../contactSelector/ContactsSelector';
+import { addRoomMembers, deleteRoomMember, updateRoom, updateRoomOwners } from 'wsc-shared';
 
 type deleteVirtualRoomModalProps = {
 	showModal: boolean;

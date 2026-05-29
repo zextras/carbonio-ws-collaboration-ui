@@ -9,7 +9,7 @@ import { concat, differenceWith, filter, find, forEach, isEqual, remove, size } 
 import PendingSubscriptionManager from './PendingSubscriptionManager';
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
-import { subscribeToMedia } from '../apis/MeetingsApi';
+import { subscribeToMedia } from 'wsc-shared';
 
 class SubscriptionsManager {
 	meetingId: string;

@@ -8,7 +8,6 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import DeleteVirtualRoomModal from './DeleteVirtualRoomModal';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,6 +19,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 

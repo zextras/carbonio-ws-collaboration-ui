@@ -16,7 +16,6 @@ import {
 	mockGoToExternalLoginPage,
 	mockGoToMeetingAccessPage
 } from '../../hooks/__mocks__/useRouting';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -31,6 +30,7 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import * as api from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });

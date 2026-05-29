@@ -9,7 +9,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import StopRecordingModal from './StopRecordingModal';
-import * as api from '../../../../network/apis/MeetingsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -21,6 +20,7 @@ import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import * as api from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 

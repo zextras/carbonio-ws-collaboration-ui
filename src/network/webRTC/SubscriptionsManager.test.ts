@@ -21,9 +21,8 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
-import { mockFetchAPI } from '../../utils/__mocks__/FetchUtils';
-import { RequestType } from '../../utils/FetchUtils';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
+import * as api from 'wsc-shared';
 
 const user1Info: User = createMockUser({
 	id: 'user1',
@@ -82,11 +81,10 @@ const groupMeeting: MeetingBe = createMockMeeting({
 	]
 });
 
-const subscribeUrl = 'meetings/meetingId/media/subscribe';
-
-vi.mock('../../utils/FetchUtils');
+let spyOnSubscribeToMedia: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
+	spyOnSubscribeToMedia = vi.spyOn(api, 'subscribeToMedia').mockResolvedValue({} as Response);
 	act(() => {
 		const store = useStore.getState();
 		store.setLoginInfo({ id: user1Info.id, name: user1Info.email, displayName: user1Info.name });
@@ -108,16 +106,17 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user4', type: STREAM_TYPE.VIDEO },
 			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
 		]);
-		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledTimes(1);
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user2', type: STREAM_TYPE.SCREEN },
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user4', type: STREAM_TYPE.VIDEO }
 			],
-			unsubscribe: []
-		});
+			[]
+		);
 	});
 
 	test('Subscribe only to some streams', async () => {
@@ -128,14 +127,15 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user2', type: STREAM_TYPE.SCREEN },
 			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
 		]);
-		expect(mockFetchAPI).toHaveBeenCalledTimes(1);
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledTimes(1);
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user2', type: STREAM_TYPE.SCREEN }
 			],
-			unsubscribe: []
-		});
+			[]
+		);
 	});
 
 	test('Add and remove subscriptions', async () => {
@@ -152,13 +152,14 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user4', type: STREAM_TYPE.VIDEO }
 		]);
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user4', type: STREAM_TYPE.VIDEO }
 			],
-			unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.SCREEN }]
-		});
+			[{ userId: 'user2', type: STREAM_TYPE.SCREEN }]
+		);
 	});
 
 	test('Subscribed stream sets video off', async () => {
@@ -172,10 +173,11 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [],
-			unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
-		});
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[],
+			[{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
+		);
 	});
 
 	test('Only one video subscribed sets video off', async () => {
@@ -185,10 +187,11 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [],
-			unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
-		});
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[],
+			[{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
+		);
 	});
 
 	test('Not subscribed stream sets video on', async () => {
@@ -209,9 +212,10 @@ describe('Test SubscriptionsManager', () => {
 
 		subscriptionsManager.addSubscription({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(subscribeUrl, RequestType.PUT, {
-			subscribe: [{ userId: 'user5', type: STREAM_TYPE.VIDEO }],
-			unsubscribe: []
-		});
+		expect(spyOnSubscribeToMedia).toHaveBeenCalledWith(
+			groupMeeting.id,
+			[{ userId: 'user5', type: STREAM_TYPE.VIDEO }],
+			[]
+		);
 	});
 });

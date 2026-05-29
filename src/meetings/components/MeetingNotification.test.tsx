@@ -9,12 +9,12 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
-import * as MeetingsApi from '../../network/apis/MeetingsApi';
 import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
+import * as MeetingsApi from 'wsc-shared';
 
 const sendAQuickMessage = 'Send a quick message';
 const joinMeeting = 'Join meeting';

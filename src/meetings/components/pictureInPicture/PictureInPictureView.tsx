@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 
 import useMediaDevices from '../../../hooks/useMediaDevices';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import { updateAudioStreamStatus, updateMediaOffer } from '../../../network';
 import {
 	getNameOfFirstTalkingUser,
 	getSelectedAudioDeviceId,
@@ -30,6 +29,7 @@ import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 import Tile from '../tile/Tile';
+import { updateAudioStreamStatus, updateMediaOffer } from 'wsc-shared';
 
 const PipContainer = styled(Container)`
 	background-color: ${({ theme }): string => theme.palette.gray0.regular};

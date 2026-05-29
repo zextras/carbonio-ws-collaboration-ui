@@ -10,7 +10,6 @@ import { act, waitFor } from '@testing-library/react';
 import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
-import { bulkDeleteRoomAttachments } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
@@ -52,7 +51,8 @@ const fireListItemVisible = async (isIntersecting: boolean): Promise<void> => {
 const renderInList = (attachment: Attachment): ReturnType<typeof setup> =>
 	setup(<List>{[<AttachmentListItem key={attachment.id} attachment={attachment} />]}</List>);
 
-vi.mock('../../../../network/apis/RoomsApi', () => ({
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal<typeof import('wsc-shared')>()),
 	bulkDeleteRoomAttachments: vi.fn()
 }));
 
@@ -66,7 +66,7 @@ vi.mock('../../../../hooks/usePreviewNavigation', () => ({
 	default: mockUsePreviewNavigation
 }));
 
-const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
+const mockedBulkDelete = vi.mocked(attachmentsApi.bulkDeleteRoomAttachments);
 
 const myUserId = 'me';
 const otherUserId = 'other-user';

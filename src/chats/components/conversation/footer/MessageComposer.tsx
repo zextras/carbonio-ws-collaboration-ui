@@ -33,7 +33,6 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { addRoomAttachment } from '../../../../network';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
@@ -52,6 +51,7 @@ import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryT
 import { getImageSize, isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
+import { addRoomAttachment } from 'wsc-shared';
 
 type ConversationMessageComposerProps = {
 	roomId: string;

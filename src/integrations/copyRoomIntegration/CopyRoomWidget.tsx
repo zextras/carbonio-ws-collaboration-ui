@@ -21,10 +21,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
-import { addRoom } from '../../network';
 import { getDuplicatedRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { MemberBe, RoomType } from '../../types/network/models/roomBeTypes';
+import { addRoom } from 'wsc-shared';
 
 type CopyRoomWidgetProps = {
 	type: 'group' | 'space' | 'channel';

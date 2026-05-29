@@ -11,7 +11,7 @@ import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
-import { createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
+import { createAudioOffer, updateAudioStreamStatus } from 'wsc-shared';
 
 export default class BidirectionalConnectionAudioInOut
 	// eslint-disable-next-line prettier/prettier

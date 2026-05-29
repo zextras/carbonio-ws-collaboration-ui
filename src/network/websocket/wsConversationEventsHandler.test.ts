@@ -18,7 +18,7 @@ import {
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
-import * as api from '../index';
+import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 

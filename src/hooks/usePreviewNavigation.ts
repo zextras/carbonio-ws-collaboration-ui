@@ -6,7 +6,6 @@
 
 import { useCallback } from 'react';
 
-import { getRoomAttachments } from '../network';
 import {
 	getMediaGalleryAttachments,
 	getMediaGalleryFilter,
@@ -15,6 +14,7 @@ import {
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { getRoomAttachments } from 'wsc-shared';
 
 export const PREVIEW_NAVIGATION_PAGE_SIZE = 20;
 const CHAT_ANCHOR_BUFFER_MS = 24 * 60 * 60 * 1000;

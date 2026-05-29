@@ -8,11 +8,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import CopyRoomWidget from './CopyRoomWidget';
-import * as api from '../../network/apis/RoomsApi';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/network/models/roomBeTypes';
+import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 const sessionMember = createMockMember({ userId: sessionUser.id, owner: true });

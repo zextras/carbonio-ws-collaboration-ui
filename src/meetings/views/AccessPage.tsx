@@ -10,8 +10,8 @@ import { useAuthenticated } from '@zextras/carbonio-shell-ui';
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting from '../../hooks/useRouting';
-import { getScheduledMeetingName } from '../../network';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
+import { getScheduledMeetingName } from 'wsc-shared';
 
 const AccessPage = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);

@@ -13,9 +13,8 @@ import { useTranslation } from 'react-i18next';
 import useEventListener from './useEventListener';
 import usePiPWindow from './usePipWindow';
 import useRouting from './useRouting';
-import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
-import { getMeetingByMeetingId, leaveMeeting } from '../network';
 import useTiles from './useTiles';
+import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import {
 	getMeetingActiveByMeetingId,
 	getMeetingParticipants
@@ -23,7 +22,7 @@ import {
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, getMeetingByMeetingId, leaveMeeting } from 'wsc-shared';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();

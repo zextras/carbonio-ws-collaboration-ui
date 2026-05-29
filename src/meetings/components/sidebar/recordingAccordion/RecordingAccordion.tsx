@@ -24,12 +24,12 @@ import { useTranslation } from 'react-i18next';
 import RecordingTimer from './RecordingTimer';
 import StartRecordingUser from './StartRecordingUser';
 import StopRecordingModal from './StopRecordingModal';
-import { startRecording } from '../../../../network';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
+import { startRecording } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

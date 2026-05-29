@@ -11,7 +11,7 @@
 		"deploy:local": "sdk deploy --container ${CONTAINER:-carbonio-advanced-carbonio-composed-ui-1}",
 		"sdk-install": "sdk install",
 		"start": "sdk watch",
-		"test": "vitest run && pnpm run test:shared",
+		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",

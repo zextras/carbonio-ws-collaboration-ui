@@ -8,9 +8,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
-import * as api from '../../../network/apis/MeetingsApi';
 import { setup } from '../../../tests/test-utils';
 import * as UserMediaManager from '../../../utils/UserMediaManager';
+import * as api from 'wsc-shared';
 
 const videoOff = 'icon: VideoOff';
 

@@ -9,11 +9,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MuteConversationAction from './MuteConversationAction';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import * as api from 'wsc-shared';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

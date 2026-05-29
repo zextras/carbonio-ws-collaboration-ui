@@ -8,7 +8,6 @@ import React, { createRef } from 'react';
 import { screen, within } from '@testing-library/react';
 
 import EditVirtualRoomModal from './EditVirtualRoomModal';
-import * as api from '../../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../../store/Store';
 import {
@@ -21,6 +20,7 @@ import {
 import { setup } from '../../../../../tests/test-utils';
 import { RoomType } from '../../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../../types/network/soap/searchUsersByFeatureRequest';
+import * as api from 'wsc-shared';
 
 const user1: ContactInfo = {
 	email: 'user1@test.com',

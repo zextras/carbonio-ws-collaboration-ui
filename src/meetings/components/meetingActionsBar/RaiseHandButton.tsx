@@ -8,7 +8,6 @@ import React, { ReactElement, useCallback, useContext, useEffect, useRef } from 
 import { Button, CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { raiseHand } from '../../../network';
 import {
 	getUserHasHandRaised,
 	getUserIsTalking
@@ -16,6 +15,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { RouterContext } from '../../contexts/routerContext';
+import { raiseHand } from 'wsc-shared';
 
 const RaiseHandButton = (): ReactElement | null => {
 	const [t] = useTranslation();

@@ -8,7 +8,6 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
@@ -29,6 +28,7 @@ import {
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
+import { replacePlaceholderRoom } from 'wsc-shared';
 
 const jabberData = 'jabber:x:data';
 

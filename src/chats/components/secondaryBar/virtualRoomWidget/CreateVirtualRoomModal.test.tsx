@@ -10,13 +10,13 @@ import { screen } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
-import * as api from '../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
+import * as api from 'wsc-shared';
 
 const virtualRoomName = 'New Virtual Room';
 const virtualRoomNamePlaceholder = 'Virtual Room’s name*';

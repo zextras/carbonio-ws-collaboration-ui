@@ -10,7 +10,6 @@ import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
 import { mockGoToInfoPage } from '../../hooks/__mocks__/useRouting';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockAttributesList,
@@ -29,6 +28,7 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { mockInitialize } from '../components/virtualBackground/__mocks__/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
+import * as api from 'wsc-shared';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 

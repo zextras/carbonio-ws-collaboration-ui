@@ -14,7 +14,7 @@ import useStore from '../../store/Store';
 import { buildPingStanza } from '../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import * as api from '../apis/RoomsApi';
+import * as api from 'wsc-shared';
 
 const getStanzaFromSpy = (spy: Mock, callIndex = 0): Element =>
 	spy.mock.calls[callIndex][0].elem.tree();

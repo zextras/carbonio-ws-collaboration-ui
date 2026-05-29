@@ -7,13 +7,14 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 import usePreviewNavigation, { PREVIEW_NAVIGATION_PAGE_SIZE } from './usePreviewNavigation';
-import { getRoomAttachments } from '../network';
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 import { DEFAULT_MEDIA_GALLERY_FILTER } from '../types/store/MediaGalleryTypes';
+import { getRoomAttachments } from 'wsc-shared';
 
-vi.mock('../network/apis/RoomsApi', () => ({
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal<typeof import('wsc-shared')>()),
 	getRoomAttachments: vi.fn()
 }));
 

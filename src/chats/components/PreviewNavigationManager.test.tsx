@@ -22,7 +22,8 @@ import { Attachment } from '../../types/network/models/attachmentTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from 'wsc-shared';
 
-vi.mock('../../network/apis/RoomsApi', () => ({
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal<typeof import('wsc-shared')>()),
 	getRoomAttachments: vi.fn(),
 	bulkDeleteRoomAttachments: vi.fn()
 }));

@@ -15,12 +15,12 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { updateRoom } from '../../../../network';
 import {
 	getRoomDescriptionSelector,
 	getRoomNameSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { updateRoom } from 'wsc-shared';
 
 type EditConversationProps = {
 	roomId: string;

@@ -11,13 +11,13 @@ import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
 import { wsClient } from '../../../../network/websocket/WebSocketClient';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
+import { createGuestAccount, getScheduledMeetingName } from 'wsc-shared';
 
 const useExternalAccess = (): {
 	meetingName: string;

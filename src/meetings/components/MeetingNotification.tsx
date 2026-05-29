@@ -14,11 +14,11 @@ import { gte } from 'semver';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import { declineMeeting } from '../../network';
 import { xmppClient } from '../../network/xmpp/XMPPClient';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
+import { declineMeeting } from 'wsc-shared';
 
 const NotificationContainer = styled(Container)`
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
