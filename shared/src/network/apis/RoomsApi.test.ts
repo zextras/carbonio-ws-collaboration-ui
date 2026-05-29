@@ -51,8 +51,6 @@ const applicationPdf = 'application/pdf';
 const roomId = 'roomId';
 const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-vi.mock('../../utils/FetchUtils');
-
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
 		// Send listRooms request

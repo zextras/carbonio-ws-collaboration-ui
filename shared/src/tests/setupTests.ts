@@ -59,8 +59,14 @@ beforeAll(() => {
 				document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 			},
 		},
-		xmppClient: {},
-		HistoryAccumulator: {}
+		xmppClient: {
+			readMessage: vi.fn(),
+			requestMessageToForward: vi.fn()
+		},
+		HistoryAccumulator: {
+			getNextId: vi.fn(),
+			getForwardedMessage: vi.fn()
+		}
 	});
 });
 
