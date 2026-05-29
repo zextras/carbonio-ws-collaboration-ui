@@ -12,14 +12,14 @@ import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
-import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
 import * as api from 'wsc-shared';
-import { RoomOwnerDemotedEvent, RoomOwnerPromotedEvent, WsEventType } from "wsc-shared";
+import { EventName, RoomOwnerDemotedEvent, RoomOwnerPromotedEvent, WsEventType } from 'wsc-shared';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -159,12 +159,15 @@ describe('Conversation view', () => {
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			act(() => {
 				useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);
-				wsEventsHandler({
-					type: WsEventType.ROOM_OWNER_PROMOTED,
-					sentDate: new Date().toISOString(),
-					roomId: testRoom.id,
-					userId: user1Info.id
-				} as RoomOwnerPromotedEvent);
+				sendCustomEvent({
+					name: EventName.MEMBER_PROMOTED,
+					data: {
+						type: WsEventType.ROOM_OWNER_PROMOTED,
+						sentDate: new Date().toISOString(),
+						roomId: testRoom.id,
+						userId: user1Info.id
+					} as RoomOwnerPromotedEvent
+				});
 			});
 			await user.click(screen.getByText('Members'));
 			const crownCounter = await screen.findAllByTestId('icon: Crown');
@@ -179,12 +182,15 @@ describe('Conversation view', () => {
 			setup(<Conversation roomId={testRoom2.id} />);
 			act(() => {
 				useStore.getState().setMemberModeratorStatus(testRoom2.id, user1Info.id, false);
-				wsEventsHandler({
-					type: WsEventType.ROOM_OWNER_DEMOTED,
-					sentDate: new Date().toISOString(),
-					roomId: testRoom2.id,
-					userId: user1Info.id
-				} as RoomOwnerDemotedEvent);
+				sendCustomEvent({
+					name: EventName.MEMBER_DEMOTED,
+					data: {
+						type: WsEventType.ROOM_OWNER_DEMOTED,
+						sentDate: new Date().toISOString(),
+						roomId: testRoom2.id,
+						userId: user1Info.id
+					} as RoomOwnerDemotedEvent
+				});
 			});
 			const snackbar = await screen.findByText(
 				`You are no longer a moderator of ${testRoom2.name} group.`

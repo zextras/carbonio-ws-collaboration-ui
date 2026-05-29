@@ -9,7 +9,7 @@ import { filter, find, reduce, size, some } from 'lodash';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 export const getMeeting = (store: RootStore, meetingId: string): Meeting | undefined =>
 	store.meetings[meetingId];

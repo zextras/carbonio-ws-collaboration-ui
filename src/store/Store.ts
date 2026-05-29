@@ -7,8 +7,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { RootStore } from '../types/store/StoreTypes';
 import {
+	RootStore,
 	useActiveConversationsSlice,
 	useConnectionsStoreSlice,
 	useSessionStoreSlice,

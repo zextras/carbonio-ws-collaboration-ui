@@ -21,7 +21,6 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -55,7 +54,7 @@ const centralTileScreen: TileData = {
 };
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);

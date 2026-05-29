@@ -5,7 +5,7 @@
  */
 
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 export const getPreviewNavigationActive = (store: RootStore): PreviewNavigationSession | null =>
 	store.previewNavigation.active;

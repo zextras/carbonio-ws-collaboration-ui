@@ -12,8 +12,8 @@ import { concat, find, forEach, indexOf, last, map, min, range, split, without }
 // import raiseHandSound from '../meetings/assets/raiseHand.mp3';
 // import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 // import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
+import { CARBONIO_PATH, MEETINGS_PATH } from '../constants';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
-import { CARBONIO_PATH, MEETINGS_PATH } from "../constants";
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',

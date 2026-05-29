@@ -12,7 +12,7 @@ import {
 	ReferenceMessage
 } from '../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 export const getReferenceMessage = (
 	store: RootStore,

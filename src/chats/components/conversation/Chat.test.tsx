@@ -29,7 +29,6 @@ import {
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
-import { RootStore } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const mockedRoom: RoomBe = createMockRoom({
@@ -380,7 +379,7 @@ describe('Chat', () => {
 				date: dateToTimestamp(now())
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 			store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 
@@ -421,7 +420,7 @@ describe('Chat', () => {
 					edited: true
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
@@ -454,7 +453,7 @@ describe('Chat', () => {
 					date: dateToTimestamp(now())
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
@@ -505,7 +504,7 @@ describe('Chat', () => {
 					editedStanzaId: 'editedStanzaId1'
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedEditedMessage);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
@@ -573,7 +572,7 @@ describe('Chat', () => {
 					}
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMsgWithAttachment);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 

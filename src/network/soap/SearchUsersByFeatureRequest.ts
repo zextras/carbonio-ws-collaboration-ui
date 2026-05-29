@@ -7,12 +7,12 @@
 import { soapFetchV2 } from '@zextras/carbonio-ui-soap-lib';
 import { find, map, remove } from 'lodash';
 
+import useStore from '../../store/Store';
 import {
 	SearchUsersByFeatureRequest,
 	SearchUsersByFeatureResponseType,
 	SearchUsersByFeatureSoapResponse
 } from '../../types/network/soap/searchUsersByFeatureRequest';
-import { isMyId } from '../websocket/eventHandlersUtilities';
 
 export const searchUsersByFeatureRequest = (
 	text: string,
@@ -43,6 +43,6 @@ export const searchUsersByFeatureRequest = (
 					email: email ?? user.name
 				};
 			});
-			remove(results, (user) => isMyId(user.id));
+			remove(results, (user) => user.id === useStore.getState().session.id);
 			return { contacts: results, more: response.more, total: response.total };
 		});

@@ -18,7 +18,6 @@ import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../../types/store/StoreTypes';
 
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
@@ -277,7 +276,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('Forward mode is turned on', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
@@ -297,7 +296,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		]);
 	});
 	test('Edit a message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
@@ -315,7 +314,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(storeUpdated.activeConversations[mockedRoom.id].referenceMessage).toBeDefined();
 	});
 	test('Copy a message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
 			wrapper: ProvidersWrapper

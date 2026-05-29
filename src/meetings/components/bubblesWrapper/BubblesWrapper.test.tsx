@@ -29,8 +29,7 @@ import {
 } from '../../../types/store/ActiveMeetingTypes';
 import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
-import { EventName } from 'wsc-shared';
+import { RootStore, EventName } from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -66,7 +65,7 @@ const message = createMockTextMessage({
 });
 
 const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);

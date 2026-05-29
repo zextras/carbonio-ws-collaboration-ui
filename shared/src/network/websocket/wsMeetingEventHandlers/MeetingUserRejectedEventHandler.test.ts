@@ -5,6 +5,7 @@
  */
 
 import { meetingUserRejectedEventHandler } from './MeetingUserRejectedEventHandler';
+import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import useStore from '../../../tests/testStore';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -12,7 +13,6 @@ import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingUserRejectedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { EventName } from 'wsc-shared';
-import { CHATS_ROUTE, MEETINGS_PATH } from "../../../constants";
 
 const room = createMockRoom({ type: RoomType.TEMPORARY });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });

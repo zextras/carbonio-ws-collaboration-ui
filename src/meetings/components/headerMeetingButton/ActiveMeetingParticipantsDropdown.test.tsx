@@ -23,7 +23,6 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -48,7 +47,7 @@ const meeting: MeetingBe = createMockMeeting({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);
@@ -80,7 +79,7 @@ describe('ActiveMeetingParticipantsDropdown tests', () => {
 
 	test('Close dropdown when there are no participants', async () => {
 		setup(<ConversationHeaderMeetingButton roomId={room.id} />);
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		act(() => {
 			store.removeParticipant(meeting.id, user1.id);
 			store.removeParticipant(meeting.id, user2.id);

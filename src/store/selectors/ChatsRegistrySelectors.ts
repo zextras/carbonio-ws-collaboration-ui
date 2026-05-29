@@ -16,8 +16,8 @@ import {
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../types/store/StoreTypes';
 import { datesAreFromTheSameDay } from '../../utils/dateUtils';
+import { RootStore } from 'wsc-shared';
 
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 

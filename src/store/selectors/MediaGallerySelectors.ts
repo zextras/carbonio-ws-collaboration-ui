@@ -9,7 +9,7 @@ import {
 	DEFAULT_MEDIA_GALLERY_FILTER,
 	MediaGalleryFilter
 } from '../../types/store/MediaGalleryTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 export const getMediaGalleryAttachments = (store: RootStore, roomId: string): Array<Attachment> =>
 	store.mediaGallery[roomId]?.attachments ?? [];

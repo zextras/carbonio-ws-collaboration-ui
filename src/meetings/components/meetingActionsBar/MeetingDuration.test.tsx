@@ -13,7 +13,6 @@ import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const room: RoomBe = createMockRoom();
 
@@ -22,7 +21,7 @@ const meeting: MeetingBe = createMockMeeting({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');

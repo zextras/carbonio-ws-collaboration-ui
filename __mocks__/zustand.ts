@@ -7,9 +7,9 @@
 import { act, cleanup } from '@testing-library/react';
 import { StateCreator, StoreApi, UseBoundStore, create as actualCreate } from 'zustand';
 
-import useStore from '../src/store/Store';
-import { RootStore } from '../src/types/store/StoreTypes';
+
 import { xmppClient } from "../src/network/xmpp/XMPPClient";
+import { RootStore } from "wsc-shared";
 
 // a variable to hold reset functions for all stores declared in the app
 const storeResetFns = new Set<() => void>();

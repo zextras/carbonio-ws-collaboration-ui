@@ -17,9 +17,7 @@ import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meet
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
-import { wsEventsHandler } from '../websocket/wsEventsHandler';
 import * as api from 'wsc-shared';
-import { MeetingMediaStreamChangedEvent, WsEventType } from "wsc-shared";
 
 const user1Info: User = createMockUser({
 	id: 'user1',
@@ -197,13 +195,7 @@ describe('Test SubscriptionsManager', () => {
 			{ userId: 'user2', type: STREAM_TYPE.SCREEN }
 		];
 
-		wsEventsHandler({
-			type: WsEventType.MEETING_MEDIA_STREAM_CHANGED,
-			userId: 'user5',
-			meetingId: groupMeeting.id,
-			mediaType: STREAM_TYPE.VIDEO,
-			active: true
-		} as MeetingMediaStreamChangedEvent);
+		useStore.getState().changeStreamStatus(groupMeeting.id, 'user5', STREAM_TYPE.VIDEO, true);
 
 		subscriptionsManager.addSubscription({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 

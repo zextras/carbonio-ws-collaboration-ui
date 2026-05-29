@@ -9,6 +9,7 @@ import React from 'react';
 import { act, fireEvent, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
+import ConversationFooter from './ConversationFooter';
 import useStore from '../../../../store/Store';
 import {
 	createMockFile,
@@ -21,9 +22,8 @@ import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import Chat from '../Chat';
-import ConversationFooter from './ConversationFooter';
+import { RootStore } from 'wsc-shared';
 
 const add1Attachment = 'Add 1 attachment';
 const add2Attachments = 'Add 2 attachments';

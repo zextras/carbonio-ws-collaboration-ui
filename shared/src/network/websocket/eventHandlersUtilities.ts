@@ -67,7 +67,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 	}
 };
 
-export const isMyId = (userId: string): boolean => userId === sharedConfig.useStore.getState().session.id;
+export const isMyId = (userId: string): boolean =>
+	userId === sharedConfig.useStore.getState().session.id;
 
 export const isMeetingActive = (meetingId: string): boolean =>
 	sharedConfig.useStore.getState().activeMeeting?.meetingId === meetingId;

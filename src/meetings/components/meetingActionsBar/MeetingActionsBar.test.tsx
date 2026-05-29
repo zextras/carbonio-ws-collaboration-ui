@@ -23,7 +23,6 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -50,7 +49,7 @@ const meeting: MeetingBe = createMockMeeting({
 const streamRef = React.createRef<HTMLDivElement>();
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);

@@ -10,7 +10,6 @@ import { act, screen } from '@testing-library/react';
 
 import RaiseHandAccordion from './RaiseHandAccordion';
 import { sendCustomEvent } from '../../../../hooks/useEventListener';
-import { wsEventsHandler } from '../../../../network/websocket/wsEventsHandler';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -23,7 +22,7 @@ import { MeetingBe, MeetingType } from '../../../../types/network/models/meeting
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { EventName, WsEventType } from "wsc-shared";
+import { EventName, WsEventType } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
@@ -97,12 +96,16 @@ describe('Snackbar notifications', () => {
 	test('shows snackbar when another user raises hand', () => {
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {
-			wsEventsHandler({
-				type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
-				userId: user2.id,
-				sentDate: new Date().toISOString(),
-				meetingId: meeting.id,
-				raised: true
+			useStore.getState().setUserWithHandRaised(user2.id, true);
+			sendCustomEvent({
+				name: EventName.MEETING_PARTICIPANT_RAISE_HAND,
+				data: {
+					type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
+					userId: user2.id,
+					sentDate: new Date().toISOString(),
+					meetingId: meeting.id,
+					raised: true
+				}
 			});
 		});
 		expect(screen.getByText(/Someone raised his hand/i)).toBeInTheDocument();
@@ -134,24 +137,32 @@ describe('Snackbar notifications', () => {
 	test('closes snackbar when hand is lowered', () => {
 		setup(<RaiseHandAccordion meetingId={meeting.id} />);
 		act(() => {
-			wsEventsHandler({
-				type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
-				userId: user2.id,
-				sentDate: new Date().toISOString(),
-				meetingId: meeting.id,
-				raised: true
+			useStore.getState().setUserWithHandRaised(user2.id, true);
+			sendCustomEvent({
+				name: EventName.MEETING_PARTICIPANT_RAISE_HAND,
+				data: {
+					type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
+					userId: user2.id,
+					sentDate: new Date().toISOString(),
+					meetingId: meeting.id,
+					raised: true
+				}
 			});
 		});
 
 		expect(screen.getByText(/Someone raised his hand/i)).toBeInTheDocument();
 
 		act(() => {
-			wsEventsHandler({
-				type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
-				userId: user2.id,
-				sentDate: new Date().toISOString(),
-				meetingId: meeting.id,
-				raised: false
+			useStore.getState().setUserWithHandRaised(user2.id, false);
+			sendCustomEvent({
+				name: EventName.MEETING_PARTICIPANT_RAISE_HAND,
+				data: {
+					type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
+					userId: user2.id,
+					sentDate: new Date().toISOString(),
+					meetingId: meeting.id,
+					raised: false
+				}
 			});
 		});
 		expect(screen.queryByText(/Someone raised his hand/i)).not.toBeInTheDocument();

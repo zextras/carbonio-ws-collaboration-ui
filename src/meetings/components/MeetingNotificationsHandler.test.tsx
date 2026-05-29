@@ -16,7 +16,13 @@ import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { EventName, MeetingJoinedEvent, MeetingStartedEvent, WsEvent, WsEventType } from "wsc-shared";
+import {
+	EventName,
+	MeetingJoinedEvent,
+	MeetingStartedEvent,
+	WsEvent,
+	WsEventType
+} from 'wsc-shared';
 
 const declineAll = 'Decline all';
 

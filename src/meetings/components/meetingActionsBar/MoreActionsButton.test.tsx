@@ -29,8 +29,8 @@ import {
 } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 import { PiPContext } from '../pictureInPicture/PictureInPictureProvider';
+import { RootStore } from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });

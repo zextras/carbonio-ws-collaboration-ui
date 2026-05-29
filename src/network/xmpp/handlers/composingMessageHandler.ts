@@ -7,9 +7,9 @@
 import { debounce } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { RootStore } from '../../../types/store/StoreTypes';
 import { getId, getResource } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
+import { RootStore } from 'wsc-shared';
 
 /**
  * CHAT STATE EVENTS (XEP-0085)
@@ -28,7 +28,7 @@ export function onComposingMessageStanza(message: Element): true {
 	const from = getId(resource);
 	const composing = message.getElementsByTagName('composing')[0];
 	const stopComposing = message.getElementsByTagName('paused')[0];
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 
 	// Ignore my own messages of writing status
 	if (store.session.id !== from) {

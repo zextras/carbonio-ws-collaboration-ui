@@ -23,7 +23,7 @@ import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 const iconVideoOffOutline = 'icon: VideoOffOutline';
 const iconMicOffOutline = 'icon: MicOffOutline';
@@ -49,7 +49,7 @@ const meeting: MeetingBe = createMockMeeting({
 const streamRef = React.createRef<HTMLVideoElement | null>();
 
 const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	const { user } = setup(
 		<Tile
 			userId={user1.id}
@@ -66,7 +66,7 @@ const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore 
 };
 
 const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	const { user } = setup(
 		<Tile
 			userId={user2.id}
@@ -83,7 +83,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 };
 
 const setupActiveMeeting = (): void => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.meetingConnection(meeting.id, { enabled: true, deviceId: 'audioId' });
 	store.setTalkingUser(user3.id, true);
 
@@ -102,7 +102,7 @@ const setupActiveMeeting = (): void => {
 };
 
 const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	const { user } = setup(
 		<Tile
 			userId={user3.id}
@@ -119,7 +119,7 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 };
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.addRooms([room]);
@@ -171,7 +171,7 @@ describe('Tile test - on meeting', () => {
 	});
 
 	test('My tile - audio and video on ', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.meetingConnection(meeting.id, { enabled: true });
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);

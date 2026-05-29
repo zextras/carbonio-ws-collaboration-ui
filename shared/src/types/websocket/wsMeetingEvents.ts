@@ -5,7 +5,7 @@
  */
 
 import { WsEventType } from './wsEvents';
-import { STREAM_TYPE } from "../store/ActiveMeetingTypes";
+import { STREAM_TYPE } from '../store/ActiveMeetingTypes';
 
 export type WsMeetingEvent =
 	| MeetingCreatedEvent

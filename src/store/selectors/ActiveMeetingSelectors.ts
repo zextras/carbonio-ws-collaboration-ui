@@ -15,7 +15,7 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 export const getActiveMeeting = (
 	store: RootStore,

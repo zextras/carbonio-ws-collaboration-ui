@@ -23,7 +23,7 @@ import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });

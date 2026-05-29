@@ -20,7 +20,6 @@ import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 const user2 = createMockUser({ id: 'user2', name: 'User 2' });
@@ -52,7 +51,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 
 describe('CinemaMode', () => {
 	test('It should display the CinemaMode component', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.addRooms([groupRoom]);
 		store.addMeetings([groupMeeting]);
 		store.meetingConnection(groupMeeting.id);

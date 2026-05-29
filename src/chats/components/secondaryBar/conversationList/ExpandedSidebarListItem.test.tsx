@@ -29,7 +29,6 @@ import {
 	MessageType,
 	OperationType
 } from '../../../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
 const iconDoneAll = 'icon: DoneAll';
@@ -214,7 +213,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('Added a new member message', () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedAddMemberMessage]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(
@@ -223,7 +222,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('Deleted image message', () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setLoginInfo({ id: user2Be.id, name: user2Be.name });
 			store.setInboxMessages([mockedConfigurationMessage]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -237,14 +236,14 @@ describe('Expanded sidebar list item', () => {
 
 	describe('One to One List Item', () => {
 		test('Other user sent a message', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedTextMessageSentByOther]);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			expect(screen.getByText(`${mockedTextMessageSentByOther.text}`)).toBeVisible();
 		});
 
 		test('when another user is typing, "is typing" message is rendered without an attachment icon', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedAttachmentMessage]);
 			store.setIsWriting(mockedOneToOne.id, user2Be.id, true);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
@@ -256,7 +255,7 @@ describe('Expanded sidebar list item', () => {
 
 	describe('Icon and message', () => {
 		test('draft message situation', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedTextMessageRead]);
 			const draftMessage = 'hi everyone!';
 			store.setDraftMessage(mockedGroup.id, draftMessage);
@@ -266,7 +265,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('draft message and unread messages', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setDraftMessage(mockedGroup.id, 'Hi!');
 			store.incrementUnreadCount(mockedGroup.id, 1);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -274,7 +273,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('should not render the attachment icon if there is a draft content and the last message is an attachment', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedAttachmentMessage]);
 			store.setDraftMessage(mockedGroup.id, 'draft');
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -282,7 +281,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('when another user is typing and there is a draft, "is typing" message is rendered without an draft icon', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedTextMessageRead]);
 			const draftMessage = 'hi everyone!';
 			store.setDraftMessage(mockedGroup.id, draftMessage);
@@ -295,7 +294,7 @@ describe('Expanded sidebar list item', () => {
 		});
 
 		test('when another user stops typing, after 7 seconds the last message sent is rendered', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setInboxMessages([mockedTextMessageSentByMeIntoGroup]);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {

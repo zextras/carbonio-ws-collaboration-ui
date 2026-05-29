@@ -5,6 +5,7 @@
  */
 
 import { meetingWaitingParticipantClashedEventHandler } from './MeetingWaitingParticipantClashedEventHandler';
+import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import {
 	createMockMeeting,
 	createMockParticipants,
@@ -16,7 +17,6 @@ import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingWaitingParticipantClashed } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { EventName } from 'wsc-shared';
-import { CHATS_ROUTE, MEETINGS_PATH } from "../../../constants";
 
 const room = createMockRoom({
 	type: RoomType.TEMPORARY,

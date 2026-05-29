@@ -21,9 +21,8 @@ import {
 import { getUserName } from './UsersSelectors';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
-import { RootStore } from '../../types/store/StoreTypes';
 import useStore from '../Store';
-import { getURLRoomPicture } from 'wsc-shared';
+import { RootStore, getURLRoomPicture } from 'wsc-shared';
 
 export const useRoomIdsList = (): string[] => {
 	const rooms = useStore((store) => store.rooms);

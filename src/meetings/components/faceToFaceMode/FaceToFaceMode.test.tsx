@@ -22,7 +22,7 @@ import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',

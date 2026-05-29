@@ -5,10 +5,10 @@
  */
 
 import { sharedConfig } from '../../../config';
+import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../constants';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { EventName } from 'wsc-shared';
-import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from "../../../constants";
 
 export const meetingParticipantHandRaisedHandler = (
 	event: MeetingParticipantHandRaisedEvent

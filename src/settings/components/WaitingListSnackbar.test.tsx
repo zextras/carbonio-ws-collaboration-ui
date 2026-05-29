@@ -14,9 +14,8 @@ import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { EventName } from 'wsc-shared';
+import { EventName, WsEventType } from 'wsc-shared';
 
 const user = createMockUser({ id: 'userId', name: 'User' });
 const user0 = createMockUser({ id: 'userId0', name: 'User' });

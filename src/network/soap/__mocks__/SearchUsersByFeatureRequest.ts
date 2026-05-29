@@ -6,17 +6,17 @@
 import mockLodash from 'lodash';
 import type { Mock } from 'vitest';
 
+import useStore from '../../../store/Store';
 import {
 	ContactInfo,
 	SearchUsersByFeatureSoapResponse
 } from '../../../types/network/soap/searchUsersByFeatureRequest';
-import { isMyId } from '../../websocket/eventHandlersUtilities';
 
 export const mockSearchUsersByFeatureRequest: Mock = vi.fn();
 
 export const searchUsersByFeatureRequest: () => Promise<SearchUsersByFeatureSoapResponse> = () =>
 	new Promise((resolve, reject) => {
 		const result = mockSearchUsersByFeatureRequest();
-		mockLodash.remove(result, (user: ContactInfo) => isMyId(user.id));
+		mockLodash.remove(result, (user: ContactInfo) => user.id === useStore.getState().session.id);
 		result ? resolve(result) : reject(new Error('No results'));
 	});

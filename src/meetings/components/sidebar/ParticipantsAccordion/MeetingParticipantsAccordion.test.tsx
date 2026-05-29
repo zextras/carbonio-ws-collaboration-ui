@@ -25,7 +25,7 @@ import { UserBe } from '../../../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
+import { RootStore } from 'wsc-shared';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -44,7 +44,7 @@ const user2Participant: MeetingParticipant = createMockParticipants({
 
 // setup of the store when I'm a moderator
 const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 
 	const room: RoomBe = createMockRoom({
 		name: '',
@@ -70,7 +70,7 @@ const storeSetupParticipantModerator = (): {
 	user: UserEvent;
 	store: RootStore;
 } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 
 	const room: RoomBe = createMockRoom({
 		name: '',

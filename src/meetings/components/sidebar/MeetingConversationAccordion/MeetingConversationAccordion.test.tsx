@@ -26,9 +26,9 @@ import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { OperationType } from '../../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
 import MeetingSidebar from '../MeetingSidebar';
+import { RootStore } from 'wsc-shared';
 
 const heightRem = 'height: 2.75rem';
 const heightPercentage = 'height: 100%';

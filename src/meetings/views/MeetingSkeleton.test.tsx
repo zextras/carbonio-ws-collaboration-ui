@@ -25,9 +25,9 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { RootStore } from '../../types/store/StoreTypes';
 import { mockInitialize } from '../components/virtualBackground/__mocks__/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
+import { RootStore } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const meetingActionBarLabel = 'meeting-action-bar';
