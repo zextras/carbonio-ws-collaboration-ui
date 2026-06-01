@@ -5,8 +5,19 @@
  */
 
 import { searchUsersByFeatureRequest } from './SearchUsersByFeatureRequest';
-import { mockSoapFetchV2 } from '../../../__mocks__/@zextras/carbonio-ui-soap-lib';
-import useStore from '../../store/Store';
+import useStore from '../../tests/testStore';
+
+const mockSoapFetchV2 = vi.hoisted(() => vi.fn());
+
+vi.mock('@zextras/carbonio-ui-soap-lib', () => ({
+	soapFetchV2: (): Promise<unknown> =>
+		new Promise((resolve, reject) => {
+			const result = mockSoapFetchV2();
+			result
+				? resolve({ Body: result, Header: { context: {} } })
+				: reject(new Error('no result provided'));
+		})
+}));
 
 const contact1Match = {
 	a: [
@@ -52,8 +63,6 @@ const contact3Info = {
 	displayName: contact3Match.a[0]._content,
 	email: contact3Match.a[1]._content
 };
-
-vi.mock('@zextras/carbonio-ui-soap-lib');
 
 describe('SearchUsersByFeatureRequest', () => {
 	test('Contact info wll be formatted as ContactInfo type', async () => {

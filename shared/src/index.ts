@@ -35,3 +35,6 @@ export * from './network';
 // Utils
 export * from './utils/textUtils';
 export * from './utils/MeetingsUtils';
+
+// Network types
+export * from './types/network/soap/searchUsersByFeatureRequest';

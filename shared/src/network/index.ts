@@ -10,3 +10,4 @@ export * from './apis/MeetingsApi';
 export * from './apis/AttachmentsApi';
 
 export * from './websocket/WebSocketClient';
+export * from './soap/SearchUsersByFeatureRequest';
