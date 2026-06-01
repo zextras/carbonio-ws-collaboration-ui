@@ -20,14 +20,10 @@ import { debounce, differenceWith, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import GalListItem from './GalListItem';
-import { searchUsersByFeatureRequest } from '../../../../network/soap/SearchUsersByFeatureRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import {
-	ContactInfo,
-	SearchUsersByFeatureSoapResponse
-} from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { SecondaryBarInfoText } from '../SecondaryBarView';
+import { ContactInfo, searchUsersByFeatureRequest } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -73,7 +69,7 @@ const useFilteredGal = (
 				setRequestStatus('loading');
 				setHasMore(false);
 				searchUsersByFeatureRequest(text)
-					.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+					.then(({ contacts, more }) => {
 						setRequestStatus('success');
 						setFilteredGal(contacts);
 						setHasMore(more);
@@ -90,7 +86,7 @@ const useFilteredGal = (
 	const loadMoreContacts = useCallback(() => {
 		setHasMore(false);
 		searchUsersByFeatureRequest(input ?? '', filteredGal.length)
-			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+			.then(({ contacts, more }) => {
 				setFilteredGal((prevResults) => union(prevResults, contacts));
 				setHasMore(more);
 			})

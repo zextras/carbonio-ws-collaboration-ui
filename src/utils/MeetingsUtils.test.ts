@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MeetingSoundFeedback } from 'wsc-shared';
-
 import {
 	createMeetingLinkFromOutside,
 	findAllPossiblePairs,
@@ -17,6 +15,7 @@ import {
 } from './MeetingsUtils';
 import { mockPlayAudio } from '../tests/setupTests';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
+import { MeetingSoundFeedback } from 'wsc-shared';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {

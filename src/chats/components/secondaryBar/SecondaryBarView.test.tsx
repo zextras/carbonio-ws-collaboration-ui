@@ -9,7 +9,6 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
-import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,7 +19,7 @@ import {
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
+import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';
@@ -111,7 +110,13 @@ const contactUser1: ContactInfo = {
 	email: user1Be.email
 };
 
-vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+const mockSearchUsersByFeatureRequest = vi.hoisted(() => vi.fn());
+
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal()),
+	searchUsersByFeatureRequest: (...args: unknown[]): Promise<SearchUsersByFeatureSoapResponse> =>
+		Promise.resolve(mockSearchUsersByFeatureRequest(...args))
+}));
 
 beforeEach(() => {
 	const store = useStore.getState();

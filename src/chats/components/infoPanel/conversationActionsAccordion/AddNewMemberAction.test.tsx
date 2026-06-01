@@ -9,7 +9,6 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
-import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -18,8 +17,8 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { User } from '../../../../types/store/UserTypes';
+import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const user1: ContactInfo = {
@@ -51,7 +50,12 @@ const mockedRoom = createMockRoom({
 	]
 });
 
-vi.mock('../../../../network/soap/SearchUsersByFeatureRequest');
+const mockSearchUsersByFeatureRequest = vi.hoisted(() => vi.fn());
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal()),
+	searchUsersByFeatureRequest: (...args: unknown[]): Promise<SearchUsersByFeatureSoapResponse> =>
+		Promise.resolve(mockSearchUsersByFeatureRequest(...args))
+}));
 
 beforeEach(() => {
 	const store = useStore.getState();
