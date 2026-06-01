@@ -4,17 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { UseBoundStore, StoreApi } from 'zustand';
+
 import { EventName, EventPayloads } from './types/AppEvents';
 import { RequestType } from './types/network/fetch';
 import { AdditionalHeaders } from './types/network/models/attachmentTypes';
 import { MeetingSoundFeedback } from './utils/MeetingsUtils';
+import type { RootStore } from './types/store/StoreTypes';
 
 export interface ISharedCodeDependencies {
 	BidirectionalConnectionAudioInOut: any;
 	VideoScreenInConnection: any;
 	VideoOutConnection: any;
 	ScreenOutConnection: any;
-	useStore: any;
+	useStore: UseBoundStore<StoreApi<RootStore>>;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
 	fetchAPI: <T>(
 		endpoint: string,

@@ -11,9 +11,8 @@ import { screen } from '@testing-library/react';
 import GalListItem from './GalListItem';
 import useStore from '../../../../store/Store';
 import { setup } from '../../../../tests/test-utils';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
-const contact: ContactInfo = {
+const contact = {
 	email: 'contact@test.com',
 	displayName: 'Contact Test',
 	id: '1234567890'
