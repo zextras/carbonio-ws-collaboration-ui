@@ -11,6 +11,7 @@ import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 import { MEETINGS_PATH } from './constants/appConstants';
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
+import displayWaitingListNotification from './meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import BidirectionalConnectionAudioInOut from './network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from './network/webRTC/ScreenOutConnection';
 import VideoOutConnection from './network/webRTC/VideoOutConnection';
@@ -20,6 +21,7 @@ import { xmppClient } from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
 import { BrowserUtils } from './utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
+import { sendAudioFeedback } from './utils/MeetingsUtils';
 import { configureSharedCode, getLicense } from 'wsc-shared';
 
 configureSharedCode({
@@ -34,7 +36,9 @@ configureSharedCode({
 	uploadFileFetchAPI,
 	BrowserUtils,
 	xmppClient,
-	HistoryAccumulator
+	HistoryAccumulator,
+	sendAudioFeedback,
+	displayWaitingListNotification
 });
 
 const UnlicensedApp = (): null => {

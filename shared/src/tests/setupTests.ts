@@ -50,6 +50,7 @@ Object.defineProperty(global, 'Audio', {
 export const mockFetchAPI = vi.fn();
 export const mockSendFileFetchAPI = vi.fn();
 export const mockUploadFileFetchAPI = vi.fn();
+export const mockDisplayWaitingListNotification = vi.fn();
 
 beforeAll(() => {
 	configureSharedCode({
@@ -118,7 +119,9 @@ beforeAll(() => {
 		HistoryAccumulator: {
 			getNextId: vi.fn(),
 			getForwardedMessage: vi.fn()
-		}
+		},
+		sendAudioFeedback: mockPlayAudio,
+		displayWaitingListNotification: mockDisplayWaitingListNotification
 	});
 });
 

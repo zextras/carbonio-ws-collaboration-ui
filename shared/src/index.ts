@@ -34,3 +34,4 @@ export * from './network';
 
 // Utils
 export * from './utils/textUtils';
+export * from './utils/MeetingsUtils';

@@ -6,12 +6,6 @@
 
 import { concat, find, forEach, indexOf, last, map, min, range, split, without } from 'lodash';
 
-// import audioOff from '../meetings/assets/AudioOFF.mp3';
-// import audioOn from '../meetings/assets/AudioON.mp3';
-// import meetingIn from '../meetings/assets/MeetingIN.mp3';
-// import raiseHandSound from '../meetings/assets/raiseHand.mp3';
-// import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
-// import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
 import { CARBONIO_PATH, MEETINGS_PATH } from '../constants';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
@@ -23,25 +17,6 @@ export enum MeetingSoundFeedback {
 	NEW_WAITING_USER = 'newWaitingUser',
 	NEW_HAND_RAISED = 'newHandRaised'
 }
-
-const SOUND_MAP: Record<MeetingSoundFeedback, string> = {
-	// TODO
-	// [MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION]: meetingIn,
-	// [MeetingSoundFeedback.MEETING_AUDIO_ON]: audioOn,
-	// [MeetingSoundFeedback.MEETING_AUDIO_OFF]: audioOff,
-	// [MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION]: screenshareOn,
-	// [MeetingSoundFeedback.NEW_WAITING_USER]: waitingUserSound,
-	// [MeetingSoundFeedback.NEW_HAND_RAISED]: raiseHandSound
-};
-
-export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | undefined => {
-	const soundSrc = SOUND_MAP[type];
-	if (!soundSrc) return undefined;
-
-	const audio = new Audio(soundSrc);
-	audio.volume = 0.5;
-	return audio.play();
-};
 
 export const maximiseRowsAndColumns = (dimensions: Dimensions, tileWidth: number): Grid => {
 	// 1rem (16px) of gap between tiles

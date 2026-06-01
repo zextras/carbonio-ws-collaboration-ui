@@ -13,7 +13,8 @@ import {
 	LOCAL_STORAGE_NAMES,
 	NotificationsSettingsType
 } from '../../../../utils/localStorageUtils';
-import { MeetingSoundFeedback, sendAudioFeedback } from '../../../../utils/MeetingsUtils';
+import { sendAudioFeedback } from '../../../../utils/MeetingsUtils';
+import { MeetingSoundFeedback } from 'wsc-shared';
 
 const displayWaitingListNotification = (meetingId: string): void => {
 	const store = useStore.getState();

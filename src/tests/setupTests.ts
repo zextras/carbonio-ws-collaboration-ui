@@ -9,6 +9,7 @@ import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
+import displayWaitingListNotification from '../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import BidirectionalConnectionAudioInOut from '../network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from '../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../network/webRTC/VideoOutConnection';
@@ -18,6 +19,7 @@ import { xmppClient } from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 import { BrowserUtils } from '../utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
+import { sendAudioFeedback } from '../utils/MeetingsUtils';
 import { configureSharedCode } from 'wsc-shared';
 
 configure({
@@ -235,7 +237,9 @@ beforeAll(() => {
 		uploadFileFetchAPI,
 		BrowserUtils,
 		xmppClient,
-		HistoryAccumulator
+		HistoryAccumulator,
+		sendAudioFeedback,
+		displayWaitingListNotification
 	});
 });
 

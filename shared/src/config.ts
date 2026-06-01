@@ -7,6 +7,7 @@
 import { EventName, EventPayloads } from './types/AppEvents';
 import { RequestType } from './types/network/fetch';
 import { AdditionalHeaders } from './types/network/models/attachmentTypes';
+import { MeetingSoundFeedback } from './utils/MeetingsUtils';
 
 export interface ISharedCodeDependencies {
 	BidirectionalConnectionAudioInOut: any;
@@ -38,6 +39,8 @@ export interface ISharedCodeDependencies {
 	BrowserUtils: any;
 	xmppClient: any;
 	HistoryAccumulator: any;
+	sendAudioFeedback: (type: MeetingSoundFeedback) => void;
+	displayWaitingListNotification: (meetingId: string) => void;
 }
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;

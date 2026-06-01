@@ -10,26 +10,11 @@ import {
 	getMeetingIdFromLink,
 	maximiseRowsAndColumns,
 	maximiseTileSize,
-	MeetingSoundFeedback,
-	orderSpeakingTiles,
-	sendAudioFeedback
+	orderSpeakingTiles
 } from './MeetingsUtils';
-import { mockPlayAudio } from '../tests/setupTests';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 describe('MeetingsUtils', () => {
-	describe('Audio feedback', () => {
-		test('test return of meetingIn notification', () => {
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
-			sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
-
-			expect(mockPlayAudio).toHaveBeenCalledTimes(5);
-		});
-	});
-
 	describe('maximiseRowsAndColumns', () => {
 		test('950x500 - 600', () => {
 			const { rows, columns } = maximiseRowsAndColumns({ width: 950, height: 500 }, 600);

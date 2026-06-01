@@ -10,12 +10,12 @@ import { LARGE_MEETING_THRESHOLD } from '../../../constants';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
+import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 import { EventName } from 'wsc-shared';
 
 const playJoinNotification = throttle(
-	() => sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),
+	() => sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),
 	5000,
 	{ leading: true, trailing: false }
 );

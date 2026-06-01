@@ -7,7 +7,7 @@
 import { sharedConfig } from '../../../config';
 import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../constants';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
+import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { EventName } from 'wsc-shared';
 
 export const meetingParticipantHandRaisedHandler = (
@@ -21,7 +21,7 @@ export const meetingParticipantHandRaisedHandler = (
 			event.raised &&
 			activeMeeting.usersWithHandRaised.length < SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD
 		) {
-			sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);
+			sharedConfig.sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);
 		}
 	}
 };

@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MeetingSoundFeedback } from 'wsc-shared';
+
 import {
 	createMeetingLinkFromOutside,
 	findAllPossiblePairs,
 	getMeetingIdFromLink,
 	maximiseRowsAndColumns,
 	maximiseTileSize,
-	MeetingSoundFeedback,
 	orderSpeakingTiles,
 	sendAudioFeedback
 } from './MeetingsUtils';
