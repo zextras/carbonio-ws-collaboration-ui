@@ -17,7 +17,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {RoomType} from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';

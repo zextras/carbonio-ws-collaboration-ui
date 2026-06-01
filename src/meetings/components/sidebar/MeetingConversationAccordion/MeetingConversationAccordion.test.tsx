@@ -24,7 +24,7 @@ import {
 import { routerContextSetup } from '../../../../tests/test-utils';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
 import MeetingSidebar from '../MeetingSidebar';
-import {OperationType, RoomType, RootStore} from 'wsc-shared';
+import { OperationType, RoomType, RootStore } from 'wsc-shared';
 
 const heightRem = 'height: 2.75rem';
 const heightPercentage = 'height: 100%';

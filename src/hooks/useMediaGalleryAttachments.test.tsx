@@ -8,7 +8,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { MEDIA_GALLERY_PAGE_SIZE, useMediaGalleryAttachments } from './useMediaGalleryAttachments';
 import useStore from '../store/Store';
-import {Attachment, DEFAULT_MEDIA_GALLERY_FILTER, getRoomAttachments} from 'wsc-shared';
+import { Attachment, DEFAULT_MEDIA_GALLERY_FILTER, getRoomAttachments } from 'wsc-shared';
 
 vi.mock('wsc-shared', async (importOriginal) => ({
 	...(await importOriginal<typeof import('wsc-shared')>()),

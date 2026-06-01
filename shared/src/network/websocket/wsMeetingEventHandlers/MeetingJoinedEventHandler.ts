@@ -7,12 +7,12 @@ import { find, throttle } from 'lodash';
 
 import { sharedConfig } from '../../../config';
 import { LARGE_MEETING_THRESHOLD } from '../../../constants';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
-import { EventName } from '../../../types/AppEvents';
 
 const playJoinNotification = throttle(
 	() => sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),

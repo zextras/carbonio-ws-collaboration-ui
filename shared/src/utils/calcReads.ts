@@ -7,7 +7,7 @@
 import { find, forEach, size } from 'lodash';
 
 import { isBefore } from './dateUtils';
-import { sharedConfig } from "../config";
+import { sharedConfig } from '../config';
 import { Marker, MarkerStatus, Message, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { Member } from '../types/store/RoomTypes';
 

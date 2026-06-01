@@ -15,8 +15,8 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
-import {RoomType} from 'wsc-shared';
 import { formatDate } from '../../../utils/dateUtils';
+import { RoomType } from 'wsc-shared';
 
 const loggedUser = createMockUser({
 	id: 'user1',

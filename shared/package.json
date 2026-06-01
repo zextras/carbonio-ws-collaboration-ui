@@ -12,6 +12,7 @@
     "immer": "*",
     "lodash": "*",
     "semver": "*",
+    "strophe.js": "*",
     "uuid": "*",
     "zustand": "*"
   }

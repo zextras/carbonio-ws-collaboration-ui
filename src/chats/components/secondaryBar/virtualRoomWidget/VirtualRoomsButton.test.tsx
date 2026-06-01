@@ -16,7 +16,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import * as api from 'wsc-shared';
-import {MeetingType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
+import { MeetingType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 

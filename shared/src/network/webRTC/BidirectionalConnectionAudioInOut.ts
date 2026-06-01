@@ -11,7 +11,7 @@ import { PeerConnConfig } from './PeerConnConfig';
 import { sharedConfig } from '../../config';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from "../apis/MeetingsApi";
+import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;

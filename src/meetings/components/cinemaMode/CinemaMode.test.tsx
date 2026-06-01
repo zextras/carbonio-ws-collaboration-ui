@@ -17,7 +17,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { routerContextSetup } from '../../../tests/test-utils';
-import {RoomType} from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 const user2 = createMockUser({ id: 'user2', name: 'User 2' });

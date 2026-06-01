@@ -18,7 +18,12 @@ import PreviewNavigationManager from './PreviewNavigationManager';
 import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { screen, setup } from '../../tests/test-utils';
-import {Attachment, PreviewNavigationSession, bulkDeleteRoomAttachments, getRoomAttachments} from 'wsc-shared';
+import {
+	Attachment,
+	PreviewNavigationSession,
+	bulkDeleteRoomAttachments,
+	getRoomAttachments
+} from 'wsc-shared';
 
 vi.mock('wsc-shared', async (importOriginal) => ({
 	...(await importOriginal<typeof import('wsc-shared')>()),

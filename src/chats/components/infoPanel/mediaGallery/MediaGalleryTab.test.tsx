@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { MediaGalleryTab } from './MediaGalleryTab';
 import useStore from '../../../../store/Store';
 import { screen, setup, triggerObserver } from '../../../../tests/test-utils';
-import {Attachment, getRoomAttachments} from 'wsc-shared';
+import { Attachment, getRoomAttachments } from 'wsc-shared';
 
 vi.mock('wsc-shared', async (importOriginal) => ({
 	...(await importOriginal<typeof import('wsc-shared')>()),

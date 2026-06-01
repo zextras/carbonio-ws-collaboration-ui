@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import {Attachment, bulkDeleteRoomAttachments} from 'wsc-shared';
+import { Attachment, bulkDeleteRoomAttachments } from 'wsc-shared';
 
 export type UseDeleteAttachmentHook = {
 	canDelete: boolean;

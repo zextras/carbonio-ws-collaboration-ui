@@ -43,7 +43,7 @@ import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { User, UserType } from '../../types/store/UserTypes';
+import { UserType } from '../../types/store/UserTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
 const meetingMock = createMockMeeting();

@@ -22,7 +22,7 @@ import { getMeetingIdFromRoom } from '../../../../store/selectors/RoomsSelectors
 import useStore from '../../../../store/Store';
 import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
 import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
-import {MemberBe, RoomType, addRoom} from 'wsc-shared';
+import { MemberBe, RoomType, addRoom } from 'wsc-shared';
 
 type CreateVirtualRoomModalProps = {
 	open: boolean;

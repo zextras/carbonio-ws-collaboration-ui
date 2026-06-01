@@ -12,7 +12,7 @@ import AddNewMemberModal from './AddNewMemberModal';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
+import { ContactInfo, RoomType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const testRoom = createMockRoom({
 	id: 'room-test',

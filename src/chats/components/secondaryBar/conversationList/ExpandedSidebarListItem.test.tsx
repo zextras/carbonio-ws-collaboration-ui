@@ -22,7 +22,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {MarkerStatus, MessageType, OperationType, RoomType} from 'wsc-shared';
+import { MarkerStatus, MessageType, OperationType, RoomType } from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 

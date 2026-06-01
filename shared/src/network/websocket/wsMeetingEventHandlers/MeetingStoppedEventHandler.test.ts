@@ -7,10 +7,10 @@
 import { meetingStoppedEventHandler } from './MeetingStoppedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import useStore from '../../../tests/testStore';
+import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from '../../../types/AppEvents';
 
 const oneToOneRoom = createMockRoom({
 	id: 'oneToOneRoomId',

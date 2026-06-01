@@ -16,9 +16,9 @@ import useStore from '../../tests/testStore';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { wsEventsHandler } from '../websocket/wsEventsHandler';
+import { RoomType } from '../../types/store/RoomTypes';
 import * as MeetingsApi from '../apis/MeetingsApi';
-import { RoomType } from "../../types/store/RoomTypes";
+import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info = createMockUser({
 	id: 'user1',
@@ -80,7 +80,9 @@ const groupMeeting = createMockMeeting({
 let spyOnSubscribeToMedia: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
-	spyOnSubscribeToMedia = vi.spyOn(MeetingsApi, 'subscribeToMedia').mockResolvedValue({} as Response);
+	spyOnSubscribeToMedia = vi
+		.spyOn(MeetingsApi, 'subscribeToMedia')
+		.mockResolvedValue({} as Response);
 	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.email, displayName: user1Info.name });
 	store.addRooms([groupRoom]);

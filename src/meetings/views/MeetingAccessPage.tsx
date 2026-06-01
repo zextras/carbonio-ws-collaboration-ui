@@ -22,7 +22,7 @@ import { MediaStatus } from '../components/meetingAccessPoint/externalAccess/Mee
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
 import useAccessMeeting from '../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
-import {MeetingType, RoomType, getMeetingByMeetingId, getScheduledMeetingName} from 'wsc-shared';
+import { MeetingType, RoomType, getMeetingByMeetingId, getScheduledMeetingName } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: absolute;

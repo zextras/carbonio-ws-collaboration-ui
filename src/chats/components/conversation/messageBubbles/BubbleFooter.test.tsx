@@ -12,7 +12,7 @@ import BubbleFooter from './BubbleFooter';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {MarkerStatus, RoomType} from 'wsc-shared';
+import { MarkerStatus, RoomType } from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 const colorGray = { color: 'rgb(128, 128, 128)' };

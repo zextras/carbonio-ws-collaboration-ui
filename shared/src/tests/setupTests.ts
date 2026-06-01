@@ -9,6 +9,14 @@ import { beforeAll } from 'vitest';
 import useStore from './testStore';
 import { configureSharedCode } from '../config';
 
+export const mockNotify = vi.fn();
+
+vi.mock('@zextras/carbonio-shell-ui', () => ({
+	t: (key: string, fallback?: string) => fallback ?? key,
+	IS_FOCUS_MODE: false,
+	getNotificationManager: () => ({ notify: mockNotify })
+}));
+
 const initialState = useStore.getState();
 
 export const mockPlayAudio = vi.fn(() => Promise.resolve());
@@ -134,6 +142,14 @@ beforeAll(() => {
 			getScreenStream: vi.fn(() => Promise.resolve(new MediaStream()))
 		}
 	});
+});
+
+beforeAll(() => {
+	vi.useFakeTimers({ shouldAdvanceTime: true });
+});
+
+afterAll(() => {
+	vi.useRealTimers();
 });
 
 beforeEach(() => {

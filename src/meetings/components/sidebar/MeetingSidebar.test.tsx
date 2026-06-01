@@ -19,7 +19,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { routerContextSetup } from '../../../tests/test-utils';
-import {RoomType, VirtualBackgroundType} from 'wsc-shared';
+import { RoomType, VirtualBackgroundType } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });

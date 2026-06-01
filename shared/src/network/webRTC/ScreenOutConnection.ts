@@ -7,10 +7,10 @@
 import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
+import { sharedConfig } from '../../config';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { screenIceRestart, updateMediaOffer } from "../apis/MeetingsApi";
-import { sharedConfig } from "../../config";
+import { screenIceRestart, updateMediaOffer } from '../apis/MeetingsApi';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;

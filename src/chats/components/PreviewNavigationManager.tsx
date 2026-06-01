@@ -20,7 +20,12 @@ import {
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
-import {Attachment, PreviewNavigationSession, bulkDeleteRoomAttachments, getRoomAttachments} from 'wsc-shared';
+import {
+	Attachment,
+	PreviewNavigationSession,
+	bulkDeleteRoomAttachments,
+	getRoomAttachments
+} from 'wsc-shared';
 
 const shouldLoadMore = (
 	session: PreviewNavigationSession,

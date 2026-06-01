@@ -10,6 +10,9 @@ import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
+import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
+import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
+import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
@@ -22,9 +25,6 @@ import {
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import VideoScreenInConnection from "../../network/webRTC/VideoScreenInConnection";
-import VideoOutConnection from "../../network/webRTC/VideoOutConnection";
-import ScreenOutConnection from "../../network/webRTC/ScreenOutConnection";
 
 const isCurrentMeeting = (store: RootStore, meetingId: string): boolean =>
 	meetingId === store.activeMeeting?.meetingId;

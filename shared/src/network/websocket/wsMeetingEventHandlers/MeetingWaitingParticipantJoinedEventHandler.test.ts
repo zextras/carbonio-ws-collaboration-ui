@@ -13,11 +13,11 @@ import {
 } from '../../../tests/createMock';
 import { mockDisplayWaitingListNotification } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingWaitingParticipantJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from '../../../types/AppEvents';
 
 const room = createMockRoom({
 	type: RoomType.TEMPORARY,

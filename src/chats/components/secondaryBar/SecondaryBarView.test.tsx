@@ -18,7 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
+import { ContactInfo, RoomType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';

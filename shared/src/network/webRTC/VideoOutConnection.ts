@@ -7,10 +7,10 @@
 import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
+import { sharedConfig } from '../../config';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { sharedConfig } from "../../config";
-import { updateMediaOffer, videoIceRestart } from "../apis/MeetingsApi";
+import { updateMediaOffer, videoIceRestart } from '../apis/MeetingsApi';
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -125,7 +125,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		const {removeLocalStreams, removeBackgroundStream } = sharedConfig.useStore.getState();
+		const { removeLocalStreams, removeBackgroundStream } = sharedConfig.useStore.getState();
 		removeLocalStreams(STREAM_TYPE.VIDEO);
 		removeBackgroundStream();
 		this.rtpSender?.track?.stop();

@@ -12,7 +12,7 @@ import ConversationInfoPanel from './ConversationInfoPanel';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import {RoomType} from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 
 vi.mock('./mediaGallery/MediaGalleryTab', () => ({
 	MediaGalleryTab: (): React.ReactElement => <div data-testid="mediaGalleryTab" />

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { sharedConfig } from '../../config';
+import { EventName } from '../../types/AppEvents';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { EventName } from '../../types/AppEvents';
 import { getMeeting } from '../apis/MeetingsApi';
 import { getRoom } from '../apis/RoomsApi';
 

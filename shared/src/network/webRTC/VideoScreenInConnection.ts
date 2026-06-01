@@ -9,11 +9,11 @@ import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
+import { sharedConfig } from '../../config';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { sharedConfig } from "../../config";
-import { createMediaAnswer, videoIceRestart } from "../apis/MeetingsApi";
+import { createMediaAnswer, videoIceRestart } from '../apis/MeetingsApi';
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;

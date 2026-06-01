@@ -12,7 +12,7 @@ import { MemberAccordion } from './MemberAccordion';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {RoomBe, RoomType} from 'wsc-shared';
+import { RoomBe, RoomType } from 'wsc-shared';
 
 const user1Be = createMockUser();
 

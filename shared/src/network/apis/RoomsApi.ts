@@ -25,10 +25,10 @@ import {
 	RoomEditableFields
 } from '../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { buildQueryString } from '../../utils/fetchUtils';
 import { getLastUnreadMessage } from '../../utils/getLastUnreadMessage';
-import { RoomType } from "../../types/store/RoomTypes";
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';

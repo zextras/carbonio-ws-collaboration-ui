@@ -12,10 +12,10 @@ import {
 } from '../../../tests/createMock';
 import { mockPlayAudio } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
+import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from '../../../types/AppEvents';
 
 const room = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ id: 'oneToOneMeeting', roomId: room.id });

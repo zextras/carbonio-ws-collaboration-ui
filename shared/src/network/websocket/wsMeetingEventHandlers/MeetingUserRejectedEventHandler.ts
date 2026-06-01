@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { sharedConfig } from '../../../config';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingUserRejectedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
-import { EventName } from '../../../types/AppEvents';
 
 export const meetingUserRejectedEventHandler = (event: MeetingUserRejectedEvent): void => {
 	const state = sharedConfig.useStore.getState();

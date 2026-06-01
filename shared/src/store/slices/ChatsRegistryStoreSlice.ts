@@ -9,7 +9,7 @@ import { produce } from 'immer';
 import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { sharedConfig } from "../../config";
+import { sharedConfig } from '../../config';
 import { EventName } from '../../types/AppEvents';
 import {
 	BackfillRequest,

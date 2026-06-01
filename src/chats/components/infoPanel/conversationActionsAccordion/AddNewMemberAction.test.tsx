@@ -16,7 +16,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
+import { ContactInfo, RoomType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const user1: ContactInfo = {

@@ -19,7 +19,7 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import {RoomType, RootStore} from 'wsc-shared';
+import { RoomType, RootStore } from 'wsc-shared';
 
 const groupRoom = createMockRoom({
 	id: 'room-test',

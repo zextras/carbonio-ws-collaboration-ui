@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { getDuplicatedRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import {MemberBe, RoomType, addRoom} from 'wsc-shared';
+import { MemberBe, RoomType, addRoom } from 'wsc-shared';
 
 type CopyRoomWidgetProps = {
 	type: 'group' | 'space' | 'channel';

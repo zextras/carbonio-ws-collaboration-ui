@@ -6,9 +6,9 @@
 
 import { sharedConfig } from '../../../config';
 import { SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from '../../../constants';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
-import { EventName } from '../../../types/AppEvents';
 
 export const meetingParticipantHandRaisedHandler = (
 	event: MeetingParticipantHandRaisedEvent

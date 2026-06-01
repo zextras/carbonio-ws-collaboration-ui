@@ -17,7 +17,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {MeetingType, RoomType} from 'wsc-shared';
+import { MeetingType, RoomType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });

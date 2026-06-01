@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { sharedConfig } from '../../../config';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingRecordingStartedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMeetingActive } from '../eventHandlersUtilities';
-import { EventName } from '../../../types/AppEvents';
 
 export const meetingRecordingStartedEventHandler = (event: MeetingRecordingStartedEvent): void => {
 	const state = sharedConfig.useStore.getState();
