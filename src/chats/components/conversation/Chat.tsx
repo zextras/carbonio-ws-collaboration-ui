@@ -30,8 +30,7 @@ import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, messageActionType } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: relative;

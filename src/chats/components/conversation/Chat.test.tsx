@@ -22,16 +22,11 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import {
-	FasteningAction,
-	OperationType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
+import {FasteningAction, OperationType, RoomType, TextMessage} from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id, owner: true })]

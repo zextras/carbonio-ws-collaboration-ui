@@ -17,8 +17,6 @@ import {
 	createMockRoom
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../types/network/models/roomBeTypes';
 
 const hiEveryone = 'hi everyone!';
 const iconVideo = 'icon: Video';
@@ -33,9 +31,9 @@ const meetingParticipants = [
 	createMockParticipants({ userId: members[1].userId })
 ];
 
-const room: RoomBe = createMockRoom({ members, id: 'roomId' });
+const room = createMockRoom({ members, id: 'roomId' });
 
-const roomMuted: RoomBe = createMockRoom({
+const roomMuted = createMockRoom({
 	members,
 	id: 'roomMutedId',
 	userSettings: { muted: true }
@@ -54,13 +52,13 @@ const roomMutedWithMeeting = createMockRoom({
 	meetingId: 'meetingId'
 });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	id: 'meetingId',
 	roomId: roomWithMeeting.id,
 	participants: meetingParticipants
 });
 
-const meetingMuted: MeetingBe = createMockMeeting({
+const meetingMuted = createMockMeeting({
 	id: 'meetingMutedId',
 	roomId: roomMutedWithMeeting.id,
 	participants: meetingParticipants

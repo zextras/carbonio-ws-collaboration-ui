@@ -19,16 +19,13 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3 = createMockUser({ id: 'user3Id', name: 'user 3' });
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: user1.id, owner: true }),
@@ -37,7 +34,7 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	roomId: room.id,
 	participants: [
 		createMockParticipants({ userId: user1.id }),

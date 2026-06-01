@@ -11,10 +11,9 @@ import * as ReactRouter from 'react-router-dom';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import { createMockMeeting } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import * as api from 'wsc-shared';
 
-const mockMeeting: MeetingBe = createMockMeeting();
+const mockMeeting = createMockMeeting();
 
 const leaveMeetingButtonText = 'Leave Meeting?';
 

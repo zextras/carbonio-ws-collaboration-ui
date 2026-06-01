@@ -15,6 +15,7 @@ import MeetingConversationAccordion from './MeetingConversationAccordion/Meeting
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import RaiseHandAccordion from './raiseHandAccordion/RaiseHandAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
+import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
 import {
 	getMeetingChatVisibility,
@@ -26,16 +27,11 @@ import {
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute, getUserId } from '../../../store/selectors/SessionSelectors';
-import useStore from '../../../store/Store';
-import {
-	MeetingAccordionType,
-	MeetingChatVisibility
-} from '../../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
-import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
-import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
 import { RouterContext } from '../../contexts/routerContext';
+import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
+import { MeetingAccordionType, MeetingChatVisibility, RoomType } from 'wsc-shared';
 
 const SidebarContainer = styled(Container)`
 	position: relative;

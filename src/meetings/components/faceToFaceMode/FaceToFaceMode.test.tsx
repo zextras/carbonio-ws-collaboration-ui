@@ -19,12 +19,9 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from 'wsc-shared';
+import {RoomType, RootStore} from 'wsc-shared';
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
@@ -34,11 +31,11 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: 'user1' });
+const user1Participant = createMockParticipants({ userId: 'user1' });
 
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: 'user2' });
+const user2Participant = createMockParticipants({ userId: 'user2' });
 
-const groupMeeting: MeetingBe = createMockMeeting({
+const groupMeeting = createMockMeeting({
 	roomId: groupRoom.id,
 	participants: [user1Participant, user2Participant]
 });

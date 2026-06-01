@@ -12,9 +12,8 @@ import ForwardInfo from './ForwardInfo';
 import useStore from '../../../../store/Store';
 import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
 
-const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId', name: 'User' });
+const forwardedUser = createMockUser({ id: 'forwardedUserId', name: 'User' });
 
 const textMessage = createMockTextMessage({ from: forwardedUser.id });
 const forwardedInfo = {

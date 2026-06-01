@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import useRouting from '../../../../hooks/useRouting';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 type GoToPrivateChatProps = {
 	memberId: string;

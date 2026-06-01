@@ -19,8 +19,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const mockRobertoUser = createMockUser({
 	id: 'idRoberto',
@@ -52,7 +51,7 @@ const mockQuintoUser = createMockUser({
 	name: 'Quinto'
 });
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	name: 'name',

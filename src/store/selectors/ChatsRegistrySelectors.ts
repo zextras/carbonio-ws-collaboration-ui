@@ -5,6 +5,7 @@
  */
 import { filter, find, forEach, includes, last, map, reduce, size } from 'lodash';
 
+import { datesAreFromTheSameDay } from '../../utils/dateUtils';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
@@ -14,10 +15,9 @@ import {
 	Message,
 	MessageFastening,
 	MessageType,
+	RootStore,
 	TextMessage
-} from '../../types/store/ChatsRegistryTypes';
-import { datesAreFromTheSameDay } from '../../utils/dateUtils';
-import { RootStore } from 'wsc-shared';
+} from 'wsc-shared';
 
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 

@@ -13,8 +13,7 @@ import { xmppClient } from '../network/xmpp/XMPPClient';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { TextMessage } from '../types/store/ChatsRegistryTypes';
-import { RoomType } from '../types/store/RoomTypes';
+import { TextMessage, RoomType } from 'wsc-shared';
 
 interface UsePinMessageReturnType {
 	canMessageBePinned: boolean;

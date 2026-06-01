@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { messageActionType } from '../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../types/store/ChatsRegistryTypes';
+import { messageActionType, Message, MessageType } from 'wsc-shared';
 
 export const canPerformAction = (
 	message: Message,

@@ -14,40 +14,37 @@ import {
 	createMockTextMessage
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
-import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../../types/store/RoomTypes';
+import { messageActionType, TextMessage, RoomType } from 'wsc-shared';
 
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP
 });
 
 const mySessionId = 'mySessionId';
 
-const simpleMyTextMessage: TextMessage = createMockTextMessage({
+const simpleMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	date: Date.now() - 6000
 });
 
-const repliedMyTextMessage: TextMessage = createMockTextMessage({
+const repliedMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	replyTo: 'replyToId',
 	date: Date.now() - 6000,
 	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 });
 
-const forwardedMyTextMessage: TextMessage = createMockTextMessage({
+const forwardedMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
 	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
-const attachmentMyTextMessage: TextMessage = createMockTextMessage({
+const attachmentMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	date: Date.now() - 6000,
 	attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
@@ -60,13 +57,13 @@ const myMessagesTypes: Array<[string, TextMessage]> = [
 	['attachment', attachmentMyTextMessage]
 ];
 
-const simpleTextMessage: TextMessage = createMockTextMessage({
+const simpleTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 60
 });
 
-const repliedTextMessage: TextMessage = createMockTextMessage({
+const repliedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
@@ -74,14 +71,14 @@ const repliedTextMessage: TextMessage = createMockTextMessage({
 	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 });
 
-const forwardedTextMessage: TextMessage = createMockTextMessage({
+const forwardedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
 	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
-const attachmentTextMessage: TextMessage = createMockTextMessage({
+const attachmentTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 60,

@@ -13,13 +13,11 @@ import { sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { RoomType } from '../../types/store/RoomTypes';
 import {
 	EventName,
 	MeetingJoinedEvent,
 	MeetingStartedEvent,
+	RoomType,
 	WsEvent,
 	WsEventType
 } from 'wsc-shared';
@@ -32,12 +30,12 @@ const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
 const room1 = createMockRoom({ id: 'roomId1', type: RoomType.ONE_TO_ONE });
 const meeting1 = createMockMeeting({ id: 'meetingId1', roomId: room1.id });
 
-const addIncomingMeetingNotification = (room: RoomBe, meeting: MeetingBe): void => {
+const addIncomingMeetingNotification = (meetingId: string): void => {
 	const event: MeetingStartedEvent = {
 		sentDate: '2412412421',
-		meetingId: meeting.id,
+		meetingId,
 		type: WsEventType.MEETING_STARTED,
-		starterUser: room.id,
+		starterUser: 'userId',
 		startedAt: '2024-04-04T15:42:22.932426Z'
 	};
 	act(() => {
@@ -59,13 +57,13 @@ describe('MeetingNotificationsHandler', () => {
 
 	test('A notification is rendered when a MeetingCreatedEvent is received', () => {
 		setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
+		addIncomingMeetingNotification(meeting.id);
 		expect(screen.getByTestId('incoming_call_notification_portal')).toBeInTheDocument();
 	});
 
 	test('A notification is removed when a JoinMeetingEvent is received', () => {
 		setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
+		addIncomingMeetingNotification(meeting.id);
 		expect(screen.getByTestId('incoming_call_notification_portal')).toBeInTheDocument();
 
 		const joinEvent: MeetingJoinedEvent = {
@@ -80,7 +78,7 @@ describe('MeetingNotificationsHandler', () => {
 
 	test('A notification is removed when meeting is removed', () => {
 		setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
+		addIncomingMeetingNotification(meeting.id);
 		expect(screen.getByTestId('incoming_call_notification')).toBeInTheDocument();
 		act(() => useStore.getState().deleteMeeting(meeting.id));
 		const audioTag = screen.queryByTestId('meeting_notification_audio');
@@ -90,7 +88,7 @@ describe('MeetingNotificationsHandler', () => {
 
 	test('A notification of 1to1 meeting is removed when is stopped because the other user leaves it', () => {
 		setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
+		addIncomingMeetingNotification(meeting.id);
 		const meetingStoppedEvent: WsEvent = {
 			type: WsEventType.MEETING_STOPPED,
 			sentDate: '123456789',
@@ -105,15 +103,15 @@ describe('MeetingNotificationsHandler', () => {
 
 	test("Button 'Decline all' is rendered when there are more than one notification", async () => {
 		setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
-		addIncomingMeetingNotification(room1, meeting1);
+		addIncomingMeetingNotification(meeting.id);
+		addIncomingMeetingNotification(meeting1.id);
 		expect(screen.getByText(declineAll)).toBeInTheDocument();
 	});
 
 	test('All notifications are removed when button Decline all is clicked', async () => {
 		const { user } = setup(<MeetingNotificationsHandler />);
-		addIncomingMeetingNotification(room, meeting);
-		addIncomingMeetingNotification(room1, meeting1);
+		addIncomingMeetingNotification(meeting.id);
+		addIncomingMeetingNotification(meeting1.id);
 		expect(screen.getByText(declineAll)).toBeInTheDocument();
 		expect(screen.getAllByTestId('incoming_call_notification')).toHaveLength(2);
 

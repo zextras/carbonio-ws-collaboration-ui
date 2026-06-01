@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import ClearHistoryModal from './ClearHistoryModal';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 type ClearHistoryProps = {
 	roomId: string;

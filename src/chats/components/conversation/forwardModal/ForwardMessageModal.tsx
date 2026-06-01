@@ -49,9 +49,7 @@ import useRouting from '../../../../hooks/useRouting';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { forwardMessages } from 'wsc-shared';
+import { forwardMessages, TextMessage, RoomType } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

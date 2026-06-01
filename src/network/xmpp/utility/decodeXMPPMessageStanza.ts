@@ -14,6 +14,8 @@ import {
 	getRequiredTagElement,
 	getTagElement
 } from './decodeStanza';
+import { calcReads } from '../../../utils/calcReads';
+import { dateToTimestamp, now } from '../../../utils/dateUtils';
 import {
 	ConfigurationMessage,
 	FasteningAction,
@@ -21,11 +23,9 @@ import {
 	MessageFastening,
 	MessageType,
 	OperationType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { calcReads } from '../../../utils/calcReads';
-import { dateToTimestamp, now } from '../../../utils/dateUtils';
-import { unicodeToChar } from '../../../utils/textUtils';
+	TextMessage,
+	unicodeToChar
+} from 'wsc-shared';
 
 type OptionalParameters = {
 	date?: number;

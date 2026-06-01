@@ -12,8 +12,7 @@ import { useTranslation } from 'react-i18next';
 import ActionComponent from './ActionComponent';
 import { getRoomMutedSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { muteRoomNotification, unmuteRoomNotification } from 'wsc-shared';
+import { muteRoomNotification, unmuteRoomNotification, RoomType } from 'wsc-shared';
 
 type MuteProps = {
 	roomId: string;

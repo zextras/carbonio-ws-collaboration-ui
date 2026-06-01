@@ -24,7 +24,7 @@ import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { Attachment } from '../../../../types/network/models/attachmentTypes';
+import {Attachment} from 'wsc-shared';
 import {
 	downloadAttachment,
 	getAttachmentSize,

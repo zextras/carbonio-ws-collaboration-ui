@@ -7,7 +7,7 @@ import ChatExporter from './ChatExporter';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { RoomType } from '../../../types/network/models/roomBeTypes';
+import {RoomType} from 'wsc-shared';
 
 const roomId = 'roomId';
 

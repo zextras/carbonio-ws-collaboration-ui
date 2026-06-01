@@ -10,7 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 
 import MemberComponentInfo from './MemberComponentInfo';
-import { Member } from '../../../../types/store/RoomTypes';
+import { Member } from 'wsc-shared';
 
 type ListOfMembersProps = {
 	roomId: string;

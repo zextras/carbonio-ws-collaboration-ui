@@ -9,6 +9,7 @@ import { v4 as uuidGenerator } from 'uuid';
 import { createMeeting, deleteMeeting } from './MeetingsApi';
 import { sharedConfig } from '../../config';
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants';
+import { EventName } from '../../types/AppEvents';
 import { RequestType } from '../../types/network/fetch';
 import {
 	BulkDeleteRoomAttachmentsResponse,
@@ -21,14 +22,13 @@ import {
 	MemberBe,
 	RoomBe,
 	RoomCreationFields,
-	RoomEditableFields,
-	RoomType
+	RoomEditableFields
 } from '../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { buildQueryString } from '../../utils/fetchUtils';
 import { getLastUnreadMessage } from '../../utils/getLastUnreadMessage';
-import { EventName } from '../../types/AppEvents';
+import { RoomType } from "../../types/store/RoomTypes";
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';

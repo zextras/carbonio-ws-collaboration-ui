@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 import { getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { RoomType } from '../types/store/RoomTypes';
 import UserDataRetriever from '../utils/UserDataRetriever';
+import { RoomType } from 'wsc-shared';
 
 export const useIsWritingLabel = (
 	roomId: string,

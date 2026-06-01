@@ -15,8 +15,8 @@ import {
 	getUpdatedStream
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
 import { getWorkerUrl } from '../../../utils/MeetingsUtils';
+import { VirtualBackgroundType } from 'wsc-shared';
 
 const BackgroundCanvas = styled.canvas`
 	display: none;

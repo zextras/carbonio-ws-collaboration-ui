@@ -9,8 +9,8 @@ import { forEach, sortBy } from 'lodash';
 
 import { getMeetingParticipants } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { dateToTimestamp } from '../utils/dateUtils';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 const useTiles = (meetingId: string): TileData[] => {
 	const meetingParticipants = useStore((store) => getMeetingParticipants(store, meetingId));

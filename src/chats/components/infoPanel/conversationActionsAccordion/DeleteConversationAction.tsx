@@ -12,8 +12,7 @@ import { useTranslation } from 'react-i18next';
 import ActionComponent from './ActionComponent';
 import DeleteConversationModal from './DeleteConversationModal';
 import useRouting from '../../../../hooks/useRouting';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { deleteRoomAndMeeting } from 'wsc-shared';
+import { deleteRoomAndMeeting, RoomType } from 'wsc-shared';
 
 type DeleteProps = {
 	roomId: string;

@@ -23,13 +23,12 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 import Tile from '../tile/Tile';
-import { updateAudioStreamStatus, updateMediaOffer } from 'wsc-shared';
+import { updateAudioStreamStatus, updateMediaOffer, STREAM_TYPE } from 'wsc-shared';
 
 const PipContainer = styled(Container)`
 	background-color: ${({ theme }): string => theme.palette.gray0.regular};

@@ -12,7 +12,7 @@ import { forEach, some } from 'lodash';
 import SpeakingElement from './SpeakingElement';
 import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 const SpeakingListContainer = styled(Container)<{ $customStyle?: string }>`
 	position: absolute;

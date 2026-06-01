@@ -13,11 +13,11 @@ import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
+import { STREAM_TYPE } from 'wsc-shared';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -61,7 +61,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	useEffect(() => {
 		if (centralTile) {
-			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			const subscription = { userId: centralTile.userId, type: centralTile.type };
 			setUpdateSubscription(meetingId!, [subscription]);
 		}
 	}, [centralTile, meetingId, setUpdateSubscription]);

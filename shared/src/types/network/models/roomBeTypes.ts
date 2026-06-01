@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { RoomType, RoomUserSettings } from '../../store/RoomTypes';
+
 export type RoomBe = {
 	id: string;
 	name?: string;
@@ -16,12 +18,6 @@ export type RoomBe = {
 	userSettings?: RoomUserSettings;
 	meetingId?: string;
 };
-
-export enum RoomType {
-	ONE_TO_ONE = 'one_to_one',
-	GROUP = 'group',
-	TEMPORARY = 'temporary'
-}
 
 export type RoomCreationFields =
 	| {
@@ -56,15 +52,4 @@ export type AddMemberFields = {
 	userId: string;
 	owner: boolean;
 	historyCleared: boolean;
-};
-
-export type RoomUserSettings = {
-	muted: boolean;
-	clearedAt?: string;
-};
-
-export type ForwardedMessageInfo = {
-	originalMessage: string;
-	originalMessageSentAt: string;
-	description?: string;
 };

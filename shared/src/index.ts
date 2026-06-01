@@ -9,9 +9,24 @@ import { configureSharedCode } from './config';
 export { configureSharedCode };
 
 // Types
-export * from './types/store/StoreTypes';
+export * from './types/store/ActiveConversationTypes';
+export * from './types/store/ActiveMeetingTypes';
+export * from './types/store/ChatsRegistryTypes';
+export * from './types/store/ConnectionsTypes';
+export * from './types/store/MediaGalleryTypes';
+export * from './types/store/MeetingTypes';
+export * from './types/store/PreviewNavigationTypes';
+export * from './types/store/RoomTypes';
 export * from './types/store/SessionTypes';
+export * from './types/store/StoreTypes';
+export * from './types/store/UserTypes';
+
 export * from './types/AppEvents';
+
+export * from './types/network/models/attachmentTypes';
+export * from './types/network/models/meetingBeTypes';
+export * from './types/network/models/roomBeTypes';
+export * from './types/network/models/userBeTypes';
 
 export * from './types/websocket/wsEvents';
 export * from './types/websocket/wsConversationEvents';

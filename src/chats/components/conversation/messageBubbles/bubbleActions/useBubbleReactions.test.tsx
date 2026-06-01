@@ -17,12 +17,11 @@ import {
 	createMockUser
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
-import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { FasteningAction, TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
+import { FasteningAction } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sesssionId', name: 'sessionName' });
-const room: RoomBe = createMockRoom();
-const simpleTextMessage: TextMessage = createMockTextMessage({
+const room = createMockRoom();
+const simpleTextMessage = createMockTextMessage({
 	roomId: room.id,
 	from: sessionUser.id,
 	date: Date.now() - 60

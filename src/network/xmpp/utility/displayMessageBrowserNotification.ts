@@ -9,11 +9,9 @@ import { includes } from 'lodash';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';
-import { EventName } from 'wsc-shared';
+import { EventName, TextMessage, RoomType } from 'wsc-shared';
 
 export const displayChatNotification = (roomId: string): boolean => {
 	const store = useStore.getState();

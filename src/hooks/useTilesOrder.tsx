@@ -20,8 +20,8 @@ import {
 import useTiles from './useTiles';
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
 	const pinnedTile: TileData | undefined = useStore(getPinnedTile);

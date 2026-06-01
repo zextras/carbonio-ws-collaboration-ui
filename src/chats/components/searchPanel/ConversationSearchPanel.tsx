@@ -24,7 +24,7 @@ import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 enum RequestStatus {
 	IDLE = 'idle',

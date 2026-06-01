@@ -6,8 +6,8 @@
 import { find, last } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { isBefore } from '../../../utils/dateUtils';
+import { Message, MessageType } from 'wsc-shared';
 
 export function getLastUnreadMessage(roomId: string): string | undefined {
 	const { session, chatsRegistry } = useStore.getState();

@@ -3,13 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 import {
 	getImagePreviewURL,
 	getImageThumbnailURL,
 	getPdfPreviewURL,
 	getPdfThumbnailURL,
-	getURLAttachment
+	getURLAttachment,
+	AttachmentMessageType
 } from 'wsc-shared';
 
 const PDF_MIME_TYPE = 'application/pdf';

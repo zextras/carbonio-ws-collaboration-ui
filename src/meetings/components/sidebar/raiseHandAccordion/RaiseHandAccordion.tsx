@@ -29,8 +29,7 @@ import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelecto
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
-import { EventName, EventPayloads, raiseHand } from 'wsc-shared';
+import { EventName, EventPayloads, raiseHand, MeetingAccordionType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

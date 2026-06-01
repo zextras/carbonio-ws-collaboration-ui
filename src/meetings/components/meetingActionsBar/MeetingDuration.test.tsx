@@ -11,12 +11,10 @@ import MeetingDuration from './MeetingDuration';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
 
-const room: RoomBe = createMockRoom();
+const room = createMockRoom();
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	roomId: room.id
 });
 

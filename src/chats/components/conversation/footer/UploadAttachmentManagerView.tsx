@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import useUploadFile from '../../../../hooks/useLoadFiles';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
-import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import {
 	canDisplayPreviewOnLoad,
 	getAttachmentExtension,
@@ -23,6 +22,7 @@ import {
 	getAttachmentSize,
 	getAttachmentType
 } from '../../../../utils/attachmentUtils';
+import { FileToUpload } from 'wsc-shared';
 
 type UploadAttachmentManagerViewProps = {
 	roomId: string;

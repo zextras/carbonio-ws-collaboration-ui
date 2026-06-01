@@ -28,11 +28,9 @@ import {
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
-import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
-import { deleteAttachment } from 'wsc-shared';
+import { deleteAttachment, messageActionType, TextMessage } from 'wsc-shared';
 
 const useBubbleContextualMenuDropDown = (
 	message: TextMessage,

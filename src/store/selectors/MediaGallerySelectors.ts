@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Attachment } from '../../types/network/models/attachmentTypes';
 import {
+	Attachment,
 	DEFAULT_MEDIA_GALLERY_FILTER,
-	MediaGalleryFilter
-} from '../../types/store/MediaGalleryTypes';
-import { RootStore } from 'wsc-shared';
+	MediaGalleryFilter,
+	RootStore
+} from 'wsc-shared';
 
 export const getMediaGalleryAttachments = (store: RootStore, roomId: string): Array<Attachment> =>
 	store.mediaGallery[roomId]?.attachments ?? [];

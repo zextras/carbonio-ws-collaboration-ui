@@ -11,13 +11,7 @@ import {
 	getMessageSelector
 } from '../store/selectors/ChatsRegistrySelectors';
 import useStore from '../store/Store';
-import {
-	FasteningAction,
-	Message,
-	MessageFastening,
-	MessageType,
-	TextMessage
-} from '../types/store/ChatsRegistryTypes';
+import { FasteningAction, Message, MessageFastening, MessageType, TextMessage } from 'wsc-shared';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	const message = useStore<Message | undefined>((store) =>

@@ -17,32 +17,31 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
+import {RoomType} from 'wsc-shared';
 
 const iconCrown = 'icon: Crown';
 const iconLogOut = 'icon: LogOut';
 const iconMessageCircleOutline = 'icon: MessageCircleOutline';
 
-const user1Be: UserBe = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Be: UserBe = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
 });
 
-const user3Be: UserBe = createMockUser({
+const user3Be = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'
 });
 
-const user4Be: UserBe = createMockUser({
+const user4Be = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'User 4'

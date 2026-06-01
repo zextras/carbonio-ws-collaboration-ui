@@ -19,58 +19,55 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { MeetingParticipant } from '../../types/store/MeetingTypes';
-import { User } from '../../types/store/UserTypes';
+import {RoomType} from 'wsc-shared';
 
 const hiString = 'hi everyone!';
 const bgGrayDot = 'background-color: #cfd5dc';
 const bgGreenDot = 'background-color: #8bc34a';
 const iconBellOff = 'icon: BellOff';
 
-const user1Info: User = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Info: User = createMockUser({
+const user2Info = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
 });
 
-const user3Info: User = createMockUser({
+const user3Info = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: 'user1' });
+const user1Participant = createMockParticipants({ userId: 'user1' });
 
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: 'user2' });
+const user2Participant = createMockParticipants({ userId: 'user2' });
 
 const members = [
 	createMockMember({ userId: user1Info.id, owner: true }),
 	createMockMember({ userId: user2Info.id })
 ];
 
-const room: RoomBe = createMockRoom({ id: 'roomId', members, type: RoomType.ONE_TO_ONE });
-const roomMuted: RoomBe = createMockRoom({
+const room = createMockRoom({ id: 'roomId', members, type: RoomType.ONE_TO_ONE });
+const roomMuted = createMockRoom({
 	id: 'mutedRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	userSettings: { muted: true }
 });
-const roomWithPicture: RoomBe = createMockRoom({
+const roomWithPicture = createMockRoom({
 	id: 'roomWithPicture',
 	members: [
 		createMockMember({ userId: user1Info.id, owner: true }),
 		createMockMember({ userId: user3Info.id })
 	]
 });
-const singleConversationWithUnloadUser: RoomBe = createMockRoom({
+const singleConversationWithUnloadUser = createMockRoom({
 	id: 'unloadRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members: [
@@ -79,14 +76,14 @@ const singleConversationWithUnloadUser: RoomBe = createMockRoom({
 	]
 });
 
-const roomWithMeeting: RoomBe = createMockRoom({
+const roomWithMeeting = createMockRoom({
 	id: 'meetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	meetingId: 'meetingId'
 });
 
-const roomMutedWithMeeting: RoomBe = createMockRoom({
+const roomMutedWithMeeting = createMockRoom({
 	id: 'mutedWithMeetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
@@ -94,13 +91,13 @@ const roomMutedWithMeeting: RoomBe = createMockRoom({
 	meetingId: 'meetingId2'
 });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	id: 'meetingId',
 	roomId: roomWithMeeting.id,
 	participants: [user1Participant, user2Participant]
 });
 
-const meeting2: MeetingBe = createMockMeeting({
+const meeting2 = createMockMeeting({
 	id: 'meetingId2',
 	roomId: roomMutedWithMeeting.id,
 	participants: [user1Participant, user2Participant]

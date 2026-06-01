@@ -18,8 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
+import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';
@@ -43,7 +42,7 @@ const user3Be = createMockUser({
 	name: 'User3'
 });
 
-const mockedGroup1: RoomBe = createMockRoom({
+const mockedGroup1 = createMockRoom({
 	id: 'mockedGroup1',
 	type: RoomType.GROUP,
 	name: 'Group of 3 people',
@@ -54,7 +53,7 @@ const mockedGroup1: RoomBe = createMockRoom({
 	]
 });
 
-const mockedGroup2: RoomBe = createMockRoom({
+const mockedGroup2 = createMockRoom({
 	id: 'mockedGroup2',
 	type: RoomType.GROUP,
 	name: 'Group of 2 people',
@@ -64,13 +63,13 @@ const mockedGroup2: RoomBe = createMockRoom({
 	]
 });
 
-const mockedOneToOne1: RoomBe = createMockRoom({
+const mockedOneToOne1 = createMockRoom({
 	id: 'mockedOTO1',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 });
 
-const mockedOneToOne2: RoomBe = createMockRoom({
+const mockedOneToOne2 = createMockRoom({
 	id: 'mockedOTO2',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user3Be.id })]

@@ -13,8 +13,7 @@ import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import useStore from '../../../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
+import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const virtualRoomName = 'New Virtual Room';

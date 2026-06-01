@@ -16,7 +16,6 @@ import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getAttribute, getUserId } from '../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
-import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
@@ -28,6 +27,7 @@ import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
 import { RouterContext } from '../contexts/routerContext';
+import { MeetingViewType } from 'wsc-shared';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;

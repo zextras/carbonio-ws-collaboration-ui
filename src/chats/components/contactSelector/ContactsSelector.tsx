@@ -31,8 +31,7 @@ import { difference, differenceBy, filter, find, map, size, union } from 'lodash
 import { useTranslation } from 'react-i18next';
 
 import ListParticipant from './ListParticipant';
-import { Member } from '../../../types/store/RoomTypes';
-import { ContactInfo, searchUsersByFeatureRequest } from 'wsc-shared';
+import { ContactInfo, searchUsersByFeatureRequest, Member } from 'wsc-shared';
 
 type ContactsSelectorProps = {
 	contactsSelected: ContactsSelected;

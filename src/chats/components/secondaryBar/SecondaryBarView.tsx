@@ -17,10 +17,10 @@ import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
 import { getAreConversationsToShowSelector } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Member } from '../../../types/store/RoomTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
+import { Member } from 'wsc-shared';
 
 const ScrollContainer = styled(Container)`
 	overflow-y: auto;

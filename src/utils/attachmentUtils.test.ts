@@ -19,7 +19,7 @@ import {
 	getAttachmentIcon,
 	AttachmentType
 } from './attachmentUtils';
-import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { AttachmentMessageType } from 'wsc-shared';
 
 const enum MimeTypes {
 	JPEG = 'image/jpeg',

@@ -52,7 +52,7 @@ const scheduledMeetingMock = createMockMeeting({ meetingType: MeetingType.SCHEDU
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 const roomMock = createMockRoom({ meetingId: meetingMock.id });
 const roomWithoutMeetingMock = createMockRoom();
-const guestUser: User = createMockUser({ type: UserType.GUEST });
+const guestUser = createMockUser({ type: UserType.GUEST });
 
 const userId = 'userId';
 

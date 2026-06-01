@@ -19,26 +19,25 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { User } from '../../../../types/store/UserTypes';
+import {RoomType} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const iconClose = 'icon: Close';
 const iconTrash2Outline = 'icon: Trash2Outline';
 
-const user1Info: User = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Info: User = createMockUser({
+const user2Info = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
 });
 
-const user3Info: User = createMockUser({
+const user3Info = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'

@@ -11,8 +11,6 @@ import { wsEventsHandler } from './wsEventsHandler';
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import useStore from '../../tests/testStore';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent
@@ -23,12 +21,12 @@ import * as RoomsApi from '../apis/RoomsApi';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	id: 'meetingId',
 	roomId: 'roomId'
 });
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	id: 'roomId',
 	name: 'Room With Me',
 	meetingId: meeting.id

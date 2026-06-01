@@ -14,8 +14,7 @@ import {
 	sendAudioFeedback
 } from './MeetingsUtils';
 import { mockPlayAudio } from '../tests/setupTests';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
-import { MeetingSoundFeedback } from 'wsc-shared';
+import { MeetingSoundFeedback, STREAM_TYPE, TileData } from 'wsc-shared';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {

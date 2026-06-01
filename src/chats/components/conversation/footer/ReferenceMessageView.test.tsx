@@ -16,13 +16,10 @@ import {
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import MessagesList from '../MessagesList';
+import { messageActionType, MarkerStatus, MessageType, RoomType } from 'wsc-shared';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	members: [

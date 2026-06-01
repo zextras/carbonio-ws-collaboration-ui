@@ -6,9 +6,8 @@
 
 import { t } from '@zextras/carbonio-shell-ui';
 
-import { User, UsersMap, UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
-import { RootStore } from 'wsc-shared';
+import { RootStore, User, UsersMap, UserType } from 'wsc-shared';
 
 export const getUsersSelector = (store: RootStore): UsersMap => store.users;
 

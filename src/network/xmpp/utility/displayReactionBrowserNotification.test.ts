@@ -13,7 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { FasteningAction } from '../../../types/store/ChatsRegistryTypes';
+import { FasteningAction } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });

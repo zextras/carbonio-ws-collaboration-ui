@@ -21,14 +21,14 @@ import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import { getEditAndDeleteFasteningSelector } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
+import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 import {
+	replacePlaceholderRoom,
 	FasteningAction,
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../../types/store/ChatsRegistryTypes';
-import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import { replacePlaceholderRoom } from 'wsc-shared';
+} from 'wsc-shared';
 
 const jabberData = 'jabber:x:data';
 

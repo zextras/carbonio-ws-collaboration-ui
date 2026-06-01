@@ -22,13 +22,9 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { routerContextSetup } from '../../../../tests/test-utils';
-import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { OperationType } from '../../../../types/store/ChatsRegistryTypes';
-import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
 import MeetingSidebar from '../MeetingSidebar';
-import { RootStore } from 'wsc-shared';
+import {OperationType, RoomType, RootStore} from 'wsc-shared';
 
 const heightRem = 'height: 2.75rem';
 const heightPercentage = 'height: 100%';
@@ -49,7 +45,7 @@ const mockUser3 = createMockUser({
 	name: 'User 3'
 });
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
@@ -60,9 +56,9 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: mockUser1.id });
+const user1Participant = createMockParticipants({ userId: mockUser1.id });
 
-const groupMeeting: MeetingBe = createMockMeeting({
+const groupMeeting = createMockMeeting({
 	roomId: groupRoom.id,
 	participants: [user1Participant]
 });
@@ -170,7 +166,7 @@ describe('Meeting sidebar', () => {
 	});
 });
 
-const temporaryRoom: RoomBe = createMockRoom({
+const temporaryRoom = createMockRoom({
 	id: 'temp-room-test',
 	type: RoomType.TEMPORARY,
 	members: [
@@ -180,7 +176,7 @@ const temporaryRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const temporaryMeeting: MeetingBe = createMockMeeting({
+const temporaryMeeting = createMockMeeting({
 	roomId: temporaryRoom.id,
 	participants: [user1Participant]
 });

@@ -42,16 +42,17 @@ import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistr
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import {
-	FileToUpload,
-	messageActionType,
-	ReferenceMessage
-} from '../../../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { getImageSize, isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
-import { addRoomAttachment } from 'wsc-shared';
+import {
+	addRoomAttachment,
+	FileToUpload,
+	messageActionType,
+	ReferenceMessage,
+	MessageType,
+	TextMessage
+} from 'wsc-shared';
 
 type ConversationMessageComposerProps = {
 	roomId: string;

@@ -6,19 +6,19 @@
 
 import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import type { Attachment } from '../../../types/network/models/attachmentTypes';
-import {
-	FasteningAction,
-	MessageType,
-	OperationType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 import { xmppClient } from '../XMPPClient';
-import { EventName } from 'wsc-shared';
+import {
+	Attachment,
+	EventName,
+	FasteningAction,
+	MessageType,
+	OperationType,
+	TextMessage
+} from 'wsc-shared';
 
 const toGalleryAttachment = (message: TextMessage): Attachment | undefined => {
 	if (!message.attachment) return undefined;

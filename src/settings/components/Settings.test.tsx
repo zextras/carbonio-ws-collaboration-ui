@@ -13,12 +13,11 @@ import Settings from './Settings';
 import useStore from '../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { UserBe } from '../../types/network/models/userBeTypes';
 import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 const squareIcon = 'icon: Square';
 
-const user1: UserBe = createMockUser({
+const user1 = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'

@@ -10,7 +10,7 @@ import { Container, Divider, List, Spinner } from '@zextras/carbonio-design-syst
 
 import { AttachmentListItem } from './AttachmentListItem';
 import { AttachmentMonthHeader } from './AttachmentMonthHeader';
-import { Attachment } from '../../../../types/network/models/attachmentTypes';
+import {Attachment} from 'wsc-shared';
 import { groupAttachmentsByMonth } from '../../../../utils/mediaGalleryUtils';
 
 type AttachmentListProps = {

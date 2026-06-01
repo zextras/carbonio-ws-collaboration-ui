@@ -16,8 +16,7 @@ import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySel
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, MessageType } from 'wsc-shared';
 
 type ScrollButtonProps = {
 	roomId: string;

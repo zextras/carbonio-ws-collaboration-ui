@@ -27,8 +27,8 @@ import {
 	getUserOnline
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { Member } from '../../../../types/store/RoomTypes';
 import { getCalendarTime } from '../../../../utils/dateUtils';
+import { Member } from 'wsc-shared';
 
 type ParticipantsInfoProps = {
 	member: Member;

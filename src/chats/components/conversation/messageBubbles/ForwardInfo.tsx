@@ -11,8 +11,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { ForwardedInfo } from '../../../../types/store/ChatsRegistryTypes';
 import { formatDate } from '../../../../utils/dateUtils';
+import { ForwardedInfo } from 'wsc-shared';
 
 type ForwardInfoProps = {
 	info: ForwardedInfo;

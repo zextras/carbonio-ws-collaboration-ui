@@ -5,12 +5,12 @@
  */
 
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 import { xmppClient } from '../XMPPClient';
+import { MessageType } from 'wsc-shared';
 
 /**
  * INBOX (XEP-0430)

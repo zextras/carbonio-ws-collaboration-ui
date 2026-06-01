@@ -20,15 +20,14 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
 
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
 
-const user3: UserBe = createMockUser({
+const user3 = createMockUser({
 	id: 'user3Id',
 	name: 'user 3'
 });

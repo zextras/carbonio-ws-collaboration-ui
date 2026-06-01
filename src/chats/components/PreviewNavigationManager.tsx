@@ -19,10 +19,8 @@ import {
 } from '../../store/selectors/PreviewNavigationSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { Attachment } from '../../types/network/models/attachmentTypes';
-import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
-import { bulkDeleteRoomAttachments, getRoomAttachments } from 'wsc-shared';
+import {Attachment, PreviewNavigationSession, bulkDeleteRoomAttachments, getRoomAttachments} from 'wsc-shared';
 
 const shouldLoadMore = (
 	session: PreviewNavigationSession,

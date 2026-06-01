@@ -18,9 +18,8 @@ import {
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
-import { ConfigurationMessage, OperationType } from '../types/store/ChatsRegistryTypes';
-import { RoomType } from '../types/store/RoomTypes';
 import { formatDate } from '../utils/dateUtils';
+import { ConfigurationMessage, OperationType, RoomType } from 'wsc-shared';
 
 export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage

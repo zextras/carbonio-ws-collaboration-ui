@@ -16,12 +16,12 @@ import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
+import { STREAM_TYPE } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	overflow: hidden;
@@ -90,7 +90,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	useEffect(() => {
 		if (!carouselIsVisible) {
-			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			const subscription = { userId: centralTile.userId, type: centralTile.type };
 			setUpdateSubscription(meetingId!, [subscription]);
 		}
 	}, [carouselIsVisible, centralTile, meetingId, setUpdateSubscription]);

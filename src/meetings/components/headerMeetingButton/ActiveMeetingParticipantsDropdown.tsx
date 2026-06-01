@@ -18,8 +18,8 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import { getMeetingIdFromRoom } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/MeetingTypes';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
+import { MeetingParticipant, MeetingParticipantMap } from 'wsc-shared';
 
 const CustomContainer = styled(Container)<{ $isDropdownOpen: boolean }>`
 	position: absolute;

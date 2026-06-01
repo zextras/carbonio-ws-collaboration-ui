@@ -5,26 +5,26 @@
  */
 
 import {
-	MeetingBe,
-	MeetingParticipantBe,
-	MeetingType
-} from '../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
-import { UserBe } from '../types/network/models/userBeTypes';
-import { FileToUpload } from '../types/store/ActiveConversationTypes';
-import {
 	ConfigurationMessage,
 	DateMessage,
 	FasteningAction,
+	FileToUpload,
 	Marker,
 	MarkerStatus,
+	MeetingBe,
+	MeetingParticipantBe,
+	MeetingType,
+	MemberBe,
 	MessageFastening,
 	MessageType,
 	OperationType,
-	TextMessage
-} from '../types/store/ChatsRegistryTypes';
-import { RoomType } from '../types/store/RoomTypes';
-import { User, UserType } from '../types/store/UserTypes';
+	RoomBe,
+	RoomType,
+	TextMessage,
+	User,
+	UserBe,
+	UserType
+} from 'wsc-shared';
 
 type AccountSettings = {
 	attrs: { [key: string]: string };

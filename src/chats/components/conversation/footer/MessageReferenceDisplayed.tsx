@@ -15,12 +15,8 @@ import useMessage from '../../../../hooks/useMessage';
 import GuestUserLabel from '../../../../meetings/components/GuestUserLabel';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import {
-	messageActionType,
-	ReferenceMessage
-} from '../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
+import { messageActionType, ReferenceMessage, TextMessage } from 'wsc-shared';
 
 const BorderContainer = styled(Container)<{
 	$customBorderColor: string;

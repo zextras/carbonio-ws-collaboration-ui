@@ -7,7 +7,7 @@
 import { TFunction } from 'i18next';
 
 import { buildPreviewItem } from './previewNavigationUtils';
-import { Attachment } from '../types/network/models/attachmentTypes';
+import {Attachment} from 'wsc-shared';
 
 const t = ((_key: string, fallback?: string): string => fallback ?? _key) as unknown as TFunction;
 

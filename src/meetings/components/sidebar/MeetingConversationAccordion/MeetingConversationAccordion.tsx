@@ -38,10 +38,13 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
-import { MessageType, OperationType } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { clearRoomHistory } from 'wsc-shared';
+import {
+	clearRoomHistory,
+	MeetingChatVisibility,
+	MessageType,
+	OperationType,
+	RoomType
+} from 'wsc-shared';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;

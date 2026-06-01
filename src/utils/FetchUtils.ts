@@ -8,8 +8,7 @@ import { includes } from 'lodash';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
-import { Version } from '../types/store/SessionTypes';
+import { AdditionalHeaders, Version } from 'wsc-shared';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';

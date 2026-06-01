@@ -13,22 +13,20 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import useStore from '../../tests/testStore';
-import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { User } from '../../types/store/UserTypes';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 import * as MeetingsApi from '../apis/MeetingsApi';
+import { RoomType } from "../../types/store/RoomTypes";
 
-const user1Info: User = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
@@ -41,34 +39,34 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipantBe = createMockParticipants({
+const user1Participant = createMockParticipants({
 	userId: 'user1',
 	videoStreamEnabled: true,
 	screenStreamEnabled: true
 });
 
-const user2Participant: MeetingParticipantBe = createMockParticipants({
+const user2Participant = createMockParticipants({
 	userId: 'user2',
 	videoStreamEnabled: true,
 	screenStreamEnabled: true
 });
 
-const user3Participant: MeetingParticipantBe = createMockParticipants({
+const user3Participant = createMockParticipants({
 	userId: 'user3',
 	videoStreamEnabled: true
 });
 
-const user4Participant: MeetingParticipantBe = createMockParticipants({
+const user4Participant = createMockParticipants({
 	userId: 'user4',
 	videoStreamEnabled: true
 });
 
-const user5Participant: MeetingParticipantBe = createMockParticipants({
+const user5Participant = createMockParticipants({
 	userId: 'user5',
 	videoStreamEnabled: false
 });
 
-const groupMeeting: MeetingBe = createMockMeeting({
+const groupMeeting = createMockMeeting({
 	roomId: groupRoom.id,
 	participants: [
 		user1Participant,

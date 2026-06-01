@@ -17,7 +17,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getUserEmail, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { Member, RoomType } from '../../../../types/store/RoomTypes';
+import { Member, RoomType } from 'wsc-shared';
 
 type ConversationInfoDetailsProps = {
 	roomId: string;

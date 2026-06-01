@@ -20,9 +20,14 @@ import {
 	getMeetingParticipants
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
-import { MeetingParticipantMap } from '../types/store/MeetingTypes';
-import { EventName, EventPayloads, getMeetingByMeetingId, leaveMeeting } from 'wsc-shared';
+import {
+	EventName,
+	EventPayloads,
+	getMeetingByMeetingId,
+	leaveMeeting,
+	STREAM_TYPE,
+	MeetingParticipantMap
+} from 'wsc-shared';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();

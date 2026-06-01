@@ -27,9 +27,9 @@ import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
 import { getIsThereAnyRoom } from '../../../store/selectors/RoomsSelectors';
 import { getExportedChat, getExportStatus } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { ExportStatus } from '../../../types/store/SessionTypes';
 import SettingsCard from '../SettingsCard';
 import ChatExporter from './ChatExporter';
+import { ExportStatus } from 'wsc-shared';
 
 const CustomListItem = styled(ListItem)`
 	margin: 0.2rem;

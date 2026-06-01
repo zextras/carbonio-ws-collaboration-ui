@@ -23,10 +23,9 @@ import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeeting
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
-import { updateAudioStreamStatus } from 'wsc-shared';
+import { updateAudioStreamStatus, STREAM_TYPE } from 'wsc-shared';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;

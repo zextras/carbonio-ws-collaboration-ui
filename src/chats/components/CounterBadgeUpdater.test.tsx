@@ -12,7 +12,7 @@ import CounterBadgeUpdater from './CounterBadgeUpdater';
 import useStore from '../../store/Store';
 import { createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { RoomType } from '../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const singleRoom = createMockRoom({ id: 'single-id', type: RoomType.ONE_TO_ONE });
 const groupRoom = createMockRoom({ id: 'group-id', type: RoomType.GROUP });

@@ -22,38 +22,31 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import {
-	MarkerStatus,
-	ConfigurationMessage,
-	MessageType,
-	OperationType
-} from '../../../../types/store/ChatsRegistryTypes';
-import { User } from '../../../../types/store/UserTypes';
+import {MarkerStatus, MessageType, OperationType, RoomType} from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 
 const iconEdit2 = 'icon: Edit2';
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
 	name: 'User2'
 });
 
-const user1Be: User = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
 	name: 'User1'
 });
 
-const user4Be: User = createMockUser({
+const user4Be = createMockUser({
 	id: 'user4Id',
 	email: 'user4@domain.com',
 	name: 'User4'
 });
 
-const mockedGroup: RoomBe = createMockRoom({
+const mockedGroup = createMockRoom({
 	id: 'groupId',
 	type: RoomType.GROUP,
 	members: [
@@ -63,7 +56,7 @@ const mockedGroup: RoomBe = createMockRoom({
 	]
 });
 
-const mockedOneToOne: RoomBe = createMockRoom({
+const mockedOneToOne = createMockRoom({
 	id: 'oneToOneId',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
@@ -113,7 +106,7 @@ const mockedTextMessageSentBySomeoneElse = createMockTextMessage({
 	text: 'I have a really bad headache!'
 });
 
-const mockedAddMemberMessage: ConfigurationMessage = createMockConfigurationMessage({
+const mockedAddMemberMessage = createMockConfigurationMessage({
 	id: 'AddMemberId',
 	roomId: mockedGroup.id,
 	date: 1234566789,
@@ -122,7 +115,7 @@ const mockedAddMemberMessage: ConfigurationMessage = createMockConfigurationMess
 	value: user4Be.id
 });
 
-const mockedConfigurationMessage: ConfigurationMessage = {
+const mockedConfigurationMessage = createMockConfigurationMessage({
 	id: 'ConfigurationId',
 	roomId: mockedGroup.id,
 	date: 123456789,
@@ -131,7 +124,7 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	value: '',
 	from: user1Be.id,
 	read: MarkerStatus.READ
-};
+});
 
 const mockedAttachmentMessage = createMockTextMessage({
 	roomId: mockedGroup.id,

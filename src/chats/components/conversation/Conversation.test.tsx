@@ -16,12 +16,16 @@ import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { User } from '../../../types/store/UserTypes';
 import * as api from 'wsc-shared';
-import { EventName, RoomOwnerDemotedEvent, RoomOwnerPromotedEvent, WsEventType } from 'wsc-shared';
+import {
+	EventName,
+	RoomOwnerDemotedEvent,
+	RoomOwnerPromotedEvent,
+	RoomType,
+	WsEventType
+} from 'wsc-shared';
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'Name of the group',
 	description: 'A description',
@@ -33,7 +37,7 @@ const testRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test-two',
 	name: 'Another group',
 	description: 'A description',
@@ -45,13 +49,13 @@ const testRoom2: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Info: User = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Info: User = createMockUser({
+const user2Info = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'

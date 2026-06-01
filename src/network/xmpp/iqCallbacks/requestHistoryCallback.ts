@@ -7,17 +7,17 @@
 import { filter, forEach, size, unionBy } from 'lodash';
 
 import useStore from '../../../store/Store';
+import { getId } from '../utility/decodeJid';
+import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
+import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppClient } from '../XMPPClient';
 import {
 	ConfigurationMessage,
 	MessageFastening,
 	MessageRange,
 	MessageType,
 	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { getId } from '../utility/decodeJid';
-import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
-import HistoryAccumulator from '../utility/HistoryAccumulator';
-import { xmppClient } from '../XMPPClient';
+} from 'wsc-shared';
 
 export function handleHistory(
 	queryId: string,

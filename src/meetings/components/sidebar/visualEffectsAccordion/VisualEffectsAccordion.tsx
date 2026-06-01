@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import VisualEffectsList from './VisualEffectsList';
 import { getVisualEffectsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
+import { MeetingAccordionType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

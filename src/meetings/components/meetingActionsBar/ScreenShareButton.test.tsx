@@ -16,10 +16,9 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { routerContextSetup, setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MEETINGS_ROUTES } from '../../contexts/routerContext';
 
-const meeting: MeetingBe = createMockMeeting({ roomId: createMockRoom().id });
+const meeting = createMockMeeting({ roomId: createMockRoom().id });
 
 describe('ScreenShare button', () => {
 	test('Should render the component', async () => {

@@ -5,7 +5,7 @@
  */
 import { canPerformAction } from './MessageActionsUtils';
 import { createMockTextMessage } from '../tests/createMock';
-import { messageActionType } from '../types/store/ActiveConversationTypes';
+import { messageActionType } from 'wsc-shared';
 
 describe('messageActionsUtils function', () => {
 	test('edit action can be performed', () => {

@@ -16,8 +16,7 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
+import {ContactInfo, RoomType, SearchUsersByFeatureSoapResponse} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 // Mock objects
@@ -39,7 +38,7 @@ const user3: ContactInfo = {
 	id: 'user3-id'
 };
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]

@@ -14,7 +14,7 @@ import {
 	getAttachmentType,
 	getAttachmentURL
 } from './attachmentUtils';
-import { Attachment } from '../types/network/models/attachmentTypes';
+import {Attachment} from 'wsc-shared';
 
 export const buildPreviewItem = (
 	attachment: Attachment,

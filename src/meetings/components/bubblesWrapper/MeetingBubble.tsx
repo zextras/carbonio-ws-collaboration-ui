@@ -22,15 +22,10 @@ import {
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import {
-	MeetingChatVisibility,
-	MeetingAccordionType
-} from '../../../types/store/ActiveMeetingTypes';
-import { MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import { RouterContext } from '../../contexts/routerContext';
+import { MeetingChatVisibility, MeetingAccordionType, MessageType, RoomType } from 'wsc-shared';
 
 const BubbleContainer = styled(Container)<{
 	$messageAttachment: boolean;

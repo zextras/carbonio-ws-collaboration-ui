@@ -9,10 +9,11 @@ import { filter, find, includes, last, map } from 'lodash';
 import {
 	FileToUpload,
 	InfoPanelTab,
-	ReferenceMessage
-} from '../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
-import { RootStore } from 'wsc-shared';
+	MessageType,
+	ReferenceMessage,
+	RootStore,
+	TextMessage
+} from 'wsc-shared';
 
 export const getReferenceMessage = (
 	store: RootStore,

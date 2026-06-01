@@ -7,23 +7,14 @@
 import { find } from 'lodash';
 
 import {
-	ActiveMeeting,
 	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
+	RootStore,
 	STREAM_TYPE,
 	TileData,
 	VirtualBackgroundType
-} from '../../types/store/ActiveMeetingTypes';
-import { RootStore } from 'wsc-shared';
-
-export const getActiveMeeting = (
-	store: RootStore,
-	meetingId: string
-): ActiveMeeting | undefined => {
-	if (store.activeMeeting?.meetingId === meetingId) return store.activeMeeting;
-	return undefined;
-};
+} from 'wsc-shared';
 
 export const getMeetingSidebarStatus = (store: RootStore): boolean =>
 	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];

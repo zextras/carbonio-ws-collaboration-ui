@@ -6,16 +6,17 @@
 
 import { filter, find, reduce, size, some } from 'lodash';
 
-import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
-import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
-import { RootStore } from 'wsc-shared';
+import {
+	Meeting,
+	MeetingParticipantMap,
+	MeetingType,
+	RootStore,
+	STREAM_TYPE,
+	TileData
+} from 'wsc-shared';
 
 export const getMeeting = (store: RootStore, meetingId: string): Meeting | undefined =>
 	store.meetings[meetingId];
-
-export const getMeetingByRoomId = (store: RootStore, roomId: string): Meeting | undefined =>
-	find(store.meetings, (meeting) => meeting.roomId === roomId);
 
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
 	store.meetings[meetingId]?.roomId;
@@ -24,7 +25,7 @@ export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	!!find(store.meetings, (meeting) => meeting.roomId === roomId)?.active;
 
 export const getMeetingActiveByMeetingId = (store: RootStore, meetingId: string): boolean =>
-	!!store.meetings[meetingId]?.active;
+	store.meetings[meetingId]?.active;
 
 export const getIfThereAreActiveVirtualRooms = (store: RootStore): boolean =>
 	some(

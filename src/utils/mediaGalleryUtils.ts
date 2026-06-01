@@ -6,7 +6,7 @@
 
 import moment from 'moment-timezone';
 
-import { Attachment } from '../types/network/models/attachmentTypes';
+import {Attachment} from 'wsc-shared';
 
 type AttachmentMonthGroup = {
 	key: string;

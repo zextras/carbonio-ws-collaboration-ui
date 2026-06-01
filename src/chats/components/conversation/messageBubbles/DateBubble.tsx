@@ -11,8 +11,8 @@ import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { Z_INDEX_RANK } from '../../../../types/generics';
-import { DateMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { dateString } from '../../../../utils/dateUtils';
+import { DateMessage } from 'wsc-shared';
 
 type DateMsgProps = {
 	message: DateMessage;

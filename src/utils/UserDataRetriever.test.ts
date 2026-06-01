@@ -7,7 +7,7 @@ import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
 import useStore from '../store/Store';
-import { UserType } from '../types/store/UserTypes';
+import { UserType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const user1 = {

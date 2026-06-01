@@ -11,8 +11,8 @@ import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported, getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
+import { AttachmentMessageType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const fileIcon = 'icon: FileTextOutline';

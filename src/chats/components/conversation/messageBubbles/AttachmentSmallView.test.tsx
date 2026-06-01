@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
+import { AttachmentMessageType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 vi.mock('../../../../hooks/usePreviewNavigation', () => ({

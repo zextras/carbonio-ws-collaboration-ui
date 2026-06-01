@@ -15,11 +15,10 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getFrontCameraStream } from '../../../utils/UserMediaManager';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
-import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer } from 'wsc-shared';
+import { leaveMeeting, updateAudioStreamStatus, updateMediaOffer, STREAM_TYPE } from 'wsc-shared';
 
 type MobileActionBarProps = {
 	meetingId: string;

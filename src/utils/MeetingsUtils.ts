@@ -13,7 +13,7 @@ import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import raiseHandSound from '../meetings/assets/raiseHand.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',

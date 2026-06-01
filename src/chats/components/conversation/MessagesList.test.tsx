@@ -19,17 +19,15 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { scrollToEnd, scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
 import {
-	ConfigurationMessage,
+	RoomType,
 	FasteningAction,
 	MarkerStatus,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { User } from '../../../types/store/UserTypes';
-import { scrollToEnd, scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
+} from 'wsc-shared';
 
 const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
 const helloString = 'Hello guys!';
@@ -38,31 +36,31 @@ const userA = createMockUser({ id: 'userA', name: 'userA' });
 const userB = createMockUser({ id: 'userB', name: 'userB' });
 const userC = createMockUser({ id: 'userC', name: 'userC' });
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2'
 });
 
-const user3Be: User = createMockUser({
+const user3Be = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User3'
 });
 
-const user1Be: User = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1'
 });
 
-const user4Be: User = createMockUser({
+const user4Be = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'User4'
 });
 
-const room: RoomBe = {
+const room = {
 	id: 'Room-Id',
 	name: 'Room Name',
 	description: 'This is the description of the group',
@@ -92,7 +90,7 @@ const room: RoomBe = {
 	]
 };
 
-const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+const mockedRoom = createMockRoom({ id: 'roomTest' });
 
 const mockedAddMemberMessage = createMockConfigurationMessage({
 	id: 'AddMemberId',
@@ -110,7 +108,7 @@ const mockedRemoveMemberMessage = createMockConfigurationMessage({
 	value: user3Be.id
 });
 
-const mockedConfigurationMessage: ConfigurationMessage = {
+const mockedConfigurationMessage = createMockConfigurationMessage({
 	id: 'ConfigurationId',
 	roomId: room.id,
 	date: 123456789,
@@ -119,7 +117,7 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	value: room.id,
 	from: user2Be.id,
 	read: MarkerStatus.READ
-};
+});
 
 const generateListMessage = (entries: Partial<TextMessage>[]): TextMessage[] =>
 	entries.map((msg, idx) => ({
@@ -459,7 +457,7 @@ describe('Display group of messages', () => {
 	});
 
 	test('Display a group of messages sent as: first user A, 3 messages user B (second is deleted) , last user C', async () => {
-		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+		const mockedRoom = createMockRoom({ id: 'roomTest' });
 		const messages = generateListMessage([
 			{ roomId: mockedRoom.id, from: userA.id },
 			{ roomId: mockedRoom.id, from: userB.id },

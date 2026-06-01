@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttributesList, ExportStatus } from '../../types/store/SessionTypes';
-import { UserType } from '../../types/store/UserTypes';
-import { RootStore } from 'wsc-shared';
+import { AttributesList, ExportStatus, RootStore, UserType } from 'wsc-shared';
 
 export const getSelectedConversation = (store: RootStore, roomId: string): boolean =>
 	store.session.selectedRoom === roomId;

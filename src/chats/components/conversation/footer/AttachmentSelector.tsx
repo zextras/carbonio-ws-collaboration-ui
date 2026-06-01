@@ -28,7 +28,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 type AttachmentSelectorProps = {
 	roomId: string;

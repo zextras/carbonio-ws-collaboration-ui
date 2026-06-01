@@ -15,10 +15,8 @@ import AddNewMemberModal from './AddNewMemberModal';
 import { getRoomMembers, getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
-import { Member } from '../../../../types/store/RoomTypes';
 import { ContactsSelected } from '../../contactSelector/ContactsSelector';
-import { addRoomMembers } from 'wsc-shared';
+import { AddMemberFields, addRoomMembers } from 'wsc-shared';
 
 type AddNewMemberProps = {
 	roomId: string;
@@ -32,8 +30,8 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		'Remove someone to add new members'
 	);
 
-	const members: Member[] = useStore((state) => getRoomMembers(state, roomId));
-	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
+	const members = useStore((state) => getRoomMembers(state, roomId));
+	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);

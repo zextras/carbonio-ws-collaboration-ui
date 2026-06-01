@@ -29,10 +29,9 @@ import {
 } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, Message, MessageType } from 'wsc-shared';
 
 const Messages = styled(Container)`
 	position: relative;

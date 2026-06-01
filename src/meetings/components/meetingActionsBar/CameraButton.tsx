@@ -24,10 +24,9 @@ import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeeting
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
-import { updateMediaOffer } from 'wsc-shared';
+import { updateMediaOffer, STREAM_TYPE } from 'wsc-shared';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;

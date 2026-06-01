@@ -11,9 +11,8 @@ import DefaultUserSidebarView from './DefaultUserSidebarView';
 import useStore from '../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../tests/createMock';
 import { screen, setup } from '../../tests/test-utils';
-import { UserBe } from '../../types/network/models/userBeTypes';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
 
 describe('DefaultUserSidebarView', () => {
 	test('should render virtual button when empty', () => {

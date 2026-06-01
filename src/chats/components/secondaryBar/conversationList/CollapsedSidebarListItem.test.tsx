@@ -12,20 +12,19 @@ import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { User } from '../../../../types/store/UserTypes';
+import {RoomType} from 'wsc-shared';
 
 const backgroundColor = 'background-color: #cfd5dc';
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
 	name: 'User2'
 });
 
-const user1Be: User = createMockUser();
+const user1Be = createMockUser();
 
-const mockedGroup: RoomBe = createMockRoom({
+const mockedGroup = createMockRoom({
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: user1Be.id, owner: true }),
@@ -34,7 +33,7 @@ const mockedGroup: RoomBe = createMockRoom({
 	]
 });
 
-const mockedOneToOne: RoomBe = createMockRoom({
+const mockedOneToOne = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 });

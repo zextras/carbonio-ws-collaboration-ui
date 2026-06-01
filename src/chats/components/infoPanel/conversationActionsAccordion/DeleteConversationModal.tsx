@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getMeetingActive } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 type DeleteModalProps = {
 	deleteConversationModalOpen: boolean;

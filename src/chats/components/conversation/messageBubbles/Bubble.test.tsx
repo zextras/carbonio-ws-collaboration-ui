@@ -20,23 +20,20 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { User, UserType } from '../../../../types/store/UserTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
+import { MarkerStatus, TextMessage, RoomType, UserType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
-const user1Be: User = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1'
 });
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2'
@@ -45,13 +42,13 @@ const user2Be: User = createMockUser({
 const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });
 const mockMember2 = createMockMember({ userId: user2Be.id });
 
-const guestUser: User = createMockUser({ type: UserType.GUEST });
+const guestUser = createMockUser({ type: UserType.GUEST });
 
-const mockedTempRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members: [mockMember1] });
+const mockedTempRoom = createMockRoom({ type: RoomType.TEMPORARY, members: [mockMember1] });
 
 const mockedMsgFromGuest = createMockTextMessage({ roomId: mockedTempRoom.id, from: guestUser.id });
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP,
 	members: [mockMember1, mockMember2]

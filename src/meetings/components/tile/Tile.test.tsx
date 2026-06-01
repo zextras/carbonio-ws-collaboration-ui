@@ -18,30 +18,25 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from 'wsc-shared';
+import { RootStore, STREAM_TYPE } from 'wsc-shared';
 
 const iconVideoOffOutline = 'icon: VideoOffOutline';
 const iconMicOffOutline = 'icon: MicOffOutline';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3 = createMockUser({ id: 'user3Id', name: 'user 3' });
 
-const member1: MemberBe = createMockMember({ userId: user1.id, owner: true });
-const member2: MemberBe = createMockMember({ userId: user2.id });
-const member3: MemberBe = createMockMember({ userId: user3.id, owner: true });
+const member1 = createMockMember({ userId: user1.id, owner: true });
+const member2 = createMockMember({ userId: user2.id });
+const member3 = createMockMember({ userId: user3.id, owner: true });
 
-const room: RoomBe = createMockRoom({ members: [member1, member2, member3] });
+const room = createMockRoom({ members: [member1, member2, member3] });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-const meeting: MeetingBe = createMockMeeting({
+const user1Participant = createMockParticipants({ userId: user1.id });
+const user3Participant = createMockParticipants({ userId: user3.id });
+const user2Participant = createMockParticipants({ userId: user2.id });
+const meeting = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
 });

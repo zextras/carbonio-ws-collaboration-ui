@@ -13,7 +13,7 @@ import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingType } from '../../types/network/models/meetingBeTypes';
+import {MeetingType} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 describe('MeetingAccessPage', () => {

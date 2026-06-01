@@ -13,9 +13,7 @@ import {
 	getMediaGalleryIsLoading
 } from '../store/selectors/MediaGallerySelectors';
 import useStore from '../store/Store';
-import { Attachment } from '../types/network/models/attachmentTypes';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../types/store/MediaGalleryTypes';
-import { getRoomAttachments } from 'wsc-shared';
+import {Attachment, DEFAULT_MEDIA_GALLERY_FILTER, getRoomAttachments} from 'wsc-shared';
 
 export const MEDIA_GALLERY_PAGE_SIZE = 20;
 

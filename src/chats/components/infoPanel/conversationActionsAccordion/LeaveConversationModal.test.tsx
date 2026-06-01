@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import LeaveConversationModal from './LeaveConversationModal';
 import useStore from '../../../../store/Store';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import {RoomBe, RoomType} from 'wsc-shared';
 
 describe('Leave Conversation', () => {
 	test('Leave modal should be visible', async () => {

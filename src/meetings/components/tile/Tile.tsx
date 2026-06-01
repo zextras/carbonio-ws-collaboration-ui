@@ -25,7 +25,7 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE } from 'wsc-shared';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;

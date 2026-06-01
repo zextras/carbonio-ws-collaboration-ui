@@ -14,8 +14,8 @@ import usePiPWindow from '../../../hooks/usePipWindow';
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { MeetingAccordionType, MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts/routerContext';
+import { MeetingAccordionType, MeetingViewType } from 'wsc-shared';
 
 const MoreActionsButton = (): ReactElement => {
 	const { meetingId } = useContext(RouterContext);

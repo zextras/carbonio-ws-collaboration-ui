@@ -12,15 +12,13 @@ import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',
@@ -41,7 +39,7 @@ const testRoom: RoomBe = createMockRoom({
 	]
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [

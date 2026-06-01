@@ -19,17 +19,14 @@ import {
 	pdfFile
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import Chat from '../Chat';
-import { RootStore } from 'wsc-shared';
+import { RootStore, FileToUpload, RoomType } from 'wsc-shared';
 
 const add1Attachment = 'Add 1 attachment';
 const add2Attachments = 'Add 2 attachments';
 const genericDescription = 'generic description';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	members: [
@@ -38,9 +35,9 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
-const imageToUpload: FileToUpload = createMockFileToUpload();
+const imageToUpload = createMockFileToUpload();
 
-const pdfToUpload: FileToUpload = createMockFileToUpload({
+const pdfToUpload = createMockFileToUpload({
 	file: pdfFile,
 	fileId: 'genericAttachmentId'
 });

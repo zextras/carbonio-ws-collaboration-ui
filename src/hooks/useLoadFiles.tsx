@@ -9,8 +9,8 @@ import { useCallback } from 'react';
 import { map } from 'lodash';
 
 import useStore from '../store/Store';
-import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { uid } from '../utils/attachmentUtils';
+import { FileToUpload } from 'wsc-shared';
 
 const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
 	const addFilesToAttach = useStore((store) => store.addFilesToAttach);

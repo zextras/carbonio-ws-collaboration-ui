@@ -12,8 +12,7 @@ import { map, pull } from 'lodash';
 import MeetingBubble from './MeetingBubble';
 import useEventListener from '../../../hooks/useEventListener';
 import { Z_INDEX_RANK } from '../../../types/generics';
-import { MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, MessageType } from 'wsc-shared';
 
 const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 	position: absolute;

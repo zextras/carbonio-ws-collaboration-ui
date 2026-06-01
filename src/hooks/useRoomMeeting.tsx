@@ -13,9 +13,7 @@ import {
 	getRoomTypeSelector
 } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { MeetingType } from '../types/network/models/meetingBeTypes';
-import { RoomType } from '../types/store/RoomTypes';
-import { createMeeting } from 'wsc-shared';
+import {MeetingType, RoomType, createMeeting} from 'wsc-shared';
 
 type RoomMeetingHookType = {
 	openMeeting: () => void;

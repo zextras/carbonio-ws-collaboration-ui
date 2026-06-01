@@ -18,26 +18,25 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'id', name: 'Name' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 
-const testRoom: RoomBe = createMockRoom({ id: 'roomTest', name: 'Test room' });
+const testRoom = createMockRoom({ id: 'roomTest', name: 'Test room' });
 
 const messageToForward = createMockTextMessage({ roomId: testRoom.id });
 const messageToForward2 = createMockTextMessage({ roomId: testRoom.id });
 const messageToForward3 = createMockTextMessage({ roomId: testRoom.id });
 
-const chat: RoomBe = createMockRoom({
+const chat = createMockRoom({
 	id: 'chat',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id })]
 });
-const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2', type: RoomType.GROUP });
-const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomType.TEMPORARY });
+const chat2 = createMockRoom({ id: 'chat2', name: 'Chat 2', type: RoomType.GROUP });
+const chat3 = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomType.TEMPORARY });
 
 vi.mock('../../../../hooks/useRouting');
 

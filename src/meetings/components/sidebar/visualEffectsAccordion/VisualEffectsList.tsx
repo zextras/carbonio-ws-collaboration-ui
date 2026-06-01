@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import useVirtualBackground from '../../../../hooks/useVirtualBackground';
 import { getBackgroundImage } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { VirtualBackgroundType } from '../../../../types/store/ActiveMeetingTypes';
+import { VirtualBackgroundType } from 'wsc-shared';
 
 const PictureContainer = styled(Container)<{ $picture?: string | false; $isSelected: boolean }>`
 	aspect-ratio: 1.2959;

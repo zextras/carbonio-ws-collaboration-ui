@@ -19,8 +19,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { OperationType } from '../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { OperationType, RoomType } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'logged-user', name: 'Logged User' });
 const otherUser = createMockUser({ id: 'other-user', name: 'Other User' });

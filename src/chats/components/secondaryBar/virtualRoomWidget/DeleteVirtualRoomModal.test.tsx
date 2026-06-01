@@ -17,20 +17,19 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import {RoomType} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
-const temporaryRoomMod: RoomBe = createMockRoom({
+const temporaryRoomMod = createMockRoom({
 	id: 'temporary-mod-room-test',
 	type: RoomType.TEMPORARY,
 	name: 'Temporary mod room',
 	members: [createMockMember({ userId: sessionUser.id, owner: true })]
 });
 
-const scheduledMeetingMod: MeetingBe = createMockMeeting({
+const scheduledMeetingMod = createMockMeeting({
 	id: 'scheduled-meeting-mod-test',
 	roomId: temporaryRoomMod.id
 });

@@ -27,9 +27,8 @@ import StopRecordingModal from './StopRecordingModal';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
-import { startRecording } from 'wsc-shared';
+import { startRecording, MeetingAccordionType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

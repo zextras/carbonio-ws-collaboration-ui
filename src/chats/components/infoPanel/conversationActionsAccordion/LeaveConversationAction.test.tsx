@@ -13,13 +13,12 @@ import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { User } from '../../../../types/store/UserTypes';
+import {RoomType} from 'wsc-shared';
 import * as api from 'wsc-shared';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
 const mockedRoom = createMockRoom({
 	id: 'roomId',

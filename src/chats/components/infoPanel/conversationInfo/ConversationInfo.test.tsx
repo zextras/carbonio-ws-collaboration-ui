@@ -14,16 +14,15 @@ import { mockUseMediaQueryCheck } from '../../../../hooks/__mocks__/useMediaQuer
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
+import {RoomType} from 'wsc-shared';
 
-const user1Be: UserBe = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	id: 'Room-Id',
 	name: 'Room Name',
 	description: 'This is the description of the group',
@@ -35,7 +34,7 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
-const oneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom = createMockRoom({
 	id: 'One-To-One-Room-Id',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id, owner: true })]

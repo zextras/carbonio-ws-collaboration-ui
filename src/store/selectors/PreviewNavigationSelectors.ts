@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
-import { RootStore } from 'wsc-shared';
+import { PreviewNavigationSession, RootStore } from 'wsc-shared';
 
 export const getPreviewNavigationActive = (store: RootStore): PreviewNavigationSession | null =>
 	store.previewNavigation.active;

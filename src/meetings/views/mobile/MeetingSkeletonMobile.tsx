@@ -11,7 +11,6 @@ import { Container } from '@zextras/carbonio-design-system';
 
 import useGeneralMeetingControls from '../../../hooks/useGeneralMeetingControls';
 import useStore from '../../../store/Store';
-import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import Logo from '../../components/Logo';
 import MobileActionBar from '../../components/mobile/MobileActionBar';
@@ -20,7 +19,7 @@ import MobileParticipants from '../../components/mobile/MobileParticipants';
 import MobileTilesView from '../../components/mobile/MobileTilesView';
 import RecordingInfo from '../../components/RecordingInfo';
 import { RouterContext } from '../../contexts/routerContext';
-import { leaveMeeting } from 'wsc-shared';
+import { leaveMeeting, UserType } from 'wsc-shared';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',

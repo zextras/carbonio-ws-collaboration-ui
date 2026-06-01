@@ -8,8 +8,7 @@ import { find, forEach, size } from 'lodash';
 
 import { isBefore } from './dateUtils';
 import useStore from '../store/Store';
-import { Marker, MarkerStatus, Message, TextMessage } from '../types/store/ChatsRegistryTypes';
-import { Member } from '../types/store/RoomTypes';
+import { Marker, MarkerStatus, Message, TextMessage, Member } from 'wsc-shared';
 
 export function calcReads(
 	messageDate: number,

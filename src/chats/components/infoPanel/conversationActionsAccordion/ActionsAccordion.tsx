@@ -25,7 +25,7 @@ import {
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

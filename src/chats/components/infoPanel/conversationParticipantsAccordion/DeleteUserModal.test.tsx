@@ -12,9 +12,8 @@ import DeleteUserModal from './DeleteUserModal';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 
-const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
+const mockRoom = createMockRoom({ id: 'roomId' });
 
 describe('Delete user modal', () => {
 	test('User click the "Remove" button', async () => {

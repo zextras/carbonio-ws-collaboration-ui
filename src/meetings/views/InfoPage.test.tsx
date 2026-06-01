@@ -11,8 +11,8 @@ import InfoPage from './InfoPage';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
 import { routerContextSetup } from '../../tests/test-utils';
-import { UserType } from '../../types/store/UserTypes';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
+import { UserType } from 'wsc-shared';
 
 const pages = [
 	[PAGE_INFO_TYPE.ROOM_EMPTY, 'This Room is empty', 'Try later', 'It seems nobody is in this Room'],

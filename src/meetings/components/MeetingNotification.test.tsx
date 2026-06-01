@@ -13,7 +13,7 @@ import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { RoomType } from '../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 import * as MeetingsApi from 'wsc-shared';
 
 const sendAQuickMessage = 'Send a quick message';

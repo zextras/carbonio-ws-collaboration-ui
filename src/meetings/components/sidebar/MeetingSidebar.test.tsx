@@ -19,15 +19,13 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { routerContextSetup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
+import {RoomType, VirtualBackgroundType} from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 const user2 = createMockUser({ id: 'user2', name: 'User 2' });
 
-const oneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom = createMockRoom({
 	id: '1to1-room-test',
 	type: RoomType.ONE_TO_ONE,
 	members: [
@@ -37,7 +35,7 @@ const oneToOneRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'group-room-test',
 	type: RoomType.GROUP,
 	members: [
@@ -48,7 +46,7 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const temporaryRoomMod: RoomBe = createMockRoom({
+const temporaryRoomMod = createMockRoom({
 	id: 'temporary-mod-room-test',
 	type: RoomType.TEMPORARY,
 	members: [
@@ -58,7 +56,7 @@ const temporaryRoomMod: RoomBe = createMockRoom({
 	]
 });
 
-const temporaryRoom: RoomBe = createMockRoom({
+const temporaryRoom = createMockRoom({
 	id: 'temporary-room-test',
 	type: RoomType.TEMPORARY,
 	members: [
@@ -68,25 +66,25 @@ const temporaryRoom: RoomBe = createMockRoom({
 	]
 });
 
-const oneToOneMeeting: MeetingBe = createMockMeeting({
+const oneToOneMeeting = createMockMeeting({
 	id: '1to1-meeting-test',
 	roomId: oneToOneRoom.id,
 	participants: [createMockParticipants({ userId: sessionUser.id })]
 });
 
-const groupMeeting: MeetingBe = createMockMeeting({
+const groupMeeting = createMockMeeting({
 	id: 'group-meeting-test',
 	roomId: groupRoom.id,
 	participants: [createMockParticipants({ userId: sessionUser.id })]
 });
 
-const scheduledMeetingMod: MeetingBe = createMockMeeting({
+const scheduledMeetingMod = createMockMeeting({
 	id: 'scheduled-meeting-mod-test',
 	roomId: temporaryRoomMod.id,
 	participants: [createMockParticipants({ userId: sessionUser.id })]
 });
 
-const scheduledMeeting: MeetingBe = createMockMeeting({
+const scheduledMeeting = createMockMeeting({
 	id: 'scheduled-meeting-test',
 	roomId: temporaryRoom.id,
 	participants: [createMockParticipants({ userId: sessionUser.id })]

@@ -15,13 +15,8 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import {
-	FasteningAction,
-	MessageFastening,
-	MessageType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
 import { xmppClient } from '../XMPPClient';
+import { FasteningAction, MessageFastening, MessageType, TextMessage } from 'wsc-shared';
 
 const createXMPPTextMessage = (textMessage: TextMessage): Element => {
 	const parser = new DOMParser();

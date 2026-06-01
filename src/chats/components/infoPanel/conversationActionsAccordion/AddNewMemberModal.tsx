@@ -20,8 +20,8 @@ import { useTranslation } from 'react-i18next';
 
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { Member } from '../../../../types/store/RoomTypes';
 import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
+import { Member } from 'wsc-shared';
 
 type AddNewMemberProps = {
 	addNewMemberModalOpen: boolean;
