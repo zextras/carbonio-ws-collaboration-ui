@@ -9,7 +9,7 @@ import { produce } from 'immer';
 import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { getSharedCodeConfig } from '../../config';
+import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import {
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
@@ -22,6 +22,9 @@ import {
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import VideoScreenInConnection from "../../network/webRTC/VideoScreenInConnection";
+import VideoOutConnection from "../../network/webRTC/VideoOutConnection";
+import ScreenOutConnection from "../../network/webRTC/ScreenOutConnection";
 
 const isCurrentMeeting = (store: RootStore, meetingId: string): boolean =>
 	meetingId === store.activeMeeting?.meetingId;
@@ -46,12 +49,6 @@ export const useActiveMeetingSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				const {
-					BidirectionalConnectionAudioInOut,
-					VideoScreenInConnection,
-					VideoOutConnection,
-					ScreenOutConnection
-				} = getSharedCodeConfig();
 				draft.activeMeeting = {
 					meetingId,
 					// Peer connections and streams

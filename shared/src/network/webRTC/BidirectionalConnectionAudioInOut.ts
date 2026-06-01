@@ -8,11 +8,10 @@ import { first } from 'lodash';
 import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
-import useStore from '../../store/Store';
+import { sharedConfig } from '../../config';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { getAudioStream } from '../../utils/UserMediaManager';
-import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from 'wsc-shared';
+import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from "../apis/MeetingsApi";
 
 export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;
@@ -51,9 +50,9 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.updateRemoteStreamAudio();
 		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
 			if (audioStreamEnabled) {
-				getAudioStream(selectedAudioDeviceId).then((stream) => {
+				sharedConfig.UserMediaManager.getAudioStream(selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
-					useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+					sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
 				});
 			}
 		});
@@ -96,7 +95,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
+							const version = sharedConfig.useStore.getState().session.apiVersion;
 							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
 								audioIceRestart(this.meetingId, localDesc.sdp);
 							}

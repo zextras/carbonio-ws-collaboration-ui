@@ -6,7 +6,9 @@
 import { sharedConfig } from '../../config';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { EventName, getMeeting, getRoom } from 'wsc-shared';
+import { EventName } from '../../types/AppEvents';
+import { getMeeting } from '../apis/MeetingsApi';
+import { getRoom } from '../apis/RoomsApi';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = sharedConfig.useStore.getState();

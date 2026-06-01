@@ -125,11 +125,6 @@ export const freeMediaResources = (streamTrack: MediaStream | null): void => {
 	}
 };
 
-export const getWorkerUrl = (): URL =>
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	new URL('../meetings/components/virtualBackground/selfieSegmentationWorker.js', import.meta.url);
-
 export const createMeetingLinkFromOutside = (meetingId: string | undefined): string => {
 	const baseURL = split(window.location.href, CARBONIO_PATH);
 	return `${baseURL[0]}${CARBONIO_PATH}${MEETINGS_PATH}${meetingId}`;

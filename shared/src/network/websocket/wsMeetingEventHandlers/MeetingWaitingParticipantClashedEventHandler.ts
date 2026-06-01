@@ -7,7 +7,7 @@
 import { sharedConfig } from '../../../config';
 import { MeetingWaitingParticipantClashed } from '../../../types/network/websocket/wsMeetingEvents';
 import { inThisMeetingTab } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingWaitingParticipantClashedEventHandler = (
 	event: MeetingWaitingParticipantClashed

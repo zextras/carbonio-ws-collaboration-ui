@@ -6,7 +6,7 @@
 import { sharedConfig } from '../../../config';
 import { MeetingParticipantClashedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMeetingActive } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingParticipantClashedEventHandler = (
 	event: MeetingParticipantClashedEvent

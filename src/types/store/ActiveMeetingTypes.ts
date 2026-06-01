@@ -7,9 +7,9 @@
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
-	IVideoScreenInConnection,
-	IVideoOutConnection
-} from '../network/webRTC/webRTC';
+	IVideoOutConnection,
+	IVideoScreenInConnection
+} from 'wsc-shared';
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;

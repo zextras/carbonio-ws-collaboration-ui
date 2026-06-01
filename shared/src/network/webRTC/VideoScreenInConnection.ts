@@ -9,11 +9,11 @@ import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
-import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { createMediaAnswer, videoIceRestart } from 'wsc-shared';
+import { sharedConfig } from "../../config";
+import { createMediaAnswer, videoIceRestart } from "../apis/MeetingsApi";
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -35,7 +35,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private readonly onConnectionStateChange = (): void => {
 		const state = this.peerConn?.connectionState;
-		const version = useStore.getState().session.apiVersion;
+		const version = sharedConfig.useStore.getState().session.apiVersion;
 		if (state === 'failed' && version && gte(version, '1.6.6')) {
 			videoIceRestart(this.meetingId);
 		}
@@ -106,7 +106,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			completeStreams,
 			(stream) => `${stream.userId}-${stream.type}`
 		) as StreamsSubscriptionMap;
-		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
+		sharedConfig.useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
 	}
 
 	public closePeerConnection(): void {

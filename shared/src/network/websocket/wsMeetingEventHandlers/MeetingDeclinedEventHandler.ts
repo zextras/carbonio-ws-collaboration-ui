@@ -6,10 +6,10 @@
 import { find } from 'lodash';
 
 import { sharedConfig } from '../../../config';
+import { EventName } from '../../../types/AppEvents';
 import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
 
 export const meetingDeclinedEventHandler = (event: MeetingDeclinedEvent): void => {
 	if (isMeetingActive(event.meetingId)) {

@@ -9,7 +9,7 @@ import { produce } from 'immer';
 import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { getSharedCodeConfig } from '../../config';
+import { sharedConfig } from "../../config";
 import { EventName } from '../../types/AppEvents';
 import {
 	BackfillRequest,
@@ -284,7 +284,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// Add message to the end of list or replace a placeholder message
 				messages.push(placeholderMessage);
 
-				getSharedCodeConfig().sendCustomEvent({
+				sharedConfig.sendCustomEvent({
 					name: EventName.NEW_MESSAGE,
 					data: placeholderMessage
 				});

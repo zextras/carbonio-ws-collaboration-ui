@@ -47,6 +47,52 @@ Object.defineProperty(global, 'Audio', {
 	})
 });
 
+Object.defineProperty(window, 'RTCPeerConnection', {
+	value: vi.fn(function RTCPeerConnectionMock() {
+		return {
+			addTrack: vi.fn(),
+			createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+			setRemoteDescription: vi.fn(() => Promise.resolve()),
+			setLocalDescription: vi.fn(() => Promise.resolve())
+		};
+	})
+});
+
+Object.defineProperty(window, 'RTCSessionDescription', {
+	value: vi.fn(function RTCPeerSessionDescriptionMock() {
+		return {
+			sdp: 'sdp',
+			type: 'offer'
+		};
+	})
+});
+
+Object.defineProperty(window, 'AudioContext', {
+	writable: true,
+	value: vi.fn(function AudioContextMock() {
+		return {
+			createOscillator: vi.fn(() => ({
+				connect: (): {
+					stream: {
+						getAudioTracks: () => {
+							prototype: MediaStream;
+							new (): MediaStream;
+							new (stream: MediaStream): MediaStream;
+							new (tracks: MediaStreamTrack[]): MediaStream;
+						}[];
+					};
+				} => ({
+					stream: {
+						getAudioTracks: () => [MediaStream]
+					}
+				}),
+				start: vi.fn()
+			})),
+			createMediaStreamDestination: vi.fn()
+		};
+	})
+});
+
 export const mockFetchAPI = vi.fn();
 export const mockSendFileFetchAPI = vi.fn();
 export const mockUploadFileFetchAPI = vi.fn();
@@ -54,50 +100,6 @@ export const mockDisplayWaitingListNotification = vi.fn();
 
 beforeAll(() => {
 	configureSharedCode({
-		// eslint-disable-next-line object-shorthand
-		BidirectionalConnectionAudioInOut: vi.fn().mockImplementation(function () {
-			return {
-				closePeerConnection: vi.fn(),
-				handleRemoteAnswer: vi.fn(),
-				updateLocalStreamTrack: vi.fn(),
-				updateRemoteStreamAudio: vi.fn(),
-				closeRtpSenderTrack: vi.fn()
-			};
-		}),
-		// eslint-disable-next-line object-shorthand
-		VideoScreenInConnection: vi.fn().mockImplementation(function () {
-			return {
-				closePeerConnection: vi.fn(),
-				handleRemoteOffer: vi.fn(),
-				handleParticipantsSubscribed: vi.fn(),
-				removeStream: vi.fn(),
-				subscriptionManager: {
-					addSubscription: vi.fn(),
-					removeSubscription: vi.fn(),
-					deleteSubscription: vi.fn(),
-					updateSubscription: vi.fn()
-				}
-			};
-		}),
-		// eslint-disable-next-line object-shorthand
-		VideoOutConnection: vi.fn().mockImplementation(function () {
-			return {
-				closePeerConnection: vi.fn(),
-				startVideo: vi.fn(),
-				stopVideo: vi.fn(),
-				handleRemoteAnswer: vi.fn(),
-				updateLocalStreamTrack: vi.fn()
-			};
-		}),
-		// eslint-disable-next-line object-shorthand
-		ScreenOutConnection: vi.fn().mockImplementation(function () {
-			return {
-				closePeerConnection: vi.fn(),
-				startScreenShare: vi.fn(),
-				handleRemoteAnswer: vi.fn(),
-				stopScreenShare: vi.fn()
-			};
-		}),
 		useStore,
 		sendCustomEvent: (event) => {
 			window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
@@ -121,7 +123,16 @@ beforeAll(() => {
 			getForwardedMessage: vi.fn()
 		},
 		sendAudioFeedback: mockPlayAudio,
-		displayWaitingListNotification: mockDisplayWaitingListNotification
+		displayWaitingListNotification: mockDisplayWaitingListNotification,
+		UserMediaManager: {
+			CONSTRAINT_ASPECT_RATIO: { aspectRatio: 1.7777 },
+			enumerateDevices: vi.fn(),
+			getAudioStream: vi.fn(() => Promise.resolve(new MediaStream())),
+			getVideoStream: vi.fn(() => Promise.resolve(new MediaStream())),
+			getFrontCameraStream: vi.fn(() => Promise.resolve(new MediaStream())),
+			getAudioAndVideo: vi.fn(() => Promise.resolve(new MediaStream())),
+			getScreenStream: vi.fn(() => Promise.resolve(new MediaStream()))
+		}
 	});
 });
 

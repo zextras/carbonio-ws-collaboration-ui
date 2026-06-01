@@ -6,7 +6,7 @@
 import { sharedConfig } from '../../../config';
 import { MeetingUserRejectedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingUserRejectedEventHandler = (event: MeetingUserRejectedEvent): void => {
 	const state = sharedConfig.useStore.getState();

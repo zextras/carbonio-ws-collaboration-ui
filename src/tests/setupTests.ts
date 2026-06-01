@@ -10,16 +10,13 @@ import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
 import displayWaitingListNotification from '../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
-import BidirectionalConnectionAudioInOut from '../network/webRTC/BidirectionalConnectionAudioInOut';
-import ScreenOutConnection from '../network/webRTC/ScreenOutConnection';
-import VideoOutConnection from '../network/webRTC/VideoOutConnection';
-import VideoScreenInConnection from '../network/webRTC/VideoScreenInConnection';
 import HistoryAccumulator from '../network/xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 import { BrowserUtils } from '../utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
 import { sendAudioFeedback } from '../utils/MeetingsUtils';
+import * as UserMediaManager from '../utils/UserMediaManager';
 import { configureSharedCode } from 'wsc-shared';
 
 configure({
@@ -226,10 +223,6 @@ beforeEach(() => {
 
 beforeAll(() => {
 	configureSharedCode({
-		BidirectionalConnectionAudioInOut,
-		VideoScreenInConnection,
-		VideoOutConnection,
-		ScreenOutConnection,
 		useStore,
 		sendCustomEvent,
 		fetchAPI,
@@ -239,7 +232,8 @@ beforeAll(() => {
 		xmppClient,
 		HistoryAccumulator,
 		sendAudioFeedback,
-		displayWaitingListNotification
+		displayWaitingListNotification,
+		UserMediaManager
 	});
 });
 

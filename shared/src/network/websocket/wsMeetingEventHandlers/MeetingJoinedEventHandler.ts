@@ -12,7 +12,7 @@ import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 const playJoinNotification = throttle(
 	() => sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION),

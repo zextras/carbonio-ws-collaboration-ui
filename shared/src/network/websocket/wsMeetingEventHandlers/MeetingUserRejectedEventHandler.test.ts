@@ -12,7 +12,7 @@ import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingUserRejectedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 const room = createMockRoom({ type: RoomType.TEMPORARY });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });

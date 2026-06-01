@@ -10,7 +10,7 @@ import useStore from '../../../tests/testStore';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingStartedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 const oneToOneRoom = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
 const oneToOneMeeting = createMockMeeting({ id: 'oneToOneMeetingId', roomId: oneToOneRoom.id });

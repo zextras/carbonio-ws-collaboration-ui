@@ -8,7 +8,7 @@ import { find } from 'lodash';
 import { sharedConfig } from '../../../config';
 import { MeetingStartedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingStartedEventHandler = (event: MeetingStartedEvent): void => {
 	const state = sharedConfig.useStore.getState();

@@ -8,7 +8,7 @@ import { find } from 'lodash';
 import { sharedConfig } from '../../../config';
 import { MeetingWaitingParticipantJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { inThisMeetingTab } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingWaitingParticipantJoinedEventHandler = (
 	event: MeetingWaitingParticipantJoinedEvent

@@ -9,15 +9,27 @@ import type { UseBoundStore, StoreApi } from 'zustand';
 import { EventName, EventPayloads } from './types/AppEvents';
 import { RequestType } from './types/network/fetch';
 import { AdditionalHeaders } from './types/network/models/attachmentTypes';
-import { MeetingSoundFeedback } from './utils/MeetingsUtils';
 import type { RootStore } from './types/store/StoreTypes';
+import { MeetingSoundFeedback } from './utils/MeetingsUtils';
+
+export interface IUserMediaManager {
+	CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints;
+	enumerateDevices: () => void;
+	getAudioStream: (deviceId?: string) => Promise<MediaStream>;
+	getVideoStream: (deviceId?: string) => Promise<MediaStream>;
+	getFrontCameraStream: () => Promise<MediaStream>;
+	getAudioAndVideo: (
+		audio?:
+			| boolean
+			| { noiseSuppression?: boolean; echoCancellation?: boolean; deviceId?: { exact: string } },
+		video?: boolean | { deviceId?: { exact: string } }
+	) => Promise<MediaStream>;
+	getScreenStream: () => Promise<MediaStream>;
+}
 
 export interface ISharedCodeDependencies {
-	BidirectionalConnectionAudioInOut: any;
-	VideoScreenInConnection: any;
-	VideoOutConnection: any;
-	ScreenOutConnection: any;
 	useStore: UseBoundStore<StoreApi<RootStore>>;
+	UserMediaManager: IUserMediaManager;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
 	fetchAPI: <T>(
 		endpoint: string,
@@ -52,7 +64,7 @@ export const configureSharedCode = (deps: ISharedCodeDependencies): void => {
 	sharedCodeDependencies = deps;
 };
 
-export const getSharedCodeConfig = (): ISharedCodeDependencies => {
+const getSharedCodeConfig = (): ISharedCodeDependencies => {
 	if (!sharedCodeDependencies) {
 		throw new Error(
 			'Shared dependencies not configured. Call configureSharedCode() before using the store.'

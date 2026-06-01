@@ -20,7 +20,7 @@ import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/ws
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
-import * as api from 'wsc-shared';
+import * as MeetingsApi from '../apis/MeetingsApi';
 
 const user1Info: User = createMockUser({
 	id: 'user1',
@@ -82,7 +82,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 let spyOnSubscribeToMedia: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
-	spyOnSubscribeToMedia = vi.spyOn(api, 'subscribeToMedia').mockResolvedValue({} as Response);
+	spyOnSubscribeToMedia = vi.spyOn(MeetingsApi, 'subscribeToMedia').mockResolvedValue({} as Response);
 	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.email, displayName: user1Info.name });
 	store.addRooms([groupRoom]);

@@ -8,7 +8,7 @@ import { MeetingAudioStreamChangedEvent } from '../../../types/network/websocket
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingAudioStreamChangedEventHandler = (
 	event: MeetingAudioStreamChangedEvent

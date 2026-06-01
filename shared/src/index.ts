@@ -17,6 +17,8 @@ export * from './types/websocket/wsEvents';
 export * from './types/websocket/wsConversationEvents';
 export * from './types/websocket/wsMeetingEvents';
 
+export * from './types/network/webRTC/webRTC';
+
 // Store slices
 export * from './store/slices/ActiveConversationsSlice';
 export * from './store/slices/ActiveMeetingSlice';
@@ -29,7 +31,7 @@ export * from './store/slices/SessionStoreSlice';
 export * from './store/slices/UsersStoreSlice';
 export * from './store/slices/RoomsStoreSlice';
 
-// Apis, WebSocket
+// Apis, Soap, WebSocket, WebRTC
 export * from './network';
 
 // Utils

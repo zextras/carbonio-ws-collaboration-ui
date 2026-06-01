@@ -6,7 +6,7 @@
 import { sharedConfig } from '../../../config';
 import { MeetingRecordingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMeetingActive } from '../eventHandlersUtilities';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../../types/AppEvents';
 
 export const meetingRecordingStoppedEventHandler = (event: MeetingRecordingStoppedEvent): void => {
 	const state = sharedConfig.useStore.getState();

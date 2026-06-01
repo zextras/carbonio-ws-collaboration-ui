@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
 import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
@@ -25,7 +26,6 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
 	onTrack: (trackEvent: RTCTrackEvent) => void;
 	onNegotiationNeeded: () => void;
-	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;
@@ -52,7 +52,7 @@ export interface IScreenOutConnection extends IPeerConnection {
 }
 
 export interface IVideoScreenInConnection extends IPeerConnection {
-	subscriptionManager?: any; // TODO
+	subscriptionManager?: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;

@@ -28,7 +28,7 @@ import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { buildQueryString } from '../../utils/fetchUtils';
 import { getLastUnreadMessage } from '../../utils/getLastUnreadMessage';
-import { EventName } from 'wsc-shared';
+import { EventName } from '../../types/AppEvents';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';

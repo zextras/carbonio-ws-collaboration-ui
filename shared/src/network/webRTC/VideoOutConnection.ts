@@ -7,11 +7,10 @@
 import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
-import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { getVideoStream } from '../../utils/UserMediaManager';
-import { videoIceRestart, updateMediaOffer } from 'wsc-shared';
+import { sharedConfig } from "../../config";
+import { updateMediaOffer, videoIceRestart } from "../apis/MeetingsApi";
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -40,10 +39,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
-			getVideoStream(selectedVideoDeviceId)
+			sharedConfig.UserMediaManager.getVideoStream(selectedVideoDeviceId)
 				.then((stream) => {
 					this.updateLocalStreamTrack(stream);
-					useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);
+					sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);
 					resolve();
 				})
 				.catch((err) => {
@@ -82,7 +81,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
+							const version = sharedConfig.useStore.getState().session.apiVersion;
 							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
 								videoIceRestart(this.meetingId, localDesc.sdp);
 							}
@@ -126,8 +125,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		useStore.getState().removeLocalStreams(STREAM_TYPE.VIDEO);
-		useStore.getState().removeBackgroundStream();
+		const {removeLocalStreams, removeBackgroundStream } = sharedConfig.useStore.getState();
+		removeLocalStreams(STREAM_TYPE.VIDEO);
+		removeBackgroundStream();
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.rtpSender = null;

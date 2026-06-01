@@ -7,11 +7,10 @@
 import { gte } from 'semver';
 
 import { PeerConnConfig } from './PeerConnConfig';
-import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { getScreenStream } from '../../utils/UserMediaManager';
-import { updateMediaOffer, screenIceRestart } from 'wsc-shared';
+import { screenIceRestart, updateMediaOffer } from "../apis/MeetingsApi";
+import { sharedConfig } from "../../config";
 
 export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -67,9 +66,9 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
-		getScreenStream().then((stream) => {
+		sharedConfig.UserMediaManager.getScreenStream().then((stream) => {
 			this.updateLocalStreamTrack(stream);
-			useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, stream);
+			sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, stream);
 		});
 	}
 
@@ -83,7 +82,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 						?.setLocalDescription(rtcSessionDesc)
 						.then(() => {
 							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
+							const version = sharedConfig.useStore.getState().session.apiVersion;
 							if (localDesc?.sdp && version && gte(version, '1.6.13')) {
 								screenIceRestart(this.meetingId, localDesc.sdp);
 							}
@@ -106,7 +105,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		useStore.getState().removeLocalStreams(STREAM_TYPE.SCREEN);
+		sharedConfig.useStore.getState().removeLocalStreams(STREAM_TYPE.SCREEN);
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.peerConn = null;
