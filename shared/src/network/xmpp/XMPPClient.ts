@@ -21,8 +21,13 @@ import { sanitizeXmppMessage } from './utility/sanitizeXmppMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import { sharedConfig } from '../../config';
 import { getEditAndDeleteFasteningSelector } from '../../store/selectors/ChatsRegistrySelectors';
+import {
+	FasteningAction,
+	MessageFastening,
+	MessageType,
+	TextMessage
+} from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import { FasteningAction, MessageFastening, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 
 const jabberData = 'jabber:x:data';

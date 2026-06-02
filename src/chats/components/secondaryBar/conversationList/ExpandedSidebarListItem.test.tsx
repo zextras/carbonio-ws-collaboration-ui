@@ -9,8 +9,6 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
@@ -22,7 +20,14 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MarkerStatus, MessageType, OperationType, RoomType } from 'wsc-shared';
+import {
+	MarkerStatus,
+	MessageType,
+	OperationType,
+	RoomType,
+	onComposingMessageStanza,
+	xmppClient
+} from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 

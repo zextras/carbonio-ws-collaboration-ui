@@ -10,7 +10,6 @@ import { now } from 'moment';
 
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -23,7 +22,7 @@ import {
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
 import { dateToTimestamp } from '../../../utils/dateUtils';
-import { FasteningAction, OperationType, RoomType, TextMessage } from 'wsc-shared';
+import { FasteningAction, OperationType, RoomType, TextMessage, xmppClient } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const mockedRoom = createMockRoom({

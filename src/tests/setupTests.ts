@@ -10,8 +10,6 @@ import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
 import displayWaitingListNotification from '../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
-import HistoryAccumulator from '../network/xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 import { BrowserUtils } from '../utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
@@ -229,8 +227,6 @@ beforeAll(() => {
 		sendFileFetchAPI,
 		uploadFileFetchAPI,
 		BrowserUtils,
-		xmppClient,
-		HistoryAccumulator,
 		sendAudioFeedback,
 		displayWaitingListNotification,
 		UserMediaManager

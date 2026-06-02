@@ -7,7 +7,6 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { usePinMessage } from './usePinMessage';
-import { xmppClient } from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 import {
 	createMockMember,
@@ -16,7 +15,7 @@ import {
 	createMockUser
 } from '../tests/createMock';
 import { ProvidersWrapper } from '../tests/test-utils';
-import { RoomType } from 'wsc-shared';
+import { RoomType, xmppClient } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });

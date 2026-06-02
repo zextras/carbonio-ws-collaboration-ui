@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import ChatExporter from './ChatExporter';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { RoomType } from 'wsc-shared';
+import { RoomType, xmppClient } from 'wsc-shared';
 
 const roomId = 'roomId';
 

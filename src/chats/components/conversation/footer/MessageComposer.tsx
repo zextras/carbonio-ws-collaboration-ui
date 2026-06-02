@@ -33,7 +33,6 @@ import MessageArea from './MessageArea';
 import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -51,7 +50,8 @@ import {
 	messageActionType,
 	ReferenceMessage,
 	MessageType,
-	TextMessage
+	TextMessage,
+	xmppClient
 } from 'wsc-shared';
 
 type ConversationMessageComposerProps = {

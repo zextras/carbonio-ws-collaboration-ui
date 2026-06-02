@@ -52,8 +52,6 @@ export interface ISharedCodeDependencies {
 		optionalFields?: AdditionalHeaders
 	) => Promise<any>;
 	BrowserUtils: any;
-	xmppClient: any;
-	HistoryAccumulator: any;
 	sendAudioFeedback: (type: MeetingSoundFeedback) => void;
 	displayWaitingListNotification: (meetingId: string) => void;
 }

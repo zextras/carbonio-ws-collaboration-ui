@@ -7,9 +7,9 @@
 import { debounce } from 'lodash';
 
 import { sharedConfig } from '../../../config';
+import { RootStore } from '../../../types/store/StoreTypes';
 import { getId, getResource } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 /**
  * CHAT STATE EVENTS (XEP-0085)

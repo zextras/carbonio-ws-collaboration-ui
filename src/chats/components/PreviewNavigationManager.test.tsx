@@ -15,14 +15,14 @@ import {
 } from '@zextras/carbonio-ui-preview';
 
 import PreviewNavigationManager from './PreviewNavigationManager';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { screen, setup } from '../../tests/test-utils';
 import {
 	Attachment,
 	PreviewNavigationSession,
 	bulkDeleteRoomAttachments,
-	getRoomAttachments
+	getRoomAttachments,
+	xmppClient
 } from 'wsc-shared';
 
 vi.mock('wsc-shared', async (importOriginal) => ({

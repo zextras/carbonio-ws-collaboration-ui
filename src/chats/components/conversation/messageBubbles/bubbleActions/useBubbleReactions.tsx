@@ -12,10 +12,9 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CustomReactionPicker from './CustomReactionPicker';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../../store/Store';
-import { TextMessage } from 'wsc-shared';
+import { TextMessage, xmppClient } from 'wsc-shared';
 
 export enum ReactionType {
 	'THUMBS_UP' = '\uD83D\uDC4D',

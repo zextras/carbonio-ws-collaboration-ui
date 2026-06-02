@@ -29,6 +29,8 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { buildQueryString } from '../../utils/fetchUtils';
 import { getLastUnreadMessage } from '../../utils/getLastUnreadMessage';
+import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { xmppClient } from '../xmpp/XMPPClient';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -182,7 +184,7 @@ export const addRoomAttachment = (
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) sharedConfig.xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
 	sharedConfig.useStore.getState().setPlaceholderMessage({
@@ -254,11 +256,11 @@ export const forwardMessages = (
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {
-		const queryId = sharedConfig.HistoryAccumulator.getNextId();
-		return sharedConfig.xmppClient
+		const queryId = HistoryAccumulator.getNextId();
+		return xmppClient
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
-				const historyMessage = sharedConfig.HistoryAccumulator.getForwardedMessage(queryId);
+				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
 				if (historyMessage) {
 					historyMessage.getElementsByTagName('body')[0].textContent = message.text;
 					listOfMessages[message.stanzaId] = historyMessage.outerHTML;

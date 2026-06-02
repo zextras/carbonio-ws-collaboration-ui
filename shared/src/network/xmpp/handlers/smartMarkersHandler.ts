@@ -5,10 +5,10 @@
  */
 
 import { sharedConfig } from '../../../config';
+import { Marker } from '../../../types/store/ChatsRegistryTypes';
 import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
-import { Marker } from '../../../types/store/ChatsRegistryTypes';
 
 export function onDisplayedMessageStanza(message: Element): true {
 	const displayed = getTagElement(message, 'displayed');

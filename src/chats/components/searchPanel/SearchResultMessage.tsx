@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
@@ -22,7 +21,7 @@ import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { formatDate } from '../../../utils/dateUtils';
 import { scrollToMessage } from '../../../utils/scrollUtils';
-import { TextMessage } from 'wsc-shared';
+import { TextMessage, xmppClient } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	border-radius: 0.25rem;

@@ -8,8 +8,8 @@ import { orderBy } from 'lodash';
 
 import { getRequiredAttribute, getRequiredTagElement } from './decodeStanza';
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { dateToTimestamp } from '../../../utils/dateUtils';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 class HistoryAccumulator {
 	// Singleton design pattern

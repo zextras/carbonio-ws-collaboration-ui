@@ -22,7 +22,6 @@ import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
@@ -33,7 +32,7 @@ import useStore from '../../../store/Store';
 import { getPinAttachmentColor, getPinAttachmentIcon } from '../../../utils/attachmentUtils';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { scrollToMessage } from '../../../utils/scrollUtils';
-import { AttachmentMessageType, TextMessage } from 'wsc-shared';
+import { AttachmentMessageType, TextMessage, xmppClient } from 'wsc-shared';
 
 interface PinMessageProps {
 	pinnedMessage: TextMessage;

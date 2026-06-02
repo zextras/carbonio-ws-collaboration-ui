@@ -12,8 +12,6 @@ import { MEETINGS_PATH } from './constants/appConstants';
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
 import displayWaitingListNotification from './meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
-import HistoryAccumulator from './network/xmpp/utility/HistoryAccumulator';
-import { xmppClient } from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
 import { BrowserUtils } from './utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
@@ -28,8 +26,6 @@ configureSharedCode({
 	sendFileFetchAPI,
 	uploadFileFetchAPI,
 	BrowserUtils,
-	xmppClient,
-	HistoryAccumulator,
 	sendAudioFeedback,
 	displayWaitingListNotification,
 	UserMediaManager

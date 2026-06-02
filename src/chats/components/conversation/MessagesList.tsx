@@ -16,7 +16,6 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener from '../../../hooks/useEventListener';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getHistoryIsFullyLoaded,
 	getIdMessageWhereScrollIsStopped,
@@ -31,7 +30,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
-import { EventName, EventPayloads, Message, MessageType } from 'wsc-shared';
+import { EventName, EventPayloads, Message, MessageType, xmppClient } from 'wsc-shared';
 
 const Messages = styled(Container)`
 	position: relative;
