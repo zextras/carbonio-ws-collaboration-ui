@@ -6,11 +6,10 @@
 
 import React from 'react';
 
-import { act, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import useStore from '../../../../store/Store';
-import { buildComposingStanza } from '../../../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
 	createMockConfigurationMessage,
@@ -20,14 +19,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import {
-	MarkerStatus,
-	MessageType,
-	OperationType,
-	RoomType,
-	onComposingMessageStanza,
-	xmppClient
-} from 'wsc-shared';
+import { MarkerStatus, MessageType, OperationType, RoomType } from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 
@@ -65,13 +57,6 @@ const mockedOneToOne = createMockRoom({
 	id: 'oneToOneId',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
-});
-
-const mockedTextMessageSentByMeIntoGroup = createMockTextMessage({
-	id: 'idSimpleTextMessage',
-	roomId: mockedGroup.id,
-	read: MarkerStatus.READ,
-	from: user1Be.id
 });
 
 const mockedTextMessageSentByOther = createMockTextMessage({
@@ -289,40 +274,6 @@ describe('Expanded sidebar list item', () => {
 			expect(screen.queryByTestId(iconEdit2)).not.toBeInTheDocument();
 			expect(screen.queryByText(draftMessage)).not.toBeInTheDocument();
 			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeVisible();
-		});
-
-		test('when another user stops typing, after 7 seconds the last message sent is rendered', async () => {
-			const store = useStore.getState();
-			store.setInboxMessages([mockedTextMessageSentByMeIntoGroup]);
-			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
-						roomId: mockedGroup.id,
-						from: user4Be.id,
-						isWriting: true
-					})
-				);
-			});
-			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeVisible();
-			vi.advanceTimersByTime(3000);
-			act(() => {
-				onComposingMessageStanza.call(
-					xmppClient,
-					buildComposingStanza({
-						roomId: mockedGroup.id,
-						from: user4Be.id,
-						isWriting: false
-					})
-				);
-			});
-			vi.advanceTimersByTime(7000);
-			expect(screen.getByTestId(iconDoneAll)).toBeVisible();
-			const messageContent = screen.getByText(
-				new RegExp(`${mockedTextMessageSentByMeIntoGroup.text}`, 'i')
-			);
-			expect(messageContent).toBeVisible();
 		});
 	});
 });

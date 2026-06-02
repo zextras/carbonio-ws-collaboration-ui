@@ -122,7 +122,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	[['zustand/devtools', never]],
 	[],
 	ChatsRegistryStoreSlice
-> = (set, get) => ({
+> = (set) => ({
 	chatsRegistry: {},
 	newMessage: (message: Message): void => {
 		set(

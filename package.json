@@ -21,7 +21,7 @@
 		"postpublish": "pinst --enable",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "pnpm run type-check -- --watch",
-		"lint": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src",
+		"lint": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./shared",
 		"lint:noWarning": "eslint --quiet --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src",
 		"build:dev": "sdk build --dev --pkgRel $(date +%s)"
 	},

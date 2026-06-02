@@ -12,9 +12,9 @@ import { configureSharedCode } from '../config';
 export const mockNotify = vi.fn();
 
 vi.mock('@zextras/carbonio-shell-ui', () => ({
-	t: (key: string, fallback?: string) => fallback ?? key,
+	t: (key: string, fallback?: string): string => fallback ?? key,
 	IS_FOCUS_MODE: false,
-	getNotificationManager: () => ({ notify: mockNotify })
+	getNotificationManager: (): any => ({ notify: mockNotify })
 }));
 
 const initialState = useStore.getState();
@@ -42,15 +42,6 @@ Object.defineProperty(window, 'MediaStream', {
 			getAudioTracks: vi.fn(() => [MediaStream]),
 			getVideoTracks: vi.fn(() => [MediaStream]),
 			addTrack: vi.fn()
-		};
-	})
-});
-
-Object.defineProperty(global, 'Audio', {
-	writable: true,
-	value: vi.fn(function AudioMock() {
-		return {
-			play: mockPlayAudio
 		};
 	})
 });

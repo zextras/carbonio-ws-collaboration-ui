@@ -6,9 +6,8 @@
 
 import { includes } from 'lodash';
 
-import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { AdditionalHeaders, Version } from 'wsc-shared';
+import { AdditionalHeaders, charToUnicode, Version } from 'wsc-shared';
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';

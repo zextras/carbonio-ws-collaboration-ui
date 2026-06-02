@@ -13,4 +13,3 @@ export * from './websocket/WebSocketClient';
 export * from './soap/SearchUsersByFeatureRequest';
 
 export { xmppClient } from './xmpp/XMPPClient';
-export { onComposingMessageStanza } from './xmpp/handlers/composingMessageHandler';

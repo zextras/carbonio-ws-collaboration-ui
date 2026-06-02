@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { configureSharedCode } from './config';
+import UserDataRetriever from './utils/UserDataRetriever';
 
 // Configs
 export { configureSharedCode };
@@ -18,6 +19,7 @@ export * from './store/index';
 // Utils
 export * from './utils/textUtils';
 export * from './utils/MeetingsUtils';
+export { UserDataRetriever };
 
 // Types
 export * from './types/network/models/attachmentTypes';
