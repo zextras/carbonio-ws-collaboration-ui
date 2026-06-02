@@ -72,8 +72,8 @@ importers:
         specifier: 7.8.1
         version: 7.8.1
       strophe.js:
-        specifier: 1.6.2
-        version: 1.6.2
+        specifier: 2.0.0
+        version: 2.0.0
       use-sync-external-store:
         specifier: 1.6.0
         version: 1.6.0(react@18.3.1)
@@ -2310,8 +2310,8 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@xmldom/xmldom@0.8.7':
-    resolution: {integrity: sha512-sI1Ly2cODlWStkINzqGrZ8K6n+MTSbAeQnAipGyL+KZCXuHaRlj2gyyy8B/9MvsFFqN7XHryQnB2QwhzvJXovg==}
+  '@xmldom/xmldom@0.8.8':
+    resolution: {integrity: sha512-0LNz4EY8B/8xXY86wMrQ4tz6zEHZv9ehFMJPm8u2gq5lQ71cfRKdaKyxfJAx5aUoyzx0qzgURblTisPGgz3d+Q==}
     engines: {node: '>=10.0.0'}
     deprecated: this version has critical issues, please update to the latest version
 
@@ -5980,8 +5980,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  strophe.js@1.6.2:
-    resolution: {integrity: sha512-aS4zkPACypSsmewr54IAVexn+m9RHrnxQEn/kr8eF8jK5lhv+nZTEEcKMaXBRyQ00lpOAEY9lYHbApXwqIjCpA==}
+  strophe.js@2.0.0:
+    resolution: {integrity: sha512-2YKE5Lbjg3H+X5f2tIApmf/5WUZ8cGnWlaIvLMZ3ksKtCN7ib5VhNU53DPzSqhV4JgXbb6jGPj0Jv8Un/fOORQ==}
 
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
@@ -9256,7 +9256,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@xmldom/xmldom@0.8.7':
+  '@xmldom/xmldom@0.8.8':
     optional: true
 
   '@xtuc/ieee754@1.2.0': {}
@@ -13225,11 +13225,12 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  strophe.js@1.6.2:
+  strophe.js@2.0.0:
     dependencies:
       abab: 2.0.6
     optionalDependencies:
-      '@xmldom/xmldom': 0.8.7
+      '@types/ws': 8.18.1
+      '@xmldom/xmldom': 0.8.8
       ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
