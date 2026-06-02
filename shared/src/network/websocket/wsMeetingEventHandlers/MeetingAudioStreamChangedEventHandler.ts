@@ -5,9 +5,9 @@
  */
 import { sharedConfig } from '../../../config';
 import { EventName } from '../../../types/AppEvents';
+import { AudioType } from '../../../types/AudioType';
 import { MeetingAudioStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingAudioStreamChangedEventHandler = (
@@ -25,8 +25,8 @@ export const meetingAudioStreamChangedEventHandler = (
 		if (isMyId(event.userId)) {
 			// Send to session user audio feedback on audio status changes
 			event.active
-				? sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
-				: sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
+				? sharedConfig.playAudio(AudioType.MEETING_AUDIO_ON)
+				: sharedConfig.playAudio(AudioType.MEETING_AUDIO_OFF);
 
 			// Mute the tile if someone performed this state on me
 			if (!event.active && !!event.moderatorId) {

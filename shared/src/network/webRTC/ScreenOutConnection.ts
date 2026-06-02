@@ -66,7 +66,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
-		sharedConfig.UserMediaManager.getScreenStream().then((stream) => {
+		sharedConfig.getStream(STREAM_TYPE.SCREEN).then((stream) => {
 			this.updateLocalStreamTrack(stream);
 			sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, stream);
 		});

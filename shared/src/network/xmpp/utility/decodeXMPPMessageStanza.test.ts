@@ -6,14 +6,14 @@
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
 import { buildConfigurationStanza, buildReactionStanza } from '../../../tests/buildXmppStanza';
-import { retractedMessage } from '../xmppMessageExamples';
 import {
 	ConfigurationMessage,
 	MessageFastening,
 	MessageType,
 	OperationType,
 	TextMessage
-} from 'wsc-shared';
+} from '../../../types/store/ChatsRegistryTypes';
+import { retractedMessage } from '../xmppMessageExamples';
 
 const applicationXml = 'application/xml';
 

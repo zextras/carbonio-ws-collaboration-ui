@@ -39,7 +39,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
-			sharedConfig.UserMediaManager.getVideoStream(selectedVideoDeviceId)
+			sharedConfig
+				.getStream(STREAM_TYPE.VIDEO, selectedVideoDeviceId)
 				.then((stream) => {
 					this.updateLocalStreamTrack(stream);
 					sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);

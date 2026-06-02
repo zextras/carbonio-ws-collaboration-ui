@@ -6,28 +6,27 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
+import { IS_FOCUS_MODE, t, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
 import displayWaitingListNotification from './meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import useStore from './store/Store';
-import { BrowserUtils } from './utils/BrowserUtils';
+import { playAudio } from './utils/AudioUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
-import { sendAudioFeedback } from './utils/MeetingsUtils';
-import * as UserMediaManager from './utils/UserMediaManager';
+import { getStream } from './utils/UserMediaManager';
 import { configureSharedCode, getLicense, MEETINGS_PATH } from 'wsc-shared';
 
 configureSharedCode({
 	useStore,
 	sendCustomEvent,
+	translate: t,
+	playAudio,
+	getStream,
 	fetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI,
-	BrowserUtils,
-	sendAudioFeedback,
-	displayWaitingListNotification,
-	UserMediaManager
+	displayWaitingListNotification
 });
 
 const UnlicensedApp = (): null => {

@@ -12,14 +12,13 @@ import { configureSharedCode } from '../config';
 export const mockNotify = vi.fn();
 
 vi.mock('@zextras/carbonio-shell-ui', () => ({
-	t: (key: string, fallback?: string): string => fallback ?? key,
 	IS_FOCUS_MODE: false,
 	getNotificationManager: (): any => ({ notify: mockNotify })
 }));
 
 const initialState = useStore.getState();
 
-export const mockPlayAudio = vi.fn(() => Promise.resolve());
+export const mockPlayAudio = vi.fn();
 
 Object.defineProperty(window, 'location', {
 	value: {
@@ -103,26 +102,13 @@ beforeAll(() => {
 		sendCustomEvent: (event) => {
 			window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
 		},
+		translate: (key, fallback) => fallback ?? key,
+		getStream: vi.fn(() => Promise.resolve(new MediaStream())),
+		playAudio: mockPlayAudio,
 		fetchAPI: mockFetchAPI,
 		sendFileFetchAPI: mockSendFileFetchAPI,
 		uploadFileFetchAPI: mockUploadFileFetchAPI,
-		BrowserUtils: {
-			clearAuthCookies: (): void => {
-				document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-				document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-			}
-		},
-		sendAudioFeedback: mockPlayAudio,
-		displayWaitingListNotification: mockDisplayWaitingListNotification,
-		UserMediaManager: {
-			CONSTRAINT_ASPECT_RATIO: { aspectRatio: 1.7777 },
-			enumerateDevices: vi.fn(),
-			getAudioStream: vi.fn(() => Promise.resolve(new MediaStream())),
-			getVideoStream: vi.fn(() => Promise.resolve(new MediaStream())),
-			getFrontCameraStream: vi.fn(() => Promise.resolve(new MediaStream())),
-			getAudioAndVideo: vi.fn(() => Promise.resolve(new MediaStream())),
-			getScreenStream: vi.fn(() => Promise.resolve(new MediaStream()))
-		}
+		displayWaitingListNotification: mockDisplayWaitingListNotification
 	});
 });
 

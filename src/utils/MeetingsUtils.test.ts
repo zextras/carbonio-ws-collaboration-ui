@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { playAudio } from './AudioUtils';
 import {
 	createMeetingLinkFromOutside,
 	findAllPossiblePairs,
 	getMeetingIdFromLink,
 	maximiseRowsAndColumns,
 	maximiseTileSize,
-	orderSpeakingTiles,
-	sendAudioFeedback
+	orderSpeakingTiles
 } from './MeetingsUtils';
 import { mockPlayAudio } from '../tests/setupTests';
-import { MeetingSoundFeedback, STREAM_TYPE, TileData } from 'wsc-shared';
+import { AudioType, STREAM_TYPE, TileData } from 'wsc-shared';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {
 		test('test return of meetingIn notification', () => {
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
-			sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
+			playAudio(AudioType.MEETING_JOIN_NOTIFICATION);
+			playAudio(AudioType.MEETING_AUDIO_ON);
+			playAudio(AudioType.MEETING_AUDIO_OFF);
+			playAudio(AudioType.MEETING_SCREENSHARE_NOTIFICATION);
+			playAudio(AudioType.NEW_WAITING_USER);
 
 			expect(mockPlayAudio).toHaveBeenCalledTimes(5);
 		});

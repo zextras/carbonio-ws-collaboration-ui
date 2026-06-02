@@ -18,7 +18,6 @@ export * from './store/index';
 
 // Utils
 export * from './utils/textUtils';
-export * from './utils/MeetingsUtils';
 export { UserDataRetriever };
 
 // Types
@@ -48,3 +47,4 @@ export * from './types/store/StoreTypes';
 export * from './types/store/UserTypes';
 
 export * from './types/AppEvents';
+export * from './types/AudioType';

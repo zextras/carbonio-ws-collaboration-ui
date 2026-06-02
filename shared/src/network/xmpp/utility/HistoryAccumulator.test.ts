@@ -7,7 +7,7 @@
 
 import HistoryAccumulator from './HistoryAccumulator';
 import { buildTextMessageFromHistory } from '../../../tests/buildXmppStanza';
-import { TextMessage } from 'wsc-shared';
+import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 describe('HistoryAccumulator', () => {
 	test('Push and get elements based on queryId', () => {

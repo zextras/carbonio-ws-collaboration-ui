@@ -5,16 +5,16 @@
  */
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
+import { t } from '@zextras/carbonio-shell-ui';
 import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
 import displayWaitingListNotification from '../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import useStore from '../store/Store';
-import { BrowserUtils } from '../utils/BrowserUtils';
+import { playAudio } from '../utils/AudioUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
-import { sendAudioFeedback } from '../utils/MeetingsUtils';
-import * as UserMediaManager from '../utils/UserMediaManager';
+import { getStream } from '../utils/UserMediaManager';
 import { configureSharedCode } from 'wsc-shared';
 
 configure({
@@ -223,13 +223,13 @@ beforeAll(() => {
 	configureSharedCode({
 		useStore,
 		sendCustomEvent,
+		translate: t,
+		getStream,
 		fetchAPI,
 		sendFileFetchAPI,
 		uploadFileFetchAPI,
-		BrowserUtils,
-		sendAudioFeedback,
-		displayWaitingListNotification,
-		UserMediaManager
+		playAudio,
+		displayWaitingListNotification
 	});
 });
 

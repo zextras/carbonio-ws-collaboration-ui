@@ -50,7 +50,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.updateRemoteStreamAudio();
 		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
 			if (audioStreamEnabled) {
-				sharedConfig.UserMediaManager.getAudioStream(selectedAudioDeviceId).then((stream) => {
+				sharedConfig.getStream(STREAM_TYPE.AUDIO, selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
 					sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
 				});

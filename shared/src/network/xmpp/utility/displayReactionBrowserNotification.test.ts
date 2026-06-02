@@ -13,7 +13,7 @@ import {
 } from '../../../tests/createMock';
 import { mockNotify } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
-import { FasteningAction } from 'wsc-shared';
+import { FasteningAction } from '../../../types/store/ChatsRegistryTypes';
 
 const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });

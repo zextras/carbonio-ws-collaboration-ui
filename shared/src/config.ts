@@ -7,30 +7,18 @@
 import type { UseBoundStore, StoreApi } from 'zustand';
 
 import { EventName, EventPayloads } from './types/AppEvents';
+import { AudioType } from './types/AudioType';
 import { RequestType } from './types/network/fetch';
 import { AdditionalHeaders } from './types/network/models/attachmentTypes';
+import { STREAM_TYPE } from './types/store/ActiveMeetingTypes';
 import type { RootStore } from './types/store/StoreTypes';
-import { MeetingSoundFeedback } from './utils/MeetingsUtils';
-
-export interface IUserMediaManager {
-	CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints;
-	enumerateDevices: () => void;
-	getAudioStream: (deviceId?: string) => Promise<MediaStream>;
-	getVideoStream: (deviceId?: string) => Promise<MediaStream>;
-	getFrontCameraStream: () => Promise<MediaStream>;
-	getAudioAndVideo: (
-		audio?:
-			| boolean
-			| { noiseSuppression?: boolean; echoCancellation?: boolean; deviceId?: { exact: string } },
-		video?: boolean | { deviceId?: { exact: string } }
-	) => Promise<MediaStream>;
-	getScreenStream: () => Promise<MediaStream>;
-}
 
 export interface ISharedCodeDependencies {
 	useStore: UseBoundStore<StoreApi<RootStore>>;
-	UserMediaManager: IUserMediaManager;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
+	translate: (key: string, fallback?: string) => string;
+	playAudio: (audioType: AudioType | string) => void;
+	getStream: (type: STREAM_TYPE, deviceId?: string) => Promise<MediaStream>;
 	fetchAPI: <T>(
 		endpoint: string,
 		method: RequestType,
@@ -51,8 +39,6 @@ export interface ISharedCodeDependencies {
 		signal?: AbortSignal,
 		optionalFields?: AdditionalHeaders
 	) => Promise<any>;
-	BrowserUtils: any;
-	sendAudioFeedback: (type: MeetingSoundFeedback) => void;
 	displayWaitingListNotification: (meetingId: string) => void;
 }
 

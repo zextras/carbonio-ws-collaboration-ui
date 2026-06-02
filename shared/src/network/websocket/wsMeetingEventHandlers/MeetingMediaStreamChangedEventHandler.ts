@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { sharedConfig } from '../../../config';
+import { AudioType } from '../../../types/AudioType';
 import { MeetingMediaStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { MeetingSoundFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingMediaStreamChangedEventHandler = (
@@ -30,7 +30,7 @@ export const meetingMediaStreamChangedEventHandler = (
 
 	// Send audio feedback when a new screen share started
 	if (isMeetingActive(event.meetingId) && mediaType === STREAM_TYPE.SCREEN && event.active) {
-		sharedConfig.sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
+		sharedConfig.playAudio(AudioType.MEETING_SCREENSHARE_NOTIFICATION);
 	}
 
 	// Update subscription manager
