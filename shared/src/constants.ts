@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// Carbonio constants
 export const CARBONIO_PATH = '/carbonio/';
 
-// Chats zapp constants
+// Chats zapp
 export const PRODUCT_NAME = 'Chats';
 export const CHATS_APP_ID = 'carbonio-ws-collaboration-ui';
 export const CHATS_ROUTE = 'chats';
 
-// Meetings zapp constants
+// Meetings zapp
 export const MEETINGS_NAME = 'Meetings';
 export const MEETINGS_ROUTE = 'meetings';
 export const MEETINGS_PATH = `focus-mode/${MEETINGS_ROUTE}/`;
@@ -27,3 +26,7 @@ export const TRACKER_EVENT = {
 	conversationSearch: 'Conversation search performed',
 	conversationSearchError: 'Conversation search error'
 };
+
+export const MESSAGE_CHAR_LIMIT = 4096;
+
+export const IME_LANGUAGES = ['zh_CN', 'ja', 'vi'];

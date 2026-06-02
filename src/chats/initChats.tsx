@@ -13,12 +13,11 @@ import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import PreviewNavigationManager from './components/PreviewNavigationManager';
-import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 import useEventListener from '../hooks/useEventListener';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
-import { EventName, EventPayloads } from 'wsc-shared';
+import { EventName, EventPayloads, CHATS_ROUTE, PRODUCT_NAME } from 'wsc-shared';
 
 const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
 

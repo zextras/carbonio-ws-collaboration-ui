@@ -30,7 +30,6 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
-import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import {
@@ -51,7 +50,9 @@ import {
 	ReferenceMessage,
 	MessageType,
 	TextMessage,
-	xmppClient
+	xmppClient,
+	IME_LANGUAGES,
+	MESSAGE_CHAR_LIMIT
 } from 'wsc-shared';
 
 type ConversationMessageComposerProps = {

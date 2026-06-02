@@ -8,7 +8,6 @@ import React, { useEffect, useState } from 'react';
 
 import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
-import { MEETINGS_PATH } from './constants/appConstants';
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
 import displayWaitingListNotification from './meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
@@ -17,7 +16,7 @@ import { BrowserUtils } from './utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
 import { sendAudioFeedback } from './utils/MeetingsUtils';
 import * as UserMediaManager from './utils/UserMediaManager';
-import { configureSharedCode, getLicense } from 'wsc-shared';
+import { configureSharedCode, getLicense, MEETINGS_PATH } from 'wsc-shared';
 
 configureSharedCode({
 	useStore,

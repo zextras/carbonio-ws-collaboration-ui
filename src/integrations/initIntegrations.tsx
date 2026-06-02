@@ -10,9 +10,9 @@ import { debounce } from 'lodash';
 
 import CopyRoomWidget from './copyRoomIntegration/CopyRoomWidget';
 import SelectVirtualRoomWidgetComponent from './virtualRoomIntegration/SelectVirtualRoomWidget';
-import { QUOTA_CHANGED_EVENT } from '../constants/appConstants';
 import { getAttribute } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
+import { QUOTA_CHANGED_EVENT } from 'wsc-shared';
 
 export default function useIntegrationsApp(): void {
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));

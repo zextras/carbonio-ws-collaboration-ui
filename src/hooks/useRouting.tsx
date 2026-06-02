@@ -8,8 +8,8 @@ import { useCallback, useContext } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { CHATS_ROUTE } from '../constants/appConstants';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
+import { CHATS_ROUTE } from 'wsc-shared';
 
 export enum ROUTES {
 	MAIN = '/',

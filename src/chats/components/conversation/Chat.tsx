@@ -23,13 +23,12 @@ import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
-import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { EventName, EventPayloads, messageActionType, xmppClient } from 'wsc-shared';
+import { EventName, EventPayloads, messageActionType, xmppClient, MEETINGS_PATH } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: relative;

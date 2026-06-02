@@ -7,7 +7,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
-import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useEventListener from '../../../hooks/useEventListener';
 import useRouting from '../../../hooks/useRouting';
@@ -16,7 +15,7 @@ import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelecto
 import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
-import { enterMeeting, EventName, joinMeeting, leaveWaitingRoom } from 'wsc-shared';
+import { enterMeeting, EventName, joinMeeting, leaveWaitingRoom, MEETINGS_PATH } from 'wsc-shared';
 
 const useAccessMeeting = (
 	mediaStatus: MediaStatus,

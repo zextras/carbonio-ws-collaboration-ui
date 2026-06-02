@@ -6,14 +6,13 @@
 
 import { concat, find, forEach, indexOf, last, map, min, range, split, without } from 'lodash';
 
-import { CARBONIO_PATH, MEETINGS_PATH } from '../constants/appConstants';
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import raiseHandSound from '../meetings/assets/raiseHand.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
-import { STREAM_TYPE, TileData } from 'wsc-shared';
+import { STREAM_TYPE, TileData, CARBONIO_PATH, MEETINGS_PATH } from 'wsc-shared';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',

@@ -9,8 +9,8 @@ import { waitFor } from '@testing-library/react';
 import * as shell from '@zextras/carbonio-shell-ui';
 
 import App from './app';
-import { MEETINGS_PATH } from './constants/appConstants';
 import { setup } from './tests/test-utils';
+import { MEETINGS_PATH } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 describe('App tests', () => {

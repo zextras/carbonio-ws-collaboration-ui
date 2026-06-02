@@ -9,7 +9,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import useStore from '../../../../store/Store';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -19,7 +18,8 @@ import {
 	getScheduledMeetingName,
 	wsClient,
 	UserType,
-	xmppClient
+	xmppClient,
+	MEETINGS_PATH
 } from 'wsc-shared';
 
 const useExternalAccess = (): {

@@ -15,9 +15,9 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationModal from './creationModal/ChatCreationModal';
-import { CHATS_APP_ID } from '../../constants/appConstants';
 import { getAttribute } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { CHATS_APP_ID } from 'wsc-shared';
 
 const RegisterCreationButton = (): ReactElement => {
 	const [t] = useTranslation();

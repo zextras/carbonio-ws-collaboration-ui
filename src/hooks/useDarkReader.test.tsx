@@ -12,7 +12,7 @@ import {
 	mockDarkReaderEnable,
 	mockDarkReaderIsEnabled
 } from '../../__mocks__/darkreader';
-import { MEETINGS_PATH } from '../constants/appConstants';
+import { MEETINGS_PATH } from 'wsc-shared';
 
 describe('useDarkReader tests', () => {
 	test('darkReaderStatus is undefined when DarkReader library status is undefined', () => {

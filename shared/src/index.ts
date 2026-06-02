@@ -5,10 +5,34 @@
  */
 import { configureSharedCode } from './config';
 
-// Setup
+// Configs
 export { configureSharedCode };
+export * from './constants';
+
+// Apis, Soap, WebSocketClient, XmppClient, WebTRC connections
+export * from './network';
+
+// Store slices
+export * from './store/index';
+
+// Utils
+export * from './utils/textUtils';
+export * from './utils/MeetingsUtils';
 
 // Types
+export * from './types/network/models/attachmentTypes';
+export * from './types/network/models/meetingBeTypes';
+export * from './types/network/models/roomBeTypes';
+export * from './types/network/models/userBeTypes';
+
+export * from './types/websocket/wsEvents';
+export * from './types/websocket/wsConversationEvents';
+export * from './types/websocket/wsMeetingEvents';
+
+export * from './types/network/webRTC/webRTC';
+
+export * from './types/network/soap/searchUsersByFeatureRequest';
+
 export * from './types/store/ActiveConversationTypes';
 export * from './types/store/ActiveMeetingTypes';
 export * from './types/store/ChatsRegistryTypes';
@@ -22,36 +46,3 @@ export * from './types/store/StoreTypes';
 export * from './types/store/UserTypes';
 
 export * from './types/AppEvents';
-
-export * from './types/network/models/attachmentTypes';
-export * from './types/network/models/meetingBeTypes';
-export * from './types/network/models/roomBeTypes';
-export * from './types/network/models/userBeTypes';
-
-export * from './types/websocket/wsEvents';
-export * from './types/websocket/wsConversationEvents';
-export * from './types/websocket/wsMeetingEvents';
-
-export * from './types/network/webRTC/webRTC';
-
-// Store slices
-export * from './store/slices/ActiveConversationsSlice';
-export * from './store/slices/ActiveMeetingSlice';
-export * from './store/slices/ChatsRegistryStoreSlice';
-export * from './store/slices/ConnectionStoreSlice';
-export * from './store/slices/MediaGalleryStoreSlice';
-export * from './store/slices/MeetingsStoreSlice';
-export * from './store/slices/PreviewNavigationStoreSlice';
-export * from './store/slices/SessionStoreSlice';
-export * from './store/slices/UsersStoreSlice';
-export * from './store/slices/RoomsStoreSlice';
-
-// Apis, Soap, WebSocket, WebRTC
-export * from './network';
-
-// Utils
-export * from './utils/textUtils';
-export * from './utils/MeetingsUtils';
-
-// Network types
-export * from './types/network/soap/searchUsersByFeatureRequest';

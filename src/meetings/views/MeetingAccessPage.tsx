@@ -11,7 +11,6 @@ import { Button, Container, Text, Tooltip } from '@zextras/carbonio-design-syste
 import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { MEETINGS_PATH } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
 import useRouting from '../../hooks/useRouting';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
@@ -22,7 +21,13 @@ import { MediaStatus } from '../components/meetingAccessPoint/externalAccess/Mee
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
 import useAccessMeeting from '../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
-import { MeetingType, RoomType, getMeetingByMeetingId, getScheduledMeetingName } from 'wsc-shared';
+import {
+	MeetingType,
+	RoomType,
+	getMeetingByMeetingId,
+	getScheduledMeetingName,
+	MEETINGS_PATH
+} from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: absolute;

@@ -13,11 +13,10 @@ import { find, map, remove, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import MeetingNotification from './MeetingNotification';
-import { MEETINGS_ROUTE } from '../../constants/appConstants';
 import useEventListener from '../../hooks/useEventListener';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
-import { EventName, EventPayloads, MeetingStartedEvent } from 'wsc-shared';
+import { EventName, EventPayloads, MeetingStartedEvent, MEETINGS_ROUTE } from 'wsc-shared';
 
 const PortalContainer = styled(Container)`
 	position: fixed;

@@ -14,10 +14,10 @@ import {
 } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
-import { CHATS_APP_ID } from '../../constants/appConstants';
 import CreateVirtualRoomModal from './secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
 import { getAttribute } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { CHATS_APP_ID } from 'wsc-shared';
 
 const RegisterVirtualRoomCreationButton = (): ReactElement => {
 	const [t] = useTranslation();

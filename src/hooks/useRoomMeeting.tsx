@@ -6,14 +6,13 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { CHATS_ROUTE, MEETINGS_PATH } from '../constants/appConstants';
 import {
 	getMeetingIdFromRoom,
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { MeetingType, RoomType, createMeeting } from 'wsc-shared';
+import { MeetingType, RoomType, createMeeting, CHATS_ROUTE, MEETINGS_PATH } from 'wsc-shared';
 
 type RoomMeetingHookType = {
 	openMeeting: () => void;
