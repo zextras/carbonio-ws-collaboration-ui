@@ -8,12 +8,14 @@ import { sharedConfig } from '../../config';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
 describe('WebSocketClient', () => {
+	beforeEach(() => {
+		sharedConfig.useStore.getState().setLoginInfo({ id: 'id', name: 'name', server: 'localhost' });
+	});
+
 	test('Connect WebSocketClient generate a WebSocket', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
-		expect(wsClient._webSocket?.url).toEqual(
-			`wss://${window.location.hostname}/services/chats/events`
-		);
+		expect(wsClient._webSocket?.url).toEqual('wss://localhost/services/chats/events');
 		expect(wsClient._webSocket).toBeDefined();
 		expect(wsClient._webSocket?.onopen).toBeDefined();
 		expect(wsClient._webSocket?.onclose).toBeDefined();

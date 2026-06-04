@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { onInboxMessageStanza } from './inboxMessageHandler';
 import { buildTextMessageFromInbox } from '../../../tests/buildXmppStanza';
 import { createMockTextMessage } from '../../../tests/createMock';

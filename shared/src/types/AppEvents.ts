@@ -41,7 +41,8 @@ export enum EventName {
 	MEMBER_DEMOTED = 'memberDemoted',
 	ROUTE_REDIRECT = 'routeRedirect',
 	MEETING_PARTICIPANT_RAISE_HAND = 'meetingParticipantRaiseHand',
-	MEETING_DECLINED = 'meetingDeclined'
+	MEETING_DECLINED = 'meetingDeclined',
+	QUOTA_CHANGED = 'carbonio-ws-collaboration-ui:quota-changed'
 }
 
 export type EventPayloads = {
@@ -65,4 +66,5 @@ export type EventPayloads = {
 	[EventName.ROUTE_REDIRECT]: { path: string };
 	[EventName.MEETING_PARTICIPANT_RAISE_HAND]: MeetingParticipantHandRaisedEvent;
 	[EventName.MEETING_DECLINED]: MeetingDeclinedEvent;
+	[EventName.QUOTA_CHANGED]: undefined;
 };

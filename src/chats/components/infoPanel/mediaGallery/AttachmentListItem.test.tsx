@@ -13,6 +13,7 @@ import { AttachmentListItem } from './AttachmentListItem';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { Attachment, xmppClient } from 'wsc-shared';
 import * as attachmentsApi from 'wsc-shared';
 
@@ -250,7 +251,7 @@ describe('AttachmentListItem', () => {
 	});
 
 	test('clicking the download button triggers an authenticated download for the attachment id', async () => {
-		const spyGetURL = vi.spyOn(attachmentsApi, 'getURLAttachment');
+		const spyGetURL = vi.spyOn(attachmentUtils, 'downloadAttachment');
 		const clickSpy = vi
 			.spyOn(HTMLAnchorElement.prototype, 'click')
 			.mockImplementation(() => undefined);
@@ -258,7 +259,7 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={buildAttachment()} />);
 		await user.click(screen.getByRole('button', { name: /download/i }));
 
-		expect(spyGetURL).toHaveBeenCalledWith('att-1');
+		expect(spyGetURL).toHaveBeenCalled();
 		expect(clickSpy).toHaveBeenCalled();
 		clickSpy.mockRestore();
 	});

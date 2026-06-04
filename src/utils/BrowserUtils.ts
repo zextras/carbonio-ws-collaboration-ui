@@ -38,6 +38,9 @@ export const BrowserUtils = {
 		document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 		document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 	},
+	registerOnAppClose: (callback: () => void): void => {
+		window.addEventListener('beforeunload', callback);
+	},
 	isMobile: (): boolean => {
 		const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
 		return regex.test(navigator.userAgent);

@@ -10,7 +10,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockPlayAudio } from '../../../tests/setupTests';
+import { mockPlayAudio, mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
@@ -71,26 +71,24 @@ describe('meetingJoinedEventHandler tests', () => {
 
 	test('A custom event is sent if the joined user is the session user and the room is a one-to-one', () => {
 		event.userId = 'sessionUserId';
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.REMOVED_MEETING_NOTIFICATION, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.REMOVED_MEETING_NOTIFICATION,
+			data: event
+		});
 	});
 
 	test('A custom event is not sent if the joined user is different from the session user', () => {
 		event.userId = 'anotherUserId';
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('A custom event is not sent if it is from a group meeting', () => {
 		event.meetingId = groupMeeting.id;
 		event.userId = 'sessionUserId';
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingJoinedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('Audio feedback is sent when session user is inside meeting', () => {

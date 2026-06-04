@@ -19,6 +19,10 @@ export interface ISharedCodeDependencies {
 	playAudio: (audioType: AudioType | string) => void;
 	displayNotification: (notificationType: string, data: unknown) => void;
 	getStream: (type: STREAM_TYPE, deviceId?: string) => Promise<MediaStream>;
+	createSilentAudioStream: () => MediaStream;
+	playRemoteAudioStream: (track: MediaStreamTrack) => void;
+	clearAuthCookies: () => void;
+	registerOnAppClose: (callback: () => void) => void;
 	fetchAPI: <T>(
 		endpoint: string,
 		method: RequestType,

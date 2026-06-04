@@ -16,9 +16,6 @@ export const getAttachment = (fileId: string): Promise<Blob> =>
 export const getAttachmentInfo = (fileId: string): Promise<Attachment> =>
 	sharedConfig.fetchAPI(`attachments/${fileId}`, RequestType.GET);
 
-export const getURLAttachment = (fileId: string): string =>
-	`${window.document.location.origin}/services/chats/attachments/${fileId}/download`;
-
 export const deleteAttachment = (fileId: string): Promise<Response> =>
 	sharedConfig.fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
 
@@ -30,16 +27,6 @@ export const getImagePreview = (
 ): Promise<Blob> => {
 	const params = buildQueryString({ quality, output_format: format });
 	return sharedConfig.fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
-};
-
-export const getImagePreviewURL = (
-	fileId: string,
-	area: string,
-	quality?: string,
-	format?: string
-): string => {
-	const params = buildQueryString({ quality, output_format: format });
-	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
 };
 
 export const getImageThumbnail = (
@@ -56,17 +43,6 @@ export const getImageThumbnail = (
 	);
 };
 
-export const getImageThumbnailURL = (
-	fileId: string,
-	area: string,
-	quality?: string,
-	format?: string,
-	shape?: string
-): string => {
-	const params = buildQueryString({ quality, output_format: format, shape });
-	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
-};
-
 export const getPdfPreview = (
 	fileId: string,
 	firstPage?: number,
@@ -74,11 +50,6 @@ export const getPdfPreview = (
 ): Promise<Blob> => {
 	const params = buildQueryString({ first_page: firstPage, last_page: lastPage });
 	return sharedConfig.fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
-};
-
-export const getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
-	const params = buildQueryString({ first_page: firstPage, last_page: lastPage });
-	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
 };
 
 export const getPdfThumbnail = (
@@ -93,15 +64,4 @@ export const getPdfThumbnail = (
 		`preview/pdf/${fileId}/${area}/thumbnail/${params}`,
 		RequestType.GET
 	);
-};
-
-export const getPdfThumbnailURL = (
-	fileId: string,
-	area: string,
-	quality?: string,
-	shape?: string,
-	format = 'jpeg'
-): string => {
-	const params = buildQueryString({ shape, quality, output_format: format });
-	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
 };

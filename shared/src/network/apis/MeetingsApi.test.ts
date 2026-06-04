@@ -36,7 +36,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockFetchAPI } from '../../tests/setupTests';
+import { mockClearAuthCookies, mockFetchAPI } from '../../tests/setupTests';
 import useStore from '../../tests/testStore';
 import { RequestType } from '../../types/network/fetch';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
@@ -260,8 +260,6 @@ describe('Meetings API', () => {
 	});
 
 	test('leaveMeeting for external user is called correctly', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
 		await leaveMeeting(meetingMock.id);
 
@@ -269,36 +267,30 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting).not.toBeDefined();
-		expect(document.cookie).toBe('');
+		expect(mockClearAuthCookies).toHaveBeenCalled();
 	});
 
 	test('leaveMeeting for internal user is called correctly', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting).not.toBeDefined();
-		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
+		expect(mockClearAuthCookies).not.toHaveBeenCalled();
 	});
 
 	test('leaveMeeting for internal user is rejected', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		await leaveMeeting(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting).not.toBeDefined();
-		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
+		expect(mockClearAuthCookies).not.toHaveBeenCalled();
 	});
 
 	test('leaveMeeting for external user is rejected', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		useStore.getState().setLoginInfo({ id: guestUser.id, userType: guestUser.type });
 
 		await leaveMeeting(meetingMock.id);
@@ -307,7 +299,7 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting).not.toBeDefined();
-		expect(document.cookie).toBe('');
+		expect(mockClearAuthCookies).toHaveBeenCalled();
 	});
 
 	test('When a member leaves a scheduled meeting, he is also removed from temporary room in version < 1.6.3', async () => {
@@ -427,8 +419,6 @@ describe('Meetings API', () => {
 	});
 
 	test('leaveWaitingRoom is called correctly for internal user', async () => {
-		const cookie = `ZM_AUTH_TOKEN=123456789`;
-		document.cookie = cookie;
 		await leaveWaitingRoom(meetingMock.id);
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
@@ -438,11 +428,10 @@ describe('Meetings API', () => {
 				status: 'REJECTED'
 			}
 		);
-		expect(document.cookie).toBe(cookie);
+		expect(mockClearAuthCookies).not.toHaveBeenCalled();
 	});
 
 	test('leaveWaitingRoom is called correctly for guest user', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789`;
 		useStore.getState().setLoginInfo({
 			id: userId,
 			name: guestUser.email,
@@ -459,7 +448,7 @@ describe('Meetings API', () => {
 				status: 'REJECTED'
 			}
 		);
-		expect(document.cookie).toBe('');
+		expect(mockClearAuthCookies).toHaveBeenCalled();
 	});
 
 	test('getWaitingList is called correctly', async () => {

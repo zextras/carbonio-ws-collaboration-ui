@@ -3,14 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import {
-	getImagePreviewURL,
-	getImageThumbnailURL,
-	getPdfPreviewURL,
-	getPdfThumbnailURL,
-	getURLAttachment,
-	AttachmentMessageType
-} from 'wsc-shared';
+import { buildQueryString, AttachmentMessageType } from 'wsc-shared';
 
 const PDF_MIME_TYPE = 'application/pdf';
 
@@ -184,10 +177,17 @@ export const getAttachmentDimensions = (
 
 export const getAttachmentURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
-	if (mimeType.startsWith('video/')) return getURLAttachment(attachmentId);
-	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
-		return getPdfPreviewURL(attachmentId);
-	return getImagePreviewURL(attachmentId, '0x0', ImageQuality.HIGH, getPreviewType(mimeType));
+	if (mimeType.startsWith('video/')) {
+		return `${window.document.location.origin}/services/chats/attachments/${attachmentId}/download`;
+	}
+	if (getAttachmentExtension(mimeType) === AttachmentType.PDF) {
+		return `${window.document.location.origin}/services/chats/preview/pdf/${attachmentId}`;
+	}
+	const params = buildQueryString({
+		quality: ImageQuality.HIGH,
+		output_format: getPreviewType(mimeType)
+	});
+	return `${window.document.location.origin}/services/chats/preview/image/${attachmentId}/0x0/${params}`;
 };
 
 export const getAttachmentThumbnailURL = (
@@ -196,19 +196,20 @@ export const getAttachmentThumbnailURL = (
 ): string | undefined => {
 	if (!isPreviewSupported(mimeType)) return undefined;
 	if (mimeType.startsWith('video/')) return undefined;
-	if (getAttachmentExtension(mimeType) === AttachmentType.PDF)
-		return getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
-	return getImageThumbnailURL(
-		attachmentId,
-		'0x0',
-		ImageQuality.LOW,
-		getPreviewType(mimeType),
-		ImageShape.RECTANGULAR
-	);
+	if (getAttachmentExtension(mimeType) === AttachmentType.PDF) {
+		const params = buildQueryString({ quality: ImageQuality.LOW, output_format: 'jpeg' });
+		return `${window.document.location.origin}/services/chats/preview/pdf/${attachmentId}/0x0/thumbnail/${params}`;
+	}
+	const params = buildQueryString({
+		quality: ImageQuality.LOW,
+		output_format: getPreviewType(mimeType),
+		shape: ImageShape.RECTANGULAR
+	});
+	return `${window.document.location.origin}/services/chats/preview/image/${attachmentId}/0x0/thumbnail/${params}`;
 };
 
 export const downloadAttachment = (attachmentId: string, fileName: string): void => {
-	const downloadUrl = getURLAttachment(attachmentId);
+	const downloadUrl = `${window.document.location.origin}/services/chats/attachments/${attachmentId}/download`;
 	const linkTag: HTMLAnchorElement = document.createElement('a');
 	document.body.appendChild(linkTag);
 	linkTag.href = downloadUrl;

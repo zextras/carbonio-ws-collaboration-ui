@@ -5,8 +5,8 @@
  */
 
 import { meetingUserRejectedEventHandler } from './MeetingUserRejectedEventHandler';
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -45,25 +45,15 @@ describe('MeetingUserRejectedEventHandler tests', () => {
 	});
 
 	test('Do not send user rejected custom event if another user is rejected', () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('Send user rejected custom event only if the rejected user is session user session', () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserRejectedEventHandler(iAmRejectedEvent);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_REJECTED, { detail: iAmRejectedEvent })
-		);
-	});
-
-	test('Do not send user rejected custom event if user is in the chat page', () => {
-		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
-		meetingUserRejectedEventHandler(iAmRejectedEvent);
-		expect(dispatchEvent).not.toHaveBeenCalledWith();
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_WAITING_PARTICIPANT_REJECTED,
+			data: iAmRejectedEvent
+		});
 	});
 });

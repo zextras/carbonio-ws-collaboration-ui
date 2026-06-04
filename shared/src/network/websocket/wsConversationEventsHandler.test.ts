@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { waitFor } from '@testing-library/react';
 
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';

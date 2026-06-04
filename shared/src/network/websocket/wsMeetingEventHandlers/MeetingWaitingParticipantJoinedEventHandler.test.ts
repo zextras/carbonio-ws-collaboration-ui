@@ -5,13 +5,12 @@
  */
 
 import { meetingWaitingParticipantJoinedEventHandler } from './MeetingWaitingParticipantJoinedEventHandler';
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockDisplayNotification } from '../../../tests/setupTests';
+import { mockDisplayNotification, mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -41,22 +40,21 @@ beforeEach(() => {
 });
 describe('MeetingWaitingParticipantJoinedEventHandler tests', () => {
 	test('When a new user joins the waiting room and he is added to waiting list and a custom event is sent', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingWaitingParticipantJoinedEventHandler(event);
 		expect(useStore.getState().meetings[meeting.id].waitingList).toContain(event.userId);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.NEW_WAITING_USER, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.NEW_WAITING_USER,
+			data: event
+		});
 	});
 
-	test("Display a browser notification when an user joins the waiting room while I'm in the meeting tab", () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
+	test('Display a browser notification when an user joins the waiting room of the active meeting', () => {
+		useStore.getState().meetingConnection(meeting.id);
 		meetingWaitingParticipantJoinedEventHandler(event);
 		expect(mockDisplayNotification).toHaveBeenCalled();
 	});
 
-	test("Do not display a browser notification if an user joins the waiting room while I'm in the chats tab", () => {
-		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
+	test('Do not display a browser notification if an user joins the waiting room of a non-active meeting', () => {
 		meetingWaitingParticipantJoinedEventHandler(event);
 		expect(mockDisplayNotification).not.toHaveBeenCalled();
 	});

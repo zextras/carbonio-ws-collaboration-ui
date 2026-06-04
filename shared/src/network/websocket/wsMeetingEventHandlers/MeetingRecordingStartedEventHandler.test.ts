@@ -6,6 +6,7 @@
 
 import { meetingRecordingStartedEventHandler } from './MeetingRecordingStartedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -42,16 +43,15 @@ describe('MeetingRecordingStartedEventHandler tests', () => {
 
 	test('A custom event is sent if the user is inside meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingRecordingStartedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_RECORDING_STARTED, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_RECORDING_STARTED,
+			data: event
+		});
 	});
 
 	test('A custom event is not sent if the user is not inside meeting', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingRecordingStartedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 });

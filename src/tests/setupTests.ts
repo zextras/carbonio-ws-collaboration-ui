@@ -12,8 +12,13 @@ import { sendCustomEvent } from '../hooks/useEventListener';
 import { displayNotification } from '../notification';
 import useStore from '../store/Store';
 import { playAudio } from '../utils/AudioUtils';
+import { BrowserUtils } from '../utils/BrowserUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
-import { getStream } from '../utils/UserMediaManager';
+import {
+	createSilentAudioStream,
+	getStream,
+	playRemoteAudioStream
+} from '../utils/UserMediaManager';
 import { configureSharedCode } from 'wsc-shared';
 
 configure({
@@ -223,6 +228,10 @@ beforeAll(() => {
 		useStore,
 		sendCustomEvent,
 		getStream,
+		createSilentAudioStream,
+		playRemoteAudioStream,
+		clearAuthCookies: BrowserUtils.clearAuthCookies,
+		registerOnAppClose: BrowserUtils.registerOnAppClose,
 		fetchAPI,
 		sendFileFetchAPI,
 		uploadFileFetchAPI,

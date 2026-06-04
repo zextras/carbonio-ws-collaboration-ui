@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import HistoryAccumulator from './HistoryAccumulator';
 import { buildTextMessageFromHistory } from '../../../tests/buildXmppStanza';
 import { TextMessage } from '../../../types/store/ChatsRegistryTypes';

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { onComposingMessageStanza } from './composingMessageHandler';
 import { buildComposingStanza } from '../../../tests/buildXmppStanza';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';

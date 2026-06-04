@@ -7,15 +7,12 @@
 import { sharedConfig } from '../../../config';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingWaitingParticipantClashed } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
 
 export const meetingWaitingParticipantClashedEventHandler = (
 	event: MeetingWaitingParticipantClashed
 ): void => {
-	if (inThisMeetingTab(event.meetingId)) {
-		sharedConfig.sendCustomEvent({
-			name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
-			data: event
-		});
-	}
+	sharedConfig.sendCustomEvent({
+		name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
+		data: event
+	});
 };

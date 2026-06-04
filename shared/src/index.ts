@@ -18,6 +18,7 @@ export * from './store/index';
 
 // Utils
 export * from './utils/textUtils';
+export * from './utils/fetchUtils';
 export { UserDataRetriever };
 
 // Types

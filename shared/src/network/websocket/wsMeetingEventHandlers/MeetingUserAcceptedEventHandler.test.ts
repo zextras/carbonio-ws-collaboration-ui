@@ -5,8 +5,8 @@
  */
 
 import { meetingUserAcceptedEventHandler } from './MeetingUserAcceptedEventHandler';
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -38,27 +38,16 @@ describe('MeetingUserAcceptedEventHandler tests', () => {
 	});
 
 	test('Do not send user accepted custom event if another user is accepted', () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('Send user accepted custom event only if the accepted user is session user session', () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
 		event.userId = 'myUserId';
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingUserAcceptedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED, { detail: event })
-		);
-	});
-
-	test('Do not send user accepted custom event if user is in the chat page', () => {
-		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-		event.userId = 'myUserId';
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
-		meetingUserAcceptedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalledWith();
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,
+			data: event
+		});
 	});
 });

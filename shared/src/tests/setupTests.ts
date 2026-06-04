@@ -20,17 +20,9 @@ const initialState = useStore.getState();
 
 export const mockPlayAudio = vi.fn();
 
-Object.defineProperty(window, 'location', {
-	value: {
-		href: 'https://localhost/carbonio/chats',
-		pathname: 'https://localhost/carbonio/chats',
-		replace: vi.fn(),
-		includes: vi.fn(),
-		assign: vi.fn()
-	}
-});
-
-Object.defineProperty(window, 'MediaStream', {
+Object.defineProperty(globalThis, 'MediaStream', {
+	configurable: true,
+	writable: true,
 	value: vi.fn(function MediaStreamMock() {
 		return {
 			stream: vi.fn(() => ({
@@ -45,7 +37,9 @@ Object.defineProperty(window, 'MediaStream', {
 	})
 });
 
-Object.defineProperty(window, 'RTCPeerConnection', {
+Object.defineProperty(globalThis, 'RTCPeerConnection', {
+	configurable: true,
+	writable: true,
 	value: vi.fn(function RTCPeerConnectionMock() {
 		return {
 			addTrack: vi.fn(),
@@ -56,7 +50,9 @@ Object.defineProperty(window, 'RTCPeerConnection', {
 	})
 });
 
-Object.defineProperty(window, 'RTCSessionDescription', {
+Object.defineProperty(globalThis, 'RTCSessionDescription', {
+	configurable: true,
+	writable: true,
 	value: vi.fn(function RTCPeerSessionDescriptionMock() {
 		return {
 			sdp: 'sdp',
@@ -65,28 +61,19 @@ Object.defineProperty(window, 'RTCSessionDescription', {
 	})
 });
 
-Object.defineProperty(window, 'AudioContext', {
+Object.defineProperty(globalThis, 'WebSocket', {
+	configurable: true,
 	writable: true,
-	value: vi.fn(function AudioContextMock() {
+	value: vi.fn(function WebSocketMock(url: string) {
 		return {
-			createOscillator: vi.fn(() => ({
-				connect: (): {
-					stream: {
-						getAudioTracks: () => {
-							prototype: MediaStream;
-							new (): MediaStream;
-							new (stream: MediaStream): MediaStream;
-							new (tracks: MediaStreamTrack[]): MediaStream;
-						}[];
-					};
-				} => ({
-					stream: {
-						getAudioTracks: () => [MediaStream]
-					}
-				}),
-				start: vi.fn()
-			})),
-			createMediaStreamDestination: vi.fn()
+			url,
+			protocol: '',
+			readyState: 1,
+			onopen: undefined,
+			onclose: undefined,
+			onmessage: undefined,
+			send: vi.fn(),
+			close: vi.fn()
 		};
 	})
 });
@@ -95,14 +82,18 @@ export const mockFetchAPI = vi.fn();
 export const mockSendFileFetchAPI = vi.fn();
 export const mockUploadFileFetchAPI = vi.fn();
 export const mockDisplayNotification = vi.fn();
+export const mockSendCustomEvent = vi.fn();
+export const mockClearAuthCookies = vi.fn();
 
 beforeAll(() => {
 	configureSharedCode({
 		useStore,
-		sendCustomEvent: (event) => {
-			window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
-		},
+		sendCustomEvent: mockSendCustomEvent,
 		getStream: vi.fn(() => Promise.resolve(new MediaStream())),
+		createSilentAudioStream: vi.fn(() => new MediaStream()),
+		playRemoteAudioStream: vi.fn(),
+		clearAuthCookies: mockClearAuthCookies,
+		registerOnAppClose: vi.fn(),
 		playAudio: mockPlayAudio,
 		displayNotification: mockDisplayNotification,
 		fetchAPI: mockFetchAPI,

@@ -5,7 +5,6 @@
  */
 
 import { sharedConfig } from '../../config';
-import { MEETINGS_PATH } from '../../constants';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
 export enum EventArea {
@@ -72,6 +71,3 @@ export const isMyId = (userId: string): boolean =>
 
 export const isMeetingActive = (meetingId: string): boolean =>
 	sharedConfig.useStore.getState().activeMeeting?.meetingId === meetingId;
-
-export const inThisMeetingTab = (meetingId: string): boolean =>
-	window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);

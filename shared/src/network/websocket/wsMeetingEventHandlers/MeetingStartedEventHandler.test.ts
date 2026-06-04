@@ -6,6 +6,7 @@
 
 import { meetingStartedEventHandler } from './MeetingStartedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
@@ -41,24 +42,22 @@ describe('MeetingStartedEventHandler tests', () => {
 	});
 
 	test('Incoming meeting notification is sent if the meeting is from one-to-one room and started by the other user', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStartedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.INCOMING_MEETING, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.INCOMING_MEETING,
+			data: event
+		});
 	});
 
 	test('Incoming meeting notification is not sent if the meeting is started by me', () => {
 		useStore.getState().setLoginInfo({ id: event.starterUser, name: 'myusername' });
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStartedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('Incoming meeting notification is not sent if the room is not one-to-one', () => {
 		event.meetingId = groupMeeting.id;
 		meetingStartedEventHandler(event);
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 });

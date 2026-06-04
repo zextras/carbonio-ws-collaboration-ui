@@ -37,18 +37,11 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.selectedAudioDeviceId = selectedAudioDeviceId;
 		this.initialAudioStatus = audioStreamEnabled;
 
-		const audioCtx: AudioContext = new window.AudioContext();
-		const oscillator: OscillatorNode = audioCtx.createOscillator();
-		const dst: AudioNode = oscillator.connect(audioCtx.createMediaStreamDestination());
-		oscillator.start();
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const audioTrack = Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
-		const oscillatorAudioTrack: MediaStream = new MediaStream([audioTrack]);
-		this.oscillatorAudioTrack = first(oscillatorAudioTrack.getAudioTracks());
+		const silentAudioStream = sharedConfig.createSilentAudioStream();
+		this.oscillatorAudioTrack = first(silentAudioStream.getAudioTracks());
 
 		this.updateRemoteStreamAudio();
-		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
+		this.updateLocalStreamTrack(silentAudioStream).then(() => {
 			if (audioStreamEnabled) {
 				sharedConfig.getStream(STREAM_TYPE.AUDIO, selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
@@ -135,16 +128,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 
 	updateRemoteStreamAudio(): void {
 		if (this.oscillatorAudioTrack != null) {
-			const fragment = window!.top!.document.createDocumentFragment();
-			const audio = window!.top!.document.createElement('audio');
-			audio.autoplay = true;
-			audio.muted = false;
-			audio.controls = false;
-			audio.id = 'bidirectionalAudioMeeting';
-			fragment.appendChild(audio);
-			const mediaStream = new MediaStream();
-			mediaStream.addTrack(this.oscillatorAudioTrack);
-			audio.srcObject = mediaStream;
+			sharedConfig.playRemoteAudioStream(this.oscillatorAudioTrack);
 		}
 	}
 

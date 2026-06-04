@@ -31,7 +31,7 @@ export class WebSocketClient {
 
 	_pongTimeout = 5000;
 
-	_pingInterval = 0;
+	_pingInterval: ReturnType<typeof setInterval> | undefined;
 
 	_disconnectionCheckFunction: DebouncedFunc<() => void>;
 
@@ -45,9 +45,9 @@ export class WebSocketClient {
 
 	connect(): void {
 		const wsUrl = '/services/chats/events';
-		const versions = sharedConfig.useStore.getState().session.supportedVersions;
+		const { supportedVersions, server } = sharedConfig.useStore.getState().session;
 		// Creating WebSocket
-		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`, versions);
+		this._webSocket = new WebSocket(`wss://${server}${wsUrl}`, supportedVersions);
 		wsDebug('WebSocket connection...');
 
 		// Attach handler
@@ -72,7 +72,7 @@ export class WebSocketClient {
 		wsDebug('...connected!');
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
-		this._pingInterval = window.setInterval(() => {
+		this._pingInterval = setInterval(() => {
 			// DEPRECATED: This function exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.1 is officially dropped.
 			const ping = this._webSocket && gte(this._webSocket?.protocol, '1.6.2') ? 'Ping' : 'ping';

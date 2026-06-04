@@ -6,6 +6,7 @@
 
 import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -34,16 +35,15 @@ beforeEach(() => {
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_PARTICIPANT_CLASHED, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_PARTICIPANT_CLASHED,
+			data: event
+		});
 	});
 
 	test('A custom event is not sent if the user is not inside meeting', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 });

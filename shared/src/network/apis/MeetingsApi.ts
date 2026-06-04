@@ -22,11 +22,6 @@ import { UserType } from '../../types/store/UserTypes';
 import { dateToTimestamp, formatDate } from '../../utils/dateUtils';
 import { PeerConnConfig } from '../webRTC/PeerConnConfig';
 
-const clearAuthCookies = (): void => {
-	document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-	document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-};
-
 export const listMeetings = (): Promise<MeetingBe[]> =>
 	sharedConfig.fetchAPI<MeetingBe[]>(`meetings`, RequestType.GET).then((resp) => {
 		sharedConfig.useStore.getState().addMeetings(resp);
@@ -176,11 +171,11 @@ export const leaveMeeting = (meetingId: string): Promise<Response> => {
 			if ((!version || lte(version, '1.6.2')) && room?.type === RoomType.TEMPORARY && iAmNotOwner) {
 				deleteRoomMember(room.id, sharedConfig.useStore.getState().session.id ?? '');
 			}
-			if (isExternal) clearAuthCookies();
+			if (isExternal) sharedConfig.clearAuthCookies();
 			return resp;
 		})
 		.catch((err) => {
-			if (isExternal) clearAuthCookies();
+			if (isExternal) sharedConfig.clearAuthCookies();
 			return err;
 		});
 };
@@ -242,7 +237,7 @@ export const leaveWaitingRoom = (meetingId: string): Promise<Response> => {
 		})
 		.finally(() => {
 			const isExternal = sharedConfig.useStore.getState().session?.userType === UserType.GUEST;
-			if (isExternal) clearAuthCookies();
+			if (isExternal) sharedConfig.clearAuthCookies();
 		});
 };
 

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import {
 	addRoom,
 	addRoomAttachment,
@@ -29,7 +31,6 @@ import {
 	updateRoom,
 	updateRoomPicture
 } from './RoomsApi';
-import { QUOTA_CHANGED_EVENT } from '../../constants';
 import { buildTextMessageFromHistory } from '../../tests/buildXmppStanza';
 import {
 	createMockAttributesList,
@@ -37,8 +38,14 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { mockFetchAPI, mockSendFileFetchAPI, mockUploadFileFetchAPI } from '../../tests/setupTests';
+import {
+	mockFetchAPI,
+	mockSendCustomEvent,
+	mockSendFileFetchAPI,
+	mockUploadFileFetchAPI
+} from '../../tests/setupTests';
 import useStore from '../../tests/testStore';
+import { EventName } from '../../types/AppEvents';
 import { RequestType } from '../../types/network/fetch';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -133,10 +140,11 @@ describe('Rooms API', () => {
 	});
 
 	test('getURLRoomPicture is called correctly', () => {
+		useStore.getState().setLoginInfo({ id: 'id', name: 'name', server: 'localhost' });
 		const room = createMockRoom({ id: roomId, name: 'new name' });
 		const url = getURLRoomPicture(room.id);
 
-		expect(url).toEqual(`http://localhost/services/chats/rooms/${roomId}/picture`);
+		expect(url).toEqual(`https://localhost/services/chats/rooms/${roomId}/picture`);
 	});
 
 	test('getRoomPicture is called correctly', async () => {
@@ -428,21 +436,18 @@ describe('Rooms API', () => {
 
 	describe('addRoomAttachment dispatches quota changed event', () => {
 		test('dispatches event on successful upload (legacy path)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
 			mockUploadFileFetchAPI.mockResolvedValueOnce({ id: 'fileId' });
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 
 		test('dispatches event on successful upload (1.6.1+ path)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
 			store.setApiVersion('1.6.1');
@@ -450,24 +455,21 @@ describe('Rooms API', () => {
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 
 		test('does not dispatch event on upload failure', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
 			mockUploadFileFetchAPI.mockRejectedValueOnce(new Error('upload failed'));
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			await expect(addRoomAttachment(roomId, testFile, { area: '0x0' }, signal)).rejects.toThrow();
-			expect(dispatchSpy).not.toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 	});
 
@@ -515,7 +517,6 @@ describe('Rooms API', () => {
 
 	describe('forwardMessages dispatches quota changed event', () => {
 		test('dispatches event when forwarded messages have attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
 			const message = createMockTextMessage({
@@ -532,14 +533,12 @@ describe('Rooms API', () => {
 			);
 
 			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 
 		test('does not dispatch event when forwarded messages have no attachments', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
 			const message = createMockTextMessage();
@@ -554,14 +553,12 @@ describe('Rooms API', () => {
 			);
 
 			await forwardMessages(['roomId'], [message]);
-			expect(dispatchSpy).not.toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 
 		test('dispatches event even when some rooms fail (partial success)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			vi.spyOn(xmppClient, 'requestMessageToForward').mockImplementation(() => Promise.resolve());
 
 			const message = createMockTextMessage({
@@ -578,10 +575,9 @@ describe('Rooms API', () => {
 			mockFetchAPI.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('network error'));
 
 			await expect(forwardMessages(['room1', 'room2'], [message])).rejects.toThrow();
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+			expect(mockSendCustomEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: EventName.QUOTA_CHANGED })
 			);
-			dispatchSpy.mockRestore();
 		});
 	});
 

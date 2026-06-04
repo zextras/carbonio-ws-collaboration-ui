@@ -64,7 +64,12 @@ const useExternalAccess = (): {
 				.then((res) => {
 					document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 					document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-					setLoginInfo({ id: res.id, name: guestName, userType: UserType.GUEST });
+					setLoginInfo({
+						id: res.id,
+						name: guestName,
+						userType: UserType.GUEST,
+						server: window.location.host
+					});
 
 					setChatsBeStatus(true);
 					xmppClient.connect(res.zmToken);

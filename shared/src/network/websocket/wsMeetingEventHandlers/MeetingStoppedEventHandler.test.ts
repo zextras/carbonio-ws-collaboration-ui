@@ -6,6 +6,7 @@
 
 import { meetingStoppedEventHandler } from './MeetingStoppedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
@@ -53,24 +54,21 @@ describe('MeetingStoppedEventHandler tests', () => {
 	});
 
 	test('Removed meeting notification is sent if the meeting is from one-to-one room', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(oneToOneEvent);
-		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
-		expect(call.type).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
+		const call = mockSendCustomEvent.mock.calls[0][0];
+		expect(call.name).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
 	});
 
 	test('Removed meeting notification is not sent if the room is not one-to-one', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(groupEvent);
-		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
-		expect(call.type).not.toBe(EventName.REMOVED_MEETING_NOTIFICATION);
+		const call = mockSendCustomEvent.mock.calls[0][0];
+		expect(call.name).not.toBe(EventName.REMOVED_MEETING_NOTIFICATION);
 	});
 
 	test('Meeting stopped notification is sent if the meeting is active', () => {
 		useStore.getState().meetingConnection(groupMeeting.id);
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(groupEvent);
-		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
-		expect(call.type).toBe(EventName.MEETING_STOPPED);
+		const call = mockSendCustomEvent.mock.calls[0][0];
+		expect(call.name).toBe(EventName.MEETING_STOPPED);
 	});
 });

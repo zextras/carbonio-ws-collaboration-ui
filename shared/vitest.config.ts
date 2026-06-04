@@ -12,12 +12,7 @@ const sharedDir = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	test: {
 		globals: true,
-		environment: 'jsdom',
-		environmentOptions: {
-			jsdom: {
-				url: 'http://localhost/'
-			}
-		},
+		environment: 'node',
 		restoreMocks: true,
 		clearMocks: true,
 		setupFiles: [resolve(sharedDir, 'src/tests/setupTests.ts')],

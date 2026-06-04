@@ -12,7 +12,7 @@ import CopyRoomWidget from './copyRoomIntegration/CopyRoomWidget';
 import SelectVirtualRoomWidgetComponent from './virtualRoomIntegration/SelectVirtualRoomWidget';
 import { getAttribute } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
-import { QUOTA_CHANGED_EVENT } from 'wsc-shared';
+import { EventName } from 'wsc-shared';
 
 export default function useIntegrationsApp(): void {
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
@@ -45,9 +45,9 @@ export default function useIntegrationsApp(): void {
 			debouncedRefreshQuota();
 		};
 
-		window.addEventListener(QUOTA_CHANGED_EVENT, handler);
+		window.addEventListener(EventName.QUOTA_CHANGED, handler);
 		return (): void => {
-			window.removeEventListener(QUOTA_CHANGED_EVENT, handler);
+			window.removeEventListener(EventName.QUOTA_CHANGED, handler);
 			debouncedRefreshQuota.cancel();
 		};
 	}, []);

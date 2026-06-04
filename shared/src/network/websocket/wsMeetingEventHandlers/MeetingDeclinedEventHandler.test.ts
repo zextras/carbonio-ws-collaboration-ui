@@ -6,6 +6,7 @@
 
 import { meetingDeclinedEventHandler } from './MeetingDeclinedEventHandler';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
@@ -32,23 +33,21 @@ beforeEach(() => {
 describe('MeetingDeclinedEventHandler tests', () => {
 	test('Custom event is dispatched when the user is in the active meeting', () => {
 		useStore.getState().meetingConnection(meeting.id);
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingDeclinedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_DECLINED, { detail: event })
-		);
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_DECLINED,
+			data: event
+		});
 	});
 
 	test('Custom event is NOT dispatched when the user is not in the active meeting', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingDeclinedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).not.toHaveBeenCalled();
 	});
 
 	test('REMOVED_MEETING_NOTIFICATION is dispatched when I declined a ONE_TO_ONE meeting from another session', () => {
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		meetingDeclinedEventHandler({ ...event, userId: 'myUserId' });
-		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
-		expect(call.type).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
+		const call = mockSendCustomEvent.mock.calls[0][0];
+		expect(call.name).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
 	});
 });

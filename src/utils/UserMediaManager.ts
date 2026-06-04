@@ -121,3 +121,33 @@ export const getStream = (type: STREAM_TYPE, deviceId?: string): Promise<MediaSt
 			return Promise.reject(new Error('Invalid stream type'));
 	}
 };
+
+/**
+ * Create a silent placeholder audio stream (via a disabled oscillator track) used to
+ * bootstrap the outgoing audio sender before the real microphone is available / when
+ * joining muted.
+ */
+export const createSilentAudioStream = (): MediaStream => {
+	const audioCtx: AudioContext = new window.AudioContext();
+	const oscillator: OscillatorNode = audioCtx.createOscillator();
+	const dst: AudioNode = oscillator.connect(audioCtx.createMediaStreamDestination());
+	oscillator.start();
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const audioTrack = Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
+	return new MediaStream([audioTrack]);
+};
+
+/** Play a remote audio track through a hidden <audio> element. */
+export const playRemoteAudioStream = (track: MediaStreamTrack): void => {
+	const fragment = window!.top!.document.createDocumentFragment();
+	const audio = window!.top!.document.createElement('audio');
+	audio.autoplay = true;
+	audio.muted = false;
+	audio.controls = false;
+	audio.id = 'bidirectionalAudioMeeting';
+	fragment.appendChild(audio);
+	const mediaStream = new MediaStream();
+	mediaStream.addTrack(track);
+	audio.srcObject = mediaStream;
+};

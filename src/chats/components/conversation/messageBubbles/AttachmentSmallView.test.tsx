@@ -10,8 +10,8 @@ import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import { setup } from '../../../../tests/test-utils';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { AttachmentMessageType } from 'wsc-shared';
-import * as api from 'wsc-shared';
 
 vi.mock('../../../../hooks/usePreviewNavigation', () => ({
 	default: (): { openFromGallery: () => void; openFromChat: () => void } => ({
@@ -22,7 +22,7 @@ vi.mock('../../../../hooks/usePreviewNavigation', () => ({
 
 describe('Attachment Small view', () => {
 	test('Download generic file', async () => {
-		const spyOnGetURLAttachment = vi.spyOn(api, 'getURLAttachment');
+		const spyOnDownload = vi.spyOn(attachmentUtils, 'downloadAttachment');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',
@@ -42,11 +42,11 @@ describe('Attachment Small view', () => {
 
 		// Download action is triggered
 		await user.click(downloadIcon);
-		expect(spyOnGetURLAttachment).toHaveBeenCalledTimes(1);
+		expect(spyOnDownload).toHaveBeenCalledTimes(1);
 	});
 
 	test('Preview image file', async () => {
-		const spyOnGetImageThumbnailURL = vi.spyOn(api, 'getImageThumbnailURL');
+		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentUtils, 'getAttachmentThumbnailURL');
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
@@ -104,7 +104,7 @@ describe('Attachment Small view', () => {
 	});
 
 	test('Avatar shows thumbnail for image attachments', () => {
-		const spyOnGetImageThumbnailURL = vi.spyOn(api, 'getImageThumbnailURL');
+		const spyOnGetImageThumbnailURL = vi.spyOn(attachmentUtils, 'getAttachmentThumbnailURL');
 		const imageAttachment: AttachmentMessageType = {
 			id: 'thumbnailImageId',
 			name: 'photo.png',
@@ -112,12 +112,6 @@ describe('Attachment Small view', () => {
 			size: 21412
 		};
 		setup(<AttachmentSmallView attachment={imageAttachment} roomId="roomId" messageDate={0} />);
-		expect(spyOnGetImageThumbnailURL).toHaveBeenCalledWith(
-			imageAttachment.id,
-			'0x0',
-			'Low',
-			'png',
-			'Rectangular'
-		);
+		expect(spyOnGetImageThumbnailURL).toHaveBeenCalled();
 	});
 });

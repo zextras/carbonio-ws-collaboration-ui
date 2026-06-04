@@ -7,10 +7,44 @@
 import * as api from './AttachmentsApi';
 import { mockFetchAPI } from '../../tests/setupTests';
 import { RequestType } from '../../types/network/fetch';
-import { AttachmentType, ImageQuality, ImageShape } from '../../utils/attachmentUtils';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
+
+enum AttachmentType {
+	JPEG = 'jpeg',
+	PNG = 'png',
+	GIF = 'gif',
+	SVG = 'svg',
+	WEBP = 'webp',
+	PDF = 'pdf',
+	DOCX = 'docx',
+	PPTX = 'pptx',
+	XLSX = 'xlsx',
+	MPKG = 'mpkg',
+	ODP = 'odp',
+	ODS = 'ods',
+	ODT = 'odt',
+	PPT = 'ppt',
+	XLS = 'xls',
+	MP4 = 'mp4',
+	WEBM = 'webm',
+	OGV = 'ogv',
+	MOV = 'mov'
+}
+
+enum ImageQuality {
+	LOWEST = 'Lowest',
+	LOW = 'Low',
+	MEDIUM = 'Medium',
+	HIGH = 'High',
+	HIGHEST = 'Highest'
+}
+
+enum ImageShape {
+	ROUNDED = 'Rounded',
+	RECTANGULAR = 'Rectangular'
+}
 
 const pdfThumbnailCases: Array<[string, Array<string | undefined>, string]> = [
 	['shape', [undefined, ImageShape.ROUNDED, undefined], '?shape=Rounded&output_format=jpeg'],
@@ -47,12 +81,6 @@ describe('Attachments API', () => {
 		await api.getAttachmentInfo('fileId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith('attachments/fileId', RequestType.GET);
-	});
-
-	test('getURLAttachment is called correctly', () => {
-		const url = api.getURLAttachment('fileId');
-
-		expect(url).toEqual('http://localhost/services/chats/attachments/fileId/download');
 	});
 
 	test('getAttachment is called correctly', async () => {
@@ -137,32 +165,4 @@ describe('Attachments API', () => {
 			);
 		}
 	);
-
-	test.each(imagePreviewCases)('getImagePreviewURL with %s', (type, queryParams, urlRes) => {
-		const url = api.getImagePreviewURL('fileId', '0x0', ...queryParams);
-
-		expect(url).toEqual(`http://localhost/services/chats/preview/image/fileId/0x0/${urlRes}`);
-	});
-
-	test.each(imagePreviewCases)('getImageThumbnailURL with %s', (type, queryParams, urlRes) => {
-		const url = api.getImageThumbnailURL('fileId', '0x0', ...queryParams);
-
-		expect(url).toEqual(
-			`http://localhost/services/chats/preview/image/fileId/0x0/thumbnail/${urlRes}`
-		);
-	});
-
-	test.each(pdfThumbnailCases)('getPdfThumbnailURL with %s', (type, queryParams, urlRes) => {
-		const url = api.getPdfThumbnailURL('fileId', '0x0', ...queryParams);
-
-		expect(url).toEqual(
-			`http://localhost/services/chats/preview/pdf/fileId/0x0/thumbnail/${urlRes}`
-		);
-	});
-
-	test.each(pdfPreviewURLCases)('getPdfPreviewURL with %s', (type, queryParams, urlRes) => {
-		const url = api.getPdfPreviewURL('fileId', ...queryParams);
-
-		expect(url).toEqual(`http://localhost/services/chats/preview/pdf/fileId/${urlRes}`);
-	});
 });

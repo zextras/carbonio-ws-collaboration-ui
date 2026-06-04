@@ -65,7 +65,8 @@ export default function MainApp(): React.JSX.Element {
 			setLoginInfo({
 				id: userAccount.id,
 				name: userAccount.name,
-				displayName: userAccount.displayName
+				displayName: userAccount.displayName,
+				server: window.location.host
 			});
 		}
 	}, [setLoginInfo, authenticated]);

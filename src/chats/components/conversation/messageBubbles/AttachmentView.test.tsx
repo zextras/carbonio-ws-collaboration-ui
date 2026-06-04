@@ -12,14 +12,14 @@ import { filter } from 'lodash';
 import AttachmentView from './AttachmentView';
 import { setup } from '../../../../tests/test-utils';
 import { extensionsSupported, getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { AttachmentMessageType } from 'wsc-shared';
-import * as api from 'wsc-shared';
 
 const fileIcon = 'icon: FileTextOutline';
 
 describe('Attachment view', () => {
 	test('Generic file visualization', async () => {
-		const spyOnGetURLAttachment = vi.spyOn(api, 'getURLAttachment');
+		const spyOnGetURLAttachment = vi.spyOn(attachmentUtils, 'getAttachmentThumbnailURL');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',

@@ -8,7 +8,7 @@ import { v4 as uuidGenerator } from 'uuid';
 
 import { createMeeting, deleteMeeting } from './MeetingsApi';
 import { sharedConfig } from '../../config';
-import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants';
+import { CHATS_ROUTE } from '../../constants';
 import { EventName } from '../../types/AppEvents';
 import { RequestType } from '../../types/network/fetch';
 import {
@@ -72,7 +72,7 @@ export const deleteRoomAndMeeting = (roomId: string): Promise<Response> => {
 };
 
 export const getURLRoomPicture = (roomId: string): string =>
-	`${window.document.location.origin}/services/chats/rooms/${roomId}/picture`;
+	`https://${sharedConfig.useStore.getState().session.server}/services/chats/rooms/${roomId}/picture`;
 
 export const getRoomPicture = (roomId: string): Promise<Blob> =>
 	sharedConfig.fetchAPI(`rooms/${roomId}/picture`, RequestType.GET);
@@ -220,7 +220,7 @@ export const addRoomAttachment = (
 				sharedConfig
 					.sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
 					.then((resp: { id: string }) => {
-						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+						sharedConfig.sendCustomEvent({ name: EventName.QUOTA_CHANGED, data: undefined });
 						resolve(resp);
 					})
 					.catch((error) => {
@@ -237,7 +237,7 @@ export const addRoomAttachment = (
 						optional
 					)
 					.then((resp: { id: string }) => {
-						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+						sharedConfig.sendCustomEvent({ name: EventName.QUOTA_CHANGED, data: undefined });
 						resolve(resp);
 					})
 					.catch((error) => {
@@ -287,7 +287,7 @@ export const forwardMessages = (
 				(r): r is PromiseFulfilledResult<Response> => r.status === 'fulfilled'
 			);
 			if (hasAttachments && fulfilled.length > 0) {
-				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+				sharedConfig.sendCustomEvent({ name: EventName.QUOTA_CHANGED, data: undefined });
 			}
 			const rejected = results.find((r) => r.status === 'rejected');
 			if (rejected) {

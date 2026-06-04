@@ -8,7 +8,7 @@ import { find } from 'lodash';
 import { sharedConfig } from '../../../config';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingWaitingParticipantJoinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingWaitingParticipantJoinedEventHandler = (
 	event: MeetingWaitingParticipantJoinedEvent
@@ -22,7 +22,7 @@ export const meetingWaitingParticipantJoinedEventHandler = (
 	if (userIsParticipant) {
 		state.addUserToWaitingList(event.meetingId, event.userId);
 		sharedConfig.sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
-		if (inThisMeetingTab(event.meetingId)) {
+		if (isMeetingActive(event.meetingId)) {
 			sharedConfig.displayNotification('waitingList', event.meetingId);
 		}
 	}

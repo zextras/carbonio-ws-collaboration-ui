@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	EventArea,
-	getEventArea,
-	inThisMeetingTab,
-	isMeetingActive,
-	isMyId
-} from './eventHandlersUtilities';
+import { EventArea, getEventArea, isMeetingActive, isMyId } from './eventHandlersUtilities';
 import { sharedConfig } from '../../config';
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../constants';
 import { createMockMeeting, createMockRoom } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
@@ -115,18 +108,6 @@ describe('eventHandlersUtilities tests', () => {
 			store.meetingConnection(meeting.id);
 			store.meetingDisconnection(meeting.id);
 			expect(isMeetingActive('nonExistentMeeting')).toBe(false);
-		});
-	});
-
-	describe('inThisMeetingTab tests', () => {
-		test('inThisMeetingTab returns true if user is in a meeting page', () => {
-			window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${activeMeeting.id}`;
-			expect(inThisMeetingTab(activeMeeting.id)).toBe(true);
-		});
-
-		test('inThisMeetingTab returns false if the user is in the chat page', () => {
-			window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-			expect(isMeetingActive(meeting.id)).toBe(false);
 		});
 	});
 });

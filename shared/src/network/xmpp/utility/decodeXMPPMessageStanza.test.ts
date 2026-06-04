@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
 import { buildConfigurationStanza, buildReactionStanza } from '../../../tests/buildXmppStanza';
 import {

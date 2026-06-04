@@ -5,12 +5,12 @@
  */
 
 import { meetingWaitingParticipantClashedEventHandler } from './MeetingWaitingParticipantClashedEventHandler';
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../../constants';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
+import { mockSendCustomEvent } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -38,19 +38,12 @@ beforeEach(() => {
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'myUserId' }));
 });
 describe('MeetingWaitingParticipantClashedEventHandler tests', () => {
-	test('A custom event is sent if the session user is the waiting page', () => {
-		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+	test('A custom event is sent if the meeting is the active one', () => {
+		useStore.getState().meetingConnection(meeting.id);
 		meetingWaitingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, { detail: event })
-		);
-	});
-
-	test('A custom event is not sent if the session user is the chat page', () => {
-		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
-		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
-		meetingWaitingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		expect(mockSendCustomEvent).toHaveBeenCalledWith({
+			name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
+			data: event
+		});
 	});
 });

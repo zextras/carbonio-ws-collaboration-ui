@@ -33,7 +33,7 @@ export type XMPPRequest = {
 class XMPPConnection {
 	private token: string | undefined;
 
-	private connection: StropheConnection;
+	private connection: StropheConnection | undefined;
 
 	private connectionStatus: StropheConnectionStatus | undefined;
 
@@ -43,17 +43,10 @@ class XMPPConnection {
 
 	private requestsQueue: XMPPRequest[] = [];
 
+	private appCloseRegistered = false;
+
 	constructor(initFunction: VoidFunction) {
 		this.initFunction = initFunction;
-
-		// Init XMPP connection
-		const service = `wss://${window.location.hostname}/services/messaging/ws-xmpp`;
-		this.connection = new Strophe.Connection(service);
-
-		// Disconnect session to broadcast unavailable presence
-		window.addEventListener('beforeunload', () => {
-			this.connection.disconnect('Session closed');
-		});
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
@@ -118,6 +111,8 @@ class XMPPConnection {
 	}
 
 	private connectionEstablish(): void {
+		if (!this.connection) return;
+
 		// In case of reconnection, reset XMPP data to let the client knows that it has to re-request everything
 		if (this.reconnectionTime > 0) {
 			sharedConfig.useStore.getState().resetXmppData();
@@ -154,9 +149,17 @@ class XMPPConnection {
 
 	public connect(token: string): void {
 		this.token = token;
-		const userId = sharedConfig.useStore.getState().session.id;
+		const { id: userId, server } = sharedConfig.useStore.getState().session;
+		const connection =
+			this.connection ?? new Strophe.Connection(`wss://${server}/services/messaging/ws-xmpp`);
+		this.connection = connection;
+		// Disconnect session to broadcast unavailable presence when the app closes
+		if (!this.appCloseRegistered) {
+			this.appCloseRegistered = true;
+			sharedConfig.registerOnAppClose(() => connection.disconnect('Session closed'));
+		}
 		const jid = `${userId}@carbonio`;
-		this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
+		connection.connect(jid, token, this.onConnectionStatus.bind(this));
 	}
 
 	public send(request: XMPPRequest): void {
