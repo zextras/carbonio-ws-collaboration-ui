@@ -102,7 +102,6 @@ beforeAll(() => {
 		sendCustomEvent: (event) => {
 			window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
 		},
-		translate: (key, fallback) => fallback ?? key,
 		getStream: vi.fn(() => Promise.resolve(new MediaStream())),
 		playAudio: mockPlayAudio,
 		fetchAPI: mockFetchAPI,

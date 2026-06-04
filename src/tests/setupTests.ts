@@ -5,7 +5,6 @@
  */
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
-import { t } from '@zextras/carbonio-shell-ui';
 import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
@@ -223,7 +222,6 @@ beforeAll(() => {
 	configureSharedCode({
 		useStore,
 		sendCustomEvent,
-		translate: t,
 		getStream,
 		fetchAPI,
 		sendFileFetchAPI,

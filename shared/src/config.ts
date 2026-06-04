@@ -16,7 +16,6 @@ import type { RootStore } from './types/store/StoreTypes';
 export interface ISharedCodeDependencies {
 	useStore: UseBoundStore<StoreApi<RootStore>>;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
-	translate: (key: string, fallback?: string) => string;
 	playAudio: (audioType: AudioType | string) => void;
 	getStream: (type: STREAM_TYPE, deviceId?: string) => Promise<MediaStream>;
 	fetchAPI: <T>(

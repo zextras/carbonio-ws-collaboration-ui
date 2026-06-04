@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { IS_FOCUS_MODE, t, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
+import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
@@ -20,7 +20,6 @@ import { configureSharedCode, getLicense, MEETINGS_PATH } from 'wsc-shared';
 configureSharedCode({
 	useStore,
 	sendCustomEvent,
-	translate: t,
 	playAudio,
 	getStream,
 	fetchAPI,
