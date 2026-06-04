@@ -5,15 +5,15 @@
  */
 
 import displayReactionBrowserNotification from './displayReactionBrowserNotification';
+import { mockNotify } from '../../__mocks__/@zextras/carbonio-shell-ui';
+import useStore from '../store/Store';
 import {
 	createMockMessageFastening,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
-} from '../../../tests/createMock';
-import { mockNotify } from '../../../tests/setupTests';
-import useStore from '../../../tests/testStore';
-import { FasteningAction } from '../../../types/store/ChatsRegistryTypes';
+} from '../tests/createMock';
+import { FasteningAction } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });
@@ -41,8 +41,7 @@ beforeEach(() => {
 	store.newMessage(messageFromUser);
 });
 
-// TODO
-describe.skip('Test display reaction browser notification', () => {
+describe('Test display reaction browser notification', () => {
 	test('Send desktop notification on new reaction to my message', async () => {
 		const newReaction = createMockMessageFastening({
 			roomId: room.id,

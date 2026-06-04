@@ -7,9 +7,9 @@
 import * as shell from '@zextras/carbonio-shell-ui';
 
 import displayMessageBrowserNotification from './displayMessageBrowserNotification';
-import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
-import { mockNotify } from '../../../tests/setupTests';
-import useStore from '../../../tests/testStore';
+import { mockNotify } from '../../__mocks__/@zextras/carbonio-shell-ui';
+import useStore from '../store/Store';
+import { createMockRoom, createMockTextMessage, createMockUser } from '../tests/createMock';
 
 const room = createMockRoom();
 const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
@@ -22,8 +22,7 @@ beforeEach(() => {
 	store.addRooms([room]);
 });
 
-// TODO
-describe.skip('Test display message browser notification', () => {
+describe('Test display message browser notification', () => {
 	test('Send desktop notification on new message', async () => {
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
 		await displayMessageBrowserNotification(newMessage);

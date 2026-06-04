@@ -17,6 +17,7 @@ export interface ISharedCodeDependencies {
 	useStore: UseBoundStore<StoreApi<RootStore>>;
 	sendCustomEvent: <E extends EventName>(event: { name: E; data: EventPayloads[E] }) => void;
 	playAudio: (audioType: AudioType | string) => void;
+	displayNotification: (notificationType: string, data: unknown) => void;
 	getStream: (type: STREAM_TYPE, deviceId?: string) => Promise<MediaStream>;
 	fetchAPI: <T>(
 		endpoint: string,
@@ -38,7 +39,6 @@ export interface ISharedCodeDependencies {
 		signal?: AbortSignal,
 		optionalFields?: AdditionalHeaders
 	) => Promise<any>;
-	displayWaitingListNotification: (meetingId: string) => void;
 }
 
 let sharedCodeDependencies: ISharedCodeDependencies | undefined;

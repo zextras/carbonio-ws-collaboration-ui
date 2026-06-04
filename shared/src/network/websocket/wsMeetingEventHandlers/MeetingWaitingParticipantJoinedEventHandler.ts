@@ -23,7 +23,7 @@ export const meetingWaitingParticipantJoinedEventHandler = (
 		state.addUserToWaitingList(event.meetingId, event.userId);
 		sharedConfig.sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
 		if (inThisMeetingTab(event.meetingId)) {
-			sharedConfig.displayWaitingListNotification(event.meetingId);
+			sharedConfig.displayNotification('waitingList', event.meetingId);
 		}
 	}
 };

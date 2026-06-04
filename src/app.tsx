@@ -10,7 +10,7 @@ import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
-import displayWaitingListNotification from './meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
+import { displayNotification } from './notification';
 import useStore from './store/Store';
 import { playAudio } from './utils/AudioUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
@@ -25,7 +25,7 @@ configureSharedCode({
 	fetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI,
-	displayWaitingListNotification
+	displayNotification
 });
 
 const UnlicensedApp = (): null => {

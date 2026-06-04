@@ -11,7 +11,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockDisplayWaitingListNotification } from '../../../tests/setupTests';
+import { mockDisplayNotification } from '../../../tests/setupTests';
 import useStore from '../../../tests/testStore';
 import { EventName } from '../../../types/AppEvents';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
@@ -52,12 +52,12 @@ describe('MeetingWaitingParticipantJoinedEventHandler tests', () => {
 	test("Display a browser notification when an user joins the waiting room while I'm in the meeting tab", () => {
 		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${meeting.id}`;
 		meetingWaitingParticipantJoinedEventHandler(event);
-		expect(mockDisplayWaitingListNotification).toHaveBeenCalled();
+		expect(mockDisplayNotification).toHaveBeenCalled();
 	});
 
 	test("Do not display a browser notification if an user joins the waiting room while I'm in the chats tab", () => {
 		window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
 		meetingWaitingParticipantJoinedEventHandler(event);
-		expect(mockDisplayWaitingListNotification).not.toHaveBeenCalled();
+		expect(mockDisplayNotification).not.toHaveBeenCalled();
 	});
 });

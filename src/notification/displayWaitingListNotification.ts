@@ -6,13 +6,13 @@
 import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
-import useStore from '../../../../store/Store';
-import { playAudio } from '../../../../utils/AudioUtils';
+import useStore from '../store/Store';
+import { playAudio } from '../utils/AudioUtils';
 import {
 	getLocalStorageItem,
 	LOCAL_STORAGE_NAMES,
 	NotificationsSettingsType
-} from '../../../../utils/localStorageUtils';
+} from '../utils/localStorageUtils';
 import { AudioType, SOUND_NOTIFICATION_PARTICIPANT_THRESHOLD } from 'wsc-shared';
 
 const displayWaitingListNotification = (meetingId: string): void => {

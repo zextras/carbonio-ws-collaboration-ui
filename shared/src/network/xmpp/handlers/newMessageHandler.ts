@@ -15,8 +15,6 @@ import {
 } from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
-import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
-import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 import { xmppClient } from '../XMPPClient';
 
 const toGalleryAttachment = (message: TextMessage): Attachment | undefined => {
@@ -56,7 +54,7 @@ export function onNewMessageStanza(message: Element): true {
 			if (newMessage.from !== sessionId) {
 				sharedConfig.sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 				store.incrementUnreadCount(newMessage.roomId, 1);
-				displayMessageBrowserNotification(newMessage);
+				sharedConfig.displayNotification('newMessage', newMessage);
 			}
 
 			// Request message subject of reply
@@ -125,7 +123,7 @@ export function onNewMessageStanza(message: Element): true {
 				}
 			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
-				displayReactionBrowserNotification(newMessage);
+				sharedConfig.displayNotification('newReaction', newMessage);
 				store.setNewReaction(
 					newMessage.roomId,
 					newMessage.originalStanzaId,

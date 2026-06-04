@@ -9,7 +9,7 @@ import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
-import displayWaitingListNotification from '../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
+import { displayNotification } from '../notification';
 import useStore from '../store/Store';
 import { playAudio } from '../utils/AudioUtils';
 import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
@@ -227,7 +227,7 @@ beforeAll(() => {
 		sendFileFetchAPI,
 		uploadFileFetchAPI,
 		playAudio,
-		displayWaitingListNotification
+		displayNotification
 	});
 });
 

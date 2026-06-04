@@ -94,7 +94,7 @@ Object.defineProperty(window, 'AudioContext', {
 export const mockFetchAPI = vi.fn();
 export const mockSendFileFetchAPI = vi.fn();
 export const mockUploadFileFetchAPI = vi.fn();
-export const mockDisplayWaitingListNotification = vi.fn();
+export const mockDisplayNotification = vi.fn();
 
 beforeAll(() => {
 	configureSharedCode({
@@ -104,10 +104,10 @@ beforeAll(() => {
 		},
 		getStream: vi.fn(() => Promise.resolve(new MediaStream())),
 		playAudio: mockPlayAudio,
+		displayNotification: mockDisplayNotification,
 		fetchAPI: mockFetchAPI,
 		sendFileFetchAPI: mockSendFileFetchAPI,
-		uploadFileFetchAPI: mockUploadFileFetchAPI,
-		displayWaitingListNotification: mockDisplayWaitingListNotification
+		uploadFileFetchAPI: mockUploadFileFetchAPI
 	});
 });
 
