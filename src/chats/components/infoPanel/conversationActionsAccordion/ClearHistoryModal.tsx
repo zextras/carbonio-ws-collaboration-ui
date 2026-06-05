@@ -9,12 +9,13 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { xmppClient } from '../../../../network/xmpp';
 import {
 	getLastMessageSelector,
 	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../../store/Store';
-import { clearRoomHistory, xmppClient } from 'wsc-shared';
+import { clearRoomHistory } from 'wsc-shared';
 
 type ClearHistoryModalProps = {
 	roomId: string;

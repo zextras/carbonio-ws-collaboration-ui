@@ -6,6 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
+import { xmppClient } from '../../../network/xmpp';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -15,7 +16,7 @@ import {
 } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
 import { formatDate } from '../../../utils/dateUtils';
-import { RoomType, xmppClient } from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 
 const loggedUser = createMockUser({
 	id: 'user1',

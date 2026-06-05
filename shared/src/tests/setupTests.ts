@@ -61,29 +61,13 @@ Object.defineProperty(globalThis, 'RTCSessionDescription', {
 	})
 });
 
-Object.defineProperty(globalThis, 'WebSocket', {
-	configurable: true,
-	writable: true,
-	value: vi.fn(function WebSocketMock(url: string) {
-		return {
-			url,
-			protocol: '',
-			readyState: 1,
-			onopen: undefined,
-			onclose: undefined,
-			onmessage: undefined,
-			send: vi.fn(),
-			close: vi.fn()
-		};
-	})
-});
-
 export const mockFetchAPI = vi.fn();
 export const mockSendFileFetchAPI = vi.fn();
 export const mockUploadFileFetchAPI = vi.fn();
 export const mockDisplayNotification = vi.fn();
 export const mockSendCustomEvent = vi.fn();
 export const mockClearAuthCookies = vi.fn();
+export const mockGetForwardedMessagePayload = vi.fn(() => Promise.resolve(''));
 
 beforeAll(() => {
 	configureSharedCode({
@@ -93,7 +77,11 @@ beforeAll(() => {
 		createSilentAudioStream: vi.fn(() => new MediaStream()),
 		playRemoteAudioStream: vi.fn(),
 		clearAuthCookies: mockClearAuthCookies,
-		registerOnAppClose: vi.fn(),
+		xmppClient: {
+			setOnline: vi.fn(),
+			readMessage: vi.fn(),
+			getForwardedMessagePayload: mockGetForwardedMessagePayload
+		},
 		playAudio: mockPlayAudio,
 		displayNotification: mockDisplayNotification,
 		fetchAPI: mockFetchAPI,

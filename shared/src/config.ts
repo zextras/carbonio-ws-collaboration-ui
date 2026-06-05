@@ -11,7 +11,14 @@ import { AudioType } from './types/AudioType';
 import { RequestType } from './types/network/fetch';
 import { AdditionalHeaders } from './types/network/models/attachmentTypes';
 import { STREAM_TYPE } from './types/store/ActiveMeetingTypes';
+import type { TextMessage } from './types/store/ChatsRegistryTypes';
 import type { RootStore } from './types/store/StoreTypes';
+
+export interface ISharedXMPPClient {
+	setOnline: () => void;
+	readMessage: (roomId: string, messageId: string) => void;
+	getForwardedMessagePayload: (message: TextMessage) => Promise<string>;
+}
 
 export interface ISharedCodeDependencies {
 	useStore: UseBoundStore<StoreApi<RootStore>>;
@@ -22,7 +29,7 @@ export interface ISharedCodeDependencies {
 	createSilentAudioStream: () => MediaStream;
 	playRemoteAudioStream: (track: MediaStreamTrack) => void;
 	clearAuthCookies: () => void;
-	registerOnAppClose: (callback: () => void) => void;
+	xmppClient: ISharedXMPPClient;
 	fetchAPI: <T>(
 		endpoint: string,
 		method: RequestType,

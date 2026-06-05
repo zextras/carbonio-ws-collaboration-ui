@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachmentModal';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
+import { xmppClient } from '../../network/xmpp';
 import {
 	getPreviewNavigationActive,
 	getPreviewNavigationOpenTargetId
@@ -23,8 +24,7 @@ import {
 	Attachment,
 	PreviewNavigationSession,
 	bulkDeleteRoomAttachments,
-	getRoomAttachments,
-	xmppClient
+	getRoomAttachments
 } from 'wsc-shared';
 
 const shouldLoadMore = (

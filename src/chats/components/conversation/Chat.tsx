@@ -26,9 +26,10 @@ import MessagesList from './MessagesList';
 import useEventListener from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import { xmppClient } from '../../../network/xmpp';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { EventName, EventPayloads, messageActionType, xmppClient, MEETINGS_PATH } from 'wsc-shared';
+import { EventName, EventPayloads, messageActionType, MEETINGS_PATH } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: relative;

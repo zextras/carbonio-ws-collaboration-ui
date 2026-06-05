@@ -20,9 +20,10 @@ import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import { xmppClient } from '../../../network/xmpp';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { RoomType, xmppClient, CHATS_APP_ID, TRACKER_EVENT } from 'wsc-shared';
+import { RoomType, CHATS_APP_ID, TRACKER_EVENT } from 'wsc-shared';
 
 enum RequestStatus {
 	IDLE = 'idle',

@@ -6,10 +6,11 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
+import { xmppClient } from '../../../network/xmpp';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { formatDate } from '../../../utils/dateUtils';
-import { ExportStatus, Message, TextMessage, MessageType, xmppClient } from 'wsc-shared';
+import { ExportStatus, Message, TextMessage, MessageType } from 'wsc-shared';
 
 export interface IChatExporter {
 	addMessagesToFullHistory(messages: Message[]): void;

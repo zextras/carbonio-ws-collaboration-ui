@@ -8,6 +8,7 @@ import { screen, renderHook } from '@testing-library/react';
 import { forEach } from 'lodash';
 
 import useBubbleReactions, { ReactionType } from './useBubbleReactions';
+import { xmppClient } from '../../../../../network/xmpp';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMessageFastening,
@@ -16,7 +17,7 @@ import {
 	createMockUser
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
-import { FasteningAction, xmppClient } from 'wsc-shared';
+import { FasteningAction } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sesssionId', name: 'sessionName' });
 const room = createMockRoom();

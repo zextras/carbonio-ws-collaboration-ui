@@ -16,6 +16,7 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
+import { xmppClient } from './network/xmpp';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -26,8 +27,7 @@ import {
 	getCapabilities,
 	listRooms,
 	listMeetings,
-	wsClient,
-	xmppClient
+	wsClient
 } from 'wsc-shared';
 
 export default function MainApp(): React.JSX.Element {

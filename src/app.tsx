@@ -10,6 +10,7 @@ import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
 import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
+import { xmppClient } from './network/xmpp';
 import { displayNotification } from './notification';
 import useStore from './store/Store';
 import { playAudio } from './utils/AudioUtils';
@@ -30,7 +31,7 @@ configureSharedCode({
 	createSilentAudioStream,
 	playRemoteAudioStream,
 	clearAuthCookies: BrowserUtils.clearAuthCookies,
-	registerOnAppClose: BrowserUtils.registerOnAppClose,
+	xmppClient,
 	fetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI,

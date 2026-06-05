@@ -9,6 +9,7 @@ import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
 
 import { sendCustomEvent } from '../hooks/useEventListener';
+import { xmppClient } from '../network/xmpp';
 import { displayNotification } from '../notification';
 import useStore from '../store/Store';
 import { playAudio } from '../utils/AudioUtils';
@@ -231,7 +232,7 @@ beforeAll(() => {
 		createSilentAudioStream,
 		playRemoteAudioStream,
 		clearAuthCookies: BrowserUtils.clearAuthCookies,
-		registerOnAppClose: BrowserUtils.registerOnAppClose,
+		xmppClient,
 		fetchAPI,
 		sendFileFetchAPI,
 		uploadFileFetchAPI,

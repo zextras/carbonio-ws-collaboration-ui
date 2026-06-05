@@ -10,11 +10,12 @@ import { act, waitFor } from '@testing-library/react';
 import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
 import * as attachmentUtils from '../../../../utils/attachmentUtils';
-import { Attachment, xmppClient } from 'wsc-shared';
+import { Attachment } from 'wsc-shared';
 import * as attachmentsApi from 'wsc-shared';
 
 let intersectionCallbacks: Array<IntersectionObserverCallback> = [];

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreviewNavigation from '../../../../../hooks/usePreviewNavigation';
+import { xmppClient } from '../../../../../network/xmpp';
 import {
 	getFilesToUploadArray,
 	getForwardList,
@@ -29,7 +30,7 @@ import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
-import { deleteAttachment, messageActionType, TextMessage, xmppClient } from 'wsc-shared';
+import { deleteAttachment, messageActionType, TextMessage } from 'wsc-shared';
 
 const useBubbleContextualMenuDropDown = (
 	message: TextMessage,

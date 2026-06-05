@@ -11,6 +11,7 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -23,14 +24,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
-import {
-	RootStore,
-	FileToUpload,
-	messageActionType,
-	RoomType,
-	UserType,
-	xmppClient
-} from 'wsc-shared';
+import { RootStore, FileToUpload, messageActionType, RoomType, UserType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const iconNavigator2 = 'icon: Navigation2';

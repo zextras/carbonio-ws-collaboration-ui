@@ -19,6 +19,9 @@ export * from './store/index';
 // Utils
 export * from './utils/textUtils';
 export * from './utils/fetchUtils';
+export * from './utils/dateUtils';
+export * from './utils/debug';
+export * from './utils/calcReads';
 export { UserDataRetriever };
 
 // Types

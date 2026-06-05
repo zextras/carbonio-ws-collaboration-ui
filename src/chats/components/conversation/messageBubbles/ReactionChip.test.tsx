@@ -9,10 +9,10 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ReactionChip from './ReactionChip';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { xmppClient } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'loggedUser', name: 'Logged User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });

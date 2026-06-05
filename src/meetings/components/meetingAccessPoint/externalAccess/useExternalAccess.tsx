@@ -10,6 +10,7 @@ import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import { setDateDefault } from '../../../../utils/dateUtils';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
@@ -18,7 +19,6 @@ import {
 	getScheduledMeetingName,
 	wsClient,
 	UserType,
-	xmppClient,
 	MEETINGS_PATH
 } from 'wsc-shared';
 

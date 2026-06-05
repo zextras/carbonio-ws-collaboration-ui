@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -20,7 +21,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
-import { MarkerStatus, TextMessage, RoomType, UserType, xmppClient } from 'wsc-shared';
+import { MarkerStatus, TextMessage, RoomType, UserType } from 'wsc-shared';
 import * as api from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';

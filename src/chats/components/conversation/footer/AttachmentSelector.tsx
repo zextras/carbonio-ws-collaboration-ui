@@ -20,6 +20,7 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import useLoadFiles from '../../../../hooks/useLoadFiles';
+import { xmppClient } from '../../../../network/xmpp';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import {
 	getRoomNameSelector,
@@ -27,7 +28,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType, xmppClient } from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 
 type AttachmentSelectorProps = {
 	roomId: string;

@@ -32,6 +32,7 @@ import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
+import { xmppClient } from '../../../../network/xmpp';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -50,7 +51,6 @@ import {
 	ReferenceMessage,
 	MessageType,
 	TextMessage,
-	xmppClient,
 	IME_LANGUAGES,
 	MESSAGE_CHAR_LIMIT
 } from 'wsc-shared';

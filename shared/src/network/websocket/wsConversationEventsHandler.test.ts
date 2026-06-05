@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// @vitest-environment jsdom
-
-import { waitFor } from '@testing-library/react';
 import { find } from 'lodash';
 
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
@@ -53,7 +50,7 @@ describe('wsConversationEventHandler tests', () => {
 			userId: sessionUser.id,
 			sentDate: '2023-01-01T00:00:00.000Z'
 		} as RoomMemberAddedEvent);
-		await waitFor(() => {
+		await vi.waitFor(() => {
 			const meeting = find(useStore.getState().meetings, (meeting) => meeting.roomId === room.id);
 			expect(meeting).toBeDefined();
 		});
@@ -67,7 +64,7 @@ describe('wsConversationEventHandler tests', () => {
 			roomId: room.id,
 			userId: sessionUser.id
 		} as RoomMemberRemovedEvent);
-		await waitFor(() => {
+		await vi.waitFor(() => {
 			const meeting = find(useStore.getState().meetings, (meeting) => meeting.roomId === room.id);
 			expect(meeting).toBeUndefined();
 		});

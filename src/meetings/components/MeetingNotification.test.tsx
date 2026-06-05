@@ -9,10 +9,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
+import { xmppClient } from '../../network/xmpp';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { RoomType, xmppClient } from 'wsc-shared';
+import { RoomType } from 'wsc-shared';
 import * as MeetingsApi from 'wsc-shared';
 
 const sendAQuickMessage = 'Send a quick message';
