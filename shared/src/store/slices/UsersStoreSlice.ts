@@ -61,6 +61,20 @@ export const useUsersStoreSlice: StateCreator<
 			'USERS/SET_LAST_ACTIVITY'
 		);
 	},
+	resetUsersPresence: (): void => {
+		set(
+			produce((draft: RootStore) => {
+				forEach(draft.users, (user) => {
+					draft.users[user.id] = {
+						...draft.users[user.id],
+						online: undefined
+					};
+				});
+			}),
+			false,
+			'USERS/RESET_PRESENCE'
+		);
+	},
 	setAnonymousUser: (id: string): void => {
 		set(
 			produce((draft: RootStore) => {

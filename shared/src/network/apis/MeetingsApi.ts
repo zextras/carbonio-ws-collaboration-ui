@@ -8,7 +8,6 @@ import { lte } from 'semver';
 
 import { deleteRoomMember } from './RoomsApi';
 import { sharedConfig } from '../../config';
-import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import { RequestType } from '../../types/network/fetch';
 import {
 	CreateMeetingData,
@@ -137,7 +136,10 @@ export const enterMeeting = (
 	settings: JoinSettings,
 	devicesId: { audioDevice?: string; videoDevice?: string }
 ): Promise<string> => {
-	const meeting = getMeetingByRoomId(sharedConfig.useStore.getState(), roomId);
+	const meeting = find(
+		sharedConfig.useStore.getState().meetings,
+		(meeting) => meeting.roomId === roomId
+	);
 	if (meeting) {
 		if (meeting.active) {
 			return joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id);

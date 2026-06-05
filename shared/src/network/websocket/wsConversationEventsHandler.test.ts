@@ -7,10 +7,10 @@
 // @vitest-environment jsdom
 
 import { waitFor } from '@testing-library/react';
+import { find } from 'lodash';
 
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
-import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import useStore from '../../tests/testStore';
 import {
@@ -54,7 +54,7 @@ describe('wsConversationEventHandler tests', () => {
 			sentDate: '2023-01-01T00:00:00.000Z'
 		} as RoomMemberAddedEvent);
 		await waitFor(() => {
-			const meeting = getMeetingByRoomId(useStore.getState(), room.id);
+			const meeting = find(useStore.getState().meetings, (meeting) => meeting.roomId === room.id);
 			expect(meeting).toBeDefined();
 		});
 	});
@@ -68,7 +68,7 @@ describe('wsConversationEventHandler tests', () => {
 			userId: sessionUser.id
 		} as RoomMemberRemovedEvent);
 		await waitFor(() => {
-			const meeting = getMeetingByRoomId(useStore.getState(), room.id);
+			const meeting = find(useStore.getState().meetings, (meeting) => meeting.roomId === room.id);
 			expect(meeting).toBeUndefined();
 		});
 	});

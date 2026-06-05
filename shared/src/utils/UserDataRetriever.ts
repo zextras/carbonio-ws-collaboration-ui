@@ -9,7 +9,6 @@ import { validate } from 'uuid';
 
 import { sharedConfig } from '../config';
 import { getUser, getUsers } from '../network';
-import { getUserName } from '../store/selectors/UsersSelectors';
 
 class UserDataRetriever {
 	private static instance: UserDataRetriever;
@@ -75,8 +74,9 @@ class UserDataRetriever {
 
 	public getAsyncUsername(userId: string): Promise<string> {
 		return new Promise((resolve) => {
-			if (sharedConfig.useStore.getState().users[userId]) {
-				resolve(getUserName(sharedConfig.useStore.getState(), userId));
+			const user = sharedConfig.useStore.getState().users[userId];
+			if (user) {
+				resolve(user.name || user.email || '');
 			} else {
 				getUser(userId)
 					.then((response) => resolve(response.name || response.email || ''))
