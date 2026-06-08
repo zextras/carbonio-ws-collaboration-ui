@@ -24,7 +24,9 @@ import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
+import { Version } from './types/store/SessionTypes';
 import { setDateDefault } from './utils/dateUtils';
+import { probeBackendApiVersion } from './utils/FetchUtils';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -75,15 +77,28 @@ export default function MainApp(): React.JSX.Element {
 		if (authenticated) setDateDefault(prefs?.zimbraPrefLocale);
 	}, [prefs, authenticated]);
 
-	// NETWORKS: detect backend type via /inbox, then load accordingly
+	// NETWORKS: detect backend type via the X-WSC-API-VERSION header, then load accordingly.
+	// Both backends expose GET /rooms (200) and stamp the version header on every response:
+	// common-socket reports >= 2.0.0, devel/MongooseIM reports 1.6.x.
 	const connect = useCallback(() => {
 		getToken()
 			.then((resp) => {
-				// Detect backend type: try /inbox first.
-				// 200 → common-socket backend (inbox data reused, XMPP never touched)
-				// 404 / network error → MongooseIM backend
-				ChatApi.getInbox()
-					.then((inboxResponse) => {
+				// Probe the backend version off a lightweight request both backends serve.
+				// WSC-pure (RestMessagingBackend) iff the header is present AND >= 2.0.0;
+				// otherwise fall back to MongooseIM (XmppMessagingBackend) — this also covers
+				// a missing/unparseable header.
+				probeBackendApiVersion().then((serverVersion) => {
+					let isWscPure = false;
+					if (serverVersion) {
+						try {
+							useStore.getState().setApiVersion(serverVersion as Version);
+							isWscPure = gte(serverVersion, '2.0.0');
+						} catch {
+							isWscPure = false;
+						}
+					}
+
+					if (isWscPure) {
 						// ===== COMMON-SOCKET PATH =====
 						useStore.getState().setIsMongooseIM(false);
 						useStore.getState().setMessagingBackend(new RestMessagingBackend());
@@ -91,33 +106,37 @@ export default function MainApp(): React.JSX.Element {
 						const { wsClient } = useStore.getState().connections;
 						wsClient?.connect();
 
-						hydrateStoreFromInbox(inboxResponse, useStore.getState().session.id);
-
-						listMeetings().catch(() => {});
-						setChatsBeStatus(true);
-					})
-					.catch(() => {
-						// ===== MONGOOSEIM PATH =====
-						useStore.getState().setIsMongooseIM(true);
-						useStore.getState().setMessagingBackend(new XmppMessagingBackend());
-
-						Promise.all([listRooms(true, true), listMeetings()])
-							.then(() => {
-								const version = useStore.getState().session.apiVersion;
-								if (version && gte(version, '1.6.8')) {
-									getCapabilities().catch(() => {
-										setAttributes(attrs);
-									});
-								} else {
-									setAttributes(attrs);
-								}
+						ChatApi.getInbox()
+							.then((inboxResponse) => {
+								hydrateStoreFromInbox(inboxResponse, useStore.getState().session.id);
+								listMeetings().catch(() => {});
 								setChatsBeStatus(true);
-								xmppClient.connect(resp.zmToken);
-								const { wsClient } = useStore.getState().connections;
-								wsClient?.connect();
 							})
 							.catch(() => setChatsBeStatus(false));
-					});
+						return;
+					}
+
+					// ===== MONGOOSEIM PATH =====
+					useStore.getState().setIsMongooseIM(true);
+					useStore.getState().setMessagingBackend(new XmppMessagingBackend());
+
+					Promise.all([listRooms(true, true), listMeetings()])
+						.then(() => {
+							const version = useStore.getState().session.apiVersion;
+							if (version && gte(version, '1.6.8')) {
+								getCapabilities().catch(() => {
+									setAttributes(attrs);
+								});
+							} else {
+								setAttributes(attrs);
+							}
+							setChatsBeStatus(true);
+							xmppClient.connect(resp.zmToken);
+							const { wsClient } = useStore.getState().connections;
+							wsClient?.connect();
+						})
+						.catch(() => setChatsBeStatus(false));
+				});
 			})
 			.catch((err) => {
 				console.error('[MainApp] getToken failed', err);

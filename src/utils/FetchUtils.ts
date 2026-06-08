@@ -67,6 +67,34 @@ const handleResponse = async (response: Response): Promise<any> => {
 	return response;
 };
 
+/**
+ * Lightweight authenticated probe used at connect-time to negotiate which
+ * messaging backend the client is talking to.
+ *
+ * Both backends expose `GET /rooms` (returns 200) and stamp the
+ * `X-WSC-API-VERSION` header on EVERY response — common-socket reports
+ * `>= 2.0.0`, devel/MongooseIM reports `1.6.x`. Because `fetchAPI` discards
+ * the `Response` object (it resolves to the parsed body), we do a raw `fetch`
+ * here so we can read the response header directly.
+ *
+ * @param endpoint chats endpoint exposed by both backends (defaults to `rooms`)
+ * @returns the value of `X-WSC-API-VERSION`, or `null` if the header is absent
+ *          or the request fails (caller treats this as a safe MongooseIM fallback)
+ */
+export async function probeBackendApiVersion(endpoint = 'rooms'): Promise<string | null> {
+	try {
+		const response = await fetch(BASE_PATH + endpoint, {
+			method: RequestType.GET,
+			headers: buildHeaders()
+		});
+		// The header is stamped on every response, including errors, so we read
+		// it regardless of response.ok.
+		return response.headers.get(wscApiVersionHeader);
+	} catch {
+		return null;
+	}
+}
+
 export function fetchAPI<T>(
 	endpoint: string,
 	method: RequestType,

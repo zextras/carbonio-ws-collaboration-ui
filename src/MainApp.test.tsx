@@ -12,6 +12,7 @@ import MainApp from './MainApp';
 import * as api from './network';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
+import * as fetchUtils from './utils/FetchUtils';
 
 describe('Entry point', () => {
 	test('Set app version', () => {
@@ -42,10 +43,48 @@ describe('Entry point', () => {
 	test('Connection is established on app load', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// MongooseIM detection: backend reports a < 2.0.0 version
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('1.6.13');
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+	});
+
+	test('WSC-pure backend (version >= 2.0.0) selects RestMessagingBackend', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// X-WSC-API-VERSION = "2.0.0" → WSC-pure / RestMessagingBackend
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('2.0.0');
+		vi.spyOn(api.ChatApi, 'getInbox').mockResolvedValueOnce({ conversations: [] } as never);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		setup(<MainApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(useStore.getState().connections.isMongooseIM).toBe(false);
+	});
+
+	test('Legacy backend (version 1.6.13) selects XmppMessagingBackend', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// X-WSC-API-VERSION = "1.6.13" → MongooseIM / XmppMessagingBackend
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('1.6.13');
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		setup(<MainApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(useStore.getState().connections.isMongooseIM).toBe(true);
+	});
+
+	test('Missing version header falls back to XmppMessagingBackend', async () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// No X-WSC-API-VERSION header → safe fallback to MongooseIM
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce(null);
+		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
+		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
+		setup(<MainApp />);
+		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
+		expect(useStore.getState().connections.isMongooseIM).toBe(true);
 	});
 
 	test('Connection is not established on app load if getToken do not respond', async () => {
@@ -59,8 +98,8 @@ describe('Entry point', () => {
 	test('Connection is not established on app load if listRooms do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		// Force MongooseIM path by making getInbox fail
-		vi.spyOn(api.ChatApi, 'getInbox').mockRejectedValueOnce(new Error());
+		// Force MongooseIM path via a < 2.0.0 version header
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('1.6.13');
 		vi.spyOn(api, 'listRooms').mockRejectedValueOnce(new Error());
 		vi.spyOn(api, 'listMeetings').mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
@@ -70,8 +109,8 @@ describe('Entry point', () => {
 	test('getCapabilities is called when API version >= 1.6.8', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
-		// Force MongooseIM path by making getInbox fail
-		vi.spyOn(api.ChatApi, 'getInbox').mockRejectedValueOnce(new Error());
+		// Force MongooseIM path via a < 2.0.0 version header
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('1.6.13');
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({
@@ -97,12 +136,12 @@ describe('Entry point', () => {
 	test('setAttributes is called when API version < 1.6.8', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// MongooseIM path with a version below the capabilities threshold
+		vi.spyOn(fetchUtils, 'probeBackendApiVersion').mockResolvedValueOnce('1.6.7');
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities');
 		setup(<MainApp />);
-		useStore.getState().setApiVersion('1.6.7');
-		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 		expect(getCapabilitiesSpy).not.toHaveBeenCalled();
 		expect(useStore.getState().session.attributes).toBeDefined();
