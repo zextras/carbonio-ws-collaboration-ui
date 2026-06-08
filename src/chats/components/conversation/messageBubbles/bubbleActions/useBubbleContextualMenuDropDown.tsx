@@ -19,13 +19,12 @@ import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreviewNavigation from '../../../../../hooks/usePreviewNavigation';
-import { deleteAttachment } from '../../../../../network';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
+import { getMessagingBackend } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -114,13 +113,8 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		if (message.attachment) {
-			deleteAttachment(message.attachment.id).then(() =>
-				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
-			);
-		} else {
-			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
-		}
+		const backend = getMessagingBackend(useStore.getState());
+		backend.deleteMessage(message.roomId, message.stanzaId, message.attachment?.id);
 	}, [message.stanzaId, message.attachment, message.roomId]);
 
 	const downloadAction = useCallback(() => {
