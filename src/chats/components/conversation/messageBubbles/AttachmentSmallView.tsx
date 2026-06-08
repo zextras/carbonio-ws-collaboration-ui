@@ -10,10 +10,10 @@ import styled from '@emotion/styled';
 import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import usePreview from '../../../../hooks/usePreview';
-import { getURLAttachment } from '../../../../network';
+import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
+	downloadAttachment,
 	getAttachmentThumbnailURL,
 	getPinAttachmentIcon,
 	isPreviewSupported
@@ -59,13 +59,18 @@ const CustomAvatar = styled(Avatar)`
 
 type AttachmentSmallViewProps = {
 	attachment: AttachmentMessageType;
+	roomId: string;
+	messageDate: number;
 };
-const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
+const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment, roomId, messageDate }) => {
 	const [t] = useTranslation();
 	const previewActionLabel = t('action.preview', 'Preview');
 	const downloadActionLabel = t('action.download', 'Download');
 
-	const { onPreviewClick } = usePreview(attachment);
+	const { openFromChat } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		openFromChat(roomId, attachment, messageDate);
+	}, [attachment, messageDate, openFromChat, roomId]);
 
 	const previewURL = useMemo(
 		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
@@ -74,16 +79,10 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 
 	const previewSupported = useMemo(() => isPreviewSupported(attachment.mimeType), [attachment]);
 
-	const download = useCallback(() => {
-		const downloadUrl = getURLAttachment(attachment.id);
-		const linkTag: HTMLAnchorElement = document.createElement('a');
-		document.body.appendChild(linkTag);
-		linkTag.href = downloadUrl;
-		linkTag.download = attachment.name;
-		linkTag.target = '_blank';
-		linkTag.click();
-		linkTag.remove();
-	}, [attachment.id, attachment.name]);
+	const download = useCallback(
+		() => downloadAttachment(attachment.id, attachment.name),
+		[attachment.id, attachment.name]
+	);
 
 	return (
 		<CustomPadding right="small" data-testid="hover-container">

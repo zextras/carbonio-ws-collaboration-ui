@@ -46,6 +46,12 @@ export type UpdateRoomOwnersResponse = Response;
 
 export type GetRoomAttachmentsResponse = {
 	attachments: Attachment[];
+	cursor?: string;
+};
+
+export type BulkDeleteRoomAttachmentsResponse = {
+	successIds: string[];
+	failedIds: string[];
 };
 
 /**

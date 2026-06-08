@@ -15,6 +15,7 @@ import {
 	deleteRoomPicture,
 	demotesRoomMember,
 	getRoom,
+	bulkDeleteRoomAttachments,
 	getRoomAttachments,
 	getRoomMembers,
 	getRoomPicture,
@@ -256,20 +257,47 @@ describe('Rooms API', () => {
 		);
 	});
 
-	test('getRoomAttachments is called correctly', async () => {
-		// Send getRoomAttachments request
-		await getRoomAttachments('roomId');
+	test('getRoomAttachments is called correctly with the minimum required params', async () => {
+		await getRoomAttachments('roomId', { limit: 20 });
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/attachments`, RequestType.GET);
+		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/attachments?limit=20`, RequestType.GET);
 	});
 
-	test('getRoomAttachments is called correctly with params', async () => {
-		// Send getRoomAttachments request
-		await getRoomAttachments('roomId', 3, 'filter');
+	test('getRoomAttachments forwards the cursor on subsequent pages', async () => {
+		await getRoomAttachments('roomId', { limit: 20, cursor: 'token_1' });
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
-			`rooms/roomId/attachments?itemsNumber=3&extraFields=filter`,
+			`rooms/roomId/attachments?limit=20&cursor=token_1`,
 			RequestType.GET
+		);
+	});
+
+	test('getRoomAttachments serializes every supported filter and sort param', async () => {
+		await getRoomAttachments('roomId', {
+			limit: 20,
+			userId: 'user-1',
+			mimeType: 'image/png',
+			createdAfter: '2024-01-01T00:00:00Z',
+			createdBefore: '2024-12-31T23:59:59Z',
+			minSize: 1024,
+			maxSize: 1048576,
+			sortBy: 'created_at',
+			order: 'desc'
+		});
+
+		expect(mockFetchAPI).toHaveBeenCalledWith(
+			`rooms/roomId/attachments?limit=20&userId=user-1&mimeType=image%2Fpng&createdAfter=2024-01-01T00%3A00%3A00Z&createdBefore=2024-12-31T23%3A59%3A59Z&minSize=1024&maxSize=1048576&sortBy=created_at&order=desc`,
+			RequestType.GET
+		);
+	});
+
+	test('bulkDeleteRoomAttachments sends attachmentIds array', async () => {
+		await bulkDeleteRoomAttachments('roomId', ['att1', 'att2']);
+
+		expect(mockFetchAPI).toHaveBeenCalledWith(
+			`rooms/roomId/attachments`,
+			RequestType.DELETE,
+			{ attachmentIds: ['att1', 'att2'] }
 		);
 	});
 

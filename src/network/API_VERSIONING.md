@@ -2,19 +2,40 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
-## Version 1.6.10
+## Version 1.6.12
+
 ### Changes
+
+- **API**: New `GET /rooms/${roomId}/attachments` and `DELETE /rooms/${roomId}/attachments` endpoints powering the room media gallery (paginated list, filtering and bulk delete of room attachments). Used as feature flag to show/hide the Media Gallery tab in the info panel.
+
+### Affected Files
+
+- 'src/network/apis/RoomsApi.ts' on functions `getRoomAttachments` and `bulkDeleteRoomAttachments`
+- 'src/chats/components/infoPanel/ConversationInfoPanel.tsx'
+- 'src/MainApp.tsx'
+
+---
+
+## Version 1.6.10
+
+### Changes
+
 - **API**: New `POST /meetings/${meetingId}/decline` endpoint to allow users to decline meeting invitations
 
 ### Affected Files
+
 - 'src/meetings/components/MeetingNotification.tsx' on function `handleDeclineMeeting`
 
 ---
+
 ## Version 1.6.9
+
 ### Changes
+
 - **API**: New `GET /meetings/${meetingId}/turnCredentials` endpoint to retrieve TURN credentials for a meeting
 
 ---
+
 ## Version 1.6.8
 
 ### Changes

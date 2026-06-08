@@ -22,6 +22,7 @@ import {
 	AddRoomAttachmentResponse,
 	AddRoomMembersResponse,
 	AddRoomResponse,
+	BulkDeleteRoomAttachmentsResponse,
 	ClearRoomHistoryResponse,
 	DeleteRoomMemberResponse,
 	DeleteRoomPictureResponse,
@@ -39,9 +40,10 @@ import {
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
+import { GetRoomAttachmentsParams } from '../../types/network/models/attachmentTypes';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
+import { buildQueryString, fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { createMeeting, deleteMeeting } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -159,18 +161,15 @@ export const updateRoomOwners = (
 
 export const getRoomAttachments = (
 	roomId: string,
-	pageNumber?: number,
-	pageFilter?: string
-): Promise<GetRoomAttachmentsResponse> => {
-	let params = '';
-	if (pageNumber || pageFilter) {
-		const array = [];
-		if (pageNumber) array.push(`itemsNumber=${pageNumber}`);
-		if (pageFilter) array.push(`extraFields=${pageFilter}`);
-		params = `?${array.join('&')}`;
-	}
-	return fetchAPI(`rooms/${roomId}/attachments${params}`, RequestType.GET);
-};
+	params: GetRoomAttachmentsParams
+): Promise<GetRoomAttachmentsResponse> =>
+	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+
+export const bulkDeleteRoomAttachments = (
+	roomId: string,
+	attachmentIds: string[]
+): Promise<BulkDeleteRoomAttachmentsResponse> =>
+	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds } as unknown as Record<string, unknown>);
 
 /**
  * Replaces a placeholder room with a real one.
@@ -346,6 +345,7 @@ const roomsApiNamespace = {
 	demotesRoomMember,
 	updateRoomOwners,
 	getRoomAttachments,
+	bulkDeleteRoomAttachments,
 	replacePlaceholderRoom,
 	addRoomAttachment
 };

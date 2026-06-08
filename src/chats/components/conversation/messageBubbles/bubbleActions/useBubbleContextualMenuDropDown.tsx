@@ -18,20 +18,20 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
-import usePreview from '../../../../../hooks/usePreview';
-import { getURLAttachment } from '../../../../../network';
+import usePreviewNavigation from '../../../../../hooks/usePreviewNavigation';
+import { deleteAttachment } from '../../../../../network';
+import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
-import { getMessagingBackend } from '../../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
-import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
+import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
 const useBubbleContextualMenuDropDown = (
@@ -43,6 +43,7 @@ const useBubbleContextualMenuDropDown = (
 	menuDropdownRef: React.RefObject<HTMLDivElement>;
 } => {
 	const [t] = useTranslation();
+	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.deleteForAll', 'Delete for all');
 	const editActionLabel = t('action.edit', 'Edit');
@@ -68,16 +69,18 @@ const useBubbleContextualMenuDropDown = (
 	const forwardList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
 
-	const backend = useStore((store) => getMessagingBackend(store));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
-	const { onPreviewClick } = usePreview(
-		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
-	);
+	const { openFromChat } = usePreviewNavigation();
+	const onPreviewClick = useCallback(() => {
+		if (message.attachment) {
+			openFromChat(message.roomId, message.attachment, message.date);
+		}
+	}, [message.attachment, message.date, message.roomId, openFromChat]);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
@@ -111,19 +114,18 @@ const useBubbleContextualMenuDropDown = (
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		backend.deleteMessage(message.roomId, message.stanzaId, message.attachment?.id);
-	}, [backend, message.attachment?.id, message.stanzaId, message.roomId]);
+		if (message.attachment) {
+			deleteAttachment(message.attachment.id).then(() =>
+				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
+			);
+		} else {
+			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
+		}
+	}, [message.stanzaId, message.attachment, message.roomId]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
-			const downloadUrl = getURLAttachment(message.attachment.id);
-			const linkTag: HTMLAnchorElement = document.createElement('a');
-			document.body.appendChild(linkTag);
-			linkTag.href = downloadUrl;
-			linkTag.download = message.attachment.name;
-			linkTag.target = '_blank';
-			linkTag.click();
-			linkTag.remove();
+			downloadAttachment(message.attachment.id, message.attachment.name);
 		}
 	}, [message.attachment]);
 
@@ -163,8 +165,6 @@ const useBubbleContextualMenuDropDown = (
 	);
 
 	const canBeDownloaded = useMemo(() => message.attachment, [message.attachment]);
-
-	const { canMessageBePinned, pinActionLabel, pinAction } = usePinMessage(message);
 
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropdownItem[] = [];
@@ -231,7 +231,11 @@ const useBubbleContextualMenuDropDown = (
 
 		// Pin functionality
 		if (canMessageBePinned) {
-			actions.push({ id: 'Pin', label: pinActionLabel, onClick: pinAction });
+			actions.push({
+				id: 'Pin',
+				label: pinActionLabel,
+				onClick: pinAction
+			});
 		}
 
 		return actions;
@@ -245,6 +249,7 @@ const useBubbleContextualMenuDropDown = (
 		canBeDeleted,
 		canBePreviewed,
 		canBeDownloaded,
+		canMessageBePinned,
 		editActionLabel,
 		editMessageAction,
 		filesToUploadArray,
@@ -256,7 +261,6 @@ const useBubbleContextualMenuDropDown = (
 		onPreviewClick,
 		downloadActionLabel,
 		downloadAction,
-		canMessageBePinned,
 		pinActionLabel,
 		pinAction
 	]);

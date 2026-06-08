@@ -7,7 +7,7 @@
 
 import { filter, find, includes, last, map } from 'lodash';
 
-import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
+import { FileToUpload, InfoPanelTab, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -127,3 +127,6 @@ export const getIsPinnedMessageSelected = (
 	roomId: string,
 	stanzaId: string
 ): boolean => store.activeConversations[roomId]?.selectedPinnedMessage === stanzaId;
+
+export const getSelectedInfoTab = (store: RootStore, roomId: string): InfoPanelTab =>
+	store.activeConversations[roomId]?.infoPanelStatus?.selectedInfoTab ?? InfoPanelTab.ACTIONS;

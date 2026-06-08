@@ -22,7 +22,7 @@ import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
-import { chatWsClient } from '../../../network/websocket/ChatWebSocketClient';
+import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
@@ -76,10 +76,14 @@ const TextExpanded = styled(Text)`
 
 const ExpandedMessageWithThumbnail = ({
 	attachment,
-	messageText
+	messageText,
+	roomId,
+	messageDate
 }: {
 	attachment: AttachmentMessageType;
 	messageText: string;
+	roomId: string;
+	messageDate: number;
 }): React.JSX.Element => (
 	<Container gap={'0.5rem'} crossAlignment="flex-start">
 		<RoundedRow
@@ -89,7 +93,7 @@ const ExpandedMessageWithThumbnail = ({
 			width={'fill'}
 			mainAlignment="flex-start"
 		>
-			<AttachmentSmallView attachment={attachment} />
+			<AttachmentSmallView attachment={attachment} roomId={roomId} messageDate={messageDate} />
 			<Text overflow="break-word" color={'gray1'} size="small">
 				{attachment.name}
 			</Text>
@@ -142,7 +146,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		}, 5000);
 
 		if (!isMessageInStore && !isMessageSelected) {
-			chatWsClient
+			xmppClient
 				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
@@ -174,13 +178,15 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				<ExpandedMessageWithThumbnail
 					attachment={pinnedMessage.attachment}
 					messageText={pinnedMessage.text}
+					roomId={pinnedMessage.roomId}
+					messageDate={pinnedMessage.date}
 				/>
 			);
 		}
 
 		return (
 			<Container crossAlignment="flex-start">
-				{pinnedMessage.forwardedInfo && <ForwardInfo info={pinnedMessage.forwardedInfo} />}
+				{pinnedMessage.forwarded && <ForwardInfo info={pinnedMessage.forwarded} />}
 				<TextExpanded overflow="break-word">{pinnedMessage.text}</TextExpanded>
 			</Container>
 		);

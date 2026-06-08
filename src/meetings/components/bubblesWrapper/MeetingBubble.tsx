@@ -170,7 +170,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 					<Padding bottom="small" />
 				</>
 			)}
-			{message.forwardedInfo && <ForwardInfo info={message.forwardedInfo} />}
+			{message.forwarded && <ForwardInfo info={message.forwarded} />}
 			{message.repliedMessage && (
 				<RepliedTextMessageSectionView
 					repliedMessageRef={message.repliedMessage}
@@ -179,7 +179,13 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 			)}
 			{messageAttachment && (
 				<>
-					<AttachmentView attachment={messageAttachment} isMyMessage={false} from={message.from} />
+					<AttachmentView
+						attachment={messageAttachment}
+						isMyMessage={false}
+						from={message.from}
+						roomId={message.roomId}
+						messageDate={message.date}
+					/>
 					<Padding bottom="0.5rem" />
 				</>
 			)}

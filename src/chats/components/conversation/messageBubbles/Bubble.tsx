@@ -137,6 +137,9 @@ const Bubble: FC<BubbleProps> = ({
 	const isSelectedSearchItem = useStore(
 		(store) => store.activeConversations[message.roomId]?.selectedSearchResult === message.stanzaId
 	);
+	const isSelectedPinnedMessage = useStore(
+		(store) => store.activeConversations[message.roomId]?.selectedPinnedMessage === message.stanzaId
+	);
 
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {
@@ -207,7 +210,7 @@ const Bubble: FC<BubbleProps> = ({
 			height="fit"
 			mainAlignment="space-between"
 			ref={forwardContainerRef}
-			$forwardIsActive={forwardIsActive || isSelectedSearchItem}
+			$forwardIsActive={forwardIsActive || isSelectedSearchItem || isSelectedPinnedMessage}
 			$hoverIsActive={hoverIsActive}
 			data-testid="forward_bubble_container"
 		>
@@ -219,7 +222,7 @@ const Bubble: FC<BubbleProps> = ({
 				height="fit"
 				width="fit"
 				crossAlignment="flex-start"
-				maxWidth={messageAttachment && !message.forwardedInfo ? '60%' : '75%'}
+				maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 				padding={{ all: 'medium' }}
 				background={isMyMessage ? 'highlight' : 'gray6'}
 				$isMyMessage={isMyMessage}
@@ -237,7 +240,7 @@ const Bubble: FC<BubbleProps> = ({
 						<Padding bottom="small" />
 					</>
 				)}
-				{message.forwardedInfo && <ForwardInfo info={message.forwardedInfo} />}
+				{message.forwarded && <ForwardInfo info={message.forwarded} />}
 				{message.repliedMessage && (
 					<RepliedTextMessageSectionView
 						repliedMessageRef={message.repliedMessage}
@@ -250,6 +253,8 @@ const Bubble: FC<BubbleProps> = ({
 							attachment={messageAttachment}
 							isMyMessage={isMyMessage}
 							from={message.from}
+							roomId={message.roomId}
+							messageDate={message.date}
 							messageListRef={messageListRef}
 						/>
 						<Padding bottom="0.5rem" />

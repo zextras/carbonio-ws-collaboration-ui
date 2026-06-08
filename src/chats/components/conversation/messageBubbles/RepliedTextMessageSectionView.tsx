@@ -143,13 +143,17 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 			>
 				{repliedMessage.attachment && (
 					<Row wrap="nowrap">
-						<AttachmentSmallView attachment={repliedMessage.attachment} />
+						<AttachmentSmallView
+							attachment={repliedMessage.attachment}
+							roomId={repliedMessage.roomId}
+							messageDate={repliedMessage.date}
+						/>
 					</Row>
 				)}
 				<Row takeAvailableSpace wrap="nowrap">
 					<Container crossAlignment="flex-start">
 						<BubbleHeader senderId={repliedMessage.from} />
-						{repliedMessage.deletedInfo ? (
+						{repliedMessage.deleted ? (
 							<DeletedMessageWrap color="secondary" overflow="ellipsis">
 								{deletedMessageLabel}
 							</DeletedMessageWrap>
