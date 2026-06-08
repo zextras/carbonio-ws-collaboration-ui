@@ -2,6 +2,17 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.13
+
+### Changes
+
+- **API**: New `PUT /meetings/${meetingId}/screen/iceRestart` endpoint to trigger an ICE restart on screenshare connections after a TURN server interruption
+
+### Affected Files
+- 'src/network/webRTC/VideoScreenInConnection.ts'
+
+---
+
 ## Version 1.6.12
 
 ### Changes
@@ -59,6 +70,19 @@ This document tracks internal changes related to API versioning, renamed events,
 ### Affected Files
 
 - 'src/meetings/components/sidebar/MeetingConversationAccordion/MeetingConversationAccordion.tsx'
+
+---
+
+## Version 1.6.6
+
+### Changes
+
+- **API**: New `PUT /meetings/${meetingId}/audio/iceRestart` and `PUT /meetings/${meetingId}/video/iceRestart` endpoints to trigger an ICE restart on audio and video connections after a TURN server interruption
+
+### Affected Files
+- 'src/network/webRTC/BidirectionalConnectionAudioInOut.ts'
+- 'src/network/webRTC/VideoOutConnection.ts'
+- 'src/network/webRTC/VideoScreenInConnection.ts'
 
 ---
 
