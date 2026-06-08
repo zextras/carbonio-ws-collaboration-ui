@@ -13,6 +13,33 @@ import {
 	MessageType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
+import type { Attachment } from '../../../types/network/models/attachmentTypes';
+
+/**
+ * Maps a resolved WS attachment to the gallery Attachment type.
+ * Returns undefined if resolved is missing.
+ * Used to prepend the attachment to the MediaGallery slice on every incoming message.
+ */
+const toGalleryAttachment = (
+	resolved: { id: string; name: string; mimeType: string; size: number } | undefined,
+	senderId: string,
+	roomId: string,
+	messageId: string,
+	timestamp: string
+): Attachment | undefined => {
+	if (!resolved) return undefined;
+	return {
+		id: resolved.id,
+		name: resolved.name,
+		mimeType: resolved.mimeType,
+		size: Number(resolved.size) || 0,
+		userId: senderId,
+		roomId,
+		createdAt: new Date(timestamp).toISOString(),
+		messageId
+		// no stanzaId on common-socket live path (native WS; optional field)
+	};
+};
 
 /**
  * Handles incoming message-received events from the WebSocket.
@@ -149,6 +176,17 @@ export function handleWsMessageReceived(event: {
 				}),
 				false
 			);
+			// Phase E: wire gallery live-update for own attachment uploads (self-echo)
+			const galleryAttachmentSelf = toGalleryAttachment(
+				resolvedAttachment,
+				senderId,
+				roomId,
+				messageId,
+				timestamp
+			);
+			if (galleryAttachmentSelf) {
+				useStore.getState().prependMediaGalleryAttachment(roomId, galleryAttachmentSelf);
+			}
 		}
 		return;
 	}
@@ -182,4 +220,16 @@ export function handleWsMessageReceived(event: {
 		newMessage(textMessage);
 	}
 	incrementUnreadCount(roomId, 1);
+
+	// Phase E: wire gallery live-update for other-user attachment messages (native WS)
+	const galleryAttachment = toGalleryAttachment(
+		resolvedAttachment,
+		senderId,
+		roomId,
+		messageId,
+		timestamp
+	);
+	if (galleryAttachment) {
+		useStore.getState().prependMediaGalleryAttachment(roomId, galleryAttachment);
+	}
 }
