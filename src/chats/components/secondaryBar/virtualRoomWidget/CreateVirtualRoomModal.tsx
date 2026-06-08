@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	CreateSnackbarFn,
@@ -137,6 +137,12 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 		setContactsSelected([]);
 		onClose();
 	}, [onClose]);
+
+	useEffect(() => {
+		if (open) {
+			textRef.current?.focus();
+		}
+	}, [open]);
 
 	return (
 		<Modal
