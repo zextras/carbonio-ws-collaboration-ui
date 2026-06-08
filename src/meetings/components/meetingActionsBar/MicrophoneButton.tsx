@@ -60,6 +60,7 @@ const MicrophoneButton = ({
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+	const messageBrokerStatus = useStore(({ connections }) => connections.status.messageBroker);
 
 	const { permission, deviceList, noDevices } = useMediaDevices('audio');
 
@@ -111,9 +112,14 @@ const MicrophoneButton = ({
 	);
 
 	const tooltipLabel = useMemo(() => {
-		if (!websocketNetworkStatus) return disableButtonLabel;
+		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return audioStatus ? disableMicLabel : enableMicLabel;
-	}, [websocketNetworkStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
+	}, [websocketNetworkStatus, messageBrokerStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
+
+	const disabled = useMemo(
+		() => !websocketNetworkStatus || !messageBrokerStatus || permission !== 'granted' || noDevices,
+		[messageBrokerStatus, noDevices, permission, websocketNetworkStatus]
+	);
 
 	return (
 		<Tooltip
@@ -125,7 +131,7 @@ const MicrophoneButton = ({
 				setShowItems={setIsAudioListOpen}
 				onClick={toggleAudioStream}
 				items={mediaAudioList}
-				disabled={!websocketNetworkStatus || permission !== 'granted' || noDevices}
+				disabled={disabled}
 				data-testid="microphone-button"
 				icon={audioStatus ? 'Mic' : 'MicOff'}
 				listRef={audioDropdownRef}

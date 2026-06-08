@@ -64,6 +64,7 @@ const CameraButton = ({
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+	const messageBrokerStatus = useStore(({ connections }) => connections.status.messageBroker);
 
 	const { permission, deviceList, noDevices } = useBrowserPermission('video');
 
@@ -134,17 +135,28 @@ const CameraButton = ({
 
 	const tooltipLabel = useMemo(() => {
 		if (permission !== 'granted') return giveMediaPermissionSnackbar;
-		if (!websocketNetworkStatus) return disableButtonLabel;
+		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return videoStatus ? disableCamLabel : enableCamLabel;
 	}, [
 		permission,
 		giveMediaPermissionSnackbar,
 		websocketNetworkStatus,
+		messageBrokerStatus,
 		disableButtonLabel,
 		videoStatus,
 		disableCamLabel,
 		enableCamLabel
 	]);
+
+	const disabled = useMemo(
+		() =>
+			!buttonStatus ||
+			!websocketNetworkStatus ||
+			!messageBrokerStatus ||
+			permission !== 'granted' ||
+			noDevices,
+		[buttonStatus, messageBrokerStatus, noDevices, permission, websocketNetworkStatus]
+	);
 
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
@@ -153,7 +165,7 @@ const CameraButton = ({
 				setShowItems={setIsVideoListOpen}
 				onClick={toggleVideoStream}
 				items={mediaVideoList}
-				disabled={!buttonStatus || !websocketNetworkStatus || permission !== 'granted' || noDevices}
+				disabled={disabled}
 				data-testid="cameraButton"
 				icon={videoStatus ? 'Video' : 'VideoOff'}
 				listRef={videoDropdownRef}

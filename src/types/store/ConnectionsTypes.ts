@@ -12,6 +12,7 @@ export type ConnectionsStoreSlice = {
 	setChatsBeStatus: (status: boolean) => void;
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
+	setMessageBrokerStatus: (status: boolean) => void;
 	setIsMongooseIM: (isMongooseIM: boolean) => void;
 	setMessagingBackend: (backend: IMessagingBackend) => void;
 	resetXmppData: () => void;
@@ -27,6 +28,7 @@ export type Connections = {
 		chats_be?: boolean;
 		xmpp?: boolean;
 		websocket?: boolean;
+		messageBroker?: boolean;
 	};
 	isMongooseIM: boolean | undefined; // undefined = detection not yet complete
 	messagingBackend?: IMessagingBackend;

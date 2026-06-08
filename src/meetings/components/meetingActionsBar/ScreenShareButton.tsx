@@ -29,6 +29,7 @@ const ScreenShareButton = (): ReactElement => {
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
 	const screenOutConn = useStore((store) => store.activeMeeting?.screenOutConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+	const messageBrokerStatus = useStore(({ connections }) => connections.status.messageBroker);
 
 	const toggleScreenStream = useCallback(() => {
 		if (!screenStatus) {
@@ -39,10 +40,11 @@ const ScreenShareButton = (): ReactElement => {
 	}, [screenOutConn, screenStatus]);
 
 	const tooltipLabel = useMemo(() => {
-		if (!websocketNetworkStatus) return disableButtonLabel;
+		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return screenStatus ? disableScreenLabel : enableScreenLabel;
 	}, [
 		websocketNetworkStatus,
+		messageBrokerStatus,
 		disableButtonLabel,
 		screenStatus,
 		disableScreenLabel,
@@ -52,13 +54,12 @@ const ScreenShareButton = (): ReactElement => {
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
 			<Button
-				data-testid="screenshare-button"
 				labelColor="gray6"
 				backgroundColor="primary"
 				icon={screenStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
 				onClick={toggleScreenStream}
 				size="large"
-				disabled={!websocketNetworkStatus}
+				disabled={!websocketNetworkStatus || !messageBrokerStatus}
 			/>
 		</Tooltip>
 	);

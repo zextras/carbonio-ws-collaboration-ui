@@ -10,6 +10,8 @@ import { WsMeetingEvent } from './wsMeetingEvents';
 export enum WsEventType {
 	INITIALIZATION = 'WebsocketConnected',
 	PONG = 'Pong',
+	MESSAGE_BROKER_DISCONNECTED = 'MessageBrokerDisconnected',
+	MESSAGE_BROKER_RESTORED = 'MessageBrokerRestored',
 	MESSAGE_RECEIVED = 'MessageReceived',
 	MESSAGE_EDITED = 'MessageEdited',
 	MESSAGE_DELETED = 'MessageDeleted',
@@ -57,7 +59,13 @@ export enum WsEventType {
 	MEETING_DECLINED = 'MeetingDeclined'
 }
 
-export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | WsMeetingEvent;
+export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent;
+
+type WsGeneralEvent =
+	| InitializationEvent
+	| PongEvent
+	| WsMessageBrokerDisconnectedEvent
+	| WsMessageBrokerRestoredEvent;
 
 export type InitializationEvent = {
 	type: WsEventType.INITIALIZATION;
@@ -66,4 +74,12 @@ export type InitializationEvent = {
 
 export type PongEvent = {
 	type: WsEventType.PONG;
+};
+
+export type WsMessageBrokerDisconnectedEvent = {
+	type: WsEventType.MESSAGE_BROKER_DISCONNECTED;
+};
+
+export type WsMessageBrokerRestoredEvent = {
+	type: WsEventType.MESSAGE_BROKER_RESTORED;
 };
