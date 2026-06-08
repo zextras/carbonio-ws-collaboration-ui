@@ -23,14 +23,15 @@ type ConversationProps = {
 
 const ConversationInfoPanel: FC<ConversationProps> = ({ roomId, goToChatView }) => {
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
+	const isPlaceholder: boolean = roomId.startsWith('placeholder-');
 
 	return (
 		<Container>
 			<ConversationInfo roomId={roomId} roomType={roomType} goToChatView={goToChatView} />
 			<Container mainAlignment="flex-start" style={{ overflowY: 'auto' }}>
 				<ConversationInfoDetails roomId={roomId} roomType={roomType} />
-				<ActionsAccordion roomId={roomId} />
-				{roomType !== RoomType.ONE_TO_ONE && <MemberAccordion roomId={roomId} />}
+				{!isPlaceholder && <ActionsAccordion roomId={roomId} />}
+				{!isPlaceholder && roomType !== RoomType.ONE_TO_ONE && <MemberAccordion roomId={roomId} />}
 			</Container>
 		</Container>
 	);

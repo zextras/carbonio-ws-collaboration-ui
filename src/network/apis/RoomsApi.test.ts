@@ -288,7 +288,7 @@ describe('Rooms API', () => {
 				RequestType.POST,
 				testFile,
 				signal,
-				{ area, messageId: expect.stringMatching(UUID_REGEX) }
+				{ area, tempId: expect.stringMatching(UUID_REGEX) }
 			);
 		});
 
@@ -314,7 +314,7 @@ describe('Rooms API', () => {
 					description: 'description',
 					replyId: 'stanzaId',
 					area,
-					messageId: expect.stringMatching(UUID_REGEX)
+					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);
 		});
@@ -350,7 +350,7 @@ describe('Rooms API', () => {
 				RequestType.PUT,
 				testFile,
 				signal,
-				{ area, messageId: expect.stringMatching(UUID_REGEX) }
+				{ area, tempId: expect.stringMatching(UUID_REGEX) }
 			);
 		});
 
@@ -377,7 +377,7 @@ describe('Rooms API', () => {
 					description: 'description',
 					replyId: 'stanzaId',
 					area,
-					messageId: expect.stringMatching(UUID_REGEX)
+					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);
 		});

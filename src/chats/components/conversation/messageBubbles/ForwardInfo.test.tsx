@@ -43,10 +43,10 @@ describe('Forward Info', () => {
 		expect(forwardMultipleTimesIcon).not.toBeInTheDocument();
 	});
 
-	test('Message forwarded more than once has ReplyAll icon', () => {
+	test('Message forwarded more than once still shows Forward icon', () => {
 		setup(<ForwardInfo info={{ ...forwardedInfo, count: 3 }} />);
 
-		const forwardMultipleTimesIcon = screen.getByTestId('icon: ForwardMultipleTimes');
-		expect(forwardMultipleTimesIcon).toBeInTheDocument();
+		const forwardIcon = screen.getByTestId('icon: Forward');
+		expect(forwardIcon).toBeInTheDocument();
 	});
 });

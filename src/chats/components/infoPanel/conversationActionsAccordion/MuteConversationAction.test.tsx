@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MuteConversationAction from './MuteConversationAction';
-import * as api from '../../../../network/apis/RoomsApi';
+import RoomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -51,7 +51,7 @@ describe('Mute/Unmute Conversation', () => {
 	});
 
 	test('mute notifications', async () => {
-		const spyOnMuteRoomNotification = vi.spyOn(api, 'muteRoomNotification');
+		const spyOnMuteRoomNotification = vi.spyOn(RoomsApi, 'muteRoomNotification');
 		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
 
 		const muteAction = await screen.findByText(/Mute notifications/i);
@@ -63,7 +63,7 @@ describe('Mute/Unmute Conversation', () => {
 	});
 
 	test('unmute notifications', async () => {
-		const spyOnUnmuteRoomNotification = vi.spyOn(api, 'unmuteRoomNotification');
+		const spyOnUnmuteRoomNotification = vi.spyOn(RoomsApi, 'unmuteRoomNotification');
 		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
 
 		const unmuteAction = screen.getByText(/Activate notifications/i);

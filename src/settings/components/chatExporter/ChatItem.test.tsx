@@ -73,7 +73,8 @@ describe('ChatItem test', () => {
 			roomId: singleRoom.id,
 			text: 'Last message',
 			from: otherUser.id,
-			deleted: true
+			deleted: true,
+			deletedInfo: { deletedBy: otherUser.id, deletedAt: '2022-08-25T17:24:28.961+02:00' }
 		});
 		useStore.getState().setInboxMessages([message]);
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);

@@ -464,7 +464,11 @@ describe('Display group of messages', () => {
 		const messages = generateListMessage([
 			{ roomId: mockedRoom.id, from: userA.id },
 			{ roomId: mockedRoom.id, from: userB.id },
-			{ roomId: mockedRoom.id, from: userB.id, deleted: true },
+			{
+				roomId: mockedRoom.id,
+				from: userB.id,
+				deletedInfo: { deletedBy: userB.id, deletedAt: '2022-08-25T17:24:28.961Z' }
+			},
 			{ roomId: mockedRoom.id, from: userB.id },
 			{ roomId: mockedRoom.id, from: userC.id }
 		]);

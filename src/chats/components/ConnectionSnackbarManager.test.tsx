@@ -29,9 +29,9 @@ describe('ConnectionSnackbarManager', () => {
 		expect(snackbar).toBeInTheDocument();
 	});
 
-	test('Snackbar is shown when there is xmpp network problem', async () => {
+	test('Snackbar is shown when there is websocket network problem (replaces old xmpp test)', async () => {
 		const store = useStore.getState();
-		store.setXmppStatus(false);
+		store.setWebsocketStatus(false);
 		setup(<ConnectionSnackbarManager />);
 		const snackbar = await screen.findByTestId('snackbar');
 		expect(snackbar).toBeInTheDocument();

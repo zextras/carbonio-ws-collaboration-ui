@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
-import * as api from '../../../network/apis/RoomsApi';
+import RoomsApi from '../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
@@ -101,7 +101,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Create a group', async () => {
-		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
+		const spyOnAddRoom = vi.spyOn(RoomsApi, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);
@@ -134,7 +134,7 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on creating a group displaying a snackbar', async () => {
-		const spyOnAddRoom = vi.spyOn(api, 'addRoom');
+		const spyOnAddRoom = vi.spyOn(RoomsApi, 'addRoom');
 		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 		const { user } = setup(<ChatCreationModal open onClose={vi.fn()} />);

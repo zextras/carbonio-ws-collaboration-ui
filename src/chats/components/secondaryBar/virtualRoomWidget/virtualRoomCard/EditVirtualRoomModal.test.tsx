@@ -8,7 +8,7 @@ import React, { createRef } from 'react';
 import { screen, within } from '@testing-library/react';
 
 import EditVirtualRoomModal from './EditVirtualRoomModal';
-import * as api from '../../../../../network/apis/RoomsApi';
+import RoomsApi from '../../../../../network/apis/RoomsApi';
 import { mockSearchUsersByFeatureRequest } from '../../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../../store/Store';
 import {
@@ -72,7 +72,7 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Edit only the name', async () => {
-		const spyOnUpdateRoom = vi.spyOn(api, 'updateRoom');
+		const spyOnUpdateRoom = vi.spyOn(RoomsApi, 'updateRoom');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
@@ -88,7 +88,7 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Add a new moderators', async () => {
-		const spyOnAddMembers = vi.spyOn(api, 'addRoomMembers');
+		const spyOnAddMembers = vi.spyOn(RoomsApi, 'addRoomMembers');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
@@ -106,7 +106,7 @@ describe('EditVirtualRoomModal test', () => {
 	});
 
 	test('Remove an old moderator', async () => {
-		const spyOnDeleteMembers = vi.spyOn(api, 'deleteRoomMember');
+		const spyOnDeleteMembers = vi.spyOn(RoomsApi, 'deleteRoomMember');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
@@ -127,7 +127,7 @@ describe('EditVirtualRoomModal test', () => {
 		const store = useStore.getState();
 		store.addParticipant(meeting.id, createMockParticipants({ userId: member1.id }));
 		store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
-		const spyUpdateOwners = vi.spyOn(api, 'updateRoomOwners');
+		const spyUpdateOwners = vi.spyOn(RoomsApi, 'updateRoomOwners');
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal

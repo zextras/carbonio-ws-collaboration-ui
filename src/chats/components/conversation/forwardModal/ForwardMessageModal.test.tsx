@@ -104,7 +104,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a 1-to-1 room', async () => {
-		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -130,7 +130,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a group', async () => {
-		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -156,7 +156,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to a group', async () => {
-		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -178,12 +178,12 @@ describe('Forward Message Modal', () => {
 		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
-		// One WS call per message per target room (3 messages × 1 room = 3 calls)
-		expect(spyOnForwardMessage).toHaveBeenCalledTimes(3);
+		// One WS call per target room, all messages batched (3 messages × 1 room = 1 call)
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Forward a message to multiple conversations', async () => {
-		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -212,7 +212,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward more than one message to multiple conversations', async () => {
-		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		const spyOnForwardMessage = vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -236,12 +236,12 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
-		// One WS call per message per target room (3 messages × 2 rooms = 6 calls)
-		expect(spyOnForwardMessage).toHaveBeenCalledTimes(6);
+		// One WS call per target room, all messages batched (3 messages × 2 rooms = 2 calls)
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(2);
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 
 		const onClose = vi.fn();
 		const { user } = setup(
@@ -262,7 +262,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
@@ -285,7 +285,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('forwarding to one room redirect to tht room', async () => {
-		vi.spyOn(ChatApi, 'forwardMessage').mockResolvedValue({} as any);
+		vi.spyOn(ChatApi, 'forwardMessages').mockResolvedValue({} as any);
 
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 

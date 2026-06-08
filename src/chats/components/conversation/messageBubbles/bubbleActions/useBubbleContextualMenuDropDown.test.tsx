@@ -45,7 +45,7 @@ const forwardedMyTextMessage: TextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
-	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+	forwardedInfo: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
 const attachmentMyTextMessage: TextMessage = createMockTextMessage({
@@ -79,7 +79,7 @@ const forwardedTextMessage: TextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
-	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+	forwardedInfo: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
 const attachmentTextMessage: TextMessage = createMockTextMessage({
@@ -200,7 +200,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const deleteForAllAction = screen.getByText(/Delete for all/i);
 		expect(deleteForAllAction).toBeInTheDocument();
 
-		if (msg.forwarded) {
+		if (msg.forwardedInfo) {
 			expect(screen.queryByText(/Edit/i)).not.toBeInTheDocument();
 		} else {
 			expect(screen.getByText(/Edit/i)).toBeInTheDocument();

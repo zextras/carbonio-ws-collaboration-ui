@@ -53,9 +53,7 @@ export function mapChatMessageToTextMessage(
 				}
 			: undefined,
 		edited: chatMessage.editedInfo ? true : undefined,
-		editedInfo: chatMessage.editedInfo
-			? { editedAt: chatMessage.editedInfo.editedAt }
-			: undefined,
+		editedInfo: chatMessage.editedInfo ? { editedAt: chatMessage.editedInfo.editedAt } : undefined,
 		forwardedInfo: chatMessage.forwardedInfo
 			? {
 					originalSenderId: chatMessage.forwardedInfo.originalSenderId,

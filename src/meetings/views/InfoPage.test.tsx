@@ -14,6 +14,8 @@ import { routerContextSetup } from '../../tests/test-utils';
 import { UserType } from '../../types/store/UserTypes';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
+const MAYBE_NEXT_TIME = 'Maybe next time';
+
 const pages = [
 	[PAGE_INFO_TYPE.ROOM_EMPTY, 'This Room is empty', 'Try later', 'It seems nobody is in this Room'],
 	[
@@ -25,7 +27,7 @@ const pages = [
 	[
 		PAGE_INFO_TYPE.HANG_UP_PAGE,
 		'You left the waiting room',
-		'Maybe next time',
+		MAYBE_NEXT_TIME,
 		'We look forward to seeing you participate in future meetings'
 	],
 	[
@@ -46,7 +48,7 @@ const pagesToCheckGuest = [
 	[
 		PAGE_INFO_TYPE.NEXT_TIME_PAGE,
 		'Your access has been refused',
-		'Maybe next time',
+		MAYBE_NEXT_TIME,
 		'The moderators have decided to deny your access to the meeting'
 	],
 	[
@@ -67,7 +69,7 @@ const pagesToCheckGuest = [
 		'PLEASE, TRY TO JOIN AGAIN',
 		'Something went wrong.'
 	],
-	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', 'Call ended', 'declined the call']
+	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', MAYBE_NEXT_TIME, 'declined the call']
 ];
 
 describe('Info page', () => {

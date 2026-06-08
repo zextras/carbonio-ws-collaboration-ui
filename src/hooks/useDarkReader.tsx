@@ -36,6 +36,7 @@ const useDarkReader = (): UseDarkReaderReturnType => {
 			},
 			{
 				ignoreImageAnalysis: ['.no-dr-invert *'],
+				ignoreCSSUrl: [],
 				invert: [],
 				css: `
 					.tox, .force-white-bg, .tox-swatches-menu, .tox .tox-edit-area__iframe {

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import GalListItem from './GalListItem';
 import useStore from '../../../../store/Store';
@@ -41,7 +41,7 @@ describe('GalListItem tests', () => {
 	test('User can create a placeholder room by clicking on the GalListItem', () => {
 		setup(<GalListItem contact={contact} expanded />);
 		const listItem = screen.getByTestId('gal_list_item');
-		listItem.click();
+		act(() => listItem.click());
 		expect(useStore.getState().rooms[`placeholder-${contact.id}`]).toBeDefined();
 	});
 });

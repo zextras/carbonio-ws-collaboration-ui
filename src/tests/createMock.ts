@@ -57,7 +57,9 @@ export const createMockTextMessage = (fields?: Partial<TextMessage>): TextMessag
 	replyTo: undefined,
 	repliedMessage: undefined,
 	forwarded: undefined,
+	forwardedInfo: undefined,
 	attachment: undefined,
+	tempId: undefined,
 	...fields
 });
 

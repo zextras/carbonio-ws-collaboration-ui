@@ -41,7 +41,7 @@ beforeEach(() => {
 
 describe('wsConversationEventHandler tests', () => {
 	test('ROOM_MEMBER_ADDED: session user is added in a room with an ongoing meeting', async () => {
-		const spyOnGetRoom = vi.spyOn(api, 'getRoom');
+		const spyOnGetRoom = vi.spyOn(api.RoomsApi, 'getRoom');
 		const spyOnGetMeeting = vi.spyOn(api, 'getMeeting');
 		spyOnGetRoom.mockImplementation(() => Promise.resolve(room));
 		spyOnGetMeeting.mockImplementation(() => Promise.resolve(meeting));

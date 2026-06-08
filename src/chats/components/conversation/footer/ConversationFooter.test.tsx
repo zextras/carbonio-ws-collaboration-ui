@@ -11,9 +11,9 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
+import { mockMessagingBackend } from '../../../../../__mocks__/zustand';
 import ChatApi from '../../../../network/apis/ChatApi';
-import * as api from '../../../../network/apis/RoomsApi';
-import { chatWsClient } from '../../../../network/websocket/ChatWebSocketClient';
+import RoomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -401,7 +401,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(RoomsApi, 'addRoomAttachment');
 		const spyOnGetImageSize = vi.spyOn(attachmentUtils, 'getImageSize');
 		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
@@ -425,7 +425,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(RoomsApi, 'addRoomAttachment');
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -445,7 +445,7 @@ describe('Send message', () => {
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		const spyOnAddRoomAttachment = vi.spyOn(api, 'addRoomAttachment');
+		const spyOnAddRoomAttachment = vi.spyOn(RoomsApi, 'addRoomAttachment');
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 
@@ -724,7 +724,7 @@ describe('Paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendTyping is called when user starts writing', async () => {
-		const spySendTyping = vi.spyOn(chatWsClient, 'sendTyping');
+		const spySendTyping = vi.spyOn(mockMessagingBackend, 'sendTyping');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, 'Hi');
@@ -732,7 +732,7 @@ describe('MessageComposer - isWriting events', () => {
 	});
 
 	test('sendTyping is throttled to at most once per second', async () => {
-		const spySendTyping = vi.spyOn(chatWsClient, 'sendTyping');
+		const spySendTyping = vi.spyOn(mockMessagingBackend, 'sendTyping');
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 

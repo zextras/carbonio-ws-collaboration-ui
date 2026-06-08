@@ -65,7 +65,11 @@ describe('Message Factory', () => {
 	});
 
 	test('Render DeletedMessage', () => {
-		const message = createMockTextMessage({ roomId: room.id, deleted: true });
+		const message = createMockTextMessage({
+			roomId: room.id,
+			deleted: true,
+			deletedInfo: { deletedBy: 'userId', deletedAt: '2022-08-25T17:24:28.961+02:00' }
+		});
 		const store = useStore.getState();
 		store.newMessage(message);
 		setup(
@@ -83,7 +87,11 @@ describe('Message Factory', () => {
 	});
 
 	test('Render unread DeletedMessage', () => {
-		const message = createMockTextMessage({ roomId: room.id, deleted: true });
+		const message = createMockTextMessage({
+			roomId: room.id,
+			deleted: true,
+			deletedInfo: { deletedBy: 'userId', deletedAt: '2022-08-25T17:24:28.961+02:00' }
+		});
 		const store = useStore.getState();
 		store.newMessage(message);
 		setup(

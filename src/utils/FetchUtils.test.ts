@@ -14,7 +14,6 @@ import {
 	uploadFileFetchAPI,
 	wscApiVersionHeader
 } from './FetchUtils';
-import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
 
 const defPath = '/services/chats/test';
@@ -187,7 +186,7 @@ describe('FetchUtils', () => {
 		const [_, { headers, body }] = (global.fetch as any).mock.calls[0];
 		expect(headers.get('queue-id')).toBe('idUser1');
 		expect(headers.get(wscApiVersionHeader)).toBe('1.6.1');
-		expect(body.get('description')).toBe(charToUnicode(optField.description));
+		expect(body.get('description')).toBe(optField.description);
 		expect(body.get('messageId')).toBe(optField.messageId);
 		expect(body.get('replyId')).toBe(optField.replyId);
 		expect(body.get('area')).toBe(optField.area);

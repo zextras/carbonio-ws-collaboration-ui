@@ -176,7 +176,12 @@ export const useConnectionsStoreSlice: StateCreator<
 				if (registry?.lastMessage) {
 					const lm = registry.lastMessage as any;
 					if (lm.id === messageId || lm.stanzaId === messageId) {
-						registry.lastMessage = { ...registry.lastMessage, text, edited: true, editedInfo: { editedAt } } as any;
+						registry.lastMessage = {
+							...registry.lastMessage,
+							text,
+							edited: true,
+							editedInfo: { editedAt }
+						} as any;
 					}
 				}
 			}),

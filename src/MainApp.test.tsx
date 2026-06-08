@@ -51,6 +51,7 @@ describe('Entry point', () => {
 	test('Connection is not established on app load if getToken do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockRejectedValueOnce(new Error('Token error'));
+		vi.spyOn(console, 'error').mockImplementation(() => {});
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
@@ -58,7 +59,10 @@ describe('Entry point', () => {
 	test('Connection is not established on app load if listRooms do not respond', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// Force MongooseIM path by making getInbox fail
+		vi.spyOn(api.ChatApi, 'getInbox').mockRejectedValueOnce(new Error());
 		vi.spyOn(api, 'listRooms').mockRejectedValueOnce(new Error());
+		vi.spyOn(api, 'listMeetings').mockRejectedValueOnce(new Error());
 		setup(<MainApp />);
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(false));
 	});
@@ -66,6 +70,8 @@ describe('Entry point', () => {
 	test('getCapabilities is called when API version >= 1.6.8', async () => {
 		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
 		vi.spyOn(api, 'getToken').mockResolvedValueOnce({ zmToken: '1234' });
+		// Force MongooseIM path by making getInbox fail
+		vi.spyOn(api.ChatApi, 'getInbox').mockRejectedValueOnce(new Error());
 		vi.spyOn(api, 'listRooms').mockResolvedValueOnce([]);
 		vi.spyOn(api, 'listMeetings').mockResolvedValueOnce([]);
 		const getCapabilitiesSpy = vi.spyOn(api, 'getCapabilities').mockResolvedValueOnce({

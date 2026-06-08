@@ -144,7 +144,7 @@ describe('PinMessage', () => {
 			id: 'idSimpleTextMessage',
 			roomId: oneToOneRoom.id,
 			from: 'user1',
-			forwarded: { id: 'forwardedId', date: 1661441294393, from: 'user2', count: 1 }
+			forwardedInfo: { id: 'forwardedId', date: 1661441294393, from: 'user2', count: 1 }
 		});
 		const { user } = setup(<PinMessage pinnedMessage={forwardedTextMessage} />);
 
