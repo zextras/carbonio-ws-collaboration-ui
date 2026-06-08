@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachmentModal';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { getMessagingBackend } from '../../store/selectors/ConnectionSelector';
 import {
 	getPreviewNavigationActive,
 	getPreviewNavigationOpenTargetId
@@ -107,7 +107,10 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 				removePreviewNavigationAttachment(target.id);
 				removeMediaGalleryAttachment(target.roomId, target.id);
 				if (target.stanzaId) {
-					xmppClient.sendChatMessageDeletion(target.roomId, target.stanzaId);
+					getMessagingBackend(useStore.getState()).deleteMessage(
+						target.roomId,
+						target.stanzaId
+					);
 				}
 				showSnackbar('success', successLabel);
 			})

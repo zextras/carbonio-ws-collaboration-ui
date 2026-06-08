@@ -16,7 +16,7 @@ import {
 
 import PreviewNavigationManager from './PreviewNavigationManager';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { IMessagingBackend } from '../../network/messaging/IMessagingBackend';
 import useStore from '../../store/Store';
 import { screen, setup } from '../../tests/test-utils';
 import { Attachment } from '../../types/network/models/attachmentTypes';
@@ -427,12 +427,13 @@ describe('PreviewNavigationManager', () => {
 		expect(items[0].actions?.map((a: { id: string }) => a.id)).toEqual(['DownloadOutline']);
 	});
 
-	test('confirming the delete modal calls the API, removes from both slices, and sends XMPP retraction', async () => {
+	test('confirming the delete modal calls the API, removes from both slices, and routes deletion through messaging backend', async () => {
 		const handle = setupManager();
 		mockedBulkDelete.mockResolvedValue({ successIds: ['a-mine'], failedIds: [] });
-		const sendDeletionSpy = vi
-			.spyOn(xmppClient, 'sendChatMessageDeletion')
-			.mockImplementation(() => undefined);
+
+		const mockDeleteMessage = vi.fn();
+		const mockBackend = { deleteMessage: mockDeleteMessage } as unknown as IMessagingBackend;
+		useStore.getState().setMessagingBackend(mockBackend);
 
 		const att = buildAttachment('a-mine', { userId, stanzaId: 'stanza-1' });
 		useStore.getState().appendMediaGalleryPage(roomId, [att], undefined);
@@ -475,7 +476,7 @@ describe('PreviewNavigationManager', () => {
 		await waitFor(() => {
 			expect(useStore.getState().previewNavigation.active).toBeNull();
 		});
-		expect(sendDeletionSpy).toHaveBeenCalledWith(roomId, 'stanza-1');
+		expect(mockDeleteMessage).toHaveBeenCalledWith(roomId, 'stanza-1');
 	});
 
 	test('clears the session when the user closes the preview (currentIndex returns to -1)', async () => {
