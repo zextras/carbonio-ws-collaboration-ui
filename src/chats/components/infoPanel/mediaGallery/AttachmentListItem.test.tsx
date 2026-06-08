@@ -12,7 +12,7 @@ import { List } from '@zextras/carbonio-design-system';
 import { AttachmentListItem } from './AttachmentListItem';
 import { bulkDeleteRoomAttachments } from '../../../../network';
 import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { IMessagingBackend } from '../../../../network/messaging/IMessagingBackend';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
@@ -167,11 +167,11 @@ describe('AttachmentListItem', () => {
 		expect(screen.getByText('This action cannot be undone.')).toBeInTheDocument();
 	});
 
-	test('confirming the modal calls the API, removes the row from the store, and sends the XMPP retraction', async () => {
+	test('confirming the modal calls the API, removes the row from the store, and routes the retraction through the messaging backend', async () => {
 		mockedBulkDelete.mockResolvedValue({ successIds: ['att-1'], failedIds: [] });
-		const sendDeletionSpy = vi
-			.spyOn(xmppClient, 'sendChatMessageDeletion')
-			.mockImplementation(() => undefined);
+		const mockDeleteMessage = vi.fn();
+		const mockBackend = { deleteMessage: mockDeleteMessage } as unknown as IMessagingBackend;
+		useStore.getState().setMessagingBackend(mockBackend);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
@@ -186,14 +186,14 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
 		});
-		expect(sendDeletionSpy).toHaveBeenCalledWith(roomId, STANZA_ID);
+		expect(mockDeleteMessage).toHaveBeenCalledWith(roomId, STANZA_ID);
 	});
 
-	test('skips the XMPP retraction when stanzaId is not available', async () => {
+	test('skips the message retraction when stanzaId is not available', async () => {
 		mockedBulkDelete.mockResolvedValue({ successIds: ['att-1'], failedIds: [] });
-		const sendDeletionSpy = vi
-			.spyOn(xmppClient, 'sendChatMessageDeletion')
-			.mockImplementation(() => undefined);
+		const mockDeleteMessage = vi.fn();
+		const mockBackend = { deleteMessage: mockDeleteMessage } as unknown as IMessagingBackend;
+		useStore.getState().setMessagingBackend(mockBackend);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: undefined });
 		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
@@ -205,7 +205,7 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
 		});
-		expect(sendDeletionSpy).not.toHaveBeenCalled();
+		expect(mockDeleteMessage).not.toHaveBeenCalled();
 	});
 
 	test('keeps the row when the API rejects the request', async () => {
