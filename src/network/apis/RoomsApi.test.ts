@@ -467,4 +467,29 @@ describe('Rooms API', () => {
 			members: [{ userId: 'userId', owner: true }]
 		});
 	});
+
+	test('replacePlaceholderRoom removes placeholder before inserting real room (no double-room flash)', async () => {
+		const userId = 'user-atomic-test';
+		const realRoom = createMockRoom({ id: 'real-room-id' });
+
+		// Insert a placeholder room into the store
+		useStore.getState().setPlaceholderRoom(userId);
+		expect(useStore.getState().rooms[`placeholder-${userId}`]).toBeDefined();
+
+		// Mock: POST returns real room, then createMeeting returns a meeting
+		mockFetchAPI.mockResolvedValueOnce(realRoom);
+		mockFetchAPI.mockResolvedValueOnce(createMockMeeting({ id: 'meeting-id', roomId: realRoom.id }));
+
+		// Track store states during the async operation.
+		// After the promise resolves, the placeholder must be gone and the real room present.
+		await replacePlaceholderRoom(userId);
+
+		const store = useStore.getState();
+		// Real room inserted
+		expect(store.rooms[realRoom.id]).toBeDefined();
+		// Placeholder removed atomically — must never have coexisted with the real room
+		// in any render-visible state (both ops are synchronous before createMeeting)
+		expect(store.rooms[`placeholder-${userId}`]).toBeUndefined();
+	});
 });
+

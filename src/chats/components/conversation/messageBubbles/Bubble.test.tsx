@@ -321,6 +321,67 @@ describe('Message header', () => {
 	});
 });
 
+describe('Forwarded message label', () => {
+	const forwardedInfoPayload = {
+		originalSenderId: 'user2',
+		originalSentAt: new Date(1661441294393).toISOString()
+	};
+
+	test('renders ForwardInfo when forwardedInfo is set (WSC path)', () => {
+		const msg = createMockTextMessage({
+			roomId: mockedRoom.id,
+			forwardedInfo: forwardedInfoPayload,
+			forwarded: undefined
+		});
+		useStore.getState().newMessage(msg);
+		setup(
+			<Bubble
+				message={msg}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		expect(screen.getByTestId('icon: Forward')).toBeInTheDocument();
+	});
+
+	test('renders ForwardInfo when forwarded is set (MongooseIM legacy path)', () => {
+		const msg = createMockTextMessage({
+			roomId: mockedRoom.id,
+			forwarded: { from: 'user2', date: 1661441294393 },
+			forwardedInfo: undefined
+		});
+		useStore.getState().newMessage(msg);
+		setup(
+			<Bubble
+				message={msg}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		expect(screen.getByTestId('icon: Forward')).toBeInTheDocument();
+	});
+
+	test('does NOT render ForwardInfo when neither field is set', () => {
+		const msg = createMockTextMessage({
+			roomId: mockedRoom.id,
+			forwardedInfo: undefined,
+			forwarded: undefined
+		});
+		useStore.getState().newMessage(msg);
+		setup(
+			<Bubble
+				message={msg}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		expect(screen.queryByTestId('icon: Forward')).not.toBeInTheDocument();
+	});
+});
+
 describe('Actions', () => {
 	test('Download an attachment', async () => {
 		const { user } = setup(

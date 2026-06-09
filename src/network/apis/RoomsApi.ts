@@ -173,18 +173,29 @@ export const bulkDeleteRoomAttachments = (
 
 /**
  * Replaces a placeholder room with a real one.
- * Creates the room via API, removes the placeholder, and redirects to the real room.
+ * Creates the room via API, atomically swaps placeholder→real room in the store
+ * (both store ops are synchronous so React 18 batches them into a single render,
+ * preventing the ~0.5 s double-room flash caused by addRooms+createMeeting+removePlaceholder),
+ * then creates the meeting and redirects.
  * @param userId The user ID that was used to create the placeholder
  * @returns The response from the room creation API
  */
-export const replacePlaceholderRoom = (userId: string): Promise<AddRoomResponse> => {
-	const { removePlaceholderRoom } = useStore.getState();
-
-	return addRoom({
+export const replacePlaceholderRoom = (userId: string): Promise<AddRoomResponse> =>
+	fetchAPI<AddRoomResponse>('rooms', RequestType.POST, {
 		type: RoomType.ONE_TO_ONE,
 		members: [{ userId, owner: true }]
-	}).then((response) => {
+	}).then(async (response) => {
+		// Atomic swap: remove placeholder and insert real room in two synchronous store
+		// updates. React 18 automatic batching merges them into one render pass so the
+		// two rooms never coexist from the UI's perspective.
+		const { removePlaceholderRoom, addRooms } = useStore.getState();
 		removePlaceholderRoom(userId);
+		addRooms([response]);
+
+		// Meeting creation happens after the swap so the real room is already visible
+		// before the ~0.5 s network round-trip completes.
+		await createMeeting(response.id, MeetingType.PERMANENT, response.name ?? '');
+
 		sendCustomEvent({
 			name: EventName.ROUTE_REDIRECT,
 			data: {
@@ -193,7 +204,6 @@ export const replacePlaceholderRoom = (userId: string): Promise<AddRoomResponse>
 		});
 		return response;
 	});
-};
 
 export const addRoomAttachment = (
 	roomId: string,

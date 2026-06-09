@@ -273,6 +273,35 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
+	// Re-evaluate the scroll button (and re-scroll if pinned to bottom) whenever an
+	// attachment image finishes loading. The image grows the scroll container after the
+	// initial render, so the IntersectionObserver alone is not enough.
+	// AttachmentView dispatches this event via window.dispatchEvent(new Event('imageLoadedInChat')).
+	// This listener was previously removed in commit 21451e17 (feat: message search CO-2428).
+	useEffect(() => {
+		const onImageLoaded = (): void => {
+			const lastMsgId = last(roomMessages)?.id;
+			const scrollPos =
+				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+			// Re-scroll if the user was pinned to the bottom (no explicit scroll position,
+			// or scroll position is the last message)
+			if (!scrollPos || scrollPos === lastMsgId) {
+				scrollToEnd(MessagesListWrapperRef);
+			}
+			// Always recompute the button so it hides when the user is already at bottom
+			const lastMsgEl = document.getElementById(`message-${lastMsgId}`);
+			const lastMsgRect = lastMsgEl?.getBoundingClientRect();
+			const containerRect = MessagesListWrapperRef.current?.getBoundingClientRect();
+			setShowScrollButton(
+				lastMsgRect != null && containerRect != null && lastMsgRect.bottom > containerRect.bottom
+			);
+		};
+		window.addEventListener('imageLoadedInChat', onImageLoaded);
+		return (): void => {
+			window.removeEventListener('imageLoadedInChat', onImageLoaded);
+		};
+	}, [roomId, roomMessages]);
+
 	// Scroll to bottom when I send a message (detect new message from me)
 	// Use the raw messages array (not enhanced with date messages) to detect new messages
 	useEffect(() => {

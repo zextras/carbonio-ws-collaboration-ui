@@ -154,7 +154,12 @@ export function handleWsMessageReceived(event: {
 						msg.date = confirmedDate;
 						msg.text = text;
 						msg.read = MarkerStatus.UNREAD;
-						msg.attachment = resolvedAttachment;
+						// Only overwrite the attachment when the echo carries attachment metadata.
+						// If the echo arrives without attachment fields (e.g. preview still pending),
+						// we preserve the placeholder attachment so the bubble keeps showing it.
+						if (resolvedAttachment) {
+							msg.attachment = resolvedAttachment;
+						}
 						msg.repliedMessage = repliedMessage;
 						msg.replyTo = event.replyToId;
 						msg.tempId = undefined;

@@ -495,6 +495,26 @@ describe('Display group of messages', () => {
 	});
 });
 
+describe('imageLoadedInChat event re-evaluates scroll button (Bug 1)', () => {
+	test('dispatching imageLoadedInChat calls scrollToEnd when user is at bottom', () => {
+		const store = useStore.getState();
+		store.updateHistory(room.id, messages);
+		// No explicit scroll position → user is considered pinned to bottom
+		setup(<MessagesList roomId={room.id} />);
+
+		// Clear previous calls from initial render
+		(scrollToEnd as ReturnType<typeof vi.fn>).mockClear();
+
+		// Simulate an attachment image finishing its load
+		act(() => {
+			window.dispatchEvent(new Event('imageLoadedInChat'));
+		});
+
+		// scrollToEnd must have been invoked to keep the viewport at the bottom
+		expect(scrollToEnd).toHaveBeenCalled();
+	});
+});
+
 describe('forward mode', () => {
 	test('Select of one or more messages to forward', async () => {
 		const { result } = renderHook(() => useStore());

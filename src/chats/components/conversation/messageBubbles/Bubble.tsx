@@ -222,7 +222,7 @@ const Bubble: FC<BubbleProps> = ({
 				height="fit"
 				width="fit"
 				crossAlignment="flex-start"
-				maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
+				maxWidth={messageAttachment && !(message.forwardedInfo ?? message.forwarded) ? '60%' : '75%'}
 				padding={{ all: 'medium' }}
 				background={isMyMessage ? 'highlight' : 'gray6'}
 				$isMyMessage={isMyMessage}
@@ -240,7 +240,9 @@ const Bubble: FC<BubbleProps> = ({
 						<Padding bottom="small" />
 					</>
 				)}
-				{message.forwarded && <ForwardInfo info={message.forwarded} />}
+				{(message.forwardedInfo ?? message.forwarded) && (
+					<ForwardInfo info={(message.forwardedInfo ?? message.forwarded)!} />
+				)}
 				{message.repliedMessage && (
 					<RepliedTextMessageSectionView
 						repliedMessageRef={message.repliedMessage}
