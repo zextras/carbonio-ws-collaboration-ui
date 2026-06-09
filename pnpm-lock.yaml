@@ -224,7 +224,7 @@ importers:
         version: 0.6.2
       semver:
         specifier: '*'
-        version: 7.8.1
+        version: 7.8.2
       uuid:
         specifier: '*'
         version: 14.0.0
