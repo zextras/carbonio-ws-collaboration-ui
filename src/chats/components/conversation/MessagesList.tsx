@@ -69,6 +69,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
 	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLDivElement>[]>([]);
 
+	// Tracks whether the scroll container is currently pinned to the bottom (~50 px tolerance).
+	// Updated on every scroll event so the ResizeObserver callback can re-pin reliably.
+	const isAtBottomRef = useRef(true);
+	const AT_BOTTOM_THRESHOLD = 50;
+
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
 
@@ -125,15 +130,26 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		[setScrollPosition, onScrollPositionChange, roomId]
 	);
 
+	// Recomputes whether the scroll button should be shown based on current DOM geometry.
+	// Safe to call at any time (after layout) — checks if the last message's bottom edge is
+	// below the visible bottom of the scroll container.
+	const recomputeScrollButton = useCallback(() => {
+		if (size(roomMessages) <= 1) {
+			setShowScrollButton(false);
+			return;
+		}
+		const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
+		const lastMsgRect = lastMsg?.getBoundingClientRect();
+		const containerRect = MessagesListWrapperRef.current?.getBoundingClientRect();
+		setShowScrollButton(
+			lastMsgRect != null && containerRect != null && lastMsgRect.bottom > containerRect.bottom
+		);
+	}, [roomMessages]);
+
 	const intersectionObserverCallback = useCallback(
 		(entries: IntersectionObserverEntry[]) => {
 			if (size(roomMessages) > 1) {
-				const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
-				const lastMsgRect = lastMsg?.getBoundingClientRect();
-				const containerRect = MessagesListWrapperRef.current?.getBoundingClientRect();
-				setShowScrollButton(
-					lastMsgRect != null && containerRect != null && lastMsgRect.bottom > containerRect.bottom
-				);
+				recomputeScrollButton();
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {
 						debouncedSetterScrollPosition.cancel();
@@ -142,7 +158,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				});
 			}
 		},
-		[roomMessages, debouncedSetterScrollPosition]
+		[roomMessages, debouncedSetterScrollPosition, recomputeScrollButton]
 	);
 
 	const observerInit = useCallback(() => {
@@ -270,37 +286,44 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const handleClickScrollButton = useCallback(() => {
 		scrollToEnd(MessagesListWrapperRef);
+		// Fix A: always hide the button immediately on click so it dismisses even when
+		// the scroll container is already at the bottom and no scroll event fires.
+		setShowScrollButton(false);
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
-	// Re-evaluate the scroll button (and re-scroll if pinned to bottom) whenever an
-	// attachment image finishes loading. The image grows the scroll container after the
-	// initial render, so the IntersectionObserver alone is not enough.
-	// AttachmentView dispatches this event via window.dispatchEvent(new Event('imageLoadedInChat')).
-	// This listener was previously removed in commit 21451e17 (feat: message search CO-2428).
+	// Fix B: Replace the racy imageLoadedInChat window-event listener with a ResizeObserver.
+	// ResizeObserver fires reliably after layout for BOTH cached and async image loads, so it
+	// handles cases the old event-based approach missed (cached images fire onLoad synchronously,
+	// before the useEffect could attach the listener).
+	//
+	// IMPORTANT: we observe the scroll container's CHILDREN (the date-group containers), NOT the
+	// container itself. MessagesListWrapper has a bounded height with `overflow-y: scroll`, so its
+	// own content-box never changes when the inner content grows — a ResizeObserver on it would
+	// never fire on an image load. The children, however, have `height: fit`, so a growing image
+	// inside a date group expands that child and the observer fires.
+	//
+	// Strategy:
+	//   - Track "at bottom" in isAtBottomRef via the onScroll handler (see JSX below).
+	//   - When any content child resizes (image grew): if at bottom → re-pin; then always
+	//     recompute the button visibility.
+	// Re-runs when messagesWrapped changes so newly rendered date groups get observed too.
 	useEffect(() => {
-		const onImageLoaded = (): void => {
-			const lastMsgId = last(roomMessages)?.id;
-			const scrollPos =
-				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
-			// Re-scroll if the user was pinned to the bottom (no explicit scroll position,
-			// or scroll position is the last message)
-			if (!scrollPos || scrollPos === lastMsgId) {
+		const container = MessagesListWrapperRef.current;
+		if (!container) return undefined;
+
+		const observer = new ResizeObserver(() => {
+			if (isAtBottomRef.current) {
 				scrollToEnd(MessagesListWrapperRef);
 			}
-			// Always recompute the button so it hides when the user is already at bottom
-			const lastMsgEl = document.getElementById(`message-${lastMsgId}`);
-			const lastMsgRect = lastMsgEl?.getBoundingClientRect();
-			const containerRect = MessagesListWrapperRef.current?.getBoundingClientRect();
-			setShowScrollButton(
-				lastMsgRect != null && containerRect != null && lastMsgRect.bottom > containerRect.bottom
-			);
-		};
-		window.addEventListener('imageLoadedInChat', onImageLoaded);
+			recomputeScrollButton();
+		});
+
+		Array.from(container.children).forEach((child) => observer.observe(child));
 		return (): void => {
-			window.removeEventListener('imageLoadedInChat', onImageLoaded);
+			observer.disconnect();
 		};
-	}, [roomId, roomMessages]);
+	}, [recomputeScrollButton, messagesWrapped]);
 
 	// Scroll to bottom when I send a message (detect new message from me)
 	// Use the raw messages array (not enhanced with date messages) to detect new messages
@@ -368,6 +391,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				id={`messageListRef${roomId}`}
 				mainAlignment="flex-start"
 				crossAlignment="flex-start"
+				onScroll={(): void => {
+					const el = MessagesListWrapperRef.current;
+					if (el) {
+						isAtBottomRef.current =
+							el.scrollHeight - el.scrollTop - el.clientHeight < AT_BOTTOM_THRESHOLD;
+						recomputeScrollButton();
+					}
+				}}
 			>
 				{!hasMoreMessageToLoad && (
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />

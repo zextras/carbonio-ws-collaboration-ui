@@ -58,6 +58,8 @@ Object.defineProperty(window, 'Worker', {
 });
 
 Object.defineProperty(window, 'ResizeObserver', {
+	writable: true,
+	configurable: true,
 	value: vi.fn(function ResizeObserverMock() {
 		return {
 			observe: vi.fn(),
