@@ -1,3 +1,9 @@
+## [0.16.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.3...v0.16.4) (2026-06-02)
+
+### Other changes
+
+* migrate to buildah (FQDN images + jenkins-lib-common@2.10.0) ([c42a1ec](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c42a1ec57f0b79b1ac4d2924035419dff57acbaf))
+
 ## [0.16.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.2...v0.16.3) (2026-05-28)
 
 ### Bug Fixes
