@@ -106,10 +106,13 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 				}
 				removePreviewNavigationAttachment(target.id);
 				removeMediaGalleryAttachment(target.roomId, target.id);
-				if (target.stanzaId) {
+				// Prefer the native messageId (WSC path); fall back to the legacy stanzaId
+				// (MongooseIM path). getMessagingBackend() routes to the active backend.
+				const targetMessageId = target.messageId ?? target.stanzaId;
+				if (targetMessageId) {
 					getMessagingBackend(useStore.getState()).deleteMessage(
 						target.roomId,
-						target.stanzaId
+						targetMessageId
 					);
 				}
 				showSnackbar('success', successLabel);

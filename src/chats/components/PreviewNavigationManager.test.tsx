@@ -479,6 +479,51 @@ describe('PreviewNavigationManager', () => {
 		expect(mockDeleteMessage).toHaveBeenCalledWith(roomId, 'stanza-1');
 	});
 
+	// WSC path: gallery attachments carry the native messageId (no stanzaId). The deletion must
+	// route through the backend using messageId, otherwise the chat bubble is never removed.
+	test('routes deletion using the native messageId when present (WSC path, no stanzaId)', async () => {
+		const handle = setupManager();
+		mockedBulkDelete.mockResolvedValue({ successIds: ['a-wsc'], failedIds: [] });
+
+		const mockDeleteMessage = vi.fn();
+		const mockBackend = { deleteMessage: mockDeleteMessage } as unknown as IMessagingBackend;
+		useStore.getState().setMessagingBackend(mockBackend);
+
+		const att = buildAttachment('a-wsc', { userId, messageId: 'msg-1' });
+		useStore.getState().appendMediaGalleryPage(roomId, [att], undefined);
+
+		const session: PreviewNavigationSession = {
+			source: 'gallery',
+			roomId,
+			sortBy: 'created_at',
+			order: 'desc',
+			attachments: [att],
+			hasMore: false,
+			isLoading: false
+		};
+		act(() => {
+			useStore.getState().startPreviewNavigation(session);
+		});
+
+		await waitFor(() => {
+			expect(handle.value.initPreview).toHaveBeenCalled();
+		});
+
+		const items = (vi.mocked(handle.value.initPreview).mock.calls.at(-1) ?? [])[0] as PreviewItem[];
+		const deleteAction = items[0].actions?.find((a: { id: string }) => a.id === 'Trash2Outline');
+
+		act(() => {
+			deleteAction?.onClick({ preventDefault: vi.fn() } as never);
+		});
+
+		const user = userEvent.setup();
+		await user.click(await screen.findByRole('button', { name: /yes, delete attachment/i }));
+
+		await waitFor(() => {
+			expect(mockDeleteMessage).toHaveBeenCalledWith(roomId, 'msg-1');
+		});
+	});
+
 	test('clears the session when the user closes the preview (currentIndex returns to -1)', async () => {
 		const handle = setupManager();
 		const session: PreviewNavigationSession = {

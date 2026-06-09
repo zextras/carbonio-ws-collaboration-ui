@@ -56,10 +56,15 @@ const useDeleteAttachment = (attachment: Attachment): UseDeleteAttachmentHook =>
 					return;
 				}
 				removeMediaGalleryAttachment(attachment.roomId, attachment.id);
-				if (attachment.stanzaId) {
+				// The WSC path populates the native messageId; the MongooseIM path populates the
+				// legacy stanzaId. Prefer messageId so the direct-WSC path no longer depends on
+				// stanzaId, falling back to stanzaId for MongooseIM. getMessagingBackend() routes
+				// the call to the active backend (REST deleteMessage vs XMPP deletion stanza).
+				const targetMessageId = attachment.messageId ?? attachment.stanzaId;
+				if (targetMessageId) {
 					getMessagingBackend(useStore.getState()).deleteMessage(
 						attachment.roomId,
-						attachment.stanzaId
+						targetMessageId
 					);
 				}
 				showSnackbar('success', successLabel);
@@ -68,6 +73,7 @@ const useDeleteAttachment = (attachment: Attachment): UseDeleteAttachmentHook =>
 	}, [
 		attachment.id,
 		attachment.roomId,
+		attachment.messageId,
 		attachment.stanzaId,
 		createSnackbar,
 		errorLabel,
