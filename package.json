@@ -65,7 +65,7 @@
 		"semantic-release": "25.0.3",
 		"sonarqube-scanner": "4.3.6",
 		"ts-node": "10.9.2",
-		"typescript": "5.9.3",
+		"typescript": "6.0.3",
 		"vitest": "4.1.8",
 		"vitest-fail-on-console": "0.10.1"
 	},
