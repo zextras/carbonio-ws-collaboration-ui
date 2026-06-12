@@ -91,7 +91,7 @@
 		"react-i18next": "12.3.1",
 		"react-router-dom": "6.30.4",
 		"semver": "7.8.4",
-		"strophe.js": "1.6.2",
+		"strophe.js": "4.0.0",
 		"use-sync-external-store": "1.6.0",
 		"uuid": "14.0.0",
 		"zustand": "5.0.14"
