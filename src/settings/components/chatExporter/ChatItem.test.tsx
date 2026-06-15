@@ -21,6 +21,14 @@ import { setup } from '../../../tests/test-utils';
 import { OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
+// The per-item export spinner only appears in MongooseIM (XMPP) mode, where setChatExporting
+// drives a client-side MAM loop and sets the chatExporting state. (WSC export is a direct
+// server-streamed download and shows no spinner.)
+vi.mock('../../../store/selectors/ConnectionSelector', async (importActual) => ({
+	...(await importActual<typeof import('../../../store/selectors/ConnectionSelector')>()),
+	getIsMongooseIM: (): boolean => true
+}));
+
 const loggedUser = createMockUser({ id: 'logged-user', name: 'Logged User' });
 const otherUser = createMockUser({ id: 'other-user', name: 'Other User' });
 

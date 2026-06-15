@@ -6,12 +6,24 @@
 
 import { act, renderHook } from '@testing-library/react';
 
+import { downloadChatExport } from '../../network/messaging/chatExportDownload';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { AttributesList, ExportStatus, Version } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
+import { getIsMongooseIM } from '../selectors/ConnectionSelector';
 import useStore from '../Store';
+
+vi.mock('../../network/messaging/chatExportDownload', () => ({
+	downloadChatExport: vi.fn(),
+	getChatExportUrl: vi.fn()
+}));
+
+vi.mock('../selectors/ConnectionSelector', async (importActual) => ({
+	...(await importActual<typeof import('../selectors/ConnectionSelector')>()),
+	getIsMongooseIM: vi.fn()
+}));
 
 const roomId = 'roomId';
 
@@ -173,7 +185,9 @@ describe('SessionStoreSlice tests', () => {
 		useStore.getState().addRooms([groupRoom]);
 	});
 	describe('chatExporting', () => {
-		test('Start chat export', () => {
+		// MongooseIM (XMPP) export drives the client-side MAM loop and the spinner state.
+		test('Start chat export (MongooseIM) sets the exporting state', () => {
+			(getIsMongooseIM as ReturnType<typeof vi.fn>).mockReturnValue(true);
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setChatExporting(roomId);
@@ -185,7 +199,8 @@ describe('SessionStoreSlice tests', () => {
 			});
 		});
 
-		test('End chat export', () => {
+		test('End chat export (MongooseIM)', () => {
+			(getIsMongooseIM as ReturnType<typeof vi.fn>).mockReturnValue(true);
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setChatExporting(roomId);
@@ -194,7 +209,8 @@ describe('SessionStoreSlice tests', () => {
 			expect(result.current.session.chatExporting).toBeUndefined();
 		});
 
-		test('Change chat export status', () => {
+		test('Change chat export status (MongooseIM)', () => {
+			(getIsMongooseIM as ReturnType<typeof vi.fn>).mockReturnValue(true);
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setChatExporting(roomId);
@@ -205,6 +221,19 @@ describe('SessionStoreSlice tests', () => {
 				exporter: new ChatExporter(roomId),
 				status: ExportStatus.DOWNLOADING
 			});
+		});
+
+		// WSC (REST) export is a direct server-streamed download: it must NOT set any
+		// exporting state (otherwise the settings spinner would hang forever).
+		test('WSC export triggers a download and sets no exporting state (no spinner)', () => {
+			(getIsMongooseIM as ReturnType<typeof vi.fn>).mockReturnValue(false);
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRooms([groupRoom]);
+				result.current.setChatExporting(roomId);
+			});
+			expect(downloadChatExport).toHaveBeenCalledWith(roomId, expect.any(String));
+			expect(result.current.session.chatExporting).toBeUndefined();
 		});
 	});
 });

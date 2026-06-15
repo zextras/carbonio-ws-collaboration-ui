@@ -6,7 +6,6 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
-import { downloadChatExport } from '../../../network/messaging/chatExportDownload';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
@@ -28,16 +27,11 @@ class ChatExporter implements IChatExporter {
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
-		const isMongooseIM = getIsMongooseIM(useStore.getState());
-		if (isMongooseIM) {
-			// XMPP: request history via MAM; results come back via addMessagesToFullHistory
+		// ChatExporter drives the legacy MongooseIM/XMPP export only (MAM loop → exportHistory).
+		// In WSC (REST) mode the export is a direct server-streamed download handled by
+		// SessionStoreSlice.setChatExporting, and this class is not constructed.
+		if (getIsMongooseIM(useStore.getState())) {
 			xmppClient.requestFullHistory(this.roomId);
-		} else {
-			// WSC: the backend streams the .txt directly — trigger a native browser download.
-			const chatName = getRoomNameSelector(useStore.getState(), this.roomId);
-			downloadChatExport(this.roomId, chatName);
-			// Clear the exporting/loading state immediately; the browser owns the download from here.
-			useStore.getState().setChatExporting();
 		}
 	}
 

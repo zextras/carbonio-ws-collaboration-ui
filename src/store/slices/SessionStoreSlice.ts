@@ -10,6 +10,7 @@ import { produce } from 'immer';
 import { maxSatisfying } from 'semver';
 import { StateCreator } from 'zustand';
 
+import { downloadChatExport } from '../../network/messaging/chatExportDownload';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import {
 	AttributesList,
@@ -20,13 +21,15 @@ import {
 } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
+import { getIsMongooseIM } from '../selectors/ConnectionSelector';
+import { getRoomNameSelector } from '../selectors/RoomsSelectors';
 
 export const useSessionStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
 	[],
 	SessionStoreSlice
-> = (set) => ({
+> = (set, get) => ({
 	session: {
 		_persistedAt: Date.now()
 	},
@@ -125,6 +128,14 @@ export const useSessionStoreSlice: StateCreator<
 		);
 	},
 	setChatExporting: (roomId?: string): void => {
+		// WSC (REST) mode: the export is a direct server-streamed download — there is no
+		// client-side history accumulation, so there is no long-running task and no spinner
+		// to show. Trigger the download and do NOT touch the chatExporting state.
+		if (roomId && !getIsMongooseIM(get())) {
+			downloadChatExport(roomId, getRoomNameSelector(get(), roomId));
+			return;
+		}
+		// MongooseIM (XMPP) mode: drive the MAM loop via ChatExporter and show the spinner.
 		set(
 			produce((draft: RootStore) => {
 				if (roomId) {

@@ -4,15 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import ChatExporter from './ChatExporter';
-import { downloadChatExport } from '../../../network/messaging/chatExportDownload';
 import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
-
-vi.mock('../../../network/messaging/chatExportDownload', () => ({
-	downloadChatExport: vi.fn()
-}));
 
 vi.mock('../../../store/selectors/ConnectionSelector', () => ({
 	getIsMongooseIM: vi.fn()
@@ -65,19 +60,5 @@ describe('ChatExporter tests', () => {
 
 		expect(document.body.appendChild).toHaveBeenCalled();
 		expect(document.body.removeChild).toHaveBeenCalled();
-	});
-
-	test('WSC mode triggers a native download and clears the exporting state', () => {
-		(getIsMongooseIM as ReturnType<typeof vi.fn>).mockReturnValue(false);
-		// Seed a chatExporting state so we can confirm it is cleared.
-		useStore.getState().setChatExporting(roomId);
-		expect(useStore.getState().session.chatExporting).toBeDefined();
-
-		// eslint-disable-next-line no-new
-		new ChatExporter(roomId);
-
-		expect(downloadChatExport).toHaveBeenCalledWith(roomId, expect.any(String));
-		// setChatExporting() with no arg clears the exporting state.
-		expect(useStore.getState().session.chatExporting).toBeUndefined();
 	});
 });

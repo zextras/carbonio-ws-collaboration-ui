@@ -9,9 +9,15 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ChatExportSettings from './ChatExportSettings';
+import { downloadChatExport } from '../../../network/messaging/chatExportDownload';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
+
+vi.mock('../../../network/messaging/chatExportDownload', () => ({
+	downloadChatExport: vi.fn(),
+	getChatExportUrl: vi.fn()
+}));
 
 const room = createMockRoom({
 	id: 'room',
@@ -86,12 +92,14 @@ describe('ChatExportSettings test', () => {
 		expect(screen.getByText('Try another query')).toBeInTheDocument();
 	});
 
-	test('Export chat', async () => {
+	test('Export chat (WSC) triggers a server-streamed download without a spinner', async () => {
 		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		await user.click(screen.getByText(room.name!));
 		const button = screen.getByRole('button');
 		await user.click(button);
-		expect(useStore.getState().session.chatExporting!.roomId).toBe(room.id);
+		expect(downloadChatExport).toHaveBeenCalledWith(room.id, expect.any(String));
+		// No exporting state is set in WSC mode, so the spinner never appears.
+		expect(useStore.getState().session.chatExporting).toBeUndefined();
 	});
 });
