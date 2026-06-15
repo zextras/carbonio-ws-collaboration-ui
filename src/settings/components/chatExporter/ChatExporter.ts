@@ -6,7 +6,7 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
-import ChatApi from '../../../network/apis/ChatApi';
+import { downloadChatExport } from '../../../network/messaging/chatExportDownload';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getIsMongooseIM } from '../../../store/selectors/ConnectionSelector';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
@@ -26,8 +26,6 @@ class ChatExporter implements IChatExporter {
 
 	fullHistory: Message[] = [];
 
-	private isLoading = false;
-
 	constructor(roomId: string) {
 		this.roomId = roomId;
 		const isMongooseIM = getIsMongooseIM(useStore.getState());
@@ -35,24 +33,11 @@ class ChatExporter implements IChatExporter {
 			// XMPP: request history via MAM; results come back via addMessagesToFullHistory
 			xmppClient.requestFullHistory(this.roomId);
 		} else {
-			this.loadFullHistory();
-		}
-	}
-
-	private async loadFullHistory(): Promise<void> {
-		if (this.isLoading) return;
-		this.isLoading = true;
-
-		try {
-			// Load messages in batches using REST API
-			const response = await ChatApi.getMessageHistory(this.roomId, undefined, 100);
-			if (response && Array.isArray(response)) {
-				this.fullHistory = response;
-			}
-		} catch (error) {
-			console.error('[ChatExporter] Failed to load history:', error);
-		} finally {
-			this.isLoading = false;
+			// WSC: the backend streams the .txt directly — trigger a native browser download.
+			const chatName = getRoomNameSelector(useStore.getState(), this.roomId);
+			downloadChatExport(this.roomId, chatName);
+			// Clear the exporting/loading state immediately; the browser owns the download from here.
+			useStore.getState().setChatExporting();
 		}
 	}
 
@@ -61,41 +46,9 @@ class ChatExporter implements IChatExporter {
 	}
 
 	public async continueExporting(): Promise<void> {
-		const isMongooseIM = getIsMongooseIM(useStore.getState());
-		if (isMongooseIM) {
-			// XMPP: delegate to xmppClient MAM pagination; it will call back into addMessagesToFullHistory
-			const from = last(this.fullHistory)?.date ?? 0;
-			xmppClient.requestFullHistory(this.roomId, from);
-			return;
-		}
-
-		const lastMessage = last(this.fullHistory);
-		if (!lastMessage) {
-			this.exportHistory();
-			return;
-		}
-
-		try {
-			const response = await ChatApi.getMessageHistory(
-				this.roomId,
-				new Date(lastMessage.date).toISOString(),
-				100
-			);
-			if (response && Array.isArray(response) && response.length > 0) {
-				this.fullHistory.push(...response);
-				// Continue loading if we got a full batch
-				if (response.length >= 100) {
-					await this.continueExporting();
-				} else {
-					this.exportHistory();
-				}
-			} else {
-				this.exportHistory();
-			}
-		} catch (error) {
-			console.error('[ChatExporter] Failed to continue loading:', error);
-			this.exportHistory();
-		}
+		// XMPP only: delegate to MAM pagination; results call back into addMessagesToFullHistory.
+		const from = last(this.fullHistory)?.date ?? 0;
+		xmppClient.requestFullHistory(this.roomId, from);
 	}
 
 	public exportHistory(): void {

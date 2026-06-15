@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { downloadChatExport } from './chatExportDownload';
 import { IMessagingBackend, ReplyInfo } from './IMessagingBackend';
+import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
 import { MarkerStatus, MessageType, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { deleteAttachment } from '../apis/AttachmentsApi';
 import ChatApi from '../apis/ChatApi';
@@ -104,8 +107,10 @@ export class RestMessagingBackend implements IMessagingBackend {
 		chatWsClient.sendTypingStopped(roomId);
 	}
 
-	requestExportHistory(_roomId: string, _from?: number): void {
-		// TODO: REST history export not yet implemented — requires a dedicated endpoint
+	requestExportHistory(roomId: string, _from?: number): void {
+		// WSC export is a server-streamed download. Single source of truth in chatExportDownload.
+		const chatName = getRoomNameSelector(useStore.getState(), roomId);
+		downloadChatExport(roomId, chatName);
 	}
 
 	applyFastening(
