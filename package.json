@@ -3,7 +3,7 @@
 	"version": "0.16.4",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
-	"packageManager": "pnpm@10.34.1",
+	"packageManager": "pnpm@10.34.3",
 	"scripts": {
 		"bump-version": "semantic-release",
 		"build": "sdk build",
