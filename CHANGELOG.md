@@ -1,3 +1,9 @@
+## [0.16.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.4...v0.16.5) (2026-06-24)
+
+### Bug Fixes
+
+* add PreviewNavigationManager to meeting initialization to support previews ([c70eb84](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c70eb844072d1ad8be98491cce43c2c1c3b3e1eb)), closes [#789](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/789)
+
 ## [0.16.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.3...v0.16.4) (2026-06-02)
 
 ### Other changes
