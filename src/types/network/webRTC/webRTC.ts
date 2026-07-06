@@ -36,7 +36,7 @@ export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
 	selectedVideoDeviceId: string | undefined;
 	startVideo(selectedVideoDeviceId?: string): Promise<void>;
-	stopVideo(): void;
+	stopVideo(): Promise<Response>;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(
 		mediaStreamTrack: MediaStream,

@@ -52,9 +52,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		});
 	}
 
-	public stopVideo(): void {
+	public stopVideo(): Promise<Response> {
 		this.closePeerConnection();
-		updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
+		return updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
