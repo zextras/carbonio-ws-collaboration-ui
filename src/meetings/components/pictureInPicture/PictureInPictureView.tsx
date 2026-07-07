@@ -108,7 +108,7 @@ const PictureInPictureView = (): ReactElement => {
 					await videoOutConn?.updateLocalStreamTrack(stream);
 					await updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true);
 				} else {
-					await videoOutConn?.startVideo();
+					await videoOutConn?.startVideo(selectedVideoDeviceId);
 				}
 			} catch (error) {
 				console.log(error);
