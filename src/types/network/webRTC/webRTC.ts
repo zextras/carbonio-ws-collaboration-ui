@@ -25,7 +25,6 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	initialAudioStatus: boolean;
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
 	onTrack: (trackEvent: RTCTrackEvent) => void;
-	onNegotiationNeeded: () => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;

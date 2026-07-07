@@ -32,6 +32,7 @@ Object.defineProperty(window, 'RTCPeerConnection', {
 	value: vi.fn(function RTCPeerConnectionMock() {
 		return {
 			addTrack: vi.fn(),
+			createOffer: vi.fn(() => Promise.resolve({ sdp: 'sdp', type: 'offer' })),
 			createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
 			setRemoteDescription: vi.fn(() => Promise.resolve()),
 			setLocalDescription: vi.fn(() => Promise.resolve())

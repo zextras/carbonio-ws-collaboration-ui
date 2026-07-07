@@ -39,6 +39,8 @@ const activeMeetingSetup = (videoStreamOn: boolean): void => {
 	store.meetingConnection(mockMeeting.id);
 };
 
+const controlledError = new Error('Controlled error');
+
 const cameraButtonComponent = (
 	<CameraButton
 		videoDropdownRef={React.createRef<HTMLDivElement>()}
@@ -125,7 +127,7 @@ describe('Camera button', () => {
 	test('Camera button is re-enabled when updateMediaOffer fails', async () => {
 		activeMeetingSetup(false);
 		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue({} as MediaStream);
-		vi.spyOn(api, 'updateMediaOffer').mockRejectedValue(new Error('Controlled error'));
+		vi.spyOn(api, 'updateMediaOffer').mockRejectedValue(controlledError);
 
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
 		videoOutConn!.peerConn = {} as RTCPeerConnection;
@@ -139,10 +141,25 @@ describe('Camera button', () => {
 		await waitFor(() => expect(cameraButton).toBeEnabled());
 	});
 
+	test('Camera button is re-enabled when the media offer fails while starting video', async () => {
+		activeMeetingSetup(false);
+		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue({
+			getVideoTracks: () => [{ stop: vi.fn() }]
+		} as unknown as MediaStream);
+		vi.spyOn(api, 'updateMediaOffer').mockRejectedValue(controlledError);
+
+		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
+		const cameraButton = await screen.findByTestId('cameraButton');
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+
+		await user.click(cameraButton);
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+	});
+
 	test('Camera button is re-enabled when stopVideo fails', async () => {
 		activeMeetingSetup(true);
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
-		vi.spyOn(videoOutConn!, 'stopVideo').mockRejectedValue(new Error('Controlled error'));
+		vi.spyOn(videoOutConn!, 'stopVideo').mockRejectedValue(controlledError);
 
 		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
 		const cameraButton = await screen.findByTestId('cameraButton');
