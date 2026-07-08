@@ -22,13 +22,20 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	selectedVideoDeviceId: string | undefined;
 
+	private readonly videoStreamEnabled: boolean;
+
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
 		this.meetingId = meetingId;
 		this.rtpSender = null;
+		this.selectedVideoDeviceId = selectedVideoDeviceId;
+		this.videoStreamEnabled = videoStreamEnabled;
+		this.init();
+	}
 
-		if (videoStreamEnabled) {
-			this.startVideo(selectedVideoDeviceId).catch((reason) => console.warn(reason));
+	private init(): void {
+		if (this.videoStreamEnabled) {
+			this.startVideo(this.selectedVideoDeviceId).catch((reason) => console.warn(reason));
 		}
 	}
 
@@ -56,7 +63,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	// Create the SDP offer, set it as local description and send it to the remote peer
-	private negotiate = async (): Promise<void> => {
+	private readonly negotiate = async (): Promise<void> => {
 		if (!this.peerConn) throw new Error('Missing peer connection');
 		const offer = await this.peerConn.createOffer();
 		await this.peerConn.setLocalDescription(offer);

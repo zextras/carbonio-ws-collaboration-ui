@@ -48,11 +48,16 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.oscillatorAudioTrack = first(oscillatorAudioTrack.getAudioTracks());
 
 		this.updateRemoteStreamAudio();
-		this.updateLocalStreamTrack(oscillatorAudioTrack)
+		this.init();
+	}
+
+	private init(): void {
+		if (!this.oscillatorAudioTrack) return;
+		this.updateLocalStreamTrack(new MediaStream([this.oscillatorAudioTrack]))
 			.then(() => this.negotiate())
 			.then(() => {
-				if (audioStreamEnabled) {
-					return getAudioStream(selectedAudioDeviceId).then((stream) => {
+				if (this.initialAudioStatus) {
+					return getAudioStream(this.selectedAudioDeviceId).then((stream) => {
 						this.updateLocalStreamTrack(stream);
 						useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
 					});
@@ -69,7 +74,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 	};
 
 	// Create the SDP offer, set it as local description and send it to the remote peer
-	private negotiate = async (): Promise<void> => {
+	private readonly negotiate = async (): Promise<void> => {
 		const offer = await this.peerConn.createOffer();
 		if (this.peerConn.signalingState !== 'stable') return;
 		await this.peerConn.setLocalDescription(offer);
