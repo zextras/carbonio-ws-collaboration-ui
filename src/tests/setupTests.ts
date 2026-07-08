@@ -29,6 +29,7 @@ vi.mock('darkreader');
 vi.mock('react-router-dom');
 
 Object.defineProperty(window, 'RTCPeerConnection', {
+	configurable: true,
 	value: vi.fn(function RTCPeerConnectionMock() {
 		return {
 			addTrack: vi.fn(),
