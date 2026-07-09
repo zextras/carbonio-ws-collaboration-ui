@@ -51,8 +51,8 @@ function wrapDetectedCode(text: string): string {
 // stay visible as the literal characters the user typed
 function escapeUnsupportedSyntax(text: string): string {
 	return text
-		.replace(/^(\s{0,100})(#{1,6})(\s)/gm, '$1\\$2$3')
-		.replace(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, '$1\\$2$3');
+		.replaceAll(/^(\s{0,100})(#{1,6})(\s)/gm, String.raw`$1\$2$3`)
+		.replaceAll(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, String.raw`$1\$2$3`);
 }
 
 const MarkdownContainer = styled.div`
