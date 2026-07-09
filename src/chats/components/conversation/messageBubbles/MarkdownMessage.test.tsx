@@ -11,6 +11,8 @@ import { screen } from '@testing-library/react';
 import MarkdownMessage from './MarkdownMessage';
 import { setup } from '../../../../tests/test-utils';
 
+const EXAMPLE_URL = 'https://example.com';
+
 describe('MarkdownMessage', () => {
 	test('renders plain text', () => {
 		setup(<MarkdownMessage text="Hello world" />);
@@ -42,12 +44,12 @@ describe('MarkdownMessage', () => {
 	});
 
 	test('renders links with target blank', () => {
-		setup(<MarkdownMessage text="[click here](https://example.com)" />);
+		setup(<MarkdownMessage text={`[click here](${EXAMPLE_URL})`} />);
 		const link = screen.getByText('click here');
 		expect(link.tagName).toBe('A');
 		expect(link).toHaveAttribute('target', '_blank');
 		expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-		expect(link).toHaveAttribute('href', 'https://example.com');
+		expect(link).toHaveAttribute('href', EXAMPLE_URL);
 	});
 
 	test('renders unordered list', () => {
@@ -92,10 +94,57 @@ describe('MarkdownMessage', () => {
 		expect(bold.tagName).toBe('STRONG');
 	});
 
-	test('renders table', () => {
+	test('preserves single line breaks in plain text', () => {
+		setup(<MarkdownMessage text={'first line\nsecond line'} />);
+		const paragraph = screen.getByText(/first line/);
+		expect(paragraph).toHaveTextContent(/first line\nsecond line/, { normalizeWhitespace: false });
+	});
+
+	test('does not render headings and keeps the literal marker', () => {
+		setup(<MarkdownMessage text="# hello title" />);
+		expect(screen.queryByRole('heading')).toBeNull();
+		expect(screen.getByText('# hello title')).toBeVisible();
+	});
+
+	test('keeps thematic break markers as literal text', () => {
+		setup(<MarkdownMessage text={'above\n\n---\n\nbelow'} />);
+		expect(screen.queryByRole('separator')).toBeNull();
+		expect(screen.getByText('---')).toBeVisible();
+	});
+
+	test('does not render tables (not in whitelist)', () => {
 		setup(<MarkdownMessage text={'| A | B |\n|---|---|\n| 1 | 2 |'} />);
-		expect(screen.getByText('A')).toBeVisible();
-		expect(screen.getByText('1')).toBeVisible();
+		expect(screen.queryByRole('table')).toBeNull();
+	});
+
+	test('renders bold with underscores', () => {
+		setup(<MarkdownMessage text="this is __bold__" />);
+		expect(screen.getByText('bold').tagName).toBe('STRONG');
+	});
+
+	test('renders italic with underscores', () => {
+		setup(<MarkdownMessage text="this is _italic_" />);
+		expect(screen.getByText('italic').tagName).toBe('EM');
+	});
+
+	test('renders explicit autolink', () => {
+		setup(<MarkdownMessage text={`visit <${EXAMPLE_URL}>`} />);
+		const link = screen.getByText(EXAMPLE_URL);
+		expect(link.tagName).toBe('A');
+		expect(link).toHaveAttribute('href', EXAMPLE_URL);
+	});
+
+	test('renders bare url autolink', () => {
+		setup(<MarkdownMessage text={`visit ${EXAMPLE_URL} now`} />);
+		const link = screen.getByText(EXAMPLE_URL);
+		expect(link.tagName).toBe('A');
+	});
+
+	test('renders email autolink as mailto', () => {
+		setup(<MarkdownMessage text="write to user@example.com please" />);
+		const link = screen.getByText('user@example.com');
+		expect(link.tagName).toBe('A');
+		expect(link).toHaveAttribute('href', 'mailto:user@example.com');
 	});
 
 	test('code block has copy button', () => {

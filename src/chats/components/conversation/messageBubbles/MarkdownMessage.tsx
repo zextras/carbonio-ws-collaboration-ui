@@ -7,10 +7,9 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import styled from '@emotion/styled';
-import { Tooltip } from '@zextras/carbonio-design-system';
+import { Icon, Tooltip } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown, { type Components } from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 
 const CODE_HEURISTIC_PATTERNS = [
@@ -47,6 +46,15 @@ function wrapDetectedCode(text: string): string {
 	return text;
 }
 
+// headings and thematic breaks are not supported, but rather than letting the
+// parser consume their markers and drop them, we escape the markers so they
+// stay visible as the literal characters the user typed
+function escapeUnsupportedSyntax(text: string): string {
+	return text
+		.replace(/^(\s{0,100})(#{1,6})(\s)/gm, '$1\\$2$3')
+		.replace(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, '$1\\$2$3');
+}
+
 const MarkdownContainer = styled.div`
 	user-select: text;
 	word-break: break-word;
@@ -54,6 +62,7 @@ const MarkdownContainer = styled.div`
 
 	p {
 		margin: 0;
+		white-space: pre-wrap;
 		& + p {
 			margin-top: 0.25rem;
 		}
@@ -109,53 +118,26 @@ const MarkdownContainer = styled.div`
 
 	li {
 		margin: 0.125rem 0;
-	}
-
-	hr {
-		border: none;
-		border-top: 1px solid ${({ theme }): string => theme.palette.gray3.regular};
-		margin: 0.5rem 0;
-	}
-
-	table {
-		border-collapse: collapse;
-		margin: 0.25rem 0;
-		font-size: 0.9em;
-	}
-
-	th,
-	td {
-		border: 1px solid ${({ theme }): string => theme.palette.gray3.regular};
-		padding: 0.25rem 0.5rem;
-		text-align: left;
-	}
-
-	th {
-		background: ${({ theme }): string => theme.palette.gray5.regular};
-		font-weight: 600;
+		white-space: pre-wrap;
 	}
 `;
 
 const CodeBlockWrapper = styled.div`
-	position: relative;
 	margin: 0.375rem 0;
 	border-radius: 0.375rem;
 	overflow: hidden;
-
-	&:hover button {
-		opacity: 1;
-	}
+	background: ${({ theme }): string => theme.palette.gray0.regular};
 `;
 
 const CodeHeader = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: #1e1e2e;
+	border-bottom: 1px solid ${({ theme }): string => theme.palette.gray1.regular};
 	padding: 0.25rem 0.5rem 0.25rem 0.75rem;
 	font-family: 'Roboto Mono', 'Courier New', monospace;
 	font-size: 0.75rem;
-	color: #a6adc8;
+	color: ${({ theme }): string => theme.palette.gray4.regular};
 `;
 
 const CopyButton = styled.button`
@@ -170,7 +152,7 @@ const CopyButton = styled.button`
 	border-radius: 0.25rem;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: ${({ theme }): string => theme.palette.gray1.regular};
 	}
 
 	${CodeBlockWrapper}:hover & {
@@ -181,8 +163,19 @@ const CopyButton = styled.button`
 const CopiedLabel = styled.span`
 	font-family: 'Roboto Mono', 'Courier New', monospace;
 	font-size: 0.75rem;
-	color: #a6e3a1;
+	color: ${({ theme }): string => theme.palette.success.regular};
 	padding-right: 0.25rem;
+`;
+
+const StyledPre = styled.pre`
+	margin: 0;
+	padding: 0.75rem 1rem;
+	font-family: 'Roboto Mono', 'Courier New', monospace;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	color: ${({ theme }): string => theme.palette.gray6.regular};
+	white-space: pre-wrap;
+	word-break: break-word;
 `;
 
 type CodeBlockProps = {
@@ -191,6 +184,10 @@ type CodeBlockProps = {
 };
 
 const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
+	const [t] = useTranslation();
+	const copyCodeLabel = t('action.copyCode', 'Copy code');
+	const codeCopiedLabel = t('feedback.codeCopied', 'Copied!');
+
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = useCallback((): void => {
@@ -208,35 +205,18 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 			<CodeHeader>
 				<span>{language || 'code'}</span>
 				{copied ? (
-					<CopiedLabel>Copied!</CopiedLabel>
+					<CopiedLabel>{codeCopiedLabel}</CopiedLabel>
 				) : (
-					<Tooltip label="Copy code">
-						<CopyButton onClick={handleCopy} type="button" aria-label="Copy code">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-								<rect x="9" y="9" width="13" height="13" rx="2" stroke="#a6adc8" strokeWidth="2" />
-								<path
-									d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
-									stroke="#a6adc8"
-									strokeWidth="2"
-								/>
-							</svg>
+					<Tooltip label={copyCodeLabel}>
+						<CopyButton onClick={handleCopy} type="button" aria-label={copyCodeLabel}>
+							<Icon icon="Copy" size="small" color="gray4" />
 						</CopyButton>
 					</Tooltip>
 				)}
 			</CodeHeader>
-			<SyntaxHighlighter
-				language={language || 'text'}
-				style={oneDark}
-				customStyle={{
-					margin: 0,
-					borderRadius: 0,
-					fontSize: '0.8125rem',
-					padding: '0.75rem 1rem'
-				}}
-				wrapLongLines
-			>
-				{code}
-			</SyntaxHighlighter>
+			<StyledPre>
+				<code>{code}</code>
+			</StyledPre>
 		</CodeBlockWrapper>
 	);
 };
@@ -246,6 +226,11 @@ type MarkdownMessageProps = {
 };
 
 const markdownComponents: Components = {
+	// avoid nesting CodeBlock's own pre inside the default pre wrapper
+	pre({ children }) {
+		// eslint-disable-next-line react/jsx-no-useless-fragment
+		return <>{children}</>;
+	},
 	code({ className, children }) {
 		const match = /language-(\w+)/.exec(className || '');
 		let rawCode = '';
@@ -271,12 +256,41 @@ const markdownComponents: Components = {
 	}
 };
 
+// whitelist of supported markdown per CO-3406: bold, italic, strikethrough,
+// inline/block code, links and autolinks, blockquote, ordered/unordered lists.
+// everything else (headings, tables, images, task lists, hr) degrades to its
+// text content instead of being rendered
+const ALLOWED_ELEMENTS = [
+	'p',
+	'br',
+	'strong',
+	'em',
+	'del',
+	'code',
+	'pre',
+	'a',
+	'blockquote',
+	'ul',
+	'ol',
+	'li'
+];
+
 const MarkdownMessage: FC<MarkdownMessageProps> = ({ text }) => {
-	const processedText = useMemo(() => wrapDetectedCode(text), [text]);
+	const processedText = useMemo(() => {
+		const wrapped = wrapDetectedCode(text);
+		// when wrapped as a code block, escaping would leak backslashes into the
+		// verbatim code, so only escape the plain-markdown path
+		return wrapped === text ? escapeUnsupportedSyntax(text) : wrapped;
+	}, [text]);
 
 	return (
 		<MarkdownContainer>
-			<ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+			<ReactMarkdown
+				remarkPlugins={[remarkGfm]}
+				components={markdownComponents}
+				allowedElements={ALLOWED_ELEMENTS}
+				unwrapDisallowed
+			>
 				{processedText}
 			</ReactMarkdown>
 		</MarkdownContainer>
