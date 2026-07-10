@@ -74,6 +74,36 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const isAtBottomRef = useRef(true);
 	const AT_BOTTOM_THRESHOLD = 50;
 
+	// Keep isAtBottomRef in sync right after a PROGRAMMATIC scroll (scrollToEnd/scrollToMessage).
+	// scrollIntoView/scrollTo do not always emit an onScroll event — e.g. jumping to the first/
+	// second message (or a single short page) leaves scrollTop at 0 unchanged — so the onScroll
+	// handler never runs and isAtBottomRef would stay stale-true. The ResizeObserver re-pin
+	// (see below) would then fire scrollToEnd() and yank the view back to the bottom, defeating
+	// search/pin navigation.
+	//
+	// When we scrolled to a SPECIFIC message we resolve "at bottom" by INTENT, not geometry: we
+	// are at the bottom only if that message is the last one. This stays correct even if the
+	// content grows afterwards (late image/avatar loads) — a jump to a non-last message must
+	// never be re-pinned to the bottom. We deliberately do NOT recompute from live geometry
+	// inside the ResizeObserver itself: there the content has already grown and would misread as
+	// "not at bottom", breaking the intended auto-follow when the user really is at the bottom.
+	const syncIsAtBottom = useCallback(
+		(scrolledToMessageId?: string) => {
+			if (scrolledToMessageId != null) {
+				const msgs = useStore.getState().chatsRegistry[roomId]?.messages;
+				const lastMsgId = msgs?.[msgs.length - 1]?.id;
+				isAtBottomRef.current = scrolledToMessageId === lastMsgId;
+				return;
+			}
+			const el = MessagesListWrapperRef.current;
+			if (el) {
+				isAtBottomRef.current =
+					el.scrollHeight - el.scrollTop - el.clientHeight < AT_BOTTOM_THRESHOLD;
+			}
+		},
+		[roomId]
+	);
+
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 	const unreadCount = useStore((store) => store.chatsRegistry[roomId]?.unread ?? 0);
 
@@ -212,10 +242,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			(lastMsg === actualPosition && store.chatsRegistry[roomId].unread === 0)
 		) {
 			scrollToEnd(MessagesListWrapperRef);
+			syncIsAtBottom();
 		} else {
 			scrollToMessage(actualPosition);
+			syncIsAtBottom(actualPosition);
 		}
-	}, [roomId]);
+	}, [roomId, syncIsAtBottom]);
 
 	const messagesSize = useMemo(() => size(roomMessages), [roomMessages]);
 
@@ -225,10 +257,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 		if (!actualPosition) {
 			scrollToEnd(MessagesListWrapperRef);
+			syncIsAtBottom();
 		} else {
 			scrollToMessage(actualPosition);
+			syncIsAtBottom(actualPosition);
 		}
-	}, [messagesSize, roomId]);
+	}, [messagesSize, roomId, syncIsAtBottom]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => formatDate(message.date, 'YYMMDD')),

@@ -575,7 +575,9 @@ describe('scroll-to-bottom button robustness fixes', () => {
 
 		// Simulate the user scrolling away from bottom by setting scrollHeight >> clientHeight
 		// and firing the React onScroll handler, so isAtBottomRef.current becomes false.
-		const wrapper = container.querySelector(`[id="messageListRef${room.id}"]`) as HTMLElement | null;
+		const wrapper = container.querySelector(
+			`[id="messageListRef${room.id}"]`
+		) as HTMLElement | null;
 		if (wrapper) {
 			Object.defineProperty(wrapper, 'scrollHeight', { value: 2000, configurable: true });
 			Object.defineProperty(wrapper, 'scrollTop', { value: 0, configurable: true });
@@ -598,6 +600,34 @@ describe('scroll-to-bottom button robustness fixes', () => {
 
 		// User is scrolled up → must NOT re-pin to bottom
 		expect(scrollToEnd).not.toHaveBeenCalled();
+	});
+
+	// Regression: jumping to a NON-LAST message (search result that is the first/second message,
+	// or a single short page) must flip isAtBottomRef to false through the programmatic scroll,
+	// so the ResizeObserver initial/settle callback does NOT re-pin the view to the bottom.
+	// Before the fix, isAtBottomRef stayed stale-true (scrollToMessage to the top emits no
+	// onScroll event), the ResizeObserver ran scrollToEnd(), and the view snapped back to the
+	// bottom while only the highlight survived. This asserts the opposite.
+	test('Fix C: jumping to a non-last message does NOT let ResizeObserver re-pin to bottom', () => {
+		const store = useStore.getState();
+		store.updateHistory(room.id, messages);
+		// Target the FIRST message (not the last one) — the failing search-result case.
+		store.setScrollPosition(room.id, messages[0].id);
+		setup(<MessagesList roomId={room.id} />);
+
+		(scrollToEnd as ReturnType<typeof vi.fn>).mockClear();
+
+		// Content resize (e.g. avatars/images settling) fires the ResizeObserver.
+		act(() => {
+			if (capturedResizeCallback) {
+				capturedResizeCallback([], {} as ResizeObserver);
+			}
+		});
+
+		// Target is not the last message → isAtBottomRef must be false → no re-pin to bottom.
+		expect(scrollToEnd).not.toHaveBeenCalled();
+		// The intended jump to the target must have happened instead.
+		expect(scrollToMessage).toHaveBeenCalledWith(messages[0].id);
 	});
 });
 
