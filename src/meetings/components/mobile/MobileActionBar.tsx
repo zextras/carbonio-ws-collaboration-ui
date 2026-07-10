@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
+import React, {
+	Dispatch,
+	ReactElement,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useState
+} from 'react';
 
 import { Button, Container } from '@zextras/carbonio-design-system';
 
@@ -36,30 +43,47 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 	const videoOutConn = useStore((store) => store.activeMeeting?.videoOutConn);
 
-	const toggleAudioStream = useCallback(() => {
-		if (!audioStatus) {
-			getAudioStream().then((stream) => {
-				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					updateAudioStreamStatus(meetingId, !audioStatus);
-				});
-			});
-		} else {
-			bidirectionalAudioConn?.closeRtpSenderTrack();
-			updateAudioStreamStatus(meetingId, !audioStatus);
+	const [audioButtonStatus, setAudioButtonStatus] = useState<boolean>(true);
+	const [videoButtonStatus, setVideoButtonStatus] = useState<boolean>(true);
+
+	useEffect(() => {
+		setAudioButtonStatus(true);
+	}, [audioStatus]);
+
+	useEffect(() => {
+		setVideoButtonStatus(true);
+	}, [videoStatus]);
+
+	const toggleAudioStream = useCallback(async () => {
+		setAudioButtonStatus(false);
+		try {
+			if (!audioStatus) {
+				const stream = await getAudioStream();
+				await bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+				await updateAudioStreamStatus(meetingId, !audioStatus);
+			} else {
+				bidirectionalAudioConn?.closeRtpSenderTrack();
+				await updateAudioStreamStatus(meetingId, !audioStatus);
+			}
+		} catch {
+			setAudioButtonStatus(true);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);
 
-	const toggleVideoStream = useCallback(() => {
-		if (videoStatus) {
-			videoOutConn?.stopVideo();
-		} else if (videoOutConn?.peerConn) {
-			getFrontCameraStream().then((stream) => {
-				videoOutConn
-					?.updateLocalStreamTrack(stream)
-					.then(() => updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-			});
-		} else {
-			videoOutConn?.startVideo();
+	const toggleVideoStream = useCallback(async () => {
+		setVideoButtonStatus(false);
+		try {
+			if (videoStatus) {
+				await videoOutConn?.stopVideo();
+			} else if (videoOutConn?.peerConn) {
+				const stream = await getFrontCameraStream();
+				await videoOutConn?.updateLocalStreamTrack(stream);
+				await updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true);
+			} else {
+				await videoOutConn?.startVideo();
+			}
+		} catch {
+			setVideoButtonStatus(true);
 		}
 	}, [videoStatus, videoOutConn, meetingId]);
 
@@ -94,8 +118,18 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 				icon={view === MobileMeetingView.CHAT ? 'Video' : 'MessageCircle'}
 				onClick={toggleChatView}
 			/>
-			<Button size="large" icon={audioStatus ? 'Mic' : 'MicOff'} onClick={toggleAudioStream} />
-			<Button size="large" icon={videoStatus ? 'Video' : 'VideoOff'} onClick={toggleVideoStream} />
+			<Button
+				size="large"
+				icon={audioStatus ? 'Mic' : 'MicOff'}
+				onClick={toggleAudioStream}
+				disabled={!audioButtonStatus}
+			/>
+			<Button
+				size="large"
+				icon={videoStatus ? 'Video' : 'VideoOff'}
+				onClick={toggleVideoStream}
+				disabled={!videoButtonStatus}
+			/>
 			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeetingAction} />
 		</Container>
 	);
