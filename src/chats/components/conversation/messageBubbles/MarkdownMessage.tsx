@@ -46,13 +46,18 @@ function wrapDetectedCode(text: string): string {
 	return text;
 }
 
-// headings and thematic breaks are not supported, but rather than letting the
-// parser consume their markers and drop them, we escape the markers so they
-// stay visible as the literal characters the user typed
+// headings (atx and setext) and thematic breaks are not supported, but rather
+// than letting the parser consume their markers and drop them, we escape the
+// markers so they stay visible as the literal characters the user typed. the
+// setext rule escapes the underline only when it follows a text line
 function escapeUnsupportedSyntax(text: string): string {
 	return text
 		.replaceAll(/^(\s{0,100})(#{1,6})(\s)/gm, String.raw`$1\$2$3`)
-		.replaceAll(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, String.raw`$1\$2$3`);
+		.replaceAll(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, String.raw`$1\$2$3`)
+		.replaceAll(
+			/^([^\n]{0,1000}\S[^\n]{0,1000}\n\s{0,3})([=-])((?:\2){0,100}[ \t]{0,100})$/gm,
+			String.raw`$1\$2$3`
+		);
 }
 
 const MarkdownContainer = styled.div`

@@ -112,6 +112,20 @@ describe('MarkdownMessage', () => {
 		expect(screen.getByText('---')).toBeVisible();
 	});
 
+	test('does not render setext h1 and keeps the underline visible', () => {
+		setup(<MarkdownMessage text={'Total Cost\n=========='} />);
+		expect(screen.queryByRole('heading')).toBeNull();
+		expect(screen.getByText(/Total Cost/)).toBeVisible();
+		expect(screen.getByText(/==========/)).toBeVisible();
+	});
+
+	test('does not render setext h2 and keeps the underline visible', () => {
+		setup(<MarkdownMessage text={'Total Cost\n--'} />);
+		expect(screen.queryByRole('heading')).toBeNull();
+		expect(screen.getByText(/Total Cost/)).toBeVisible();
+		expect(screen.getByText(/--/)).toBeVisible();
+	});
+
 	test('does not render tables (not in whitelist)', () => {
 		setup(<MarkdownMessage text={'| A | B |\n|---|---|\n| 1 | 2 |'} />);
 		expect(screen.queryByRole('table')).toBeNull();
