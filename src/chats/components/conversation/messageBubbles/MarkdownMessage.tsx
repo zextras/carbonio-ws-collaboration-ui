@@ -123,6 +123,7 @@ const MarkdownContainer = styled.div`
 `;
 
 const CodeBlockWrapper = styled.div`
+	position: relative;
 	margin: 0.375rem 0;
 	border-radius: 0.375rem;
 	overflow: hidden;
@@ -132,18 +133,25 @@ const CodeBlockWrapper = styled.div`
 const CodeHeader = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	border-bottom: 1px solid ${({ theme }): string => theme.palette.gray1.regular};
-	padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+	padding: 0.25rem 0.75rem;
 	font-family: 'Roboto Mono', 'Courier New', monospace;
 	font-size: 0.75rem;
 	color: ${({ theme }): string => theme.palette.gray4.regular};
 `;
 
+const CopyControl = styled.div`
+	position: absolute;
+	bottom: 0.375rem;
+	right: 0.5rem;
+	display: flex;
+	align-items: center;
+`;
+
 const CopyButton = styled.button`
 	opacity: 0;
 	transition: opacity 150ms ease;
-	background: transparent;
+	background: ${({ theme }): string => theme.palette.gray0.regular};
 	border: none;
 	cursor: pointer;
 	display: flex;
@@ -164,7 +172,9 @@ const CopiedLabel = styled.span`
 	font-family: 'Roboto Mono', 'Courier New', monospace;
 	font-size: 0.75rem;
 	color: ${({ theme }): string => theme.palette.success.regular};
-	padding-right: 0.25rem;
+	background: ${({ theme }): string => theme.palette.gray0.regular};
+	padding: 0.25rem 0.375rem;
+	border-radius: 0.25rem;
 `;
 
 const StyledPre = styled.pre`
@@ -204,6 +214,11 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 		<CodeBlockWrapper>
 			<CodeHeader>
 				<span>{language || 'code'}</span>
+			</CodeHeader>
+			<StyledPre>
+				<code>{code}</code>
+			</StyledPre>
+			<CopyControl>
 				{copied ? (
 					<CopiedLabel>{codeCopiedLabel}</CopiedLabel>
 				) : (
@@ -213,10 +228,7 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 						</CopyButton>
 					</Tooltip>
 				)}
-			</CodeHeader>
-			<StyledPre>
-				<code>{code}</code>
-			</StyledPre>
+			</CopyControl>
 		</CodeBlockWrapper>
 	);
 };
