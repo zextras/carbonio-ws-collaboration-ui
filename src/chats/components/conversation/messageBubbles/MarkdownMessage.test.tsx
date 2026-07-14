@@ -126,6 +126,12 @@ describe('MarkdownMessage', () => {
 		expect(screen.getByText(/--/)).toBeVisible();
 	});
 
+	test('does not escape markdown markers inside a fenced code block', () => {
+		setup(<MarkdownMessage text={'```python\n# commento importante\nvalore = 1\n```'} />);
+		expect(screen.getByText(/# commento importante/)).toBeVisible();
+		expect(screen.queryByText(/\\# commento importante/)).toBeNull();
+	});
+
 	test('does not render tables (not in whitelist)', () => {
 		setup(<MarkdownMessage text={'| A | B |\n|---|---|\n| 1 | 2 |'} />);
 		expect(screen.queryByRole('table')).toBeNull();

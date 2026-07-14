@@ -50,7 +50,7 @@ function wrapDetectedCode(text: string): string {
 // than letting the parser consume their markers and drop them, we escape the
 // markers so they stay visible as the literal characters the user typed. the
 // setext rule escapes the underline only when it follows a text line
-function escapeUnsupportedSyntax(text: string): string {
+function escapeMarkers(text: string): string {
 	return text
 		.replaceAll(/^(\s{0,100})(#{1,6})(\s)/gm, String.raw`$1\$2$3`)
 		.replaceAll(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, String.raw`$1\$2$3`)
@@ -58,6 +58,40 @@ function escapeUnsupportedSyntax(text: string): string {
 			/^([^\n]{0,1000}\S[^\n]{0,1000}\n\s{0,3})([=-])((?:\2){0,100}[ \t]{0,100})$/gm,
 			String.raw`$1\$2$3`
 		);
+}
+
+// escaping must never touch content inside fenced code blocks, otherwise the
+// spurious backslashes corrupt both the rendered code and the copied text
+function escapeUnsupportedSyntax(text: string): string {
+	const lines = text.split('\n');
+	const result: string[] = [];
+	let plainBlock: string[] = [];
+	let openFence = '';
+
+	const flushPlainBlock = (): void => {
+		if (plainBlock.length > 0) {
+			result.push(escapeMarkers(plainBlock.join('\n')));
+			plainBlock = [];
+		}
+	};
+
+	lines.forEach((line) => {
+		const fence = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1]?.[0] ?? '';
+		if (openFence === '') {
+			if (fence === '') {
+				plainBlock.push(line);
+			} else {
+				flushPlainBlock();
+				openFence = fence;
+				result.push(line);
+			}
+		} else {
+			result.push(line);
+			if (fence === openFence) openFence = '';
+		}
+	});
+	flushPlainBlock();
+	return result.join('\n');
 }
 
 const MarkdownContainer = styled.div`
