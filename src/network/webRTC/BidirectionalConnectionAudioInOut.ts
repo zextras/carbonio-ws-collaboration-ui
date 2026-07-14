@@ -7,11 +7,13 @@
 import { first } from 'lodash';
 import { gte } from 'semver';
 
+import { getAudioStream } from '../../utils/UserMediaManager';
+
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { getAudioStream } from '../../utils/UserMediaManager';
+
 import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
@@ -55,15 +57,18 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		if (!this.oscillatorAudioTrack) return;
 		this.updateLocalStreamTrack(new MediaStream([this.oscillatorAudioTrack]))
 			.then(() => this.negotiate())
-			.then(() => {
-				if (this.initialAudioStatus) {
-					return getAudioStream(this.selectedAudioDeviceId).then((stream) => {
-						this.updateLocalStreamTrack(stream);
-						useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+			.then(() =>
+				getAudioStream(this.selectedAudioDeviceId).then((stream) => {
+					this.updateLocalStreamTrack(stream).then((track) => {
+						// If starting muted, disable the track but keep it alive
+						// to maintain Bluetooth HFP profile
+						if (!this.initialAudioStatus) {
+							track.enabled = false;
+						}
 					});
-				}
-				return undefined;
-			})
+					useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+				})
+			)
 			.catch((reason) => console.warn(reason));
 	}
 
@@ -143,6 +148,31 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 			const mediaStream = new MediaStream();
 			mediaStream.addTrack(this.oscillatorAudioTrack);
 			audio.srcObject = mediaStream;
+		}
+	}
+
+	/**
+	 * Mute the audio track by disabling it instead of stopping it.
+	 * This keeps the Bluetooth HFP profile active, avoiding the 1-2 second
+	 * audio gap caused by A2DP ↔ HFP profile switching.
+	 */
+	muteAudioTrack(): void {
+		if (this.rtpSender?.track) {
+			this.rtpSender.track.enabled = false;
+		}
+	}
+
+	/**
+	 * Unmute the audio track by re-enabling it if still alive,
+	 * or acquiring a new stream if the track was previously stopped.
+	 */
+	async unmuteAudioTrack(deviceId?: string): Promise<void> {
+		if (this.rtpSender?.track && this.rtpSender.track.readyState === 'live') {
+			this.rtpSender.track.enabled = true;
+		} else {
+			// Fallback: track was stopped or lost, acquire a new one
+			const stream = await getAudioStream(deviceId);
+			await this.updateLocalStreamTrack(stream);
 		}
 	}
 

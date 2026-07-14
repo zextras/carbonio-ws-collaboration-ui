@@ -25,7 +25,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
+import { getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
@@ -80,17 +80,16 @@ const PictureInPictureView = (): ReactElement => {
 		(event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
 			if (!audioStatus) {
-				getAudioStream(selectedAudioDeviceId)
-					.then((stream) => {
-						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							updateAudioStreamStatus(meetingId!, !audioStatus);
-						});
+				bidirectionalAudioConn
+					?.unmuteAudioTrack(selectedAudioDeviceId)
+					.then(() => {
+						updateAudioStreamStatus(meetingId!, !audioStatus);
 					})
 					.catch((e) => {
 						console.log(e);
 					});
 			} else {
-				bidirectionalAudioConn?.closeRtpSenderTrack();
+				bidirectionalAudioConn?.muteAudioTrack();
 				updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},

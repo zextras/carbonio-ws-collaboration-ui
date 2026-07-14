@@ -104,11 +104,10 @@ const MicrophoneButton = ({
 			setButtonStatus(false);
 			try {
 				if (!audioStatus) {
-					const stream = await getAudioStream(selectedAudioDeviceId);
-					await bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+					await bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId);
 					await updateAudioStreamStatus(meetingId!, !audioStatus);
 				} else {
-					bidirectionalAudioConn?.closeRtpSenderTrack();
+					bidirectionalAudioConn?.muteAudioTrack();
 					await updateAudioStreamStatus(meetingId!, !audioStatus);
 				}
 			} catch {
