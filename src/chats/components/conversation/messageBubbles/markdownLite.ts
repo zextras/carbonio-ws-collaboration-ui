@@ -128,6 +128,7 @@ const IMAGE = /!\[[^\]\n]{0,500}\]\([^)\n]{0,2000}\)/;
 const LINK = /\[([^\]\n]{1,500})\]\((https?:\/\/[^)\s]{1,2000}|mailto:[^)\s]{1,320})\)/;
 const AUTOLINK = /<(https?:\/\/[^\s>]{1,2000})>/;
 const BARE_URL = /https?:\/\/[^\s<>]{1,2000}/;
+const WWW_URL = /(?<![\w.])www\.[A-Za-z0-9-]{1,63}\.[^\s<>]{2,500}/;
 const EMAIL = /[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}/;
 // delimiters must hug their content (no inner leading/trailing space) so
 // literal uses like "2 * 3 * 4" or snake_case identifiers are left alone
@@ -202,6 +203,14 @@ const RULES: InlineRule[] = [
 		toResult: (match): RuleResult => {
 			const url = trimBareUrl(match[0]);
 			return { token: { type: 'link', href: url, text: url }, length: url.length };
+		}
+	},
+	// scheme-less www URLs are common in chat: link them with an http fallback
+	{
+		pattern: WWW_URL,
+		toResult: (match): RuleResult => {
+			const url = trimBareUrl(match[0]);
+			return { token: { type: 'link', href: `http://${url}`, text: url }, length: url.length };
 		}
 	},
 	{

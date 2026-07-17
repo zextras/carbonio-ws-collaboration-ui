@@ -207,6 +207,13 @@ describe('MarkdownMessage', () => {
 		expect(link.tagName).toBe('A');
 	});
 
+	test('renders scheme-less www url as link with http fallback', () => {
+		setup(<MarkdownMessage text="guarda su www.example.com per i dettagli" />);
+		const link = screen.getByText('www.example.com');
+		expect(link.tagName).toBe('A');
+		expect(link).toHaveAttribute('href', 'http://www.example.com');
+	});
+
 	test('renders email autolink as mailto', () => {
 		setup(<MarkdownMessage text="write to user@example.com please" />);
 		const link = screen.getByText('user@example.com');
