@@ -9,8 +9,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import ReactMarkdown, { type Components } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+
+import { Block, InlineToken, parseBlocks, parseInline } from './markdownLite';
 
 const CODE_HEURISTIC_PATTERNS = [
 	/^(import|export|from)\s{1,100}/m,
@@ -44,17 +44,6 @@ function wrapDetectedCode(text: string): string {
 	if (hasMarkdownSyntax(text)) return text;
 	if (looksLikeCode(text)) return `\`\`\`\n${text}\n\`\`\``;
 	return text;
-}
-
-type NodeWithPosition = {
-	position?: { start?: { offset?: number }; end?: { offset?: number } };
-};
-
-// slice of the source text the node was parsed from, as the user typed it
-function rawText(node: NodeWithPosition | undefined, source: string): string | undefined {
-	const start = node?.position?.start?.offset;
-	const end = node?.position?.end?.offset;
-	return start !== undefined && end !== undefined ? source.slice(start, end) : undefined;
 }
 
 const MarkdownContainer = styled.div`
@@ -110,6 +99,7 @@ const MarkdownContainer = styled.div`
 		padding: 0.125rem 0 0.125rem 0.5rem;
 		color: ${({ theme }): string => theme.palette.text.regular};
 		opacity: 0.8;
+		white-space: pre-wrap;
 	}
 
 	ul,
@@ -236,212 +226,64 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 	);
 };
 
-// Markdown supported: bold, italic, strikethrough, inline/block
-// code, links and autolinks, blockquote, ordered/unordered lists
-const SUPPORTED_ELEMENTS = [
-	'p',
-	'br',
-	'strong',
-	'em',
-	'del',
-	'code',
-	'pre',
-	'a',
-	'blockquote',
-	'ul',
-	'ol',
-	'li'
-];
-
-// Everything else is rendered back as the literal source text the user typed
-const UNSUPPORTED_BLOCK_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'table'];
-const UNSUPPORTED_INLINE_ELEMENTS = ['img', 'input'];
-
-const ALLOWED_ELEMENTS = [
-	...SUPPORTED_ELEMENTS,
-	...UNSUPPORTED_BLOCK_ELEMENTS,
-	...UNSUPPORTED_INLINE_ELEMENTS
-];
-
-// blank lines the user typed before a block would be collapsed by the parser:
-// count the newlines in the source right before the block so they can be
-// rendered back as visible empty lines
-function countBlankLinesBefore(node: NodeWithPosition | undefined, source: string): number {
-	const start = node?.position?.start?.offset;
-	if (start === undefined) return 0;
-
-	let newlines = 0;
-	let index = start - 1;
-	while (
-		index >= 0 &&
-		(source[index] === '\n' || source[index] === ' ' || source[index] === '\t')
-	) {
-		if (source[index] === '\n') newlines += 1;
-		index -= 1;
-	}
-	// after a previous block one newline is the block separator itself, while at
-	// the start of the message every newline is a blank line
-	return index < 0 ? newlines : Math.max(0, newlines - 1);
-}
-
-type HastNode = NodeWithPosition & { type?: string; value?: string; children?: HastNode[] };
-
-// the parser strips the spaces the user typed around line breaks inside a
-// paragraph: put them back from the source slice, but only when source and
-// parsed value differ in whitespace alone (escapes and entities must keep
-// their parsed form)
-function restoreStrippedSpaces(node: HastNode, source: string): void {
-	if (node.type === 'text' && typeof node.value === 'string') {
-		const slice = rawText(node, source);
-		if (
-			slice !== undefined &&
-			slice !== node.value &&
-			slice.replaceAll(/\s+/g, '') === node.value.replaceAll(/\s+/g, '')
-		) {
-			Object.assign(node, { value: slice });
-		}
-	}
-	node.children?.forEach((child) => restoreStrippedSpaces(child, source));
-}
-
-function rehypeRestoreStrippedSpaces() {
-	return (tree: HastNode, file: { value?: unknown }): void => {
-		if (typeof file.value === 'string') restoreStrippedSpaces(tree, file.value);
-	};
-}
-
-type LiteralProps = { node?: NodeWithPosition; children?: React.ReactNode };
-
-function buildMarkdownComponents(source: string): Components {
-	const blanksBefore = (node: NodeWithPosition | undefined): React.JSX.Element[] =>
-		Array.from({ length: countBlankLinesBefore(node, source) }, (_, index) => <br key={index} />);
-
-	// spaces between the start of the line and the block, stripped by the parser
-	const indentBefore = (node: NodeWithPosition | undefined): string => {
-		const start = node?.position?.start?.offset;
-		if (start === undefined) return '';
-
-		let index = start - 1;
-		while (index >= 0 && (source[index] === ' ' || source[index] === '\t')) {
-			index -= 1;
-		}
-		return index < 0 || source[index] === '\n' ? source.slice(index + 1, start) : '';
-	};
-
-	const blockWithBlanks = (
-		Tag: 'p' | 'blockquote' | 'ul' | 'ol',
-		node: NodeWithPosition | undefined,
-		children: React.ReactNode
-	): React.JSX.Element => (
-		<>
-			{blanksBefore(node)}
-			<Tag>
-				{Tag === 'p' && indentBefore(node)}
-				{children}
-			</Tag>
-		</>
-	);
-
-	const literal = (Tag: 'p' | 'span'): FC<LiteralProps> =>
-		function Literal({ node, children }: LiteralProps) {
-			return (
-				<>
-					{Tag === 'p' && blanksBefore(node)}
-					<Tag>
-						{Tag === 'p' && indentBefore(node)}
-						{rawText(node, source) ?? children}
-					</Tag>
-				</>
-			);
-		};
-
-	const supported: Components = {
-		p({ node, children }) {
-			return blockWithBlanks('p', node, children as React.ReactNode);
-		},
-		blockquote({ node, children }) {
-			return blockWithBlanks('blockquote', node, children as React.ReactNode);
-		},
-		ul({ node, children }) {
-			return blockWithBlanks('ul', node, children as React.ReactNode);
-		},
-		ol({ node, children }) {
-			return blockWithBlanks('ol', node, children as React.ReactNode);
-		},
-		// fenced blocks unwrap so CodeBlock provides its own pre; indented code
-		// blocks (4+ leading spaces) degrade to the literal indented text, since
-		// in a chat leading spaces are indentation, not code syntax
-		pre({ node, children }) {
-			const start = node?.position?.start?.offset;
-			const end = node?.position?.end?.offset;
-			const isFence = start !== undefined && (source[start] === '`' || source[start] === '~');
-
-			if (start !== undefined && end !== undefined && !isFence) {
+function renderInline(tokens: InlineToken[]): React.ReactNode {
+	return tokens.map((token, index) => {
+		switch (token.type) {
+			case 'text':
+				return token.value;
+			case 'literal':
+				return <span key={index}>{token.value}</span>;
+			case 'code':
+				return <code key={index}>{token.value}</code>;
+			case 'link':
 				return (
-					<>
-						{blanksBefore(node)}
-						<p>
-							{indentBefore(node)}
-							{source.slice(start, end)}
-						</p>
-					</>
+					<a key={index} href={token.href} target="_blank" rel="noopener noreferrer">
+						{token.text}
+					</a>
 				);
-			}
-			// eslint-disable-next-line react/jsx-no-useless-fragment
-			return <>{children}</>;
-		},
-		code({ node, className, children }) {
-			const language = /language-(\w+)/.exec(className ?? '')?.[1];
-			const code = React.Children.toArray(children as React.ReactNode)
-				.filter((child) => typeof child === 'string' || typeof child === 'number')
-				.join('')
-				.replace(/\n$/, '');
+			case 'strong':
+				return <strong key={index}>{renderInline(token.children)}</strong>;
+			case 'em':
+				return <em key={index}>{renderInline(token.children)}</em>;
+			case 'del':
+				return <del key={index}>{renderInline(token.children)}</del>;
+			default:
+				return null;
+		}
+	});
+}
 
-			if (language || code.includes('\n')) {
-				return (
-					<>
-						{blanksBefore(node)}
-						<CodeBlock language={language ?? ''} code={code} />
-					</>
-				);
-			}
-			return <code className={className}>{children}</code>;
-		},
-		a({ href, children }) {
-			return (
-				<a href={href} target="_blank" rel="noopener noreferrer">
-					{children}
-				</a>
+function renderBlock(block: Block, key: number): React.ReactNode {
+	switch (block.type) {
+		case 'paragraph':
+			return <p key={key}>{renderInline(parseInline(block.content))}</p>;
+		case 'blank':
+			return <br key={key} />;
+		case 'quote':
+			return <blockquote key={key}>{renderInline(parseInline(block.content))}</blockquote>;
+		case 'list': {
+			const items = block.items.map((item, index) => (
+				<li key={index}>{renderInline(parseInline(item))}</li>
+			));
+			return block.ordered ? (
+				<ol key={key} start={block.start}>
+					{items}
+				</ol>
+			) : (
+				<ul key={key}>{items}</ul>
 			);
 		}
-	};
-
-	return {
-		...(Object.fromEntries([
-			...UNSUPPORTED_BLOCK_ELEMENTS.map((tag) => [tag, literal('p')]),
-			...UNSUPPORTED_INLINE_ELEMENTS.map((tag) => [tag, literal('span')])
-		]) as Components),
-		...supported
-	};
+		case 'codeBlock':
+			return <CodeBlock key={key} language={block.language} code={block.code} />;
+		default:
+			return null;
+	}
 }
 
 const MarkdownMessage: FC<{ text: string }> = ({ text }) => {
-	const processedText = useMemo(() => wrapDetectedCode(text), [text]);
-	const components = useMemo(() => buildMarkdownComponents(processedText), [processedText]);
+	const blocks = useMemo(() => parseBlocks(wrapDetectedCode(text)), [text]);
 
-	return (
-		<MarkdownContainer>
-			<ReactMarkdown
-				remarkPlugins={[remarkGfm]}
-				rehypePlugins={[rehypeRestoreStrippedSpaces]}
-				components={components}
-				allowedElements={ALLOWED_ELEMENTS}
-				unwrapDisallowed
-			>
-				{processedText}
-			</ReactMarkdown>
-		</MarkdownContainer>
-	);
+	return <MarkdownContainer>{blocks.map(renderBlock)}</MarkdownContainer>;
 };
 
 export default MarkdownMessage;
