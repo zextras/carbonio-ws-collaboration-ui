@@ -112,6 +112,39 @@ describe('MarkdownMessage', () => {
 		expect(screen.getByText('---')).toBeVisible();
 	});
 
+	test('preserves leading spaces on continuation lines', () => {
+		setup(<MarkdownMessage text={'lista:\n   punto uno\n   punto due'} />);
+		const paragraph = screen.getByText(/lista:/);
+		expect(paragraph).toHaveTextContent(/lista:\n {3}punto uno\n {3}punto due/, {
+			normalizeWhitespace: false
+		});
+	});
+
+	test('preserves leading spaces on the first line', () => {
+		setup(<MarkdownMessage text={'  ciao'} />);
+		expect(screen.getByText(/ciao/)).toHaveTextContent(/ {2}ciao/, {
+			normalizeWhitespace: false
+		});
+	});
+
+	test('does not turn text indented with 4+ spaces into a code block', () => {
+		setup(<MarkdownMessage text={'    comando indentato'} />);
+		expect(screen.queryByLabelText('Copy code')).toBeNull();
+		expect(screen.getByText(/comando indentato/)).toHaveTextContent(/ {4}comando indentato/, {
+			normalizeWhitespace: false
+		});
+	});
+
+	test('keeps typed blank lines between paragraphs visible', () => {
+		setup(<MarkdownMessage text={'dfegergreg\nwefwefew\n\n\nwef'} />);
+		expect(document.querySelectorAll('br')).toHaveLength(2);
+	});
+
+	test('renders one blank line for a single empty line between paragraphs', () => {
+		setup(<MarkdownMessage text={'first\n\nsecond'} />);
+		expect(document.querySelectorAll('br')).toHaveLength(1);
+	});
+
 	test('does not render setext h1 and keeps the underline visible', () => {
 		setup(<MarkdownMessage text={'Total Cost\n=========='} />);
 		expect(screen.queryByRole('heading')).toBeNull();

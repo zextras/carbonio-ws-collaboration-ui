@@ -263,58 +263,177 @@ const ALLOWED_ELEMENTS = [
 	...UNSUPPORTED_INLINE_ELEMENTS
 ];
 
-const supportedComponents: Components = {
-	// avoid nesting CodeBlock's own pre inside the default pre wrapper
-	pre({ children }) {
-		// eslint-disable-next-line react/jsx-no-useless-fragment
-		return <>{children}</>;
-	},
-	code({ className, children }) {
-		const language = /language-(\w+)/.exec(className ?? '')?.[1];
-		const code = React.Children.toArray(children as React.ReactNode)
-			.filter((child) => typeof child === 'string' || typeof child === 'number')
-			.join('')
-			.replace(/\n$/, '');
+// blank lines the user typed before a block would be collapsed by the parser:
+// count the newlines in the source right before the block so they can be
+// rendered back as visible empty lines
+function countBlankLinesBefore(node: NodeWithPosition | undefined, source: string): number {
+	const start = node?.position?.start?.offset;
+	if (start === undefined) return 0;
 
-		if (language || code.includes('\n')) {
-			return <CodeBlock language={language ?? ''} code={code} />;
-		}
-		return <code className={className}>{children}</code>;
-	},
-	a({ href, children }) {
-		return (
-			<a href={href} target="_blank" rel="noopener noreferrer">
-				{children}
-			</a>
-		);
+	let newlines = 0;
+	let index = start - 1;
+	while (
+		index >= 0 &&
+		(source[index] === '\n' || source[index] === ' ' || source[index] === '\t')
+	) {
+		if (source[index] === '\n') newlines += 1;
+		index -= 1;
 	}
-};
+	// after a previous block one newline is the block separator itself, while at
+	// the start of the message every newline is a blank line
+	return index < 0 ? newlines : Math.max(0, newlines - 1);
+}
+
+type HastNode = NodeWithPosition & { type?: string; value?: string; children?: HastNode[] };
+
+// the parser strips the spaces the user typed around line breaks inside a
+// paragraph: put them back from the source slice, but only when source and
+// parsed value differ in whitespace alone (escapes and entities must keep
+// their parsed form)
+function restoreStrippedSpaces(node: HastNode, source: string): void {
+	if (node.type === 'text' && typeof node.value === 'string') {
+		const slice = rawText(node, source);
+		if (
+			slice !== undefined &&
+			slice !== node.value &&
+			slice.replaceAll(/\s+/g, '') === node.value.replaceAll(/\s+/g, '')
+		) {
+			Object.assign(node, { value: slice });
+		}
+	}
+	node.children?.forEach((child) => restoreStrippedSpaces(child, source));
+}
+
+function rehypeRestoreStrippedSpaces() {
+	return (tree: HastNode, file: { value?: unknown }): void => {
+		if (typeof file.value === 'string') restoreStrippedSpaces(tree, file.value);
+	};
+}
 
 type LiteralProps = { node?: NodeWithPosition; children?: React.ReactNode };
 
-function buildLiteralComponents(source: string): Components {
+function buildMarkdownComponents(source: string): Components {
+	const blanksBefore = (node: NodeWithPosition | undefined): React.JSX.Element[] =>
+		Array.from({ length: countBlankLinesBefore(node, source) }, (_, index) => <br key={index} />);
+
+	// spaces between the start of the line and the block, stripped by the parser
+	const indentBefore = (node: NodeWithPosition | undefined): string => {
+		const start = node?.position?.start?.offset;
+		if (start === undefined) return '';
+
+		let index = start - 1;
+		while (index >= 0 && (source[index] === ' ' || source[index] === '\t')) {
+			index -= 1;
+		}
+		return index < 0 || source[index] === '\n' ? source.slice(index + 1, start) : '';
+	};
+
+	const blockWithBlanks = (
+		Tag: 'p' | 'blockquote' | 'ul' | 'ol',
+		node: NodeWithPosition | undefined,
+		children: React.ReactNode
+	): React.JSX.Element => (
+		<>
+			{blanksBefore(node)}
+			<Tag>
+				{Tag === 'p' && indentBefore(node)}
+				{children}
+			</Tag>
+		</>
+	);
+
 	const literal = (Tag: 'p' | 'span'): FC<LiteralProps> =>
 		function Literal({ node, children }: LiteralProps) {
-			return <Tag>{rawText(node, source) ?? children}</Tag>;
+			return (
+				<>
+					{Tag === 'p' && blanksBefore(node)}
+					<Tag>
+						{Tag === 'p' && indentBefore(node)}
+						{rawText(node, source) ?? children}
+					</Tag>
+				</>
+			);
 		};
 
-	return Object.fromEntries([
-		...UNSUPPORTED_BLOCK_ELEMENTS.map((tag) => [tag, literal('p')]),
-		...UNSUPPORTED_INLINE_ELEMENTS.map((tag) => [tag, literal('span')])
-	]) as Components;
+	const supported: Components = {
+		p({ node, children }) {
+			return blockWithBlanks('p', node, children as React.ReactNode);
+		},
+		blockquote({ node, children }) {
+			return blockWithBlanks('blockquote', node, children as React.ReactNode);
+		},
+		ul({ node, children }) {
+			return blockWithBlanks('ul', node, children as React.ReactNode);
+		},
+		ol({ node, children }) {
+			return blockWithBlanks('ol', node, children as React.ReactNode);
+		},
+		// fenced blocks unwrap so CodeBlock provides its own pre; indented code
+		// blocks (4+ leading spaces) degrade to the literal indented text, since
+		// in a chat leading spaces are indentation, not code syntax
+		pre({ node, children }) {
+			const start = node?.position?.start?.offset;
+			const end = node?.position?.end?.offset;
+			const isFence = start !== undefined && (source[start] === '`' || source[start] === '~');
+
+			if (start !== undefined && end !== undefined && !isFence) {
+				return (
+					<>
+						{blanksBefore(node)}
+						<p>
+							{indentBefore(node)}
+							{source.slice(start, end)}
+						</p>
+					</>
+				);
+			}
+			// eslint-disable-next-line react/jsx-no-useless-fragment
+			return <>{children}</>;
+		},
+		code({ node, className, children }) {
+			const language = /language-(\w+)/.exec(className ?? '')?.[1];
+			const code = React.Children.toArray(children as React.ReactNode)
+				.filter((child) => typeof child === 'string' || typeof child === 'number')
+				.join('')
+				.replace(/\n$/, '');
+
+			if (language || code.includes('\n')) {
+				return (
+					<>
+						{blanksBefore(node)}
+						<CodeBlock language={language ?? ''} code={code} />
+					</>
+				);
+			}
+			return <code className={className}>{children}</code>;
+		},
+		a({ href, children }) {
+			return (
+				<a href={href} target="_blank" rel="noopener noreferrer">
+					{children}
+				</a>
+			);
+		}
+	};
+
+	return {
+		...(Object.fromEntries([
+			...UNSUPPORTED_BLOCK_ELEMENTS.map((tag) => [tag, literal('p')]),
+			...UNSUPPORTED_INLINE_ELEMENTS.map((tag) => [tag, literal('span')])
+		]) as Components),
+		...supported
+	};
 }
 
 const MarkdownMessage: FC<{ text: string }> = ({ text }) => {
 	const processedText = useMemo(() => wrapDetectedCode(text), [text]);
-	const components = useMemo(
-		() => ({ ...supportedComponents, ...buildLiteralComponents(processedText) }),
-		[processedText]
-	);
+	const components = useMemo(() => buildMarkdownComponents(processedText), [processedText]);
 
 	return (
 		<MarkdownContainer>
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
+				rehypePlugins={[rehypeRestoreStrippedSpaces]}
 				components={components}
 				allowedElements={ALLOWED_ELEMENTS}
 				unwrapDisallowed
