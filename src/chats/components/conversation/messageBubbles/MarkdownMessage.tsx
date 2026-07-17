@@ -165,7 +165,8 @@ const CopyButton = styled.button`
 		background: ${({ theme }): string => theme.palette.gray1.regular};
 	}
 
-	${CodeBlockWrapper}:hover & {
+	${CodeBlockWrapper}:hover &,
+	&:focus-visible {
 		opacity: 1;
 	}
 `;
@@ -204,7 +205,7 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 
 	const handleCopy = useCallback((): void => {
 		navigator.clipboard
-			.writeText(code)
+			?.writeText(code)
 			.then(() => {
 				setCopied(true);
 				setTimeout(() => setCopied(false), 2000);
@@ -270,10 +271,10 @@ const supportedComponents: Components = {
 	},
 	code({ className, children }) {
 		const language = /language-(\w+)/.exec(className ?? '')?.[1];
-		const code = (Array.isArray(children) ? children.join('') : `${children ?? ''}`).replace(
-			/\n$/,
-			''
-		);
+		const code = React.Children.toArray(children as React.ReactNode)
+			.filter((child) => typeof child === 'string' || typeof child === 'number')
+			.join('')
+			.replace(/\n$/, '');
 
 		if (language || code.includes('\n')) {
 			return <CodeBlock language={language ?? ''} code={code} />;
