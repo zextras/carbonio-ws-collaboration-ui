@@ -46,52 +46,15 @@ function wrapDetectedCode(text: string): string {
 	return text;
 }
 
-// headings (atx and setext) and thematic breaks are not supported, but rather
-// than letting the parser consume their markers and drop them, we escape the
-// markers so they stay visible as the literal characters the user typed. the
-// setext rule escapes the underline only when it follows a text line
-function escapeMarkers(text: string): string {
-	return text
-		.replaceAll(/^(\s{0,100})(#{1,6})(\s)/gm, String.raw`$1\$2$3`)
-		.replaceAll(/^(\s{0,100})([-*_])((?:[ \t]{0,100}\2){2,}[ \t]{0,100})$/gm, String.raw`$1\$2$3`)
-		.replaceAll(
-			/^([^\n]{0,1000}\S[^\n]{0,1000}\n\s{0,3})([=-])((?:\2){0,100}[ \t]{0,100})$/gm,
-			String.raw`$1\$2$3`
-		);
-}
+type NodeWithPosition = {
+	position?: { start?: { offset?: number }; end?: { offset?: number } };
+};
 
-// escaping must never touch content inside fenced code blocks, otherwise the
-// spurious backslashes corrupt both the rendered code and the copied text
-function escapeUnsupportedSyntax(text: string): string {
-	const lines = text.split('\n');
-	const result: string[] = [];
-	let plainBlock: string[] = [];
-	let openFence = '';
-
-	const flushPlainBlock = (): void => {
-		if (plainBlock.length > 0) {
-			result.push(escapeMarkers(plainBlock.join('\n')));
-			plainBlock = [];
-		}
-	};
-
-	lines.forEach((line) => {
-		const fence = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1]?.[0] ?? '';
-		if (openFence === '') {
-			if (fence === '') {
-				plainBlock.push(line);
-			} else {
-				flushPlainBlock();
-				openFence = fence;
-				result.push(line);
-			}
-		} else {
-			result.push(line);
-			if (fence === openFence) openFence = '';
-		}
-	});
-	flushPlainBlock();
-	return result.join('\n');
+// slice of the source text the node was parsed from, as the user typed it
+function rawText(node: NodeWithPosition | undefined, source: string): string | undefined {
+	const start = node?.position?.start?.offset;
+	const end = node?.position?.end?.offset;
+	return start !== undefined && end !== undefined ? source.slice(start, end) : undefined;
 }
 
 const MarkdownContainer = styled.div`
@@ -272,46 +235,9 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 	);
 };
 
-type MarkdownMessageProps = {
-	text: string;
-};
-
-const markdownComponents: Components = {
-	// avoid nesting CodeBlock's own pre inside the default pre wrapper
-	pre({ children }) {
-		// eslint-disable-next-line react/jsx-no-useless-fragment
-		return <>{children}</>;
-	},
-	code({ className, children }) {
-		const match = /language-(\w+)/.exec(className || '');
-		let rawCode = '';
-		if (Array.isArray(children)) {
-			rawCode = children.join('');
-		} else if (typeof children === 'string' || typeof children === 'number') {
-			rawCode = `${children}`;
-		}
-		const trimmedCode = rawCode.replace(/\n$/, '');
-
-		if (match || trimmedCode.includes('\n')) {
-			return <CodeBlock language={match?.[1] || ''} code={trimmedCode} />;
-		}
-
-		return <code className={className}>{children}</code>;
-	},
-	a({ href, children }) {
-		return (
-			<a href={href} target="_blank" rel="noopener noreferrer">
-				{children}
-			</a>
-		);
-	}
-};
-
-// whitelist of supported markdown per CO-3406: bold, italic, strikethrough,
-// inline/block code, links and autolinks, blockquote, ordered/unordered lists.
-// everything else (headings, tables, images, task lists, hr) degrades to its
-// text content instead of being rendered
-const ALLOWED_ELEMENTS = [
+// Markdown supported: bold, italic, strikethrough, inline/block
+// code, links and autolinks, blockquote, ordered/unordered lists
+const SUPPORTED_ELEMENTS = [
 	'p',
 	'br',
 	'strong',
@@ -326,19 +252,69 @@ const ALLOWED_ELEMENTS = [
 	'li'
 ];
 
-const MarkdownMessage: FC<MarkdownMessageProps> = ({ text }) => {
-	const processedText = useMemo(() => {
-		const wrapped = wrapDetectedCode(text);
-		// when wrapped as a code block, escaping would leak backslashes into the
-		// verbatim code, so only escape the plain-markdown path
-		return wrapped === text ? escapeUnsupportedSyntax(text) : wrapped;
-	}, [text]);
+// Everything else is rendered back as the literal source text the user typed
+const UNSUPPORTED_BLOCK_ELEMENTS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'table'];
+const UNSUPPORTED_INLINE_ELEMENTS = ['img', 'input'];
+
+const ALLOWED_ELEMENTS = [
+	...SUPPORTED_ELEMENTS,
+	...UNSUPPORTED_BLOCK_ELEMENTS,
+	...UNSUPPORTED_INLINE_ELEMENTS
+];
+
+const supportedComponents: Components = {
+	// avoid nesting CodeBlock's own pre inside the default pre wrapper
+	pre({ children }) {
+		// eslint-disable-next-line react/jsx-no-useless-fragment
+		return <>{children}</>;
+	},
+	code({ className, children }) {
+		const language = /language-(\w+)/.exec(className ?? '')?.[1];
+		const code = (Array.isArray(children) ? children.join('') : `${children ?? ''}`).replace(
+			/\n$/,
+			''
+		);
+
+		if (language || code.includes('\n')) {
+			return <CodeBlock language={language ?? ''} code={code} />;
+		}
+		return <code className={className}>{children}</code>;
+	},
+	a({ href, children }) {
+		return (
+			<a href={href} target="_blank" rel="noopener noreferrer">
+				{children}
+			</a>
+		);
+	}
+};
+
+type LiteralProps = { node?: NodeWithPosition; children?: React.ReactNode };
+
+function buildLiteralComponents(source: string): Components {
+	const literal = (Tag: 'p' | 'span'): FC<LiteralProps> =>
+		function Literal({ node, children }: LiteralProps) {
+			return <Tag>{rawText(node, source) ?? children}</Tag>;
+		};
+
+	return Object.fromEntries([
+		...UNSUPPORTED_BLOCK_ELEMENTS.map((tag) => [tag, literal('p')]),
+		...UNSUPPORTED_INLINE_ELEMENTS.map((tag) => [tag, literal('span')])
+	]) as Components;
+}
+
+const MarkdownMessage: FC<{ text: string }> = ({ text }) => {
+	const processedText = useMemo(() => wrapDetectedCode(text), [text]);
+	const components = useMemo(
+		() => ({ ...supportedComponents, ...buildLiteralComponents(processedText) }),
+		[processedText]
+	);
 
 	return (
 		<MarkdownContainer>
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
-				components={markdownComponents}
+				components={components}
 				allowedElements={ALLOWED_ELEMENTS}
 				unwrapDisallowed
 			>

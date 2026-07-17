@@ -132,9 +132,23 @@ describe('MarkdownMessage', () => {
 		expect(screen.queryByText(/\\# commento importante/)).toBeNull();
 	});
 
-	test('does not render tables (not in whitelist)', () => {
+	test('degrades image to its literal markdown keeping surrounding text', () => {
+		setup(<MarkdownMessage text={'guarda qui ![screenshot](https://example.com/y.png) ok?'} />);
+		expect(screen.queryByRole('img')).toBeNull();
+		expect(screen.getByText(/guarda qui/)).toBeVisible();
+		expect(screen.getByText('![screenshot](https://example.com/y.png)')).toBeVisible();
+	});
+
+	test('degrades a lone image to its literal markdown without an empty bubble', () => {
+		setup(<MarkdownMessage text={'![screenshot](https://example.com/x.png)'} />);
+		expect(screen.queryByRole('img')).toBeNull();
+		expect(screen.getByText('![screenshot](https://example.com/x.png)')).toBeVisible();
+	});
+
+	test('does not render tables and keeps the literal text', () => {
 		setup(<MarkdownMessage text={'| A | B |\n|---|---|\n| 1 | 2 |'} />);
 		expect(screen.queryByRole('table')).toBeNull();
+		expect(screen.getByText(/\| A \| B \|/)).toBeVisible();
 	});
 
 	test('renders bold with underscores', () => {
