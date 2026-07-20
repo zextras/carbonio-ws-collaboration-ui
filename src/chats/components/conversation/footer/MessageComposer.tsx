@@ -338,8 +338,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {
 			setTextMessage(e.target.value);
+			sendThrottleIsWriting();
+			sendDebouncedPause();
 		},
-		[setTextMessage]
+		[setTextMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
 	const handleKeyUp = useCallback(
@@ -387,12 +389,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
-			} else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
-				sendThrottleIsWriting();
-				sendDebouncedPause();
 			}
 		},
-		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
+		[sendDisabled, carbonioLanguage, sendMessage]
 	);
 
 	useEffect(() => {

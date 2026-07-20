@@ -774,10 +774,11 @@ describe('MessageComposer - isWriting events', () => {
 
 	test('sendIsWriting is not called when pressing system shortcuts like Cmd+R', async () => {
 		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
-		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
-		await user.click(composerTextArea);
-		await user.keyboard('{Meta>}r{/Meta}');
+		// Use fireEvent instead of user.keyboard because JSDOM does not suppress
+		// character insertion for Meta-modified keys as real browsers do.
+		fireEvent.keyDown(composerTextArea, { key: 'r', metaKey: true });
 		expect(spySendIsWriting).not.toHaveBeenCalled();
 	});
 
@@ -788,6 +789,14 @@ describe('MessageComposer - isWriting events', () => {
 		await user.click(composerTextArea);
 		await user.keyboard('{Control>}c{/Control}');
 		expect(spySendIsWriting).not.toHaveBeenCalled();
+	});
+
+	test('sendIsWriting is called when typing a normal character', async () => {
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, 'a');
+		expect(spySendIsWriting).toHaveBeenCalled();
 	});
 });
 
