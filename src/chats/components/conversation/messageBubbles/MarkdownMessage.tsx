@@ -1,10 +1,10 @@
 /*
- * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2026 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Icon, Tooltip } from '@zextras/carbonio-design-system';
@@ -158,16 +158,24 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 	const codeCopiedLabel = t('feedback.codeCopied', 'Copied!');
 
 	const [copied, setCopied] = useState(false);
+	const resetTimer = useRef<ReturnType<typeof setTimeout>>();
 
-	const handleCopy = useCallback((): void => {
-		navigator.clipboard
-			?.writeText(code)
-			.then(() => {
-				setCopied(true);
-				setTimeout(() => setCopied(false), 2000);
-			})
-			.catch(() => undefined);
-	}, [code]);
+	useEffect(() => (): void => clearTimeout(resetTimer.current), []);
+
+	const handleCopy = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>): void => {
+			e.stopPropagation();
+			navigator.clipboard
+				?.writeText(code)
+				.then(() => {
+					setCopied(true);
+					clearTimeout(resetTimer.current);
+					resetTimer.current = setTimeout(() => setCopied(false), 2000);
+				})
+				.catch(() => undefined);
+		},
+		[code]
+	);
 
 	return (
 		<CodeBlockWrapper>
@@ -204,7 +212,13 @@ function renderInline(tokens: InlineToken[]): React.ReactNode {
 				return <code key={key}>{token.value}</code>;
 			case 'link':
 				return (
-					<a key={key} href={token.href} target="_blank" rel="noopener noreferrer">
+					<a
+						key={key}
+						href={token.href}
+						target="_blank"
+						rel="noopener noreferrer"
+						onClick={(e): void => e.stopPropagation()}
+					>
 						{token.text}
 					</a>
 				);
