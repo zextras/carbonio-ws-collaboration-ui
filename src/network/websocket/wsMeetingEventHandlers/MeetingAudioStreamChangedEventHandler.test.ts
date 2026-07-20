@@ -77,11 +77,11 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
-		const closeRtpSender = vi.spyOn(
+		const muteAudioTrack = vi.spyOn(
 			activeMeeting!.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,
-			'closeRtpSenderTrack'
+			'muteAudioTrack'
 		);
 		meetingAudioStreamChangedEventHandler(event);
-		expect(closeRtpSender).toHaveBeenCalled();
+		expect(muteAudioTrack).toHaveBeenCalled();
 	});
 });

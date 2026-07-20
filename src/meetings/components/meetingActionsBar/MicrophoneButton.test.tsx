@@ -16,7 +16,6 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import * as UserMediaManager from '../../../utils/UserMediaManager';
 
 const buttonDataTestId = 'microphone-button';
 
@@ -102,13 +101,10 @@ describe('Microphone button', () => {
 
 	test('Microphone button is disabled while enabling audio and re-enabled when stream status updates', async () => {
 		activeMeetingSetup(false);
-		vi.spyOn(UserMediaManager, 'getAudioStream').mockResolvedValue({} as MediaStream);
 		vi.spyOn(api, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
 
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
-		vi.spyOn(bidirectionalAudioConn!, 'updateLocalStreamTrack').mockResolvedValue(
-			{} as MediaStreamTrack
-		);
+		vi.spyOn(bidirectionalAudioConn!, 'unmuteAudioTrack').mockResolvedValue();
 
 		const { user } = routerContextSetup(microphoneButtonComponent, { meetingId: mockMeeting.id });
 		const microphoneButton = await screen.findByTestId(buttonDataTestId);
@@ -125,13 +121,10 @@ describe('Microphone button', () => {
 
 	test('Microphone button is re-enabled when updateAudioStreamStatus fails on enabling', async () => {
 		activeMeetingSetup(false);
-		vi.spyOn(UserMediaManager, 'getAudioStream').mockResolvedValue({} as MediaStream);
 		vi.spyOn(api, 'updateAudioStreamStatus').mockRejectedValue(new Error('Controlled error'));
 
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
-		vi.spyOn(bidirectionalAudioConn!, 'updateLocalStreamTrack').mockResolvedValue(
-			{} as MediaStreamTrack
-		);
+		vi.spyOn(bidirectionalAudioConn!, 'unmuteAudioTrack').mockResolvedValue();
 
 		const { user } = routerContextSetup(microphoneButtonComponent, { meetingId: mockMeeting.id });
 		const microphoneButton = await screen.findByTestId(buttonDataTestId);
@@ -146,7 +139,7 @@ describe('Microphone button', () => {
 		vi.spyOn(api, 'updateAudioStreamStatus').mockRejectedValue(new Error('Controlled error'));
 
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
-		vi.spyOn(bidirectionalAudioConn!, 'closeRtpSenderTrack').mockImplementation(() => {});
+		vi.spyOn(bidirectionalAudioConn!, 'muteAudioTrack').mockImplementation(() => {});
 
 		const { user } = routerContextSetup(microphoneButtonComponent, { meetingId: mockMeeting.id });
 		const microphoneButton = await screen.findByTestId(buttonDataTestId);

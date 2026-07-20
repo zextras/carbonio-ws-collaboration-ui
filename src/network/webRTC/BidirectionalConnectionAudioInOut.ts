@@ -62,7 +62,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 					this.updateLocalStreamTrack(stream).then((track) => {
 						// If starting muted, disable the track but keep it alive
 						// to maintain Bluetooth HFP profile
-						if (!this.initialAudioStatus) {
+						if (!this.initialAudioStatus && track) {
 							track.enabled = false;
 						}
 					});

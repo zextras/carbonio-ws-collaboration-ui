@@ -62,7 +62,9 @@ describe('BidirectionalConnectionAudioInOut', () => {
 		const updateAudioStreamStatusSpy = vi
 			.spyOn(MeetingsApi, 'updateAudioStreamStatus')
 			.mockResolvedValue({} as Response);
-		const getAudioStreamSpy = vi.spyOn(UserMediaManager, 'getAudioStream');
+		const getAudioStreamSpy = vi
+			.spyOn(UserMediaManager, 'getAudioStream')
+			.mockResolvedValue(mockAudioStream);
 
 		// eslint-disable-next-line no-new
 		new BidirectionalConnectionAudioInOut(meetingId, false);
@@ -70,7 +72,8 @@ describe('BidirectionalConnectionAudioInOut', () => {
 
 		expect(createAudioOfferSpy).toHaveBeenCalledWith(meetingId, 'sdp');
 		expect(updateAudioStreamStatusSpy).toHaveBeenCalledWith(meetingId, false);
-		expect(getAudioStreamSpy).not.toHaveBeenCalled();
+		// Audio stream is always acquired to keep Bluetooth HFP profile active
+		expect(getAudioStreamSpy).toHaveBeenCalled();
 	});
 
 	test('Acquires the audio stream on construction when audio is enabled', async () => {

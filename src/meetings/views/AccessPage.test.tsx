@@ -31,6 +31,13 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import * as UserMediaManager from '../../utils/UserMediaManager';
+
+// Prevent async state updates from BidirectionalConnectionAudioInOut.init()
+// leaking outside act() when meetingConnection() is called
+beforeEach(() => {
+	vi.spyOn(UserMediaManager, 'getAudioStream').mockRejectedValue(new Error('Controlled error'));
+});
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
