@@ -24,6 +24,8 @@ const roomId = 'room-1';
 const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
 const AUG_CREATED_AT = '2021-08-15T10:00:00Z';
 const AUG_TEST_ID = 'mediaGalleryAttachmentClickArea-aug';
+const A1_TEST_ID = 'mediaGalleryAttachmentClickArea-a1';
+const MAY_CREATED_AT = '2021-05-10T10:00:00Z';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
 	id,
@@ -58,10 +60,7 @@ describe('MediaGalleryTab', () => {
 
 	test('renders attachments grouped by month-year header', async () => {
 		mockedGetRoomAttachments.mockResolvedValue({
-			attachments: [
-				buildAttachment('aug', AUG_CREATED_AT),
-				buildAttachment('may', '2021-05-10T10:00:00Z')
-			],
+			attachments: [buildAttachment('aug', AUG_CREATED_AT), buildAttachment('may', MAY_CREATED_AT)],
 			cursor: undefined
 		});
 
@@ -73,32 +72,57 @@ describe('MediaGalleryTab', () => {
 		expect(screen.getByTestId('mediaGalleryMonthHeader-May 2021')).toBeInTheDocument();
 	});
 
-	test('renders a divider between consecutive month groups but not before the first', async () => {
-		mockedGetRoomAttachments.mockResolvedValue({
-			attachments: [
-				buildAttachment('aug', AUG_CREATED_AT),
-				buildAttachment('may', '2021-05-10T10:00:00Z')
-			],
+	test('the Docs list renders a divider between consecutive month groups but not before the first', async () => {
+		mockedGetRoomAttachments.mockResolvedValueOnce({ attachments: [], cursor: undefined });
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('aug', AUG_CREATED_AT), buildAttachment('may', MAY_CREATED_AT)],
 			cursor: undefined
 		});
 
-		setup(<MediaGalleryTab roomId={roomId} />);
+		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+		await screen.findByTestId('mediaGalleryEmptyState');
+		await user.click(screen.getByTestId('mediaGalleryCategory-docs'));
 
 		await screen.findByTestId(AUG_TEST_ID);
 		const dividers = screen.getAllByTestId(/^mediaGalleryMonthDivider-/);
 		expect(dividers).toHaveLength(1);
 	});
 
-	test('does not render any month divider when there is a single group', async () => {
+	test('the grid renders month headers but no dividers', async () => {
 		mockedGetRoomAttachments.mockResolvedValue({
-			attachments: [buildAttachment('aug', AUG_CREATED_AT)],
+			attachments: [buildAttachment('aug', AUG_CREATED_AT), buildAttachment('may', MAY_CREATED_AT)],
 			cursor: undefined
 		});
 
 		setup(<MediaGalleryTab roomId={roomId} />);
 
 		await screen.findByTestId(AUG_TEST_ID);
+		expect(screen.getByTestId('mediaGalleryMonthHeader-August 2021')).toBeInTheDocument();
 		expect(screen.queryAllByTestId(/^mediaGalleryMonthDivider-/)).toHaveLength(0);
+	});
+
+	test('shows the total counter chip when the response carries a total', async () => {
+		mockedGetRoomAttachments.mockResolvedValue({
+			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
+			cursor: undefined,
+			total: 4758
+		});
+
+		setup(<MediaGalleryTab roomId={roomId} />);
+
+		expect(await screen.findByTestId('mediaGalleryTotalCounter')).toHaveTextContent('4758 images');
+	});
+
+	test('hides the total counter chip when the response has no total', async () => {
+		mockedGetRoomAttachments.mockResolvedValue({
+			attachments: [buildAttachment('a1', SAMPLE_CREATED_AT)],
+			cursor: undefined
+		});
+
+		setup(<MediaGalleryTab roomId={roomId} />);
+
+		await screen.findByTestId(A1_TEST_ID);
+		expect(screen.queryByTestId('mediaGalleryTotalCounter')).not.toBeInTheDocument();
 	});
 
 	test('hides the load-more trigger when no further pages are available', async () => {
@@ -109,7 +133,7 @@ describe('MediaGalleryTab', () => {
 
 		setup(<MediaGalleryTab roomId={roomId} />);
 
-		await screen.findByTestId('mediaGalleryAttachmentClickArea-a1');
+		await screen.findByTestId(A1_TEST_ID);
 		expect(screen.queryByTestId('list-bottom-element')).not.toBeInTheDocument();
 	});
 
@@ -122,7 +146,7 @@ describe('MediaGalleryTab', () => {
 		});
 
 		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
-		await screen.findByTestId('mediaGalleryAttachmentClickArea-a1');
+		await screen.findByTestId(A1_TEST_ID);
 
 		mockedGetRoomAttachments.mockResolvedValueOnce({
 			attachments: [buildAttachment('mine-1', '2024-02-01T10:00:00Z')],

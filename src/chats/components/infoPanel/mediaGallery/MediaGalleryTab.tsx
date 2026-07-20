@@ -8,11 +8,13 @@ import React, { FC, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
+import { AttachmentGrid } from './AttachmentGrid';
 import { AttachmentList } from './AttachmentList';
 import { AttachmentListSkeleton } from './AttachmentListSkeleton';
 import { CategoryTabs } from './CategoryTabs';
 import { EmptyAttachmentList } from './EmptyAttachmentList';
 import { SentByFilterButton } from './SentByFilterButton';
+import { TotalCounterChip } from './TotalCounterChip';
 import { useMediaGalleryAttachments } from '../../../../hooks/useMediaGalleryAttachments';
 import { MimeTypeCategory } from '../../../../types/network/models/attachmentTypes';
 
@@ -22,11 +24,13 @@ type MediaGalleryTabProps = {
 
 export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 	const [category, setCategory] = useState<MimeTypeCategory>('IMAGES');
-	const { attachments, isInitialized, isLoading, hasMore, loadMore, filterKey } =
+	const { attachments, isInitialized, isLoading, hasMore, loadMore, total, filterKey } =
 		useMediaGalleryAttachments(roomId, category);
 
 	const showInitialSkeleton = !isInitialized && isLoading;
 	const showEmptyState = isInitialized && attachments.length === 0;
+	// Documents keep the detailed list; images and videos use the 4-column grid.
+	const ContentComponent = category === 'DOCUMENTS' ? AttachmentList : AttachmentGrid;
 
 	return (
 		<Container
@@ -46,11 +50,16 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 				<CategoryTabs category={category} onCategoryChange={setCategory} />
 				<SentByFilterButton roomId={roomId} />
 			</Container>
-			<Container mainAlignment="flex-start" crossAlignment="stretch" minHeight={0}>
+			<Container
+				mainAlignment="flex-start"
+				crossAlignment="stretch"
+				minHeight={0}
+				style={{ position: 'relative' }}
+			>
 				{showInitialSkeleton && <AttachmentListSkeleton />}
-				{showEmptyState && <EmptyAttachmentList />}
+				{showEmptyState && <EmptyAttachmentList category={category} />}
 				{!showInitialSkeleton && !showEmptyState && (
-					<AttachmentList
+					<ContentComponent
 						key={filterKey}
 						attachments={attachments}
 						hasMore={hasMore}
@@ -58,6 +67,7 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 						loadMore={loadMore}
 					/>
 				)}
+				<TotalCounterChip total={total} category={category} />
 			</Container>
 		</Container>
 	);
