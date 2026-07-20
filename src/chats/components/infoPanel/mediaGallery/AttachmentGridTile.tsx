@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Dropdown, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { MediaGallerySelectionContext } from './MediaGallerySelectionContext';
 import useAttachmentActions from './useAttachmentActions';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getVideoThumbnailURL } from '../../../../network';
@@ -29,13 +30,19 @@ const TileSlot = styled.div`
 	aspect-ratio: 1 / 1;
 `;
 
-const TileWrapper = styled.div`
+const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 	position: relative;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
 	cursor: pointer;
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
+	.selectionCheckbox {
+		visibility: ${({ $selectionMode }): string => ($selectionMode ? 'visible' : 'hidden')};
+	}
+	&:hover .selectionCheckbox {
+		visibility: visible;
+	}
 `;
 
 const TileImage = styled.img`
@@ -53,6 +60,19 @@ const VideoBadge = styled.div`
 	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
 `;
 
+const SelectionCheckbox = styled.div<{ $selected: boolean }>`
+	position: absolute;
+	top: 0.25rem;
+	left: 0.25rem;
+	z-index: 1;
+	display: flex;
+	cursor: pointer;
+	border-radius: 0.125rem;
+	background-color: ${({ $selected, theme }): string =>
+		$selected ? theme.palette.gray6.regular : 'transparent'};
+	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
+`;
+
 type AttachmentGridTileProps = {
 	attachment: Attachment;
 	// Whether the row containing this tile has entered the viewport at least once.
@@ -65,6 +85,8 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 	const downloadTooltip = t('action.download', 'Download');
 
 	const { contextMenuItems, modals } = useAttachmentActions(attachment);
+	const { isSelectionMode, isSelected, toggleSelection } = useContext(MediaGallerySelectionContext);
+	const selected = isSelected(attachment.id);
 
 	const isVideo = isAttachmentVideo(attachment.mimeType);
 	const thumbnailUrl = isVideo
@@ -85,21 +107,36 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 	const canPreview = isPreviewSupported(attachment.mimeType);
 	const { openFromGallery } = usePreviewNavigation();
 	const onTileClick = useCallback(() => {
-		if (canPreview) {
+		if (isSelectionMode) {
+			toggleSelection(attachment);
+		} else if (canPreview) {
 			openFromGallery(attachment.roomId, attachment);
 		} else {
 			downloadAttachment(attachment.id, attachment.name);
 		}
-	}, [attachment, canPreview, openFromGallery]);
+	}, [attachment, canPreview, isSelectionMode, openFromGallery, toggleSelection]);
+
+	const onCheckboxClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
 
 	const showImage = hasBeenVisible && thumbnailUrl !== undefined && !thumbnailFailed;
 
 	return (
 		<TileSlot>
-			<Tooltip label={canPreview ? previewTooltip : downloadTooltip} placement="top">
+			<Tooltip
+				label={canPreview ? previewTooltip : downloadTooltip}
+				placement="top"
+				disabled={isSelectionMode}
+			>
 				<Dropdown
 					items={contextMenuItems}
 					contextMenu
+					disabled={isSelectionMode}
 					disableRestoreFocus
 					display="block"
 					style={{ width: '100%', height: '100%' }}
@@ -109,6 +146,7 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 						onClick={onTileClick}
 						role="button"
 						aria-label={attachment.name}
+						$selectionMode={isSelectionMode}
 					>
 						{showImage ? (
 							<TileImage src={thumbnailUrl} alt={attachment.name} onError={onThumbnailError} />
@@ -127,6 +165,20 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 								<Icon icon="Video" size="small" color="gray6" />
 							</VideoBadge>
 						)}
+						<SelectionCheckbox
+							className="selectionCheckbox"
+							data-testid={`mediaGallerySelect-${attachment.id}`}
+							onClick={onCheckboxClick}
+							$selected={selected}
+							role="checkbox"
+							aria-checked={selected}
+						>
+							<Icon
+								icon={selected ? 'CheckmarkSquare' : 'Square'}
+								size="medium"
+								color={selected ? 'primary' : 'gray6'}
+							/>
+						</SelectionCheckbox>
 					</TileWrapper>
 				</Dropdown>
 			</Tooltip>

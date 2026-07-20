@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import {
@@ -12,6 +12,7 @@ import {
 	Button,
 	Container,
 	Dropdown,
+	Icon,
 	ListItem,
 	Row,
 	Text,
@@ -19,6 +20,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { MediaGallerySelectionContext } from './MediaGallerySelectionContext';
 import useAttachmentActions from './useAttachmentActions';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
@@ -61,6 +63,32 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 	cursor: ${(props): string => (props.clickable ? 'pointer' : 'default')};
 `;
 
+// Swaps the file icon with the selection checkbox on hover and while the
+// selection mode is active.
+const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
+	flex-shrink: 0;
+	.fileAvatar {
+		display: ${({ $selectionMode }): string => ($selectionMode ? 'none' : 'block')};
+	}
+	.selectionCheckbox {
+		display: ${({ $selectionMode }): string => ($selectionMode ? 'flex' : 'none')};
+	}
+	&:hover .fileAvatar {
+		display: none;
+	}
+	&:hover .selectionCheckbox {
+		display: flex;
+	}
+`;
+
+const SelectionCheckbox = styled.div`
+	width: 2.5rem;
+	height: 2.5rem;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+`;
+
 const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
@@ -75,6 +103,8 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 
 	const { canDelete, openDeleteModal, canForward, openForwardModal, contextMenuItems, modals } =
 		useAttachmentActions(attachment);
+	const { isSelectionMode, isSelected, toggleSelection } = useContext(MediaGallerySelectionContext);
+	const selected = isSelected(attachment.id);
 
 	const senderLabel = sessionId === attachment.userId ? youLabel : senderName || unknownUserLabel;
 	const sizeLabel = getAttachmentSize(attachment.size);
@@ -93,6 +123,22 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	const onPreviewClick = useCallback(() => {
 		openFromGallery(attachment.roomId, attachment);
 	}, [attachment, openFromGallery]);
+
+	const onRowClick = useCallback(() => {
+		if (isSelectionMode) {
+			toggleSelection(attachment);
+		} else if (canPreview) {
+			onPreviewClick();
+		}
+	}, [attachment, canPreview, isSelectionMode, onPreviewClick, toggleSelection]);
+
+	const onCheckboxClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
 
 	const onDeleteClick = useCallback(
 		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -119,28 +165,50 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	);
 
 	return (
-		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview}>
-			<Dropdown items={contextMenuItems} contextMenu disableRestoreFocus display="block">
+		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview || isSelectionMode}>
+			<Dropdown
+				items={contextMenuItems}
+				contextMenu
+				disabled={isSelectionMode}
+				disableRestoreFocus
+				display="block"
+			>
 				<CustomContainer
 					data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
 					orientation="horizontal"
 					mainAlignment="flex-start"
 					crossAlignment="center"
-					clickable={canPreview}
+					clickable={canPreview || isSelectionMode}
 					padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
 					gap="0.5rem"
 					height="fit"
-					onClick={canPreview ? onPreviewClick : undefined}
+					onClick={canPreview || isSelectionMode ? onRowClick : undefined}
 				>
-					<FileAvatar
-						data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
-						icon={getPinAttachmentIcon(attachment.mimeType)}
-						label={attachment.name}
-						shape="square"
-						background="gray3"
-						color={getPinAttachmentColor(attachment.mimeType)}
-						picture={pictureUrl}
-					/>
+					<AvatarSlot $selectionMode={isSelectionMode}>
+						<FileAvatar
+							className="fileAvatar"
+							data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
+							icon={getPinAttachmentIcon(attachment.mimeType)}
+							label={attachment.name}
+							shape="square"
+							background="gray3"
+							color={getPinAttachmentColor(attachment.mimeType)}
+							picture={pictureUrl}
+						/>
+						<SelectionCheckbox
+							className="selectionCheckbox"
+							data-testid={`mediaGallerySelect-${attachment.id}`}
+							onClick={onCheckboxClick}
+							role="checkbox"
+							aria-checked={selected}
+						>
+							<Icon
+								icon={selected ? 'CheckmarkSquare' : 'Square'}
+								size="large"
+								color={selected ? 'primary' : 'gray0'}
+							/>
+						</SelectionCheckbox>
+					</AvatarSlot>
 					<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
 						<Container
 							orientation="vertical"
