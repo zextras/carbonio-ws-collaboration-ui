@@ -8,9 +8,12 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 
 import { useSnackbar } from '@zextras/carbonio-design-system';
 import { PreviewItem, PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
+import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
+import ForwardMessageModal from './conversation/forwardModal/ForwardMessageModal';
 import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachmentModal';
+import { buildAttachmentForwardMessages } from './infoPanel/mediaGallery/useAttachmentForward';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
 import { xmppClient } from '../../network/xmpp/XMPPClient';
@@ -23,6 +26,25 @@ import useStore from '../../store/Store';
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
+
+const buildOrderedItems = (
+	session: PreviewNavigationSession | null,
+	sessionId: string | undefined,
+	t: TFunction,
+	onDelete: (id: string) => void,
+	onForward: (id: string) => void
+): Array<PreviewItem> => {
+	if (!session) return [];
+	const items = session.attachments.reduce<Array<PreviewItem>>((acc, att) => {
+		const item = buildPreviewItem(att, t, {
+			onDelete: att.userId === sessionId ? onDelete : undefined,
+			onForward: att.stanzaId !== undefined ? onForward : undefined
+		});
+		if (item) acc.push(item);
+		return acc;
+	}, []);
+	return session.source === 'chat' ? [...items].reverse() : items;
+};
 
 const shouldLoadMore = (
 	session: PreviewNavigationSession,
@@ -71,6 +93,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 	);
 
 	const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+	const [pendingForwardId, setPendingForwardId] = useState<string | null>(null);
 
 	const attachmentsById = useMemo(() => {
 		const map = new Map<string, Attachment>();
@@ -78,20 +101,13 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		return map;
 	}, [session?.attachments]);
 
-	const orderedItems = useMemo<Array<PreviewItem>>(() => {
-		if (!session) return [];
-		const items = session.attachments.reduce<Array<PreviewItem>>((acc, att) => {
-			const canDelete = att.userId === sessionId;
-			const item = buildPreviewItem(att, t, {
-				onDelete: canDelete ? (id): void => setPendingDeleteId(id) : undefined
-			});
-			if (item) acc.push(item);
-			return acc;
-		}, []);
-		return session.source === 'chat' ? [...items].reverse() : items;
-	}, [session, sessionId, t]);
+	const orderedItems = useMemo<Array<PreviewItem>>(
+		() => buildOrderedItems(session, sessionId, t, setPendingDeleteId, setPendingForwardId),
+		[session, sessionId, t]
+	);
 
 	const closeDeleteModal = useCallback(() => setPendingDeleteId(null), []);
+	const closeForwardModal = useCallback(() => setPendingForwardId(null), []);
 
 	const confirmDelete = useCallback(() => {
 		if (!pendingDeleteId) return;
@@ -251,8 +267,21 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 		[]
 	);
 
-	if (pendingDeleteId === null) return null;
-	return <DeleteAttachmentModal open onConfirm={confirmDelete} onClose={closeDeleteModal} />;
+	if (pendingDeleteId !== null) {
+		return <DeleteAttachmentModal open onConfirm={confirmDelete} onClose={closeDeleteModal} />;
+	}
+	const forwardTarget = pendingForwardId ? attachmentsById.get(pendingForwardId) : undefined;
+	if (forwardTarget) {
+		return (
+			<ForwardMessageModal
+				open
+				onClose={closeForwardModal}
+				roomId={forwardTarget.roomId}
+				messagesToForward={buildAttachmentForwardMessages(forwardTarget)}
+			/>
+		);
+	}
+	return null;
 };
 
 export default PreviewNavigationManager;

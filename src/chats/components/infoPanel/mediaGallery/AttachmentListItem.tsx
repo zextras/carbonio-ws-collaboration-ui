@@ -11,6 +11,7 @@ import {
 	Avatar,
 	Button,
 	Container,
+	Dropdown,
 	ListItem,
 	Row,
 	Text,
@@ -18,8 +19,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { DeleteAttachmentModal } from './DeleteAttachmentModal';
-import useDeleteAttachment from './useDeleteAttachment';
+import useAttachmentActions from './useAttachmentActions';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -66,14 +66,15 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
 	const deleteTooltip = t('action.delete', 'Delete');
+	const forwardTooltip = t('action.forward', 'Forward');
 	const downloadTooltip = t('action.download', 'Download');
 	const previewTooltip = t('action.preview', 'Preview');
 
 	const sessionId = useStore(getUserId);
 	const senderName = useStore((store) => getUserName(store, attachment.userId));
 
-	const { canDelete, modalOpen, openModal, closeModal, confirmDelete } =
-		useDeleteAttachment(attachment);
+	const { canDelete, openDeleteModal, canForward, openForwardModal, contextMenuItems, modals } =
+		useAttachmentActions(attachment);
 
 	const senderLabel = sessionId === attachment.userId ? youLabel : senderName || unknownUserLabel;
 	const sizeLabel = getAttachmentSize(attachment.size);
@@ -96,9 +97,17 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	const onDeleteClick = useCallback(
 		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 			e.stopPropagation();
-			openModal();
+			openDeleteModal();
 		},
-		[openModal]
+		[openDeleteModal]
+	);
+
+	const onForwardClick = useCallback(
+		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+			e.stopPropagation();
+			openForwardModal();
+		},
+		[openForwardModal]
 	);
 
 	const onDownloadClick = useCallback(
@@ -111,72 +120,85 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 
 	return (
 		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview}>
-			<CustomContainer
-				data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
-				orientation="horizontal"
-				mainAlignment="flex-start"
-				crossAlignment="center"
-				clickable={canPreview}
-				padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
-				gap="0.5rem"
-				height="fit"
-				onClick={canPreview ? onPreviewClick : undefined}
-			>
-				<FileAvatar
-					data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
-					icon={getPinAttachmentIcon(attachment.mimeType)}
-					label={attachment.name}
-					shape="square"
-					background="gray3"
-					color={getPinAttachmentColor(attachment.mimeType)}
-					picture={pictureUrl}
-				/>
-				<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
-					<Container
-						orientation="vertical"
-						mainAlignment="center"
-						crossAlignment="flex-start"
-						minWidth={0}
-					>
-						<Tooltip overflowTooltip label={attachment.name}>
-							<Text size="small" overflow="ellipsis" lineHeight={1}>
-								{attachment.name}
-							</Text>
+			<Dropdown items={contextMenuItems} contextMenu disableRestoreFocus display="block">
+				<CustomContainer
+					data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					crossAlignment="center"
+					clickable={canPreview}
+					padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
+					gap="0.5rem"
+					height="fit"
+					onClick={canPreview ? onPreviewClick : undefined}
+				>
+					<FileAvatar
+						data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
+						icon={getPinAttachmentIcon(attachment.mimeType)}
+						label={attachment.name}
+						shape="square"
+						background="gray3"
+						color={getPinAttachmentColor(attachment.mimeType)}
+						picture={pictureUrl}
+					/>
+					<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
+						<Container
+							orientation="vertical"
+							mainAlignment="center"
+							crossAlignment="flex-start"
+							minWidth={0}
+						>
+							<Tooltip overflowTooltip label={attachment.name}>
+								<Text size="small" overflow="ellipsis" lineHeight={1}>
+									{attachment.name}
+								</Text>
+							</Tooltip>
+							<Tooltip overflowTooltip label={subline}>
+								<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
+									{subline}
+								</Text>
+							</Tooltip>
+						</Container>
+					</Row>
+					{canDelete && (
+						<Tooltip label={deleteTooltip} placement="top">
+							<Button
+								data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+								size="large"
+								icon="Trash2Outline"
+								type="ghost"
+								color="error"
+								onClick={onDeleteClick}
+							/>
 						</Tooltip>
-						<Tooltip overflowTooltip label={subline}>
-							<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
-								{subline}
-							</Text>
+					)}
+					{canForward && (
+						<Tooltip label={forwardTooltip} placement="top">
+							<Button
+								data-testid={`mediaGalleryAttachmentForward-${attachment.id}`}
+								aria-label={forwardTooltip}
+								size="large"
+								icon="Forward"
+								type="ghost"
+								color="gray0"
+								onClick={onForwardClick}
+							/>
 						</Tooltip>
-					</Container>
-				</Row>
-				{canDelete && (
-					<Tooltip label={deleteTooltip} placement="top">
+					)}
+					<Tooltip label={downloadTooltip} placement="top">
 						<Button
-							data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+							data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
+							aria-label={downloadTooltip}
 							size="large"
-							icon="Trash2Outline"
+							icon="DownloadOutline"
 							type="ghost"
-							color="error"
-							onClick={onDeleteClick}
+							color="gray0"
+							onClick={onDownloadClick}
 						/>
 					</Tooltip>
-				)}
-				<Tooltip label={downloadTooltip} placement="top">
-					<Button
-						data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
-						aria-label={downloadTooltip}
-						size="large"
-						icon="DownloadOutline"
-						type="ghost"
-						color="gray0"
-						onClick={onDownloadClick}
-					/>
-				</Tooltip>
-				{modalOpen && (
-					<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
-				)}
-			</CustomContainer>
+					{modals}
+				</CustomContainer>
+			</Dropdown>
 		</Tooltip>
 	);
 };

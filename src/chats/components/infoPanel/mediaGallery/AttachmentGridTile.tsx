@@ -7,9 +7,10 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
-import { Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Dropdown, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import useAttachmentActions from './useAttachmentActions';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getVideoThumbnailURL } from '../../../../network';
 import { Attachment } from '../../../../types/network/models/attachmentTypes';
@@ -21,10 +22,17 @@ import {
 	isPreviewSupported
 } from '../../../../utils/attachmentUtils';
 
-const TileWrapper = styled.div`
-	position: relative;
+// Sizing lives on the slot so the tile keeps the 4-column layout even when
+// wrapped by the contextual menu dropdown.
+const TileSlot = styled.div`
 	width: calc((100% - 3 * 0.125rem) / 4);
 	aspect-ratio: 1 / 1;
+`;
+
+const TileWrapper = styled.div`
+	position: relative;
+	width: 100%;
+	height: 100%;
 	overflow: hidden;
 	cursor: pointer;
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
@@ -56,6 +64,8 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 	const previewTooltip = t('action.preview', 'Preview');
 	const downloadTooltip = t('action.download', 'Download');
 
+	const { contextMenuItems, modals } = useAttachmentActions(attachment);
+
 	const isVideo = isAttachmentVideo(attachment.mimeType);
 	const thumbnailUrl = isVideo
 		? getVideoThumbnailURL(attachment.id, '0x0', ImageQuality.LOW)
@@ -85,31 +95,42 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 	const showImage = hasBeenVisible && thumbnailUrl !== undefined && !thumbnailFailed;
 
 	return (
-		<Tooltip label={canPreview ? previewTooltip : downloadTooltip} placement="top">
-			<TileWrapper
-				data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
-				onClick={onTileClick}
-				role="button"
-				aria-label={attachment.name}
-			>
-				{showImage ? (
-					<TileImage src={thumbnailUrl} alt={attachment.name} onError={onThumbnailError} />
-				) : (
-					<Container mainAlignment="center" crossAlignment="center" height="100%">
-						<Icon
-							data-testid={`mediaGalleryTileIcon-${attachment.id}`}
-							icon={isVideo ? 'Video' : 'Image'}
-							size="large"
-							color="secondary"
-						/>
-					</Container>
-				)}
-				{isVideo && (
-					<VideoBadge data-testid={`mediaGalleryVideoBadge-${attachment.id}`}>
-						<Icon icon="Video" size="small" color="gray6" />
-					</VideoBadge>
-				)}
-			</TileWrapper>
-		</Tooltip>
+		<TileSlot>
+			<Tooltip label={canPreview ? previewTooltip : downloadTooltip} placement="top">
+				<Dropdown
+					items={contextMenuItems}
+					contextMenu
+					disableRestoreFocus
+					display="block"
+					style={{ width: '100%', height: '100%' }}
+				>
+					<TileWrapper
+						data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
+						onClick={onTileClick}
+						role="button"
+						aria-label={attachment.name}
+					>
+						{showImage ? (
+							<TileImage src={thumbnailUrl} alt={attachment.name} onError={onThumbnailError} />
+						) : (
+							<Container mainAlignment="center" crossAlignment="center" height="100%">
+								<Icon
+									data-testid={`mediaGalleryTileIcon-${attachment.id}`}
+									icon={isVideo ? 'Video' : 'Image'}
+									size="large"
+									color="secondary"
+								/>
+							</Container>
+						)}
+						{isVideo && (
+							<VideoBadge data-testid={`mediaGalleryVideoBadge-${attachment.id}`}>
+								<Icon icon="Video" size="small" color="gray6" />
+							</VideoBadge>
+						)}
+					</TileWrapper>
+				</Dropdown>
+			</Tooltip>
+			{modals}
+		</TileSlot>
 	);
 };

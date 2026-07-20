@@ -19,7 +19,10 @@ import { Attachment } from '../types/network/models/attachmentTypes';
 export const buildPreviewItem = (
 	attachment: Attachment,
 	t: TFunction,
-	options?: { onDelete?: (attachmentId: string) => void }
+	options?: {
+		onDelete?: (attachmentId: string) => void;
+		onForward?: (attachmentId: string) => void;
+	}
 ): PreviewItem | null => {
 	const attachmentURL = getAttachmentURL(attachment.id, attachment.mimeType);
 	if (!attachmentURL) return null;
@@ -37,6 +40,16 @@ export const buildPreviewItem = (
 			downloadAttachment(attachment.id, attachment.name);
 		}
 	};
+	const onForward = options?.onForward;
+	const forwardAction = onForward && {
+		icon: 'Forward',
+		tooltipLabel: t('action.forward', 'Forward'),
+		id: 'Forward',
+		onClick: (ev: React.MouseEvent<HTMLButtonElement> | KeyboardEvent): void => {
+			ev.preventDefault();
+			onForward(attachment.id);
+		}
+	};
 	const onDelete = options?.onDelete;
 	const deleteAction = onDelete && {
 		icon: 'Trash2Outline',
@@ -47,7 +60,9 @@ export const buildPreviewItem = (
 			onDelete(attachment.id);
 		}
 	};
-	const actions = deleteAction ? [downloadAction, deleteAction] : [downloadAction];
+	const actions = [downloadAction];
+	if (forwardAction) actions.push(forwardAction);
+	if (deleteAction) actions.push(deleteAction);
 
 	const commonOptions = {
 		id: attachment.id,

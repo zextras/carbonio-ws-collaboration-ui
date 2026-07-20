@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { within } from '@testing-library/react';
+import { fireEvent, within } from '@testing-library/react';
 
 import { AttachmentGrid } from './AttachmentGrid';
 import useStore from '../../../../store/Store';
@@ -80,6 +80,16 @@ describe('AttachmentGrid', () => {
 		const { active } = useStore.getState().previewNavigation;
 		expect(active?.source).toBe('gallery');
 		expect(active?.openTargetId).toBe('a1');
+	});
+
+	test('right-click on a tile opens the contextual menu with download and forward', async () => {
+		const attachment = buildAttachment('a1', { stanzaId: 'stanza-1' });
+		setup(<AttachmentGrid attachments={[attachment]} {...gridProps} />);
+
+		fireEvent.contextMenu(screen.getByTestId('mediaGalleryAttachmentClickArea-a1'));
+
+		expect(await screen.findByText('Download')).toBeInTheDocument();
+		expect(screen.getByText('Forward')).toBeInTheDocument();
 	});
 
 	test('clicking a non-previewable tile does not open a preview session', async () => {

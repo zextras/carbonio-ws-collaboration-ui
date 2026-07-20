@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
@@ -78,6 +78,8 @@ const ghostUserId = 'ghost-user';
 const roomId = 'room-1';
 const STANZA_ID = 'stanza-123';
 const DELETE_BUTTON_TEST_ID = 'mediaGalleryAttachmentDelete-att-1';
+const FORWARD_BUTTON_TEST_ID = 'mediaGalleryAttachmentForward-att-1';
+const CLICK_AREA_TEST_ID = 'mediaGalleryAttachmentClickArea-att-1';
 const IMAGE_MIME_TYPE = 'image/png';
 const IMAGE_ICON_TEST_ID = 'icon: Image';
 
@@ -282,6 +284,41 @@ describe('AttachmentListItem', () => {
 		expect(
 			useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
 		).toHaveLength(1);
+	});
+
+	test('renders the forward button when the attachment has a stanzaId', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />);
+		expect(screen.getByTestId(FORWARD_BUTTON_TEST_ID)).toBeInTheDocument();
+	});
+
+	test('hides the forward button when the stanzaId is missing', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: undefined })} />);
+		expect(screen.queryByTestId(FORWARD_BUTTON_TEST_ID)).not.toBeInTheDocument();
+	});
+
+	test('clicking the forward button opens the forward modal and does not open the preview', async () => {
+		const { user } = setup(
+			<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />
+		);
+		await user.click(screen.getByTestId(FORWARD_BUTTON_TEST_ID));
+		expect(await screen.findByTestId('chip_input_forward_modal')).toBeInTheDocument();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
+	});
+
+	test('right-click opens the contextual menu with download and forward actions', async () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />);
+		fireEvent.contextMenu(screen.getByTestId(CLICK_AREA_TEST_ID));
+		expect(await screen.findByText('Download')).toBeInTheDocument();
+		expect(screen.getByText('Forward')).toBeInTheDocument();
+		expect(screen.queryByTestId('mediaGalleryCtxDelete-att-1')).not.toBeInTheDocument();
+	});
+
+	test('right-click shows the delete entry only for own attachments', async () => {
+		setup(
+			<AttachmentListItem attachment={buildAttachment({ userId: myUserId, stanzaId: STANZA_ID })} />
+		);
+		fireEvent.contextMenu(screen.getByTestId(CLICK_AREA_TEST_ID));
+		expect(await screen.findByTestId('mediaGalleryCtxDelete-att-1')).toBeInTheDocument();
 	});
 
 	test('renders the download button for attachments uploaded by other users', () => {

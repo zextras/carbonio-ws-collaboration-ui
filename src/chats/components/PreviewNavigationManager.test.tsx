@@ -431,6 +431,41 @@ describe('PreviewNavigationManager', () => {
 		expect(items[0].actions?.map((a: { id: string }) => a.id)).toEqual(['DownloadOutline']);
 	});
 
+	test('shows the forward action when the attachment has a stanzaId and opens the forward modal', async () => {
+		const handle = setupManager();
+		const session: PreviewNavigationSession = {
+			source: 'gallery',
+			roomId,
+			sortBy: 'created_at',
+			order: 'desc',
+			attachments: [buildAttachment('a-fwd', { userId: otherId, stanzaId: 'stanza-f' })],
+			hasMore: false,
+			isLoading: false
+		};
+
+		act(() => {
+			useStore.getState().startPreviewNavigation(session);
+		});
+
+		await waitFor(() => {
+			expect(handle.value.initPreview).toHaveBeenCalled();
+		});
+
+		const lastInit = vi.mocked(handle.value.initPreview).mock.calls.at(-1) ?? [];
+		const items = lastInit[0] as PreviewItem[];
+		expect(items[0].actions?.map((a: { id: string }) => a.id)).toEqual([
+			'DownloadOutline',
+			'Forward'
+		]);
+
+		const forwardAction = items[0].actions?.find((a: { id: string }) => a.id === 'Forward');
+		act(() => {
+			forwardAction?.onClick({ preventDefault: vi.fn() } as never);
+		});
+
+		expect(await screen.findByTestId('chip_input_forward_modal')).toBeInTheDocument();
+	});
+
 	test('confirming the delete modal calls the API, removes from both slices, and sends XMPP retraction', async () => {
 		const handle = setupManager();
 		mockedBulkDelete.mockResolvedValue({ successIds: ['a-mine'], failedIds: [] });
