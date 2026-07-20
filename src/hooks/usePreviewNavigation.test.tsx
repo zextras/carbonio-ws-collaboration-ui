@@ -50,12 +50,11 @@ describe('usePreviewNavigation', () => {
 		test('snapshots the current gallery state into the new session', () => {
 			const a1 = buildAttachment('a1');
 			const a2 = buildAttachment('a2');
-			useStore.getState().appendMediaGalleryPage(roomId, [a1, a2], 'cursor-x');
+			const mineFilter = { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' };
+			useStore.getState().setMediaGalleryActiveFilter(roomId, mineFilter);
 			useStore
 				.getState()
-				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
-			// setMediaGalleryFilter wipes attachments on filter change, so re-seed.
-			useStore.getState().appendMediaGalleryPage(roomId, [a1, a2], 'cursor-x');
+				.appendMediaGalleryPage(roomId, mineFilter, [a1, a2], undefined, 'cursor-x');
 
 			const { result } = renderHook(() => usePreviewNavigation());
 			act(() => {

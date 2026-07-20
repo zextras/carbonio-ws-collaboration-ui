@@ -19,7 +19,7 @@ type MediaGalleryTabProps = {
 };
 
 export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
-	const { attachments, isInitialized, isLoading, hasMore, loadMore } =
+	const { attachments, isInitialized, isLoading, hasMore, loadMore, filterKey } =
 		useMediaGalleryAttachments(roomId);
 
 	const showInitialSkeleton = !isInitialized && isLoading;
@@ -39,6 +39,7 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 				{showEmptyState && <EmptyAttachmentList />}
 				{!showInitialSkeleton && !showEmptyState && (
 					<AttachmentList
+						key={filterKey}
 						attachments={attachments}
 						hasMore={hasMore}
 						isLoading={isLoading}

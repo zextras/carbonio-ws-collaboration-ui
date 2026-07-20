@@ -6,16 +6,19 @@
 
 import { Attachment } from '../../types/network/models/attachmentTypes';
 import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
+import { getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
 import useStore from '../Store';
 import {
+	getMediaGalleryActiveFilter,
 	getMediaGalleryAttachments,
-	getMediaGalleryFilter,
 	getMediaGalleryHasMore,
 	getMediaGalleryIsInitialized,
-	getMediaGalleryIsLoading
+	getMediaGalleryIsLoading,
+	getMediaGalleryTotal
 } from './MediaGallerySelectors';
 
 const roomId = 'room-1';
+const FILTER_KEY = getMediaGalleryBucketKey(DEFAULT_MEDIA_GALLERY_FILTER);
 
 const buildAttachment = (id: string): Attachment => ({
 	id,
@@ -28,30 +31,40 @@ const buildAttachment = (id: string): Attachment => ({
 });
 
 describe('Media gallery selectors', () => {
-	test('return sane defaults when the room has no state yet', () => {
+	test('return sane defaults when the bucket does not exist yet', () => {
 		const store = useStore.getState();
-		expect(getMediaGalleryAttachments(store, 'missing')).toEqual([]);
-		expect(getMediaGalleryHasMore(store, 'missing')).toBe(true);
-		expect(getMediaGalleryIsLoading(store, 'missing')).toBe(false);
-		expect(getMediaGalleryIsInitialized(store, 'missing')).toBe(false);
-		expect(getMediaGalleryFilter(store, 'missing')).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
+		expect(getMediaGalleryAttachments(store, 'missing', FILTER_KEY)).toEqual([]);
+		expect(getMediaGalleryHasMore(store, 'missing', FILTER_KEY)).toBe(true);
+		expect(getMediaGalleryIsLoading(store, 'missing', FILTER_KEY)).toBe(false);
+		expect(getMediaGalleryIsInitialized(store, 'missing', FILTER_KEY)).toBe(false);
+		expect(getMediaGalleryTotal(store, 'missing', FILTER_KEY)).toBeUndefined();
+		expect(getMediaGalleryActiveFilter(store, 'missing')).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
 	});
 
-	test('reflect the populated room state', () => {
+	test('getMediaGalleryAttachments returns a stable reference while the bucket is missing', () => {
+		const store = useStore.getState();
+		expect(getMediaGalleryAttachments(store, 'missing', FILTER_KEY)).toBe(
+			getMediaGalleryAttachments(store, 'other-missing', FILTER_KEY)
+		);
+	});
+
+	test('reflect the populated bucket state', () => {
 		const att = buildAttachment('a1');
-		useStore.getState().appendMediaGalleryPage(roomId, [att], 'cursor-1');
-		const store = useStore.getState();
-		expect(getMediaGalleryAttachments(store, roomId)).toEqual([att]);
-		expect(getMediaGalleryHasMore(store, roomId)).toBe(true);
-		expect(getMediaGalleryIsInitialized(store, roomId)).toBe(true);
-		expect(getMediaGalleryFilter(store, roomId)).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
-	});
-
-	test('getMediaGalleryFilter returns the room filter once it has been set', () => {
 		useStore
 			.getState()
-			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+			.appendMediaGalleryPage(roomId, DEFAULT_MEDIA_GALLERY_FILTER, [att], 9, 'cursor-1');
 		const store = useStore.getState();
-		expect(getMediaGalleryFilter(store, roomId).userId).toBe('me');
+		expect(getMediaGalleryAttachments(store, roomId, FILTER_KEY)).toEqual([att]);
+		expect(getMediaGalleryHasMore(store, roomId, FILTER_KEY)).toBe(true);
+		expect(getMediaGalleryIsInitialized(store, roomId, FILTER_KEY)).toBe(true);
+		expect(getMediaGalleryTotal(store, roomId, FILTER_KEY)).toBe(9);
+	});
+
+	test('getMediaGalleryActiveFilter returns the room filter once it has been set', () => {
+		useStore
+			.getState()
+			.setMediaGalleryActiveFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
+		const store = useStore.getState();
+		expect(getMediaGalleryActiveFilter(store, roomId).userId).toBe('me');
 	});
 });

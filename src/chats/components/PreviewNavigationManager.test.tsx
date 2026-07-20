@@ -20,7 +20,11 @@ import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { screen, setup } from '../../tests/test-utils';
 import { Attachment } from '../../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
+import { getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
+
+const DEFAULT_BUCKET_KEY = getMediaGalleryBucketKey(DEFAULT_MEDIA_GALLERY_FILTER);
 
 vi.mock('../../network/apis/RoomsApi', () => ({
 	getRoomAttachments: vi.fn(),
@@ -435,7 +439,9 @@ describe('PreviewNavigationManager', () => {
 			.mockImplementation(() => undefined);
 
 		const att = buildAttachment('a-mine', { userId, stanzaId: 'stanza-1' });
-		useStore.getState().appendMediaGalleryPage(roomId, [att], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(roomId, DEFAULT_MEDIA_GALLERY_FILTER, [att], undefined, undefined);
 
 		const session: PreviewNavigationSession = {
 			source: 'gallery',
@@ -469,7 +475,9 @@ describe('PreviewNavigationManager', () => {
 			expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['a-mine']);
 		});
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		// Once the only remaining attachment is gone, the manager tears the session down.
 		await waitFor(() => {

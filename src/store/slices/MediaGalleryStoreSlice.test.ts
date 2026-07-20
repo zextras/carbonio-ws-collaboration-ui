@@ -5,102 +5,174 @@
  */
 
 import { Attachment } from '../../types/network/models/attachmentTypes';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
+import {
+	DEFAULT_MEDIA_GALLERY_FILTER,
+	MediaGalleryBucket,
+	MediaGalleryFilter
+} from '../../types/store/MediaGalleryTypes';
+import { getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
 import useStore from '../Store';
 
 const roomId = 'room-1';
 const UNKNOWN_ROOM_ID = 'unknown-room';
 
+const IMAGES_FILTER: MediaGalleryFilter = {
+	...DEFAULT_MEDIA_GALLERY_FILTER,
+	mimeTypeCategory: 'IMAGES'
+};
+
+const MINE_FILTER: MediaGalleryFilter = { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'user-1' };
+
 const buildAttachment = (overrides: Partial<Attachment> = {}): Attachment => ({
 	id: 'att-id',
-	name: 'file.txt',
+	name: 'file.png',
 	size: 1024,
-	mimeType: 'text/plain',
+	mimeType: 'image/png',
 	userId: 'user-1',
 	roomId,
 	createdAt: '2024-01-01T10:00:00Z',
 	...overrides
 });
 
+const getBucket = (filter: MediaGalleryFilter, room = roomId): MediaGalleryBucket | undefined =>
+	useStore.getState().mediaGallery[room]?.buckets[getMediaGalleryBucketKey(filter)];
+
 describe('Media gallery slice', () => {
-	test('appendMediaGalleryPage lazy-creates the room state with default filter', () => {
+	test('appendMediaGalleryPage lazy-creates the room state and the bucket', () => {
 		const att1 = buildAttachment({ id: 'a1' });
-		useStore.getState().appendMediaGalleryPage(roomId, [att1], 'cursor-1');
-		const state = useStore.getState().mediaGallery[roomId];
-		expect(state.attachments).toEqual([att1]);
-		expect(state.nextCursor).toBe('cursor-1');
-		expect(state.hasMore).toBe(true);
-		expect(state.isInitialized).toBe(true);
-		expect(state.isLoading).toBe(false);
-		expect(state.filter).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
-	});
-
-	test('appendMediaGalleryPage marks hasMore=false when no cursor is returned', () => {
-		const att1 = buildAttachment({ id: 'a1' });
-		const att2 = buildAttachment({ id: 'a2' });
-		useStore.getState().appendMediaGalleryPage(roomId, [att1], 'cursor-1');
-		useStore.getState().appendMediaGalleryPage(roomId, [att2], undefined);
-		const state = useStore.getState().mediaGallery[roomId];
-		expect(state.attachments.map((a) => a.id)).toEqual(['a1', 'a2']);
-		expect(state.nextCursor).toBeUndefined();
-		expect(state.hasMore).toBe(false);
-	});
-
-	test('setMediaGalleryLoading flips the loading flag and lazy-creates the room state', () => {
-		useStore.getState().setMediaGalleryLoading(roomId, true);
-		expect(useStore.getState().mediaGallery[roomId].isLoading).toBe(true);
-		useStore.getState().setMediaGalleryLoading(roomId, false);
-		expect(useStore.getState().mediaGallery[roomId].isLoading).toBe(false);
-	});
-
-	test('setMediaGalleryFilter applies the new filter and resets pagination state', () => {
-		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
 		useStore
 			.getState()
-			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
-		const state = useStore.getState().mediaGallery[roomId];
-		expect(state.filter.userId).toBe('me');
-		expect(state.attachments).toEqual([]);
-		expect(state.nextCursor).toBeUndefined();
-		expect(state.hasMore).toBe(true);
-		expect(state.isInitialized).toBe(false);
-		expect(state.isLoading).toBe(false);
+			.appendMediaGalleryPage(roomId, DEFAULT_MEDIA_GALLERY_FILTER, [att1], 7, 'cursor-1');
+		const bucket = getBucket(DEFAULT_MEDIA_GALLERY_FILTER);
+		expect(bucket?.attachments).toEqual([att1]);
+		expect(bucket?.filter).toEqual(DEFAULT_MEDIA_GALLERY_FILTER);
+		expect(bucket?.total).toBe(7);
+		expect(bucket?.nextCursor).toBe('cursor-1');
+		expect(bucket?.hasMore).toBe(true);
+		expect(bucket?.isInitialized).toBe(true);
+		expect(bucket?.isLoading).toBe(false);
+		expect(useStore.getState().mediaGallery[roomId].activeFilter).toEqual(
+			DEFAULT_MEDIA_GALLERY_FILTER
+		);
 	});
 
-	test('setMediaGalleryFilter is a no-op when the filter is unchanged', () => {
-		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
-		useStore.getState().setMediaGalleryFilter(roomId, DEFAULT_MEDIA_GALLERY_FILTER);
-		const state = useStore.getState().mediaGallery[roomId];
-		// pagination state was preserved because the filter did not change
-		expect(state.attachments).toHaveLength(1);
-		expect(state.nextCursor).toBe('cur-1');
-		expect(state.isInitialized).toBe(true);
-	});
-
-	test('removeMediaGalleryAttachment drops the attachment by id and preserves pagination', () => {
+	test('appendMediaGalleryPage accumulates pages and marks hasMore=false when no cursor is returned', () => {
 		useStore
 			.getState()
 			.appendMediaGalleryPage(
 				roomId,
-				[
-					buildAttachment({ id: 'a1' }),
-					buildAttachment({ id: 'a2' }),
-					buildAttachment({ id: 'a3' })
-				],
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a1' })],
+				2,
+				'cursor-1'
+			);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a2' })],
+				undefined,
+				undefined
+			);
+		const bucket = getBucket(DEFAULT_MEDIA_GALLERY_FILTER);
+		expect(bucket?.attachments.map((a) => a.id)).toEqual(['a1', 'a2']);
+		expect(bucket?.nextCursor).toBeUndefined();
+		expect(bucket?.hasMore).toBe(false);
+		// A response without total keeps the last known counter.
+		expect(bucket?.total).toBe(2);
+	});
+
+	test('pages fetched with different filters land in independent buckets', () => {
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a1' })],
+				2,
+				'cursor-1'
+			);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(roomId, IMAGES_FILTER, [buildAttachment({ id: 'a2' })], 1, undefined);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
+		expect(getBucket(IMAGES_FILTER)?.attachments.map((a) => a.id)).toEqual(['a2']);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.hasMore).toBe(true);
+		expect(getBucket(IMAGES_FILTER)?.hasMore).toBe(false);
+	});
+
+	test('setMediaGalleryLoading flips the loading flag of its bucket only', () => {
+		useStore.getState().setMediaGalleryLoading(roomId, DEFAULT_MEDIA_GALLERY_FILTER, true);
+		useStore.getState().setMediaGalleryLoading(roomId, IMAGES_FILTER, false);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.isLoading).toBe(true);
+		expect(getBucket(IMAGES_FILTER)?.isLoading).toBe(false);
+		useStore.getState().setMediaGalleryLoading(roomId, DEFAULT_MEDIA_GALLERY_FILTER, false);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.isLoading).toBe(false);
+	});
+
+	test('setMediaGalleryActiveFilter updates the filter and keeps every bucket cached', () => {
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a1' })],
+				1,
 				'cur-1'
 			);
-		useStore.getState().removeMediaGalleryAttachment(roomId, 'a2');
+		useStore.getState().setMediaGalleryActiveFilter(roomId, MINE_FILTER);
 		const state = useStore.getState().mediaGallery[roomId];
-		expect(state.attachments.map((a) => a.id)).toEqual(['a1', 'a3']);
-		expect(state.nextCursor).toBe('cur-1');
-		expect(state.hasMore).toBe(true);
+		expect(state.activeFilter.userId).toBe('user-1');
+		// The previously fetched bucket is untouched: switching back must not refetch.
+		const bucket = getBucket(DEFAULT_MEDIA_GALLERY_FILTER);
+		expect(bucket?.attachments).toHaveLength(1);
+		expect(bucket?.nextCursor).toBe('cur-1');
+		expect(bucket?.isInitialized).toBe(true);
+	});
+
+	test('setMediaGalleryActiveFilter is a no-op when the filter is unchanged', () => {
+		useStore.getState().setMediaGalleryActiveFilter(roomId, DEFAULT_MEDIA_GALLERY_FILTER);
+		const before = useStore.getState().mediaGallery[roomId];
+		useStore.getState().setMediaGalleryActiveFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER });
+		expect(useStore.getState().mediaGallery[roomId]).toBe(before);
+	});
+
+	test('removeMediaGalleryAttachment drops the attachment from every bucket and decrements totals', () => {
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a1' }), buildAttachment({ id: 'a2' })],
+				2,
+				'cur-1'
+			);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(roomId, IMAGES_FILTER, [buildAttachment({ id: 'a1' })], 1, undefined);
+		useStore.getState().removeMediaGalleryAttachment(roomId, 'a1');
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a2']);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(1);
+		expect(getBucket(IMAGES_FILTER)?.attachments).toEqual([]);
+		expect(getBucket(IMAGES_FILTER)?.total).toBe(0);
+		// Pagination of the buckets is preserved.
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.nextCursor).toBe('cur-1');
 	});
 
 	test('removeMediaGalleryAttachment is a no-op when the id is unknown', () => {
-		useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[buildAttachment({ id: 'a1' })],
+				1,
+				'cur-1'
+			);
 		useStore.getState().removeMediaGalleryAttachment(roomId, 'missing');
-		const state = useStore.getState().mediaGallery[roomId];
-		expect(state.attachments.map((a) => a.id)).toEqual(['a1']);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
+		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(1);
 	});
 
 	test('removeMediaGalleryAttachment is a no-op when the room is uninitialised', () => {
@@ -111,39 +183,71 @@ describe('Media gallery slice', () => {
 	describe('prependMediaGalleryAttachment', () => {
 		const NEW_ID = 'new';
 
-		test('prepends a new attachment when the gallery is initialised', () => {
-			useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+		test('prepends a new attachment to every initialised bucket it matches and bumps totals', () => {
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' })],
+					1,
+					'cur-1'
+				);
+			useStore.getState().appendMediaGalleryPage(roomId, IMAGES_FILTER, [], 0, undefined);
 			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID }));
-			const state = useStore.getState().mediaGallery[roomId];
-			expect(state.attachments.map((a) => a.id)).toEqual([NEW_ID, 'a1']);
-			expect(state.nextCursor).toBe('cur-1');
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				NEW_ID,
+				'a1'
+			]);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(2);
+			// The attachment is an image, so it belongs to the IMAGES bucket too.
+			expect(getBucket(IMAGES_FILTER)?.attachments.map((a) => a.id)).toEqual([NEW_ID]);
+			expect(getBucket(IMAGES_FILTER)?.total).toBe(1);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.nextCursor).toBe('cur-1');
 		});
 
-		test('skips when the room state is missing or not yet initialised', () => {
+		test('skips the buckets whose filter does not match the attachment', () => {
+			useStore.getState().appendMediaGalleryPage(roomId, MINE_FILTER, [], 0, undefined);
+			useStore.getState().appendMediaGalleryPage(roomId, IMAGES_FILTER, [], 0, undefined);
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(
+					roomId,
+					buildAttachment({ id: NEW_ID, userId: 'someone-else', mimeType: 'application/pdf' })
+				);
+			expect(getBucket(MINE_FILTER)?.attachments).toEqual([]);
+			expect(getBucket(IMAGES_FILTER)?.attachments).toEqual([]);
+		});
+
+		test('skips buckets not sorted by descending creation date', () => {
+			const ASC_FILTER: MediaGalleryFilter = { sortBy: 'created_at', order: 'asc' };
+			useStore.getState().appendMediaGalleryPage(roomId, ASC_FILTER, [], 0, undefined);
+			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID }));
+			expect(getBucket(ASC_FILTER)?.attachments).toEqual([]);
+		});
+
+		test('skips when the room state is missing or the bucket is not yet initialised', () => {
 			useStore.getState().prependMediaGalleryAttachment(UNKNOWN_ROOM_ID, buildAttachment());
 			expect(useStore.getState().mediaGallery[UNKNOWN_ROOM_ID]).toBeUndefined();
 
-			useStore.getState().setMediaGalleryLoading(roomId, true);
+			useStore.getState().setMediaGalleryLoading(roomId, DEFAULT_MEDIA_GALLERY_FILTER, true);
 			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID }));
-			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments).toEqual([]);
 		});
 
-		test('skips when the userId filter does not match the attachment sender', () => {
-			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
+		test('skips when the attachment id is already in the bucket', () => {
 			useStore
 				.getState()
-				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
-			useStore.getState().appendMediaGalleryPage(roomId, [], undefined);
-			useStore
-				.getState()
-				.prependMediaGalleryAttachment(roomId, buildAttachment({ id: NEW_ID, userId: 'someone' }));
-			expect(useStore.getState().mediaGallery[roomId].attachments).toEqual([]);
-		});
-
-		test('skips when the attachment id is already in the list', () => {
-			useStore.getState().appendMediaGalleryPage(roomId, [buildAttachment({ id: 'a1' })], 'cur-1');
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' })],
+					1,
+					'cur-1'
+				);
 			useStore.getState().prependMediaGalleryAttachment(roomId, buildAttachment({ id: 'a1' }));
-			expect(useStore.getState().mediaGallery[roomId].attachments.map((a) => a.id)).toEqual(['a1']);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(1);
 		});
 	});
 });

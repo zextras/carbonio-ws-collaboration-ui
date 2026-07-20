@@ -17,6 +17,10 @@ import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
 import type { Attachment } from '../../../../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../../../types/store/MediaGalleryTypes';
+import { getMediaGalleryBucketKey } from '../../../../utils/attachmentUtils';
+
+const DEFAULT_BUCKET_KEY = getMediaGalleryBucketKey(DEFAULT_MEDIA_GALLERY_FILTER);
 
 let intersectionCallbacks: Array<IntersectionObserverCallback> = [];
 
@@ -174,7 +178,15 @@ describe('AttachmentListItem', () => {
 			.mockImplementation(() => undefined);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -184,7 +196,9 @@ describe('AttachmentListItem', () => {
 			expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['att-1']);
 		});
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		expect(sendDeletionSpy).toHaveBeenCalledWith(roomId, STANZA_ID);
 	});
@@ -196,14 +210,24 @@ describe('AttachmentListItem', () => {
 			.mockImplementation(() => undefined);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: undefined });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		expect(sendDeletionSpy).not.toHaveBeenCalled();
 	});
@@ -212,7 +236,15 @@ describe('AttachmentListItem', () => {
 		mockedBulkDelete.mockRejectedValue(new Error('status ko'));
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -221,14 +253,24 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(mockedBulkDelete).toHaveBeenCalled();
 		});
-		expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(1);
+		expect(
+			useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+		).toHaveLength(1);
 	});
 
 	test('keeps the row when the API returns the id in failedIds', async () => {
 		mockedBulkDelete.mockResolvedValue({ successIds: [], failedIds: ['att-1'] });
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -237,7 +279,9 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(mockedBulkDelete).toHaveBeenCalled();
 		});
-		expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(1);
+		expect(
+			useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+		).toHaveLength(1);
 	});
 
 	test('renders the download button for attachments uploaded by other users', () => {

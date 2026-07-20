@@ -10,12 +10,9 @@ import {
 	getPdfThumbnailURL,
 	getURLAttachment
 } from '../network';
-import {
-	Attachment,
-	GetRoomAttachmentsParams,
-	MimeTypeCategory
-} from '../types/network/models/attachmentTypes';
+import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { MediaGalleryFilter } from '../types/store/MediaGalleryTypes';
 
 const PDF_MIME_TYPE = 'application/pdf';
 
@@ -360,9 +357,6 @@ export const getPinAttachmentColor = (fileType: string): string => {
 	return 'primary';
 };
 
-// All the filter/sort params of GET /rooms/:id/attachments, without the pagination ones.
-export type RoomAttachmentsFilter = Omit<GetRoomAttachmentsParams, 'limit' | 'cursor'>;
-
 // Mirrors the server-side definition of mimeTypeCategory (API 1.6.14, CO-3830):
 // image/* -> IMAGES, video/* -> VIDEOS, everything else (incl. audio) -> DOCUMENTS.
 export const getMimeTypeCategory = (mimeType: string): MimeTypeCategory => {
@@ -373,7 +367,7 @@ export const getMimeTypeCategory = (mimeType: string): MimeTypeCategory => {
 
 // Deterministic key for a media gallery bucket: same filter combination ->
 // same key, regardless of the construction order of the object.
-export const getMediaGalleryBucketKey = (filter: RoomAttachmentsFilter): string =>
+export const getMediaGalleryBucketKey = (filter: MediaGalleryFilter): string =>
 	Object.entries(filter)
 		.filter(([, value]) => value !== undefined)
 		.sort(([a], [b]) => a.localeCompare(b))
@@ -385,7 +379,7 @@ export const getMediaGalleryBucketKey = (filter: RoomAttachmentsFilter): string 
 // ISO 8601 timestamps compare correctly as strings.
 export const attachmentMatchesFilter = (
 	attachment: Attachment,
-	filter: RoomAttachmentsFilter
+	filter: MediaGalleryFilter
 ): boolean =>
 	(!filter.mimeTypeCategory ||
 		getMimeTypeCategory(attachment.mimeType) === filter.mimeTypeCategory) &&

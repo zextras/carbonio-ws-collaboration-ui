@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Container, DefaultTabBarItemProps, TabBar, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { getMediaGalleryFilter } from '../../../../store/selectors/MediaGallerySelectors';
+import { getMediaGalleryActiveFilter } from '../../../../store/selectors/MediaGallerySelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 
@@ -98,9 +98,9 @@ export const AttachmentFilterTabs: FC<AttachmentFilterTabsProps> = ({ roomId }) 
 	const allLabel = t('mediaGallery.filter.all', 'All attachments');
 	const mineLabel = t('mediaGallery.filter.mine', 'My attachments');
 
-	const filterUserId = useStore((store) => getMediaGalleryFilter(store, roomId).userId);
+	const filterUserId = useStore((store) => getMediaGalleryActiveFilter(store, roomId).userId);
 	const currentUserId = useStore(getUserId);
-	const setMediaGalleryFilter = useStore((store) => store.setMediaGalleryFilter);
+	const setMediaGalleryActiveFilter = useStore((store) => store.setMediaGalleryActiveFilter);
 
 	const items = useMemo(
 		() => [
@@ -121,10 +121,10 @@ export const AttachmentFilterTabs: FC<AttachmentFilterTabsProps> = ({ roomId }) 
 		(_ev: React.MouseEvent<HTMLDivElement> | KeyboardEvent, id: string) => {
 			if (id === selected) return;
 			const nextUserId = id === FILTER_MINE ? currentUserId : undefined;
-			const currentFilter = getMediaGalleryFilter(useStore.getState(), roomId);
-			setMediaGalleryFilter(roomId, { ...currentFilter, userId: nextUserId });
+			const currentFilter = getMediaGalleryActiveFilter(useStore.getState(), roomId);
+			setMediaGalleryActiveFilter(roomId, { ...currentFilter, userId: nextUserId });
 		},
-		[selected, currentUserId, setMediaGalleryFilter, roomId]
+		[selected, currentUserId, setMediaGalleryActiveFilter, roomId]
 	);
 
 	return (

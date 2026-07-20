@@ -31,16 +31,16 @@ describe('AttachmentFilterTabs', () => {
 	test('clicking "My attachments" sets the filter to the current user id', async () => {
 		const { user } = setup(<AttachmentFilterTabs roomId={roomId} />);
 		await user.click(screen.getByTestId(MINE_TAB_TEST_ID));
-		expect(useStore.getState().mediaGallery[roomId].filter.userId).toBe(myUserId);
+		expect(useStore.getState().mediaGallery[roomId].activeFilter.userId).toBe(myUserId);
 	});
 
 	test('clicking "All attachments" clears the userId filter', async () => {
 		useStore
 			.getState()
-			.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: myUserId });
+			.setMediaGalleryActiveFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: myUserId });
 		const { user } = setup(<AttachmentFilterTabs roomId={roomId} />);
 		expect(screen.getByTestId(MINE_TAB_TEST_ID)).toHaveAttribute(ARIA_SELECTED, 'true');
 		await user.click(screen.getByTestId(ALL_TAB_TEST_ID));
-		expect(useStore.getState().mediaGallery[roomId].filter.userId).toBeUndefined();
+		expect(useStore.getState().mediaGallery[roomId].activeFilter.userId).toBeUndefined();
 	});
 });
