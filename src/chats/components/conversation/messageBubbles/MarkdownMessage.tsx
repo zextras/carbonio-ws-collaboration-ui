@@ -227,33 +227,35 @@ const CodeBlock: FC<CodeBlockProps> = ({ language, code }) => {
 };
 
 function renderInline(tokens: InlineToken[]): React.ReactNode {
-	return tokens.map((token, index) => {
+	return [...tokens.entries()].map(([index, token]) => {
+		const key = `${token.type}-${index}`;
 		switch (token.type) {
 			case 'text':
 				return token.value;
 			case 'literal':
-				return <span key={index}>{token.value}</span>;
+				return <span key={key}>{token.value}</span>;
 			case 'code':
-				return <code key={index}>{token.value}</code>;
+				return <code key={key}>{token.value}</code>;
 			case 'link':
 				return (
-					<a key={index} href={token.href} target="_blank" rel="noopener noreferrer">
+					<a key={key} href={token.href} target="_blank" rel="noopener noreferrer">
 						{token.text}
 					</a>
 				);
 			case 'strong':
-				return <strong key={index}>{renderInline(token.children)}</strong>;
+				return <strong key={key}>{renderInline(token.children)}</strong>;
 			case 'em':
-				return <em key={index}>{renderInline(token.children)}</em>;
+				return <em key={key}>{renderInline(token.children)}</em>;
 			case 'del':
-				return <del key={index}>{renderInline(token.children)}</del>;
+				return <del key={key}>{renderInline(token.children)}</del>;
 			default:
 				return null;
 		}
 	});
 }
 
-function renderBlock(block: Block, key: number): React.ReactNode {
+function renderBlock(block: Block, index: number): React.ReactNode {
+	const key = `${block.type}-${index}`;
 	switch (block.type) {
 		case 'paragraph':
 			return <p key={key}>{renderInline(parseInline(block.content))}</p>;
@@ -262,8 +264,8 @@ function renderBlock(block: Block, key: number): React.ReactNode {
 		case 'quote':
 			return <blockquote key={key}>{renderInline(parseInline(block.content))}</blockquote>;
 		case 'list': {
-			const items = block.items.map((item, index) => (
-				<li key={index}>{renderInline(parseInline(item))}</li>
+			const items = [...block.items.entries()].map(([itemIndex, item]) => (
+				<li key={`item-${itemIndex}`}>{renderInline(parseInline(item))}</li>
 			));
 			return block.ordered ? (
 				<ol key={key} start={block.start}>
@@ -283,7 +285,9 @@ function renderBlock(block: Block, key: number): React.ReactNode {
 const MarkdownMessage: FC<{ text: string }> = ({ text }) => {
 	const blocks = useMemo(() => parseBlocks(wrapDetectedCode(text)), [text]);
 
-	return <MarkdownContainer>{blocks.map(renderBlock)}</MarkdownContainer>;
+	return (
+		<MarkdownContainer>{blocks.map((block, index) => renderBlock(block, index))}</MarkdownContainer>
+	);
 };
 
 export default MarkdownMessage;

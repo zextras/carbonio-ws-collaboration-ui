@@ -108,7 +108,7 @@ function scanBlock(lines: string[], index: number): BlockScan {
 
 export function parseBlocks(source: string): Block[] {
 	const blocks: Block[] = [];
-	const lines = source.replace(/\r\n?/g, '\n').split('\n');
+	const lines = source.replaceAll(/\r\n?/g, '\n').split('\n');
 	let index = 0;
 
 	while (index < lines.length) {
@@ -117,7 +117,7 @@ export function parseBlocks(source: string): Block[] {
 		index = next;
 	}
 
-	while (blocks.length > 0 && blocks[blocks.length - 1].type === 'blank') {
+	while (blocks.at(-1)?.type === 'blank') {
 		blocks.pop();
 	}
 	return blocks;
@@ -133,9 +133,9 @@ const EMAIL = /[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}/;
 // delimiters must hug their content (no inner leading/trailing space) so
 // literal uses like "2 * 3 * 4" or snake_case identifiers are left alone
 const STRONG_ASTERISK = /\*\*(?!\s)([^\n]{1,1000}?)(?<!\s)\*\*/;
-const STRONG_UNDERSCORE = /(?<![\w_])__(?!\s)([^\n]{1,1000}?)(?<!\s)__(?![\w_])/;
+const STRONG_UNDERSCORE = /(?<!\w)__(?!\s)([^\n]{1,1000}?)(?<!\s)__(?!\w)/;
 const EM_ASTERISK = /\*(?![\s*])([^*\n]{1,1000}?)(?<!\s)\*/;
-const EM_UNDERSCORE = /(?<![\w_])_(?![\s_])([^_\n]{1,1000}?)(?<!\s)_(?![\w_])/;
+const EM_UNDERSCORE = /(?<!\w)_(?![\s_])([^_\n]{1,1000}?)(?<!\s)_(?!\w)/;
 const DEL = /~~(?!\s)([^\n]{1,1000}?)(?<!\s)~~/;
 
 // bare URLs often end a sentence: trailing punctuation is not part of the link
