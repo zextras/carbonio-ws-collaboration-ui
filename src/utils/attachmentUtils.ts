@@ -10,6 +10,11 @@ import {
 	getPdfThumbnailURL,
 	getURLAttachment
 } from '../network';
+import {
+	Attachment,
+	GetRoomAttachmentsParams,
+	MimeTypeCategory
+} from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
 const PDF_MIME_TYPE = 'application/pdf';
@@ -354,3 +359,39 @@ export const getPinAttachmentColor = (fileType: string): string => {
 	}
 	return 'primary';
 };
+
+// All the filter/sort params of GET /rooms/:id/attachments, without the pagination ones.
+export type RoomAttachmentsFilter = Omit<GetRoomAttachmentsParams, 'limit' | 'cursor'>;
+
+// Mirrors the server-side definition of mimeTypeCategory (API 1.6.14, CO-3830):
+// image/* -> IMAGES, video/* -> VIDEOS, everything else (incl. audio) -> DOCUMENTS.
+export const getMimeTypeCategory = (mimeType: string): MimeTypeCategory => {
+	if (isAttachmentImage(mimeType)) return 'IMAGES';
+	if (isAttachmentVideo(mimeType)) return 'VIDEOS';
+	return 'DOCUMENTS';
+};
+
+// Deterministic key for a media gallery bucket: same filter combination ->
+// same key, regardless of the construction order of the object.
+export const getMediaGalleryBucketKey = (filter: RoomAttachmentsFilter): string =>
+	Object.entries(filter)
+		.filter(([, value]) => value !== undefined)
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([key, value]) => `${key}=${value}`)
+		.join('&');
+
+// Client-side mirror of the server-side filtering of GET /rooms/:id/attachments,
+// used to decide which cached buckets a real-time attachment belongs to.
+// ISO 8601 timestamps compare correctly as strings.
+export const attachmentMatchesFilter = (
+	attachment: Attachment,
+	filter: RoomAttachmentsFilter
+): boolean =>
+	(!filter.mimeTypeCategory ||
+		getMimeTypeCategory(attachment.mimeType) === filter.mimeTypeCategory) &&
+	(!filter.mimeType || attachment.mimeType === filter.mimeType) &&
+	(!filter.userId || attachment.userId === filter.userId) &&
+	(!filter.createdAfter || attachment.createdAt >= filter.createdAfter) &&
+	(!filter.createdBefore || attachment.createdAt <= filter.createdBefore) &&
+	(filter.minSize === undefined || attachment.size >= filter.minSize) &&
+	(filter.maxSize === undefined || attachment.size <= filter.maxSize);

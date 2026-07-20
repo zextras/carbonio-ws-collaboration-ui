@@ -21,7 +21,8 @@ import useStore from '../../../store/Store';
 import { InfoPanelTab } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-const MEDIA_GALLERY_MIN_API_VERSION = '1.6.12';
+// 1.6.14 added the mimeTypeCategory filter and the total count to GET rooms/{id}/attachments (CO-3830).
+const MEDIA_GALLERY_MIN_API_VERSION = '1.6.14';
 
 type ConversationProps = {
 	roomId: string;

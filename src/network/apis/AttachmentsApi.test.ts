@@ -167,4 +167,12 @@ describe('Attachments API', () => {
 
 		expect(url).toEqual(`http://localhost/services/chats/preview/pdf/fileId/${urlRes}`);
 	});
+
+	test.each(imagePreviewCases)('getVideoThumbnailURL with %s', (type, queryParams, urlRes) => {
+		const url = api.getVideoThumbnailURL('fileId', '0x0', ...queryParams);
+
+		expect(url).toEqual(
+			`http://localhost/services/chats/preview/video/fileId/0x0/thumbnail/${urlRes}`
+		);
+	});
 });

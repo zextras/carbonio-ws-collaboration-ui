@@ -62,6 +62,16 @@ export const getImageThumbnailURL = (
 	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
 };
 
+export const getVideoThumbnailURL = (
+	fileId: string,
+	area: string,
+	quality?: string,
+	format?: string
+): string => {
+	const params = buildQueryString({ quality, output_format: format });
+	return `${window.document.location.origin}/services/chats/preview/video/${fileId}/${area}/thumbnail/${params}`;
+};
+
 export const getPdfPreview = (
 	fileId: string,
 	firstPage?: number,

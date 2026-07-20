@@ -27,20 +27,28 @@ export type AttachmentsSortBy = 'created_at' | 'size';
 
 export type AttachmentsSortOrder = 'asc' | 'desc';
 
+export type MimeTypeCategory = 'IMAGES' | 'VIDEOS' | 'DOCUMENTS';
+
+/** API >= 1.6.14 (CO-3830). Mutually exclusive with mimeType: the server returns 400 if both are set. */
+type MimeTypeFilter =
+	| { mimeType?: string; mimeTypeCategory?: never }
+	| { mimeType?: never; mimeTypeCategory?: MimeTypeCategory };
+
 export type GetRoomAttachmentsParams = {
 	limit: number;
 	cursor?: string;
 	userId?: string;
-	mimeType?: string;
 	createdAfter?: string;
 	createdBefore?: string;
 	minSize?: number;
 	maxSize?: number;
 	sortBy?: AttachmentsSortBy;
 	order?: AttachmentsSortOrder;
-};
+} & MimeTypeFilter;
 
 export type GetRoomAttachmentsResponse = {
+	/** API >= 1.6.14 (CO-3830). Total matching attachments, independent of cursor pagination. */
+	total?: number;
 	attachments: Array<Attachment>;
 	cursor?: string;
 };
