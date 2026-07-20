@@ -771,6 +771,24 @@ describe('MessageComposer - isWriting events', () => {
 		await user.click(sendButton);
 		expect(spySendPaused).toHaveBeenCalledTimes(1);
 	});
+
+	test('sendIsWriting is not called when pressing system shortcuts like Cmd+R', async () => {
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		await user.click(composerTextArea);
+		await user.keyboard('{Meta>}r{/Meta}');
+		expect(spySendIsWriting).not.toHaveBeenCalled();
+	});
+
+	test('sendIsWriting is not called when pressing Ctrl shortcuts', async () => {
+		const spySendIsWriting = vi.spyOn(xmppClient, 'sendIsWriting');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		await user.click(composerTextArea);
+		await user.keyboard('{Control>}c{/Control}');
+		expect(spySendIsWriting).not.toHaveBeenCalled();
+	});
 });
 
 describe('Draft message', () => {

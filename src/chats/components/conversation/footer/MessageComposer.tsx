@@ -387,7 +387,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
-			} else {
+			} else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
 				sendThrottleIsWriting();
 				sendDebouncedPause();
 			}
