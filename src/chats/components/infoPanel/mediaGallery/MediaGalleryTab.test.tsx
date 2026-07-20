@@ -113,7 +113,7 @@ describe('MediaGalleryTab', () => {
 		expect(screen.queryByTestId('list-bottom-element')).not.toBeInTheDocument();
 	});
 
-	test('switching to "My attachments" refetches with userId of the logged user', async () => {
+	test('selecting "You" in the Sent by dropdown refetches with userId of the logged user', async () => {
 		const myUserId = 'me';
 		useStore.getState().setLoginInfo({ id: myUserId, name: 'Me' });
 		mockedGetRoomAttachments.mockResolvedValueOnce({
@@ -129,7 +129,8 @@ describe('MediaGalleryTab', () => {
 			cursor: undefined
 		});
 
-		await user.click(screen.getByTestId('mediaGalleryFilter-mine'));
+		await user.click(screen.getByTestId('mediaGallerySentByFilterButton'));
+		await user.click(await screen.findByTestId('mediaGallerySentBy-you'));
 
 		await waitFor(() => {
 			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
@@ -139,6 +140,48 @@ describe('MediaGalleryTab', () => {
 			expect.objectContaining({ userId: myUserId, cursor: undefined })
 		);
 		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-mine-1')).toBeInTheDocument();
+	});
+
+	test('the first fetch requests the Images category', async () => {
+		mockedGetRoomAttachments.mockResolvedValue({ attachments: [], cursor: undefined });
+		setup(<MediaGalleryTab roomId={roomId} />);
+		await waitFor(() => {
+			expect(mockedGetRoomAttachments).toHaveBeenCalledWith(
+				roomId,
+				expect.objectContaining({ mimeTypeCategory: 'IMAGES' })
+			);
+		});
+	});
+
+	test('switching category tab fetches that category and switching back reuses the cache', async () => {
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('img-1', SAMPLE_CREATED_AT)],
+			cursor: undefined
+		});
+
+		const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+		await screen.findByTestId('mediaGalleryAttachmentClickArea-img-1');
+
+		mockedGetRoomAttachments.mockResolvedValueOnce({
+			attachments: [buildAttachment('vid-1', '2024-02-01T10:00:00Z')],
+			cursor: undefined
+		});
+
+		await user.click(screen.getByTestId('mediaGalleryCategory-videos'));
+
+		await waitFor(() => {
+			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
+		});
+		expect(mockedGetRoomAttachments).toHaveBeenLastCalledWith(
+			roomId,
+			expect.objectContaining({ mimeTypeCategory: 'VIDEOS' })
+		);
+		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-vid-1')).toBeInTheDocument();
+
+		// Going back to Images shows the cached bucket without a new request.
+		await user.click(screen.getByTestId('mediaGalleryCategory-images'));
+		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-img-1')).toBeInTheDocument();
+		expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
 	});
 
 	test('fetches the next page when the bottom element intersects the viewport', async () => {
