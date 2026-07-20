@@ -106,28 +106,21 @@ const CameraButton = ({
 	);
 
 	const toggleVideoStream = useCallback(
-		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
+		async (event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			setButtonStatus(false);
-			if (!videoStatus) {
-				if (!videoOutConn?.peerConn) {
-					videoOutConn?.startVideo(selectedVideoDeviceId).catch(() => {
-						setButtonStatus(true);
-					});
+			try {
+				if (videoStatus) {
+					await videoOutConn?.stopVideo();
+				} else if (videoOutConn?.peerConn) {
+					const stream = await getVideoStream(selectedVideoDeviceId);
+					await videoOutConn?.updateLocalStreamTrack(stream);
+					await updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true);
 				} else {
-					getVideoStream(selectedVideoDeviceId)
-						.then((stream) => {
-							videoOutConn
-								?.updateLocalStreamTrack(stream)
-								.then(() => updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
-						})
-						.catch((e) => {
-							setButtonStatus(true);
-							console.log(e);
-						});
+					await videoOutConn?.startVideo(selectedVideoDeviceId);
 				}
-			} else {
-				videoOutConn?.stopVideo();
+			} catch {
+				setButtonStatus(true);
 			}
 		},
 		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
