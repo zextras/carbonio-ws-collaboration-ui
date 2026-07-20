@@ -7,13 +7,11 @@
 import { first } from 'lodash';
 import { gte } from 'semver';
 
-import { getAudioStream } from '../../utils/UserMediaManager';
-
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-
+import { getAudioStream } from '../../utils/UserMediaManager';
 import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
@@ -63,6 +61,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 						// If starting muted, disable the track but keep it alive
 						// to maintain Bluetooth HFP profile
 						if (!this.initialAudioStatus && track) {
+							// eslint-disable-next-line no-param-reassign
 							track.enabled = false;
 						}
 					});
