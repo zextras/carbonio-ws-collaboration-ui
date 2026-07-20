@@ -12,40 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Block, InlineToken, parseBlocks, parseInline } from './markdownLite';
 
-const CODE_HEURISTIC_PATTERNS = [
-	/^(import|export|from)\s{1,100}/m,
-	/^(const|let|var|function|class|interface|type|enum)\s{1,100}/m,
-	/^(def|class|import|from|if __name__)\s{1,100}/m,
-	/^(public|private|protected|static|void|int|String)\s{1,100}/m,
-	/[{}[\]];?\s{0,100}$/m,
-	/^\s{0,100}(if|else|for|while|return|switch|case)\s{0,100}[({]/m,
-	/=>\s{0,100}[{(]/m,
-	/\.\w{1,100}\([^)]{0,500}\)/m,
-	/<\/?[A-Z]\w{1,100}[\s/>]/m
-];
-
-const MULTI_LINE_THRESHOLD = 3;
-const PATTERN_MATCH_THRESHOLD = 2;
-
-function looksLikeCode(text: string): boolean {
-	const lines = text.split('\n');
-	if (lines.length < MULTI_LINE_THRESHOLD) return false;
-
-	const matchCount = CODE_HEURISTIC_PATTERNS.filter((pattern) => pattern.test(text)).length;
-	return matchCount >= PATTERN_MATCH_THRESHOLD;
-}
-
-function hasMarkdownSyntax(text: string): boolean {
-	if (text.includes('`') || text.includes('*') || text.includes('_')) return true;
-	return /^#{1,6}\s|^[-*+]\s|^\d{1,10}\.\s|^>\s|\[[^\]]{1,200}\]\([^)]{1,2000}\)/m.test(text);
-}
-
-function wrapDetectedCode(text: string): string {
-	if (hasMarkdownSyntax(text)) return text;
-	if (looksLikeCode(text)) return `\`\`\`\n${text}\n\`\`\``;
-	return text;
-}
-
 const MarkdownContainer = styled.div`
 	user-select: text;
 	word-break: break-word;
@@ -254,36 +220,36 @@ function renderInline(tokens: InlineToken[]): React.ReactNode {
 	});
 }
 
-function renderBlock(block: Block, index: number): React.ReactNode {
-	const key = `${block.type}-${index}`;
-	switch (block.type) {
-		case 'paragraph':
-			return <p key={key}>{renderInline(parseInline(block.content))}</p>;
-		case 'blank':
-			return <br key={key} />;
-		case 'quote':
-			return <blockquote key={key}>{renderInline(parseInline(block.content))}</blockquote>;
-		case 'list': {
-			const items = [...block.items.entries()].map(([itemIndex, item]) => (
-				<li key={`item-${itemIndex}`}>{renderInline(parseInline(item))}</li>
-			));
-			return block.ordered ? (
-				<ol key={key} start={block.start}>
-					{items}
-				</ol>
-			) : (
-				<ul key={key}>{items}</ul>
-			);
-		}
-		case 'codeBlock':
-			return <CodeBlock key={key} language={block.language} code={block.code} />;
-		default:
-			return null;
-	}
-}
-
 const MarkdownMessage: FC<{ text: string }> = ({ text }) => {
-	const blocks = useMemo(() => parseBlocks(wrapDetectedCode(text)), [text]);
+	const blocks = useMemo(() => parseBlocks(text), [text]);
+
+	const renderBlock = useCallback((block: Block, index: number): React.ReactNode => {
+		const key = `${block.type}-${index}`;
+		switch (block.type) {
+			case 'paragraph':
+				return <p key={key}>{renderInline(parseInline(block.content))}</p>;
+			case 'blank':
+				return <br key={key} />;
+			case 'quote':
+				return <blockquote key={key}>{renderInline(parseInline(block.content))}</blockquote>;
+			case 'list': {
+				const items = [...block.items.entries()].map(([itemIndex, item]) => (
+					<li key={`item-${itemIndex}`}>{renderInline(parseInline(item))}</li>
+				));
+				return block.ordered ? (
+					<ol key={key} start={block.start}>
+						{items}
+					</ol>
+				) : (
+					<ul key={key}>{items}</ul>
+				);
+			}
+			case 'codeBlock':
+				return <CodeBlock key={key} language={block.language} code={block.code} />;
+			default:
+				return null;
+		}
+	}, []);
 
 	return (
 		<MarkdownContainer>{blocks.map((block, index) => renderBlock(block, index))}</MarkdownContainer>

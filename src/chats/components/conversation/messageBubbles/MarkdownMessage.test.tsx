@@ -76,22 +76,12 @@ describe('MarkdownMessage', () => {
 		expect(screen.getByLabelText('Copy code')).toBeInTheDocument();
 	});
 
-	test('auto-detects pasted code and wraps in code block', () => {
+	test('does not turn pasted code into a code block without an explicit fence', () => {
 		const pastedCode =
 			'import React from "react";\n\nconst App = () => {\n  return <div>Hello</div>;\n};\n\nexport default App;';
 		setup(<MarkdownMessage text={pastedCode} />);
-		expect(screen.getByText('code')).toBeVisible();
-	});
-
-	test('does not auto-detect short text as code', () => {
-		setup(<MarkdownMessage text="just a normal message" />);
 		expect(screen.queryByText('code')).toBeNull();
-	});
-
-	test('does not auto-detect text with markdown syntax as code', () => {
-		setup(<MarkdownMessage text={'**bold** text\n- list item\n- another item'} />);
-		const bold = screen.getByText('bold');
-		expect(bold.tagName).toBe('STRONG');
+		expect(screen.queryByLabelText('Copy code')).toBeNull();
 	});
 
 	test('preserves single line breaks in plain text', () => {
