@@ -14,8 +14,8 @@ import JalMahal from '../meetings/assets/virtualBackgrounds/JalMahal.png';
 import LivingRoom from '../meetings/assets/virtualBackgrounds/LivingRoom.png';
 import Mountains from '../meetings/assets/virtualBackgrounds/Mountains.png';
 import Office from '../meetings/assets/virtualBackgrounds/Office.png';
-import { VirtualBackgroundType } from '../types/store/ActiveMeetingTypes';
 import { BrowserUtils } from '../utils/BrowserUtils';
+import { VirtualBackgroundType } from 'wsc-shared';
 
 const useVirtualBackground = (
 	backgroundSelected?: VirtualBackgroundType,

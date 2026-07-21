@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
-import { leaveMeeting } from '../../../network';
 import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
+import { leaveMeeting } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {

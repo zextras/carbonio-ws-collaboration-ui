@@ -16,9 +16,8 @@ import ReadByPopoverList from './readByPopoverList/ReadByPopoverList';
 import { usePinMessage } from '../../../../hooks/usePinMessage';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import { formatDate } from '../../../../utils/dateUtils';
+import { MarkerStatus, TextMessage, RoomType } from 'wsc-shared';
 
 type BubbleFooterProps = {
 	message: TextMessage;

@@ -8,7 +8,7 @@ import { useCallback, useMemo } from 'react';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { isEnabled, enable, disable } from 'darkreader';
 
-import { MEETINGS_PATH } from '../constants/appConstants';
+import { MEETINGS_PATH } from 'wsc-shared';
 
 type DarkReaderModeType = 'enabled' | 'disabled' | 'auto';
 

@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MuteConversationAction from './MuteConversationAction';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: '',
 	description: 'A description',
@@ -24,7 +24,7 @@ const testRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test-2',
 	name: '',
 	description: 'A description',

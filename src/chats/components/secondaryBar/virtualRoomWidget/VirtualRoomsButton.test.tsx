@@ -8,8 +8,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
-import * as api from '../../../../network/apis/RoomsApi';
-import { mockSearchUsersByFeatureRequest } from '../../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -17,7 +15,8 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MeetingType } from '../../../../types/network/models/meetingBeTypes';
+import * as api from 'wsc-shared';
+import { MeetingType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
@@ -25,7 +24,12 @@ const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 
 const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 
-vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
+const mockSearchUsersByFeatureRequest = vi.hoisted(() => vi.fn());
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal()),
+	searchUsersByFeatureRequest: (...args: unknown[]): Promise<SearchUsersByFeatureSoapResponse> =>
+		Promise.resolve(mockSearchUsersByFeatureRequest(...args))
+}));
 
 beforeEach(() => {
 	const store = useStore.getState();

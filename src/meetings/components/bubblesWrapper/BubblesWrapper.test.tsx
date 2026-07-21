@@ -10,7 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router-dom';
 
 import BubblesWrapper from './BubblesWrapper';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -20,35 +20,34 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { routerContextSetup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../types/network/models/userBeTypes';
 import {
+	EventName,
+	MarkerStatus,
+	MeetingAccordionType,
 	MeetingChatVisibility,
-	MeetingAccordionType
-} from '../../../types/store/ActiveMeetingTypes';
-import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+	MessageType,
+	RoomType,
+	RootStore
+} from 'wsc-shared';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3 = createMockUser({ id: 'user3Id', name: 'user 3' });
+const member1 = { userId: user1.id, owner: true };
+const member2 = { userId: user2.id, owner: false };
+const member3 = { userId: user3.id, owner: true };
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	name: '',
 	description: '',
 	type: RoomType.GROUP,
 	members: [member1, member2, member3]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-const meeting: MeetingBe = createMockMeeting({
+const user1Participant = createMockParticipants({ userId: user1.id });
+const user3Participant = createMockParticipants({ userId: user3.id });
+const user2Participant = createMockParticipants({ userId: user2.id });
+const meeting = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
 });
@@ -65,7 +64,7 @@ const message = createMockTextMessage({
 });
 
 const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1.id, name: user1.name });
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);

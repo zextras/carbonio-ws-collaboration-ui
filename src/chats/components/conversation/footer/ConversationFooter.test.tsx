@@ -11,8 +11,7 @@ import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/r
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
-import * as api from '../../../../network/apis/RoomsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -23,20 +22,16 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { Message } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
-import { User, UserType } from '../../../../types/store/UserTypes';
 import * as attachmentUtils from '../../../../utils/attachmentUtils';
 import { now } from '../../../../utils/dateUtils';
+import { RootStore, FileToUpload, messageActionType, RoomType, UserType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
 const iconNavigator2 = 'icon: Navigation2';
 const initText = 'we are gonna se';
 const iconAttach = 'icon: Attach';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	members: [
@@ -45,9 +40,9 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
-const guestUser: User = createMockUser({ type: UserType.GUEST });
+const guestUser = createMockUser({ type: UserType.GUEST });
 
-const mockedRoomTemporary: RoomBe = createMockRoom({
+const mockedRoomTemporary = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.TEMPORARY,
 	members: [
@@ -56,13 +51,13 @@ const mockedRoomTemporary: RoomBe = createMockRoom({
 	]
 });
 
-const mockedMessage: Message = createMockTextMessage({
+const mockedMessage = createMockTextMessage({
 	from: 'idPaolo',
 	roomId: mockedRoom.id,
 	date: now() - 1
 });
 
-const otherMockedMessage: Message = createMockTextMessage({
+const otherMockedMessage = createMockTextMessage({
 	from: 'idPaolo',
 	roomId: mockedRoom.id,
 	date: Date.now(),
@@ -811,7 +806,7 @@ describe('Draft message', () => {
 	test('ArrowUp do not triggers edit when last message is not mine', async () => {
 		const { user, store } = storeSetupGroup();
 
-		const messageByRoberto: Message = createMockTextMessage({
+		const messageByRoberto = createMockTextMessage({
 			from: 'idRoberto',
 			roomId: mockedRoom.id,
 			date: Date.now()

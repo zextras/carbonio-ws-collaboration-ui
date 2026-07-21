@@ -19,7 +19,7 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const CustomButton = styled(Button)`
 	padding: 0.125rem 0.5rem;

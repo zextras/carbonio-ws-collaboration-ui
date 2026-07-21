@@ -20,14 +20,13 @@ import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
 import useBrowserPermission from '../../../hooks/useMediaDevices';
-import { updateMediaOffer } from '../../../network';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
+import { updateMediaOffer, STREAM_TYPE } from 'wsc-shared';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;

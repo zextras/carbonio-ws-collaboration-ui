@@ -9,18 +9,17 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: '',
 	description: 'A description',
@@ -28,7 +27,7 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' })]
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',

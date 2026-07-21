@@ -20,10 +20,9 @@ import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
-import { getMeetingByMeetingId } from '../../network';
 import { useVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
-import { Room } from '../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
+import { getMeetingByMeetingId, Room } from 'wsc-shared';
 
 export type defaultType = {
 	label: string;

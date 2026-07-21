@@ -12,9 +12,8 @@ import ClearHistoryModal from './ClearHistoryModal';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 
-const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
+const mockRoom = createMockRoom({ id: 'roomId' });
 
 beforeEach(() => {
 	const store = useStore.getState();

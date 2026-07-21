@@ -12,13 +12,13 @@ import ConversationInfoPanel from './ConversationInfoPanel';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { RoomType } from 'wsc-shared';
 
 vi.mock('./mediaGallery/MediaGalleryTab', () => ({
 	MediaGalleryTab: (): React.ReactElement => <div data-testid="mediaGalleryTab" />
 }));
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'room-test',
 	name: '',
 	description: 'A description',
@@ -27,7 +27,7 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const oneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: 'myId' })]
 });

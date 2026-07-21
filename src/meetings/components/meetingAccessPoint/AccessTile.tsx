@@ -5,10 +5,10 @@
  */
 import React, { FC, useMemo } from 'react';
 
-import { MEETINGS_PATH } from '../../../constants/appConstants';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import Tile from '../tile/Tile';
+import { MEETINGS_PATH } from 'wsc-shared';
 
 type AccessTileProps = {
 	videoStreamRef: React.RefObject<HTMLVideoElement>;

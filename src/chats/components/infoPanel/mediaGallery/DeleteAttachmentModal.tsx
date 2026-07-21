@@ -19,8 +19,7 @@ type DeleteAttachmentModalProps = {
 export const DeleteAttachmentModal: FC<DeleteAttachmentModalProps> = ({
 	open,
 	onConfirm,
-	onClose,
-	onCancel
+	onClose
 }) => {
 	const [t] = useTranslation();
 	const title = t('mediaGallery.deleteAttachmentTitle', 'Delete attachment');

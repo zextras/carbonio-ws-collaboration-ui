@@ -13,11 +13,10 @@ import { find, map, remove, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import MeetingNotification from './MeetingNotification';
-import { MEETINGS_ROUTE } from '../../constants/appConstants';
-import useEventListener, { EventName, IncomingMeetingEvent } from '../../hooks/useEventListener';
-import { MeetingStartedEvent } from '../../types/network/websocket/wsMeetingEvents';
+import useEventListener from '../../hooks/useEventListener';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
+import { EventName, EventPayloads, MeetingStartedEvent, MEETINGS_ROUTE } from 'wsc-shared';
 
 const PortalContainer = styled(Container)`
 	position: fixed;
@@ -48,17 +47,14 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const addNotification = useCallback(
-		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
-			clearTimeout(timeout.current);
-			if (event) {
-				setNotificationArray((prev) => [event?.detail, ...prev]);
-			}
-			setMeetingSound(true);
-			timeout.current = setTimeout(() => setMeetingSound(false), 12000);
-		},
-		[]
-	);
+	const addNotification = useCallback((event: EventPayloads[EventName.INCOMING_MEETING]) => {
+		clearTimeout(timeout.current);
+		if (event) {
+			setNotificationArray((prev) => [event, ...prev]);
+		}
+		setMeetingSound(true);
+		timeout.current = setTimeout(() => setMeetingSound(false), 12000);
+	}, []);
 
 	const removeNotification = useCallback((notificationId: string): void => {
 		setNotificationArray((prev: MeetingStartedEvent[]) => {
@@ -70,10 +66,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const removeNotificationFromMeetingEvent = useCallback(
-		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
+		(event: EventPayloads[EventName.REMOVED_MEETING_NOTIFICATION]) => {
 			const notificationToRemove = find(
 				notificationArray,
-				(notification) => notification.meetingId === event?.detail.meetingId
+				(notification) => notification.meetingId === event.meetingId
 			);
 			if (notificationToRemove) {
 				removeNotification(notificationToRemove.meetingId);

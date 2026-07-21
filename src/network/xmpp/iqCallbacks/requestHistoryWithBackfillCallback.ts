@@ -6,10 +6,10 @@
 
 import { handleHistory } from './requestHistoryCallback';
 import useStore from '../../../store/Store';
-import { BackfillRequest, MessageRange } from '../../../types/store/ChatsRegistryTypes';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
 import { xmppClient } from '../XMPPClient';
+import { BackfillRequest, MessageRange } from 'wsc-shared';
 
 function detectGaps(messageRanges: MessageRange[]): BackfillRequest[] {
 	if (messageRanges.length < 2) return [];

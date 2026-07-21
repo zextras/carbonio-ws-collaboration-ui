@@ -22,7 +22,7 @@ import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
 import EditVirtualRoomModal from './EditVirtualRoomModal';
-import { deleteRoomMember } from '../../../../../network';
+import { deleteRoomMember } from 'wsc-shared';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;

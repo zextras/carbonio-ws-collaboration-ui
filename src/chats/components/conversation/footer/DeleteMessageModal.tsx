@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 

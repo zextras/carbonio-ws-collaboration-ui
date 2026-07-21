@@ -16,13 +16,19 @@ import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
-import { getCapabilities, getToken, listMeetings, listRooms } from './network';
-import { wsClient } from './network/websocket/WebSocketClient';
-import { xmppClient } from './network/xmpp/XMPPClient';
+import { xmppClient } from './network/xmpp';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
+import {
+	AccountSettings,
+	getToken,
+	getCapabilities,
+	listRooms,
+	listMeetings,
+	wsClient
+} from 'wsc-shared';
 
 export default function MainApp(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -59,7 +65,8 @@ export default function MainApp(): React.JSX.Element {
 			setLoginInfo({
 				id: userAccount.id,
 				name: userAccount.name,
-				displayName: userAccount.displayName
+				displayName: userAccount.displayName,
+				server: window.location.host
 			});
 		}
 	}, [setLoginInfo, authenticated]);
@@ -78,10 +85,10 @@ export default function MainApp(): React.JSX.Element {
 						const version = useStore.getState().session.apiVersion;
 						if (version && gte(version, '1.6.8')) {
 							getCapabilities().catch(() => {
-								setAttributes(attrs);
+								setAttributes(attrs as AccountSettings['attrs']);
 							});
 						} else {
-							setAttributes(attrs);
+							setAttributes(attrs as AccountSettings['attrs']);
 						}
 						setChatsBeStatus(true);
 						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)

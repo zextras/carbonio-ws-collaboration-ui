@@ -9,7 +9,7 @@ import React from 'react';
 import { AttachmentFilterTabs } from './AttachmentFilterTabs';
 import useStore from '../../../../store/Store';
 import { screen, setup } from '../../../../tests/test-utils';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../../../types/store/MediaGalleryTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from 'wsc-shared';
 
 const roomId = 'room-1';
 const myUserId = 'me';

@@ -5,7 +5,7 @@
  */
 
 import { groupAttachmentsByMonth } from './mediaGalleryUtils';
-import { Attachment } from '../types/network/models/attachmentTypes';
+import { Attachment } from 'wsc-shared';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
 	id,

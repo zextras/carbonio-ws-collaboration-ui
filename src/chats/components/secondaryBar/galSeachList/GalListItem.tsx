@@ -11,8 +11,8 @@ import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbon
 
 import useRouting from '../../../../hooks/useRouting';
 import useStore from '../../../../store/Store';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
+import { ContactInfo } from 'wsc-shared';
 
 const ListItem = styled(Container)`
 	cursor: pointer;

@@ -9,7 +9,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import RecordingInfo from './RecordingInfo';
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -18,20 +18,17 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
-import { RoomType } from '../../types/store/RoomTypes';
+import { EventName, MeetingType, RoomType, WsEventType } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	type: RoomType.TEMPORARY,
 	members: [createMockMember({ userId: user1.id, owner: true })]
 });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	roomId: 'id',
 	meetingType: MeetingType.SCHEDULED
 });

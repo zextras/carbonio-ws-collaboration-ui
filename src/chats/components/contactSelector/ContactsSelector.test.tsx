@@ -9,9 +9,8 @@ import React, { useState } from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
-import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import { setup } from '../../../tests/test-utils';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
+import { ContactInfo, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const user1: ContactInfo = {
 	email: 'user1@test.com',
@@ -32,7 +31,12 @@ const MockComponent = ({ owner }: { owner?: boolean }): React.ReactElement => {
 	);
 };
 
-vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+const mockSearchUsersByFeatureRequest = vi.hoisted(() => vi.fn());
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal()),
+	searchUsersByFeatureRequest: (...args: unknown[]): Promise<SearchUsersByFeatureSoapResponse> =>
+		Promise.resolve(mockSearchUsersByFeatureRequest(...args))
+}));
 
 describe('ContactsSelector', () => {
 	test('Initial request has a result', async () => {

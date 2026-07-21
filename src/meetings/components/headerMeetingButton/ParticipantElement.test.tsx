@@ -12,7 +12,7 @@ import ParticipantElement from './ParticipantElement';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockUser } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { UserType } from '../../../types/store/UserTypes';
+import { UserType } from 'wsc-shared';
 
 const loggedUser = createMockUser();
 const internalUser = createMockUser();

@@ -27,7 +27,7 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import { PinMessage } from '../../../../chats/components/conversation/PinMessage';
 import useDarkReader from '../../../../hooks/useDarkReader';
-import { clearRoomHistory } from '../../../../network';
+import ChatExporter from '../../../../settings/components/chatExporter/ChatExporter';
 import { getPinnedMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
@@ -38,9 +38,13 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
-import { MessageType, OperationType } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import {
+	clearRoomHistory,
+	MeetingChatVisibility,
+	MessageType,
+	OperationType,
+	RoomType
+} from 'wsc-shared';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
@@ -314,7 +318,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({ r
 					/>
 					<Button
 						label={t('action.exportMessages', 'Export messages')}
-						onClick={() => setChatExporting(roomId)}
+						onClick={() => setChatExporting(roomId, new ChatExporter(roomId))}
 						icon="Copy"
 						iconPlacement="left"
 					/>

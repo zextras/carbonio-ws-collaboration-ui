@@ -6,7 +6,7 @@
 
 import { Strophe } from 'strophe.js';
 
-import { xmppDebug } from '../../../utils/debug';
+import { xmppDebug } from 'wsc-shared';
 
 export function errorCallback(stanza: Element): void {
 	const query = stanza.getElementsByTagName('query')[0];

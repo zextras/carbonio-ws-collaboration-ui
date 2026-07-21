@@ -10,16 +10,16 @@ import { fireEvent, screen } from '@testing-library/react';
 import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
-import * as api from '../../../../network/apis/AttachmentsApi';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported, getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
+import { AttachmentMessageType } from 'wsc-shared';
 
 const fileIcon = 'icon: FileTextOutline';
 
 describe('Attachment view', () => {
 	test('Generic file visualization', async () => {
-		const spyOnGetURLAttachment = vi.spyOn(api, 'getURLAttachment');
+		const spyOnGetURLAttachment = vi.spyOn(attachmentUtils, 'getAttachmentThumbnailURL');
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',

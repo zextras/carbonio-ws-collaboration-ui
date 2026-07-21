@@ -18,8 +18,8 @@ import useDarkReader from '../../../../hooks/useDarkReader';
 import useMessage from '../../../../hooks/useMessage';
 import { getUserName, getUserSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
+import { MessageType, TextMessage } from 'wsc-shared';
 
 type RepliedTextMessageSectionViewProps = {
 	repliedMessageRef: TextMessage;

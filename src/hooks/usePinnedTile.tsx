@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { getPinnedTile } from '../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 type usePinnedTileReturn = {
 	isPinned: boolean;

@@ -17,21 +17,19 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Info.id }), createMockMember({ userId: user2Info.id })]
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user1Info, user2Info]);
 	store.addRooms([testRoom]);

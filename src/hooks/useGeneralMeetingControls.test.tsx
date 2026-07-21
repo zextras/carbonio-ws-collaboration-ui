@@ -12,7 +12,7 @@ import useStore from '../store/Store';
 import { createMockMeeting, createMockParticipants } from '../tests/createMock';
 import { ProvidersWrapper } from '../tests/test-utils';
 import { mockGoToInfoPage } from './__mocks__/useRouting';
-import * as api from '../network/apis/MeetingsApi';
+import * as api from 'wsc-shared';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
 

@@ -11,13 +11,13 @@ import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-d
 import { useTranslation } from 'react-i18next';
 
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
-import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
 	downloadAttachment,
 	getAttachmentThumbnailURL,
 	getPinAttachmentIcon,
 	isPreviewSupported
 } from '../../../../utils/attachmentUtils';
+import { AttachmentMessageType } from 'wsc-shared';
 
 const HoverContainer = styled(Container)<{ $isGenericFile: boolean }>`
 	z-index: 1;

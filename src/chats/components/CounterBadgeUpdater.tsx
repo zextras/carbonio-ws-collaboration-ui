@@ -8,9 +8,9 @@ import { useEffect } from 'react';
 
 import { updatePrimaryBadge } from '@zextras/carbonio-shell-ui';
 
-import { CHATS_ROUTE } from '../../constants/appConstants';
 import { getTotalUnreadCountSelector } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
+import { CHATS_ROUTE } from 'wsc-shared';
 
 const CounterBadgeUpdater = (): null => {
 	const totalUnreadCount = useStore(getTotalUnreadCountSelector);

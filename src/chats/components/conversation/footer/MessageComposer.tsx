@@ -30,11 +30,9 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
-import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
-import { addRoomAttachment } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -43,15 +41,19 @@ import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistr
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import {
-	FileToUpload,
-	messageActionType,
-	ReferenceMessage
-} from '../../../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { getImageSize, isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
+import {
+	addRoomAttachment,
+	FileToUpload,
+	messageActionType,
+	ReferenceMessage,
+	MessageType,
+	TextMessage,
+	IME_LANGUAGES,
+	MESSAGE_CHAR_LIMIT
+} from 'wsc-shared';
 
 type ConversationMessageComposerProps = {
 	roomId: string;

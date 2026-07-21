@@ -16,13 +16,13 @@ import usePagination from '../../../hooks/usePagination';
 import useTiles from '../../../hooks/useTiles';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
+import { STREAM_TYPE } from 'wsc-shared';
 
 const GridContainer = styled(Container)`
 	position: relative;

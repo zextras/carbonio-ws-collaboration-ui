@@ -16,8 +16,7 @@ import SearchUserAction from './SearchUserAction';
 import { getRoomMembers } from '../../../../store/selectors/RoomsSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { Member } from '../../../../types/store/RoomTypes';
-import { UsersMap } from '../../../../types/store/UserTypes';
+import { Member } from 'wsc-shared';
 
 type ParticipantsListProps = {
 	roomId: string;
@@ -33,8 +32,8 @@ const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 		'participantsList.noMatch.general',
 		'Your search returned no results, try another keyword.'
 	);
-	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
-	const users: UsersMap = useStore(getUsersSelector);
+	const members = useStore((state) => getRoomMembers(state, roomId));
+	const users = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
 	const [filteredInput, setFilteredInput] = useState('');
 

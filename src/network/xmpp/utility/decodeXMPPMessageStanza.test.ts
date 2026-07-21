@@ -4,16 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
 import { buildConfigurationStanza, buildReactionStanza } from '../../../tests/buildXmppStanza';
+import { retractedMessage } from '../xmppMessageExamples';
 import {
 	ConfigurationMessage,
 	MessageFastening,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { retractedMessage } from '../xmppMessageExamples';
+} from 'wsc-shared';
 
 const applicationXml = 'application/xml';
 

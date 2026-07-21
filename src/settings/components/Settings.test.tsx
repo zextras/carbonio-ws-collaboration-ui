@@ -13,13 +13,11 @@ import Settings from './Settings';
 import useStore from '../../store/Store';
 import { createMockAttributesList, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { UserBe } from '../../types/network/models/userBeTypes';
-import { RootStore } from '../../types/store/StoreTypes';
 import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 const squareIcon = 'icon: Square';
 
-const user1: UserBe = createMockUser({
+const user1 = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
@@ -42,7 +40,7 @@ const notificationsSettingsObjectFalse: NotificationsSettingsType = {
 const dataTestid = 'data-testid';
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setUserInfo([user1]);
 	store.setLoginInfo({ id: user1.id, name: user1.name, displayName: user1.name });
 });
@@ -162,7 +160,7 @@ describe('Settings view', () => {
 					JSON.stringify({ EnableCamera: true, EnableMicrophone: true })
 				);
 			});
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 			const { user } = setup(<Settings />);
 
@@ -181,7 +179,7 @@ describe('Settings view', () => {
 
 	describe('Recording settings', () => {
 		test('Recording enabled', () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList());
 			setup(<Settings />);
 
@@ -189,7 +187,7 @@ describe('Settings view', () => {
 			expect(recordingContainer).toBeInTheDocument();
 		});
 		test('Meeting section with recording disabled', () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
 			setup(<Settings />);
 
@@ -198,7 +196,7 @@ describe('Settings view', () => {
 		});
 
 		test('Reset recording folder', async () => {
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList());
 			localStorage.setItem(
 				'ChatsRecordingSettings',

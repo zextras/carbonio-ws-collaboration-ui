@@ -17,15 +17,14 @@ import {
 	createMockRoom
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from 'wsc-shared';
 
 const memberOne = createMockMember({ userId: 'myId' });
 const memberTwo = createMockMember({ userId: 'userTwo' });
 const deleteGroupOngoingMeeting =
 	'There is currently an active meeting. Deleting the Group will end the meeting without any warning.This action will affect all Group members and cannot be undone. Are you sure you want to delete this Group?';
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',
@@ -33,7 +32,7 @@ const testRoom: RoomBe = createMockRoom({
 	members: [memberOne, memberTwo]
 });
 
-const testMeeting: MeetingBe = createMockMeeting({
+const testMeeting = createMockMeeting({
 	roomId: testRoom.id,
 	participants: [
 		createMockParticipants({ userId: memberOne.userId }),

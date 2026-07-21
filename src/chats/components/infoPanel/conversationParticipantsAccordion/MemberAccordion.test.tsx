@@ -12,12 +12,11 @@ import { MemberAccordion } from './MemberAccordion';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
+import { RoomBe, RoomType } from 'wsc-shared';
 
-const user1Be: UserBe = createMockUser();
+const user1Be = createMockUser();
 
-const user2Be: UserBe = createMockUser();
+const user2Be = createMockUser();
 
 const member = [
 	{
@@ -43,7 +42,7 @@ const members = [
 	}
 ];
 
-const room: RoomBe = createMockRoom({ type: RoomType.GROUP });
+const room = createMockRoom({ type: RoomType.GROUP });
 
 beforeEach(() => {
 	const store = useStore.getState();

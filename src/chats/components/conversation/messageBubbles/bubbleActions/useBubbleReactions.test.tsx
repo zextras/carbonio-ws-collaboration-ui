@@ -8,7 +8,7 @@ import { screen, renderHook } from '@testing-library/react';
 import { forEach } from 'lodash';
 
 import useBubbleReactions, { ReactionType } from './useBubbleReactions';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../../network/xmpp';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMessageFastening,
@@ -17,13 +17,11 @@ import {
 	createMockUser
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
-import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { FasteningAction, TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../../../../types/store/StoreTypes';
+import { FasteningAction } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'sesssionId', name: 'sessionName' });
-const room: RoomBe = createMockRoom();
-const simpleTextMessage: TextMessage = createMockTextMessage({
+const room = createMockRoom();
+const simpleTextMessage = createMockTextMessage({
 	roomId: room.id,
 	from: sessionUser.id,
 	date: Date.now() - 60
@@ -39,7 +37,7 @@ const reactionToSimpleTextMessage = createMockMessageFastening({
 const iconTestId = 'icon: SmileOutline';
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.name });
 	store.addRooms([room]);
 	store.newMessage(simpleTextMessage);

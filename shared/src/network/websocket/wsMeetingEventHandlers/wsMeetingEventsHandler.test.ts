@@ -1,0 +1,227 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+import * as MeetingAudioAnsweredEventHandler from './MeetingAudioAnsweredEventHandler';
+import * as MeetingAudioStreamChangedEventHandler from './MeetingAudioStreamChangedEventHandler';
+import * as MeetingDeclinedEventHandler from './MeetingDeclinedEventHandler';
+import * as MeetingJoinedEventHandler from './MeetingJoinedEventHandler';
+import * as MeetingLeftEventHandler from './MeetingLeftEventHandler';
+import * as MeetingMediaStreamChangedEventHandler from './MeetingMediaStreamChangedEventHandler';
+import * as MeetingParticipantClashedEventHandler from './MeetingParticipantClashedEventHandler';
+import * as MeetingParticipantSubscribedEventHandler from './MeetingParticipantSubscribedEventHandler';
+import * as MeetingParticipantTalkingHandler from './MeetingParticipantTalkingHandler';
+import * as MeetingRecordingStartedEventHandler from './MeetingRecordingStartedEventHandler';
+import * as MeetingRecordingStoppedEventHandler from './MeetingRecordingStoppedEventHandler';
+import * as MeetingSDPAnsweredEventHandler from './MeetingSDPAnsweredEventHandler';
+import * as MeetingSDPOfferedEventHandler from './MeetingSDPOfferedEventHandler';
+import * as MeetingStartedEventHandler from './MeetingStartedEventHandler';
+import * as MeetingStoppedEventHandler from './MeetingStoppedEventHandler';
+import * as MeetingUserAcceptedEventHandler from './MeetingUserAcceptedEventHandler';
+import * as MeetingUserRejectedEventHandler from './MeetingUserRejectedEventHandler';
+import * as MeetingWaitingParticipantClashedEventHandler from './MeetingWaitingParticipantClashedEventHandler';
+import * as MeetingWaitingParticipantJoinedEventHandler from './MeetingWaitingParticipantJoinedEventHandler';
+import { wsMeetingEventsHandler } from './wsMeetingEventsHandler';
+import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import useStore from '../../../tests/testStore';
+import { WsEvent, WsEventType } from '../../../types/network/websocket/wsEvents';
+import {
+	MeetingCreatedEvent,
+	MeetingDeletedEvent
+} from '../../../types/network/websocket/wsMeetingEvents';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+
+describe('wsMeetingEventsHandler', () => {
+	test('MEETING_CREATED event is handled', () => {
+		useStore.getState().addRooms([createMockRoom({ id: 'roomId' })]);
+		const event: MeetingCreatedEvent = {
+			type: WsEventType.MEETING_CREATED,
+			meetingId: '123',
+			roomId: 'roomId',
+			sentDate: '2024-05-30T12:34:56Z'
+		};
+		wsMeetingEventsHandler(event);
+		expect(useStore.getState().meetings[event.meetingId]).toBeDefined();
+	});
+
+	test('MEETING_STARTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_STARTED };
+		const handler = vi.spyOn(MeetingStartedEventHandler, 'meetingStartedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_PARTICIPANT_JOINED event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_JOINED };
+		const handler = vi.spyOn(MeetingJoinedEventHandler, 'meetingJoinedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_PARTICIPANT_LEFT event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_LEFT };
+		const handler = vi.spyOn(MeetingLeftEventHandler, 'meetingLeftEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_STOPPED event is handled', () => {
+		const event = { type: WsEventType.MEETING_STOPPED };
+		const handler = vi.spyOn(MeetingStoppedEventHandler, 'meetingStoppedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_DELETED event is handled', () => {
+		const store = useStore.getState();
+		store.addRooms([createMockRoom({ id: 'roomId' })]);
+		store.addMeetings([createMockMeeting({ id: 'meetingId', roomId: 'roomId' })]);
+		const event: MeetingDeletedEvent = {
+			type: WsEventType.MEETING_DELETED,
+			meetingId: 'meetingId',
+			sentDate: '2024-05-30T12:34:56Z'
+		};
+		wsMeetingEventsHandler(event);
+		expect(useStore.getState().meetings.roomId).not.toBeDefined();
+	});
+
+	test('MEETING_AUDIO_STREAM_CHANGED event is handled', () => {
+		const event = { type: WsEventType.MEETING_AUDIO_STREAM_CHANGED };
+		const handler = vi.spyOn(
+			MeetingAudioStreamChangedEventHandler,
+			'meetingAudioStreamChangedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_MEDIA_STREAM_CHANGED event is handled', () => {
+		const event = { type: WsEventType.MEETING_MEDIA_STREAM_CHANGED, mediaType: STREAM_TYPE.SCREEN };
+		const handler = vi.spyOn(
+			MeetingMediaStreamChangedEventHandler,
+			'meetingMediaStreamChangedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_AUDIO_ANSWERED event is handled', () => {
+		const event = { type: WsEventType.MEETING_AUDIO_ANSWERED };
+		const handler = vi.spyOn(MeetingAudioAnsweredEventHandler, 'meetingAudioAnsweredEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_SDP_ANSWERED event is handled', () => {
+		const event = { type: WsEventType.MEETING_SDP_ANSWERED, mediaType: STREAM_TYPE.SCREEN };
+		const handler = vi.spyOn(MeetingSDPAnsweredEventHandler, 'meetingSDPAnsweredEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_SDP_OFFERED event is handled', () => {
+		const event = { type: WsEventType.MEETING_SDP_OFFERED };
+		const handler = vi.spyOn(MeetingSDPOfferedEventHandler, 'meetingSDPOfferedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_PARTICIPANT_SUBSCRIBED event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_SUBSCRIBED };
+		const handler = vi.spyOn(
+			MeetingParticipantSubscribedEventHandler,
+			'meetingParticipantSubscribedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_PARTICIPANT_TALKING event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_TALKING };
+		const handler = vi.spyOn(
+			MeetingParticipantTalkingHandler,
+			'meetingParticipantTalkingEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_PARTICIPANT_CLASHED event is handled', () => {
+		const event = { type: WsEventType.MEETING_PARTICIPANT_CLASHED };
+		const handler = vi.spyOn(
+			MeetingParticipantClashedEventHandler,
+			'meetingParticipantClashedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_WAITING_PARTICIPANT_JOINED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED };
+		const handler = vi.spyOn(
+			MeetingWaitingParticipantJoinedEventHandler,
+			'meetingWaitingParticipantJoinedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_WAITING_PARTICIPANT_ACCEPTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED };
+		const handler = vi.spyOn(MeetingUserAcceptedEventHandler, 'meetingUserAcceptedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_WAITING_PARTICIPANT_REJECTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED };
+		const handler = vi.spyOn(MeetingUserRejectedEventHandler, 'meetingUserRejectedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_WAITING_PARTICIPANT_CLASHED event is handled', () => {
+		const event = { type: WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED };
+		const handler = vi.spyOn(
+			MeetingWaitingParticipantClashedEventHandler,
+			'meetingWaitingParticipantClashedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_RECORDING_STARTED event is handled', () => {
+		const event = { type: WsEventType.MEETING_RECORDING_STARTED };
+		const handler = vi.spyOn(
+			MeetingRecordingStartedEventHandler,
+			'meetingRecordingStartedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_RECORDING_STOPPED event is handled', () => {
+		const event = { type: WsEventType.MEETING_RECORDING_STOPPED };
+		const handler = vi.spyOn(
+			MeetingRecordingStoppedEventHandler,
+			'meetingRecordingStoppedEventHandler'
+		);
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('MEETING_DECLINED event is handled', () => {
+		const event = { type: WsEventType.MEETING_DECLINED };
+		const handler = vi.spyOn(MeetingDeclinedEventHandler, 'meetingDeclinedEventHandler');
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(handler).toHaveBeenCalledWith(event);
+	});
+
+	test('Log an error for unhandled event types', () => {
+		console.error = vi.fn();
+		const event = { type: 'UNHANDLED_EVENT_TYPE' };
+		wsMeetingEventsHandler(event as WsEvent);
+		expect(console.error).toHaveBeenCalledWith(`Unhandled meeting event type: ${event.type}`);
+	});
+});

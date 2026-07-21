@@ -14,14 +14,13 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
 const user3 = createMockUser({ id: 'user3', name: 'user3' });
 
-const oneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom = createMockRoom({
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id, owner: true })]
 });
@@ -71,7 +70,7 @@ describe('PinMessage', () => {
 			createMockMember({ userId: 'user2' }),
 			createMockMember({ userId: 'user3' })
 		];
-		const group: RoomBe = createMockRoom({
+		const group = createMockRoom({
 			type: RoomType.GROUP,
 			members
 		});

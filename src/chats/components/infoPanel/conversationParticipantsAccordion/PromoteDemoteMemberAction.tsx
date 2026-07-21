@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { demotesRoomMember, promoteRoomMember } from '../../../../network';
+import { demotesRoomMember, promoteRoomMember } from 'wsc-shared';
 
 type PromoteDemoteMemberProps = {
 	owner: boolean;

@@ -8,7 +8,6 @@ import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { fullHistoryCallback } from './iqCallbacks/fullHistoryCallback';
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
 import { requestHistoryCallback } from './iqCallbacks/requestHistoryCallback';
@@ -26,9 +25,11 @@ import {
 	FasteningAction,
 	MessageFastening,
 	MessageType,
-	TextMessage
-} from '../../types/store/ChatsRegistryTypes';
-import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
+	TextMessage,
+	dateToISODate,
+	dateToTimestamp,
+	replacePlaceholderRoom
+} from 'wsc-shared';
 
 const jabberData = 'jabber:x:data';
 
@@ -478,6 +479,16 @@ class XMPPClient {
 				callback: () => resolve(),
 				errorCallback: reject
 			});
+		});
+	}
+
+	getForwardedMessagePayload(message: TextMessage): Promise<string> {
+		const queryId = HistoryAccumulator.getNextId();
+		return this.requestMessageToForward(message.roomId, message.stanzaId, queryId).then(() => {
+			const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
+			if (!historyMessage) return '';
+			historyMessage.getElementsByTagName('body')[0].textContent = message.text;
+			return historyMessage.outerHTML;
 		});
 	}
 

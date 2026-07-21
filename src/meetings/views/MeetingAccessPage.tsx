@@ -11,20 +11,23 @@ import { Button, Container, Text, Tooltip } from '@zextras/carbonio-design-syste
 import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { MEETINGS_PATH } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
 import useRouting from '../../hooks/useRouting';
-import { getMeetingByMeetingId, getScheduledMeetingName } from '../../network';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import { RoomType } from '../../types/store/RoomTypes';
 import { calcScaleDivisor } from '../../utils/styleUtils';
 import { MediaStatus } from '../components/meetingAccessPoint/externalAccess/MeetingExternalAccessPage';
 import MeetingAccessPageMediaSection from '../components/meetingAccessPoint/MeetingAccessPageMediaSection';
 import useAccessMeeting from '../components/meetingAccessPoint/useAccessMeeting';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
+import {
+	MeetingType,
+	RoomType,
+	getMeetingByMeetingId,
+	getScheduledMeetingName,
+	MEETINGS_PATH
+} from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	position: absolute;

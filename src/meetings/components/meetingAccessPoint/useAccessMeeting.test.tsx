@@ -8,14 +8,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import useAccessMeeting from './useAccessMeeting';
-import { MEETINGS_PATH } from '../../../constants/appConstants';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../hooks/__mocks__/useRouting';
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
-import * as api from '../../../network/apis/MeetingsApi';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { dateToISODate, now } from '../../../utils/dateUtils';
+import * as api from 'wsc-shared';
+import { WsEventType, MEETINGS_PATH } from 'wsc-shared';
 
 const mediaStatus: MediaStatus = {
 	audio: { enabled: true, selectedDeviceId: 'audio-device-1' },
@@ -62,7 +61,7 @@ describe('useAccessMeeting tests', () => {
 	test('Handle MEETING_WAITING_PARTICIPANT_REJECTED event', () => {
 		renderHook(() => useAccessMeeting(mediaStatus));
 		sendCustomEvent({
-			name: EventName.MEETING_WAITING_PARTICIPANT_REJECTED,
+			name: api.EventName.MEETING_WAITING_PARTICIPANT_REJECTED,
 			data: {
 				meetingId: room.meetingId!,
 				sentDate: dateToISODate(now()),
@@ -76,7 +75,7 @@ describe('useAccessMeeting tests', () => {
 	test('Handle MEETING_WAITING_PARTICIPANT_CLASHED event', () => {
 		renderHook(() => useAccessMeeting(mediaStatus));
 		sendCustomEvent({
-			name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
+			name: api.EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
 			data: {
 				meetingId: room.meetingId!,
 				sentDate: dateToISODate(now()),
@@ -104,7 +103,7 @@ describe('useAccessMeeting tests', () => {
 		vi.spyOn(api, 'joinMeeting').mockResolvedValueOnce({ status: 'ACCEPTED' });
 		renderHook(() => useAccessMeeting(mediaStatus));
 		sendCustomEvent({
-			name: EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,
+			name: api.EventName.MEETING_WAITING_PARTICIPANT_ACCEPTED,
 			data: {
 				meetingId: room.meetingId!,
 				sentDate: dateToISODate(now()),

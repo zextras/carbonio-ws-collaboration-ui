@@ -9,12 +9,11 @@ import { useCallback, useMemo } from 'react';
 import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { xmppClient } from '../network/xmpp/XMPPClient';
+import { xmppClient } from '../network/xmpp';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { TextMessage } from '../types/store/ChatsRegistryTypes';
-import { RoomType } from '../types/store/RoomTypes';
+import { TextMessage, RoomType } from 'wsc-shared';
 
 interface UsePinMessageReturnType {
 	canMessageBePinned: boolean;

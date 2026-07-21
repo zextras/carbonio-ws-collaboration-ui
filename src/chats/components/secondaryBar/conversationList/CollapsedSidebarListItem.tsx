@@ -18,9 +18,9 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import { getSelectedConversation } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';
+import { RoomType } from 'wsc-shared';
 
 type SidebarListItemProps = {
 	roomId: string;

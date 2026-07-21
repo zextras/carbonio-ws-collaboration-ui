@@ -31,12 +31,7 @@ import { difference, differenceBy, filter, find, map, size, union } from 'lodash
 import { useTranslation } from 'react-i18next';
 
 import ListParticipant from './ListParticipant';
-import { searchUsersByFeatureRequest } from '../../../network/soap/SearchUsersByFeatureRequest';
-import {
-	ContactInfo,
-	SearchUsersByFeatureSoapResponse
-} from '../../../types/network/soap/searchUsersByFeatureRequest';
-import { Member } from '../../../types/store/RoomTypes';
+import { ContactInfo, searchUsersByFeatureRequest, Member } from 'wsc-shared';
 
 type ContactsSelectorProps = {
 	contactsSelected: ContactsSelected;
@@ -155,7 +150,7 @@ const ContactsSelector = ({
 		setLoading(true);
 		setHasMore(false);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '')
-			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+			.then(({ contacts, more }) => {
 				setSearchResult(filterResponse(contacts));
 				setLoading(false);
 				setHasMore(more);
@@ -169,7 +164,7 @@ const ContactsSelector = ({
 	const loadMoreContacts = useCallback(() => {
 		setHasMore(false);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '', searchResult.length)
-			.then(({ contacts, more }: SearchUsersByFeatureSoapResponse) => {
+			.then(({ contacts, more }) => {
 				setSearchResult((prevResults) => union(prevResults, filterResponse(contacts)));
 				setHasMore(more);
 			})

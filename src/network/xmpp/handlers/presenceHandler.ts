@@ -7,7 +7,6 @@
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { isMyId } from '../../websocket/eventHandlersUtilities';
 import { xmppClient } from '../XMPPClient';
 
 export function onPresenceStanza(stanza: Element): true {
@@ -15,7 +14,7 @@ export function onPresenceStanza(stanza: Element): true {
 	const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
 	const type = stanza.getAttribute('type');
 
-	if (isMyId(from) && type === 'unavailable') {
+	if (from === store.session.id && type === 'unavailable') {
 		// Another client of the logged user went offline
 		xmppClient.setOnline();
 	} else if (type == null) {

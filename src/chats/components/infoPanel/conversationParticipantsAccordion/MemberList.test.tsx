@@ -12,37 +12,35 @@ import MemberList from './MemberList';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { Member, RoomType } from '../../../../types/store/RoomTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1Be: User = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
 });
 
-const user3Be: User = createMockUser({
+const user3Be = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'
 });
 
-const user4Be: User = createMockUser({
+const user4Be = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'User 4'
 });
 
-const user4MemberBe: Member = createMockMember({ userId: 'user4' });
+const user4MemberBe = createMockMember({ userId: 'user4' });
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	id: 'Room-Id',
 	type: RoomType.GROUP,
 	members: [

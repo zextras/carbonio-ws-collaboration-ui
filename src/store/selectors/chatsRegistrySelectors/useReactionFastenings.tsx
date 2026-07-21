@@ -5,8 +5,8 @@
  */
 import { filter } from 'lodash';
 
-import { FasteningAction, MessageFastening } from '../../../types/store/ChatsRegistryTypes';
 import useStore from '../../Store';
+import { FasteningAction, MessageFastening } from 'wsc-shared';
 
 export const useReactionFastenings = (roomId: string, stanzaId: string): MessageFastening[] => {
 	const fastenings = useStore((store) => store.chatsRegistry[roomId]?.fastenings[stanzaId]);

@@ -12,9 +12,8 @@ import { useTranslation } from 'react-i18next';
 import ActionComponent from './ActionComponent';
 import LeaveConversationModal from './LeaveConversationModal';
 import useRouting from '../../../../hooks/useRouting';
-import { deleteRoomMember } from '../../../../network';
 import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { deleteRoomMember, RoomType } from 'wsc-shared';
 
 type LeaveProps = {
 	roomId: string;

@@ -8,9 +8,8 @@ import {
 	getPreviewNavigationActive,
 	getPreviewNavigationOpenTargetId
 } from './PreviewNavigationSelectors';
-import { Attachment } from '../../types/network/models/attachmentTypes';
-import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import useStore from '../Store';
+import { Attachment, PreviewNavigationSession } from 'wsc-shared';
 
 const buildAttachment = (id: string): Attachment => ({
 	id,

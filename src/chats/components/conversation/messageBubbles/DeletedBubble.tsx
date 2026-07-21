@@ -11,8 +11,8 @@ import { Container, Text, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useStore from '../../../../store/Store';
-import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { formatDate } from '../../../../utils/dateUtils';
+import { TextMessage } from 'wsc-shared';
 
 type DeletedBubbleProps = {
 	message: TextMessage;

@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { onInboxMessageStanza } from './inboxMessageHandler';
 import { buildTextMessageFromInbox } from '../../../tests/buildXmppStanza';
 import { createMockTextMessage } from '../../../tests/createMock';
-import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 import { xmppClient } from '../XMPPClient';
+import { MessageType, TextMessage } from 'wsc-shared';
 
 describe('XMPP inboxMessageHandler tests', () => {
 	test('Text message inbox arrives', () => {

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { onPingStanza, onPresenceStanza } from './presenceHandler';
 import useStore from '../../../store/Store';
 import { buildPingStanza, buildPresenceStanza } from '../../../tests/buildXmppStanza';

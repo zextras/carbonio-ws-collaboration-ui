@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import useStore from '../../../store/Store';
-import { xmppDebug } from '../../../utils/debug';
 import { getId } from '../utility/decodeJid';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
+import { xmppDebug } from 'wsc-shared';
 
 export function fullHistoryCallback(stanza: Element, queryId: string): void {
 	const messages = HistoryAccumulator.getFullHistoryMessages(queryId);

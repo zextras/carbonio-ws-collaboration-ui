@@ -18,8 +18,7 @@ import {
 import { getExportedChat, getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { MessageType, RoomType } from 'wsc-shared';
 
 type ChatItemProps = {
 	roomId: string;

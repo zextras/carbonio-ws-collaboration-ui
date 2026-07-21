@@ -15,7 +15,7 @@ import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 import useMessage from '../../../../hooks/useMessage';
-import { ExtendedMessage, MessageType } from '../../../../types/store/ChatsRegistryTypes';
+import { ExtendedMessage, MessageType } from 'wsc-shared';
 
 type MessageProps = {
 	message: ExtendedMessage;

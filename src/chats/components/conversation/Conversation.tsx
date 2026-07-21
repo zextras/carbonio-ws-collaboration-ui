@@ -12,11 +12,11 @@ import { Container } from '@zextras/carbonio-design-system';
 import Chat from './Chat';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
 import ConversationSearchPanel from '../searchPanel/ConversationSearchPanel';
+import { ConversationProps } from 'wsc-shared';
 
 const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 	background-image: url('${({ $darkModeActive }): string =>

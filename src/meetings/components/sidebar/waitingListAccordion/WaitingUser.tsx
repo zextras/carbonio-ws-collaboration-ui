@@ -19,10 +19,10 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { acceptWaitingUser } from '../../../../network';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import GuestUserLabel from '../../GuestUserLabel';
+import { acceptWaitingUser } from 'wsc-shared';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

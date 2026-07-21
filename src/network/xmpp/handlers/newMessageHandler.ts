@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
+import { displayNotification } from '../../../notification';
 import useStore from '../../../store/Store';
-import type { Attachment } from '../../../types/network/models/attachmentTypes';
+import { getTagElement } from '../utility/decodeStanza';
+import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
+import { xmppClient } from '../XMPPClient';
 import {
+	EventName,
+	Attachment,
 	FasteningAction,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { getTagElement } from '../utility/decodeStanza';
-import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
-import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
-import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
-import { xmppClient } from '../XMPPClient';
+} from 'wsc-shared';
 
 const toGalleryAttachment = (message: TextMessage): Attachment | undefined => {
 	if (!message.attachment) return undefined;
@@ -41,7 +41,7 @@ export function onNewMessageStanza(message: Element): true {
 	if (!newMessage) return true;
 
 	const store = useStore.getState();
-	const sessionId: string | undefined = useStore.getState().session.id;
+	const sessionId = store.session.id;
 
 	store.setInboxMessages([newMessage]);
 	switch (newMessage.type) {
@@ -56,7 +56,7 @@ export function onNewMessageStanza(message: Element): true {
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 				store.incrementUnreadCount(newMessage.roomId, 1);
-				displayMessageBrowserNotification(newMessage);
+				displayNotification('newMessage', newMessage);
 			}
 
 			// Request message subject of reply
@@ -125,7 +125,7 @@ export function onNewMessageStanza(message: Element): true {
 				}
 			}
 			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
-				displayReactionBrowserNotification(newMessage);
+				displayNotification('newReaction', newMessage);
 				store.setNewReaction(
 					newMessage.roomId,
 					newMessage.originalStanzaId,

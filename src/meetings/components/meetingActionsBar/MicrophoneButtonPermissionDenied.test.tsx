@@ -18,32 +18,28 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
-const user4: UserBe = createMockUser({ id: 'user4Id', name: 'user 4' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3 = createMockUser({ id: 'user3Id', name: 'user 3' });
+const user4 = createMockUser({ id: 'user4Id', name: 'user 4' });
 
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
-const member4: MemberBe = { userId: user4.id, owner: false };
+const member1 = { userId: user1.id, owner: true };
+const member2 = { userId: user2.id, owner: false };
+const member3 = { userId: user3.id, owner: true };
+const member4 = { userId: user4.id, owner: false };
 
-const room: RoomBe = createMockRoom({
+const room = createMockRoom({
 	name: '',
 	description: '',
 	type: RoomType.GROUP,
 	members: [member1, member2, member3, member4]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+const user1Participant = createMockParticipants({ userId: user1.id });
 
-const meeting: MeetingBe = createMockMeeting({
+const meeting = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant]
 });

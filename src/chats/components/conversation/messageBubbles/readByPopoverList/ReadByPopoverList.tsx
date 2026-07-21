@@ -14,9 +14,9 @@ import {
 } from '../../../../../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
-import { MessageType } from '../../../../../types/store/ChatsRegistryTypes';
 import { isBefore } from '../../../../../utils/dateUtils';
 import UserPopoverList from '../../../userPopoverList/UserPopoverList';
+import { MessageType } from 'wsc-shared';
 
 type ReadByProps = {
 	roomId: string;

@@ -16,7 +16,6 @@ import { getRoomMembers, getRoomMutedSelector } from '../../store/selectors/Room
 import { getAttribute } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
-import { Member } from '../../types/store/RoomTypes';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -73,13 +72,13 @@ const ActiveMeetingDot = styled.div`
 `;
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessage }) => {
-	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
+	const sessionId = useStore((store) => store.session.id);
+	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
 	const idAvailable = otherMember?.userId ?? '';
-	const userName: string = useStore((store) => getUserName(store, idAvailable));
+	const userName = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
-	const memberOnline: boolean = useStore((store) => getUserOnline(store, idAvailable));
+	const memberOnline = useStore((store) => getUserOnline(store, idAvailable));
 	const showUsersPresence = useStore((store) => getAttribute(store, 'showUsersPresence'));
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 

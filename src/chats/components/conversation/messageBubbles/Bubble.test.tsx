@@ -10,8 +10,7 @@ import { screen } from '@testing-library/react';
 import { now } from 'moment';
 
 import Bubble from './Bubble';
-import * as api from '../../../../network/apis/AttachmentsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -21,23 +20,20 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
-import { User, UserType } from '../../../../types/store/UserTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
+import { MarkerStatus, TextMessage, RoomType, UserType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
-const user1Be: User = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1'
 });
 
-const user2Be: User = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2'
@@ -46,13 +42,13 @@ const user2Be: User = createMockUser({
 const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });
 const mockMember2 = createMockMember({ userId: user2Be.id });
 
-const guestUser: User = createMockUser({ type: UserType.GUEST });
+const guestUser = createMockUser({ type: UserType.GUEST });
 
-const mockedTempRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members: [mockMember1] });
+const mockedTempRoom = createMockRoom({ type: RoomType.TEMPORARY, members: [mockMember1] });
 
 const mockedMsgFromGuest = createMockTextMessage({ roomId: mockedTempRoom.id, from: guestUser.id });
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP,
 	members: [mockMember1, mockMember2]
@@ -164,7 +160,7 @@ const mockedTextMessagePending = createMockTextMessage({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom, mockedTempRoom]);
 	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.setUserInfo([guestUser, user1Be]);
@@ -187,7 +183,7 @@ describe('Message bubble component visualization', () => {
 		expect(insideText).toBeVisible();
 	});
 	test('Display image', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedAttachmentMessageKb);
 		setup(
 			<Bubble
@@ -231,7 +227,7 @@ const readsMessages: Array<[string, TextMessage, boolean, string]> = [
 
 describe('Attachment footer', () => {
 	test.each(sizeFormatMessages)('Display size in %s', async (format, msg, evaluate) => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(msg);
 		setup(
 			<Bubble
@@ -245,7 +241,7 @@ describe('Attachment footer', () => {
 		expect(extensionFile).toBeInTheDocument();
 	});
 	test.each(readsMessages)('Display message sent from me, %s', (format, msg, cap, iconToCheck) => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(msg);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(
@@ -263,7 +259,7 @@ describe('Attachment footer', () => {
 		expect(ackIcon).toBeInTheDocument();
 	});
 	test('Display reads for a message sent from me, me - user cannot see reads', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedTextMessageSentByMe);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
@@ -278,7 +274,7 @@ describe('Attachment footer', () => {
 		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
 	});
 	test('Display unread message sent from me - user cannot see reads', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(mockedTextMessageUnread);
 		store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));

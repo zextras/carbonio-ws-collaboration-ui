@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useFilterRoomsOnInput } from './useFilterRoomsOnInput';
 import useStore from '../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../tests/createMock';
-import { RoomType } from '../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'userId1', name: 'User 1' });
 const user2 = createMockUser({ id: 'userId2', name: 'User 2' });

@@ -9,7 +9,6 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
-import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -19,9 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
-import { RootStore } from '../../../types/store/StoreTypes';
+import { ContactInfo, RoomType, SearchUsersByFeatureSoapResponse } from 'wsc-shared';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';
@@ -45,7 +42,7 @@ const user3Be = createMockUser({
 	name: 'User3'
 });
 
-const mockedGroup1: RoomBe = createMockRoom({
+const mockedGroup1 = createMockRoom({
 	id: 'mockedGroup1',
 	type: RoomType.GROUP,
 	name: 'Group of 3 people',
@@ -56,7 +53,7 @@ const mockedGroup1: RoomBe = createMockRoom({
 	]
 });
 
-const mockedGroup2: RoomBe = createMockRoom({
+const mockedGroup2 = createMockRoom({
 	id: 'mockedGroup2',
 	type: RoomType.GROUP,
 	name: 'Group of 2 people',
@@ -66,13 +63,13 @@ const mockedGroup2: RoomBe = createMockRoom({
 	]
 });
 
-const mockedOneToOne1: RoomBe = createMockRoom({
+const mockedOneToOne1 = createMockRoom({
 	id: 'mockedOTO1',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 });
 
-const mockedOneToOne2: RoomBe = createMockRoom({
+const mockedOneToOne2 = createMockRoom({
 	id: 'mockedOTO2',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user3Be.id })]
@@ -112,10 +109,16 @@ const contactUser1: ContactInfo = {
 	email: user1Be.email
 };
 
-vi.mock('../../../network/soap/SearchUsersByFeatureRequest');
+const mockSearchUsersByFeatureRequest = vi.hoisted(() => vi.fn());
+
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal()),
+	searchUsersByFeatureRequest: (...args: unknown[]): Promise<SearchUsersByFeatureSoapResponse> =>
+		Promise.resolve(mockSearchUsersByFeatureRequest(...args))
+}));
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setChatsBeStatus(true);
 	store.setLoginInfo({ id: user1Be.id, name: user1Be.name });
 	store.addRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
@@ -140,7 +143,7 @@ describe('SecondaryBar tests', () => {
 	});
 
 	test('User see the ShimmeringListView when network status is not ready', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setChatsBeStatus(false);
 		setup(<SecondaryBarView expanded />);
 		expect(screen.getByTestId('shimmering_list_view')).toBeInTheDocument();

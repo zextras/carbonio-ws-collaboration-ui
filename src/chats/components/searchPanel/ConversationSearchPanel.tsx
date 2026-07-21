@@ -19,12 +19,11 @@ import { useTracker } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import SearchResultMessage from './SearchResultMessage';
-import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../network/xmpp';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { RoomType, CHATS_APP_ID, TRACKER_EVENT } from 'wsc-shared';
 
 enum RequestStatus {
 	IDLE = 'idle',

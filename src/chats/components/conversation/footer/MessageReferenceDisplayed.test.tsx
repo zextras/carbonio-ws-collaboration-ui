@@ -16,15 +16,11 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { messageActionType, RoomType } from 'wsc-shared';
 
 const refBorderMsg = 'reference-border-message';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP
 });
@@ -45,13 +41,13 @@ const myMockedRepliedTextMessage = createMockTextMessage({
 	text: 'Text message sent by me'
 });
 
-const user1: User = createMockUser({
+const user1 = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1' // on DS them will be color #FFA726
 });
 
-const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId' });
+const forwardedUser = createMockUser({ id: 'forwardedUserId' });
 
 const forwardedTextMessage = createMockTextMessage({
 	id: 'messageId',

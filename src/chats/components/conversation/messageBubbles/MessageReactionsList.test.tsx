@@ -18,16 +18,15 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FasteningAction, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
+import { FasteningAction } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'loggedUser', name: 'Logged User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 const user2 = createMockUser({ id: 'user2', name: 'User 2' });
 const user3 = createMockUser({ id: 'user3', name: 'User 3' });
 
-const room: RoomBe = createMockRoom();
-const simpleTextMessage: TextMessage = createMockTextMessage({
+const room = createMockRoom();
+const simpleTextMessage = createMockTextMessage({
 	roomId: room.id,
 	from: loggedUser.id,
 	date: Date.now() - 60

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// @vitest-environment jsdom
+
 import { Mock } from 'vitest';
 
 import { lastActivityCallback } from './iqCallbacks/lastActivityCallback';
@@ -13,8 +15,8 @@ import { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import { buildPingStanza } from '../../tests/buildXmppStanza';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
-import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
-import * as api from '../apis/RoomsApi';
+import { dateToISODate, dateToTimestamp } from 'wsc-shared';
+import * as RoomsApi from 'wsc-shared';
 
 const getStanzaFromSpy = (spy: Mock, callIndex = 0): Element =>
 	spy.mock.calls[callIndex][0].elem.tree();
@@ -94,7 +96,7 @@ describe('XMPPClient', () => {
 	});
 
 	test('sendChatMessage to a placeholder should create a room', () => {
-		const spyOnAddRoom = vi.spyOn(api, 'replacePlaceholderRoom');
+		const spyOnAddRoom = vi.spyOn(RoomsApi, 'replacePlaceholderRoom');
 		spyOnAddRoom.mockImplementation(() => Promise.resolve(createMockRoom({ id: 'roomId123' })));
 		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');
 		expect(spyOnAddRoom).toHaveBeenCalledTimes(1);

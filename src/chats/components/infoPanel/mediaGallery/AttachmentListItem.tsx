@@ -24,7 +24,6 @@ import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import {
 	downloadAttachment,
 	getAttachmentSize,
@@ -33,6 +32,7 @@ import {
 	getPinAttachmentIcon,
 	isPreviewSupported
 } from '../../../../utils/attachmentUtils';
+import { Attachment } from 'wsc-shared';
 
 type AttachmentListItemProps = {
 	attachment: Attachment;

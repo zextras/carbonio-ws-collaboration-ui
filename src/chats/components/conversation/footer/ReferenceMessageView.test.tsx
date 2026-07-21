@@ -16,14 +16,10 @@ import {
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
+import { messageActionType, MarkerStatus, MessageType, RoomType } from 'wsc-shared';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	members: [
@@ -43,7 +39,7 @@ const mockedMessage = createMockTextMessage({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
 	store.newMessage(mockedMessage);
 });
@@ -58,7 +54,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 		expect(ctxMenu).toBeDefined();
 	});
 	test('Display of reference message shows correctly', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setReferenceMessage(mockedRoom.id, {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
@@ -72,7 +68,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 		expect(closeButton).toBeInTheDocument();
 	});
 	test('Close reference message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setReferenceMessage(mockedRoom.id, {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,

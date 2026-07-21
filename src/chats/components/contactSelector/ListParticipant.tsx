@@ -20,7 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
+import { ContactInfo } from 'wsc-shared';
 
 type ListParticipantProps = {
 	item: ContactInfo;

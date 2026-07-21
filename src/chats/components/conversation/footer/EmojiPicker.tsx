@@ -20,9 +20,9 @@ import { Container } from '@zextras/carbonio-design-system';
 import { Picker } from 'emoji-mart';
 import moment from 'moment-timezone';
 
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
 import { calcScaleDivisor } from '../../../../utils/styleUtils';
+import { MEETINGS_PATH } from 'wsc-shared';
 
 const PickerWrapper = styled(Container)`
 	z-index: ${Z_INDEX_RANK.EMOJI_PICKER};

@@ -12,9 +12,9 @@ import EditConversationModal from './EditConversationModal';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from 'wsc-shared';
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'Name',
 	description: 'A description',

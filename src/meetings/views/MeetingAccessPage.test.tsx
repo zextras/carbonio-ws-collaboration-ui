@@ -10,11 +10,11 @@ import { screen } from '@testing-library/react';
 
 import MeetingAccessPage from './MeetingAccessPage';
 import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingType } from '../../types/network/models/meetingBeTypes';
+import { MeetingType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
 describe('MeetingAccessPage', () => {
 	test('Enable the DarkReader on first render', async () => {

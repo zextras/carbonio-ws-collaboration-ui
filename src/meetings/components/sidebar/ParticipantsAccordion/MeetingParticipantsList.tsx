@@ -14,9 +14,8 @@ import SearchUserAction from '../../../../chats/components/infoPanel/conversatio
 import { getMeetingParticipants } from '../../../../store/selectors/MeetingSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingParticipant, MeetingParticipantMap } from '../../../../types/store/MeetingTypes';
-import { UsersMap } from '../../../../types/store/UserTypes';
 import ParticipantElement from '../../headerMeetingButton/ParticipantElement';
+import { MeetingParticipant, MeetingParticipantMap } from 'wsc-shared';
 
 type ParticipantsListProps = {
 	meetingId: string;
@@ -39,7 +38,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipants(store, meetingId)
 	);
-	const users: UsersMap = useStore(getUsersSelector);
+	const users = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<MeetingParticipant[] | undefined>(
 		values(meetingParticipants)
 	);

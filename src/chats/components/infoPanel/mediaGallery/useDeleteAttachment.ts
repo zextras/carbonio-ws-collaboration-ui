@@ -9,11 +9,10 @@ import { useCallback, useState } from 'react';
 import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { bulkDeleteRoomAttachments } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { Attachment } from '../../../../types/network/models/attachmentTypes';
+import { Attachment, bulkDeleteRoomAttachments } from 'wsc-shared';
 
 export type UseDeleteAttachmentHook = {
 	canDelete: boolean;

@@ -80,6 +80,9 @@ importers:
       uuid:
         specifier: 14.0.1
         version: 14.0.1
+      wsc-shared:
+        specifier: workspace:*
+        version: link:shared
       zustand:
         specifier: 5.0.14
         version: 5.0.14(@types/react@18.3.31)(immer@11.1.15)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -204,6 +207,30 @@ importers:
       vitest-fail-on-console:
         specifier: 0.10.1
         version: 0.10.1(@vitest/utils@4.1.10)(vite@8.0.16(@types/node@20.19.43)(jiti@2.7.0)(less@4.6.7)(terser@5.48.0))(vitest@4.1.10)
+
+  shared:
+    dependencies:
+      '@zextras/carbonio-ui-soap-lib':
+        specifier: '*'
+        version: 1.3.0
+      immer:
+        specifier: '*'
+        version: 10.2.0
+      lodash:
+        specifier: '*'
+        version: 4.18.1
+      moment-timezone:
+        specifier: '*'
+        version: 0.6.2
+      semver:
+        specifier: '*'
+        version: 7.8.5
+      uuid:
+        specifier: '*'
+        version: 14.0.1
+      zustand:
+        specifier: '*'
+        version: 5.0.14(@types/react@18.3.31)(immer@10.2.0)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
 
 packages:
 
@@ -5494,7 +5521,6 @@ packages:
     engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
     deprecated: |-
       You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
-
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   qs@6.15.2:

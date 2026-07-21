@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../tile/Tile';
+import { STREAM_TYPE } from 'wsc-shared';
 
 const MobileTilesView = ({ meetingId }: { meetingId: string }): ReactElement | null => {
 	const [t] = useTranslation();
@@ -27,7 +27,7 @@ const MobileTilesView = ({ meetingId }: { meetingId: string }): ReactElement | n
 
 	useEffect(() => {
 		if (centralTile) {
-			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			const subscription = { userId: centralTile.userId, type: centralTile.type };
 			setUpdateSubscription(meetingId, [subscription]);
 		}
 	}, [centralTile, meetingId, setUpdateSubscription]);

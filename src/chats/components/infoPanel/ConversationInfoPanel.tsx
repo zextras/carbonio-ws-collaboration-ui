@@ -18,8 +18,7 @@ import { MediaGalleryTab } from './mediaGallery/MediaGalleryTab';
 import { getSelectedInfoTab } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getRoomTypeSelector, getIsPlaceholderRoom } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { InfoPanelTab } from '../../../types/store/ActiveConversationTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { InfoPanelTab, RoomType } from 'wsc-shared';
 
 const MEDIA_GALLERY_MIN_API_VERSION = '1.6.12';
 

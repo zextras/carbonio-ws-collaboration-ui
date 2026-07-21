@@ -9,7 +9,7 @@ import React, { FC, useMemo } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { RoomType } from '../../../../types/store/RoomTypes';
+import { RoomType } from 'wsc-shared';
 
 type LeaveModalProps = {
 	leaveConversationModalOpen: boolean;

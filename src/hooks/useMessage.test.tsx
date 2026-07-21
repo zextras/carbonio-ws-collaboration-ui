@@ -13,7 +13,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../tests/createMock';
-import { FasteningAction, TextMessage } from '../types/store/ChatsRegistryTypes';
+import { FasteningAction, TextMessage } from 'wsc-shared';
 
 const room = createMockRoom();
 const message = createMockTextMessage();

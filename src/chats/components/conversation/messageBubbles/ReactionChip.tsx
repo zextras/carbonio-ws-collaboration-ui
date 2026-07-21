@@ -11,7 +11,7 @@ import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-sy
 import { includes, size } from 'lodash';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { useUserNameList } from '../../../../store/selectors/usersSelectors/useUserNameList';

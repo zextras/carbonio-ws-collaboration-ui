@@ -18,22 +18,21 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup, screen } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../../types/network/models/userBeTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1Be: UserBe = createMockUser({
+const user1Be = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Be: UserBe = createMockUser({
+const user2Be = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
 });
 
-const user3Be: UserBe = createMockUser({
+const user3Be = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'
@@ -47,7 +46,7 @@ beforeEach(() => {
 
 describe('Actions Tab Content', () => {
 	test('A owner of a group should see the correct actions - More than one owner', () => {
-		const room: RoomBe = createMockRoom({
+		const room = createMockRoom({
 			type: RoomType.GROUP,
 			members: [
 				createMockMember({ userId: user1Be.id, owner: true }),
@@ -70,7 +69,7 @@ describe('Actions Tab Content', () => {
 	});
 
 	test('In a one_to_one users should see only mute actions', () => {
-		const room: RoomBe = createMockRoom({
+		const room = createMockRoom({
 			type: RoomType.ONE_TO_ONE,
 			members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 		});
@@ -86,7 +85,7 @@ describe('Actions Tab Content', () => {
 	});
 
 	test('A owner of a group should see the correct actions - One owner', () => {
-		const room: RoomBe = createMockRoom({
+		const room = createMockRoom({
 			type: RoomType.GROUP,
 			members: [
 				createMockMember({ userId: user1Be.id, owner: true }),
@@ -106,7 +105,7 @@ describe('Actions Tab Content', () => {
 	});
 
 	test('See Clear History action only if there are some messages in the conversation', () => {
-		const room: RoomBe = createMockRoom({ members: [createMockMember({ userId: user1Be.id })] });
+		const room = createMockRoom({ members: [createMockMember({ userId: user1Be.id })] });
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
 		store.addRooms([room]);
@@ -119,7 +118,7 @@ describe('Actions Tab Content', () => {
 	});
 
 	test('A owner of a group should see add member disabled', () => {
-		const room: RoomBe = createMockRoom({
+		const room = createMockRoom({
 			type: RoomType.GROUP,
 			members: [
 				createMockMember({ userId: user1Be.id, owner: true }),
@@ -139,7 +138,7 @@ describe('Actions Tab Content', () => {
 	});
 
 	test('A owner of a group should see add member enabled', () => {
-		const room: RoomBe = createMockRoom({
+		const room = createMockRoom({
 			type: RoomType.GROUP,
 			members: [
 				createMockMember({ userId: user1Be.id, owner: true }),

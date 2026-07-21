@@ -8,6 +8,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
+import ChatExporter from './ChatExporter';
 import ChatItem from './ChatItem';
 import useStore from '../../../store/Store';
 import {
@@ -18,8 +19,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { OperationType } from '../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import { OperationType, RoomType } from 'wsc-shared';
 
 const loggedUser = createMockUser({ id: 'logged-user', name: 'Logged User' });
 const otherUser = createMockUser({ id: 'other-user', name: 'Other User' });
@@ -108,7 +108,7 @@ describe('ChatItem test', () => {
 	});
 
 	test('If chat is exported, chat item displays export icon', () => {
-		useStore.getState().setChatExporting(singleRoom.id);
+		useStore.getState().setChatExporting(singleRoom.id, new ChatExporter(singleRoom.id));
 		setup(<ChatItem roomId={singleRoom.id} onClick={vi.fn()} />);
 		const spinner = screen.getByTestId('spinner');
 		expect(spinner).toBeInTheDocument();

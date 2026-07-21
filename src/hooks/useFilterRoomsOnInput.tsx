@@ -13,8 +13,7 @@ import { FilteredConversation } from '../chats/components/secondaryBar/Secondary
 import { useOrderedRoomsInfoByLastMessage } from '../store/selectors/chatsRegistrySelectors/useOrderedRoomsInfoByLastMessage';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
-import { RoomType } from '../types/store/RoomTypes';
-import UserDataRetriever from '../utils/UserDataRetriever';
+import { RoomType, UserDataRetriever } from 'wsc-shared';
 
 export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
 	const sessionId = useStore(getUserId);

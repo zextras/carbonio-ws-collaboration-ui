@@ -13,7 +13,7 @@ import { Container, Padding } from '@zextras/carbonio-design-system';
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useBubbleReactions from './useBubbleReactions';
 import { Z_INDEX_RANK } from '../../../../../types/generics';
-import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
+import { TextMessage } from 'wsc-shared';
 
 const DropDownWrapper = styled(Container)`
 	position: relative;

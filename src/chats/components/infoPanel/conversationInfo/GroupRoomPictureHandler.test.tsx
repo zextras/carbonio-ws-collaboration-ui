@@ -9,7 +9,6 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
-import * as api from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
@@ -18,17 +17,16 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',
@@ -39,7 +37,7 @@ const testRoom: RoomBe = createMockRoom({
 	]
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test2',
 	name: 'A Group',
 	description: 'This is a beautiful description',
@@ -52,7 +50,7 @@ const testRoom2: RoomBe = createMockRoom({
 });
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user1Info, user2Info]);
 	store.addRooms([testRoom, testRoom2]);
@@ -116,7 +114,7 @@ describe('Room Picture Handler - groups', () => {
 		const spyOnUpdateRoomPicture = vi.spyOn(api, 'updateRoomPicture');
 		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '1' }));
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 

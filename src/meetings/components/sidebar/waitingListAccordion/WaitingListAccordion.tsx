@@ -15,7 +15,7 @@ import WaitingUser from './WaitingUser';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getWaitingList } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
+import { MeetingAccordionType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

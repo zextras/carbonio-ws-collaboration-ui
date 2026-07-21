@@ -10,7 +10,7 @@ import { now } from 'moment';
 
 import Chat from './Chat';
 import { ConversationView } from './Conversation';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../network/xmpp';
 import useStore from '../../../store/Store';
 import {
 	createMockAttributesList,
@@ -22,17 +22,11 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup, within } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import {
-	FasteningAction,
-	OperationType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
+import { FasteningAction, OperationType, RoomType, TextMessage } from 'wsc-shared';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1.id, owner: true })]
@@ -59,7 +53,7 @@ describe('Chat', () => {
 				roomId: mockedRoom.id
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 			xmppClient.features = [];
 
@@ -83,7 +77,7 @@ describe('Chat', () => {
 				roomId: mockedRoom.id
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 
 			// Mock xmppClient.pinMessage to update the store
@@ -124,7 +118,7 @@ describe('Chat', () => {
 				text: 'Second message'
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(firstMessage);
 			store.newMessage(secondMessage);
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
@@ -174,7 +168,7 @@ describe('Chat', () => {
 				text: 'Second message'
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(firstMessage);
 			store.newMessage(secondMessage);
 			store.setPinnedMessage(mockedRoom.id, firstMessage);
@@ -214,7 +208,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
@@ -250,7 +244,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage and unpinMessage to update the store
@@ -285,7 +279,7 @@ describe('Chat', () => {
 					roomId: mockedRoom.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
@@ -326,7 +320,7 @@ describe('Chat', () => {
 					from: user1.id
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 				store.newMessage(mockPinConfigurationMessage);
 
@@ -380,7 +374,7 @@ describe('Chat', () => {
 				date: dateToTimestamp(now())
 			});
 
-			const store: RootStore = useStore.getState();
+			const store = useStore.getState();
 			store.newMessage(mockedTextMessage);
 			store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 
@@ -421,7 +415,7 @@ describe('Chat', () => {
 					edited: true
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 
 				// Mock xmppClient.pinMessage to update the store
@@ -454,7 +448,7 @@ describe('Chat', () => {
 					date: dateToTimestamp(now())
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMessage);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
@@ -505,7 +499,7 @@ describe('Chat', () => {
 					editedStanzaId: 'editedStanzaId1'
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedEditedMessage);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 
@@ -573,7 +567,7 @@ describe('Chat', () => {
 					}
 				});
 
-				const store: RootStore = useStore.getState();
+				const store = useStore.getState();
 				store.newMessage(mockedTextMsgWithAttachment);
 				store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 

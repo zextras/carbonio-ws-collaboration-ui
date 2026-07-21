@@ -33,10 +33,9 @@ import { getMessageAttachment } from '../../../../store/selectors/ChatsRegistryS
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
+import { MarkerStatus, TextMessage, RoomType } from 'wsc-shared';
 
 type BubbleProps = {
 	message: TextMessage;

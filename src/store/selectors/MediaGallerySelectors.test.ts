@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Attachment } from '../../types/network/models/attachmentTypes';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
 import useStore from '../Store';
 import {
 	getMediaGalleryAttachments,
@@ -14,6 +12,7 @@ import {
 	getMediaGalleryIsInitialized,
 	getMediaGalleryIsLoading
 } from './MediaGallerySelectors';
+import { Attachment, DEFAULT_MEDIA_GALLERY_FILTER } from 'wsc-shared';
 
 const roomId = 'room-1';
 

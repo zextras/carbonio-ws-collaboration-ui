@@ -5,7 +5,22 @@
  */
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
+import { beforeAll } from 'vitest';
 import failOnConsole from 'vitest-fail-on-console';
+
+import { sendCustomEvent } from '../hooks/useEventListener';
+import { xmppClient } from '../network/xmpp';
+import { displayNotification } from '../notification';
+import useStore from '../store/Store';
+import { playAudio } from '../utils/AudioUtils';
+import { BrowserUtils } from '../utils/BrowserUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../utils/FetchUtils';
+import {
+	createSilentAudioStream,
+	getStream,
+	playRemoteAudioStream
+} from '../utils/UserMediaManager';
+import { configureSharedCode } from 'wsc-shared';
 
 configure({
 	asyncUtilTimeout: 2000
@@ -208,6 +223,23 @@ beforeEach(() => {
 				play: mockPlayAudio
 			};
 		})
+	});
+});
+
+beforeAll(() => {
+	configureSharedCode({
+		useStore,
+		sendCustomEvent,
+		getStream,
+		createSilentAudioStream,
+		playRemoteAudioStream,
+		clearAuthCookies: BrowserUtils.clearAuthCookies,
+		xmppClient,
+		fetchAPI,
+		sendFileFetchAPI,
+		uploadFileFetchAPI,
+		playAudio,
+		displayNotification
 	});
 });
 

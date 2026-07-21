@@ -9,7 +9,7 @@ import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-syste
 import { addSettingsView } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
-import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
+import { CHATS_ROUTE, PRODUCT_NAME } from 'wsc-shared';
 
 const LazySettingsView = lazy(
 	() => import(/* webpackChunkName: "settingsView" */ './views/SettingsView')

@@ -9,15 +9,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
-import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
-import { wsClient } from '../../../../network/websocket/WebSocketClient';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
-import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
 import { PAGE_INFO_TYPE } from '../../../contexts/routerContext';
+import {
+	createGuestAccount,
+	getScheduledMeetingName,
+	wsClient,
+	UserType,
+	MEETINGS_PATH
+} from 'wsc-shared';
 
 const useExternalAccess = (): {
 	meetingName: string;
@@ -61,7 +64,12 @@ const useExternalAccess = (): {
 				.then((res) => {
 					document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 					document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-					setLoginInfo({ id: res.id, name: guestName, userType: UserType.GUEST });
+					setLoginInfo({
+						id: res.id,
+						name: guestName,
+						userType: UserType.GUEST,
+						server: window.location.host
+					});
 
 					setChatsBeStatus(true);
 					xmppClient.connect(res.zmToken);

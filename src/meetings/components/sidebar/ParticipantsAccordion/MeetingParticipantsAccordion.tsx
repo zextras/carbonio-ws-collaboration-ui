@@ -14,7 +14,7 @@ import MeetingParticipantsList from './MeetingParticipantsList';
 import { getMeetingParticipantsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
+import { MeetingAccordionType } from 'wsc-shared';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

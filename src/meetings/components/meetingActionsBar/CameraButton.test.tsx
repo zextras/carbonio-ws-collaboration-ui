@@ -8,15 +8,12 @@ import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 
 import CameraButton from './CameraButton';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { routerContextSetup, setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
 import * as UserMediaManager from '../../../utils/UserMediaManager';
+import * as api from 'wsc-shared';
+import { MeetingBe, RoomBe, STREAM_TYPE, RoomType } from 'wsc-shared';
 
 const mockMeeting: MeetingBe = createMockMeeting();
 const mockRoom: RoomBe = createMockRoom({
@@ -143,10 +140,8 @@ describe('Camera button', () => {
 
 	test('Camera button is re-enabled when the media offer fails while starting video', async () => {
 		activeMeetingSetup(false);
-		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue({
-			getVideoTracks: () => [{ stop: vi.fn() }]
-		} as unknown as MediaStream);
-		vi.spyOn(api, 'updateMediaOffer').mockRejectedValue(controlledError);
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
+		vi.spyOn(videoOutConn!, 'startVideo').mockRejectedValue(controlledError);
 
 		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
 		const cameraButton = await screen.findByTestId('cameraButton');

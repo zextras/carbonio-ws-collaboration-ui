@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { updateAudioStreamStatus } from '../network';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -17,6 +16,7 @@ import {
 import { getOwnershipOfTheRoom } from '../store/selectors/RoomsSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
+import { updateAudioStreamStatus } from 'wsc-shared';
 
 type useMuteForAllReturn = {
 	muteForAllHasToAppear: boolean;

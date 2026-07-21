@@ -1,0 +1,73 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
+import { sharedConfig } from '../../config';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+
+export enum EventArea {
+	GENERAL = 'general',
+	MEETING = 'meeting',
+	CONVERSATION = 'conversation'
+}
+
+export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
+	switch (eventType) {
+		case WsEventType.INITIALIZATION:
+		case WsEventType.PONG:
+		case WsEventType.MESSAGE_BROKER_DISCONNECTED:
+		case WsEventType.MESSAGE_BROKER_RESTORED: {
+			return EventArea.GENERAL;
+		}
+		case WsEventType.ROOM_CREATED:
+		case WsEventType.ROOM_UPDATED:
+		case WsEventType.ROOM_DELETED:
+		case WsEventType.ROOM_OWNER_PROMOTED:
+		case WsEventType.ROOM_OWNER_DEMOTED:
+		case WsEventType.ROOM_PICTURE_CHANGED:
+		case WsEventType.ROOM_PICTURE_DELETED:
+		case WsEventType.ROOM_MEMBER_ADDED:
+		case WsEventType.ROOM_MEMBER_REMOVED:
+		case WsEventType.ROOM_MUTED:
+		case WsEventType.ROOM_UNMUTED:
+		case WsEventType.ROOM_HISTORY_CLEARED: {
+			return EventArea.CONVERSATION;
+		}
+		case WsEventType.MEETING_CREATED:
+		case WsEventType.MEETING_STARTED:
+		case WsEventType.MEETING_PARTICIPANT_JOINED:
+		case WsEventType.MEETING_PARTICIPANT_LEFT:
+		case WsEventType.MEETING_STOPPED:
+		case WsEventType.MEETING_DELETED:
+		case WsEventType.MEETING_DECLINED:
+		case WsEventType.MEETING_AUDIO_STREAM_CHANGED:
+		case WsEventType.MEETING_MEDIA_STREAM_CHANGED:
+		case WsEventType.MEETING_AUDIO_ANSWERED:
+		case WsEventType.MEETING_SDP_ANSWERED:
+		case WsEventType.MEETING_SDP_OFFERED:
+		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED:
+		case WsEventType.MEETING_PARTICIPANT_TALKING:
+		case WsEventType.MEETING_PARTICIPANT_CLASHED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_ACCEPTED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_REJECTED:
+		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED:
+		case WsEventType.MEETING_RECORDING_STARTED:
+		case WsEventType.MEETING_RECORDING_STOPPED:
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED:
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
+			return EventArea.MEETING;
+		}
+		default: {
+			return undefined;
+		}
+	}
+};
+
+export const isMyId = (userId: string): boolean =>
+	userId === sharedConfig.useStore.getState().session.id;
+
+export const isMeetingActive = (meetingId: string): boolean =>
+	sharedConfig.useStore.getState().activeMeeting?.meetingId === meetingId;

@@ -8,9 +8,35 @@ import React, { useEffect, useState } from 'react';
 
 import { IS_FOCUS_MODE, useIsCarbonioCE } from '@zextras/carbonio-shell-ui';
 
-import { MEETINGS_PATH } from './constants/appConstants';
+import { sendCustomEvent } from './hooks/useEventListener';
 import MainApp from './MainApp';
-import { getLicense } from './network';
+import { xmppClient } from './network/xmpp';
+import { displayNotification } from './notification';
+import useStore from './store/Store';
+import { playAudio } from './utils/AudioUtils';
+import { BrowserUtils } from './utils/BrowserUtils';
+import { fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from './utils/FetchUtils';
+import {
+	createSilentAudioStream,
+	getStream,
+	playRemoteAudioStream
+} from './utils/UserMediaManager';
+import { configureSharedCode, getLicense, MEETINGS_PATH } from 'wsc-shared';
+
+configureSharedCode({
+	useStore,
+	sendCustomEvent,
+	playAudio,
+	getStream,
+	createSilentAudioStream,
+	playRemoteAudioStream,
+	clearAuthCookies: BrowserUtils.clearAuthCookies,
+	xmppClient,
+	fetchAPI,
+	sendFileFetchAPI,
+	uploadFileFetchAPI,
+	displayNotification
+});
 
 const UnlicensedApp = (): null => {
 	useEffect(() => {

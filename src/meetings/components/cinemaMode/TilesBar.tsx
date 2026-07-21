@@ -14,10 +14,10 @@ import { useTranslation } from 'react-i18next';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts/routerContext';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
+import { STREAM_TYPE, TileData } from 'wsc-shared';
 
 const TilesBarContainer = styled(Container)`
 	padding: 3.25rem 1rem;

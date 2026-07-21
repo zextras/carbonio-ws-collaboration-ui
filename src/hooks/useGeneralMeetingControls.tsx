@@ -10,22 +10,24 @@ import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, find, maxBy, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, {
-	EventName,
-	MeetingWaitingParticipantClashedEvent
-} from './useEventListener';
+import useEventListener from './useEventListener';
 import usePiPWindow from './usePipWindow';
 import useRouting from './useRouting';
-import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
-import { getMeetingByMeetingId, leaveMeeting } from '../network';
 import useTiles from './useTiles';
+import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import {
 	getMeetingActiveByMeetingId,
 	getMeetingParticipants
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
-import { MeetingParticipantMap } from '../types/store/MeetingTypes';
+import {
+	EventName,
+	EventPayloads,
+	getMeetingByMeetingId,
+	leaveMeeting,
+	STREAM_TYPE,
+	MeetingParticipantMap
+} from 'wsc-shared';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();
@@ -116,8 +118,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	// Disconnect user if he joins the meeting with other session
 	const meetingParticipantClashedHandler = useCallback(
-		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
-			meetingDisconnection(event?.detail.meetingId ?? '');
+		(event: EventPayloads[EventName.MEETING_PARTICIPANT_CLASHED]) => {
+			meetingDisconnection(event.meetingId ?? '');
 			closePipWindow();
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},

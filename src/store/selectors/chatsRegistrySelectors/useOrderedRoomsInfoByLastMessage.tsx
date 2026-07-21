@@ -9,8 +9,8 @@ import { filter, isEqual, orderBy } from 'lodash';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
 import { FilteredConversation } from '../../../chats/components/secondaryBar/SecondaryBarView';
-import { RoomType } from '../../../types/store/RoomTypes';
 import useStore from '../../Store';
+import { RoomType } from 'wsc-shared';
 
 export const useOrderedRoomsInfoByLastMessage = (): FilteredConversation[] => {
 	const roomsData = useStoreWithEqualityFn(

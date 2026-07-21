@@ -14,41 +14,37 @@ import {
 	createMockTextMessage
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
-import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../../types/store/StoreTypes';
+import { messageActionType, TextMessage, RoomType } from 'wsc-shared';
 
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
-const mockedRoom: RoomBe = createMockRoom({
+const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP
 });
 
 const mySessionId = 'mySessionId';
 
-const simpleMyTextMessage: TextMessage = createMockTextMessage({
+const simpleMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	date: Date.now() - 6000
 });
 
-const repliedMyTextMessage: TextMessage = createMockTextMessage({
+const repliedMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	replyTo: 'replyToId',
 	date: Date.now() - 6000,
 	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 });
 
-const forwardedMyTextMessage: TextMessage = createMockTextMessage({
+const forwardedMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
 	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
-const attachmentMyTextMessage: TextMessage = createMockTextMessage({
+const attachmentMyTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	date: Date.now() - 6000,
 	attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
@@ -61,13 +57,13 @@ const myMessagesTypes: Array<[string, TextMessage]> = [
 	['attachment', attachmentMyTextMessage]
 ];
 
-const simpleTextMessage: TextMessage = createMockTextMessage({
+const simpleTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 60
 });
 
-const repliedTextMessage: TextMessage = createMockTextMessage({
+const repliedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
@@ -75,14 +71,14 @@ const repliedTextMessage: TextMessage = createMockTextMessage({
 	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 });
 
-const forwardedTextMessage: TextMessage = createMockTextMessage({
+const forwardedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
 	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
-const attachmentTextMessage: TextMessage = createMockTextMessage({
+const attachmentTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 60,
@@ -97,7 +93,7 @@ const messageTypes: Array<[string, TextMessage]> = [
 ];
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([mockedRoom]);
 	store.setAttributes(createMockAttributesList());
 });
@@ -138,7 +134,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('If forward mode is active, the forward action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
@@ -153,7 +149,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Reply a message after starting an edit should reset the input', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -218,7 +214,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being edited, the delete for all action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -240,7 +236,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being replied, the delete action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
 		store.setReferenceMessage(simpleTextMessage.roomId, {
@@ -262,7 +258,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if forward mode is active, the forward action should not be present', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
@@ -277,7 +273,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('Forward mode is turned on', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
@@ -297,7 +293,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		]);
 	});
 	test('Edit a message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
@@ -315,7 +311,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(storeUpdated.activeConversations[mockedRoom.id].referenceMessage).toBeDefined();
 	});
 	test('Copy a message', async () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
 			wrapper: ProvidersWrapper

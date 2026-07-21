@@ -22,8 +22,10 @@
 		"type-check:watch": "pnpm run type-check -- --watch",
 		"lint": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src",
 		"lint:noWarning": "eslint --quiet --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src",
-		"build:dev": "sdk build --dev --pkgRel $(date +%s)"
-	},
+		"build:dev": "sdk build --dev --pkgRel $(date +%s)",
+        "test:shared": "vitest run --config shared/vitest.config.ts",
+        "lint:shared": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./shared"
+    },
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
@@ -94,6 +96,7 @@
 		"strophe.js": "1.6.2",
 		"use-sync-external-store": "1.6.0",
 		"uuid": "14.0.1",
+		"wsc-shared": "workspace:*",
 		"zustand": "5.0.14"
 	},
 	"pnpm": {

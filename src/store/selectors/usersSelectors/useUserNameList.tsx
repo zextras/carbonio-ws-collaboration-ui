@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import UserDataRetriever from '../../../utils/UserDataRetriever';
+
 import useStore from '../../Store';
 import { getUsersSelector } from '../UsersSelectors';
+import { UserDataRetriever } from 'wsc-shared';
 
 export const useUserNameList = (ids: string[]): string[] => {
 	const users = useStore(getUsersSelector);

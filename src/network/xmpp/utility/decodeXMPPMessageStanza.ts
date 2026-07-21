@@ -7,6 +7,10 @@
 import { includes } from 'lodash';
 import { Strophe } from 'strophe.js';
 
+// Ensure namespaces are registered even when XMPPClient is not instantiated (e.g. in tests)
+Strophe.addNamespace('AFFILIATIONS', 'urn:xmpp:muclight:0#affiliations');
+Strophe.addNamespace('CONFIGURATION', 'urn:xmpp:muclight:0#configuration');
+
 import { getId, getResource } from './decodeJid';
 import {
 	getAttribute,
@@ -21,11 +25,12 @@ import {
 	MessageFastening,
 	MessageType,
 	OperationType,
-	TextMessage
-} from '../../../types/store/ChatsRegistryTypes';
-import { calcReads } from '../../../utils/calcReads';
-import { dateToTimestamp, now } from '../../../utils/dateUtils';
-import { unicodeToChar } from '../../../utils/textUtils';
+	TextMessage,
+	calcReads,
+	dateToTimestamp,
+	now,
+	unicodeToChar
+} from 'wsc-shared';
 
 type OptionalParameters = {
 	date?: number;

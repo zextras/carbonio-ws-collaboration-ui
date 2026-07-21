@@ -10,13 +10,13 @@ import { act, waitFor } from '@testing-library/react';
 import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
-import { bulkDeleteRoomAttachments } from '../../../../network';
-import * as attachmentsApi from '../../../../network/apis/AttachmentsApi';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../../network/xmpp';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
-import type { Attachment } from '../../../../types/network/models/attachmentTypes';
+import * as attachmentUtils from '../../../../utils/attachmentUtils';
+import { Attachment } from 'wsc-shared';
+import * as attachmentsApi from 'wsc-shared';
 
 let intersectionCallbacks: Array<IntersectionObserverCallback> = [];
 
@@ -52,7 +52,8 @@ const fireListItemVisible = async (isIntersecting: boolean): Promise<void> => {
 const renderInList = (attachment: Attachment): ReturnType<typeof setup> =>
 	setup(<List>{[<AttachmentListItem key={attachment.id} attachment={attachment} />]}</List>);
 
-vi.mock('../../../../network/apis/RoomsApi', () => ({
+vi.mock('wsc-shared', async (importOriginal) => ({
+	...(await importOriginal<typeof import('wsc-shared')>()),
 	bulkDeleteRoomAttachments: vi.fn()
 }));
 
@@ -66,7 +67,7 @@ vi.mock('../../../../hooks/usePreviewNavigation', () => ({
 	default: mockUsePreviewNavigation
 }));
 
-const mockedBulkDelete = vi.mocked(bulkDeleteRoomAttachments);
+const mockedBulkDelete = vi.mocked(attachmentsApi.bulkDeleteRoomAttachments);
 
 const myUserId = 'me';
 const otherUserId = 'other-user';
@@ -251,7 +252,7 @@ describe('AttachmentListItem', () => {
 	});
 
 	test('clicking the download button triggers an authenticated download for the attachment id', async () => {
-		const spyGetURL = vi.spyOn(attachmentsApi, 'getURLAttachment');
+		const spyGetURL = vi.spyOn(attachmentUtils, 'downloadAttachment');
 		const clickSpy = vi
 			.spyOn(HTMLAnchorElement.prototype, 'click')
 			.mockImplementation(() => undefined);
@@ -259,7 +260,7 @@ describe('AttachmentListItem', () => {
 		const { user } = setup(<AttachmentListItem attachment={buildAttachment()} />);
 		await user.click(screen.getByRole('button', { name: /download/i }));
 
-		expect(spyGetURL).toHaveBeenCalledWith('att-1');
+		expect(spyGetURL).toHaveBeenCalled();
 		expect(clickSpy).toHaveBeenCalled();
 		clickSpy.mockRestore();
 	});

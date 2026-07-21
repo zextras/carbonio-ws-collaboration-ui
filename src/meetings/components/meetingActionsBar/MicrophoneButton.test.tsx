@@ -8,15 +8,12 @@ import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 
 import MicrophoneButton from './MicrophoneButton';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { routerContextSetup, setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
 import * as UserMediaManager from '../../../utils/UserMediaManager';
+import * as api from 'wsc-shared';
+import { MeetingBe, RoomBe, STREAM_TYPE, RoomType } from 'wsc-shared';
 
 const buttonDataTestId = 'microphone-button';
 

@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
 
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../network/xmpp';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { now } from '../../../utils/dateUtils';

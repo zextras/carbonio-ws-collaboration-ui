@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
+import { STREAM_TYPE } from 'wsc-shared';
+
+const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
 	aspectRatio: 1.7777
 	// video: { aspectRatio: 1.618 }
 };
@@ -90,31 +92,6 @@ export const getFrontCameraStream = (): Promise<MediaStream> =>
 		.getUserMedia({ video: { facingMode: 'user', ...CONSTRAINT_ASPECT_RATIO } })
 		.catch(() => navigator.mediaDevices.getUserMedia({ video: CONSTRAINT_ASPECT_RATIO }));
 
-export const getAudioAndVideo = (
-	audio?:
-		| boolean
-		| {
-				noiseSuppression?: boolean;
-				echoCancellation?: boolean;
-				deviceId?: { exact: string };
-		  },
-	video?: boolean | { deviceId?: { exact: string } }
-): Promise<MediaStream> =>
-	new Promise((resolve, reject) => {
-		navigator.mediaDevices
-			.getUserMedia({
-				video,
-				audio
-			})
-			.then((stream: MediaStream) => {
-				resolve(stream);
-			})
-			.catch((err) => {
-				console.error('Error while requesting video and audio tracks', err);
-				reject(err);
-			});
-	});
-
 /**
  * Request the screen stream for the session
  * https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture
@@ -131,3 +108,46 @@ export const getScreenStream = (): Promise<MediaStream> =>
 				reject(err);
 			});
 	});
+
+export const getStream = (type: STREAM_TYPE, deviceId?: string): Promise<MediaStream> => {
+	switch (type) {
+		case STREAM_TYPE.AUDIO:
+			return getAudioStream(deviceId);
+		case STREAM_TYPE.VIDEO:
+			return getVideoStream(deviceId);
+		case STREAM_TYPE.SCREEN:
+			return getScreenStream();
+		default:
+			return Promise.reject(new Error('Invalid stream type'));
+	}
+};
+
+/**
+ * Create a silent placeholder audio stream (via a disabled oscillator track) used to
+ * bootstrap the outgoing audio sender before the real microphone is available / when
+ * joining muted.
+ */
+export const createSilentAudioStream = (): MediaStream => {
+	const audioCtx: AudioContext = new window.AudioContext();
+	const oscillator: OscillatorNode = audioCtx.createOscillator();
+	const dst: AudioNode = oscillator.connect(audioCtx.createMediaStreamDestination());
+	oscillator.start();
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const audioTrack = Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
+	return new MediaStream([audioTrack]);
+};
+
+/** Play a remote audio track through a hidden <audio> element. */
+export const playRemoteAudioStream = (track: MediaStreamTrack): void => {
+	const fragment = window!.top!.document.createDocumentFragment();
+	const audio = window!.top!.document.createElement('audio');
+	audio.autoplay = true;
+	audio.muted = false;
+	audio.controls = false;
+	audio.id = 'bidirectionalAudioMeeting';
+	fragment.appendChild(audio);
+	const mediaStream = new MediaStream();
+	mediaStream.addTrack(track);
+	audio.srcObject = mediaStream;
+};

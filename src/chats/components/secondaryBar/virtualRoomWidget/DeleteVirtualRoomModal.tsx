@@ -15,9 +15,9 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
-import { deleteRoomAndMeeting } from '../../../../network';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { deleteRoomAndMeeting } from 'wsc-shared';
 
 type deleteVirtualRoomModalProps = {
 	showModal: boolean;

@@ -22,13 +22,13 @@ import AttachmentSmallView from './AttachmentSmallView';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
 	downloadAttachment,
 	getAttachmentDimensions,
 	getAttachmentThumbnailURL
 } from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
+import { AttachmentMessageType } from 'wsc-shared';
 
 const HoverContainer = styled(Container)`
 	z-index: 1;

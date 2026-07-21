@@ -18,11 +18,10 @@ import { useTranslation } from 'react-i18next';
 
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
-import { addRoom } from '../../../network';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import ContactsSelector, { ContactsSelected } from '../contactSelector/ContactsSelector';
+import { MemberBe, RoomType, addRoom } from 'wsc-shared';
 
 const ChatCreationModal = ({
 	open,

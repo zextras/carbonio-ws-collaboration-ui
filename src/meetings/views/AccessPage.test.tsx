@@ -16,7 +16,6 @@ import {
 	mockGoToExternalLoginPage,
 	mockGoToMeetingAccessPage
 } from '../../hooks/__mocks__/useRouting';
-import * as api from '../../network/apis/MeetingsApi';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -25,44 +24,40 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { UserBe } from '../../types/network/models/userBeTypes';
-import { MeetingParticipant } from '../../types/store/MeetingTypes';
-import { RoomType } from '../../types/store/RoomTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+import { MeetingType, RoomType, RootStore } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
-const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
+const user1 = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2 = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3 = createMockUser({ id: 'user3Id', name: 'user 3' });
 
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
+const member1 = { userId: user1.id, owner: true };
+const member2 = { userId: user2.id, owner: false };
+const member3 = { userId: user3.id, owner: true };
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [member1, member2],
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: 'user1' });
+const user1Participant = createMockParticipants({ userId: 'user1' });
 
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: 'user2' });
+const user2Participant = createMockParticipants({ userId: 'user2' });
 
-const groupMeeting: MeetingBe = createMockMeeting({
+const groupMeeting = createMockMeeting({
 	roomId: groupRoom.id,
 	participants: [user1Participant, user2Participant]
 });
 
-const groupForWaitingRoom: RoomBe = createMockRoom({
+const groupForWaitingRoom = createMockRoom({
 	id: 'room-test',
 	type: RoomType.TEMPORARY,
 	members: [member3]
 });
 
-const meetingForWaitingRoom: MeetingBe = createMockMeeting({
+const meetingForWaitingRoom = createMockMeeting({
 	roomId: groupForWaitingRoom.id,
 	meetingType: MeetingType.SCHEDULED
 });

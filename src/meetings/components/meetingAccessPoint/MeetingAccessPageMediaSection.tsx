@@ -14,12 +14,12 @@ import AccessTile from './AccessTile';
 import { MediaStatus } from './externalAccess/MeetingExternalAccessPage';
 import { MicTestButton } from './MicTestButton';
 import { useLocalMediaHandler } from './useLocalMediaHandler';
-import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../utils/localStorageUtils';
+import { MEETINGS_PATH } from 'wsc-shared';
 
 type AccessMeetingPageMediaSectionProps = {
 	hasUserDirectAccess: boolean | undefined;

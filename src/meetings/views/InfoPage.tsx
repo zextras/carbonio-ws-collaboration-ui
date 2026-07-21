@@ -11,7 +11,6 @@ import { useTracker } from '@zextras/carbonio-shell-ui';
 import { map, range } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { CHATS_APP_ID, TRACKER_EVENT } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
@@ -19,6 +18,7 @@ import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors'
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { PAGE_INFO_TYPE, RouterContext } from '../contexts/routerContext';
+import { CHATS_APP_ID, TRACKER_EVENT } from 'wsc-shared';
 
 const Title = styled(Text)`
 	font-size: 1.6rem;

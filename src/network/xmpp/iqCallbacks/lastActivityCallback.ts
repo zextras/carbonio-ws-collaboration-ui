@@ -20,7 +20,6 @@ export function lastActivityCallback(stanza: Element): true {
 	const seconds: number = parseInt(getRequiredAttribute(queryElement, 'seconds'), 10);
 	const date = Date.now() - seconds * 1000;
 
-	const store = useStore.getState();
-	store.setUserLastActivity(from, date);
+	useStore.getState().setUserLastActivity(from, date);
 	return true;
 }

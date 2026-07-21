@@ -18,13 +18,11 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
-import { addRoom } from '../../../../network';
 import { getMeetingIdFromRoom } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { MemberBe } from '../../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
 import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
+import { MemberBe, RoomType, addRoom } from 'wsc-shared';
 
 type CreateVirtualRoomModalProps = {
 	open: boolean;

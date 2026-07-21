@@ -13,11 +13,11 @@ import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import PreviewNavigationManager from './components/PreviewNavigationManager';
-import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
-import useEventListener, { EventName, RouteRedirectEvent } from '../hooks/useEventListener';
+import useEventListener from '../hooks/useEventListener';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
+import { EventName, EventPayloads, CHATS_ROUTE, PRODUCT_NAME } from 'wsc-shared';
 
 const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
 
@@ -57,9 +57,9 @@ export default function useChatsApp(): void {
 	const navigate = useNavigate();
 
 	const handleRedirectFromBrowserNotification = useCallback(
-		(event: CustomEvent<RouteRedirectEvent['data']> | undefined) => {
-			if (event?.detail.path) {
-				navigate(event.detail.path);
+		(event: EventPayloads[EventName.ROUTE_REDIRECT]) => {
+			if (event.path) {
+				navigate(event.path);
 			}
 		},
 		[navigate]

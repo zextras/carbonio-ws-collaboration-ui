@@ -12,17 +12,20 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachmentModal';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
-import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../network/xmpp';
 import {
 	getPreviewNavigationActive,
 	getPreviewNavigationOpenTargetId
 } from '../../store/selectors/PreviewNavigationSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { Attachment } from '../../types/network/models/attachmentTypes';
-import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
 import { buildPreviewItem } from '../../utils/previewNavigationUtils';
+import {
+	Attachment,
+	PreviewNavigationSession,
+	bulkDeleteRoomAttachments,
+	getRoomAttachments
+} from 'wsc-shared';
 
 const shouldLoadMore = (
 	session: PreviewNavigationSession,

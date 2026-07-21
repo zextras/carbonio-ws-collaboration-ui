@@ -13,8 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { OperationType } from '../../../types/store/ChatsRegistryTypes';
-import { dateToTimestamp } from '../../../utils/dateUtils';
+import { OperationType, dateToTimestamp } from 'wsc-shared';
 
 const sessionUser = createMockUser({ id: 'userId', name: 'User' });
 const user1 = createMockUser({ id: 'user1', name: 'User1' });

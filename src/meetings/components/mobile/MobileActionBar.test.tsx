@@ -8,19 +8,16 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import MobileActionBar from './MobileActionBar';
-import * as api from '../../../network/apis/MeetingsApi';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { routerContextSetup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
 import * as UserMediaManager from '../../../utils/UserMediaManager';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
+import { STREAM_TYPE, RoomType } from 'wsc-shared';
+import * as api from 'wsc-shared';
 
-const mockMeeting: MeetingBe = createMockMeeting();
-const mockRoom: RoomBe = createMockRoom({
+const mockMeeting = createMockMeeting();
+const mockRoom = createMockRoom({
 	id: mockMeeting.roomId,
 	type: RoomType.GROUP,
 	members: [{ userId: 'userId', owner: true }]

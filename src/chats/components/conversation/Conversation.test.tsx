@@ -12,20 +12,20 @@ import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import { mockUseMediaQueryCheck } from '../../../hooks/__mocks__/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../hooks/__mocks__/useRouting';
-import * as api from '../../../network/apis/RoomsApi';
-import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
+import { sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import * as api from 'wsc-shared';
 import {
+	EventName,
 	RoomOwnerDemotedEvent,
-	RoomOwnerPromotedEvent
-} from '../../../types/network/websocket/wsConversationEvents';
-import { WsEventType } from '../../../types/network/websocket/wsEvents';
-import { User } from '../../../types/store/UserTypes';
+	RoomOwnerPromotedEvent,
+	RoomType,
+	WsEventType
+} from 'wsc-shared';
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'Name of the group',
 	description: 'A description',
@@ -37,7 +37,7 @@ const testRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test-two',
 	name: 'Another group',
 	description: 'A description',
@@ -49,13 +49,13 @@ const testRoom2: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Info: User = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2Info: User = createMockUser({
+const user2Info = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
@@ -163,12 +163,15 @@ describe('Conversation view', () => {
 			const { user } = setup(<Conversation roomId={testRoom.id} />);
 			act(() => {
 				useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);
-				wsEventsHandler({
-					type: WsEventType.ROOM_OWNER_PROMOTED,
-					sentDate: new Date().toISOString(),
-					roomId: testRoom.id,
-					userId: user1Info.id
-				} as RoomOwnerPromotedEvent);
+				sendCustomEvent({
+					name: EventName.MEMBER_PROMOTED,
+					data: {
+						type: WsEventType.ROOM_OWNER_PROMOTED,
+						sentDate: new Date().toISOString(),
+						roomId: testRoom.id,
+						userId: user1Info.id
+					} as RoomOwnerPromotedEvent
+				});
 			});
 			await user.click(screen.getByText('Members'));
 			const crownCounter = await screen.findAllByTestId('icon: Crown');
@@ -183,12 +186,15 @@ describe('Conversation view', () => {
 			setup(<Conversation roomId={testRoom2.id} />);
 			act(() => {
 				useStore.getState().setMemberModeratorStatus(testRoom2.id, user1Info.id, false);
-				wsEventsHandler({
-					type: WsEventType.ROOM_OWNER_DEMOTED,
-					sentDate: new Date().toISOString(),
-					roomId: testRoom2.id,
-					userId: user1Info.id
-				} as RoomOwnerDemotedEvent);
+				sendCustomEvent({
+					name: EventName.MEMBER_DEMOTED,
+					data: {
+						type: WsEventType.ROOM_OWNER_DEMOTED,
+						sentDate: new Date().toISOString(),
+						roomId: testRoom2.id,
+						userId: user1Info.id
+					} as RoomOwnerDemotedEvent
+				});
 			});
 			const snackbar = await screen.findByText(
 				`You are no longer a moderator of ${testRoom2.name} group.`

@@ -12,16 +12,13 @@ import { mockGoToMainPage } from '../../../../hooks/__mocks__/useRouting';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { RoomType } from 'wsc-shared';
 
-const user1Info: User = createMockUser();
+const user1Info = createMockUser();
 
-const user2Info: User = createMockUser();
+const user2Info = createMockUser();
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',
@@ -42,7 +39,7 @@ const testRoom: RoomBe = createMockRoom({
 	]
 });
 
-const testRoom2: RoomBe = createMockRoom({
+const testRoom2 = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
@@ -64,7 +61,7 @@ const testRoom2: RoomBe = createMockRoom({
 vi.mock('../../../../hooks/useRouting');
 
 beforeEach(() => {
-	const store: RootStore = useStore.getState();
+	const store = useStore.getState();
 	store.addRooms([testRoom2]);
 	store.setLoginInfo({ id: user1Info.id, name: user1Info.name });
 	store.setUserInfo([user1Info, user2Info]);

@@ -5,9 +5,9 @@
  */
 /* eslint-disable */
 
-import { dateToTimestamp } from '../../../utils/dateUtils';
+import { dateToTimestamp } from 'wsc-shared';
 import { getId } from './decodeJid';
-import { Marker } from '../../../types/store/ChatsRegistryTypes';
+import { Marker } from 'wsc-shared';
 import { getRequiredAttribute } from './decodeStanza';
 
 export function decodeMarker(markerStanza: Element): Marker {

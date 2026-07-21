@@ -5,10 +5,9 @@
  */
 
 import useStore from '../../../store/Store';
-import { Marker } from '../../../types/store/ChatsRegistryTypes';
-import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
+import { Marker, now } from 'wsc-shared';
 
 export function onDisplayedMessageStanza(message: Element): true {
 	const displayed = getTagElement(message, 'displayed');
@@ -23,8 +22,7 @@ export function onDisplayedMessageStanza(message: Element): true {
 				markerDate: now(),
 				type: 'displayed'
 			};
-			const store = useStore.getState();
-			store.updateReadStatus(roomId, [displayedMessage]);
+			useStore.getState().updateReadStatus(roomId, [displayedMessage]);
 		}
 	}
 	return true;

@@ -10,9 +10,8 @@ import { screen } from '@testing-library/react';
 
 import ListParticipant from './ListParticipant';
 import { setup } from '../../../tests/test-utils';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
-const contactInfo: ContactInfo = {
+const contactInfo = {
 	email: 'test@user.com',
 	displayName: 'Test User',
 	id: '1234567890'

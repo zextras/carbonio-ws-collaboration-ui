@@ -10,7 +10,7 @@ import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import DeleteUserModal from './DeleteUserModal';
-import { deleteRoomMember } from '../../../../network';
+import { deleteRoomMember } from 'wsc-shared';
 
 type RemoveMemberProps = {
 	roomId: string;

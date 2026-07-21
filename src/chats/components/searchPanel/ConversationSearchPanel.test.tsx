@@ -6,7 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { xmppClient } from '../../../network/xmpp';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -15,17 +15,16 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { screen, setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { User } from '../../../types/store/UserTypes';
 import { formatDate } from '../../../utils/dateUtils';
+import { RoomType } from 'wsc-shared';
 
-const loggedUser: User = createMockUser({
+const loggedUser = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
 });
 
-const user2: User = createMockUser({
+const user2 = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
@@ -35,14 +34,14 @@ const members = [
 	createMockMember({ userId: user2.id })
 ];
 
-const groupRoom: RoomBe = createMockRoom({
+const groupRoom = createMockRoom({
 	id: 'groud-id',
 	name: 'Name of the group',
 	type: RoomType.GROUP,
 	members
 });
 
-const oneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom = createMockRoom({
 	id: 'single-id',
 	type: RoomType.ONE_TO_ONE,
 	members

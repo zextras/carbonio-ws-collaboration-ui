@@ -19,7 +19,6 @@ export function smartMarkersCallback(stanza: Element): void {
 		const markers = map(smartMarkersQuery.getElementsByTagName('marker'), (marker) =>
 			decodeMarker(marker)
 		);
-		const store = useStore.getState();
-		store.updateReadStatus(roomId, markers);
+		useStore.getState().updateReadStatus(roomId, markers);
 	}
 }

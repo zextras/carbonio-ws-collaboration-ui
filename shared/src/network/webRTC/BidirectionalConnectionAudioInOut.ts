@@ -1,0 +1,143 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
+import { first } from 'lodash';
+import { gte } from 'semver';
+
+import { PeerConnConfig } from './PeerConnConfig';
+import { sharedConfig } from '../../config';
+import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { audioIceRestart, createAudioOffer, updateAudioStreamStatus } from '../apis/MeetingsApi';
+
+export default class BidirectionalConnectionAudioInOut implements IBidirectionalConnectionAudioInOut {
+	peerConn: RTCPeerConnection;
+
+	meetingId: string;
+
+	rtpSender: RTCRtpSender | null;
+
+	selectedAudioDeviceId: string | undefined;
+
+	initialAudioStatus: boolean;
+
+	oscillatorAudioTrack: MediaStreamTrack | undefined;
+
+	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
+		this.peerConn.ontrack = this.onTrack;
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
+
+		this.meetingId = meetingId;
+		this.rtpSender = null;
+		this.selectedAudioDeviceId = selectedAudioDeviceId;
+		this.initialAudioStatus = audioStreamEnabled;
+
+		const silentAudioStream = sharedConfig.createSilentAudioStream();
+		this.oscillatorAudioTrack = first(silentAudioStream.getAudioTracks());
+
+		this.updateRemoteStreamAudio();
+		this.init();
+	}
+
+	private init(): void {
+		if (!this.oscillatorAudioTrack) return;
+		this.updateLocalStreamTrack(new MediaStream([this.oscillatorAudioTrack]))
+			.then(() => this.negotiate())
+			.then(() => {
+				if (this.initialAudioStatus) {
+					return sharedConfig
+						.getStream(STREAM_TYPE.AUDIO, this.selectedAudioDeviceId)
+						.then((stream) => {
+							this.updateLocalStreamTrack(stream);
+							sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+						});
+				}
+				return undefined;
+			})
+			.catch((reason) => console.warn(reason));
+	}
+
+	// Handle new tracks
+	onTrack = (trackEvent: RTCTrackEvent): void => {
+		this.oscillatorAudioTrack = trackEvent.track;
+		this.updateRemoteStreamAudio();
+	};
+
+	// Create the SDP offer, set it as local description and send it to the remote peer
+	private readonly negotiate = async (): Promise<void> => {
+		const offer = await this.peerConn.createOffer();
+		if (this.peerConn.signalingState !== 'stable') return;
+		await this.peerConn.setLocalDescription(offer);
+		if (!offer.sdp) return;
+		await createAudioOffer(this.meetingId, offer.sdp);
+		await updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
+	};
+
+	private readonly onConnectionStateChange = (): void => {
+		const state = this.peerConn?.connectionState;
+		if (state === 'failed') {
+			this.peerConn
+				?.createOffer({ iceRestart: true })
+				.then((rtcSessionDesc) => {
+					this.peerConn
+						?.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							const localDesc = this.peerConn?.localDescription;
+							const version = sharedConfig.useStore.getState().session.apiVersion;
+							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
+								audioIceRestart(this.meetingId, localDesc.sdp);
+							}
+						})
+						.catch((reason) => console.warn('setLocalDescription failed', reason));
+				})
+				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		}
+	};
+
+	// Handle remote answer to the SDP offer arrived from the signaling channel
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
+		if (this.peerConn.signalingState !== 'have-remote-offer') {
+			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
+			this.peerConn.setRemoteDescription(remoteDescription);
+		}
+	}
+
+	/**
+	 * Stop the old track and add the new one selected to the sender without the need
+	 * to perform a new renegotiation due to the switch of resource
+	 * @param mediaStreamTrack
+	 */
+	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
+		return new Promise((resolve) => {
+			const audioTrack: MediaStreamTrack = mediaStreamTrack.getAudioTracks()[0];
+			if (this.rtpSender == null) {
+				this.rtpSender = this.peerConn.addTrack(audioTrack, mediaStreamTrack ?? new MediaStream());
+			} else if (this.rtpSender.track) {
+				this.rtpSender.track.stop();
+				this.rtpSender.replaceTrack(audioTrack).catch((reason) => console.warn(reason));
+			}
+			this.oscillatorAudioTrack = audioTrack;
+			resolve(audioTrack);
+		});
+	}
+
+	updateRemoteStreamAudio(): void {
+		if (this.oscillatorAudioTrack != null) {
+			sharedConfig.playRemoteAudioStream(this.oscillatorAudioTrack);
+		}
+	}
+
+	closeRtpSenderTrack(): void {
+		this.rtpSender?.track?.stop();
+	}
+
+	closePeerConnection(): void {
+		this.closeRtpSenderTrack();
+		this.oscillatorAudioTrack?.stop?.();
+		this.peerConn?.close?.();
+	}
+}

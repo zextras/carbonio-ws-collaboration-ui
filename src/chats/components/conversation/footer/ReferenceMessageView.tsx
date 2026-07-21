@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { messageActionType } from 'wsc-shared';
 
 type ReferenceMessageViewProps = {
 	roomId: string;

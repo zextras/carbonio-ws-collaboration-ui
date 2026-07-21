@@ -9,44 +9,40 @@ import { renderHook } from '@testing-library/react';
 import { useIsWritingLabel } from './useIsWritingLabel';
 import useStore from '../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../tests/createMock';
-import { RoomBe } from '../types/network/models/roomBeTypes';
-import { UserBe } from '../types/network/models/userBeTypes';
-import { RootStore } from '../types/store/StoreTypes';
-import { User } from '../types/store/UserTypes';
 
 vi.mock('react-i18next');
 
-const user1Info: UserBe = createMockUser({
+const user1Info = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'One'
 });
 
-const user2Info: UserBe = createMockUser({
+const user2Info = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'Two'
 });
 
-const user3Info: UserBe = createMockUser({
+const user3Info = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'Three'
 });
 
-const user4Info: UserBe = createMockUser({
+const user4Info = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'Four'
 });
 
-const user5Info: User = createMockUser({
+const user5Info = createMockUser({
 	id: 'user5',
 	email: 'user5@domain.com',
 	name: 'User 5'
 });
 
-const testRoom: RoomBe = createMockRoom({
+const testRoom = createMockRoom({
 	id: 'room-test',
 	members: [
 		createMockMember({ userId: user1Info.id, owner: true }),
@@ -64,7 +60,7 @@ beforeEach(() => {
 
 describe('useIsWritingLabel', () => {
 	test('one user is writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 
 		const { result } = renderHook(() => useIsWritingLabel(testRoom.id));
@@ -72,7 +68,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(' status.isTyping');
 	});
 	test('two users are writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 
@@ -81,7 +77,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(',  status.areTyping');
 	});
 	test('four users are writing', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 		store.setIsWriting(testRoom.id, user3Info.id, true);
@@ -92,7 +88,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe('status.nameAndNumberOfPeopleAreTyping');
 	});
 	test('one user is writing - meeting view', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 
 		const { result } = renderHook(() => useIsWritingLabel(testRoom.id, true));
@@ -100,7 +96,7 @@ describe('useIsWritingLabel', () => {
 		expect(result.current).toBe(' status.isTyping');
 	});
 	test('more users are writing - meeting view', () => {
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
 		store.setIsWriting(testRoom.id, user1Info.id, true);
 		store.setIsWriting(testRoom.id, user2Info.id, true);
 		store.setIsWriting(testRoom.id, user3Info.id, true);
