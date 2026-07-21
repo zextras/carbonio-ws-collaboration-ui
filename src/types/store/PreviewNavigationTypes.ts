@@ -7,7 +7,8 @@
 import {
 	Attachment,
 	AttachmentsSortBy,
-	AttachmentsSortOrder
+	AttachmentsSortOrder,
+	MimeTypeCategory
 } from '../network/models/attachmentTypes';
 
 export type PreviewNavigationSession = {
@@ -16,6 +17,9 @@ export type PreviewNavigationSession = {
 	sortBy: AttachmentsSortBy;
 	order: AttachmentsSortOrder;
 	userId?: string;
+	// Category of the gallery bucket the session was opened from: the lazy-load
+	// must use the same filter or the cursor would not be valid.
+	mimeTypeCategory?: MimeTypeCategory;
 	attachments: Array<Attachment>;
 	nextCursor?: string;
 	hasMore: boolean;

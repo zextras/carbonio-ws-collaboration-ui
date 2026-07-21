@@ -6,9 +6,14 @@
 
 import { Attachment, GetRoomAttachmentsParams } from '../network/models/attachmentTypes';
 
+// Omit that distributes over unions: a plain Omit would flatten the XOR between
+// mimeType and mimeTypeCategory, silently allowing both to be set together
+// (which the API rejects with a 400).
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
+
 // All the filter/sort params of the attachments API, without the pagination ones.
 // Each distinct combination identifies an independent pagination bucket.
-export type MediaGalleryFilter = Omit<GetRoomAttachmentsParams, 'limit' | 'cursor'>;
+export type MediaGalleryFilter = DistributiveOmit<GetRoomAttachmentsParams, 'limit' | 'cursor'>;
 
 // The filter chosen by the user: the mime type category comes from the active tab,
 // not from the filter itself.

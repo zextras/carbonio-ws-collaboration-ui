@@ -231,6 +231,7 @@ describe('PreviewNavigationManager', () => {
 			roomId,
 			sortBy: 'created_at',
 			order: 'desc',
+			mimeTypeCategory: 'IMAGES',
 			attachments: [
 				buildAttachment('a-1'),
 				buildAttachment('a-2'),
@@ -259,7 +260,7 @@ describe('PreviewNavigationManager', () => {
 		await waitFor(() => {
 			expect(mockedGetRoomAttachments).toHaveBeenCalledWith(
 				roomId,
-				expect.objectContaining({ cursor: 'cursor-1' })
+				expect.objectContaining({ cursor: 'cursor-1', mimeTypeCategory: 'IMAGES' })
 			);
 		});
 	});

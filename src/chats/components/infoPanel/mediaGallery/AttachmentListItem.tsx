@@ -66,27 +66,27 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 // Swaps the file icon with the selection checkbox on hover and while the
 // selection mode is active.
 const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
+	position: relative;
 	flex-shrink: 0;
-	.fileAvatar {
-		display: ${({ $selectionMode }): string => ($selectionMode ? 'none' : 'block')};
-	}
+	/* Opacity instead of display keeps the checkbox keyboard-focusable; its
+	   opaque background covers the file icon when shown. */
 	.selectionCheckbox {
-		display: ${({ $selectionMode }): string => ($selectionMode ? 'flex' : 'none')};
+		opacity: ${({ $selectionMode }): number => ($selectionMode ? 1 : 0)};
 	}
-	&:hover .fileAvatar {
-		display: none;
-	}
-	&:hover .selectionCheckbox {
-		display: flex;
+	&:hover .selectionCheckbox,
+	.selectionCheckbox:focus-visible {
+		opacity: 1;
 	}
 `;
 
 const SelectionCheckbox = styled.div`
-	width: 2.5rem;
-	height: 2.5rem;
+	position: absolute;
+	inset: 0;
+	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	background-color: ${({ theme }): string => theme.palette.gray6.regular};
 `;
 
 const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
@@ -134,6 +134,16 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 
 	const onCheckboxClick = useCallback(
 		(e: React.MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
+
+	const onCheckboxKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			e.preventDefault();
 			e.stopPropagation();
 			toggleSelection(attachment);
 		},
@@ -199,8 +209,11 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 							className="selectionCheckbox"
 							data-testid={`mediaGallerySelect-${attachment.id}`}
 							onClick={onCheckboxClick}
+							onKeyDown={onCheckboxKeyDown}
 							role="checkbox"
+							tabIndex={0}
 							aria-checked={selected}
+							aria-label={attachment.name}
 						>
 							<Icon
 								icon={selected ? 'CheckmarkSquare' : 'Square'}

@@ -239,6 +239,7 @@ describe('MediaGalleryTab', () => {
 		const SELECT_A1_TEST_ID = 'mediaGallerySelect-a1';
 		const SELECT_A2_TEST_ID = 'mediaGallerySelect-a2';
 		const SELECTION_HEADER_TEST_ID = 'mediaGallerySelectionHeader';
+		const ONE_SELECTED = '1 selected';
 
 		const seedTwoAttachments = (overrides?: Partial<Attachment>): void => {
 			mockedGetRoomAttachments.mockResolvedValueOnce({
@@ -263,7 +264,7 @@ describe('MediaGalleryTab', () => {
 			expect(screen.getByTestId('mediaGalleryTotalCounter')).toBeInTheDocument();
 
 			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
-			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent('1 selected');
+			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent(ONE_SELECTED);
 			expect(screen.getByTestId('mediaGalleryBulkActionsBar')).toBeInTheDocument();
 			expect(screen.queryByTestId('mediaGalleryTotalCounter')).not.toBeInTheDocument();
 
@@ -271,7 +272,7 @@ describe('MediaGalleryTab', () => {
 			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent('2 selected');
 
 			await user.click(screen.getByTestId(SELECT_A2_TEST_ID));
-			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent('1 selected');
+			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent(ONE_SELECTED);
 		});
 
 		test('Cancel clears the selection and leaves selection mode', async () => {
@@ -311,6 +312,20 @@ describe('MediaGalleryTab', () => {
 			await waitFor(() => {
 				expect(screen.queryByTestId(SELECTION_HEADER_TEST_ID)).not.toBeInTheDocument();
 			});
+		});
+
+		test('the tile checkbox toggles the selection with the keyboard', async () => {
+			seedTwoAttachments();
+			setup(<MediaGalleryTab roomId={roomId} />);
+			await screen.findByTestId(A1_TEST_ID);
+
+			// eslint-disable-next-line testing-library/prefer-user-event -- asserts the raw keydown handler
+			fireEvent.keyDown(screen.getByTestId(SELECT_A1_TEST_ID), { key: 'Enter' });
+			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent(ONE_SELECTED);
+
+			// eslint-disable-next-line testing-library/prefer-user-event -- asserts the raw keydown handler
+			fireEvent.keyDown(screen.getByTestId(SELECT_A1_TEST_ID), { key: ' ' });
+			expect(screen.queryByTestId(SELECTION_HEADER_TEST_ID)).not.toBeInTheDocument();
 		});
 
 		test('the contextual menu is disabled in selection mode', async () => {

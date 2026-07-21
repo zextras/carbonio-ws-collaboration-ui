@@ -37,11 +37,13 @@ const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 	overflow: hidden;
 	cursor: pointer;
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
+	/* Opacity instead of visibility keeps the checkbox keyboard-focusable. */
 	.selectionCheckbox {
-		visibility: ${({ $selectionMode }): string => ($selectionMode ? 'visible' : 'hidden')};
+		opacity: ${({ $selectionMode }): number => ($selectionMode ? 1 : 0)};
 	}
-	&:hover .selectionCheckbox {
-		visibility: visible;
+	&:hover .selectionCheckbox,
+	.selectionCheckbox:focus-visible {
+		opacity: 1;
 	}
 `;
 
@@ -124,6 +126,25 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 		[attachment, toggleSelection]
 	);
 
+	const onTileKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			e.preventDefault();
+			onTileClick();
+		},
+		[onTileClick]
+	);
+
+	const onCheckboxKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			e.preventDefault();
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
+
 	const showImage = hasBeenVisible && thumbnailUrl !== undefined && !thumbnailFailed;
 
 	return (
@@ -144,7 +165,9 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 					<TileWrapper
 						data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
 						onClick={onTileClick}
+						onKeyDown={onTileKeyDown}
 						role="button"
+						tabIndex={0}
 						aria-label={attachment.name}
 						$selectionMode={isSelectionMode}
 					>
@@ -169,9 +192,12 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 							className="selectionCheckbox"
 							data-testid={`mediaGallerySelect-${attachment.id}`}
 							onClick={onCheckboxClick}
+							onKeyDown={onCheckboxKeyDown}
 							$selected={selected}
 							role="checkbox"
+							tabIndex={0}
 							aria-checked={selected}
+							aria-label={attachment.name}
 						>
 							<Icon
 								icon={selected ? 'CheckmarkSquare' : 'Square'}

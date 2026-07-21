@@ -11,7 +11,7 @@ import { getMediaGalleryActiveFilter } from '../store/selectors/MediaGallerySele
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
-import { getMediaGalleryBucketKey } from '../utils/attachmentUtils';
+import { getMediaGalleryBucketKey, getMimeTypeCategory } from '../utils/attachmentUtils';
 
 export const PREVIEW_NAVIGATION_PAGE_SIZE = 20;
 const CHAT_ANCHOR_BUFFER_MS = 24 * 60 * 60 * 1000;
@@ -33,7 +33,12 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 	const openFromGallery = useCallback(
 		(roomId: string, clickedAttachment: Attachment): void => {
 			const state = useStore.getState();
-			const filter = getMediaGalleryActiveFilter(state, roomId);
+			const activeFilter = getMediaGalleryActiveFilter(state, roomId);
+			// Gallery buckets are keyed per category tab, and an attachment's own
+			// category always matches the tab it is rendered in (the server filter
+			// mirrors getMimeTypeCategory), so it identifies the current bucket.
+			const mimeTypeCategory = getMimeTypeCategory(clickedAttachment.mimeType);
+			const filter = { ...activeFilter, mimeTypeCategory };
 			const bucket = state.mediaGallery[roomId]?.buckets[getMediaGalleryBucketKey(filter)];
 			startPreviewNavigation({
 				source: 'gallery',
@@ -41,6 +46,7 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 				sortBy: filter.sortBy ?? 'created_at',
 				order: filter.order ?? 'desc',
 				userId: filter.userId,
+				mimeTypeCategory,
 				attachments: bucket?.attachments ?? [],
 				nextCursor: bucket?.nextCursor,
 				hasMore: bucket?.hasMore ?? true,

@@ -186,6 +186,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 			limit: PREVIEW_NAVIGATION_PAGE_SIZE,
 			cursor: session.nextCursor,
 			userId: session.userId,
+			mimeTypeCategory: session.mimeTypeCategory,
 			sortBy: session.sortBy,
 			order: session.order
 		})
