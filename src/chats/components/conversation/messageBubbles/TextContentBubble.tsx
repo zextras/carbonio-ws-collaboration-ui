@@ -4,33 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, ReactElement, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Text } from '@zextras/carbonio-design-system';
-import { filter, join, size } from 'lodash';
+import { filter, size } from 'lodash';
+
+import MarkdownMessage from './MarkdownMessage';
 
 const MessageText = styled(Container)`
 	white-space: pre-wrap;
 	word-break: break-word;
-`;
-
-const MessageContent = styled.span`
-	user-select: text;
-	vertical-align: middle;
-	a {
-		color: ${({ theme }): string => theme.palette.info.regular};
-		text-decoration: underline;
-		&:hover {
-			color: ${({ theme }): string => theme.palette.info.hover};
-		}
-		&:focus {
-			color: ${({ theme }): string => theme.palette.info.focus};
-		}
-		&:active {
-			color: ${({ theme }): string => theme.palette.info.active};
-		}
-	}
 `;
 
 const CustomText = styled(Text)<{ $isEmojiString: boolean }>`
@@ -38,26 +22,28 @@ const CustomText = styled(Text)<{ $isEmojiString: boolean }>`
 `;
 
 type TextContentBubbleProps = {
-	textContent: string | (string | ReactElement)[];
+	textContent: string;
 };
 
 const TextContentBubble: FC<TextContentBubbleProps> = ({ textContent }) => {
 	const isEmojiString = useMemo(() => {
 		const regexEmoji = /\p{Extended_Pictographic}/u;
-		const text = join(textContent, '').replace(/\s+/g, '');
+		const text = textContent.replaceAll(/\s+/g, '');
 		const emojiMatches = filter([...text], (char) => regexEmoji.test(char));
 		return size(emojiMatches) > 0 && size(emojiMatches) < 4 && size(text) === size(emojiMatches);
 	}, [textContent]);
 
-	return (
-		<MessageText color="secondary" crossAlignment="flex-start">
-			<MessageContent>
-				<CustomText overflow="break-word" $isEmojiString={isEmojiString}>
+	if (isEmojiString) {
+		return (
+			<MessageText color="secondary" crossAlignment="flex-start">
+				<CustomText overflow="break-word" $isEmojiString>
 					{textContent}
 				</CustomText>
-			</MessageContent>
-		</MessageText>
-	);
+			</MessageText>
+		);
+	}
+
+	return <MarkdownMessage text={textContent} />;
 };
 
 export default TextContentBubble;
