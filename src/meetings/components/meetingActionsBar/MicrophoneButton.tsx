@@ -77,6 +77,7 @@ const MicrophoneButton = ({
 			getAudioStream(audioItem.deviceId).then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then((track) => {
 					if (!audioStatus && track) {
+						// eslint-disable-next-line no-param-reassign
 						track.enabled = false;
 					}
 				});
