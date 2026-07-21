@@ -74,14 +74,14 @@ const MicrophoneButton = ({
 
 	const onClickAudioItem = useCallback(
 		(audioItem: MediaDeviceInfo) => {
-			if (audioStatus) {
-				getAudioStream(audioItem.deviceId).then((stream) => {
-					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-					setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
+			getAudioStream(audioItem.deviceId).then((stream) => {
+				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then((track) => {
+					if (!audioStatus && track) {
+						track.enabled = false;
+					}
 				});
-			} else {
 				setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
-			}
+			});
 		},
 		[audioStatus, bidirectionalAudioConn, setSelectedDeviceId]
 	);
