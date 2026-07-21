@@ -11,6 +11,7 @@ import { addRoute } from '@zextras/carbonio-shell-ui';
 
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import ConnectionSnackbarManager from '../chats/components/ConnectionSnackbarManager';
+import PreviewNavigationManager from '../chats/components/PreviewNavigationManager';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from 'wsc-shared';
 
 const LazyMeetingMainView = lazy(
@@ -21,6 +22,7 @@ const MeetingMain = (): React.JSX.Element => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
 		<ModalManager>
 			<ConnectionSnackbarManager />
+			<PreviewNavigationManager />
 			<LazyMeetingMainView />
 		</ModalManager>
 	</Suspense>

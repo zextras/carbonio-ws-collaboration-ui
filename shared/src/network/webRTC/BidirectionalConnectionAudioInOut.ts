@@ -29,7 +29,6 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
-		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
 		this.meetingId = meetingId;
@@ -41,14 +40,25 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.oscillatorAudioTrack = first(silentAudioStream.getAudioTracks());
 
 		this.updateRemoteStreamAudio();
-		this.updateLocalStreamTrack(silentAudioStream).then(() => {
-			if (audioStreamEnabled) {
-				sharedConfig.getStream(STREAM_TYPE.AUDIO, selectedAudioDeviceId).then((stream) => {
-					this.updateLocalStreamTrack(stream).then();
-					sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
-				});
-			}
-		});
+		this.init();
+	}
+
+	private init(): void {
+		if (!this.oscillatorAudioTrack) return;
+		this.updateLocalStreamTrack(new MediaStream([this.oscillatorAudioTrack]))
+			.then(() => this.negotiate())
+			.then(() => {
+				if (this.initialAudioStatus) {
+					return sharedConfig
+						.getStream(STREAM_TYPE.AUDIO, this.selectedAudioDeviceId)
+						.then((stream) => {
+							this.updateLocalStreamTrack(stream);
+							sharedConfig.useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+						});
+				}
+				return undefined;
+			})
+			.catch((reason) => console.warn(reason));
 	}
 
 	// Handle new tracks
@@ -57,25 +67,14 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.updateRemoteStreamAudio();
 	};
 
-	// Create SDP offer, set it as local description and send it to the remote peer
-	onNegotiationNeeded = (): void => {
-		this.peerConn
-			.createOffer()
-			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-				if (this.peerConn.signalingState === 'stable') {
-					this.peerConn
-						.setLocalDescription(rtcSessionDesc)
-						.then(() => {
-							if (rtcSessionDesc.sdp) {
-								createAudioOffer(this.meetingId, rtcSessionDesc.sdp).then(() => {
-									updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
-								});
-							}
-						})
-						.catch((reason) => console.warn(reason));
-				}
-			})
-			.catch((reason) => console.warn('createOffer failed', reason));
+	// Create the SDP offer, set it as local description and send it to the remote peer
+	private readonly negotiate = async (): Promise<void> => {
+		const offer = await this.peerConn.createOffer();
+		if (this.peerConn.signalingState !== 'stable') return;
+		await this.peerConn.setLocalDescription(offer);
+		if (!offer.sdp) return;
+		await createAudioOffer(this.meetingId, offer.sdp);
+		await updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
 	};
 
 	private readonly onConnectionStateChange = (): void => {

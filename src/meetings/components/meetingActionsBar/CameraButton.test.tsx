@@ -5,11 +5,46 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 
 import CameraButton from './CameraButton';
 import useStore from '../../../store/Store';
-import { setup } from '../../../tests/test-utils';
+import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
+import * as UserMediaManager from '../../../utils/UserMediaManager';
+import * as api from 'wsc-shared';
+import { MeetingBe, RoomBe, STREAM_TYPE, RoomType } from 'wsc-shared';
+
+const mockMeeting: MeetingBe = createMockMeeting();
+const mockRoom: RoomBe = createMockRoom({
+	id: mockMeeting.roomId,
+	type: RoomType.GROUP,
+	members: [{ userId: 'userId', owner: true }]
+});
+
+const activeMeetingSetup = (videoStreamOn: boolean): void => {
+	const store = useStore.getState();
+	store.setLoginInfo({ id: 'userId', name: 'User' });
+	store.setWebsocketStatus(true);
+	store.addRooms([mockRoom]);
+	store.addMeetings([mockMeeting]);
+	store.addParticipant(mockMeeting.id, {
+		userId: 'userId',
+		videoStreamOn,
+		joinedAt: ''
+	});
+	store.meetingConnection(mockMeeting.id);
+};
+
+const controlledError = new Error('Controlled error');
+
+const cameraButtonComponent = (
+	<CameraButton
+		videoDropdownRef={React.createRef<HTMLDivElement>()}
+		isVideoListOpen={false}
+		setIsVideoListOpen={vi.fn()}
+	/>
+);
 
 describe('Camera button', () => {
 	test('Should render the component', async () => {
@@ -62,5 +97,70 @@ describe('Camera button', () => {
 		);
 		const cameraButton = await screen.findByTestId('cameraButton');
 		expect(cameraButton).toBeDisabled();
+	});
+
+	test('Camera button is disabled while enabling video and re-enabled when stream status updates', async () => {
+		activeMeetingSetup(false);
+		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue({} as MediaStream);
+		vi.spyOn(api, 'updateMediaOffer').mockResolvedValue({} as Response);
+
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
+		videoOutConn!.peerConn = {} as RTCPeerConnection;
+		vi.spyOn(videoOutConn!, 'updateLocalStreamTrack').mockResolvedValue({} as MediaStreamTrack);
+
+		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
+		const cameraButton = await screen.findByTestId('cameraButton');
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+
+		await user.click(cameraButton);
+		expect(cameraButton).toBeDisabled();
+
+		act(() => {
+			useStore.getState().changeStreamStatus(mockMeeting.id, 'userId', STREAM_TYPE.VIDEO, true);
+		});
+		expect(cameraButton).toBeEnabled();
+	});
+
+	test('Camera button is re-enabled when updateMediaOffer fails', async () => {
+		activeMeetingSetup(false);
+		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue({} as MediaStream);
+		vi.spyOn(api, 'updateMediaOffer').mockRejectedValue(controlledError);
+
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
+		videoOutConn!.peerConn = {} as RTCPeerConnection;
+		vi.spyOn(videoOutConn!, 'updateLocalStreamTrack').mockResolvedValue({} as MediaStreamTrack);
+
+		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
+		const cameraButton = await screen.findByTestId('cameraButton');
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+
+		await user.click(cameraButton);
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+	});
+
+	test('Camera button is re-enabled when the media offer fails while starting video', async () => {
+		activeMeetingSetup(false);
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
+		vi.spyOn(videoOutConn!, 'startVideo').mockRejectedValue(controlledError);
+
+		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
+		const cameraButton = await screen.findByTestId('cameraButton');
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+
+		await user.click(cameraButton);
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+	});
+
+	test('Camera button is re-enabled when stopVideo fails', async () => {
+		activeMeetingSetup(true);
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
+		vi.spyOn(videoOutConn!, 'stopVideo').mockRejectedValue(controlledError);
+
+		const { user } = routerContextSetup(cameraButtonComponent, { meetingId: mockMeeting.id });
+		const cameraButton = await screen.findByTestId('cameraButton');
+		await waitFor(() => expect(cameraButton).toBeEnabled());
+
+		await user.click(cameraButton);
+		await waitFor(() => expect(cameraButton).toBeEnabled());
 	});
 });

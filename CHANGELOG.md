@@ -1,3 +1,15 @@
+## [0.16.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.5...v0.16.6) (2026-07-10)
+
+### Bug Fixes
+
+* recover audio/video toggle buttons after a failed call [CO-3865] ([#803](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/803)) ([57635a0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/57635a02fd4b4702400d7601ac09478293454e25))
+
+## [0.16.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.4...v0.16.5) (2026-06-24)
+
+### Bug Fixes
+
+* add PreviewNavigationManager to meeting initialization to support previews ([c70eb84](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c70eb844072d1ad8be98491cce43c2c1c3b3e1eb)), closes [#789](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/789)
+
 ## [0.16.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.3...v0.16.4) (2026-06-02)
 
 ### Other changes

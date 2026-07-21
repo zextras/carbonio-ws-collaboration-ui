@@ -68,13 +68,15 @@ export const mockDisplayNotification = vi.fn();
 export const mockSendCustomEvent = vi.fn();
 export const mockClearAuthCookies = vi.fn();
 export const mockGetForwardedMessagePayload = vi.fn(() => Promise.resolve(''));
+export const mockGetStream = vi.fn(() => Promise.resolve(new MediaStream()));
+export const mockCreateSilentAudioStream = vi.fn(() => new MediaStream());
 
 beforeAll(() => {
 	configureSharedCode({
 		useStore,
 		sendCustomEvent: mockSendCustomEvent,
-		getStream: vi.fn(() => Promise.resolve(new MediaStream())),
-		createSilentAudioStream: vi.fn(() => new MediaStream()),
+		getStream: mockGetStream,
+		createSilentAudioStream: mockCreateSilentAudioStream,
 		playRemoteAudioStream: vi.fn(),
 		clearAuthCookies: mockClearAuthCookies,
 		xmppClient: {
@@ -101,4 +103,6 @@ afterAll(() => {
 beforeEach(() => {
 	useStore.setState(initialState, true);
 	mockFetchAPI.mockReset().mockResolvedValue({});
+	mockGetStream.mockReset().mockResolvedValue(new MediaStream());
+	mockCreateSilentAudioStream.mockReset().mockReturnValue(new MediaStream());
 });

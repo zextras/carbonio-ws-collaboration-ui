@@ -156,7 +156,7 @@ describe('MobileActionBar test', () => {
 		store.meetingConnection(mockMeeting.id);
 
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
-		const stopVideoSpy = vi.spyOn(videoOutConn!, 'stopVideo').mockImplementation(() => {});
+		const stopVideoSpy = vi.spyOn(videoOutConn!, 'stopVideo').mockResolvedValue({} as Response);
 
 		const { user } = routerContextSetup(
 			<MobileActionBar

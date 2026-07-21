@@ -10,7 +10,9 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useContext,
-	useMemo
+	useEffect,
+	useMemo,
+	useState
 } from 'react';
 
 import { Tooltip } from '@zextras/carbonio-design-system';
@@ -63,6 +65,12 @@ const MicrophoneButton = ({
 
 	const { permission, deviceList, noDevices } = useMediaDevices('audio');
 
+	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
+
+	useEffect(() => {
+		setButtonStatus(true);
+	}, [audioStatus]);
+
 	const onClickAudioItem = useCallback(
 		(audioItem: MediaDeviceInfo) => {
 			if (audioStatus) {
@@ -90,21 +98,20 @@ const MicrophoneButton = ({
 	);
 
 	const toggleAudioStream = useCallback(
-		(event: { stopPropagation: () => void }) => {
+		async (event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
-			if (!audioStatus) {
-				getAudioStream(selectedAudioDeviceId)
-					.then((stream) => {
-						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							updateAudioStreamStatus(meetingId!, !audioStatus);
-						});
-					})
-					.catch((e) => {
-						console.log(e);
-					});
-			} else {
-				bidirectionalAudioConn?.closeRtpSenderTrack();
-				updateAudioStreamStatus(meetingId!, !audioStatus);
+			setButtonStatus(false);
+			try {
+				if (!audioStatus) {
+					const stream = await getAudioStream(selectedAudioDeviceId);
+					await bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				} else {
+					bidirectionalAudioConn?.closeRtpSenderTrack();
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				}
+			} catch {
+				setButtonStatus(true);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
@@ -116,8 +123,13 @@ const MicrophoneButton = ({
 	}, [websocketNetworkStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
 
 	const disabled = useMemo(
-		() => !websocketNetworkStatus || !messageBrokerStatus || permission !== 'granted' || noDevices,
-		[messageBrokerStatus, noDevices, permission, websocketNetworkStatus]
+		() =>
+			!buttonStatus ||
+			!websocketNetworkStatus ||
+			!messageBrokerStatus ||
+			permission !== 'granted' ||
+			noDevices,
+		[buttonStatus, messageBrokerStatus, noDevices, permission, websocketNetworkStatus]
 	);
 
 	return (
