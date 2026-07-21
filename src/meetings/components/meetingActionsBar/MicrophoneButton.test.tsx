@@ -125,6 +125,9 @@ describe('Microphone button', () => {
 
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
 		vi.spyOn(bidirectionalAudioConn!, 'unmuteAudioTrack').mockResolvedValue();
+		const muteAudioTrack = vi
+			.spyOn(bidirectionalAudioConn!, 'muteAudioTrack')
+			.mockImplementation(() => {});
 
 		const { user } = routerContextSetup(microphoneButtonComponent, { meetingId: mockMeeting.id });
 		const microphoneButton = await screen.findByTestId(buttonDataTestId);
@@ -132,6 +135,8 @@ describe('Microphone button', () => {
 
 		await user.click(microphoneButton);
 		await waitFor(() => expect(microphoneButton).toBeEnabled());
+		// The local track state is rolled back to muted
+		expect(muteAudioTrack).toHaveBeenCalled();
 	});
 
 	test('Microphone button is re-enabled when updateAudioStreamStatus fails on disabling', async () => {
@@ -140,6 +145,9 @@ describe('Microphone button', () => {
 
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
 		vi.spyOn(bidirectionalAudioConn!, 'muteAudioTrack').mockImplementation(() => {});
+		const unmuteAudioTrack = vi
+			.spyOn(bidirectionalAudioConn!, 'unmuteAudioTrack')
+			.mockResolvedValue();
 
 		const { user } = routerContextSetup(microphoneButtonComponent, { meetingId: mockMeeting.id });
 		const microphoneButton = await screen.findByTestId(buttonDataTestId);
@@ -147,5 +155,7 @@ describe('Microphone button', () => {
 
 		await user.click(microphoneButton);
 		await waitFor(() => expect(microphoneButton).toBeEnabled());
+		// The local track state is rolled back to unmuted
+		expect(unmuteAudioTrack).toHaveBeenCalled();
 	});
 });

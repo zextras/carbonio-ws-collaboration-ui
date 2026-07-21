@@ -65,6 +65,13 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 				await updateAudioStreamStatus(meetingId, !audioStatus);
 			}
 		} catch {
+			// Roll back the local track state to keep it consistent
+			// with the server-side status that failed to update
+			if (audioStatus) {
+				bidirectionalAudioConn?.unmuteAudioTrack().catch(() => undefined);
+			} else {
+				bidirectionalAudioConn?.muteAudioTrack();
+			}
 			setAudioButtonStatus(true);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);

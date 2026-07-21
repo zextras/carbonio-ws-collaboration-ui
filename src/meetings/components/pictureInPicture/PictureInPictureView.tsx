@@ -77,20 +77,25 @@ const PictureInPictureView = (): ReactElement => {
 	}, [whoIsSpeaking]);
 
 	const toggleAudioStream = useCallback(
-		(event: { stopPropagation: () => void }) => {
+		async (event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
-			if (!audioStatus) {
-				bidirectionalAudioConn
-					?.unmuteAudioTrack(selectedAudioDeviceId)
-					.then(() => {
-						updateAudioStreamStatus(meetingId!, !audioStatus);
-					})
-					.catch((e) => {
-						console.log(e);
-					});
-			} else {
-				bidirectionalAudioConn?.muteAudioTrack();
-				updateAudioStreamStatus(meetingId!, !audioStatus);
+			try {
+				if (!audioStatus) {
+					await bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId);
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				} else {
+					bidirectionalAudioConn?.muteAudioTrack();
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				}
+			} catch (e) {
+				// Roll back the local track state to keep it consistent
+				// with the server-side status that failed to update
+				if (audioStatus) {
+					bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId).catch(() => undefined);
+				} else {
+					bidirectionalAudioConn?.muteAudioTrack();
+				}
+				console.error(e);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
