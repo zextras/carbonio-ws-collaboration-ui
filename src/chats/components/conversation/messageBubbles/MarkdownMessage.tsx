@@ -16,6 +16,7 @@ const MarkdownContainer = styled.div`
 	user-select: text;
 	word-break: break-word;
 	line-height: 1.45;
+	color: ${({ theme }): string => theme.palette.text.regular};
 
 	p {
 		margin: 0;
