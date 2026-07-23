@@ -29,6 +29,12 @@ function assertBrowserName(browser: typeof BrowserUtils, browserName: string): v
 	expect(browserType.name).toEqual(browserName);
 }
 
+function assertOperatingSystem(browser: typeof BrowserUtils, os: string): void {
+	const operatingSystem = new UtilsAdapterBrowserDetector(browser).getOperatingSystem();
+
+	expect(operatingSystem.name).toEqual(os);
+}
+
 describe('BrowserDetector', () => {
 	test('detects Firefox', () => {
 		const firefox = {
@@ -86,5 +92,16 @@ describe('BrowserDetector', () => {
 		};
 
 		assertBrowserName(browser, 'Unknown');
+	});
+
+	test('unknown os when not linux or mac or windows', () => {
+		const browser = {
+			...fakeBrowserUtils,
+			isLinux: (): boolean => false,
+			isWindows: (): boolean => false,
+			isMac: (): boolean => false
+		};
+
+		assertOperatingSystem(browser, 'Unknown');
 	});
 });

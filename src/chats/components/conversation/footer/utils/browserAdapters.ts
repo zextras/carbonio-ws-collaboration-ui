@@ -9,7 +9,7 @@ export type Browser = {
 	name: 'Firefox' | 'Safari' | 'Chrome' | 'IE' | 'Unknown';
 };
 export type OperatingSystem = {
-	name: 'Linux' | 'Mac' | 'Windows';
+	name: 'Linux' | 'Mac' | 'Windows' | 'Unknown';
 };
 
 export interface BrowserDetector {
@@ -44,6 +44,15 @@ export class UtilsAdapterBrowserDetector implements BrowserDetector {
 	}
 
 	getOperatingSystem(): OperatingSystem {
-		return { name: 'Linux' };
+		if (this.browserUtils.isMac()) {
+			return { name: 'Mac' };
+		}
+		if (this.browserUtils.isWin()) {
+			return { name: 'Windows' };
+		}
+		if (this.browserUtils.isLinux()) {
+			return { name: 'Linux' };
+		}
+		return { name: 'Unknown' };
 	}
 }

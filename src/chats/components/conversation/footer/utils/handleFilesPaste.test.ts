@@ -97,7 +97,8 @@ describe('handlePaste', () => {
 
 	const unsupportedBrowsers: Array<BrowserType> = [
 		{ type: 'Unknown', os: 'Windows' },
-		{ type: 'Unknown', os: 'Mac' }
+		{ type: 'Unknown', os: 'Mac' },
+		{ type: 'Unknown', os: 'Unknown' }
 	];
 	test.each(unsupportedBrowsers)('unsupported browsers', (browser: BrowserType) => {
 		const onError = vi.fn();
