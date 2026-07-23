@@ -316,7 +316,11 @@ describe('Rooms API', () => {
 				RequestType.POST,
 				testFile,
 				signal,
-				{ area, tempId: expect.stringMatching(UUID_REGEX) }
+				{
+					area,
+					messageId: expect.stringMatching(UUID_REGEX),
+					tempId: expect.stringMatching(UUID_REGEX)
+				}
 			);
 		});
 
@@ -342,9 +346,26 @@ describe('Rooms API', () => {
 					description: 'description',
 					replyId: 'stanzaId',
 					area,
+					messageId: expect.stringMatching(UUID_REGEX),
 					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);
+		});
+
+		test('addRoomAttachment sends messageId equal to tempId (devel legacy correlation parity)', async () => {
+			const store = useStore.getState();
+			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
+
+			const optional = mockUploadFileFetchAPI.mock.calls[0][4] as {
+				messageId?: string;
+				tempId?: string;
+			};
+			expect(optional.messageId).toMatch(UUID_REGEX);
+			expect(optional.tempId).toMatch(UUID_REGEX);
+			expect(optional.messageId).toBe(optional.tempId);
 		});
 
 		test('addRoomAttachment is called correctly with placeholderRoom', async () => {
@@ -378,7 +399,11 @@ describe('Rooms API', () => {
 				RequestType.PUT,
 				testFile,
 				signal,
-				{ area, tempId: expect.stringMatching(UUID_REGEX) }
+				{
+					area,
+					messageId: expect.stringMatching(UUID_REGEX),
+					tempId: expect.stringMatching(UUID_REGEX)
+				}
 			);
 		});
 
@@ -405,6 +430,7 @@ describe('Rooms API', () => {
 					description: 'description',
 					replyId: 'stanzaId',
 					area,
+					messageId: expect.stringMatching(UUID_REGEX),
 					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);

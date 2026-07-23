@@ -34,12 +34,13 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
+import { getLastUnreadMessage } from '../../../../network/xmpp/utility/getLastUnreadMessage';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
+import { getIsMongooseIM, getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -302,6 +303,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		stopTyping();
 		const message = textMessage.trim();
 		if (filesToUploadArray && filesToUploadArray.length > 0) {
+			// devel legacy parity: on the MongooseIM backend, sending an attachment marks the
+			// conversation read (getLastUnreadMessage -> xmppClient.readMessage, here via
+			// backend.markAsRead). The common-socket path manages read state through the smart
+			// marker in MessagesList, so this is gated to legacy to keep the new path unchanged.
+			if (getIsMongooseIM(useStore.getState())) {
+				const lastUnreadId = getLastUnreadMessage(roomId);
+				if (lastUnreadId) backend.markAsRead(roomId, lastUnreadId);
+			}
+
 			const abortControllerList: AbortController[] = filesToUploadArray.map(
 				() => new AbortController()
 			);

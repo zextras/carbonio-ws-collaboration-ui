@@ -9,6 +9,18 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WebSocketClient } from './WebSocketClient';
 
 describe('WebSocketClient', () => {
+	// The client schedules real timers (ping setInterval in _onOpen, reconnect setTimeout in
+	// _onClose/_tryReconnection). Those fire after the jsdom env is torn down and call connect()
+	// -> window.location, leaking an unhandled "window is not defined". Fake timers keep them
+	// from firing; every test here asserts synchronous state, so nothing needs to advance them.
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	test('Connect WebSocketClient generate a WebSocket', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();

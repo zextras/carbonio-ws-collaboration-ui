@@ -777,6 +777,51 @@ describe('MessageComposer - isWriting events', () => {
 	});
 });
 
+describe('MessageComposer - read on attachment send (devel legacy parity)', () => {
+	const unreadFromOther: Message = createMockTextMessage({
+		id: 'unread-1',
+		from: 'idRoberto',
+		roomId: mockedRoom.id,
+		date: now() - 1
+	});
+	const attachmentFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
+
+	test('legacy (MongooseIM) path marks the conversation read when sending an attachment', async () => {
+		const store = useStore.getState();
+		store.setIsMongooseIM(true);
+		store.updateHistory(mockedRoom.id, [unreadFromOther]);
+
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+		await user.upload(input, attachmentFile);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+
+		await waitFor(() =>
+			expect(mockMessagingBackend.markAsRead).toHaveBeenCalledWith(mockedRoom.id, 'unread-1')
+		);
+	});
+
+	test('new (common-socket) path does NOT mark read on attachment send (no double read-on-send)', async () => {
+		const store = useStore.getState();
+		store.setIsMongooseIM(false);
+		store.updateHistory(mockedRoom.id, [unreadFromOther]);
+		const spyOnAddRoomAttachment = vi.spyOn(RoomsApi, 'addRoomAttachment');
+
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+		await user.upload(input, attachmentFile);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+
+		// The send path executed...
+		await waitFor(() => expect(spyOnAddRoomAttachment).toHaveBeenCalled());
+		// ...but the new path must NOT explicitly mark read on send (it relies on the
+		// smart marker in MessagesList); firing it here would double read-on-send.
+		expect(mockMessagingBackend.markAsRead).not.toHaveBeenCalled();
+	});
+});
+
 describe('Draft message', () => {
 	test('The composer should have the draft message in the text area on opening the conversation', () => {
 		const store = useStore.getState();

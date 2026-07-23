@@ -254,6 +254,10 @@ export const addRoomAttachment = (
 				area: optionalFields.area,
 				text: optionalFields.text,
 				replyToId: optionalFields.replyToId,
+				// devel legacy parity: messageId is the sole optimistic-correlation handle on the
+				// MongooseIM backend (it becomes the XMPP stanza id). The new path uses tempId.
+				// The backend accepts both harmlessly, so we send both set to the same client UUID.
+				messageId: tempId,
 				tempId
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
