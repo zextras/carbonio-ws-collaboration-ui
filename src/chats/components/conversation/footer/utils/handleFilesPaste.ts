@@ -16,13 +16,21 @@ interface BrowserDetector {
 	getChromeVersion: () => number | false;
 }
 
-export const handleFilesPaste = (
-	includeFiles: FileList,
-	onFilesPaste: () => void,
-	actionType: MessageActionType,
-	loadFiles: (files: FileList) => void,
-	browserUtils: BrowserDetector = BrowserUtils
-): void => {
+export const handleFilesPaste = ({
+	includeFiles,
+	onFilesPaste,
+	actionType,
+	loadFiles,
+	onError,
+	browserUtils = BrowserUtils
+}: {
+	includeFiles: FileList;
+	onFilesPaste: () => void;
+	actionType: MessageActionType;
+	loadFiles: (files: FileList) => void;
+	onError?: (error: Error | unknown) => void;
+	browserUtils: BrowserDetector;
+}): void => {
 	try {
 		// Avoid to paste files if user is editing a message
 		const editingMessage = actionType === MessageActionType.EDIT;
@@ -51,9 +59,9 @@ export const handleFilesPaste = (
 		) {
 			loadFiles(includeFiles);
 		} else {
-			console.error(`Browser not support copy/paste function ${navigator.userAgent}`);
+			onError?.(new Error(`Browser not support copy/paste function ${navigator.userAgent}`));
 		}
 	} catch (e) {
-		console.error(e);
+		onError?.(e);
 	}
 };
