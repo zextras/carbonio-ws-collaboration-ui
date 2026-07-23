@@ -36,7 +36,6 @@ import useStore from '../../../../store/Store';
 import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../../utils/attachmentUtils';
-import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
 	message: TextMessage;
@@ -115,7 +114,6 @@ const Bubble: FC<BubbleProps> = ({
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
 	const isMyMessage = mySessionId === message.from;
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
-	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 	const forwardMessageList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
 	const isForwardLimitNotReached: boolean = useStore((store) =>
@@ -262,7 +260,7 @@ const Bubble: FC<BubbleProps> = ({
 						<Padding bottom="0.5rem" />
 					</>
 				)}
-				<TextContentBubble textContent={messageFormatted} />
+				<TextContentBubble textContent={message.text} />
 				{messageAttachment && (
 					<MessageReactionsList roomId={message.roomId} stanzaId={message.stanzaId} />
 				)}

@@ -410,12 +410,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			) {
 				e.preventDefault();
 				sendMessage();
-			} else {
-				sendThrottleTyping();
-				sendDebouncedStopTyping();
 			}
 		},
-		[sendDisabled, carbonioLanguage, sendMessage, sendThrottleTyping, sendDebouncedStopTyping]
+		[sendDisabled, carbonioLanguage, sendMessage]
 	);
 
 	// Send typing notification on keystroke

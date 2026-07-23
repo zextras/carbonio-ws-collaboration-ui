@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import AttachmentSmallView from './messageBubbles/AttachmentSmallView';
 import ForwardInfo from './messageBubbles/ForwardInfo';
+import MarkdownMessage from './messageBubbles/MarkdownMessage';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
@@ -66,8 +67,7 @@ const RoundedRow = styled(Row)`
 	border-radius: 0.25rem;
 `;
 
-const TextExpanded = styled(Text)`
-	white-space: pre-wrap;
+const TextExpanded = styled.div`
 	max-height: 7.5rem;
 	overflow-y: auto;
 	width: 100%;
@@ -98,7 +98,11 @@ const ExpandedMessageWithThumbnail = ({
 				{attachment.name}
 			</Text>
 		</RoundedRow>
-		{messageText && <TextExpanded overflow="break-word">{messageText}</TextExpanded>}
+		{messageText && (
+			<TextExpanded>
+				<MarkdownMessage text={messageText} />
+			</TextExpanded>
+		)}
 	</Container>
 );
 
@@ -187,9 +191,11 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		return (
 			<Container crossAlignment="flex-start">
 				{(pinnedMessage.forwardedInfo ?? pinnedMessage.forwarded) && (
-						<ForwardInfo info={(pinnedMessage.forwardedInfo ?? pinnedMessage.forwarded)!} />
-					)}
-				<TextExpanded overflow="break-word">{pinnedMessage.text}</TextExpanded>
+					<ForwardInfo info={(pinnedMessage.forwardedInfo ?? pinnedMessage.forwarded)!} />
+				)}
+				<TextExpanded>
+					<MarkdownMessage text={pinnedMessage.text} />
+				</TextExpanded>
 			</Container>
 		);
 	}, [pinnedMessage]);

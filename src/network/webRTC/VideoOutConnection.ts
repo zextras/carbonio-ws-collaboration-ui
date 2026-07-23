@@ -22,54 +22,52 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	selectedVideoDeviceId: string | undefined;
 
+	private readonly videoStreamEnabled: boolean;
+
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = null;
 		this.meetingId = meetingId;
 		this.rtpSender = null;
+		this.selectedVideoDeviceId = selectedVideoDeviceId;
+		this.videoStreamEnabled = videoStreamEnabled;
+		this.init();
+	}
 
-		if (videoStreamEnabled) {
-			this.startVideo(selectedVideoDeviceId);
+	private init(): void {
+		if (this.videoStreamEnabled) {
+			this.startVideo(this.selectedVideoDeviceId).catch((reason) => console.warn(reason));
 		}
 	}
 
 	public startVideo(selectedVideoDeviceId?: string): Promise<void> {
-		return new Promise((resolve, reject) => {
-			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-			this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
+		this.peerConn.onconnectionstatechange = this.onConnectionStateChange;
 
-			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
+		if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
-			getVideoStream(selectedVideoDeviceId)
-				.then((stream) => {
-					this.updateLocalStreamTrack(stream);
-					useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);
-					resolve();
-				})
-				.catch((err) => {
-					reject(new Error(`Error while requesting video track, reason: ${err}`));
-				});
-		});
-	}
-
-	public stopVideo(): void {
-		this.closePeerConnection();
-		updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
-	}
-
-	// Create SDP offer, set it as local description and send it to the remote peer
-	private onNegotiationNeeded = (): void => {
-		this.peerConn
-			?.createOffer()
-			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-				this.peerConn
-					?.setLocalDescription(rtcSessionDesc)
-					.then(() => {
-						updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, rtcSessionDesc.sdp);
-					})
-					.catch((reason) => console.warn(reason));
+		return getVideoStream(selectedVideoDeviceId)
+			.then((stream) => {
+				this.updateLocalStreamTrack(stream);
+				useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);
+				return this.negotiate();
 			})
-			.catch((reason) => console.warn('createOffer failed', reason));
+			.catch((err) => {
+				this.closePeerConnection();
+				throw new Error(`Error while starting video, reason: ${err}`);
+			});
+	}
+
+	public stopVideo(): Promise<Response> {
+		this.closePeerConnection();
+		return updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
+	}
+
+	// Create the SDP offer, set it as local description and send it to the remote peer
+	private readonly negotiate = async (): Promise<void> => {
+		if (!this.peerConn) throw new Error('Missing peer connection');
+		const offer = await this.peerConn.createOffer();
+		await this.peerConn.setLocalDescription(offer);
+		await updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, offer.sdp);
 	};
 
 	private readonly onConnectionStateChange = (): void => {

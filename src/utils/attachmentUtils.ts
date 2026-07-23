@@ -84,7 +84,7 @@ export const extensionsSupported = [
 	},
 	{
 		extension: AttachmentType.PDF,
-		mimeType: 'application/pdf',
+		mimeType: PDF_MIME_TYPE,
 		preview: AttachmentType.JPEG
 	},
 	{

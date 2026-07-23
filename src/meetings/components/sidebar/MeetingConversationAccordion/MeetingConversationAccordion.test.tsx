@@ -112,7 +112,7 @@ describe('Meeting sidebar', () => {
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
 		expect(chatAccordion).toHaveStyle(heightPercentage);
 		await waitFor(() => user.click(toggleChatBtn));
-		expect(toggleChatBtn).toHaveStyle('height: fit');
+		await waitFor(() => expect(chatAccordion).toHaveStyle(heightRem));
 	});
 	test('Display meeting chat with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);

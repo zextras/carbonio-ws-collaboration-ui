@@ -1,3 +1,95 @@
+## [0.17.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.6...v0.17.0) (2026-07-21)
+
+## [0.16.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.5...v0.16.6) (2026-07-10)
+
+### Bug Fixes
+
+* recover audio/video toggle buttons after a failed call [CO-3865] ([#803](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/803)) ([57635a0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/57635a02fd4b4702400d7601ac09478293454e25))
+
+## [0.16.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.4...v0.16.5) (2026-06-24)
+
+### Bug Fixes
+
+* add PreviewNavigationManager to meeting initialization to support previews ([c70eb84](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c70eb844072d1ad8be98491cce43c2c1c3b3e1eb)), closes [#789](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/789)
+
+## [0.16.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.3...v0.16.4) (2026-06-02)
+
+### Other changes
+
+* migrate to buildah (FQDN images + jenkins-lib-common@2.10.0) ([c42a1ec](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c42a1ec57f0b79b1ac4d2924035419dff57acbaf))
+
+## [0.16.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.2...v0.16.3) (2026-05-28)
+
+### Bug Fixes
+
+* **meeting:** restore video/audio stream on temporary TURN server disconnection [CO-3707] ([#754](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/754)) ([5703a7d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5703a7de7df9375bc41dcd38bc2f7826cc1d4b37))
+
+## [0.16.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.1...v0.16.2) (2026-05-26)
+
+### Bug Fixes
+
+* **ci:** update jenkins-lib-common to v2.8.5 ([#746](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/746)) ([de77c7b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/de77c7b1e4fbe3d6031b6fce8e2fea688d6dbf3b))
+
+## [0.16.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.16.0...v0.16.1) (2026-05-25)
+
+### Bug Fixes
+
+* trigger release ([5e934f8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5e934f88144747ca4da813f598f1ec536bdbec52))
+
+## [0.16.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.1...v0.16.0) (2026-05-20)
+
+### Features
+
+* navigate attachments preview ([da303b5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/da303b5ff54b741f1cdab7169042dbf4bdf39449))
+
+## [0.15.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.15.0...v0.15.1) (2026-05-19)
+
+### Bug Fixes
+
+* remove incoming call notification when user decline from another session ([#730](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/730)) ([2be28c8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2be28c8757489a07fc89119c50acb13ef21f7cfc))
+
+## [0.15.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.14.0...v0.15.0) (2026-05-18)
+
+### Features
+
+* chats media and document gallery ([009b9e8](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/009b9e81895b2ca784bb1b04c9c09633afb68706))
+
+## [0.14.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.13.0...v0.14.0) (2026-05-15)
+
+### Features
+
+* add message broker status handling and update UI components accordingly [CO-3577] ([#724](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/724)) ([d929891](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d9298918f493b47bfb58c42d9358d099ddb5d65b))
+
+## [0.13.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.4...v0.13.0) (2026-05-14)
+
+### Features
+
+* add auto focus on inputs ([7d7a528](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7d7a5282d6820c737a6a81a444056f3711868fb6)), closes [#723](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/723)
+
+## [0.12.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.3...v0.12.4) (2026-05-14)
+
+### Bug Fixes
+
+* **ci:** migrate Jenkinsfile to jenkins-lib-common ([#727](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/727)) ([7e44458](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7e44458f11004311cf266e42eb1f28c8f3a52726))
+
+## [0.12.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.2...v0.12.3) (2026-05-12)
+
+### Other changes
+
+* **release:** update jenkins-lib-ui to 1.0.13 ([563d9c7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/563d9c7f6fe8a60751f5f56e15f72f3f6f95884a))
+
+## [0.12.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.1...v0.12.2) (2026-05-08)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-ui-preview to v5 ([#714](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/714)) ([3f79a85](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3f79a855a05e78672f8c814494fb21875cb6b31c))
+
+## [0.12.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.12.0...v0.12.1) (2026-05-07)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-design-system to v12.0.4 ([#711](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/711)) ([153b356](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/153b35672cd736ddd54096dac67b0abc9e82c6b2))
+
 ## [0.12.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.11.0...v0.12.0) (2026-05-05)
 
 ### Features

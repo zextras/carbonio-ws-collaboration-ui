@@ -748,6 +748,33 @@ describe('MessageComposer - isWriting events', () => {
 		await user.type(composerTextArea, 'I am fine');
 		expect(spySendTyping).toHaveBeenCalled();
 	});
+
+	test('sendTyping is not called when pressing system shortcuts like Cmd+R', async () => {
+		const spySendTyping = vi.spyOn(mockMessagingBackend, 'sendTyping');
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		// Use fireEvent instead of user.keyboard because JSDOM does not suppress
+		// character insertion for Meta-modified keys as real browsers do.
+		fireEvent.keyDown(composerTextArea, { key: 'r', metaKey: true });
+		expect(spySendTyping).not.toHaveBeenCalled();
+	});
+
+	test('sendTyping is not called when pressing Ctrl shortcuts', async () => {
+		const spySendTyping = vi.spyOn(mockMessagingBackend, 'sendTyping');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		await user.click(composerTextArea);
+		await user.keyboard('{Control>}c{/Control}');
+		expect(spySendTyping).not.toHaveBeenCalled();
+	});
+
+	test('sendTyping is called when typing a normal character', async () => {
+		const spySendTyping = vi.spyOn(mockMessagingBackend, 'sendTyping');
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, 'a');
+		expect(spySendTyping).toHaveBeenCalled();
+	});
 });
 
 describe('Draft message', () => {
