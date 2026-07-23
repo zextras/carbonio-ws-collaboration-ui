@@ -52,10 +52,7 @@ export enum WsEventType {
 export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent;
 
 type WsGeneralEvent =
-	| InitializationEvent
-	| PongEvent
-	| WsMessageBrokerDisconnectedEvent
-	| WsMessageBrokerRestoredEvent;
+	InitializationEvent | PongEvent | WsMessageBrokerDisconnectedEvent | WsMessageBrokerRestoredEvent;
 
 export type InitializationEvent = {
 	type: WsEventType.INITIALIZATION;

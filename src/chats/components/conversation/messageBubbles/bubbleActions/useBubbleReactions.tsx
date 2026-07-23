@@ -18,11 +18,11 @@ import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
 export enum ReactionType {
-	'THUMBS_UP' = '\uD83D\uDC4D',
-	'HEART' = '\u2764\uFE0F',
-	'JOY' = '\uD83D\uDE02',
-	'CRY' = '\uD83D\uDE22',
-	'THUMBS_DOWN' = '\uD83D\uDC4E'
+	THUMBS_UP = '\uD83D\uDC4D',
+	HEART = '\u2764\uFE0F',
+	JOY = '\uD83D\uDE02',
+	CRY = '\uD83D\uDE22',
+	THUMBS_DOWN = '\uD83D\uDC4E'
 }
 
 const CustomPopover = styled(Popover)`
