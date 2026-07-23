@@ -6,6 +6,34 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export type Browser = {
+	name: 'Firefox' | 'Safari' | 'Chrome' | 'IE' | 'Unknown';
+};
+
+export type OperatingSystem = {
+	name: 'Linux' | 'Mac' | 'Windows';
+};
+
+export interface BrowserDetector {
+	getBrowserType(): Browser;
+	getOperatingSystem(): OperatingSystem;
+}
+
+export class UtilsAdapterBrowserDetector implements BrowserDetector {
+	private readonly browserUtils: typeof BrowserUtils;
+	constructor(browserUtils: typeof BrowserUtils) {
+		this.browserUtils = browserUtils;
+	}
+
+	getBrowserType(): Browser {
+		return {name: 'Firefox'};
+	}
+
+	getOperatingSystem(): OperatingSystem {
+		return {name: 'Linux'};
+	}
+}
+
 export const BrowserUtils = {
 	isFirefox: (): boolean => navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
 	isSafari: (): boolean =>

@@ -4,17 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { BrowserUtils } from '../../../../../utils/BrowserUtils';
-
-interface BrowserDetector {
-	isFirefox: () => boolean;
-	isSafari: () => boolean;
-	isChrome: () => boolean;
-	isLinux: () => boolean;
-	isMac: () => boolean;
-	isWin: () => boolean;
-	getChromeVersion: () => number | false;
-}
+import {BrowserDetector} from '../../../../../utils/BrowserUtils';
 
 export const handleFilesPaste = ({
 	includeFiles,
@@ -22,14 +12,14 @@ export const handleFilesPaste = ({
 	actionType,
 	loadFiles,
 	onError,
-	browserUtils = BrowserUtils
+	browserDetector
 }: {
 	includeFiles: FileList;
 	onFilesPaste: () => void;
 	actionType: MessageActionType;
 	loadFiles: (files: FileList) => void;
 	onError?: (error: Error | unknown) => void;
-	browserUtils: BrowserDetector;
+	browserDetector: BrowserDetector;
 }): void => {
 	try {
 		// Avoid to paste files if user is editing a message
@@ -40,20 +30,21 @@ export const handleFilesPaste = ({
 		}
 
 		onFilesPaste();
-		const isFirefoxBrowser = browserUtils.isFirefox();
-		const isChromeBrowser = browserUtils.isChrome();
-		const chromeVersion = browserUtils.getChromeVersion();
-		const isSafariBrowser = browserUtils.isSafari();
-		const isLinux = browserUtils.isLinux();
-		const isMac = browserUtils.isMac();
-		const isWin = browserUtils.isWin();
+		const browserName = browserDetector.getBrowserType().name;
+		const isFirefoxBrowser = browserName === 'Firefox';
+		const isChromeBrowser = browserName === 'Chrome';
+		const isSafariBrowser = browserName === 'Safari';
+
+		let operatingSystemName = browserDetector.getOperatingSystem().name;
+		const isLinux = operatingSystemName === 'Linux';
+		const isMac = operatingSystemName === 'Mac';
+		const isWin = operatingSystemName === 'Windows';
+
 		if (
 			isLinux ||
 			(isWin && isFirefoxBrowser) ||
 			isChromeBrowser ||
-			chromeVersion ||
 			(isMac && isChromeBrowser) ||
-			chromeVersion ||
 			isFirefoxBrowser ||
 			isSafariBrowser
 		) {
