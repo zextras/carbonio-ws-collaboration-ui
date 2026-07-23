@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import {BrowserDetector} from '../../../../../utils/BrowserUtils';
+import { BrowserDetector } from '../../../../../utils/BrowserUtils';
 
 export const handleFilesPaste = ({
 	includeFiles,
@@ -35,7 +35,7 @@ export const handleFilesPaste = ({
 		const isChromeBrowser = browserName === 'Chrome';
 		const isSafariBrowser = browserName === 'Safari';
 
-		let operatingSystemName = browserDetector.getOperatingSystem().name;
+		const operatingSystemName = browserDetector.getOperatingSystem().name;
 		const isLinux = operatingSystemName === 'Linux';
 		const isMac = operatingSystemName === 'Mac';
 		const isWin = operatingSystemName === 'Windows';

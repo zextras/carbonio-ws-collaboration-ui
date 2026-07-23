@@ -4,22 +4,27 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {noop} from 'lodash';
+import { noop } from 'lodash';
 
-import {handleFilesPaste} from './handleFilesPaste';
-import {MessageActionType} from '../../../../../types/store/ActiveConversationTypes';
-import {Browser, BrowserDetector, OperatingSystem} from "../../../../../utils/BrowserUtils";
+import { handleFilesPaste } from './handleFilesPaste';
+import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { Browser, BrowserDetector, OperatingSystem } from '../../../../../utils/BrowserUtils';
 
-function mockBrowserDetector(browserName: Browser['name'], operatingSystemName: OperatingSystem['name']) {
-	const windowsUnknownBrowser: BrowserDetector = {
+function mockBrowserDetector(
+	browserName: Browser['name'],
+	operatingSystemName: OperatingSystem['name']
+): BrowserDetector {
+	return {
 		getBrowserType(): Browser {
-			return {name: browserName};
-		}, getOperatingSystem(): OperatingSystem {
-			return {name: operatingSystemName};
+			return { name: browserName };
+		},
+		getOperatingSystem(): OperatingSystem {
+			return { name: operatingSystemName };
 		}
-	}
-	return windowsUnknownBrowser;
+	};
 }
+
+type BrowserType = { type: Browser['name']; os: OperatingSystem['name'] };
 
 describe('handlePaste', () => {
 	const file = new File([''], 'image.jpg', { type: 'image/jpeg' });
@@ -35,7 +40,7 @@ describe('handlePaste', () => {
 			onFilesPaste: noop,
 			actionType: MessageActionType.EDIT,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Chrome", "Windows")
+			browserDetector: mockBrowserDetector('Chrome', 'Windows')
 		});
 
 		expect(spyLoadFiles).not.toHaveBeenCalled();
@@ -47,7 +52,7 @@ describe('handlePaste', () => {
 			onFilesPaste: noop,
 			actionType: MessageActionType.REPLY,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Chrome", "Windows")
+			browserDetector: mockBrowserDetector('Chrome', 'Windows')
 		});
 
 		expect(spyLoadFiles).toHaveBeenCalled();
@@ -60,7 +65,7 @@ describe('handlePaste', () => {
 			onFilesPaste,
 			actionType: MessageActionType.REPLY,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Chrome", "Windows")
+			browserDetector: mockBrowserDetector('Chrome', 'Windows')
 		});
 
 		expect(onFilesPaste).toHaveBeenCalled();
@@ -72,7 +77,7 @@ describe('handlePaste', () => {
 			onFilesPaste: noop,
 			actionType: MessageActionType.REPLY,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Chrome", "Windows")
+			browserDetector: mockBrowserDetector('Chrome', 'Windows')
 		});
 
 		expect(spyLoadFiles).not.toHaveBeenCalled();
@@ -84,13 +89,17 @@ describe('handlePaste', () => {
 			onFilesPaste: noop,
 			actionType: MessageActionType.REPLY,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Chrome", "Linux")
+			browserDetector: mockBrowserDetector('Chrome', 'Linux')
 		});
 
 		expect(spyLoadFiles).toHaveBeenCalled();
 	});
 
-	test('paste error when windows OS with unknown browser', () => {
+	const unsupportedBrowsers: Array<BrowserType> = [
+		{ type: 'Unknown', os: 'Windows' },
+		{ type: 'Unknown', os: 'Mac' }
+	];
+	test.each(unsupportedBrowsers)('unsupported browsers', (browser: BrowserType) => {
 		const onError = vi.fn();
 		handleFilesPaste({
 			includeFiles: filelist,
@@ -98,10 +107,38 @@ describe('handlePaste', () => {
 			onError,
 			actionType: MessageActionType.REPLY,
 			loadFiles: spyLoadFiles,
-			browserDetector: mockBrowserDetector("Unknown", "Windows")
+			browserDetector: mockBrowserDetector(browser.type, browser.os)
 		});
 
 		expect(spyLoadFiles).not.toHaveBeenCalled();
 		expect(onError).toHaveBeenCalled();
+	});
+
+	const supportedBrowsers: Array<BrowserType> = [
+		{ type: 'Chrome', os: 'Windows' },
+		{ type: 'Firefox', os: 'Windows' },
+		{ type: 'Safari', os: 'Windows' },
+
+		{ type: 'Chrome', os: 'Mac' },
+		{ type: 'Firefox', os: 'Mac' },
+		{ type: 'Safari', os: 'Mac' },
+
+		{ type: 'Chrome', os: 'Linux' },
+		{ type: 'Firefox', os: 'Linux' },
+		{ type: 'Safari', os: 'Linux' },
+		{ type: 'Unknown', os: 'Linux' }
+	];
+	test.each(supportedBrowsers)('supported browsers', (browser: BrowserType) => {
+		const onError = vi.fn();
+		handleFilesPaste({
+			includeFiles: filelist,
+			onFilesPaste: noop,
+			onError,
+			actionType: MessageActionType.REPLY,
+			loadFiles: spyLoadFiles,
+			browserDetector: mockBrowserDetector(browser.type, browser.os)
+		});
+
+		expect(spyLoadFiles).toHaveBeenCalled();
 	});
 });

@@ -21,16 +21,17 @@ export interface BrowserDetector {
 
 export class UtilsAdapterBrowserDetector implements BrowserDetector {
 	private readonly browserUtils: typeof BrowserUtils;
+
 	constructor(browserUtils: typeof BrowserUtils) {
 		this.browserUtils = browserUtils;
 	}
 
 	getBrowserType(): Browser {
-		return {name: 'Firefox'};
+		return { name: 'Firefox' };
 	}
 
 	getOperatingSystem(): OperatingSystem {
-		return {name: 'Linux'};
+		return { name: 'Linux' };
 	}
 }
 
