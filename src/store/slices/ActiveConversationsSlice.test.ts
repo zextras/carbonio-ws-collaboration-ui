@@ -11,7 +11,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
-import { messageActionType } from '../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../types/store/ActiveConversationTypes';
 import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
 import useStore from '../Store';
 
@@ -124,7 +124,7 @@ describe('Active conversations slice', () => {
 				messageId: message.id,
 				senderId: sessionUser.id,
 				stanzaId: message.stanzaId,
-				actionType: messageActionType.REPLY
+				actionType: MessageActionType.REPLY
 			};
 			useStore.getState().setReferenceMessage(mockedRoom.id, reference);
 			expect(useStore.getState().activeConversations[mockedRoom.id].referenceMessage).toStrictEqual(
@@ -144,7 +144,7 @@ describe('Active conversations slice', () => {
 				messageId: message.id,
 				senderId: sessionUser.id,
 				stanzaId: message.stanzaId,
-				actionType: messageActionType.REPLY
+				actionType: MessageActionType.REPLY
 			};
 			useStore.getState().setReferenceMessage(mockedRoom.id, reference);
 			useStore.getState().unsetReferenceMessage(mockedRoom.id);

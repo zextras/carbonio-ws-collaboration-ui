@@ -14,7 +14,7 @@ import {
 	ActiveConversationsSlice,
 	FileToUpload,
 	InfoPanelTab,
-	messageActionType
+	MessageActionType
 } from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
@@ -96,7 +96,7 @@ export const useActiveConversationsSlice: StateCreator<
 			messageId: string;
 			senderId: string;
 			stanzaId: string;
-			actionType: messageActionType;
+			actionType: MessageActionType;
 			attachment?: AttachmentMessageType;
 		}
 	): void => {

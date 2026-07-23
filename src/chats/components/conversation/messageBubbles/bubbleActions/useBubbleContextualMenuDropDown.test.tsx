@@ -15,7 +15,7 @@ import {
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../../types/store/StoreTypes';
@@ -160,7 +160,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			messageId: simpleTextMessage.id,
 			senderId: simpleTextMessage.from,
 			stanzaId: simpleTextMessage.stanzaId,
-			actionType: messageActionType.EDIT,
+			actionType: MessageActionType.EDIT,
 			attachment: simpleTextMessage.attachment
 		});
 
@@ -225,7 +225,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			messageId: simpleTextMessage.id,
 			senderId: simpleTextMessage.from,
 			stanzaId: simpleTextMessage.stanzaId,
-			actionType: messageActionType.EDIT,
+			actionType: MessageActionType.EDIT,
 			attachment: simpleTextMessage.attachment
 		});
 
@@ -247,7 +247,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			messageId: simpleTextMessage.id,
 			senderId: simpleTextMessage.from,
 			stanzaId: simpleTextMessage.stanzaId,
-			actionType: messageActionType.REPLY,
+			actionType: MessageActionType.REPLY,
 			attachment: simpleTextMessage.attachment
 		});
 

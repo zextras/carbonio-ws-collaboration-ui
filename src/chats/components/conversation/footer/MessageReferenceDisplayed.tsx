@@ -16,7 +16,7 @@ import GuestUserLabel from '../../../../meetings/components/GuestUserLabel';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import {
-	messageActionType,
+	MessageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
@@ -71,7 +71,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	}, [message, unsetReferenceMessage]);
 
 	const labelAction = useMemo(() => {
-		if (referenceMessage.actionType === messageActionType.EDIT) return editYourMessageLabel;
+		if (referenceMessage.actionType === MessageActionType.EDIT) return editYourMessageLabel;
 		if (myId === referenceMessage.senderId) return replyToYourselfLabel;
 		return replyTo;
 	}, [

@@ -23,7 +23,7 @@ export type ActiveConversationsSlice = {
 			messageId: string;
 			senderId: string;
 			stanzaId: string;
-			actionType: messageActionType;
+			actionType: MessageActionType;
 			attachment?: AttachmentMessageType;
 		}
 	) => void;
@@ -67,7 +67,7 @@ export type ActiveConversationsMap = {
 	[roomId: string]: ActiveConversation;
 };
 
-export enum messageActionType {
+export enum MessageActionType {
 	EDIT = 'edit',
 	REPLY = 'reply'
 }
@@ -77,7 +77,7 @@ export type ReferenceMessage = {
 	messageId: string;
 	senderId: string;
 	stanzaId: string;
-	actionType: messageActionType;
+	actionType: MessageActionType;
 	attachment?: AttachmentMessageType;
 };
 

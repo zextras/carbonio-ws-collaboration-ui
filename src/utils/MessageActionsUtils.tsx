@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { messageActionType } from '../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../types/store/ChatsRegistryTypes';
 
 export const canPerformAction = (
 	message: Message,
 	isMyMessage: boolean,
 	actionTimeLimitInMinutes: number,
-	actionType?: messageActionType
+	actionType?: MessageActionType
 ): boolean => {
 	if (actionTimeLimitInMinutes === 0) return false;
 	const inTime = Date.now() <= message.date + actionTimeLimitInMinutes * 60000;
-	if (actionType === messageActionType.EDIT && message.type === MessageType.TEXT_MSG)
+	if (actionType === MessageActionType.EDIT && message.type === MessageType.TEXT_MSG)
 		return isMyMessage && inTime && !message.forwarded;
 	return isMyMessage && inTime;
 };

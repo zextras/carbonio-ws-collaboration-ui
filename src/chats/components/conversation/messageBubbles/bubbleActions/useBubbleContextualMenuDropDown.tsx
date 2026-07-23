@@ -29,7 +29,7 @@ import {
 import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
-import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { downloadAttachment, isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
@@ -108,7 +108,7 @@ const useBubbleContextualMenuDropDown = (
 			messageId: message.id,
 			senderId: message.from,
 			stanzaId: message.stanzaId,
-			actionType: messageActionType.EDIT,
+			actionType: MessageActionType.EDIT,
 			attachment: message.attachment
 		});
 	}, [message, setDraftMessage, setReferenceMessage]);
@@ -130,14 +130,14 @@ const useBubbleContextualMenuDropDown = (
 	}, [message.attachment]);
 
 	const replyMessageAction = useCallback(() => {
-		if (referenceMessage?.actionType === messageActionType.EDIT) {
+		if (referenceMessage?.actionType === MessageActionType.EDIT) {
 			setDraftMessage(message.roomId);
 		}
 		setReferenceMessage(message.roomId, {
 			messageId: message.id,
 			senderId: message.from,
 			stanzaId: message.stanzaId,
-			actionType: messageActionType.REPLY,
+			actionType: MessageActionType.REPLY,
 			attachment: message.attachment
 		});
 	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
@@ -148,7 +148,7 @@ const useBubbleContextualMenuDropDown = (
 	);
 
 	const canBeEdited = useMemo(
-		() => canPerformAction(message, isMyMessage, messageEditTimeLimit, messageActionType.EDIT),
+		() => canPerformAction(message, isMyMessage, messageEditTimeLimit, MessageActionType.EDIT),
 		[messageEditTimeLimit, isMyMessage, message]
 	);
 

@@ -24,7 +24,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { FileToUpload, MessageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { Message } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -307,7 +307,7 @@ describe('ConversationFooter', () => {
 			messageId: originalMessage.id,
 			senderId: originalMessage.from,
 			stanzaId: originalMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		});
 
 		setup(<ConversationFooter roomId={mockedRoom.id} />);
@@ -330,7 +330,7 @@ describe('ConversationFooter', () => {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
 			stanzaId: mockedMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		});
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 
@@ -351,7 +351,7 @@ describe('ConversationFooter', () => {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
 			stanzaId: mockedMessage.stanzaId,
-			actionType: messageActionType.EDIT
+			actionType: MessageActionType.EDIT
 		});
 
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
@@ -373,7 +373,7 @@ describe('ConversationFooter', () => {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
 			stanzaId: mockedMessage.stanzaId,
-			actionType: messageActionType.EDIT
+			actionType: MessageActionType.EDIT
 		});
 
 		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);

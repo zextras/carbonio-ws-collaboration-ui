@@ -34,7 +34,7 @@ import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../types/store/ActiveConversationTypes';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -73,7 +73,7 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	const handleOnDragOver = useCallback(
 		(ev: React.DragEvent<HTMLElement>) => {
 			// Avoid to drop files if user is editing a message
-			const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
+			const editingMessage = referenceMessage?.actionType === MessageActionType.EDIT;
 			if (!editingMessage) {
 				ev.preventDefault();
 				setDropzoneEnabled(true);

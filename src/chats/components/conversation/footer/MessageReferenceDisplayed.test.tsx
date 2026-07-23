@@ -18,7 +18,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { User } from '../../../../types/store/UserTypes';
 
@@ -94,7 +94,7 @@ describe('Message reference displayed', () => {
 			messageId: mockedRepliedTextMessage.id,
 			senderId: mockedRepliedTextMessage.from,
 			stanzaId: mockedRepliedTextMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		};
 		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
 		const userNameComponent = await screen.findByTestId('reference-message-username');
@@ -116,7 +116,7 @@ describe('Message reference displayed', () => {
 			messageId: myMockedRepliedTextMessage.id,
 			senderId: myMockedRepliedTextMessage.from,
 			stanzaId: myMockedRepliedTextMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		};
 		setup(<MessageReferenceDisplayed referenceMessage={myReferenceMessage} />);
 		const replyToMySelfLabel = screen.getByText(/Reply to yourself/i);
@@ -135,7 +135,7 @@ describe('Message reference displayed', () => {
 			messageId: myMockedRepliedTextMessage.id,
 			senderId: myMockedRepliedTextMessage.from,
 			stanzaId: myMockedRepliedTextMessage.stanzaId,
-			actionType: messageActionType.EDIT
+			actionType: MessageActionType.EDIT
 		};
 		setup(<MessageReferenceDisplayed referenceMessage={myReferenceEditMessage} />);
 		const editYourMessageLabel = screen.getByText(/Edit your message/i);
@@ -156,7 +156,7 @@ describe('Message reference displayed', () => {
 			messageId: forwardedTextMessage.id,
 			senderId: forwardedTextMessage.from,
 			stanzaId: forwardedTextMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		};
 		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
 
@@ -180,7 +180,7 @@ describe('Message reference displayed', () => {
 			messageId: attachmentTextMessage.id,
 			senderId: attachmentTextMessage.from,
 			stanzaId: attachmentTextMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		};
 		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
 

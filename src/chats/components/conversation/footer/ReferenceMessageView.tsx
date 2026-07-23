@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../../types/store/ActiveConversationTypes';
 
 type ReferenceMessageViewProps = {
 	roomId: string;
@@ -26,7 +26,7 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 
 	const closeReferenceView = useCallback(() => {
-		if (referenceMessage?.actionType === messageActionType.EDIT) {
+		if (referenceMessage?.actionType === MessageActionType.EDIT) {
 			setDraftMessage(roomId);
 		}
 		unsetReferenceMessage(roomId);

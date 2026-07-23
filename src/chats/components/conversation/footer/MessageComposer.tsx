@@ -45,7 +45,7 @@ import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import {
 	FileToUpload,
-	messageActionType,
+	MessageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
@@ -128,7 +128,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
-		if (referenceMessage?.actionType === messageActionType.EDIT) {
+		if (referenceMessage?.actionType === MessageActionType.EDIT) {
 			return false;
 		}
 		// Disable if textMessage is composed only by spaces, tabs or line breaks
@@ -242,7 +242,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			completeReferenceMessage: TextMessage
 		): void => {
 			switch (referenceMessage.actionType) {
-				case messageActionType.REPLY: {
+				case MessageActionType.REPLY: {
 					xmppClient.sendChatMessageReply(
 						roomId,
 						message,
@@ -252,7 +252,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					unsetReferenceMessage(roomId);
 					break;
 				}
-				case messageActionType.EDIT: {
+				case MessageActionType.EDIT: {
 					// If a text message (not an attachment description) is completely removed, open the delete dialog
 					if (message === '' && !referenceMessage.attachment) {
 						setDeleteMessageModalStatus(true);
@@ -330,7 +330,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	// Set focus on input after closing DeleteMessageModal
 	useEffect(() => {
-		if (referenceMessage?.actionType === messageActionType.EDIT && !deleteMessageModalStatus) {
+		if (referenceMessage?.actionType === MessageActionType.EDIT && !deleteMessageModalStatus) {
 			messageInputRef?.current?.focus();
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
@@ -356,7 +356,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					lastMessageOfRoom,
 					lastMessageOfRoom.from === myUserId,
 					messageEditTimeLimit,
-					messageActionType.EDIT
+					MessageActionType.EDIT
 				)
 			) {
 				setDraftMessage(lastMessageOfRoom.roomId, lastMessageOfRoom.text);
@@ -364,7 +364,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					messageId: lastMessageOfRoom.id,
 					senderId: lastMessageOfRoom.from,
 					stanzaId: lastMessageOfRoom.stanzaId,
-					actionType: messageActionType.EDIT,
+					actionType: MessageActionType.EDIT,
 					attachment: lastMessageOfRoom.attachment
 				});
 			}
@@ -406,7 +406,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		(ev: ClipboardEvent) => {
 			try {
 				// Avoid to paste files if user is editing a message
-				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
+				const editingMessage = referenceMessage?.actionType === MessageActionType.EDIT;
 				if (!editingMessage) {
 					const includeFiles = ev.clipboardData?.files;
 					if (includeFiles && includeFiles.length > 0) {
@@ -449,7 +449,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			messageInputRef.current.focus();
 			// clean the composer section and remove all file uploading if user
 			// is uploading files and then decide to edit a message
-			if (filesToUploadArray && referenceMessage.actionType === messageActionType.EDIT) {
+			if (filesToUploadArray && referenceMessage.actionType === MessageActionType.EDIT) {
 				removeFilesToAttach(roomId);
 			}
 		}
@@ -475,7 +475,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			!isUserGuest &&
 			!isUploading &&
 			(!filesToUploadArray || filesToUploadArray.length === 0) &&
-			(!referenceMessage || referenceMessage.actionType === messageActionType.REPLY),
+			(!referenceMessage || referenceMessage.actionType === MessageActionType.REPLY),
 		[filesToUploadArray, isUploading, isUserGuest, referenceMessage]
 	);
 

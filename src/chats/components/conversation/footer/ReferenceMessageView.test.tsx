@@ -17,7 +17,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { MessageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { MarkerStatus, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -63,7 +63,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
 			stanzaId: mockedMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		});
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
@@ -77,7 +77,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 			messageId: mockedMessage.id,
 			senderId: mockedMessage.from,
 			stanzaId: mockedMessage.stanzaId,
-			actionType: messageActionType.REPLY
+			actionType: MessageActionType.REPLY
 		});
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
