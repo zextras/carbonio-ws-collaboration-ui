@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { BrowserDetector } from './browserAdapters';
 import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { BrowserDetector } from '../../../../../utils/BrowserUtils';
 
 export const handleFilesPaste = ({
 	includeFiles,

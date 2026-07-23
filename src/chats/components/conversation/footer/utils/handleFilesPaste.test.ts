@@ -6,9 +6,9 @@
 
 import { noop } from 'lodash';
 
+import { Browser, BrowserDetector, OperatingSystem } from './browserAdapters';
 import { handleFilesPaste } from './handleFilesPaste';
 import { MessageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { Browser, BrowserDetector, OperatingSystem } from '../../../../../utils/BrowserUtils';
 
 function mockBrowserDetector(
 	browserName: Browser['name'],
