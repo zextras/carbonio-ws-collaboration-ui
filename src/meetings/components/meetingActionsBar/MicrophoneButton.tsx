@@ -16,7 +16,7 @@ import React, {
 } from 'react';
 
 import { Tooltip } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { first, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
@@ -74,14 +74,18 @@ const MicrophoneButton = ({
 
 	const onClickAudioItem = useCallback(
 		(audioItem: MediaDeviceInfo) => {
-			if (audioStatus) {
-				getAudioStream(audioItem.deviceId).then((stream) => {
-					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+			getAudioStream(audioItem.deviceId)
+				.then((stream) => {
+					const track = first(stream.getAudioTracks());
+					// Disable the track before attaching it to the sender
+					// so that no audio frame can leak while muted
+					if (!audioStatus && track) {
+						track.enabled = false;
+					}
 					setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
-				});
-			} else {
-				setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
-			}
+					return bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+				})
+				.catch((reason) => console.error(reason));
 		},
 		[audioStatus, bidirectionalAudioConn, setSelectedDeviceId]
 	);
@@ -104,14 +108,20 @@ const MicrophoneButton = ({
 			setButtonStatus(false);
 			try {
 				if (!audioStatus) {
-					const stream = await getAudioStream(selectedAudioDeviceId);
-					await bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+					await bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId);
 					await updateAudioStreamStatus(meetingId!, !audioStatus);
 				} else {
-					bidirectionalAudioConn?.closeRtpSenderTrack();
+					bidirectionalAudioConn?.muteAudioTrack();
 					await updateAudioStreamStatus(meetingId!, !audioStatus);
 				}
 			} catch {
+				// Roll back the local track state to keep it consistent
+				// with the server-side status that failed to update
+				if (audioStatus) {
+					bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId).catch(() => undefined);
+				} else {
+					bidirectionalAudioConn?.muteAudioTrack();
+				}
 				setButtonStatus(true);
 			}
 		},

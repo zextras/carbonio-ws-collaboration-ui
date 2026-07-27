@@ -27,6 +27,13 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
 
+	// Reference to the oscillator placeholder track, never reassigned:
+	// used to tell the real microphone track apart from the placeholder
+	private readonly placeholderAudioTrack: MediaStreamTrack | undefined;
+
+	// Desired mute state, read when async stream acquisitions resolve
+	private muted: boolean;
+
 	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
@@ -36,6 +43,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		this.rtpSender = null;
 		this.selectedAudioDeviceId = selectedAudioDeviceId;
 		this.initialAudioStatus = audioStreamEnabled;
+		this.muted = !audioStreamEnabled;
 
 		const audioCtx: AudioContext = new window.AudioContext();
 		const oscillator: OscillatorNode = audioCtx.createOscillator();
@@ -46,6 +54,7 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		const audioTrack = Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
 		const oscillatorAudioTrack: MediaStream = new MediaStream([audioTrack]);
 		this.oscillatorAudioTrack = first(oscillatorAudioTrack.getAudioTracks());
+		this.placeholderAudioTrack = this.oscillatorAudioTrack;
 
 		this.updateRemoteStreamAudio();
 		this.init();
@@ -55,15 +64,12 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		if (!this.oscillatorAudioTrack) return;
 		this.updateLocalStreamTrack(new MediaStream([this.oscillatorAudioTrack]))
 			.then(() => this.negotiate())
-			.then(() => {
-				if (this.initialAudioStatus) {
-					return getAudioStream(this.selectedAudioDeviceId).then((stream) => {
-						this.updateLocalStreamTrack(stream);
-						useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
-					});
-				}
-				return undefined;
-			})
+			.then(() =>
+				// The stream is acquired even when starting muted, to keep the
+				// Bluetooth HFP profile active and avoid the 1-2 second audio gap
+				// caused by A2DP ↔ HFP profile switching on unmute
+				getAudioStream(this.selectedAudioDeviceId).then((stream) => this.applyAudioStream(stream))
+			)
 			.catch((reason) => console.warn(reason));
 	}
 
@@ -80,7 +86,9 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		await this.peerConn.setLocalDescription(offer);
 		if (!offer.sdp) return;
 		await createAudioOffer(this.meetingId, offer.sdp);
-		await updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
+		// Read the current muted state (not initialAudioStatus) to honor a
+		// mute/unmute requested while the negotiation was still in flight
+		await updateAudioStreamStatus(this.meetingId, !this.muted);
 	};
 
 	private readonly onConnectionStateChange = (): void => {
@@ -131,6 +139,25 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 		});
 	}
 
+	/**
+	 * Replace the sender track with the given microphone stream, applying the
+	 * current muted state. The track is disabled before being attached to the
+	 * sender so that no audio frame can leak while muted, and the state is read
+	 * again once attached to honor a mute/unmute requested during acquisition.
+	 */
+	private applyAudioStream(stream: MediaStream): Promise<void> {
+		const streamTrack = first(stream.getAudioTracks());
+		if (streamTrack) {
+			streamTrack.enabled = !this.muted;
+		}
+		return this.updateLocalStreamTrack(stream).then(() => {
+			if (streamTrack) {
+				streamTrack.enabled = !this.muted;
+			}
+			useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
+		});
+	}
+
 	updateRemoteStreamAudio(): void {
 		if (this.oscillatorAudioTrack != null) {
 			const fragment = window!.top!.document.createDocumentFragment();
@@ -143,6 +170,46 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 			const mediaStream = new MediaStream();
 			mediaStream.addTrack(this.oscillatorAudioTrack);
 			audio.srcObject = mediaStream;
+		}
+	}
+
+	/**
+	 * Mute the audio track by disabling it instead of stopping it.
+	 * This keeps the Bluetooth HFP profile active, avoiding the 1-2 second
+	 * audio gap caused by A2DP ↔ HFP profile switching.
+	 */
+	muteAudioTrack(): void {
+		// The flag is set unconditionally so that an acquisition still in
+		// flight (e.g. init()) picks up the muted state when it resolves
+		this.muted = true;
+		if (this.rtpSender?.track) {
+			this.rtpSender.track.enabled = false;
+		}
+	}
+
+	/**
+	 * Unmute the audio track by re-enabling it if still alive,
+	 * or acquiring a new stream if the sender track is missing, ended or
+	 * still the oscillator placeholder (microphone never acquired yet).
+	 */
+	async unmuteAudioTrack(deviceId?: string): Promise<void> {
+		this.muted = false;
+		const track = this.rtpSender?.track;
+		if (track && track !== this.placeholderAudioTrack && track.readyState === 'live') {
+			track.enabled = true;
+		} else {
+			// A concurrent acquisition (e.g. init() still in flight) is harmless:
+			// updateLocalStreamTrack always stops the previous sender track
+			try {
+				const stream = await getAudioStream(deviceId ?? this.selectedAudioDeviceId);
+				await this.applyAudioStream(stream);
+				if (deviceId) {
+					this.selectedAudioDeviceId = deviceId;
+				}
+			} catch (reason) {
+				this.muted = true;
+				throw reason;
+			}
 		}
 	}
 

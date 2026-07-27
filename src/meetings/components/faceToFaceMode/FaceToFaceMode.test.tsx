@@ -23,6 +23,13 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
+import * as UserMediaManager from '../../../utils/UserMediaManager';
+
+// Prevent async state updates from BidirectionalConnectionAudioInOut.init()
+// leaking outside act() when meetingConnection() is called
+beforeEach(() => {
+	vi.spyOn(UserMediaManager, 'getAudioStream').mockRejectedValue(new Error('Controlled error'));
+});
 
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',

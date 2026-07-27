@@ -25,7 +25,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
+import { getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
@@ -77,21 +77,25 @@ const PictureInPictureView = (): ReactElement => {
 	}, [whoIsSpeaking]);
 
 	const toggleAudioStream = useCallback(
-		(event: { stopPropagation: () => void }) => {
+		async (event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
-			if (!audioStatus) {
-				getAudioStream(selectedAudioDeviceId)
-					.then((stream) => {
-						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							updateAudioStreamStatus(meetingId!, !audioStatus);
-						});
-					})
-					.catch((e) => {
-						console.log(e);
-					});
-			} else {
-				bidirectionalAudioConn?.closeRtpSenderTrack();
-				updateAudioStreamStatus(meetingId!, !audioStatus);
+			try {
+				if (!audioStatus) {
+					await bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId);
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				} else {
+					bidirectionalAudioConn?.muteAudioTrack();
+					await updateAudioStreamStatus(meetingId!, !audioStatus);
+				}
+			} catch (e) {
+				// Roll back the local track state to keep it consistent
+				// with the server-side status that failed to update
+				if (audioStatus) {
+					bidirectionalAudioConn?.unmuteAudioTrack(selectedAudioDeviceId).catch(() => undefined);
+				} else {
+					bidirectionalAudioConn?.muteAudioTrack();
+				}
+				console.error(e);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]

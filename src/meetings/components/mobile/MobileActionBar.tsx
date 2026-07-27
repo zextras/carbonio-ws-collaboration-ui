@@ -24,7 +24,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { getAudioStream, getFrontCameraStream } from '../../../utils/UserMediaManager';
+import { getFrontCameraStream } from '../../../utils/UserMediaManager';
 import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
@@ -58,14 +58,20 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		setAudioButtonStatus(false);
 		try {
 			if (!audioStatus) {
-				const stream = await getAudioStream();
-				await bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+				await bidirectionalAudioConn?.unmuteAudioTrack();
 				await updateAudioStreamStatus(meetingId, !audioStatus);
 			} else {
-				bidirectionalAudioConn?.closeRtpSenderTrack();
+				bidirectionalAudioConn?.muteAudioTrack();
 				await updateAudioStreamStatus(meetingId, !audioStatus);
 			}
 		} catch {
+			// Roll back the local track state to keep it consistent
+			// with the server-side status that failed to update
+			if (audioStatus) {
+				bidirectionalAudioConn?.unmuteAudioTrack().catch(() => undefined);
+			} else {
+				bidirectionalAudioConn?.muteAudioTrack();
+			}
 			setAudioButtonStatus(true);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId]);

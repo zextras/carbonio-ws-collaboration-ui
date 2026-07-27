@@ -28,6 +28,8 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;
+	muteAudioTrack(): void;
+	unmuteAudioTrack(deviceId?: string): Promise<void>;
 	closeRtpSenderTrack(): void;
 }
 

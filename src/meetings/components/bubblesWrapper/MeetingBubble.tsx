@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Padding } from '@zextras/carbonio-design-system';
@@ -29,7 +29,6 @@ import {
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
-import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import { RouterContext } from '../../contexts/routerContext';
 
 const BubbleContainer = styled(Container)<{
@@ -98,10 +97,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const extension = getAttachmentExtension(messageAttachment?.mimeType);
 	const size = getAttachmentSize(messageAttachment?.size);
 
-	const messageFormatted = useMemo(
-		() => message?.type === MessageType.TEXT_MSG && parseUrlOnMessage(message.text),
-		[message]
-	);
+	const messageText = message?.type === MessageType.TEXT_MSG ? message.text : '';
 
 	const onClickHandler = useCallback(() => {
 		setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true);
@@ -189,7 +185,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 					<Padding bottom="0.5rem" />
 				</>
 			)}
-			<TextContentBubble textContent={messageFormatted || ''} />
+			<TextContentBubble textContent={messageText} />
 			<BubbleFooter
 				message={message}
 				isMyMessage={false}
