@@ -38,7 +38,7 @@ const buildOrderedItems = (
 	const items = session.attachments.reduce<Array<PreviewItem>>((acc, att) => {
 		const item = buildPreviewItem(att, t, {
 			onDelete: att.userId === sessionId ? onDelete : undefined,
-			onForward: att.stanzaId !== undefined ? onForward : undefined
+			onForward: att.stanzaId === undefined ? undefined : onForward
 		});
 		if (item) acc.push(item);
 		return acc;

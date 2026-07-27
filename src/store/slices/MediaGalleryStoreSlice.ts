@@ -53,6 +53,13 @@ const ensureBucket = (
 	return state.buckets[key];
 };
 
+const removeFromBucket = (bucket: MediaGalleryBucket, attachmentId: string): void => {
+	const index = bucket.attachments.findIndex((a) => a.id === attachmentId);
+	if (index === -1) return;
+	bucket.attachments.splice(index, 1);
+	if (bucket.total !== undefined && bucket.total > 0) bucket.total -= 1;
+};
+
 const prependToBucket = (bucket: MediaGalleryBucket, attachment: Attachment): void => {
 	if (!bucket.isInitialized) return;
 	// A new attachment is the most recent one: its position is only known
@@ -126,12 +133,7 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const state = draft.mediaGallery[roomId];
 				if (!state) return;
-				Object.values(state.buckets).forEach((bucket) => {
-					const index = bucket.attachments.findIndex((a) => a.id === attachmentId);
-					if (index === -1) return;
-					bucket.attachments.splice(index, 1);
-					if (bucket.total !== undefined && bucket.total > 0) bucket.total -= 1;
-				});
+				Object.values(state.buckets).forEach((bucket) => removeFromBucket(bucket, attachmentId));
 			}),
 			false,
 			'MG/REMOVE_ATTACHMENT'

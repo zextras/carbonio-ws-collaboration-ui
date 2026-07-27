@@ -15,7 +15,7 @@ export const getAttachmentInfo = (fileId: string): Promise<Attachment> =>
 	fetchAPI(`attachments/${fileId}`, RequestType.GET);
 
 export const getURLAttachment = (fileId: string): string =>
-	`${window.document.location.origin}/services/chats/attachments/${fileId}/download`;
+	`${globalThis.document.location.origin}/services/chats/attachments/${fileId}/download`;
 
 export const deleteAttachment = (fileId: string): Promise<Response> =>
 	fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
@@ -37,7 +37,7 @@ export const getImagePreviewURL = (
 	format?: string
 ): string => {
 	const params = buildQueryString({ quality, output_format: format });
-	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
+	return `${globalThis.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
 };
 
 export const getImageThumbnail = (
@@ -59,7 +59,7 @@ export const getImageThumbnailURL = (
 	shape?: string
 ): string => {
 	const params = buildQueryString({ quality, output_format: format, shape });
-	return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
+	return `${globalThis.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
 };
 
 export const getVideoThumbnailURL = (
@@ -69,7 +69,7 @@ export const getVideoThumbnailURL = (
 	format?: string
 ): string => {
 	const params = buildQueryString({ quality, output_format: format });
-	return `${window.document.location.origin}/services/chats/preview/video/${fileId}/${area}/thumbnail/${params}`;
+	return `${globalThis.document.location.origin}/services/chats/preview/video/${fileId}/${area}/thumbnail/${params}`;
 };
 
 export const getPdfPreview = (
@@ -83,7 +83,7 @@ export const getPdfPreview = (
 
 export const getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
 	const params = buildQueryString({ first_page: firstPage, last_page: lastPage });
-	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
+	return `${globalThis.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
 };
 
 export const getPdfThumbnail = (
@@ -105,5 +105,5 @@ export const getPdfThumbnailURL = (
 	format = 'jpeg'
 ): string => {
 	const params = buildQueryString({ shape, quality, output_format: format });
-	return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
+	return `${globalThis.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
 };
