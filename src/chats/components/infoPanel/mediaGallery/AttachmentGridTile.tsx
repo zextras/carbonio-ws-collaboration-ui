@@ -45,6 +45,24 @@ const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 	.selectionCheckbox:focus-visible {
 		opacity: 1;
 	}
+	/* Where hovering is possible the hidden checkbox must not capture the clicks
+	   landing on its corner of the tile. */
+	@media (hover: hover) {
+		.selectionCheckbox {
+			pointer-events: ${({ $selectionMode }): string => ($selectionMode ? 'auto' : 'none')};
+		}
+		&:hover .selectionCheckbox,
+		.selectionCheckbox:focus-visible {
+			pointer-events: auto;
+		}
+	}
+	/* Without hover the checkbox would never show up, leaving no way into the
+	   selection mode: keep it visible. */
+	@media (hover: none) {
+		.selectionCheckbox {
+			opacity: 1;
+		}
+	}
 `;
 
 const TileImage = styled.img`

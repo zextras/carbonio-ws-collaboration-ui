@@ -26,7 +26,15 @@ export function buildAttachmentForwardMessages(
 			type: MessageType.TEXT_MSG,
 			from: attachment.userId,
 			text: '',
-			read: MarkerStatus.READ
+			read: MarkerStatus.READ,
+			// Forwarding copies the file server-side, so the quota changes: without
+			// this field forwardMessages would skip the QUOTA_CHANGED_EVENT dispatch.
+			attachment: {
+				id: attachment.id,
+				name: attachment.name,
+				mimeType: attachment.mimeType,
+				size: attachment.size
+			}
 		}
 	];
 }
