@@ -28,7 +28,14 @@ import { OperationType } from '../../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
+import * as UserMediaManager from '../../../../utils/UserMediaManager';
 import MeetingSidebar from '../MeetingSidebar';
+
+// Prevent async state updates from BidirectionalConnectionAudioInOut.init()
+// leaking outside act() when meetingConnection() is called
+beforeEach(() => {
+	vi.spyOn(UserMediaManager, 'getAudioStream').mockRejectedValue(new Error('Controlled error'));
+});
 
 const heightRem = 'height: 2.75rem';
 const heightPercentage = 'height: 100%';
