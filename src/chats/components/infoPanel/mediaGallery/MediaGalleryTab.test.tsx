@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, within } from '@testing-library/react';
 
 import { MediaGalleryTab } from './MediaGalleryTab';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../../../network';
@@ -27,6 +27,7 @@ const SAMPLE_CREATED_AT = '2024-01-01T10:00:00Z';
 const AUG_CREATED_AT = '2021-08-15T10:00:00Z';
 const AUG_TEST_ID = 'mediaGalleryAttachmentClickArea-aug';
 const A1_TEST_ID = 'mediaGalleryAttachmentClickArea-a1';
+const A2_TEST_ID = 'mediaGalleryAttachmentClickArea-a2';
 const MAY_CREATED_AT = '2021-05-10T10:00:00Z';
 
 const buildAttachment = (id: string, createdAt: string): Attachment => ({
@@ -231,7 +232,7 @@ describe('MediaGalleryTab', () => {
 			expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
 		});
 
-		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-a2')).toBeInTheDocument();
+		expect(await screen.findByTestId(A2_TEST_ID)).toBeInTheDocument();
 	});
 
 	describe('selection mode', () => {
@@ -240,6 +241,7 @@ describe('MediaGalleryTab', () => {
 		const SELECT_A2_TEST_ID = 'mediaGallerySelect-a2';
 		const SELECTION_HEADER_TEST_ID = 'mediaGallerySelectionHeader';
 		const ONE_SELECTED = '1 selected';
+		const CONFIRM_MULTI_LABEL = 'Yes, delete attachments';
 
 		const seedTwoAttachments = (overrides?: Partial<Attachment>): void => {
 			mockedGetRoomAttachments.mockResolvedValueOnce({
@@ -275,6 +277,34 @@ describe('MediaGalleryTab', () => {
 			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent(ONE_SELECTED);
 		});
 
+		test('a selected tile swaps the empty square for the checkmark', async () => {
+			seedTwoAttachments();
+			const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+			await screen.findByTestId(A1_TEST_ID);
+
+			const checkbox = screen.getByTestId(SELECT_A1_TEST_ID);
+			expect(within(checkbox).getByTestId('icon: Square')).toBeInTheDocument();
+
+			await user.click(checkbox);
+			expect(within(checkbox).getByTestId('icon: Checkmark')).toBeInTheDocument();
+			expect(within(checkbox).queryByTestId('icon: Square')).not.toBeInTheDocument();
+		});
+
+		test('a selected Docs row swaps the file avatar for the checkmark', async () => {
+			mockedGetRoomAttachments.mockResolvedValueOnce({ attachments: [], cursor: undefined });
+			mockedGetRoomAttachments.mockResolvedValueOnce({
+				attachments: [{ ...buildAttachment('a1', SAMPLE_CREATED_AT), userId: myUserId }],
+				cursor: undefined
+			});
+			const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+			await screen.findByTestId('mediaGalleryEmptyState');
+			await user.click(screen.getByTestId('mediaGalleryCategory-docs'));
+
+			const checkbox = await screen.findByTestId(SELECT_A1_TEST_ID);
+			await user.click(checkbox);
+			expect(within(checkbox).getByTestId('icon: Checkmark')).toBeInTheDocument();
+		});
+
 		test('Cancel clears the selection and leaves selection mode', async () => {
 			seedTwoAttachments();
 			const { user } = setup(<MediaGalleryTab roomId={roomId} />);
@@ -293,7 +323,7 @@ describe('MediaGalleryTab', () => {
 			await screen.findByTestId(A1_TEST_ID);
 
 			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
-			await user.click(screen.getByTestId('mediaGalleryAttachmentClickArea-a2'));
+			await user.click(screen.getByTestId(A2_TEST_ID));
 
 			expect(screen.getByTestId(SELECTION_HEADER_TEST_ID)).toHaveTextContent('2 selected');
 			expect(useStore.getState().previewNavigation.active).toBeNull();
@@ -348,7 +378,11 @@ describe('MediaGalleryTab', () => {
 			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
 			await user.click(screen.getByTestId(SELECT_A2_TEST_ID));
 			await user.click(screen.getByTestId('mediaGalleryBulkDelete'));
-			await user.click(await screen.findByRole('button', { name: /yes, delete attachment/i }));
+
+			// The confirmation modal speaks of the whole selection.
+			expect(await screen.findByText('Delete attachments')).toBeInTheDocument();
+			expect(screen.getByText(/do you want to delete these 2 attachments\?/i)).toBeInTheDocument();
+			await user.click(screen.getByRole('button', { name: CONFIRM_MULTI_LABEL }));
 
 			await waitFor(() => {
 				expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['a1', 'a2']);
@@ -357,6 +391,42 @@ describe('MediaGalleryTab', () => {
 				expect(screen.queryByTestId(SELECTION_HEADER_TEST_ID)).not.toBeInTheDocument();
 			});
 			expect(await screen.findByTestId('mediaGalleryEmptyState')).toBeInTheDocument();
+			expect(await screen.findByText('Attachments deleted')).toBeInTheDocument();
+		});
+
+		test('deleting a single selected attachment gives the singular feedback', async () => {
+			seedTwoAttachments();
+			mockedBulkDelete.mockResolvedValue({ successIds: ['a1'], failedIds: [] });
+			const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+			await screen.findByTestId(A1_TEST_ID);
+
+			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
+			await user.click(screen.getByTestId('mediaGalleryBulkDelete'));
+
+			// One target only: the modal keeps the singular copy.
+			expect(await screen.findByText('Delete attachment')).toBeInTheDocument();
+			await user.click(screen.getByRole('button', { name: 'Yes, delete attachment' }));
+
+			await waitFor(() => {
+				expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['a1']);
+			});
+			expect(await screen.findByText('Attachment deleted')).toBeInTheDocument();
+		});
+
+		test('bulk delete keeps the attachments the API reports as failed', async () => {
+			seedTwoAttachments();
+			mockedBulkDelete.mockResolvedValue({ successIds: ['a1'], failedIds: ['a2'] });
+			const { user } = setup(<MediaGalleryTab roomId={roomId} />);
+			await screen.findByTestId(A1_TEST_ID);
+
+			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
+			await user.click(screen.getByTestId(SELECT_A2_TEST_ID));
+			await user.click(screen.getByTestId('mediaGalleryBulkDelete'));
+			await user.click(await screen.findByRole('button', { name: CONFIRM_MULTI_LABEL }));
+
+			expect(await screen.findByText('Could not delete some attachments')).toBeInTheDocument();
+			expect(screen.getByTestId(A2_TEST_ID)).toBeInTheDocument();
+			expect(screen.queryByTestId(A1_TEST_ID)).not.toBeInTheDocument();
 		});
 
 		test('bulk delete is disabled when a selected attachment belongs to another user', async () => {

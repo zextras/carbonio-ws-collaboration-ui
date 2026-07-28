@@ -44,18 +44,23 @@ type UseAttachmentForwardResult = {
 	modalOpen: boolean;
 	openModal: () => void;
 	closeModal: () => void;
-	messagesToForward: Array<TextMessage> | undefined;
+	messagesToForward: Array<TextMessage>;
 };
 
-const useAttachmentForward = (attachment: Attachment): UseAttachmentForwardResult => {
+// Forward of one or more attachments: an attachment without stanzaId builds no
+// message, so forwarding is possible only when every target produced one.
+const useAttachmentForward = (attachments: Array<Attachment>): UseAttachmentForwardResult => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const openModal = useCallback(() => setModalOpen(true), []);
 	const closeModal = useCallback(() => setModalOpen(false), []);
 
-	const messagesToForward = useMemo(() => buildAttachmentForwardMessages(attachment), [attachment]);
+	const messagesToForward = useMemo(
+		() => attachments.flatMap((attachment) => buildAttachmentForwardMessages(attachment) ?? []),
+		[attachments]
+	);
 
 	return {
-		canForward: messagesToForward !== undefined,
+		canForward: attachments.length > 0 && messagesToForward.length === attachments.length,
 		modalOpen,
 		openModal,
 		closeModal,

@@ -80,16 +80,22 @@ const VideoBadge = styled.div`
 	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
 `;
 
+// Selected state as per Figma (Info Panel, node 4413:3324): filled primary box
+// of 1.125rem with a 0.1875rem radius and a white 0.75rem checkmark inside.
 const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 	position: absolute;
 	top: 0.25rem;
 	left: 0.25rem;
 	z-index: 1;
 	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.125rem;
+	height: 1.125rem;
 	cursor: pointer;
-	border-radius: 0.125rem;
+	border-radius: 0.1875rem;
 	background-color: ${({ $selected, theme }): string =>
-		$selected ? theme.palette.gray6.regular : 'transparent'};
+		$selected ? theme.palette.primary.regular : 'transparent'};
 	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
 `;
 
@@ -218,9 +224,9 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 							aria-label={attachment.name}
 						>
 							<Icon
-								icon={selected ? 'CheckmarkSquare' : 'Square'}
-								size="medium"
-								color={selected ? 'primary' : 'gray6'}
+								icon={selected ? 'Checkmark' : 'Square'}
+								size={selected ? 'small' : 'medium'}
+								color="gray6"
 							/>
 						</SelectionCheckbox>
 					</TileWrapper>

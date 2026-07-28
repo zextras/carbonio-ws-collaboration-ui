@@ -97,14 +97,19 @@ const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
 	}
 `;
 
-const SelectionCheckbox = styled.div`
+// Takes the place of the file avatar, so it matches its footprint and its 15%
+// rounding. Selected state as per Figma (Info Panel, node 4413:3324): filled
+// primary box with a white checkmark, here scaled up to the avatar size.
+const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 	position: absolute;
 	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	background-color: ${({ theme }): string => theme.palette.gray6.regular};
+	border-radius: 15%;
+	background-color: ${({ $selected, theme }): string =>
+		$selected ? theme.palette.primary.regular : theme.palette.gray6.regular};
 `;
 
 const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
@@ -228,15 +233,16 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 							data-testid={`mediaGallerySelect-${attachment.id}`}
 							onClick={onCheckboxClick}
 							onKeyDown={onCheckboxKeyDown}
+							$selected={selected}
 							role="checkbox"
 							tabIndex={0}
 							aria-checked={selected}
 							aria-label={attachment.name}
 						>
 							<Icon
-								icon={selected ? 'CheckmarkSquare' : 'Square'}
+								icon={selected ? 'Checkmark' : 'Square'}
 								size="large"
-								color={selected ? 'primary' : 'gray0'}
+								color={selected ? 'gray6' : 'gray0'}
 							/>
 						</SelectionCheckbox>
 					</AvatarSlot>

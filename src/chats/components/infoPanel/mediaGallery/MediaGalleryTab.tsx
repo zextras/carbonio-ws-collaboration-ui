@@ -116,7 +116,7 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 						/>
 					)}
 					{isSelectionMode ? (
-						<BulkActionsBar roomId={roomId} />
+						<BulkActionsBar />
 					) : (
 						<TotalCounterChip total={total} category={category} />
 					)}

@@ -6,8 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import styled from '@emotion/styled';
-import { Container, List, ListItem, Spinner } from '@zextras/carbonio-design-system';
+import { Container, List, Spinner, useIsVisible } from '@zextras/carbonio-design-system';
 
 import { AttachmentGridTile } from './AttachmentGridTile';
 import { AttachmentMonthHeader } from './AttachmentMonthHeader';
@@ -15,12 +14,7 @@ import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import { groupAttachmentsByMonth } from '../../../../utils/mediaGalleryUtils';
 
 const GRID_COLUMNS = 4;
-
-const RowContainer = styled.div`
-	display: flex;
-	gap: 0.125rem;
-	padding: 0 0.5rem 0.125rem;
-`;
+const GRID_GAP = '0.125rem';
 
 function chunkAttachments(attachments: Array<Attachment>, size: number): Array<Array<Attachment>> {
 	const rows: Array<Array<Attachment>> = [];
@@ -32,19 +26,35 @@ function chunkAttachments(attachments: Array<Attachment>, size: number): Array<A
 
 type AttachmentGridRowProps = {
 	attachments: Array<Attachment>;
+	// Ref of the scrolling list, injected by List into each of its children.
+	listRef?: React.RefObject<HTMLDivElement>;
 };
 
-const AttachmentGridRow: FC<AttachmentGridRowProps> = ({ attachments }) => (
-	<ListItem key={attachments[0].id} background="gray6">
-		{(visible: boolean): React.ReactElement => (
-			<RowContainer data-testid={`mediaGalleryGridRow-${attachments[0].id}`}>
-				{attachments.map((attachment) => (
-					<AttachmentGridTile key={attachment.id} attachment={attachment} visible={visible} />
-				))}
-			</RowContainer>
-		)}
-	</ListItem>
-);
+// A row is only the layout device keeping four tiles together, so it is a plain
+// container instead of a ListItem: the list item would add its own hover/active
+// highlight, tinting four unrelated tiles at once, and a tab stop the row does
+// not need. Visibility for the lazy thumbnails comes from the same hook ListItem
+// uses internally.
+const AttachmentGridRow: FC<AttachmentGridRowProps> = ({ attachments, listRef }) => {
+	const [visible, rowRef] = useIsVisible<HTMLDivElement>(listRef);
+	return (
+		<Container
+			ref={rowRef}
+			data-testid={`mediaGalleryGridRow-${attachments[0].id}`}
+			orientation="horizontal"
+			// Keeps the tiles of an incomplete row aligned under the first column.
+			mainAlignment="flex-start"
+			crossAlignment="flex-start"
+			height="fit"
+			gap={GRID_GAP}
+			padding={{ horizontal: '0.5rem', bottom: GRID_GAP }}
+		>
+			{attachments.map((attachment) => (
+				<AttachmentGridTile key={attachment.id} attachment={attachment} visible={visible} />
+			))}
+		</Container>
+	);
+};
 
 type AttachmentGridProps = {
 	attachments: Array<Attachment>;
