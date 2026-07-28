@@ -23,10 +23,6 @@ export type UseDeleteAttachmentHook = {
 	confirmDelete: () => void;
 };
 
-// Deletion of one or more attachments of the same room: the API is bulk, so a
-// single attachment is just a list of one.
-// onDeleted runs once the request completed, partial failures included: the bulk
-// bar uses it to leave the selection mode.
 const useDeleteAttachment = (
 	attachments: Array<Attachment>,
 	onDeleted?: () => void
@@ -43,7 +39,6 @@ const useDeleteAttachment = (
 
 	const [modalOpen, setModalOpen] = useState(false);
 
-	// Own attachments only, and nothing to delete is not deletable.
 	const canDelete = useMemo(
 		() =>
 			attachments.length > 0 && attachments.every((attachment) => attachment.userId === sessionId),

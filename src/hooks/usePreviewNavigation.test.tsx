@@ -52,7 +52,6 @@ describe('usePreviewNavigation', () => {
 			const a2 = buildAttachment('a2');
 			const mineFilter = { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' };
 			useStore.getState().setMediaGalleryActiveFilter(roomId, mineFilter);
-			// The gallery fetches per-category buckets: an image lives in IMAGES.
 			useStore
 				.getState()
 				.appendMediaGalleryPage(
@@ -81,7 +80,6 @@ describe('usePreviewNavigation', () => {
 
 		test('does not snapshot the bucket of a different category', () => {
 			const video = buildAttachment('v1', { mimeType: 'video/mp4' });
-			// Only the IMAGES bucket is populated: opening a video must not use it.
 			useStore
 				.getState()
 				.appendMediaGalleryPage(

@@ -43,7 +43,6 @@ export const BulkActionsBar: FC = () => {
 
 	const { selectedAttachments, clearSelection } = useContext(MediaGallerySelectionContext);
 
-	// Same actions as a single row or tile, applied to the whole selection.
 	const { canDelete, openDeleteModal, canForward, openForwardModal, download, modals } =
 		useAttachmentActions(selectedAttachments, { onDeleted: clearSelection });
 

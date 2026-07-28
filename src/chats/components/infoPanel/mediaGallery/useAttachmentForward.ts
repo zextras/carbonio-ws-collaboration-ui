@@ -10,9 +10,6 @@ import { Attachment } from '../../../../types/network/models/attachmentTypes';
 import { MarkerStatus, MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../../utils/dateUtils';
 
-// Forwarding an attachment means forwarding the message that carries it: build
-// the minimal TextMessage the forward API needs from the attachment metadata.
-// Possible only when the stanzaId of the original message is known.
 export function buildAttachmentForwardMessages(
 	attachment: Attachment
 ): Array<TextMessage> | undefined {
@@ -27,8 +24,6 @@ export function buildAttachmentForwardMessages(
 			from: attachment.userId,
 			text: '',
 			read: MarkerStatus.READ,
-			// Forwarding copies the file server-side, so the quota changes: without
-			// this field forwardMessages would skip the QUOTA_CHANGED_EVENT dispatch.
 			attachment: {
 				id: attachment.id,
 				name: attachment.name,
@@ -47,8 +42,6 @@ type UseAttachmentForwardResult = {
 	messagesToForward: Array<TextMessage>;
 };
 
-// Forward of one or more attachments: an attachment without stanzaId builds no
-// message, so forwarding is possible only when every target produced one.
 const useAttachmentForward = (attachments: Array<Attachment>): UseAttachmentForwardResult => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const openModal = useCallback(() => setModalOpen(true), []);

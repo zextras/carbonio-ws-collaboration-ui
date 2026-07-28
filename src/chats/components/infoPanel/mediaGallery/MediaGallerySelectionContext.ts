@@ -15,12 +15,9 @@ export type MediaGallerySelection = {
 	isSelected: (attachmentId: string) => boolean;
 	toggleSelection: (attachment: Attachment) => void;
 	clearSelection: () => void;
-	// Drops the selected items no longer part of the given list (e.g. deleted).
 	pruneSelection: (attachments: Array<Attachment>) => void;
 };
 
-// Default no-op value: components used outside the gallery tab simply never
-// enter the selection mode.
 export const MediaGallerySelectionContext = createContext<MediaGallerySelection>({
 	isSelectionMode: false,
 	selectedCount: 0,

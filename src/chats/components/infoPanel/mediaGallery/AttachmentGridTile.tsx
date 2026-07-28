@@ -23,8 +23,6 @@ import {
 	isPreviewSupported
 } from '../../../../utils/attachmentUtils';
 
-// Sizing lives on the slot so the tile keeps the 4-column layout even when
-// wrapped by the contextual menu dropdown.
 const TileSlot = styled.div`
 	width: calc((100% - 3 * 0.125rem) / 4);
 	aspect-ratio: 1 / 1;
@@ -37,7 +35,6 @@ const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 	overflow: hidden;
 	cursor: pointer;
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
-	/* Opacity instead of visibility keeps the checkbox keyboard-focusable. */
 	.selectionCheckbox {
 		opacity: ${({ $selectionMode }): number => ($selectionMode ? 1 : 0)};
 	}
@@ -45,8 +42,6 @@ const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 	.selectionCheckbox:focus-visible {
 		opacity: 1;
 	}
-	/* Where hovering is possible the hidden checkbox must not capture the clicks
-	   landing on its corner of the tile. */
 	@media (hover: hover) {
 		.selectionCheckbox {
 			pointer-events: ${({ $selectionMode }): string => ($selectionMode ? 'auto' : 'none')};
@@ -56,8 +51,6 @@ const TileWrapper = styled.div<{ $selectionMode: boolean }>`
 			pointer-events: auto;
 		}
 	}
-	/* Without hover the checkbox would never show up, leaving no way into the
-	   selection mode: keep it visible. */
 	@media (hover: none) {
 		.selectionCheckbox {
 			opacity: 1;
@@ -80,8 +73,6 @@ const VideoBadge = styled.div`
 	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
 `;
 
-// Selected state as per Figma (Info Panel, node 4413:3324): filled primary box
-// of 1.125rem with a 0.1875rem radius and a white 0.75rem checkmark inside.
 const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 	position: absolute;
 	top: 0.25rem;
@@ -101,7 +92,6 @@ const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 
 type AttachmentGridTileProps = {
 	attachment: Attachment;
-	// Whether the row containing this tile has entered the viewport at least once.
 	visible: boolean;
 };
 
@@ -119,14 +109,11 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 		? getVideoThumbnailURL(attachment.id, '0x0', ImageQuality.LOW)
 		: getAttachmentThumbnailURL(attachment.id, attachment.mimeType);
 
-	// Latch the first visibility so the thumbnail is fetched lazily but only once.
 	const [hasBeenVisible, setHasBeenVisible] = useState(false);
 	useEffect(() => {
 		if (visible) setHasBeenVisible(true);
 	}, [visible]);
 
-	// The backend replies 202 while the video frame is being generated: fall back
-	// to the icon without retrying.
 	const [thumbnailFailed, setThumbnailFailed] = useState(false);
 	const onThumbnailError = useCallback(() => setThumbnailFailed(true), []);
 

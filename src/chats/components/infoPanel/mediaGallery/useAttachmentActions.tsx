@@ -17,8 +17,6 @@ import { downloadAttachment } from '../../../../utils/attachmentUtils';
 import ForwardMessageModal from '../../conversation/forwardModal/ForwardMessageModal';
 
 type UseAttachmentActionsOptions = {
-	// Runs once a deletion request completed; the bulk bar leaves the selection
-	// mode with it.
 	onDeleted?: () => void;
 };
 
@@ -27,17 +25,11 @@ type UseAttachmentActionsResult = {
 	openDeleteModal: () => void;
 	canForward: boolean;
 	openForwardModal: () => void;
-	// Downloads every target: the browser queues the parallel requests by itself.
 	download: () => void;
-	// Download / Forward / Delete entries for the right-click contextual menu of a
-	// single row or tile (selection mode disables it, so it never has many targets).
 	contextMenuItems: Array<DropdownItem>;
-	// Modals driven by the actions above; render them next to the component.
 	modals: React.ReactElement;
 };
 
-// Download / Forward / Delete of one attachment or of a whole selection: the
-// single-target callers pass the attachment, the bulk bar the selected list.
 const useAttachmentActions = (
 	target: Attachment | Array<Attachment>,
 	options?: UseAttachmentActionsOptions
@@ -118,7 +110,6 @@ const useAttachmentActions = (
 		openForwardModal
 	]);
 
-	// Every target belongs to the room the gallery is showing.
 	const roomId = attachments[0]?.roomId;
 	const modals = (
 		<>

@@ -79,7 +79,6 @@ describe('Media gallery slice', () => {
 		expect(bucket?.attachments.map((a) => a.id)).toEqual(['a1', 'a2']);
 		expect(bucket?.nextCursor).toBeUndefined();
 		expect(bucket?.hasMore).toBe(false);
-		// A response without total keeps the last known counter.
 		expect(bucket?.total).toBe(2);
 	});
 
@@ -124,7 +123,6 @@ describe('Media gallery slice', () => {
 		useStore.getState().setMediaGalleryActiveFilter(roomId, MINE_FILTER);
 		const state = useStore.getState().mediaGallery[roomId];
 		expect(state.activeFilter.userId).toBe('user-1');
-		// The previously fetched bucket is untouched: switching back must not refetch.
 		const bucket = getBucket(DEFAULT_MEDIA_GALLERY_FILTER);
 		expect(bucket?.attachments).toHaveLength(1);
 		expect(bucket?.nextCursor).toBe('cur-1');
@@ -156,7 +154,6 @@ describe('Media gallery slice', () => {
 		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(1);
 		expect(getBucket(IMAGES_FILTER)?.attachments).toEqual([]);
 		expect(getBucket(IMAGES_FILTER)?.total).toBe(0);
-		// Pagination of the buckets is preserved.
 		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.nextCursor).toBe('cur-1');
 	});
 
@@ -200,7 +197,6 @@ describe('Media gallery slice', () => {
 				'a1'
 			]);
 			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.total).toBe(2);
-			// The attachment is an image, so it belongs to the IMAGES bucket too.
 			expect(getBucket(IMAGES_FILTER)?.attachments.map((a) => a.id)).toEqual([NEW_ID]);
 			expect(getBucket(IMAGES_FILTER)?.total).toBe(1);
 			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.nextCursor).toBe('cur-1');

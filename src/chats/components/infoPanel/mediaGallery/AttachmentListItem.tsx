@@ -63,13 +63,9 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 	cursor: ${(props): string => (props.clickable ? 'pointer' : 'default')};
 `;
 
-// Swaps the file icon with the selection checkbox on hover and while the
-// selection mode is active.
 const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
 	position: relative;
 	flex-shrink: 0;
-	/* Opacity instead of display keeps the checkbox keyboard-focusable; its
-	   opaque background covers the file icon when shown. */
 	.selectionCheckbox {
 		opacity: ${({ $selectionMode }): number => ($selectionMode ? 1 : 0)};
 	}
@@ -77,8 +73,6 @@ const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
 	.selectionCheckbox:focus-visible {
 		opacity: 1;
 	}
-	/* Where hovering is possible the hidden checkbox must not swallow the clicks
-	   aimed at the file icon it covers. */
 	@media (hover: hover) {
 		.selectionCheckbox {
 			pointer-events: ${({ $selectionMode }): string => ($selectionMode ? 'auto' : 'none')};
@@ -88,8 +82,6 @@ const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
 			pointer-events: auto;
 		}
 	}
-	/* Without hover the checkbox would never show up, leaving no way into the
-	   selection mode: keep it visible. */
 	@media (hover: none) {
 		.selectionCheckbox {
 			opacity: 1;
@@ -97,9 +89,6 @@ const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
 	}
 `;
 
-// Takes the place of the file avatar, so it matches its footprint and its 15%
-// rounding. Selected state as per Figma (Info Panel, node 4413:3324): filled
-// primary box with a white checkmark, here scaled up to the avatar size.
 const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 	position: absolute;
 	inset: 0;

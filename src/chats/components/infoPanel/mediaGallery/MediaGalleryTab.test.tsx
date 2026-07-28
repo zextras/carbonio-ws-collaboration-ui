@@ -205,7 +205,6 @@ describe('MediaGalleryTab', () => {
 		);
 		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-vid-1')).toBeInTheDocument();
 
-		// Going back to Images shows the cached bucket without a new request.
 		await user.click(screen.getByTestId('mediaGalleryCategory-images'));
 		expect(await screen.findByTestId('mediaGalleryAttachmentClickArea-img-1')).toBeInTheDocument();
 		expect(mockedGetRoomAttachments).toHaveBeenCalledTimes(2);
@@ -379,7 +378,6 @@ describe('MediaGalleryTab', () => {
 			await user.click(screen.getByTestId(SELECT_A2_TEST_ID));
 			await user.click(screen.getByTestId('mediaGalleryBulkDelete'));
 
-			// The confirmation modal speaks of the whole selection.
 			expect(await screen.findByText('Delete attachments')).toBeInTheDocument();
 			expect(screen.getByText(/do you want to delete these 2 attachments\?/i)).toBeInTheDocument();
 			await user.click(screen.getByRole('button', { name: CONFIRM_MULTI_LABEL }));
@@ -403,7 +401,6 @@ describe('MediaGalleryTab', () => {
 			await user.click(screen.getByTestId(SELECT_A1_TEST_ID));
 			await user.click(screen.getByTestId('mediaGalleryBulkDelete'));
 
-			// One target only: the modal keeps the singular copy.
 			expect(await screen.findByText('Delete attachment')).toBeInTheDocument();
 			await user.click(screen.getByRole('button', { name: 'Yes, delete attachment' }));
 

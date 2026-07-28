@@ -175,10 +175,8 @@ describe('useMediaGalleryAttachments', () => {
 		await waitFor(() => {
 			expect(result.current.attachments.map((a) => a.id)).toEqual(['mine-1']);
 		});
-		// The unfiltered bucket is still cached...
 		expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
 
-		// ...so switching back must not fire another request.
 		act(() => {
 			result.current.setActiveFilter(DEFAULT_MEDIA_GALLERY_FILTER);
 		});

@@ -13,7 +13,6 @@ type DeleteAttachmentModalProps = {
 	open: boolean;
 	onConfirm: () => void;
 	onClose: () => void;
-	// How many attachments are about to be deleted; drives the singular/plural copy.
 	count?: number;
 };
 

@@ -11,7 +11,6 @@ import {
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-// Stable fallback so subscriptions don't re-render while the bucket doesn't exist yet.
 const NO_ATTACHMENTS: Array<Attachment> = [];
 
 export const getMediaGalleryAttachments = (

@@ -357,16 +357,12 @@ export const getPinAttachmentColor = (fileType: string): string => {
 	return 'primary';
 };
 
-// Mirrors the server-side definition of mimeTypeCategory (API 1.6.14, CO-3830):
-// image/* -> IMAGES, video/* -> VIDEOS, everything else (incl. audio) -> DOCUMENTS.
 export const getMimeTypeCategory = (mimeType: string): MimeTypeCategory => {
 	if (isAttachmentImage(mimeType)) return 'IMAGES';
 	if (isAttachmentVideo(mimeType)) return 'VIDEOS';
 	return 'DOCUMENTS';
 };
 
-// Deterministic key for a media gallery bucket: same filter combination ->
-// same key, regardless of the construction order of the object.
 export const getMediaGalleryBucketKey = (filter: MediaGalleryFilter): string =>
 	Object.entries(filter)
 		.filter(([, value]) => value !== undefined)
@@ -374,9 +370,6 @@ export const getMediaGalleryBucketKey = (filter: MediaGalleryFilter): string =>
 		.map(([key, value]) => `${key}=${value}`)
 		.join('&');
 
-// Client-side mirror of the server-side filtering of GET /rooms/:id/attachments,
-// used to decide which cached buckets a real-time attachment belongs to.
-// ISO 8601 timestamps compare correctly as strings.
 export const attachmentMatchesFilter = (
 	attachment: Attachment,
 	filter: MediaGalleryFilter

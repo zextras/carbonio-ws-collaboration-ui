@@ -34,9 +34,6 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 		(roomId: string, clickedAttachment: Attachment): void => {
 			const state = useStore.getState();
 			const activeFilter = getMediaGalleryActiveFilter(state, roomId);
-			// Gallery buckets are keyed per category tab, and an attachment's own
-			// category always matches the tab it is rendered in (the server filter
-			// mirrors getMimeTypeCategory), so it identifies the current bucket.
 			const mimeTypeCategory = getMimeTypeCategory(clickedAttachment.mimeType);
 			const filter = { ...activeFilter, mimeTypeCategory };
 			const bucket = state.mediaGallery[roomId]?.buckets[getMediaGalleryBucketKey(filter)];

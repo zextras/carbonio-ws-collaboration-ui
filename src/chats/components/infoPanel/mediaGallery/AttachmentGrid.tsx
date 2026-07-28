@@ -26,15 +26,9 @@ function chunkAttachments(attachments: Array<Attachment>, size: number): Array<A
 
 type AttachmentGridRowProps = {
 	attachments: Array<Attachment>;
-	// Ref of the scrolling list, injected by List into each of its children.
 	listRef?: React.RefObject<HTMLDivElement>;
 };
 
-// A row is only the layout device keeping four tiles together, so it is a plain
-// container instead of a ListItem: the list item would add its own hover/active
-// highlight, tinting four unrelated tiles at once, and a tab stop the row does
-// not need. Visibility for the lazy thumbnails comes from the same hook ListItem
-// uses internally.
 const AttachmentGridRow: FC<AttachmentGridRowProps> = ({ attachments, listRef }) => {
 	const [visible, rowRef] = useIsVisible<HTMLDivElement>(listRef);
 	return (
@@ -42,7 +36,6 @@ const AttachmentGridRow: FC<AttachmentGridRowProps> = ({ attachments, listRef })
 			ref={rowRef}
 			data-testid={`mediaGalleryGridRow-${attachments[0].id}`}
 			orientation="horizontal"
-			// Keeps the tiles of an incomplete row aligned under the first column.
 			mainAlignment="flex-start"
 			crossAlignment="flex-start"
 			height="fit"

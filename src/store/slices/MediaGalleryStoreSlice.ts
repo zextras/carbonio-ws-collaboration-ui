@@ -62,8 +62,6 @@ const removeFromBucket = (bucket: MediaGalleryBucket, attachmentId: string): voi
 
 const prependToBucket = (bucket: MediaGalleryBucket, attachment: Attachment): void => {
 	if (!bucket.isInitialized) return;
-	// A new attachment is the most recent one: its position is only known
-	// for buckets sorted by descending creation date.
 	if (bucket.filter.sortBy !== 'created_at' || bucket.filter.order !== 'desc') return;
 	if (!attachmentMatchesFilter(attachment, bucket.filter)) return;
 	if (bucket.attachments.some((a) => a.id === attachment.id)) return;
@@ -120,8 +118,6 @@ export const useMediaGalleryStoreSlice: StateCreator<
 				const state = initMediaGalleryRoom(draft, roomId);
 				if (getMediaGalleryBucketKey(state.activeFilter) === getMediaGalleryBucketKey(activeFilter))
 					return;
-				// Buckets are independent caches keyed by filter combination, so the
-				// previously fetched ones stay valid and don't need any reset.
 				state.activeFilter = activeFilter;
 			}),
 			false,

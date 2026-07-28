@@ -48,8 +48,6 @@ describe('buildAttachmentForwardMessages', () => {
 	test('carries the attachment field so forwarding triggers the quota refresh', () => {
 		const messages = buildAttachmentForwardMessages(buildAttachment());
 
-		// forwardMessages dispatches QUOTA_CHANGED_EVENT only when some forwarded
-		// message carries an attachment.
 		expect(messages?.some((message) => message.attachment)).toBe(true);
 	});
 

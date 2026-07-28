@@ -42,19 +42,16 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 		count: selectedCount
 	});
 
-	// Selection is scoped to the current bucket: reset it on tab/filter change...
 	useEffect(() => {
 		clearSelection();
 	}, [filterKey, clearSelection]);
 
-	// ...and drop items that left the list (e.g. deleted from another flow).
 	useEffect(() => {
 		pruneSelection(attachments);
 	}, [attachments, pruneSelection]);
 
 	const showInitialSkeleton = !isInitialized && isLoading;
 	const showEmptyState = isInitialized && attachments.length === 0;
-	// Documents keep the detailed list; images and videos use the 4-column grid.
 	const ContentComponent = category === 'DOCUMENTS' ? AttachmentList : AttachmentGrid;
 
 	return (

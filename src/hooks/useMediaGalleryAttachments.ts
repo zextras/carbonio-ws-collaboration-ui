@@ -31,8 +31,6 @@ type UseMediaGalleryAttachmentsResult = {
 	loadMore: () => void;
 	activeFilter: MediaGalleryActiveFilter;
 	setActiveFilter: (activeFilter: MediaGalleryActiveFilter) => void;
-	// Identity of the bucket shown right now; changes whenever filter or tab
-	// change, so it can be used as a React key to remount the lists.
 	filterKey: string;
 };
 
@@ -42,7 +40,6 @@ export const useMediaGalleryAttachments = (
 ): UseMediaGalleryAttachmentsResult => {
 	const activeFilter = useStore((store) => getMediaGalleryActiveFilter(store, roomId));
 
-	// The full params of the bucket shown right now: user filter + current tab.
 	const filter = useMemo(
 		() => ({ ...activeFilter, mimeTypeCategory: category }),
 		[activeFilter, category]
