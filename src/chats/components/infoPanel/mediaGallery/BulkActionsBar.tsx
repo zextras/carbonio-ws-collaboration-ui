@@ -28,7 +28,7 @@ const BarContainer = styled.div`
 `;
 
 const RoundActionButton = styled(Button)`
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: ${({ theme }): string => theme.palette.gray5.hover} !important;
 	}
 `;
