@@ -6,6 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
+import styled from '@emotion/styled';
 import {
 	Button,
 	Container,
@@ -20,6 +21,21 @@ import { useTranslation } from 'react-i18next';
 import { getMediaGalleryActiveFilter } from '../../../../store/selectors/MediaGallerySelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+
+const FilterButtonContainer = styled(Container)`
+	position: relative;
+`;
+
+const ActiveFilterDot = styled.div`
+	position: absolute;
+	width: 0.313rem;
+	height: 0.313rem;
+	background-color: ${({ theme }): string => theme.palette.primary.regular};
+	border: 0.0625rem solid ${({ theme }): string => theme.palette.primary.regular};
+	border-radius: 50%;
+	top: 0.25rem;
+	right: 0.25rem;
+`;
 
 type SentByFilterButtonProps = {
 	roomId: string;
@@ -105,15 +121,20 @@ export const SentByFilterButton: FC<SentByFilterButtonProps> = ({ roomId }) => {
 
 	return (
 		<Dropdown items={items} placement="bottom-end">
-			<Button
-				icon="Options2Outline"
-				type="ghost"
-				color="text"
-				size="large"
-				title={filterTooltip}
-				onClick={(): null => null}
-				data-testid="mediaGallerySentByFilterButton"
-			/>
+			<FilterButtonContainer width="fit" height="fit">
+				<Button
+					icon="Options2Outline"
+					type="ghost"
+					color="text"
+					size="large"
+					title={filterTooltip}
+					onClick={(): null => null}
+					data-testid="mediaGallerySentByFilterButton"
+				/>
+				{filterUserId !== undefined && (
+					<ActiveFilterDot data-testid="mediaGallerySentByActiveDot" />
+				)}
+			</FilterButtonContainer>
 		</Dropdown>
 	);
 };

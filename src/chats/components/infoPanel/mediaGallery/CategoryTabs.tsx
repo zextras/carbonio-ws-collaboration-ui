@@ -37,7 +37,10 @@ const SegmentedItem = styled(Container)<{
 	$position: SegmentPosition;
 }>`
 	cursor: pointer;
-	border: 0.0625rem solid ${({ theme }): string => theme.palette.primary.regular};
+	border-style: solid;
+	border-color: ${({ theme }): string => theme.palette.primary.regular};
+	border-width: ${({ $position }): string =>
+		$position === 'left' ? '0.0625rem' : '0.0625rem 0.0625rem 0.0625rem 0'};
 	border-radius: ${({ $position }): string => SEGMENT_RADIUS[$position]};
 	background-color: ${({ theme, $selected }): string =>
 		$selected ? theme.palette.primary.regular : theme.palette.gray6.regular};

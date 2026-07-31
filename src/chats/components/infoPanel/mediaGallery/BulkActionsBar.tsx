@@ -27,6 +27,12 @@ const BarContainer = styled.div`
 	box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.25);
 `;
 
+const RoundActionButton = styled(Button)`
+	&:hover {
+		background-color: ${({ theme }): string => theme.palette.gray4.regular} !important;
+	}
+`;
+
 export const BulkActionsBar: FC = () => {
 	const [t] = useTranslation();
 	const downloadTooltip = t('action.download', 'Download');
@@ -49,10 +55,11 @@ export const BulkActionsBar: FC = () => {
 	return (
 		<BarContainer data-testid="mediaGalleryBulkActionsBar">
 			<Tooltip label={downloadTooltip} placement="top">
-				<Button
+				<RoundActionButton
 					data-testid="mediaGalleryBulkDownload"
 					aria-label={downloadTooltip}
 					size="large"
+					shape="round"
 					icon="DownloadOutline"
 					type="ghost"
 					color="gray0"
@@ -60,10 +67,11 @@ export const BulkActionsBar: FC = () => {
 				/>
 			</Tooltip>
 			<Tooltip label={canForward ? forwardTooltip : forwardDisabledTooltip} placement="top">
-				<Button
+				<RoundActionButton
 					data-testid="mediaGalleryBulkForward"
 					aria-label={forwardTooltip}
 					size="large"
+					shape="round"
 					icon="Forward"
 					type="ghost"
 					color="gray0"
@@ -72,10 +80,11 @@ export const BulkActionsBar: FC = () => {
 				/>
 			</Tooltip>
 			<Tooltip label={canDelete ? deleteTooltip : deleteDisabledTooltip} placement="top">
-				<Button
+				<RoundActionButton
 					data-testid="mediaGalleryBulkDelete"
 					aria-label={deleteTooltip}
 					size="large"
+					shape="round"
 					icon="Trash2Outline"
 					type="ghost"
 					color="error"

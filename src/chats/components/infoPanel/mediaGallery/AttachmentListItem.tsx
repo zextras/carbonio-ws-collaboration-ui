@@ -12,7 +12,6 @@ import {
 	Button,
 	Container,
 	Dropdown,
-	Icon,
 	ListItem,
 	Row,
 	Text,
@@ -51,6 +50,7 @@ const FileAvatar = styled(Avatar)`
 	min-height: 2.5rem;
 	width: 2.5rem;
 	height: 2.5rem;
+	cursor: pointer;
 	svg {
 		width: 1.5rem;
 		min-width: 1.5rem;
@@ -63,42 +63,8 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 	cursor: ${(props): string => (props.clickable ? 'pointer' : 'default')};
 `;
 
-const AvatarSlot = styled.div<{ $selectionMode: boolean }>`
-	position: relative;
+const AvatarSlot = styled.div`
 	flex-shrink: 0;
-	.selectionCheckbox {
-		opacity: ${({ $selectionMode }): number => ($selectionMode ? 1 : 0)};
-	}
-	&:hover .selectionCheckbox,
-	.selectionCheckbox:focus-visible {
-		opacity: 1;
-	}
-	@media (hover: hover) {
-		.selectionCheckbox {
-			pointer-events: ${({ $selectionMode }): string => ($selectionMode ? 'auto' : 'none')};
-		}
-		&:hover .selectionCheckbox,
-		.selectionCheckbox:focus-visible {
-			pointer-events: auto;
-		}
-	}
-	@media (hover: none) {
-		.selectionCheckbox {
-			opacity: 1;
-		}
-	}
-`;
-
-const SelectionCheckbox = styled.div<{ $selected: boolean }>`
-	position: absolute;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	border-radius: 15%;
-	background-color: ${({ $selected, theme }): string =>
-		$selected ? theme.palette.primary.regular : theme.palette.gray6.regular};
 `;
 
 const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
@@ -130,6 +96,12 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 		if (visible) setHasBeenVisible(true);
 	}, [visible]);
 	const pictureUrl = hasBeenVisible ? thumbnailUrl : undefined;
+
+	const [isPreviewingSelection, setIsPreviewingSelection] = useState(false);
+	const onAvatarMouseEnter = useCallback(() => setIsPreviewingSelection(true), []);
+	const onAvatarMouseLeave = useCallback(() => setIsPreviewingSelection(false), []);
+	const onAvatarFocus = useCallback(() => setIsPreviewingSelection(true), []);
+	const onAvatarBlur = useCallback(() => setIsPreviewingSelection(false), []);
 
 	const { openFromGallery } = usePreviewNavigation();
 	const onPreviewClick = useCallback(() => {
@@ -206,7 +178,12 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 					height="fit"
 					onClick={canPreview || isSelectionMode ? onRowClick : undefined}
 				>
-					<AvatarSlot $selectionMode={isSelectionMode}>
+					<AvatarSlot
+						onMouseEnter={onAvatarMouseEnter}
+						onMouseLeave={onAvatarMouseLeave}
+						onFocus={onAvatarFocus}
+						onBlur={onAvatarBlur}
+					>
 						<FileAvatar
 							className="fileAvatar"
 							data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
@@ -216,24 +193,15 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 							background="gray3"
 							color={getPinAttachmentColor(attachment.mimeType)}
 							picture={pictureUrl}
-						/>
-						<SelectionCheckbox
-							className="selectionCheckbox"
-							data-testid={`mediaGallerySelect-${attachment.id}`}
+							selecting={isSelectionMode || isPreviewingSelection}
+							selected={selected}
 							onClick={onCheckboxClick}
 							onKeyDown={onCheckboxKeyDown}
-							$selected={selected}
 							role="checkbox"
 							tabIndex={0}
 							aria-checked={selected}
 							aria-label={attachment.name}
-						>
-							<Icon
-								icon={selected ? 'Checkmark' : 'Square'}
-								size="large"
-								color={selected ? 'gray6' : 'gray0'}
-							/>
-						</SelectionCheckbox>
+						/>
 					</AvatarSlot>
 					<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
 						<Container

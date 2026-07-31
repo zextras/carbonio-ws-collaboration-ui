@@ -6,6 +6,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 
+import styled from '@emotion/styled';
 import { Button, Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +24,12 @@ import { SentByFilterButton } from './SentByFilterButton';
 import { TotalCounterChip } from './TotalCounterChip';
 import { useMediaGalleryAttachments } from '../../../../hooks/useMediaGalleryAttachments';
 import { MimeTypeCategory } from '../../../../types/network/models/attachmentTypes';
+
+const CancelButton = styled(Button)`
+	> div {
+		text-transform: lowercase;
+	}
+`;
 
 type MediaGalleryTabProps = {
 	roomId: string;
@@ -65,7 +72,7 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 			<MediaGallerySelectionContext.Provider value={selection}>
 				<Container
 					orientation="horizontal"
-					padding={{ top: 'large', bottom: 'medium', horizontal: '2rem' }}
+					padding={{ top: 'large', bottom: 'medium', horizontal: 'large' }}
 					height="fit"
 					flexShrink={0}
 					gap="0.5rem"
@@ -78,14 +85,14 @@ export const MediaGalleryTab: FC<MediaGalleryTabProps> = ({ roomId }) => {
 						data-testid="mediaGallerySelectionHeader"
 						orientation="horizontal"
 						mainAlignment="space-between"
-						padding={{ horizontal: '2rem', bottom: 'extrasmall' }}
+						padding={{ horizontal: 'large', bottom: 'extrasmall' }}
 						height="fit"
 						flexShrink={0}
 					>
 						<Text size="small" color="secondary">
 							{selectedCountLabel}
 						</Text>
-						<Button
+						<CancelButton
 							data-testid="mediaGallerySelectionCancel"
 							label={cancelLabel}
 							type="ghost"

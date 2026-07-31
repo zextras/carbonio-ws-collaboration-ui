@@ -299,9 +299,9 @@ describe('MediaGalleryTab', () => {
 			await screen.findByTestId('mediaGalleryEmptyState');
 			await user.click(screen.getByTestId('mediaGalleryCategory-docs'));
 
-			const checkbox = await screen.findByTestId(SELECT_A1_TEST_ID);
-			await user.click(checkbox);
-			expect(within(checkbox).getByTestId('icon: Checkmark')).toBeInTheDocument();
+			const avatar = await screen.findByTestId('mediaGalleryAttachmentIcon-a1');
+			await user.click(avatar);
+			expect(within(avatar).getByTestId('icon: Checkmark')).toBeInTheDocument();
 		});
 
 		test('Cancel clears the selection and leaves selection mode', async () => {

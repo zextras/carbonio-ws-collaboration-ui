@@ -81,10 +81,10 @@ const SelectionCheckbox = styled.div<{ $selected: boolean }>`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.125rem;
-	height: 1.125rem;
+	width: 1.5rem;
+	height: 1.5rem;
 	cursor: pointer;
-	border-radius: 0.1875rem;
+	border-radius: 0.25rem;
 	background-color: ${({ $selected, theme }): string =>
 		$selected ? theme.palette.primary.regular : 'transparent'};
 	filter: drop-shadow(0 0 0.125rem rgba(0, 0, 0, 0.6));
@@ -212,7 +212,7 @@ export const AttachmentGridTile: FC<AttachmentGridTileProps> = ({ attachment, vi
 						>
 							<Icon
 								icon={selected ? 'Checkmark' : 'Square'}
-								size={selected ? 'small' : 'medium'}
+								size={selected ? 'medium' : 'large'}
 								color="gray6"
 							/>
 						</SelectionCheckbox>
