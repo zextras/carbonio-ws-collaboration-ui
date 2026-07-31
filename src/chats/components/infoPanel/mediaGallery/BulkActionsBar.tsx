@@ -29,7 +29,7 @@ const BarContainer = styled.div`
 
 const RoundActionButton = styled(Button)`
 	&:hover {
-		background-color: ${({ theme }): string => theme.palette.gray4.regular} !important;
+		background-color: ${({ theme }): string => theme.palette.gray5.hover} !important;
 	}
 `;
 

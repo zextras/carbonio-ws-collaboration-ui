@@ -27,7 +27,8 @@ import { MimeTypeCategory } from '../../../../types/network/models/attachmentTyp
 
 const CancelButton = styled(Button)`
 	> div {
-		text-transform: lowercase;
+		text-transform: none;
+		font-size: ${({ theme }): string => theme.sizes.font.small};
 	}
 `;
 
