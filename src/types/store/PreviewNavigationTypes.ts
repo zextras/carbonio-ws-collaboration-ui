@@ -7,7 +7,8 @@
 import {
 	Attachment,
 	AttachmentsSortBy,
-	AttachmentsSortOrder
+	AttachmentsSortOrder,
+	MimeTypeCategory
 } from '../network/models/attachmentTypes';
 
 export type PreviewNavigationSession = {
@@ -16,6 +17,7 @@ export type PreviewNavigationSession = {
 	sortBy: AttachmentsSortBy;
 	order: AttachmentsSortOrder;
 	userId?: string;
+	mimeTypeCategory?: MimeTypeCategory;
 	attachments: Array<Attachment>;
 	nextCursor?: string;
 	hasMore: boolean;

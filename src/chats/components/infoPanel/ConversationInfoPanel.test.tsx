@@ -34,7 +34,7 @@ const oneToOneRoom: RoomBe = createMockRoom({
 
 const user1 = createMockUser({ id: 'user1Id', name: 'User 1' });
 
-const MEDIA_GALLERY_API_VERSION = '1.6.12';
+const MEDIA_GALLERY_API_VERSION = '1.6.14';
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -81,8 +81,8 @@ describe('Conversation info panel', () => {
 		expect(screen.queryByTestId(tabBarTestId)).not.toBeInTheDocument();
 	});
 
-	test('Media Gallery tab is hidden when the API version is below 1.6.12', () => {
-		useStore.getState().setApiVersion('1.6.10');
+	test('Media Gallery tab is hidden when the API version is below 1.6.14', () => {
+		useStore.getState().setApiVersion('1.6.12');
 		setup(<ConversationInfoPanel roomId={groupRoom.id} goToChatView={vi.fn()} />);
 		expect(screen.getByTestId(tabBarTestId)).toBeInTheDocument();
 		expect(screen.queryByText(mediaGalleryTabLabel)).not.toBeInTheDocument();

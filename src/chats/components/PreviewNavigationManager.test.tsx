@@ -20,7 +20,11 @@ import { xmppClient } from '../../network/xmpp/XMPPClient';
 import useStore from '../../store/Store';
 import { screen, setup } from '../../tests/test-utils';
 import { Attachment } from '../../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../types/store/MediaGalleryTypes';
 import { PreviewNavigationSession } from '../../types/store/PreviewNavigationTypes';
+import { getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
+
+const DEFAULT_BUCKET_KEY = getMediaGalleryBucketKey(DEFAULT_MEDIA_GALLERY_FILTER);
 
 vi.mock('../../network/apis/RoomsApi', () => ({
 	getRoomAttachments: vi.fn(),
@@ -227,6 +231,7 @@ describe('PreviewNavigationManager', () => {
 			roomId,
 			sortBy: 'created_at',
 			order: 'desc',
+			mimeTypeCategory: 'IMAGES',
 			attachments: [
 				buildAttachment('a-1'),
 				buildAttachment('a-2'),
@@ -255,7 +260,7 @@ describe('PreviewNavigationManager', () => {
 		await waitFor(() => {
 			expect(mockedGetRoomAttachments).toHaveBeenCalledWith(
 				roomId,
-				expect.objectContaining({ cursor: 'cursor-1' })
+				expect.objectContaining({ cursor: 'cursor-1', mimeTypeCategory: 'IMAGES' })
 			);
 		});
 	});
@@ -427,6 +432,41 @@ describe('PreviewNavigationManager', () => {
 		expect(items[0].actions?.map((a: { id: string }) => a.id)).toEqual(['DownloadOutline']);
 	});
 
+	test('shows the forward action when the attachment has a stanzaId and opens the forward modal', async () => {
+		const handle = setupManager();
+		const session: PreviewNavigationSession = {
+			source: 'gallery',
+			roomId,
+			sortBy: 'created_at',
+			order: 'desc',
+			attachments: [buildAttachment('a-fwd', { userId: otherId, stanzaId: 'stanza-f' })],
+			hasMore: false,
+			isLoading: false
+		};
+
+		act(() => {
+			useStore.getState().startPreviewNavigation(session);
+		});
+
+		await waitFor(() => {
+			expect(handle.value.initPreview).toHaveBeenCalled();
+		});
+
+		const lastInit = vi.mocked(handle.value.initPreview).mock.calls.at(-1) ?? [];
+		const items = lastInit[0] as PreviewItem[];
+		expect(items[0].actions?.map((a: { id: string }) => a.id)).toEqual([
+			'DownloadOutline',
+			'Forward'
+		]);
+
+		const forwardAction = items[0].actions?.find((a: { id: string }) => a.id === 'Forward');
+		act(() => {
+			forwardAction?.onClick({ preventDefault: vi.fn() } as never);
+		});
+
+		expect(await screen.findByTestId('chip_input_forward_modal')).toBeInTheDocument();
+	});
+
 	test('confirming the delete modal calls the API, removes from both slices, and sends XMPP retraction', async () => {
 		const handle = setupManager();
 		mockedBulkDelete.mockResolvedValue({ successIds: ['a-mine'], failedIds: [] });
@@ -435,7 +475,9 @@ describe('PreviewNavigationManager', () => {
 			.mockImplementation(() => undefined);
 
 		const att = buildAttachment('a-mine', { userId, stanzaId: 'stanza-1' });
-		useStore.getState().appendMediaGalleryPage(roomId, [att], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(roomId, DEFAULT_MEDIA_GALLERY_FILTER, [att], undefined, undefined);
 
 		const session: PreviewNavigationSession = {
 			source: 'gallery',
@@ -469,7 +511,9 @@ describe('PreviewNavigationManager', () => {
 			expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['a-mine']);
 		});
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		// Once the only remaining attachment is gone, the manager tears the session down.
 		await waitFor(() => {

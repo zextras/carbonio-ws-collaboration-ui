@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 
 import styled from '@emotion/styled';
 import {
 	Avatar,
 	Button,
 	Container,
+	Dropdown,
 	ListItem,
 	Row,
 	Text,
@@ -18,8 +19,8 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { DeleteAttachmentModal } from './DeleteAttachmentModal';
-import useDeleteAttachment from './useDeleteAttachment';
+import { MediaGallerySelectionContext } from './MediaGallerySelectionContext';
+import useAttachmentActions from './useAttachmentActions';
 import usePreviewNavigation from '../../../../hooks/usePreviewNavigation';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -49,6 +50,7 @@ const FileAvatar = styled(Avatar)`
 	min-height: 2.5rem;
 	width: 2.5rem;
 	height: 2.5rem;
+	cursor: pointer;
 	svg {
 		width: 1.5rem;
 		min-width: 1.5rem;
@@ -61,19 +63,26 @@ const CustomContainer = styled(Container)<{ clickable: boolean }>`
 	cursor: ${(props): string => (props.clickable ? 'pointer' : 'default')};
 `;
 
+const AvatarSlot = styled.div`
+	flex-shrink: 0;
+`;
+
 const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachment, visible }) => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 	const unknownUserLabel = t('status.unknownUser', 'Unknown user');
 	const deleteTooltip = t('action.delete', 'Delete');
+	const forwardTooltip = t('action.forward', 'Forward');
 	const downloadTooltip = t('action.download', 'Download');
 	const previewTooltip = t('action.preview', 'Preview');
 
 	const sessionId = useStore(getUserId);
 	const senderName = useStore((store) => getUserName(store, attachment.userId));
 
-	const { canDelete, modalOpen, openModal, closeModal, confirmDelete } =
-		useDeleteAttachment(attachment);
+	const { canDelete, openDeleteModal, canForward, openForwardModal, contextMenuItems, modals } =
+		useAttachmentActions(attachment);
+	const { isSelectionMode, isSelected, toggleSelection } = useContext(MediaGallerySelectionContext);
+	const selected = isSelected(attachment.id);
 
 	const senderLabel = sessionId === attachment.userId ? youLabel : senderName || unknownUserLabel;
 	const sizeLabel = getAttachmentSize(attachment.size);
@@ -88,17 +97,57 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	}, [visible]);
 	const pictureUrl = hasBeenVisible ? thumbnailUrl : undefined;
 
+	const [isPreviewingSelection, setIsPreviewingSelection] = useState(false);
+	const onAvatarMouseEnter = useCallback(() => setIsPreviewingSelection(true), []);
+	const onAvatarMouseLeave = useCallback(() => setIsPreviewingSelection(false), []);
+	const onAvatarFocus = useCallback(() => setIsPreviewingSelection(true), []);
+	const onAvatarBlur = useCallback(() => setIsPreviewingSelection(false), []);
+
 	const { openFromGallery } = usePreviewNavigation();
 	const onPreviewClick = useCallback(() => {
 		openFromGallery(attachment.roomId, attachment);
 	}, [attachment, openFromGallery]);
 
+	const onRowClick = useCallback(() => {
+		if (isSelectionMode) {
+			toggleSelection(attachment);
+		} else if (canPreview) {
+			onPreviewClick();
+		}
+	}, [attachment, canPreview, isSelectionMode, onPreviewClick, toggleSelection]);
+
+	const onCheckboxClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
+
+	const onCheckboxKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			e.preventDefault();
+			e.stopPropagation();
+			toggleSelection(attachment);
+		},
+		[attachment, toggleSelection]
+	);
+
 	const onDeleteClick = useCallback(
 		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 			e.stopPropagation();
-			openModal();
+			openDeleteModal();
 		},
-		[openModal]
+		[openDeleteModal]
+	);
+
+	const onForwardClick = useCallback(
+		(e: KeyboardEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+			e.stopPropagation();
+			openForwardModal();
+		},
+		[openForwardModal]
 	);
 
 	const onDownloadClick = useCallback(
@@ -110,73 +159,108 @@ const AttachmentListItemContent: FC<AttachmentListItemContentProps> = ({ attachm
 	);
 
 	return (
-		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview}>
-			<CustomContainer
-				data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
-				orientation="horizontal"
-				mainAlignment="flex-start"
-				crossAlignment="center"
-				clickable={canPreview}
-				padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
-				gap="0.5rem"
-				height="fit"
-				onClick={canPreview ? onPreviewClick : undefined}
+		<Tooltip label={previewTooltip} placement="top" disabled={!canPreview || isSelectionMode}>
+			<Dropdown
+				items={contextMenuItems}
+				contextMenu
+				disabled={isSelectionMode}
+				disableRestoreFocus
+				display="block"
 			>
-				<FileAvatar
-					data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
-					icon={getPinAttachmentIcon(attachment.mimeType)}
-					label={attachment.name}
-					shape="square"
-					background="gray3"
-					color={getPinAttachmentColor(attachment.mimeType)}
-					picture={pictureUrl}
-				/>
-				<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
-					<Container
-						orientation="vertical"
-						mainAlignment="center"
-						crossAlignment="flex-start"
-						minWidth={0}
+				<CustomContainer
+					data-testid={`mediaGalleryAttachmentClickArea-${attachment.id}`}
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					crossAlignment="center"
+					clickable={canPreview || isSelectionMode}
+					padding={{ left: 'large', right: 'small', vertical: 'extrasmall' }}
+					gap="0.5rem"
+					height="fit"
+					onClick={canPreview || isSelectionMode ? onRowClick : undefined}
+				>
+					<AvatarSlot
+						onMouseEnter={onAvatarMouseEnter}
+						onMouseLeave={onAvatarMouseLeave}
+						onFocus={onAvatarFocus}
+						onBlur={onAvatarBlur}
 					>
-						<Tooltip overflowTooltip label={attachment.name}>
-							<Text size="small" overflow="ellipsis" lineHeight={1}>
-								{attachment.name}
-							</Text>
+						<FileAvatar
+							className="fileAvatar"
+							data-testid={`mediaGalleryAttachmentIcon-${attachment.id}`}
+							icon={getPinAttachmentIcon(attachment.mimeType)}
+							label={attachment.name}
+							shape="square"
+							background="gray3"
+							color={getPinAttachmentColor(attachment.mimeType)}
+							picture={pictureUrl}
+							selecting={isSelectionMode || isPreviewingSelection}
+							selected={selected}
+							onClick={onCheckboxClick}
+							onKeyDown={onCheckboxKeyDown}
+							role="checkbox"
+							tabIndex={0}
+							aria-checked={selected}
+							aria-label={attachment.name}
+						/>
+					</AvatarSlot>
+					<Row takeAvailableSpace wrap="nowrap" mainAlignment="flex-start" crossAlignment="center">
+						<Container
+							orientation="vertical"
+							mainAlignment="center"
+							crossAlignment="flex-start"
+							minWidth={0}
+						>
+							<Tooltip overflowTooltip label={attachment.name}>
+								<Text size="small" overflow="ellipsis" lineHeight={1}>
+									{attachment.name}
+								</Text>
+							</Tooltip>
+							<Tooltip overflowTooltip label={subline}>
+								<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
+									{subline}
+								</Text>
+							</Tooltip>
+						</Container>
+					</Row>
+					{canDelete && (
+						<Tooltip label={deleteTooltip} placement="top">
+							<Button
+								data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+								size="large"
+								icon="Trash2Outline"
+								type="ghost"
+								color="error"
+								onClick={onDeleteClick}
+							/>
 						</Tooltip>
-						<Tooltip overflowTooltip label={subline}>
-							<Text size="extrasmall" color="secondary" overflow="ellipsis" lineHeight={1.5}>
-								{subline}
-							</Text>
+					)}
+					{canForward && (
+						<Tooltip label={forwardTooltip} placement="top">
+							<Button
+								data-testid={`mediaGalleryAttachmentForward-${attachment.id}`}
+								aria-label={forwardTooltip}
+								size="large"
+								icon="Forward"
+								type="ghost"
+								color="gray0"
+								onClick={onForwardClick}
+							/>
 						</Tooltip>
-					</Container>
-				</Row>
-				{canDelete && (
-					<Tooltip label={deleteTooltip} placement="top">
+					)}
+					<Tooltip label={downloadTooltip} placement="top">
 						<Button
-							data-testid={`mediaGalleryAttachmentDelete-${attachment.id}`}
+							data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
+							aria-label={downloadTooltip}
 							size="large"
-							icon="Trash2Outline"
+							icon="DownloadOutline"
 							type="ghost"
-							color="error"
-							onClick={onDeleteClick}
+							color="gray0"
+							onClick={onDownloadClick}
 						/>
 					</Tooltip>
-				)}
-				<Tooltip label={downloadTooltip} placement="top">
-					<Button
-						data-testid={`mediaGalleryAttachmentDownload-${attachment.id}`}
-						aria-label={downloadTooltip}
-						size="large"
-						icon="DownloadOutline"
-						type="ghost"
-						color="gray0"
-						onClick={onDownloadClick}
-					/>
-				</Tooltip>
-				{modalOpen && (
-					<DeleteAttachmentModal open={modalOpen} onConfirm={confirmDelete} onClose={closeModal} />
-				)}
-			</CustomContainer>
+					{modals}
+				</CustomContainer>
+			</Dropdown>
 		</Tooltip>
 	);
 };

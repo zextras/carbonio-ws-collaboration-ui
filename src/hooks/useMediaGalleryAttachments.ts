@@ -4,73 +4,109 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { getRoomAttachments } from '../network';
 import {
+	getMediaGalleryActiveFilter,
 	getMediaGalleryAttachments,
 	getMediaGalleryHasMore,
 	getMediaGalleryIsInitialized,
-	getMediaGalleryIsLoading
+	getMediaGalleryIsLoading,
+	getMediaGalleryTotal
 } from '../store/selectors/MediaGallerySelectors';
 import useStore from '../store/Store';
-import { Attachment } from '../types/network/models/attachmentTypes';
-import { DEFAULT_MEDIA_GALLERY_FILTER } from '../types/store/MediaGalleryTypes';
+import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
+import { MediaGalleryActiveFilter } from '../types/store/MediaGalleryTypes';
+import { getMediaGalleryBucketKey } from '../utils/attachmentUtils';
 
-export const MEDIA_GALLERY_PAGE_SIZE = 20;
+export const MEDIA_GALLERY_PAGE_SIZE = 50;
 
 type UseMediaGalleryAttachmentsResult = {
 	attachments: Array<Attachment>;
 	isInitialized: boolean;
 	isLoading: boolean;
 	hasMore: boolean;
+	total: number | undefined;
 	loadMore: () => void;
+	activeFilter: MediaGalleryActiveFilter;
+	setActiveFilter: (activeFilter: MediaGalleryActiveFilter) => void;
+	filterKey: string;
 };
 
-export const useMediaGalleryAttachments = (roomId: string): UseMediaGalleryAttachmentsResult => {
-	const attachments = useStore((store) => getMediaGalleryAttachments(store, roomId));
-	const isInitialized = useStore((store) => getMediaGalleryIsInitialized(store, roomId));
-	const isLoading = useStore((store) => getMediaGalleryIsLoading(store, roomId));
-	const hasMore = useStore((store) => getMediaGalleryHasMore(store, roomId));
+export const useMediaGalleryAttachments = (
+	roomId: string,
+	category?: MimeTypeCategory
+): UseMediaGalleryAttachmentsResult => {
+	const activeFilter = useStore((store) => getMediaGalleryActiveFilter(store, roomId));
+
+	const filter = useMemo(
+		() => ({ ...activeFilter, mimeTypeCategory: category }),
+		[activeFilter, category]
+	);
+	const filterKey = useMemo(() => getMediaGalleryBucketKey(filter), [filter]);
+
+	const attachments = useStore((store) => getMediaGalleryAttachments(store, roomId, filterKey));
+	const isInitialized = useStore((store) => getMediaGalleryIsInitialized(store, roomId, filterKey));
+	const isLoading = useStore((store) => getMediaGalleryIsLoading(store, roomId, filterKey));
+	const hasMore = useStore((store) => getMediaGalleryHasMore(store, roomId, filterKey));
+	const total = useStore((store) => getMediaGalleryTotal(store, roomId, filterKey));
 	const setMediaGalleryLoading = useStore((store) => store.setMediaGalleryLoading);
 	const appendMediaGalleryPage = useStore((store) => store.appendMediaGalleryPage);
+	const setMediaGalleryActiveFilter = useStore((store) => store.setMediaGalleryActiveFilter);
 
 	const fetchPage = useCallback(
 		(cursor: string | undefined): void => {
-			const state = useStore.getState().mediaGallery[roomId];
-			if (state?.isLoading) return;
-			const filter = state?.filter ?? DEFAULT_MEDIA_GALLERY_FILTER;
-			setMediaGalleryLoading(roomId, true);
-			getRoomAttachments(roomId, {
-				limit: MEDIA_GALLERY_PAGE_SIZE,
-				cursor,
-				userId: filter.userId,
-				sortBy: filter.sortBy,
-				order: filter.order
-			})
+			const bucket = useStore.getState().mediaGallery[roomId]?.buckets[filterKey];
+			if (bucket?.isLoading) return;
+			setMediaGalleryLoading(roomId, filter, true);
+			getRoomAttachments(roomId, { ...filter, limit: MEDIA_GALLERY_PAGE_SIZE, cursor })
 				.then((response) => {
-					appendMediaGalleryPage(roomId, response.attachments, response.cursor);
+					appendMediaGalleryPage(
+						roomId,
+						filter,
+						response.attachments,
+						response.total,
+						response.cursor
+					);
 				})
 				.catch((error) => {
 					console.error('Failed to fetch room attachments', error);
-					setMediaGalleryLoading(roomId, false);
+					setMediaGalleryLoading(roomId, filter, false);
 				});
 		},
-		[roomId, setMediaGalleryLoading, appendMediaGalleryPage]
+		[roomId, filter, filterKey, setMediaGalleryLoading, appendMediaGalleryPage]
 	);
 
 	useEffect(() => {
-		const state = useStore.getState().mediaGallery[roomId];
-		if (!state?.isInitialized && !state?.isLoading) {
+		const bucket = useStore.getState().mediaGallery[roomId]?.buckets[filterKey];
+		if (!bucket?.isInitialized && !bucket?.isLoading) {
 			fetchPage(undefined);
 		}
-	}, [roomId, isInitialized, fetchPage]);
+	}, [roomId, filterKey, isInitialized, fetchPage]);
 
 	const loadMore = useCallback(() => {
-		const state = useStore.getState().mediaGallery[roomId];
-		if (!state || state.isLoading || !state.hasMore) return;
-		fetchPage(state.nextCursor);
-	}, [roomId, fetchPage]);
+		const bucket = useStore.getState().mediaGallery[roomId]?.buckets[filterKey];
+		if (!bucket || bucket.isLoading || !bucket.hasMore) return;
+		fetchPage(bucket.nextCursor);
+	}, [roomId, filterKey, fetchPage]);
 
-	return { attachments, isInitialized, isLoading, hasMore, loadMore };
+	const setActiveFilter = useCallback(
+		(newFilter: MediaGalleryActiveFilter): void => {
+			setMediaGalleryActiveFilter(roomId, newFilter);
+		},
+		[roomId, setMediaGalleryActiveFilter]
+	);
+
+	return {
+		attachments,
+		isInitialized,
+		isLoading,
+		hasMore,
+		total,
+		loadMore,
+		activeFilter,
+		setActiveFilter,
+		filterKey
+	};
 };

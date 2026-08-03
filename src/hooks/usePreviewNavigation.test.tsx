@@ -47,15 +47,20 @@ beforeEach(() => {
 
 describe('usePreviewNavigation', () => {
 	describe('openFromGallery', () => {
-		test('snapshots the current gallery state into the new session', () => {
+		test('snapshots the bucket of the attachment category into the new session', () => {
 			const a1 = buildAttachment('a1');
 			const a2 = buildAttachment('a2');
-			useStore.getState().appendMediaGalleryPage(roomId, [a1, a2], 'cursor-x');
+			const mineFilter = { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' };
+			useStore.getState().setMediaGalleryActiveFilter(roomId, mineFilter);
 			useStore
 				.getState()
-				.setMediaGalleryFilter(roomId, { ...DEFAULT_MEDIA_GALLERY_FILTER, userId: 'me' });
-			// setMediaGalleryFilter wipes attachments on filter change, so re-seed.
-			useStore.getState().appendMediaGalleryPage(roomId, [a1, a2], 'cursor-x');
+				.appendMediaGalleryPage(
+					roomId,
+					{ ...mineFilter, mimeTypeCategory: 'IMAGES' },
+					[a1, a2],
+					undefined,
+					'cursor-x'
+				);
 
 			const { result } = renderHook(() => usePreviewNavigation());
 			act(() => {
@@ -69,7 +74,31 @@ describe('usePreviewNavigation', () => {
 			expect(active?.nextCursor).toBe('cursor-x');
 			expect(active?.hasMore).toBe(true);
 			expect(active?.userId).toBe('me');
+			expect(active?.mimeTypeCategory).toBe('IMAGES');
 			expect(active?.openTargetId).toBe('a1');
+		});
+
+		test('does not snapshot the bucket of a different category', () => {
+			const video = buildAttachment('v1', { mimeType: 'video/mp4' });
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					{ ...DEFAULT_MEDIA_GALLERY_FILTER, mimeTypeCategory: 'IMAGES' },
+					[buildAttachment('a1')],
+					undefined,
+					'cursor-x'
+				);
+
+			const { result } = renderHook(() => usePreviewNavigation());
+			act(() => {
+				result.current.openFromGallery(roomId, video);
+			});
+
+			const { active } = useStore.getState().previewNavigation;
+			expect(active?.mimeTypeCategory).toBe('VIDEOS');
+			expect(active?.attachments).toEqual([]);
+			expect(active?.nextCursor).toBeUndefined();
 		});
 
 		test('falls back to safe defaults when the gallery has no state yet', () => {

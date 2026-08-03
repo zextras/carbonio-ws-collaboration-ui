@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import { List } from '@zextras/carbonio-design-system';
 
 import { AttachmentListItem } from './AttachmentListItem';
@@ -17,6 +17,10 @@ import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { screen, setup } from '../../../../tests/test-utils';
 import type { Attachment } from '../../../../types/network/models/attachmentTypes';
+import { DEFAULT_MEDIA_GALLERY_FILTER } from '../../../../types/store/MediaGalleryTypes';
+import { getMediaGalleryBucketKey } from '../../../../utils/attachmentUtils';
+
+const DEFAULT_BUCKET_KEY = getMediaGalleryBucketKey(DEFAULT_MEDIA_GALLERY_FILTER);
 
 let intersectionCallbacks: Array<IntersectionObserverCallback> = [];
 
@@ -74,6 +78,8 @@ const ghostUserId = 'ghost-user';
 const roomId = 'room-1';
 const STANZA_ID = 'stanza-123';
 const DELETE_BUTTON_TEST_ID = 'mediaGalleryAttachmentDelete-att-1';
+const FORWARD_BUTTON_TEST_ID = 'mediaGalleryAttachmentForward-att-1';
+const CLICK_AREA_TEST_ID = 'mediaGalleryAttachmentClickArea-att-1';
 const IMAGE_MIME_TYPE = 'image/png';
 const IMAGE_ICON_TEST_ID = 'icon: Image';
 
@@ -174,7 +180,15 @@ describe('AttachmentListItem', () => {
 			.mockImplementation(() => undefined);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -184,7 +198,9 @@ describe('AttachmentListItem', () => {
 			expect(mockedBulkDelete).toHaveBeenCalledWith(roomId, ['att-1']);
 		});
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		expect(sendDeletionSpy).toHaveBeenCalledWith(roomId, STANZA_ID);
 	});
@@ -196,14 +212,24 @@ describe('AttachmentListItem', () => {
 			.mockImplementation(() => undefined);
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: undefined });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
 		await user.click(screen.getByRole('button', { name: /yes, delete attachment/i }));
 
 		await waitFor(() => {
-			expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(0);
+			expect(
+				useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+			).toHaveLength(0);
 		});
 		expect(sendDeletionSpy).not.toHaveBeenCalled();
 	});
@@ -212,7 +238,15 @@ describe('AttachmentListItem', () => {
 		mockedBulkDelete.mockRejectedValue(new Error('status ko'));
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -221,14 +255,24 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(mockedBulkDelete).toHaveBeenCalled();
 		});
-		expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(1);
+		expect(
+			useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+		).toHaveLength(1);
 	});
 
 	test('keeps the row when the API returns the id in failedIds', async () => {
 		mockedBulkDelete.mockResolvedValue({ successIds: [], failedIds: ['att-1'] });
 
 		const attachment = buildAttachment({ userId: myUserId, stanzaId: STANZA_ID });
-		useStore.getState().appendMediaGalleryPage(roomId, [attachment], undefined);
+		useStore
+			.getState()
+			.appendMediaGalleryPage(
+				roomId,
+				DEFAULT_MEDIA_GALLERY_FILTER,
+				[attachment],
+				undefined,
+				undefined
+			);
 
 		const { user } = setup(<AttachmentListItem attachment={attachment} />);
 		await user.click(screen.getByTestId(DELETE_BUTTON_TEST_ID));
@@ -237,7 +281,44 @@ describe('AttachmentListItem', () => {
 		await waitFor(() => {
 			expect(mockedBulkDelete).toHaveBeenCalled();
 		});
-		expect(useStore.getState().mediaGallery[roomId].attachments).toHaveLength(1);
+		expect(
+			useStore.getState().mediaGallery[roomId].buckets[DEFAULT_BUCKET_KEY].attachments
+		).toHaveLength(1);
+	});
+
+	test('renders the forward button when the attachment has a stanzaId', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />);
+		expect(screen.getByTestId(FORWARD_BUTTON_TEST_ID)).toBeInTheDocument();
+	});
+
+	test('hides the forward button when the stanzaId is missing', () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: undefined })} />);
+		expect(screen.queryByTestId(FORWARD_BUTTON_TEST_ID)).not.toBeInTheDocument();
+	});
+
+	test('clicking the forward button opens the forward modal and does not open the preview', async () => {
+		const { user } = setup(
+			<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />
+		);
+		await user.click(screen.getByTestId(FORWARD_BUTTON_TEST_ID));
+		expect(await screen.findByTestId('chip_input_forward_modal')).toBeInTheDocument();
+		expect(mockOpenFromGallery).not.toHaveBeenCalled();
+	});
+
+	test('right-click opens the contextual menu with download and forward actions', async () => {
+		setup(<AttachmentListItem attachment={buildAttachment({ stanzaId: STANZA_ID })} />);
+		fireEvent.contextMenu(screen.getByTestId(CLICK_AREA_TEST_ID));
+		expect(await screen.findByText('Download')).toBeInTheDocument();
+		expect(screen.getByText('Forward')).toBeInTheDocument();
+		expect(screen.queryByTestId('mediaGalleryCtxDelete-att-1')).not.toBeInTheDocument();
+	});
+
+	test('right-click shows the delete entry only for own attachments', async () => {
+		setup(
+			<AttachmentListItem attachment={buildAttachment({ userId: myUserId, stanzaId: STANZA_ID })} />
+		);
+		fireEvent.contextMenu(screen.getByTestId(CLICK_AREA_TEST_ID));
+		expect(await screen.findByTestId('mediaGalleryCtxDelete-att-1')).toBeInTheDocument();
 	});
 
 	test('renders the download button for attachments uploaded by other users', () => {

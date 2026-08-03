@@ -9,9 +9,19 @@ import React, { FC } from 'react';
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-export const EmptyAttachmentList: FC = () => {
+import { MimeTypeCategory } from '../../../../types/network/models/attachmentTypes';
+
+type EmptyAttachmentListProps = {
+	category: MimeTypeCategory;
+};
+
+export const EmptyAttachmentList: FC<EmptyAttachmentListProps> = ({ category }) => {
 	const [t] = useTranslation();
-	const titleLabel = t('mediaGallery.emptyState.title', 'No attachments in this list');
+	const titleByCategory: { [key in MimeTypeCategory]: string } = {
+		IMAGES: t('mediaGallery.emptyState.titleImages', 'No images in this list'),
+		VIDEOS: t('mediaGallery.emptyState.titleVideos', 'No videos in this list'),
+		DOCUMENTS: t('mediaGallery.emptyState.titleDocuments', 'No documents in this list')
+	};
 	const descriptionLabel = t(
 		'mediaGallery.emptyState.description',
 		'Photos, videos and files will appear here when shared'
@@ -25,7 +35,7 @@ export const EmptyAttachmentList: FC = () => {
 			padding={{ all: 'large' }}
 		>
 			<Text size="medium" color="secondary" weight="bold" overflow="break-word">
-				{titleLabel}
+				{titleByCategory[category]}
 			</Text>
 			<Padding top="extrasmall">
 				<Text size="small" color="secondary" textAlign="center" overflow="break-word">

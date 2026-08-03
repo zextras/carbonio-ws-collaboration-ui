@@ -10,7 +10,9 @@ import {
 	getPdfThumbnailURL,
 	getURLAttachment
 } from '../network';
+import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { MediaGalleryFilter } from '../types/store/MediaGalleryTypes';
 
 const PDF_MIME_TYPE = 'application/pdf';
 
@@ -354,3 +356,29 @@ export const getPinAttachmentColor = (fileType: string): string => {
 	}
 	return 'primary';
 };
+
+export const getMimeTypeCategory = (mimeType: string): MimeTypeCategory => {
+	if (isAttachmentImage(mimeType)) return 'IMAGES';
+	if (isAttachmentVideo(mimeType)) return 'VIDEOS';
+	return 'DOCUMENTS';
+};
+
+export const getMediaGalleryBucketKey = (filter: MediaGalleryFilter): string =>
+	Object.entries(filter)
+		.filter(([, value]) => value !== undefined)
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([key, value]) => `${key}=${value}`)
+		.join('&');
+
+export const attachmentMatchesFilter = (
+	attachment: Attachment,
+	filter: MediaGalleryFilter
+): boolean =>
+	(!filter.mimeTypeCategory ||
+		getMimeTypeCategory(attachment.mimeType) === filter.mimeTypeCategory) &&
+	(!filter.mimeType || attachment.mimeType === filter.mimeType) &&
+	(!filter.userId || attachment.userId === filter.userId) &&
+	(!filter.createdAfter || attachment.createdAt >= filter.createdAfter) &&
+	(!filter.createdBefore || attachment.createdAt <= filter.createdBefore) &&
+	(filter.minSize === undefined || attachment.size >= filter.minSize) &&
+	(filter.maxSize === undefined || attachment.size <= filter.maxSize);

@@ -27,20 +27,26 @@ export type AttachmentsSortBy = 'created_at' | 'size';
 
 export type AttachmentsSortOrder = 'asc' | 'desc';
 
+export type MimeTypeCategory = 'IMAGES' | 'VIDEOS' | 'DOCUMENTS';
+
+type MimeTypeFilter =
+	| { mimeType?: string; mimeTypeCategory?: never }
+	| { mimeType?: never; mimeTypeCategory?: MimeTypeCategory };
+
 export type GetRoomAttachmentsParams = {
 	limit: number;
 	cursor?: string;
 	userId?: string;
-	mimeType?: string;
 	createdAfter?: string;
 	createdBefore?: string;
 	minSize?: number;
 	maxSize?: number;
 	sortBy?: AttachmentsSortBy;
 	order?: AttachmentsSortOrder;
-};
+} & MimeTypeFilter;
 
 export type GetRoomAttachmentsResponse = {
+	total?: number;
 	attachments: Array<Attachment>;
 	cursor?: string;
 };

@@ -4,43 +4,47 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	Attachment,
-	AttachmentsSortBy,
-	AttachmentsSortOrder
-} from '../network/models/attachmentTypes';
+import { Attachment, GetRoomAttachmentsParams } from '../network/models/attachmentTypes';
 
-export type MediaGalleryFilter = {
-	userId?: string;
-	sortBy: AttachmentsSortBy;
-	order: AttachmentsSortOrder;
-};
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
-export type MediaGalleryRoomState = {
+export type MediaGalleryFilter = DistributiveOmit<GetRoomAttachmentsParams, 'limit' | 'cursor'>;
+
+export type MediaGalleryActiveFilter = Omit<MediaGalleryFilter, 'mimeType' | 'mimeTypeCategory'>;
+
+export type MediaGalleryBucket = {
+	filter: MediaGalleryFilter;
 	attachments: Array<Attachment>;
+	total?: number;
 	nextCursor?: string;
 	hasMore: boolean;
 	isLoading: boolean;
 	isInitialized: boolean;
-	filter: MediaGalleryFilter;
+};
+
+export type MediaGalleryRoomState = {
+	buckets: { [filterKey: string]: MediaGalleryBucket };
+	activeFilter: MediaGalleryActiveFilter;
 };
 
 export type MediaGalleryMap = { [roomId: string]: MediaGalleryRoomState };
 
-export const DEFAULT_MEDIA_GALLERY_FILTER: MediaGalleryFilter = {
+export const DEFAULT_MEDIA_GALLERY_FILTER: MediaGalleryActiveFilter = {
 	sortBy: 'created_at',
 	order: 'desc'
 };
 
 export type MediaGalleryStoreSlice = {
 	mediaGallery: MediaGalleryMap;
-	setMediaGalleryLoading: (roomId: string, isLoading: boolean) => void;
+	setMediaGalleryLoading: (roomId: string, filter: MediaGalleryFilter, isLoading: boolean) => void;
 	appendMediaGalleryPage: (
 		roomId: string,
+		filter: MediaGalleryFilter,
 		attachments: Array<Attachment>,
+		total: number | undefined,
 		nextCursor: string | undefined
 	) => void;
-	setMediaGalleryFilter: (roomId: string, filter: MediaGalleryFilter) => void;
+	setMediaGalleryActiveFilter: (roomId: string, activeFilter: MediaGalleryActiveFilter) => void;
 	removeMediaGalleryAttachment: (roomId: string, attachmentId: string) => void;
 	prependMediaGalleryAttachment: (roomId: string, attachment: Attachment) => void;
 };

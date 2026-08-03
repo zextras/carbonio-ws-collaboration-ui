@@ -17,8 +17,12 @@ import {
 	getAttachmentType,
 	getApplicationIcon,
 	getAttachmentIcon,
+	getMimeTypeCategory,
+	getMediaGalleryBucketKey,
+	attachmentMatchesFilter,
 	AttachmentType
 } from './attachmentUtils';
+import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
 const enum MimeTypes {
@@ -239,6 +243,97 @@ describe('attachmentUtils tests', () => {
 
 		test('delegates to getApplicationIcon for application types', () => {
 			expect(getAttachmentIcon(MimeTypes.PDF)).toBe('FilePdfOutline');
+		});
+	});
+
+	describe('getMimeTypeCategory', () => {
+		test('returns IMAGES for image mime types', () => {
+			expect(getMimeTypeCategory(MimeTypes.PNG)).toBe('IMAGES');
+			expect(getMimeTypeCategory(MimeTypes.JPEG)).toBe('IMAGES');
+		});
+
+		test('returns VIDEOS for any video mime type', () => {
+			expect(getMimeTypeCategory(MimeTypes.MP4)).toBe('VIDEOS');
+			expect(getMimeTypeCategory(MimeTypes.MKV)).toBe('VIDEOS');
+		});
+
+		test('returns DOCUMENTS for everything else, audio included', () => {
+			expect(getMimeTypeCategory(MimeTypes.PDF)).toBe('DOCUMENTS');
+			expect(getMimeTypeCategory('audio/mpeg')).toBe('DOCUMENTS');
+			expect(getMimeTypeCategory('text/plain')).toBe('DOCUMENTS');
+		});
+	});
+
+	describe('getMediaGalleryBucketKey', () => {
+		test('returns the same key regardless of the property order', () => {
+			const keyA = getMediaGalleryBucketKey({ userId: 'user-1', mimeTypeCategory: 'IMAGES' });
+			const keyB = getMediaGalleryBucketKey({ mimeTypeCategory: 'IMAGES', userId: 'user-1' });
+			expect(keyA).toBe(keyB);
+		});
+
+		test('skips undefined values', () => {
+			const keyA = getMediaGalleryBucketKey({ mimeTypeCategory: 'IMAGES', userId: undefined });
+			const keyB = getMediaGalleryBucketKey({ mimeTypeCategory: 'IMAGES' });
+			expect(keyA).toBe(keyB);
+		});
+
+		test('different filters produce different keys', () => {
+			const keyA = getMediaGalleryBucketKey({ mimeTypeCategory: 'IMAGES' });
+			const keyB = getMediaGalleryBucketKey({ mimeTypeCategory: 'VIDEOS' });
+			expect(keyA).not.toBe(keyB);
+		});
+	});
+
+	describe('attachmentMatchesFilter', () => {
+		const attachment: Attachment = {
+			id: 'attachment-id',
+			name: 'photo.png',
+			size: 2048,
+			mimeType: MimeTypes.PNG,
+			userId: 'user-1',
+			roomId: 'room-1',
+			createdAt: '2026-07-10T10:00:00.000Z'
+		};
+
+		test('an empty filter matches any attachment', () => {
+			expect(attachmentMatchesFilter(attachment, {})).toBe(true);
+		});
+
+		test('matches on the mime type category', () => {
+			expect(attachmentMatchesFilter(attachment, { mimeTypeCategory: 'IMAGES' })).toBe(true);
+			expect(attachmentMatchesFilter(attachment, { mimeTypeCategory: 'VIDEOS' })).toBe(false);
+		});
+
+		test('matches on the exact mime type', () => {
+			expect(attachmentMatchesFilter(attachment, { mimeType: MimeTypes.PNG })).toBe(true);
+			expect(attachmentMatchesFilter(attachment, { mimeType: MimeTypes.JPEG })).toBe(false);
+		});
+
+		test('matches on the sender', () => {
+			expect(attachmentMatchesFilter(attachment, { userId: 'user-1' })).toBe(true);
+			expect(attachmentMatchesFilter(attachment, { userId: 'user-2' })).toBe(false);
+		});
+
+		test('createdAfter and createdBefore boundaries are inclusive', () => {
+			expect(attachmentMatchesFilter(attachment, { createdAfter: attachment.createdAt })).toBe(
+				true
+			);
+			expect(attachmentMatchesFilter(attachment, { createdBefore: attachment.createdAt })).toBe(
+				true
+			);
+			expect(
+				attachmentMatchesFilter(attachment, { createdAfter: '2026-07-11T00:00:00.000Z' })
+			).toBe(false);
+			expect(
+				attachmentMatchesFilter(attachment, { createdBefore: '2026-07-09T00:00:00.000Z' })
+			).toBe(false);
+		});
+
+		test('minSize and maxSize boundaries are inclusive and 0 is a valid minSize', () => {
+			expect(attachmentMatchesFilter(attachment, { minSize: 2048, maxSize: 2048 })).toBe(true);
+			expect(attachmentMatchesFilter(attachment, { minSize: 0 })).toBe(true);
+			expect(attachmentMatchesFilter(attachment, { minSize: 4096 })).toBe(false);
+			expect(attachmentMatchesFilter(attachment, { maxSize: 1024 })).toBe(false);
 		});
 	});
 });

@@ -7,14 +7,11 @@
 import { useCallback } from 'react';
 
 import { getRoomAttachments } from '../network';
-import {
-	getMediaGalleryAttachments,
-	getMediaGalleryFilter,
-	getMediaGalleryHasMore
-} from '../store/selectors/MediaGallerySelectors';
+import { getMediaGalleryActiveFilter } from '../store/selectors/MediaGallerySelectors';
 import useStore from '../store/Store';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { getMediaGalleryBucketKey, getMimeTypeCategory } from '../utils/attachmentUtils';
 
 export const PREVIEW_NAVIGATION_PAGE_SIZE = 20;
 const CHAT_ANCHOR_BUFFER_MS = 24 * 60 * 60 * 1000;
@@ -36,19 +33,20 @@ const usePreviewNavigation = (): UsePreviewNavigation => {
 	const openFromGallery = useCallback(
 		(roomId: string, clickedAttachment: Attachment): void => {
 			const state = useStore.getState();
-			const attachments = getMediaGalleryAttachments(state, roomId);
-			const hasMore = getMediaGalleryHasMore(state, roomId);
-			const filter = getMediaGalleryFilter(state, roomId);
-			const galleryRoom = state.mediaGallery[roomId];
+			const activeFilter = getMediaGalleryActiveFilter(state, roomId);
+			const mimeTypeCategory = getMimeTypeCategory(clickedAttachment.mimeType);
+			const filter = { ...activeFilter, mimeTypeCategory };
+			const bucket = state.mediaGallery[roomId]?.buckets[getMediaGalleryBucketKey(filter)];
 			startPreviewNavigation({
 				source: 'gallery',
 				roomId,
-				sortBy: filter.sortBy,
-				order: filter.order,
+				sortBy: filter.sortBy ?? 'created_at',
+				order: filter.order ?? 'desc',
 				userId: filter.userId,
-				attachments,
-				nextCursor: galleryRoom?.nextCursor,
-				hasMore,
+				mimeTypeCategory,
+				attachments: bucket?.attachments ?? [],
+				nextCursor: bucket?.nextCursor,
+				hasMore: bucket?.hasMore ?? true,
 				isLoading: false,
 				openTargetId: clickedAttachment.id
 			});
