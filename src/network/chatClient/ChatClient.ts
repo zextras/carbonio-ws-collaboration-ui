@@ -8,6 +8,7 @@ import { gte } from 'semver';
 
 import useStore from '../../store/Store';
 import { wsDebug } from '../../utils/debug';
+import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 export const WSC_PURE_MIN_VERSION = '2.0.0';
@@ -60,14 +61,21 @@ export const chatClient: ChatClient = {
 	},
 	connect: (token) => {
 		if (isWscPure()) {
-			wsDebug('chatClient.connect: WSC-pure backend, XMPP connection skipped');
+			wsDebug('chatClient.connect: WSC-pure backend, chat boots through the SDK');
+			// REST has no persistent chat connection: the legacy xmpp status flag
+			// feeds the connection-health banners, so mark it healthy.
+			useStore.getState().setXmppStatus(true);
+			wscSdk.fetchInbox().catch((err) => {
+				console.error('chatClient.connect: inbox hydration failed', err);
+			});
 			return;
 		}
 		xmppClient.connect(token);
 	},
 	setOnline: () => {
 		if (isWscPure()) {
-			sdkNotWiredYet('setOnline');
+			// No outbound presence action exists on 2.0.0: the events-socket
+			// lifecycle announces presence. Nothing to send by design.
 			return;
 		}
 		xmppClient.setOnline();
