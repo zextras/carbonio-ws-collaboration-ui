@@ -7,6 +7,7 @@
 import { gte } from 'semver';
 
 import useStore from '../../store/Store';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
 import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -119,7 +120,30 @@ export const chatClient: ChatClient = {
 	// forward the exact call arity so spies and default values behave unchanged.
 	requestHistory: (...args) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('requestHistory');
+			// The 4th v1 arg (unread) is deliberately unused: only the XMPP inbox
+			// handler ever passes it, and the v2 boot reads unread counts from
+			// GET /inbox without preloading history pages.
+			const [roomId, endHistory, quantity] = args;
+			const store = useStore.getState();
+			const room = store.rooms[roomId];
+			// v1 parity: the XMPP request bails out on unknown rooms too
+			if (!room) {
+				return;
+			}
+			const oldest = store.chatsRegistry[roomId]?.messages[0];
+			const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
+			wscSdk
+				.fetchTimeline(roomId, {
+					before: endHistory,
+					// Composite cursor only when the anchor is a message already in store
+					...(oldest && oldest.date === endHistory ? { beforeId: oldest.id } : {}),
+					...(quantity !== undefined ? { limit: quantity } : {}),
+					...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
+				})
+				.then(() => useStore.getState().setHistoryLoadDisabled(roomId, false))
+				.catch((err) => {
+					console.error('chatClient.requestHistory: timeline hydration failed', err);
+				});
 			return;
 		}
 		xmppClient.requestHistory(...args);

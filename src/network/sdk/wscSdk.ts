@@ -26,7 +26,12 @@ const bridge: StoreBridge = {
 	updateReadStatus: (roomId, markers: Array<StoreMarker>): void =>
 		useStore.getState().updateReadStatus(roomId, markers as Array<Marker>),
 	setUserPresence: (userId, online): void => useStore.getState().setUserPresence(userId, online),
-	setUserLastActivity: (userId, date): void => useStore.getState().setUserLastActivity(userId, date)
+	setUserLastActivity: (userId, date): void =>
+		useStore.getState().setUserLastActivity(userId, date),
+	updateHistory: (roomId, messages: Array<StoreMessage>): void =>
+		useStore.getState().updateHistory(roomId, messages as Array<Message>),
+	setHistoryIsFullyLoaded: (roomId): void => useStore.getState().setHistoryIsFullyLoaded(roomId),
+	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId)
 };
 
 const http = createHttpClient({
@@ -41,7 +46,9 @@ const http = createHttpClient({
 	getExtraHeaders: (): Record<string, string> => {
 		const { queueId } = useStore.getState().session;
 		return queueId ? { 'queue-id': queueId } : {};
-	}
+	},
+	// Surfaces protocol diagnostics (e.g. the 422 version renegotiation)
+	logger: { warn: console.warn, error: console.error }
 });
 
 export const wscSdk = createWscClient({ http, bridge });
