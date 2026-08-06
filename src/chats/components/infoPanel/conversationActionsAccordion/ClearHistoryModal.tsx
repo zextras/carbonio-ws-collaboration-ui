@@ -10,7 +10,7 @@ import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { clearRoomHistory } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import {
 	getLastMessageSelector,
 	getRoomUnreadSelector
@@ -44,7 +44,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 
 	const clearHistory = useCallback(() => {
 		if (unreadMessagesCount > 0 && lastTextMessage) {
-			xmppClient.readMessage(roomId, lastTextMessage.id);
+			chatClient.readMessage(roomId, lastTextMessage.id);
 		}
 		clearRoomHistory(roomId).then(() => {
 			successfulSnackbar();

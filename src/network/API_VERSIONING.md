@@ -2,6 +2,24 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 2.0.0 (in progress)
+
+### Changes
+
+- **Protocol**: WSC-pure backend (MongooseIM replacement) — REST writes + single push WebSocket. `2.0.0` added to `supportedVersions`; against a 1.6.x backend the whole v2 path stays dormant.
+- **Client architecture**: chat call sites moved from `xmppClient` to the version-gated `chatClient` façade; XMPP connection is skipped when the negotiated version is `>= 2.0.0`. New chat WS events (`MessageReceived`, `MessageEdited`, `MessageDeleted`, `MessageForwarded`, `MessagePinned`, `MessageUnpinned`, `ReactionChanged`, `ReadUpdated`, `PresenceChanged`, `Typing`, `Error`) routed to `wsChatEventsRouter` (SDK wiring lands one API per step, see `wsc-both/PIANO-MIGRAZIONE-SDK.md`).
+
+### Affected Files
+
+- 'src/network/chatClient/ChatClient.ts' (new façade)
+- 'src/network/websocket/wsChatEventsRouter.ts' (new)
+- 'src/network/websocket/wsEventsHandler.ts', 'src/network/websocket/eventHandlersUtilities.ts'
+- 'src/types/network/websocket/wsEvents.ts'
+- 'src/MainApp.tsx' (supportedVersions + boot through the façade)
+- ~20 UI call sites (mechanical `xmppClient` → `chatClient` rename)
+
+---
+
 ## Version 1.6.13
 
 ### Changes

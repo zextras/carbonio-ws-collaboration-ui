@@ -33,9 +33,9 @@ import {
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
+import { chatClient } from '../chatClient/ChatClient';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -185,7 +185,7 @@ export const addRoomAttachment = (
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) chatClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
 	useStore.getState().setPlaceholderMessage({
@@ -250,7 +250,7 @@ export const forwardMessages = (
 
 	const promises = messages.map((message) => {
 		const queryId = HistoryAccumulator.getNextId();
-		return xmppClient
+		return chatClient
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
 				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);

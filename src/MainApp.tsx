@@ -17,8 +17,8 @@ import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
 import { getCapabilities, getToken, listMeetings, listRooms } from './network';
+import { chatClient } from './network/chatClient/ChatClient';
 import { wsClient } from './network/websocket/WebSocketClient';
-import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -35,6 +35,7 @@ export default function MainApp(): React.JSX.Element {
 
 	useEffect(() => {
 		setSupportedVersions([
+			'2.0.0',
 			'1.6.14',
 			'1.6.13',
 			'1.6.12',
@@ -85,8 +86,8 @@ export default function MainApp(): React.JSX.Element {
 							setAttributes(attrs);
 						}
 						setChatsBeStatus(true);
-						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						xmppClient.connect(resp.zmToken);
+						// Init chatClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+						chatClient.connect(resp.zmToken);
 						wsClient.connect();
 					})
 					.catch(() => setChatsBeStatus(false));

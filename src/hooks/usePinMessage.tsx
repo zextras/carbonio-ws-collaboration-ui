@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { xmppClient } from '../network/xmpp/XMPPClient';
+import { chatClient } from '../network/chatClient/ChatClient';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
@@ -45,7 +45,7 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 
 	const canMessageBePinned = useMemo(
 		() =>
-			xmppClient.features.includes('zextras:iq:pin') &&
+			chatClient.features.includes('zextras:iq:pin') &&
 			(roomType === RoomType.ONE_TO_ONE || amIModerator),
 		[amIModerator, roomType]
 	);
@@ -66,7 +66,7 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 				confirmLabel: t('modal.replacePinConfirm', 'Yes, replace pin'),
 				secondaryActionLabel: t('modal.replacePinCancel', 'No, cancel'),
 				onConfirm: () => {
-					xmppClient.pinMessage(message.roomId, stanzaIdToPin);
+					chatClient.pinMessage(message.roomId, stanzaIdToPin);
 					closeModal(modalId);
 					useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 				},
@@ -86,11 +86,11 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 		}
 
 		if (isMessagePinned) {
-			xmppClient.unpinMessage(message.roomId, stanzaIdToPin);
+			chatClient.unpinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().removePinnedMessage(message.roomId);
 			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		} else {
-			xmppClient.pinMessage(message.roomId, stanzaIdToPin);
+			chatClient.pinMessage(message.roomId, stanzaIdToPin);
 			useStore.getState().setSelectedPinnedMessage(message.roomId, undefined);
 		}
 	}, [pinnedMessage, isMessagePinned, createModal, t, message.roomId, stanzaIdToPin, closeModal]);
