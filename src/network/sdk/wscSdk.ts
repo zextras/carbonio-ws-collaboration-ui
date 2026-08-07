@@ -31,7 +31,10 @@ const bridge: StoreBridge = {
 	updateHistory: (roomId, messages: Array<StoreMessage>): void =>
 		useStore.getState().updateHistory(roomId, messages as Array<Message>),
 	setHistoryIsFullyLoaded: (roomId): void => useStore.getState().setHistoryIsFullyLoaded(roomId),
-	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId)
+	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId),
+	newMessage: (message: StoreMessage): void => useStore.getState().newMessage(message as Message),
+	removePlaceholderMessage: (roomId, messageId): void =>
+		useStore.getState().removePlaceholderMessage(roomId, messageId)
 };
 
 const http = createHttpClient({

@@ -21,9 +21,12 @@ import type { Mock } from 'vitest';
 import { chatClient, isWscPure } from './ChatClient';
 import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
+const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 
 function mockJsonResponse(body: unknown): void {
 	(global.fetch as Mock).mockImplementationOnce(() =>
@@ -119,7 +122,7 @@ describe('chatClient façade', () => {
 					roomId: 'room-1',
 					senderId: 'user-2',
 					text: 'ciao',
-					createdAt: '2026-08-01T10:00:00Z'
+					createdAt: AUG_FIRST_LATE_MORNING
 				}),
 				unreadCount: 2,
 				markers: [
@@ -173,7 +176,7 @@ describe('chatClient façade', () => {
 						roomId: 'room-t',
 						senderId: 'user-2',
 						text: 'ciao',
-						createdAt: '2026-08-01T10:00:00Z'
+						createdAt: AUG_FIRST_LATE_MORNING
 					})
 				)
 			],
@@ -262,6 +265,101 @@ describe('chatClient façade', () => {
 		chatClient.readMessage('room-m', 'msg-ghost');
 
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('sends a message through the SDK: optimistic placeholder, then the REST confirmation promotes it', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const sentId = 'msg-sent-1';
+		mockJsonResponse({ id: sentId, createdAt: AUG_FIRST_LATE_MORNING });
+
+		chatClient.sendChatMessage('room-s', 'ciao');
+
+		// The placeholder lands synchronously, PENDING, with the tempId as id
+		const pending = useStore.getState().chatsRegistry['room-s'].messages[0];
+		expect(pending).toMatchObject({ text: 'ciao', read: 'pending', from: 'me' });
+		const tempId = pending.id;
+
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-s/messages');
+		expect((global.fetch as Mock).mock.calls[0]?.[1]).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ text: 'ciao', tempId })
+		});
+		const { messages, lastMessage } = useStore.getState().chatsRegistry['room-s'];
+		expect(messages.map((message) => message.id)).toEqual([sentId]);
+		expect(messages[0]).toMatchObject({ stanzaId: sentId, read: 'unread' });
+		expect(lastMessage).toMatchObject({ id: sentId, text: 'ciao' });
+	});
+
+	it('keeps a single message when the self-echo lands before the REST confirmation', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		let releaseRest: () => void = () => undefined;
+		(global.fetch as Mock).mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					releaseRest = (): void =>
+						resolve({
+							ok: true,
+							status: 201,
+							headers: {
+								get: (name: string): string | null =>
+									name.toLowerCase() === 'content-type' ? 'application/json' : null
+							},
+							json: (): Promise<unknown> =>
+								Promise.resolve({ id: 'msg-dup', createdAt: AUG_FIRST_LATE_MORNING })
+						});
+				})
+		);
+
+		chatClient.sendChatMessage('room-d', 'doppio');
+		const tempId = useStore.getState().chatsRegistry['room-d'].messages[0].id;
+		await vi.advanceTimersByTimeAsync(0);
+
+		// The WS self-echo arrives while the REST call is still in flight
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-dup',
+			roomId: 'room-d',
+			senderId: 'me',
+			text: 'doppio',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			tempId
+		});
+		expect(
+			useStore.getState().chatsRegistry['room-d'].messages.map((message) => message.id)
+		).toEqual(['msg-dup']);
+
+		// The late REST confirmation must be a no-op, not a duplicate
+		releaseRest();
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { messages } = useStore.getState().chatsRegistry['room-d'];
+		expect(messages.map((message) => message.id)).toEqual(['msg-dup']);
+	});
+
+	it('reads the last unread message before sending (v1 parity)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-rb', [
+			createMockTextMessage({
+				id: 'msg-unread',
+				roomId: 'room-rb',
+				from: 'user-2',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		mockJsonResponse(undefined);
+		mockJsonResponse({ id: 'msg-new', createdAt: AUG_FIRST_LATE_MORNING });
+
+		chatClient.sendChatMessage('room-rb', 'rispondo');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const urls = (global.fetch as Mock).mock.calls.map((call) => call[0]);
+		expect(urls[0]).toBe('/services/chats/rooms/room-rb/read');
+		expect(urls[1]).toBe('/services/chats/rooms/room-rb/messages');
 	});
 
 	it('exposes the live XMPP features list', () => {

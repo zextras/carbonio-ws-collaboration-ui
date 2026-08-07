@@ -5,11 +5,15 @@
  */
 
 import { gte } from 'semver';
+import { v4 as uuidGenerator } from 'uuid';
 
 import useStore from '../../store/Store';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
+import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { wscSdk } from '../sdk/wscSdk';
+import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
+import { sanitizeXmppMessage } from '../xmpp/utility/sanitizeXmppMessage';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 export const WSC_PURE_MIN_VERSION = '2.0.0';
@@ -83,7 +87,34 @@ export const chatClient: ChatClient = {
 	},
 	sendChatMessage: (roomId, message) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendChatMessage');
+			// v1 parity: a placeholder room becomes a real 1:1 on the first message
+			const placeholderRoom = roomId.split('placeholder-');
+			if (placeholderRoom[1]) {
+				replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
+					chatClient.sendChatMessage(response.id, message);
+				});
+				return;
+			}
+			const senderId = useStore.getState().session.id;
+			if (!senderId) {
+				return;
+			}
+			// Read messages before sending a new one (v1 parity)
+			const lastMessageId = getLastUnreadMessage(roomId);
+			if (lastMessageId) {
+				chatClient.readMessage(roomId, lastMessageId);
+			}
+			// Optimistic flow: the placeholder id doubles as the self-echo tempId;
+			// the SDK promotes it from whichever confirmation lands first. Like v1,
+			// the placeholder keeps the raw text and only the wire text is stripped
+			// of control characters (the util is XMPP-named but XML-agnostic).
+			const tempId = uuidGenerator();
+			useStore.getState().setPlaceholderMessage({ roomId, id: tempId, text: message });
+			wscSdk
+				.sendMessage({ roomId, text: sanitizeXmppMessage(message), tempId, senderId })
+				.catch((err) => {
+					console.error('chatClient.sendChatMessage: message send failed', err);
+				});
 			return;
 		}
 		xmppClient.sendChatMessage(roomId, message);
