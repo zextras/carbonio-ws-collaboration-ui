@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { findRepliedMessage } from './findRepliedMessage';
 import useStore from '../../store/Store';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
@@ -60,6 +62,70 @@ function sdkNotWiredYet(method: string): void {
 	wsDebug(`chatClient.${method}: WSC-pure backend, but the SDK path for this API is not wired yet`);
 }
 
+/**
+ * v2 read-marker path, shared by `readMessage` and the read-before-send of
+ * the outgoing-text flows. v1 parity: the XMPP sender also bails out when the
+ * message is not in store. Nothing is written locally: the store update comes
+ * back through the own ReadUpdated echo, like the v1 MUC displayed echo.
+ */
+function readMessageViaSdk(roomId: string, messageId: string): void {
+	const message = useStore
+		.getState()
+		.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
+	if (!message) {
+		return;
+	}
+	wscSdk.markAsRead(roomId, messageId).catch((err) => {
+		console.error('chatClient.readMessage: read marker update failed', err);
+	});
+}
+
+/**
+ * Shared v2 outgoing-text path (plain sends and replies). Optimistic flow:
+ * the placeholder id doubles as the self-echo tempId; the SDK promotes it
+ * from whichever confirmation lands first. Like v1, the placeholder keeps the
+ * raw text and only the wire text is stripped of control characters (the
+ * util is XMPP-named but XML-agnostic). On a reply the quoted message
+ * resolved from the store travels with the params, so the REST confirmation
+ * keeps the reply section the hydrated placeholder was already rendering.
+ */
+function sendTextViaSdk(
+	caller: 'sendChatMessage' | 'sendChatMessageReply',
+	roomId: string,
+	message: string,
+	replyToId?: string
+): void {
+	const senderId = useStore.getState().session.id;
+	if (!senderId) {
+		return;
+	}
+	// Read messages before sending a new one (v1 parity)
+	const lastMessageId = getLastUnreadMessage(roomId);
+	if (lastMessageId) {
+		readMessageViaSdk(roomId, lastMessageId);
+	}
+	const tempId = uuidGenerator();
+	useStore
+		.getState()
+		.setPlaceholderMessage({ roomId, id: tempId, text: message, replyTo: replyToId });
+	wscSdk
+		.sendMessage({
+			roomId,
+			text: sanitizeXmppMessage(message),
+			tempId,
+			senderId,
+			...(replyToId
+				? {
+						replyToId,
+						repliedMessage: findRepliedMessage(roomId, replyToId) as StoreTextMessage | undefined
+					}
+				: {})
+		})
+		.catch((err) => {
+			console.error(`chatClient.${caller}: message send failed`, err);
+		});
+}
+
 export const chatClient: ChatClient = {
 	get features(): Array<string> {
 		return xmppClient.features;
@@ -95,33 +161,17 @@ export const chatClient: ChatClient = {
 				});
 				return;
 			}
-			const senderId = useStore.getState().session.id;
-			if (!senderId) {
-				return;
-			}
-			// Read messages before sending a new one (v1 parity)
-			const lastMessageId = getLastUnreadMessage(roomId);
-			if (lastMessageId) {
-				chatClient.readMessage(roomId, lastMessageId);
-			}
-			// Optimistic flow: the placeholder id doubles as the self-echo tempId;
-			// the SDK promotes it from whichever confirmation lands first. Like v1,
-			// the placeholder keeps the raw text and only the wire text is stripped
-			// of control characters (the util is XMPP-named but XML-agnostic).
-			const tempId = uuidGenerator();
-			useStore.getState().setPlaceholderMessage({ roomId, id: tempId, text: message });
-			wscSdk
-				.sendMessage({ roomId, text: sanitizeXmppMessage(message), tempId, senderId })
-				.catch((err) => {
-					console.error('chatClient.sendChatMessage: message send failed', err);
-				});
+			sendTextViaSdk('sendChatMessage', roomId, message);
 			return;
 		}
 		xmppClient.sendChatMessage(roomId, message);
 	},
 	sendChatMessageReply: (roomId, message, replyTo, replyMessageId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendChatMessageReply');
+			// The 3rd v1 arg (the quoted author, only needed for the XMPP `to`
+			// address) has no v2 counterpart: the server resolves the quoted
+			// message from replyToId.
+			sendTextViaSdk('sendChatMessageReply', roomId, message, replyMessageId);
 			return;
 		}
 		xmppClient.sendChatMessageReply(roomId, message, replyTo, replyMessageId);
@@ -209,18 +259,7 @@ export const chatClient: ChatClient = {
 	},
 	readMessage: (roomId, messageId) => {
 		if (isWscPure()) {
-			// v1 parity: the XMPP sender also bails out when the message is not in
-			// store. Nothing is written locally: the store update comes back through
-			// the own ReadUpdated echo, like the v1 MUC displayed echo.
-			const message = useStore
-				.getState()
-				.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
-			if (!message) {
-				return;
-			}
-			wscSdk.markAsRead(roomId, messageId).catch((err) => {
-				console.error('chatClient.readMessage: read marker update failed', err);
-			});
+			readMessageViaSdk(roomId, messageId);
 			return;
 		}
 		xmppClient.readMessage(roomId, messageId);

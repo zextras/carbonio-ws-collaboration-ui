@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -11,6 +13,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
 import type { Message, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { wsDebug } from '../../utils/debug';
+import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 
@@ -45,16 +48,23 @@ export function wsChatEventsRouter(event: WsEvent): void {
 		}
 		case WsEventType.MESSAGE_RECEIVED: {
 			// The SDK performs the store writes shared by every sender (own echo
-			// included: it promotes the placeholder through the tempId)
-			const message = wscSdk.handleMessageReceived({
-				messageId: event.messageId,
-				roomId: event.roomId,
-				senderId: event.senderId,
-				text: event.text,
-				timestamp: event.timestamp,
-				...(event.replyToId ? { replyToId: event.replyToId } : {}),
-				...(event.tempId ? { tempId: event.tempId } : {})
-			});
+			// included: it promotes the placeholder through the tempId). On a
+			// reply, the quoted message is resolved here — the event carries no
+			// preview and the SDK never reads the store (v1 hydrated from the
+			// store too; its not-loaded fallback, an archive query by id, has no
+			// v2 endpoint: the bubble just renders without the reply section)
+			const message = wscSdk.handleMessageReceived(
+				{
+					messageId: event.messageId,
+					roomId: event.roomId,
+					senderId: event.senderId,
+					text: event.text,
+					timestamp: event.timestamp,
+					...(event.replyToId ? { replyToId: event.replyToId } : {}),
+					...(event.tempId ? { tempId: event.tempId } : {})
+				},
+				findRepliedMessage(event.roomId, event.replyToId) as StoreTextMessage | undefined
+			);
 			// Me/others split like the v1 handler: unread counter, sound/badge
 			// custom event and browser notification only for other senders
 			if (!isMyId(event.senderId)) {

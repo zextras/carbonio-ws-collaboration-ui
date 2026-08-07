@@ -13,8 +13,10 @@ import useStore from '../../store/Store';
 import { createMockTextMessage } from '../../tests/createMock';
 import type { WsPresenceChangedEvent } from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
+const replyText = 'ti rispondo';
 
 function presenceEvent(userId: string, online: boolean): WsPresenceChangedEvent {
 	return { type: WsEventType.PRESENCE_CHANGED, userId, online };
@@ -158,6 +160,100 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		const registry = useStore.getState().chatsRegistry['room-md'];
 		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-other-device']);
 		expect(registry?.unread ?? 0).toBe(0);
+	});
+
+	it('hydrates the reply section from the store when a reply lands (v1 hydration parity)', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-rr', [
+			createMockTextMessage({
+				id: 'msg-orig',
+				roomId: 'room-rr',
+				from: 'user-2',
+				text: 'messaggio originale',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-reply-1',
+			roomId: 'room-rr',
+			senderId: 'user-3',
+			text: replyText,
+			timestamp: AUG_FIRST_LATE_MORNING,
+			replyToId: 'msg-orig'
+		});
+
+		const reply = useStore
+			.getState()
+			.chatsRegistry['room-rr']?.messages.find((message) => message.id === 'msg-reply-1');
+		expect(reply).toMatchObject({
+			replyTo: 'msg-orig',
+			repliedMessage: expect.objectContaining({ id: 'msg-orig', text: 'messaggio originale' })
+		});
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('keeps a reply renderable when the quoted message is not loaded', () => {
+		// v1 fired an archive query by id here; v2 has no such endpoint, so the
+		// bubble renders without the reply section (and without any round-trip)
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-reply-2',
+			roomId: 'room-rn',
+			senderId: 'user-3',
+			text: 'reply orfana',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			replyToId: 'msg-ancient'
+		});
+
+		const message = useStore.getState().chatsRegistry['room-rn']?.messages[0];
+		expect(message).toMatchObject({ id: 'msg-reply-2', replyTo: 'msg-ancient' });
+		expect((message as TextMessage).repliedMessage).toBeUndefined();
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('promotes a reply placeholder from the self-echo with the reply section hydrated', () => {
+		const targetId = 'msg-target';
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-re', [
+			createMockTextMessage({
+				id: targetId,
+				stanzaId: targetId,
+				roomId: 'room-re',
+				from: 'user-2',
+				text: 'messaggio citato',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+		useStore.getState().setPlaceholderMessage({
+			roomId: 'room-re',
+			id: 'tmp-re',
+			text: replyText,
+			replyTo: targetId
+		});
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-reply-echo',
+			roomId: 'room-re',
+			senderId: 'me',
+			text: replyText,
+			timestamp: AUG_FIRST_LATE_MORNING,
+			replyToId: targetId,
+			tempId: 'tmp-re'
+		});
+
+		const { messages } = useStore.getState().chatsRegistry['room-re'];
+		// The PENDING placeholder is gone: one confirmed reply, quoted message attached
+		expect(messages.map((message) => message.id)).toEqual([targetId, 'msg-reply-echo']);
+		expect(messages[1]).toMatchObject({
+			from: 'me',
+			read: 'unread',
+			replyTo: targetId,
+			repliedMessage: expect.objectContaining({ id: targetId, text: 'messaggio citato' })
+		});
+		expect(useStore.getState().chatsRegistry['room-re']?.unread ?? 0).toBe(0);
 	});
 
 	it('promotes the own placeholder from the self-echo without touching the unread counter', () => {

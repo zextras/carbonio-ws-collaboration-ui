@@ -27,6 +27,7 @@ import { xmppClient } from '../xmpp/XMPPClient';
 
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
+const quotedId = 'msg-quoted';
 
 function mockJsonResponse(body: unknown): void {
 	(global.fetch as Mock).mockImplementationOnce(() =>
@@ -360,6 +361,51 @@ describe('chatClient façade', () => {
 		const urls = (global.fetch as Mock).mock.calls.map((call) => call[0]);
 		expect(urls[0]).toBe('/services/chats/rooms/room-rb/read');
 		expect(urls[1]).toBe('/services/chats/rooms/room-rb/messages');
+	});
+
+	it('sends a reply through the SDK: replyToId on the wire, reply section hydrated end-to-end', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-rp', [
+			createMockTextMessage({
+				id: quotedId,
+				stanzaId: quotedId,
+				roomId: 'room-rp',
+				from: 'user-2',
+				text: 'testo citato',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		mockJsonResponse(undefined);
+		mockJsonResponse({ id: 'msg-reply', createdAt: AUG_FIRST_LATE_MORNING });
+
+		chatClient.sendChatMessageReply('room-rp', 'rispondo', 'user-2', quotedId);
+
+		// The placeholder lands synchronously, already hydrated by the slice
+		const pending = useStore.getState().chatsRegistry['room-rp'].messages[1];
+		expect(pending).toMatchObject({
+			text: 'rispondo',
+			read: 'pending',
+			replyTo: quotedId,
+			repliedMessage: expect.objectContaining({ id: quotedId })
+		});
+
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-rp/read');
+		expect(calls[1]?.[0]).toBe('/services/chats/rooms/room-rp/messages');
+		expect(calls[1]?.[1]).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ text: 'rispondo', tempId: pending.id, replyToId: quotedId })
+		});
+		// The REST confirmation keeps the reply fields the placeholder was rendering
+		const { messages } = useStore.getState().chatsRegistry['room-rp'];
+		expect(messages.map((message) => message.id)).toEqual([quotedId, 'msg-reply']);
+		expect(messages[1]).toMatchObject({
+			replyTo: quotedId,
+			repliedMessage: expect.objectContaining({ id: quotedId, text: 'testo citato' })
+		});
 	});
 
 	it('exposes the live XMPP features list', () => {
