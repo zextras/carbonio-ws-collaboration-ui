@@ -465,3 +465,74 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 		expect(fastenings?.map((fastening) => fastening.action)).toEqual(['edit', 'delete']);
 	});
 });
+
+describe('wsChatEventsRouter - ReactionChanged', () => {
+	function reactionEvent(
+		userId: string,
+		operation: 'added' | 'removed'
+	): Parameters<typeof wsChatEventsRouter>[0] {
+		return {
+			type: WsEventType.REACTION_CHANGED,
+			messageId: 'msg-mine',
+			roomId: 'room-rc',
+			userId,
+			reaction: '👍',
+			operation
+		};
+	}
+
+	function seedMyMessage(): void {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-rc', [
+			createMockTextMessage({
+				id: 'msg-mine',
+				stanzaId: 'msg-mine',
+				roomId: 'room-rc',
+				from: 'me',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+	}
+
+	it("files another user's reaction and triggers the v1 animation state, without unread bumps", () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('user-2', 'added'));
+
+		const registry = useStore.getState().chatsRegistry['room-rc'];
+		expect(registry?.fastenings['msg-mine']).toEqual([
+			expect.objectContaining({ action: 'reaction', from: 'user-2', value: '👍' })
+		]);
+		// v1 parity: newReactions animation state (slice self-guards on my own
+		// messages), no unread, no round-trip
+		expect(useStore.getState().activeConversations['room-rc']?.newReactions).toEqual([
+			{ stanzaId: 'msg-mine', reaction: '👍' }
+		]);
+		expect(registry?.unread ?? 0).toBe(0);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('files my own echo without touching the animation state', () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('me', 'added'));
+
+		expect(useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine']).toHaveLength(1);
+		expect(useStore.getState().activeConversations['room-rc']?.newReactions).toBeUndefined();
+	});
+
+	it('keeps the whole toggle history with increasing dates (add -> remove -> add)', () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('user-2', 'added'));
+		wsChatEventsRouter(reactionEvent('user-2', 'removed'));
+		wsChatEventsRouter(reactionEvent('user-2', 'added'));
+
+		const fastenings = useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine'];
+		// Three distinct fastenings, v1 stanza-history parity: the projection
+		// (latest per user by date) must land on the re-added emoji
+		expect(fastenings?.map((fastening) => fastening.value)).toEqual(['👍', '', '👍']);
+		expect(fastenings?.[2]?.date).toBeGreaterThan(fastenings?.[1]?.date as number);
+		expect(fastenings?.[1]?.date).toBeGreaterThan(fastenings?.[0]?.date as number);
+	});
+});

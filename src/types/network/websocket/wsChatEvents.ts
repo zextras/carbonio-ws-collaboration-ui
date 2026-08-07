@@ -18,7 +18,8 @@ export type WsChatEvent =
 	| WsReadUpdatedEvent
 	| WsMessageReceivedEvent
 	| WsMessageEditedEvent
-	| WsMessageDeletedEvent;
+	| WsMessageDeletedEvent
+	| WsReactionChangedEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
@@ -61,4 +62,14 @@ export type WsMessageDeletedEvent = {
 	roomId: string;
 	senderId: string;
 	deletedAt: string;
+};
+
+/** A per-user reaction delta, not the aggregated state. */
+export type WsReactionChangedEvent = {
+	type: WsEventType.REACTION_CHANGED;
+	messageId: string;
+	roomId: string;
+	userId: string;
+	reaction: string;
+	operation: 'added' | 'removed';
 };

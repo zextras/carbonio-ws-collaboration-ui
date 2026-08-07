@@ -11,12 +11,13 @@ import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
-import type { Message, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
+import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
 
 /**
  * Entry point for the WSC-pure chat events (backend >= 2.0.0). The migration
@@ -105,6 +106,34 @@ export function wsChatEventsRouter(event: WsEvent): void {
 				},
 				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
 			);
+			return;
+		}
+		case WsEventType.REACTION_CHANGED: {
+			// Every reactor's echo synthesizes the fastening (the only
+			// confirmation path — both endpoints answer 204). The me/others
+			// effects mirror the v1 fastening handler: animation state (the slice
+			// self-guards on my own messages and reads the just-added fastening
+			// for removals — hence the write order), browser notification
+			// (self-guarded against empty values), focus reset. No unread bump:
+			// v1 parity, reactions never counted (plan §5.14).
+			const fastening = wscSdk.handleReactionChanged({
+				messageId: event.messageId,
+				roomId: event.roomId,
+				userId: event.userId,
+				reaction: event.reaction,
+				operation: event.operation
+			});
+			if (!isMyId(event.userId)) {
+				displayReactionBrowserNotification(fastening as MessageFastening);
+				useStore
+					.getState()
+					.setNewReaction(event.roomId, event.messageId, fastening.value ?? '', event.userId);
+				if (useStore.getState().activeConversations[event.roomId]?.inputHasFocus) {
+					setTimeout(() => {
+						useStore.getState().unsetNewReactions(event.roomId);
+					}, 0);
+				}
+			}
 			return;
 		}
 		default:

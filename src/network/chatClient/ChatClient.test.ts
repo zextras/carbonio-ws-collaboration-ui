@@ -521,6 +521,56 @@ describe('chatClient façade', () => {
 		});
 	});
 
+	it('reacts to a message through the SDK: POST with the percent-encoded emoji', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		mockJsonResponse(undefined);
+
+		chatClient.sendChatMessageReaction('room-rx', 'msg-rx', '👨‍👩‍👧');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.[0]).toBe(
+			`/services/chats/rooms/room-rx/messages/msg-rx/reactions/${encodeURIComponent('👨‍👩‍👧')}`
+		);
+		expect(calls[0]?.[1]).toMatchObject({ method: 'POST' });
+	});
+
+	it('removes a reaction by resolving my current emoji from the store (v1 empty-value contract)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		// My active reaction lands from its own echo, the only confirmation path
+		wsChatEventsRouter({
+			type: WsEventType.REACTION_CHANGED,
+			messageId: 'msg-rm',
+			roomId: 'room-rm',
+			userId: 'me',
+			reaction: '👍',
+			operation: 'added'
+		});
+		mockJsonResponse(undefined);
+
+		chatClient.sendChatMessageReaction('room-rm', 'msg-rm', '');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.[0]).toBe(
+			`/services/chats/rooms/room-rm/messages/msg-rm/reactions/${encodeURIComponent('👍')}`
+		);
+		expect(calls[0]?.[1]).toMatchObject({ method: 'DELETE' });
+	});
+
+	it('removing without an active reaction is a no-op (the v1 empty stanza did nothing there too)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		chatClient.sendChatMessageReaction('room-rn', 'msg-rn', '');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
 	it('exposes the live XMPP features list', () => {
 		xmppClient.features = ['zextras:iq:pin'];
 

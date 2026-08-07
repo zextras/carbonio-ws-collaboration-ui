@@ -9,6 +9,7 @@ import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { findRepliedMessage } from './findRepliedMessage';
+import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
@@ -215,7 +216,25 @@ export const chatClient: ChatClient = {
 	},
 	sendChatMessageReaction: (roomId, messageStanzaId, reaction) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendChatMessageReaction');
+			// No optimistic write, v1 parity: the bubble updates on the
+			// ReactionChanged echo (both endpoints answer a bodyless 204).
+			if (reaction === '') {
+				// The v1 removal was an empty-valued stanza; v2 DELETEs the specific
+				// emoji, so resolve my current one from the store — the same
+				// selector the reaction pickers read. Nothing active, nothing to
+				// remove: the empty v1 stanza was a no-op there too.
+				const myReaction = getMyLastReaction(useStore.getState(), roomId, messageStanzaId);
+				if (!myReaction) {
+					return;
+				}
+				wscSdk.removeReaction(roomId, messageStanzaId, myReaction).catch((err) => {
+					console.error('chatClient.sendChatMessageReaction: reaction removal failed', err);
+				});
+				return;
+			}
+			wscSdk.sendReaction(roomId, messageStanzaId, reaction).catch((err) => {
+				console.error('chatClient.sendChatMessageReaction: reaction send failed', err);
+			});
 			return;
 		}
 		xmppClient.sendChatMessageReaction(roomId, messageStanzaId, reaction);
