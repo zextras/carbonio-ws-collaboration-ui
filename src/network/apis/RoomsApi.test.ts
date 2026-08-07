@@ -604,3 +604,75 @@ describe('Rooms API', () => {
 		});
 	});
 });
+
+describe('forwardMessages on a WSC-pure backend', () => {
+	afterEach(() => {
+		// The zustand store survives across tests: leave the version un-negotiated
+		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+	});
+
+	test('forwards by reference: one bulk POST per destination room, no MAM hybrid', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const mamSpy = vi.spyOn(xmppClient, 'requestMessageToForward');
+		vi.mocked(global.fetch).mockImplementation(() =>
+			Promise.resolve({
+				ok: true,
+				status: 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src'
+		});
+		await forwardMessages(['room-a', 'room-b'], [message]);
+
+		const urls = vi.mocked(global.fetch).mock.calls.map((call) => call[0]);
+		expect(urls).toEqual([
+			'/services/chats/rooms/room-a/forward',
+			'/services/chats/rooms/room-b/forward'
+		]);
+		expect(vi.mocked(global.fetch).mock.calls[0]?.[1]).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ messages: [{ sourceRoomId: 'room-src', messageId: 'msg-ref' }] })
+		});
+		// The v1 hybrid never runs: no MAM fetch, no legacy endpoint
+		expect(mamSpy).not.toHaveBeenCalled();
+		expect(mockFetchAPI).not.toHaveBeenCalled();
+	});
+
+	test('rethrows the first failed destination and skips the quota event', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+		vi.mocked(global.fetch).mockImplementation((url) =>
+			Promise.resolve({
+				ok: !String(url).includes('room-bad'),
+				status: String(url).includes('room-bad') ? 403 : 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src',
+			attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+		});
+		await expect(forwardMessages(['room-bad'], [message])).rejects.toThrow();
+		// No fulfilled destination: the quota event must not fire
+		expect(dispatchSpy).not.toHaveBeenCalledWith(
+			expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+		);
+		dispatchSpy.mockRestore();
+	});
+});

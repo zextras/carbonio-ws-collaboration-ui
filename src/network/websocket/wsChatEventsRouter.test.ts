@@ -16,6 +16,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
+const AUG_FIRST_EARLY_MORNING = '2026-08-01T09:00:00Z';
 const replyText = 'ti rispondo';
 
 function presenceEvent(userId: string, online: boolean): WsPresenceChangedEvent {
@@ -47,7 +48,7 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 
 	it('refreshes the last activity through the presence batch on an offline transition', async () => {
 		mockJsonResponseOnce([
-			{ userId: 'user-off', online: false, lastActivity: '2026-08-01T09:00:00Z' }
+			{ userId: 'user-off', online: false, lastActivity: AUG_FIRST_EARLY_MORNING }
 		]);
 
 		wsChatEventsRouter(presenceEvent('user-off', false));
@@ -56,7 +57,7 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/presence/batch');
 		expect(useStore.getState().users['user-off']).toMatchObject({
 			online: false,
-			lastActivity: Date.parse('2026-08-01T09:00:00Z')
+			lastActivity: Date.parse(AUG_FIRST_EARLY_MORNING)
 		});
 	});
 
@@ -534,5 +535,73 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 		expect(fastenings?.map((fastening) => fastening.value)).toEqual(['👍', '', '👍']);
 		expect(fastenings?.[2]?.date).toBeGreaterThan(fastenings?.[1]?.date as number);
 		expect(fastenings?.[1]?.date).toBeGreaterThan(fastenings?.[0]?.date as number);
+	});
+});
+
+describe('wsChatEventsRouter - MessageForwarded', () => {
+	const forwardedText = 'contenuto inoltrato';
+
+	function forwardedEvent(senderId: string): Parameters<typeof wsChatEventsRouter>[0] {
+		return {
+			type: WsEventType.MESSAGE_FORWARDED,
+			messageId: 'msg-fw',
+			roomId: 'room-fw',
+			originalRoomId: 'room-src',
+			senderId,
+			text: forwardedText,
+			timestamp: AUG_FIRST_LATE_MORNING,
+			forwardedFrom: 'user-9',
+			forwardedAt: AUG_FIRST_EARLY_MORNING
+		};
+	}
+
+	it("lands another user's forward as a new message with the forwarded badge and the v1 effects", () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const received: Array<unknown> = [];
+		const listener = (event: Event): void => {
+			received.push((event as CustomEvent).detail);
+		};
+		window.addEventListener(EventName.NEW_MESSAGE, listener);
+
+		wsChatEventsRouter(forwardedEvent('user-2'));
+		window.removeEventListener(EventName.NEW_MESSAGE, listener);
+
+		const registry = useStore.getState().chatsRegistry['room-fw'];
+		expect(registry?.messages[0]).toMatchObject({
+			id: 'msg-fw',
+			text: forwardedText,
+			forwarded: { from: 'user-9', date: Date.parse(AUG_FIRST_EARLY_MORNING), count: 1 }
+		});
+		expect(registry?.lastMessage).toMatchObject({ id: 'msg-fw' });
+		expect(registry?.unread).toBe(1);
+		expect(received).toEqual([expect.objectContaining({ id: 'msg-fw' })]);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('lands my own forward echo without touching the unread counter', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter(forwardedEvent('me'));
+
+		const registry = useStore.getState().chatsRegistry['room-fw'];
+		expect(registry?.messages[0]).toMatchObject({ id: 'msg-fw', from: 'me' });
+		expect(registry?.unread ?? 0).toBe(0);
+	});
+
+	it('keeps the forwarded badge when a forward is delivered as MessageReceived (dual-path)', () => {
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-fw-dual',
+			roomId: 'room-fd',
+			senderId: 'user-2',
+			text: forwardedText,
+			timestamp: AUG_FIRST_LATE_MORNING,
+			forwardedFrom: 'user-9',
+			forwardedAt: AUG_FIRST_EARLY_MORNING
+		});
+
+		expect(useStore.getState().chatsRegistry['room-fd']?.messages[0]).toMatchObject({
+			forwarded: expect.objectContaining({ from: 'user-9' })
+		});
 	});
 });

@@ -19,7 +19,8 @@ export type WsChatEvent =
 	| WsMessageReceivedEvent
 	| WsMessageEditedEvent
 	| WsMessageDeletedEvent
-	| WsReactionChangedEvent;
+	| WsReactionChangedEvent
+	| WsMessageForwardedEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
@@ -44,6 +45,23 @@ export type WsMessageReceivedEvent = {
 	replyToId?: string;
 	/** Client-generated correlation key: present on the sender's own echo. */
 	tempId?: string;
+	/** Defensive dual-path: the original author, when this delivery is actually a forward. */
+	forwardedFrom?: string;
+	forwardedAt?: string;
+};
+
+export type WsMessageForwardedEvent = {
+	type: WsEventType.MESSAGE_FORWARDED;
+	messageId: string;
+	roomId: string;
+	/** The room the message was forwarded from. */
+	originalRoomId: string;
+	senderId: string;
+	text: string;
+	/** Optional in the spike's shape: the SDK falls back to the arrival instant. */
+	timestamp?: string;
+	forwardedFrom?: string;
+	forwardedAt?: string;
 };
 
 export type WsMessageEditedEvent = {

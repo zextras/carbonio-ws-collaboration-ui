@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -18,6 +18,21 @@ import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
+
+/**
+ * The v1 receiving effects for another sender's message: unread counter,
+ * sound/badge custom event, browser notification. Shared by MESSAGE_RECEIVED
+ * and MESSAGE_FORWARDED — v1 landed forwards through the same plain message
+ * handler, effects included.
+ */
+function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: string): void {
+	if (isMyId(senderId)) {
+		return;
+	}
+	useStore.getState().incrementUnreadCount(roomId, 1);
+	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
+	displayMessageBrowserNotification(message as TextMessage);
+}
 
 /**
  * Entry point for the WSC-pure chat events (backend >= 2.0.0). The migration
@@ -63,17 +78,32 @@ export function wsChatEventsRouter(event: WsEvent): void {
 					text: event.text,
 					timestamp: event.timestamp,
 					...(event.replyToId ? { replyToId: event.replyToId } : {}),
-					...(event.tempId ? { tempId: event.tempId } : {})
+					...(event.tempId ? { tempId: event.tempId } : {}),
+					...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
+					...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {})
 				},
 				findRepliedMessage(event.roomId, event.replyToId) as StoreTextMessage | undefined
 			);
-			// Me/others split like the v1 handler: unread counter, sound/badge
-			// custom event and browser notification only for other senders
-			if (!isMyId(event.senderId)) {
-				useStore.getState().incrementUnreadCount(event.roomId, 1);
-				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
-				displayMessageBrowserNotification(message as TextMessage);
-			}
+			// Me/others split like the v1 handler
+			notifyOthersMessage(message, event.senderId, event.roomId);
+			return;
+		}
+		case WsEventType.MESSAGE_FORWARDED: {
+			// To the receiving room a forward IS a new message (v1 landed it
+			// through the plain message handler): same me/others effects as
+			// MESSAGE_RECEIVED. The forwarder's own echo is the only
+			// confirmation — the 201 carries no text and nothing was optimistic.
+			const message = wscSdk.handleMessageForwarded({
+				messageId: event.messageId,
+				roomId: event.roomId,
+				originalRoomId: event.originalRoomId,
+				senderId: event.senderId,
+				text: event.text,
+				...(event.timestamp ? { timestamp: event.timestamp } : {}),
+				...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
+				...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {})
+			});
+			notifyOthersMessage(message, event.senderId, event.roomId);
 			return;
 		}
 		case WsEventType.MESSAGE_EDITED: {

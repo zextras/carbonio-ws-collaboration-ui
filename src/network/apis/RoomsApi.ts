@@ -33,7 +33,8 @@ import {
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
-import { chatClient } from '../chatClient/ChatClient';
+import { chatClient, isWscPure } from '../chatClient/ChatClient';
+import { wscSdk } from '../sdk/wscSdk';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
@@ -246,6 +247,37 @@ export const forwardMessages = (
 	roomsId: string[],
 	messages: TextMessage[]
 ): Promise<Response[]> => {
+	if (isWscPure()) {
+		// v2 forwards by reference — one bulk POST per destination room, no
+		// content on the wire: the v1 hybrid below (one MAM fetch per message
+		// to rebuild the original stanza XML, body swapped with the projected
+		// text) dissolves. Store updates come from the MessageForwarded echo.
+		const references = messages.map((message) => ({
+			// v2 invariant: id === stanzaId === server UUID
+			sourceRoomId: message.roomId,
+			messageId: message.stanzaId
+		}));
+		const hasAttachments = messages.some((message) => message.attachment);
+		return Promise.allSettled(
+			roomsId.map((roomId) => wscSdk.forwardMessages(roomId, references))
+		).then((results) => {
+			const fulfilled = results.filter((result) => result.status === 'fulfilled');
+			// Forwarding an attachment clones it server-side: same quota effect
+			// as the v1 flow
+			if (hasAttachments && fulfilled.length > 0) {
+				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+			}
+			const rejected = results.find(
+				(result): result is PromiseRejectedResult => result.status === 'rejected'
+			);
+			if (rejected) {
+				throw rejected.reason;
+			}
+			// The caller (ForwardMessageModal) only chains then/catch: the v1
+			// Response values were never consumed
+			return [] as Response[];
+		});
+	}
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {
