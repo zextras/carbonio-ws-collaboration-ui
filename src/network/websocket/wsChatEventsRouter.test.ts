@@ -9,6 +9,7 @@ import type { Mock } from 'vitest';
 
 import { wsChatEventsRouter } from './wsChatEventsRouter';
 import useStore from '../../store/Store';
+import { createMockTextMessage } from '../../tests/createMock';
 import type { WsPresenceChangedEvent } from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
@@ -62,5 +63,52 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 
 		expect(useStore.getState().users.me).toBeUndefined();
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+});
+
+describe('wsChatEventsRouter - ReadUpdated', () => {
+	it('stores another member read marker without any round-trip', () => {
+		useStore.getState().updateHistory('room-r', [
+			createMockTextMessage({
+				id: 'msg-r1',
+				roomId: 'room-r',
+				date: Date.parse('2026-08-01T10:00:00Z')
+			})
+		]);
+
+		wsChatEventsRouter({
+			type: WsEventType.READ_UPDATED,
+			roomId: 'room-r',
+			userId: 'user-2',
+			messageId: 'msg-r1'
+		});
+
+		expect(useStore.getState().chatsRegistry['room-r']?.markers['user-2']).toMatchObject({
+			messageId: 'msg-r1',
+			type: 'displayed'
+		});
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('clears the unread counter when the own echo comes back (v1 displayed-echo parity)', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-u', [
+			createMockTextMessage({
+				id: 'msg-u1',
+				roomId: 'room-u',
+				from: 'user-2',
+				date: Date.parse('2026-08-01T10:00:00Z')
+			})
+		]);
+		useStore.getState().setUnreadCount('room-u', 1);
+
+		wsChatEventsRouter({
+			type: WsEventType.READ_UPDATED,
+			roomId: 'room-u',
+			userId: 'me',
+			messageId: 'msg-u1'
+		});
+
+		expect(useStore.getState().chatsRegistry['room-u']?.unread).toBe(0);
 	});
 });

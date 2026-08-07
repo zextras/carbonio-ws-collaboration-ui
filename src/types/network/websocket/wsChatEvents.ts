@@ -13,10 +13,17 @@ import { WsEventType } from './wsEvents';
  * specs/SPEC_SOURCE.md). One member lands per migration step, matching the
  * SDK handler it is routed to.
  */
-export type WsChatEvent = WsPresenceChangedEvent;
+export type WsChatEvent = WsPresenceChangedEvent | WsReadUpdatedEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
 	userId: string;
 	online: boolean;
+};
+
+export type WsReadUpdatedEvent = {
+	type: WsEventType.READ_UPDATED;
+	roomId: string;
+	userId: string;
+	messageId: string;
 };

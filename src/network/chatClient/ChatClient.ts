@@ -178,7 +178,18 @@ export const chatClient: ChatClient = {
 	},
 	readMessage: (roomId, messageId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('readMessage');
+			// v1 parity: the XMPP sender also bails out when the message is not in
+			// store. Nothing is written locally: the store update comes back through
+			// the own ReadUpdated echo, like the v1 MUC displayed echo.
+			const message = useStore
+				.getState()
+				.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
+			if (!message) {
+				return;
+			}
+			wscSdk.markAsRead(roomId, messageId).catch((err) => {
+				console.error('chatClient.readMessage: read marker update failed', err);
+			});
 			return;
 		}
 		xmppClient.readMessage(roomId, messageId);

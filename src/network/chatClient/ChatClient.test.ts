@@ -235,6 +235,35 @@ describe('chatClient façade', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
+	it('moves the read marker through the SDK on a WSC-pure backend: PUT rooms/{id}/read', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().updateHistory('room-m', [
+			createMockTextMessage({
+				id: 'msg-m1',
+				roomId: 'room-m',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		mockJsonResponse(undefined);
+
+		chatClient.readMessage('room-m', 'msg-m1');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-m/read');
+		expect((global.fetch as Mock).mock.calls[0]?.[1]).toMatchObject({
+			method: 'PUT',
+			body: JSON.stringify({ messageId: 'msg-m1' })
+		});
+	});
+
+	it('does not PUT a read marker for a message missing from the store (v1 parity)', () => {
+		useStore.getState().setApiVersion('2.0.0');
+
+		chatClient.readMessage('room-m', 'msg-ghost');
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
 	it('exposes the live XMPP features list', () => {
 		xmppClient.features = ['zextras:iq:pin'];
 

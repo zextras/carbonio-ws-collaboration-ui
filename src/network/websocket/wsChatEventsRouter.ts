@@ -27,5 +27,16 @@ export function wsChatEventsRouter(event: WsEvent): void {
 		});
 		return;
 	}
+	if (event.type === WsEventType.READ_UPDATED) {
+		// Own echo included, unlike presence: updateReadStatus recomputes the
+		// unread counter from the own marker and the read statuses from the
+		// others' — the v1 single-path displayed-stanza behavior
+		wscSdk.handleReadUpdated({
+			roomId: event.roomId,
+			userId: event.userId,
+			messageId: event.messageId
+		});
+		return;
+	}
 	wsDebug('Chat event (SDK not wired yet):', event);
 }
