@@ -476,6 +476,51 @@ describe('chatClient façade', () => {
 		});
 	});
 
+	it('deletes a message through the SDK: bare DELETE on the wire, the echo owns every store write', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const target = createMockTextMessage({
+			id: 'msg-del',
+			stanzaId: 'msg-del',
+			roomId: 'room-del',
+			from: 'me',
+			text: 'da cancellare',
+			date: Date.parse(AUG_FIRST_MORNING)
+		});
+		useStore.getState().updateHistory('room-del', [target]);
+		useStore.getState().setLastMessage('room-del', target);
+		mockJsonResponse(undefined);
+
+		chatClient.sendChatMessageDeletion('room-del', 'msg-del');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-del/messages/msg-del');
+		expect(calls[0]?.[1]).toMatchObject({ method: 'DELETE' });
+		// The 204 carries no server timestamp: no fastening, no sidebar write —
+		// the store only moves on the echo below (v1 retraction parity)
+		expect(useStore.getState().chatsRegistry['room-del'].fastenings['msg-del']).toBeUndefined();
+		expect(useStore.getState().chatsRegistry['room-del'].lastMessage).toMatchObject({
+			text: 'da cancellare'
+		});
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_DELETED,
+			messageId: 'msg-del',
+			roomId: 'room-del',
+			senderId: 'me',
+			deletedAt: AUG_FIRST_LATE_MORNING
+		});
+		expect(useStore.getState().chatsRegistry['room-del'].fastenings['msg-del']).toEqual([
+			expect.objectContaining({ action: 'delete', originalStanzaId: 'msg-del' })
+		]);
+		expect(useStore.getState().chatsRegistry['room-del'].lastMessage).toMatchObject({
+			deleted: true,
+			text: ''
+		});
+	});
+
 	it('exposes the live XMPP features list', () => {
 		xmppClient.features = ['zextras:iq:pin'];
 

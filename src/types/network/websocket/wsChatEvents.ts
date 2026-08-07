@@ -17,7 +17,8 @@ export type WsChatEvent =
 	| WsPresenceChangedEvent
 	| WsReadUpdatedEvent
 	| WsMessageReceivedEvent
-	| WsMessageEditedEvent;
+	| WsMessageEditedEvent
+	| WsMessageDeletedEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
@@ -52,4 +53,12 @@ export type WsMessageEditedEvent = {
 	/** The full new text, not a delta. */
 	text: string;
 	editedAt: string;
+};
+
+export type WsMessageDeletedEvent = {
+	type: WsEventType.MESSAGE_DELETED;
+	messageId: string;
+	roomId: string;
+	senderId: string;
+	deletedAt: string;
 };

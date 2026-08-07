@@ -368,3 +368,100 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 		expect(useStore.getState().chatsRegistry['room-ei']?.fastenings['msg-twice']).toHaveLength(1);
 	});
 });
+
+describe('wsChatEventsRouter - MessageDeleted', () => {
+	function deletedEvent(
+		roomId: string,
+		messageId: string
+	): Parameters<typeof wsChatEventsRouter>[0] {
+		return {
+			type: WsEventType.MESSAGE_DELETED,
+			messageId,
+			roomId,
+			senderId: 'user-2',
+			deletedAt: '2026-08-01T12:00:00Z'
+		};
+	}
+
+	it('files the DELETE fastening and clears the sidebar entry when it targets the last message', () => {
+		const target = createMockTextMessage({
+			id: 'msg-last',
+			stanzaId: 'msg-last',
+			roomId: 'room-dl',
+			from: 'user-2',
+			text: 'da cancellare',
+			date: Date.parse(AUG_FIRST_LATE_MORNING),
+			replyTo: 'msg-quoted',
+			attachment: { id: 'att-1', name: 'foto.png', mimeType: 'image/png', size: 10 }
+		});
+		useStore.getState().updateHistory('room-dl', [target]);
+		useStore.getState().setLastMessage('room-dl', target);
+
+		wsChatEventsRouter(deletedEvent('room-dl', 'msg-last'));
+
+		const registry = useStore.getState().chatsRegistry['room-dl'];
+		// The message itself keeps its text: the bubble projects the fastening
+		expect(registry?.messages[0]).toMatchObject({ text: 'da cancellare' });
+		expect(registry?.fastenings['msg-last']).toEqual([
+			expect.objectContaining({ action: 'delete', from: 'user-2' })
+		]);
+		// v1 fastening handler parity: sidebar rebuilt with text, attachment and
+		// reply reference cleared; no unread bump, no round-trip
+		expect(registry?.lastMessage).toMatchObject({ deleted: true, text: '' });
+		expect((registry?.lastMessage as TextMessage).attachment).toBeUndefined();
+		expect((registry?.lastMessage as TextMessage).replyTo).toBeUndefined();
+		expect(registry?.unread ?? 0).toBe(0);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('leaves the sidebar untouched when the deletion targets an older message', () => {
+		const older = createMockTextMessage({
+			id: 'msg-old',
+			stanzaId: 'msg-old',
+			roomId: 'room-do',
+			text: 'vecchio',
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		const last = createMockTextMessage({
+			id: 'msg-new',
+			stanzaId: 'msg-new',
+			roomId: 'room-do',
+			text: 'ultimo',
+			date: Date.parse('2026-08-01T10:30:00Z')
+		});
+		useStore.getState().updateHistory('room-do', [older, last]);
+		useStore.getState().setLastMessage('room-do', last);
+
+		wsChatEventsRouter(deletedEvent('room-do', 'msg-old'));
+
+		const registry = useStore.getState().chatsRegistry['room-do'];
+		expect(registry?.fastenings['msg-old']).toHaveLength(1);
+		expect(registry?.lastMessage).toMatchObject({ id: 'msg-new', text: 'ultimo' });
+	});
+
+	it('keeps the DELETE last in the projection order when it lands after an edit', () => {
+		const target = createMockTextMessage({
+			id: 'msg-ed',
+			stanzaId: 'msg-ed',
+			roomId: 'room-dp',
+			text: 'originale',
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-dp', [target]);
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_EDITED,
+			messageId: 'msg-ed',
+			roomId: 'room-dp',
+			senderId: 'user-2',
+			text: 'corretto',
+			editedAt: '2026-08-01T11:00:00Z'
+		});
+		wsChatEventsRouter(deletedEvent('room-dp', 'msg-ed'));
+
+		// The slice orders by date and the projection (useMessage) takes the
+		// last EDIT/DELETE: the server-stamped deletion wins over the edit
+		const fastenings = useStore.getState().chatsRegistry['room-dp']?.fastenings['msg-ed'];
+		expect(fastenings?.map((fastening) => fastening.action)).toEqual(['edit', 'delete']);
+	});
+});

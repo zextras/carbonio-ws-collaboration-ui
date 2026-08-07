@@ -93,6 +93,20 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			);
 			return;
 		}
+		case WsEventType.MESSAGE_DELETED: {
+			// Same contract as MESSAGE_EDITED — and the only confirmation path
+			// for the deleter (the 204 writes nothing).
+			wscSdk.handleMessageDeleted(
+				{
+					messageId: event.messageId,
+					roomId: event.roomId,
+					senderId: event.senderId,
+					deletedAt: event.deletedAt
+				},
+				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
+			);
+			return;
+		}
 		default:
 			wsDebug('Chat event (SDK not wired yet):', event);
 	}

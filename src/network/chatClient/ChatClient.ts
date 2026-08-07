@@ -203,7 +203,12 @@ export const chatClient: ChatClient = {
 	},
 	sendChatMessageDeletion: (roomId, messageStanzaId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendChatMessageDeletion');
+			// No optimistic write, v1 parity: the bubble updates on the
+			// MessageDeleted echo — the only confirmation path, since the 204
+			// carries no server timestamp to synthesize the fastening from.
+			wscSdk.deleteMessage(roomId, messageStanzaId).catch((err) => {
+				console.error('chatClient.sendChatMessageDeletion: message deletion failed', err);
+			});
 			return;
 		}
 		xmppClient.sendChatMessageDeletion(roomId, messageStanzaId);
