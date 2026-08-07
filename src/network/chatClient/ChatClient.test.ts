@@ -28,6 +28,9 @@ import { xmppClient } from '../xmpp/XMPPClient';
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const quotedId = 'msg-quoted';
+const editTargetId = 'msg-target';
+const editedText = 'testo corretto';
+const originalText = 'testo originale';
 
 function mockJsonResponse(body: unknown): void {
 	(global.fetch as Mock).mockImplementationOnce(() =>
@@ -405,6 +408,71 @@ describe('chatClient façade', () => {
 		expect(messages[1]).toMatchObject({
 			replyTo: quotedId,
 			repliedMessage: expect.objectContaining({ id: quotedId, text: 'testo citato' })
+		});
+	});
+
+	it('edits a message through the SDK: PUT on the wire, then the echo is a no-op on the fastening and rebuilds the sidebar', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const target = createMockTextMessage({
+			id: editTargetId,
+			stanzaId: editTargetId,
+			roomId: 'room-ed',
+			from: 'me',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_MORNING)
+		});
+		useStore.getState().updateHistory('room-ed', [target]);
+		useStore.getState().setLastMessage('room-ed', target);
+		mockJsonResponse({ id: editTargetId, text: editedText, updatedAt: AUG_FIRST_LATE_MORNING });
+
+		chatClient.sendChatMessageEdit('room-ed', editedText, editTargetId, editTargetId);
+		await vi.advanceTimersByTimeAsync(0);
+
+		// No read-before-send and no optimistic write for edits (v1 parity):
+		// the PUT is the first and only call
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-ed/messages/msg-target/edit');
+		expect(calls[0]?.[1]).toMatchObject({
+			method: 'PUT',
+			body: JSON.stringify({ text: editedText })
+		});
+		// The message keeps its original text: the UI projects the latest EDIT
+		// fastening at render time (useMessage), exactly like v1 corrections
+		expect(useStore.getState().chatsRegistry['room-ed'].messages[0]).toMatchObject({
+			text: originalText
+		});
+		expect(useStore.getState().chatsRegistry['room-ed'].fastenings[editTargetId]).toEqual([
+			expect.objectContaining({
+				action: 'edit',
+				originalStanzaId: editTargetId,
+				value: editedText,
+				from: 'me',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+		// The REST path never touches the sidebar (a pre-PUT lookup could be
+		// stale): still the original entry here
+		expect(useStore.getState().chatsRegistry['room-ed'].lastMessage).toMatchObject({
+			text: originalText
+		});
+
+		// The MessageEdited echo (the backend sends it to the editor too) builds
+		// the same deterministic fastening id — the slice dedup makes it a no-op —
+		// and owns the sidebar rebuild with its fresh router lookup
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_EDITED,
+			messageId: editTargetId,
+			roomId: 'room-ed',
+			senderId: 'me',
+			text: editedText,
+			editedAt: AUG_FIRST_LATE_MORNING
+		});
+		expect(useStore.getState().chatsRegistry['room-ed'].fastenings[editTargetId]).toHaveLength(1);
+		expect(useStore.getState().chatsRegistry['room-ed'].lastMessage).toMatchObject({
+			edited: true,
+			text: editedText
 		});
 	});
 

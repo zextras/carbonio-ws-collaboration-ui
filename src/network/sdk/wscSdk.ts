@@ -8,11 +8,18 @@ import { createHttpClient, createWscClient } from '@zextras/carbonio-ws-collabor
 import type {
 	StoreBridge,
 	StoreMarker,
-	StoreMessage
+	StoreMessage,
+	StoreMessageFastening
 } from '@zextras/carbonio-ws-collaboration-sdk';
 
 import useStore from '../../store/Store';
-import type { Marker, Message } from '../../types/store/ChatsRegistryTypes';
+import type {
+	ConfigurationMessage,
+	Marker,
+	Message,
+	MessageFastening,
+	TextMessage
+} from '../../types/store/ChatsRegistryTypes';
 import type { Version } from '../../types/store/SessionTypes';
 import { BASE_PATH } from '../../utils/FetchUtils';
 
@@ -34,7 +41,11 @@ const bridge: StoreBridge = {
 	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId),
 	newMessage: (message: StoreMessage): void => useStore.getState().newMessage(message as Message),
 	removePlaceholderMessage: (roomId, messageId): void =>
-		useStore.getState().removePlaceholderMessage(roomId, messageId)
+		useStore.getState().removePlaceholderMessage(roomId, messageId),
+	addFastening: (fastenings: Array<StoreMessageFastening>): void =>
+		useStore.getState().addFastening(fastenings as Array<MessageFastening>),
+	setLastMessage: (roomId, message: StoreMessage): void =>
+		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage)
 };
 
 const http = createHttpClient({

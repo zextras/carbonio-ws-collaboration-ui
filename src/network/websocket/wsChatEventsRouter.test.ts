@@ -279,3 +279,92 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		expect(registry?.unread ?? 0).toBe(0);
 	});
 });
+
+describe('wsChatEventsRouter - MessageEdited', () => {
+	const editedText = 'testo corretto';
+	const originalText = 'testo originale';
+
+	function editedEvent(
+		roomId: string,
+		messageId: string
+	): Parameters<typeof wsChatEventsRouter>[0] {
+		return {
+			type: WsEventType.MESSAGE_EDITED,
+			messageId,
+			roomId,
+			senderId: 'user-2',
+			text: editedText,
+			editedAt: '2026-08-01T11:00:00Z'
+		};
+	}
+
+	it('files the EDIT fastening and rebuilds the sidebar entry when it targets the last message', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const target = createMockTextMessage({
+			id: 'msg-last',
+			stanzaId: 'msg-last',
+			roomId: 'room-ed',
+			from: 'user-2',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-ed', [target]);
+		useStore.getState().setLastMessage('room-ed', target);
+
+		wsChatEventsRouter(editedEvent('room-ed', 'msg-last'));
+
+		const registry = useStore.getState().chatsRegistry['room-ed'];
+		// The message keeps the original text: the bubble projects the fastening
+		expect(registry?.messages[0]).toMatchObject({ text: originalText });
+		expect(registry?.fastenings['msg-last']).toEqual([
+			expect.objectContaining({ action: 'edit', value: editedText, from: 'user-2' })
+		]);
+		// v1 fastening handler parity: sidebar rebuilt, no unread bump, no round-trip
+		expect(registry?.lastMessage).toMatchObject({ edited: true, text: editedText });
+		expect(registry?.unread ?? 0).toBe(0);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('leaves the sidebar untouched when the edit targets an older message', () => {
+		const older = createMockTextMessage({
+			id: 'msg-old',
+			stanzaId: 'msg-old',
+			roomId: 'room-eo',
+			text: 'vecchio',
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		const last = createMockTextMessage({
+			id: 'msg-new',
+			stanzaId: 'msg-new',
+			roomId: 'room-eo',
+			text: 'ultimo',
+			date: Date.parse('2026-08-01T10:30:00Z')
+		});
+		useStore.getState().updateHistory('room-eo', [older, last]);
+		useStore.getState().setLastMessage('room-eo', last);
+
+		wsChatEventsRouter(editedEvent('room-eo', 'msg-old'));
+
+		const registry = useStore.getState().chatsRegistry['room-eo'];
+		expect(registry?.fastenings['msg-old']).toHaveLength(1);
+		expect(registry?.lastMessage).toMatchObject({ id: 'msg-new', text: 'ultimo' });
+	});
+
+	it('keeps one fastening when the echo repeats the REST confirmation (deterministic id)', () => {
+		const target = createMockTextMessage({
+			id: 'msg-twice',
+			stanzaId: 'msg-twice',
+			roomId: 'room-ei',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-ei', [target]);
+
+		// Same edit landing from both confirmation paths builds the same
+		// fastening id: the slice dedup makes the second write a no-op
+		wsChatEventsRouter(editedEvent('room-ei', 'msg-twice'));
+		wsChatEventsRouter(editedEvent('room-ei', 'msg-twice'));
+
+		expect(useStore.getState().chatsRegistry['room-ei']?.fastenings['msg-twice']).toHaveLength(1);
+	});
+});

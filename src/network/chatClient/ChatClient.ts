@@ -178,7 +178,25 @@ export const chatClient: ChatClient = {
 	},
 	sendChatMessageEdit: (roomId, message, messageStanzaId, parentStanzaId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendChatMessageEdit');
+			// The 4th v1 arg (the previous correction's stanza id, the XEP-0422
+			// parent-id) has no v2 counterpart: the edit is keyed on the stable
+			// message id, unchanged across corrections. No optimistic write, like
+			// v1: the bubble updates on whichever confirmation lands first (REST
+			// response or MessageEdited echo).
+			const senderId = useStore.getState().session.id;
+			if (!senderId) {
+				return;
+			}
+			wscSdk
+				.editMessage({
+					roomId,
+					messageId: messageStanzaId,
+					text: sanitizeXmppMessage(message),
+					senderId
+				})
+				.catch((err) => {
+					console.error('chatClient.sendChatMessageEdit: message edit failed', err);
+				});
 			return;
 		}
 		xmppClient.sendChatMessageEdit(roomId, message, messageStanzaId, parentStanzaId);

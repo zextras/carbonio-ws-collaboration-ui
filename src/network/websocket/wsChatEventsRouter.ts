@@ -13,6 +13,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
 import type { Message, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { wsDebug } from '../../utils/debug';
+import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
@@ -72,6 +73,24 @@ export function wsChatEventsRouter(event: WsEvent): void {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 				displayMessageBrowserNotification(message as TextMessage);
 			}
+			return;
+		}
+		case WsEventType.MESSAGE_EDITED: {
+			// No me/others split (v1 parity: corrections came back through the MUC
+			// to everyone, no unread bump, no notifications). The sidebar last
+			// message is resolved here — fresh, so the merge never lands on a
+			// message that stopped being the last one — and only when the edit
+			// actually targets it.
+			wscSdk.handleMessageEdited(
+				{
+					messageId: event.messageId,
+					roomId: event.roomId,
+					senderId: event.senderId,
+					text: event.text,
+					editedAt: event.editedAt
+				},
+				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
+			);
 			return;
 		}
 		default:
