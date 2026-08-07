@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { WsChatEvent } from './wsChatEvents';
 import { WsConversationEvent } from './wsConversationEvents';
 import { WsMeetingEvent } from './wsMeetingEvents';
 
@@ -62,7 +63,7 @@ export enum WsEventType {
 	MEETING_DECLINED = 'MeetingDeclined'
 }
 
-export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent;
+export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent | WsChatEvent;
 
 type WsGeneralEvent =
 	| InitializationEvent
