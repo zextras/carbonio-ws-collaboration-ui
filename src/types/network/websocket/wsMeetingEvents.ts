@@ -30,7 +30,8 @@ export type WsMeetingEvent =
 	| MeetingRecordingStartedEvent
 	| MeetingRecordingStoppedEvent
 	| MeetingParticipantHandRaisedEvent
-	| MeetingParticipantHandRaisedListEvent;
+	| MeetingParticipantHandRaisedListEvent
+	| MeetingParticipantConnectionQualityChangedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -161,4 +162,10 @@ export type MeetingParticipantHandRaisedListEvent = BasicMeetingEvent & {
 export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_DECLINED;
 	userId: string;
+};
+
+export type MeetingParticipantConnectionQualityChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_QUALITY_CHANGED;
+	userId: string;
+	quality: 'good' | 'fair' | 'poor' | 'lost';
 };
