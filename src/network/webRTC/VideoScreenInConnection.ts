@@ -91,7 +91,13 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	public removeStream = (streamKey: string, streamType: STREAM_TYPE[]): void => {
 		forEach(streamType, (type) => {
-			delete this.streamsMap[`${streamKey}-${type}`];
+			const key = `${streamKey}-${type}`;
+			delete this.streamsMap[key];
+			if (type === STREAM_TYPE.VIDEO) {
+				this.videoReceivers.delete(key);
+				this.prevStats.delete(key);
+				this.qualityStates.delete(key);
+			}
 		});
 	};
 
@@ -122,35 +128,38 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				.filter(([key]) => !!this.streamsMap[key]?.mid)
 				.map(([key, { receiver, userId }]) => {
 					const mid = this.streamsMap[key]?.mid as string;
-					return receiver.getStats().then((report) => {
-						let lost = 0;
-						let recv = 0;
-						report.forEach(
-							(
-								r: RTCStats & {
-									packetsLost?: number;
-									packetsReceived?: number;
-									kind?: string;
+					return receiver
+						.getStats()
+						.then((report) => {
+							let lost = 0;
+							let recv = 0;
+							report.forEach(
+								(
+									r: RTCStats & {
+										packetsLost?: number;
+										packetsReceived?: number;
+										kind?: string;
+									}
+								) => {
+									if (r.type === 'inbound-rtp' && r.kind === 'video') {
+										lost = r.packetsLost ?? 0;
+										recv = r.packetsReceived ?? 0;
+									}
 								}
-							) => {
-								if (r.type === 'inbound-rtp' && r.kind === 'video') {
-									lost = r.packetsLost ?? 0;
-									recv = r.packetsReceived ?? 0;
-								}
+							);
+							const prev = this.prevStats.get(key) ?? { lost: 0, recv: 0 };
+							const dLost = Math.max(0, lost - prev.lost);
+							const dRecv = Math.max(0, recv - prev.recv);
+							this.prevStats.set(key, { lost, recv });
+							const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
+							const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
+							const next = decideSubstream(prevState, { lossRate });
+							this.qualityStates.set(key, next);
+							if (next.change !== undefined) {
+								requestVideoQuality(this.meetingId, userId, mid, next.change).catch(() => {});
 							}
-						);
-						const prev = this.prevStats.get(key) ?? { lost: 0, recv: 0 };
-						const dLost = Math.max(0, lost - prev.lost);
-						const dRecv = Math.max(0, recv - prev.recv);
-						this.prevStats.set(key, { lost, recv });
-						const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
-						const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
-						const next = decideSubstream(prevState, { lossRate });
-						this.qualityStates.set(key, next);
-						if (next.change !== undefined) {
-							requestVideoQuality(this.meetingId, userId, mid, next.change).catch(() => {});
-						}
-					});
+						})
+						.catch(() => {});
 				})
 		).then(() => undefined);
 
