@@ -49,6 +49,8 @@ export type Session = {
 
 export type Version = `${number}.${number}.${number}`;
 
+export type SimulcastTier = { rid: string; scaleResolutionDownBy: number };
+
 export type AttributesList = {
 	privateChatCreationEnabled: boolean;
 	groupChatCreationEnabled: boolean;
@@ -63,6 +65,8 @@ export type AttributesList = {
 	videoCallEnabled: boolean;
 	recordingEnabled: boolean;
 	virtualBackgroundEnabled: boolean;
+	videoSimulcastTiers?: SimulcastTier[];
+	videoPublishMaxHeight?: number;
 };
 
 export enum ExportStatus {
