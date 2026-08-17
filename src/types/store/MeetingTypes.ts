@@ -30,6 +30,11 @@ export type MeetingsSlice = {
 		startRecordingUserId: string
 	) => void;
 	stopRecording: (meetingId: string) => void;
+	setParticipantConnectionQuality: (
+		meetingId: string,
+		userId: string,
+		quality: 'good' | 'fair' | 'poor' | 'lost'
+	) => void;
 };
 
 export type Meeting = {
@@ -58,4 +63,5 @@ export type MeetingParticipant = {
 	joinedAt: string;
 	dateScreenOn?: string;
 	handRaisedAt?: string;
+	connectionQuality?: 'good' | 'fair' | 'poor' | 'lost';
 };

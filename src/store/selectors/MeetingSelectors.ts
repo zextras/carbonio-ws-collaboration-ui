@@ -73,6 +73,17 @@ export const getParticipantAudioStatus = (
 	return participant?.audioStreamOn ?? false;
 };
 
+export const getParticipantConnectionQuality = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): 'good' | 'fair' | 'poor' | 'lost' | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const meeting = store.meetings[meetingId];
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.connectionQuality;
+};
+
 export const getParticipantVideoStatus = (
 	store: RootStore,
 	meetingId: string | undefined,

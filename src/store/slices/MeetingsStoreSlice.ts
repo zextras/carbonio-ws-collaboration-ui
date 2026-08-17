@@ -233,5 +233,21 @@ export const useMeetingsStoreSlice: StateCreator<
 			false,
 			'MEETINGS/STOP_RECORDING'
 		);
+	},
+	setParticipantConnectionQuality: (
+		meetingId: string,
+		userId: string,
+		quality: 'good' | 'fair' | 'poor' | 'lost'
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = draft.meetings[meetingId];
+				if (meeting?.participants[userId]) {
+					meeting.participants[userId].connectionQuality = quality;
+				}
+			}),
+			false,
+			'MEETINGS/SET_PARTICIPANT_CONNECTION_QUALITY'
+		);
 	}
 });
