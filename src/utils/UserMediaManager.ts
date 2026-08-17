@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import useStore from '../store/Store';
+
 export const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
 	aspectRatio: 1.7777
 	// video: { aspectRatio: 1.618 }
@@ -65,9 +67,16 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
+		const maxHeight =
+			(useStore.getState().session.attributes?.videoPublishMaxHeight as number) ?? 720;
+		const videoConstraints: MediaTrackConstraints = {
+			aspectRatio: 1.7777,
+			width: { max: Math.round((maxHeight * 16) / 9) },
+			height: { max: maxHeight }
+		};
 		const constraints = deviceId
-			? { video: { deviceId: { exact: deviceId }, ...CONSTRAINT_ASPECT_RATIO } }
-			: { video: CONSTRAINT_ASPECT_RATIO };
+			? { video: { deviceId: { exact: deviceId }, ...videoConstraints } }
+			: { video: videoConstraints };
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
