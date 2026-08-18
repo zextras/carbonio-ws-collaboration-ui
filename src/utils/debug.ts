@@ -28,3 +28,14 @@ export const xmppDebug = (text: string, object?: Element): void => {
 		);
 	}
 };
+
+// Debug WebRTC/media events
+export const rtcDebug = (text: string, ...args: unknown[]): void => {
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(
+			`%c CHATS RTC [${new Date().toISOString().slice(11, -5)}]: ${text}`,
+			'color: Orange',
+			...args
+		);
+	}
+};

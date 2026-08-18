@@ -9,6 +9,7 @@ export type QualityState = {
 	badCount: number;
 	goodCount: number;
 	change?: 0 | 1 | 2;
+	off?: boolean;
 };
 
 export const initialQualityState = (start: 0 | 1 | 2 = 2): QualityState => ({
@@ -21,9 +22,10 @@ const BAD = 0.05;
 const GOOD = 0.01;
 const DROP_AFTER = 2;
 const RAISE_AFTER = 10;
+const OFF_AFTER = 2;
 
 export function decideSubstream(prev: QualityState, s: { lossRate: number }): QualityState {
-	const st: QualityState = { ...prev, change: undefined };
+	const st: QualityState = { ...prev, change: undefined, off: undefined };
 	if (s.lossRate > BAD) {
 		st.badCount += 1;
 		st.goodCount = 0;
@@ -31,6 +33,9 @@ export function decideSubstream(prev: QualityState, s: { lossRate: number }): Qu
 			st.substream = (st.substream - 1) as 0 | 1 | 2;
 			st.badCount = 0;
 			st.change = st.substream;
+		} else if (st.substream === 0 && st.badCount >= OFF_AFTER) {
+			st.badCount = 0;
+			st.off = true;
 		}
 	} else if (s.lossRate < GOOD) {
 		st.goodCount += 1;
