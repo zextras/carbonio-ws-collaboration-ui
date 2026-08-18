@@ -26,7 +26,8 @@ const mapParticipants = (participants: MeetingParticipantBe[]): MeetingParticipa
 			audioStreamOn: participant.audioStreamEnabled || false,
 			videoStreamOn: participant.videoStreamEnabled || false,
 			screenStreamOn: participant.screenStreamEnabled || false,
-			joinedAt: participant.joinedAt
+			joinedAt: participant.joinedAt,
+			connectionQuality: participant.connectionQuality
 		};
 		return acc;
 	}, {});

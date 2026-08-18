@@ -89,6 +89,22 @@ describe('MeetingStoreSlice tests', () => {
 			expect(meeting1.startedAt).toBeUndefined();
 		});
 
+		test('Participant connectionQuality from payload is stored', () => {
+			const participantWithQuality = createMockParticipants({
+				userId: 'userId0',
+				connectionQuality: 'poor'
+			});
+			const meetingWithQuality = createMockMeeting({
+				id: 'meetingWithQuality',
+				roomId: room1.id,
+				participants: [participantWithQuality]
+			});
+			useStore.getState().addMeetings([meetingWithQuality]);
+
+			const stored = useStore.getState().meetings.meetingWithQuality.participants.userId0;
+			expect(stored.connectionQuality).toBe('poor');
+		});
+
 		test('Remove meeting', () => {
 			useStore.getState().addMeetings([mockMeeting0, mockMeeting1]);
 			useStore.getState().deleteMeeting(mockMeeting0.id);
