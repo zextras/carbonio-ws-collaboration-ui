@@ -17,6 +17,31 @@ import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMee
 import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
+type InboundVideoStats = { lost: number; recv: number; jbDelay: number; jbEmitted: number };
+
+const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
+	const s: InboundVideoStats = { lost: 0, recv: 0, jbDelay: 0, jbEmitted: 0 };
+	report.forEach(
+		(
+			r: RTCStats & {
+				packetsLost?: number;
+				packetsReceived?: number;
+				jitterBufferDelay?: number;
+				jitterBufferEmittedCount?: number;
+				kind?: string;
+			}
+		) => {
+			if (r.type === 'inbound-rtp' && r.kind === 'video') {
+				s.lost = r.packetsLost ?? 0;
+				s.recv = r.packetsReceived ?? 0;
+				s.jbDelay = r.jitterBufferDelay ?? 0;
+				s.jbEmitted = r.jitterBufferEmittedCount ?? 0;
+			}
+		}
+	);
+	return s;
+};
+
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
 
@@ -30,7 +55,12 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private qualityStates = new Map<string, QualityState>();
 
-	private prevStats = new Map<string, { lost: number; recv: number }>();
+	private prevStats = new Map<
+		string,
+		{ lost: number; recv: number; jbDelay: number; jbEmitted: number; jbdAvg: number }
+	>();
+
+	private maskUntilTick = new Map<string, number>();
 
 	private suppressedVideo = new Map<string, { userId: string; offAtTick: number }>();
 
@@ -103,6 +133,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.prevStats.delete(key);
 				this.qualityStates.delete(key);
 				this.suppressedVideo.delete(key);
+				this.maskUntilTick.delete(key);
 			}
 		});
 	};
@@ -119,6 +150,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				};
 				if (type === STREAM_TYPE.VIDEO) {
 					this.videoReceivers.set(streamsKey, { receiver: ev.receiver, userId });
+					// a live track means this feed is no longer auto-suppressed (avoid the cooldown filter
+					// skipping a freshly re-subscribed receiver)
+					this.suppressedVideo.delete(streamsKey);
+					// mask decisions while VP8 simulcast layers ramp up (~first ticks after (re)subscribe)
+					this.maskUntilTick.set(streamsKey, this.evalTick + 4);
 					if (this.qualityIntervalId == null) {
 						this.qualityIntervalId = setInterval(this.evaluateQuality, 2000);
 					}
@@ -138,45 +174,48 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					return receiver
 						.getStats()
 						.then((report) => {
-							let lost = 0;
-							let recv = 0;
-							report.forEach(
-								(
-									r: RTCStats & {
-										packetsLost?: number;
-										packetsReceived?: number;
-										kind?: string;
-									}
-								) => {
-									if (r.type === 'inbound-rtp' && r.kind === 'video') {
-										lost = r.packetsLost ?? 0;
-										recv = r.packetsReceived ?? 0;
-									}
-								}
-							);
-							const prev = this.prevStats.get(key) ?? { lost: 0, recv: 0 };
+							const { lost, recv, jbDelay, jbEmitted } = readInboundVideoStats(report);
+							const prev = this.prevStats.get(key) ?? {
+								lost: 0,
+								recv: 0,
+								jbDelay: 0,
+								jbEmitted: 0,
+								jbdAvg: 0
+							};
 							const dLost = Math.max(0, lost - prev.lost);
 							const dRecv = Math.max(0, recv - prev.recv);
-							this.prevStats.set(key, { lost, recv });
-							const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
-							rtcDebug(`feed=${key} lossRate=${lossRate.toFixed(3)} dLost=${dLost} dRecv=${dRecv}`);
+							const dJbDelay = Math.max(0, jbDelay - prev.jbDelay);
+							const dJbEmitted = Math.max(0, jbEmitted - prev.jbEmitted);
+							// per-frame jitter-buffer delay this tick (ms); its DIRECTION confirms congestion
+							// (rejects Wi-Fi/cellular random loss) — no magnitude threshold on purpose.
+							const jbdAvg = dJbEmitted > 0 ? (dJbDelay / dJbEmitted) * 1000 : prev.jbdAvg;
+							const jbdRising = dJbEmitted > 0 && jbdAvg > prev.jbdAvg;
+							this.prevStats.set(key, { lost, recv, jbDelay, jbEmitted, jbdAvg });
+
+							// too few packets this tick => not statistically meaningful; keep baselines, skip
+							if (dLost + dRecv < 20) return;
+							// settle mask right after a layer switch / (re)subscribe (keyframe + VP8 ramp)
+							if ((this.maskUntilTick.get(key) ?? 0) > this.evalTick) return;
+
+							const lossRate = dLost / (dLost + dRecv);
+							rtcDebug(
+								`feed=${key} loss=${lossRate.toFixed(3)} jbdAvg=${jbdAvg.toFixed(
+									1
+								)} rising=${jbdRising}`
+							);
 							const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
-							const next = decideSubstream(prevState, { lossRate });
+							const next = decideSubstream(prevState, { lossRate, jbdRising });
 							this.qualityStates.set(key, next);
 							if (next.change !== undefined && mid) {
 								requestVideoQuality(this.meetingId, userId, mid, next.change).catch(() => {});
+								// +2: after a switch the same-SSRC cumulative jitterBufferDelay spans both layers
+								// for one tick, so mask 2 ticks to get a clean same-layer jbdAvg baseline (not just
+								// the keyframe settle) — reducing this to +1 would fabricate a spurious jbdRising.
+								this.maskUntilTick.set(key, this.evalTick + 2);
 								rtcDebug(`feed=${key} -> substream ${next.change}`);
 							}
 							if (next.off) {
-								useStore
-									.getState()
-									.setRemoveSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
-								useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, true);
-								this.suppressedVideo.set(key, { userId, offAtTick: this.evalTick });
-								this.videoReceivers.delete(key);
-								this.qualityStates.delete(key);
-								this.prevStats.delete(key);
-								rtcDebug(`feed=${key} AUTO-OFF (unsubscribe) — sustained bad connection at low`);
+								this.suppressFeed(key, userId);
 							}
 						})
 						.catch(() => {});
@@ -196,6 +235,17 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		});
 	};
 
+	private suppressFeed(key: string, userId: string): void {
+		useStore.getState().setRemoveSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
+		useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, true);
+		this.suppressedVideo.set(key, { userId, offAtTick: this.evalTick });
+		this.videoReceivers.delete(key);
+		this.qualityStates.delete(key);
+		this.prevStats.delete(key);
+		this.maskUntilTick.delete(key);
+		rtcDebug(`feed=${key} AUTO-OFF (unsubscribe) — sustained bad connection at low`);
+	}
+
 	private updateStreams(): void {
 		const completeStreams = filter(this.streamsMap, (stream) => !!stream.stream && !!stream.userId);
 		const newStreams = keyBy(
@@ -214,6 +264,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.qualityStates.clear();
 		this.prevStats.clear();
 		this.suppressedVideo.clear();
+		this.maskUntilTick.clear();
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();
 	}

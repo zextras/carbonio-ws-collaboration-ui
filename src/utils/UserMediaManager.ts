@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import useStore from '../store/Store';
-
 export const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
 	aspectRatio: 1.7777
 	// video: { aspectRatio: 1.618 }
@@ -67,8 +65,9 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		const maxHeight =
-			(useStore.getState().session.attributes?.videoPublishMaxHeight as number) ?? 720;
+		// Cap webcam capture at 720p so the top simulcast layer (scaleResolutionDownBy=1) stays
+		// bounded and uniform across publishers (a 1080p/4K camera would make a monster top layer).
+		const maxHeight = 720;
 		const videoConstraints: MediaTrackConstraints = {
 			aspectRatio: 1.7777,
 			width: { max: Math.round((maxHeight * 16) / 9) },

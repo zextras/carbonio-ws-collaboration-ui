@@ -66,7 +66,6 @@ export type AttributesList = {
 	recordingEnabled: boolean;
 	virtualBackgroundEnabled: boolean;
 	videoSimulcastTiers?: SimulcastTier[];
-	videoPublishMaxHeight?: number;
 };
 
 export enum ExportStatus {
