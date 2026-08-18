@@ -102,6 +102,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.videoReceivers.delete(key);
 				this.prevStats.delete(key);
 				this.qualityStates.delete(key);
+				this.suppressedVideo.delete(key);
 			}
 		});
 	};

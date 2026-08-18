@@ -270,7 +270,7 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.localVideoSuppressed[userId] = suppressed;
+				(draft.activeMeeting.localVideoSuppressed ??= {})[userId] = suppressed;
 			}),
 			false,
 			'AM/SET_LOCAL_VIDEO_SUPPRESSED'

@@ -37,5 +37,8 @@ export const meetingMediaStreamChangedEventHandler = (
 	if (!isMyId(event.userId) && event.active) {
 		const sub = { userId: event.userId, type: mediaType };
 		state.setAddSubscription(event.meetingId, sub);
+		if (mediaType === STREAM_TYPE.VIDEO) {
+			state.setLocalVideoSuppressed(event.meetingId, event.userId, false);
+		}
 	}
 };
