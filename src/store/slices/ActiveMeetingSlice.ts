@@ -69,6 +69,7 @@ export const useActiveMeetingSlice: StateCreator<
 						selectedVideoDeviceId: videoStream?.deviceId
 					},
 					subscription: {},
+					localVideoSuppressed: {},
 					// Default graphic values
 					sidebarStatus: {
 						[MeetingAccordionType.GENERAL]: true,
@@ -263,6 +264,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/ADD_SUB'
+		);
+	},
+	setLocalVideoSuppressed: (meetingId: string, userId: string, suppressed: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.localVideoSuppressed[userId] = suppressed;
+			}),
+			false,
+			'AM/SET_LOCAL_VIDEO_SUPPRESSED'
 		);
 	},
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]): void => {

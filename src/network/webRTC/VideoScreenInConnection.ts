@@ -14,6 +14,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
+import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
@@ -30,6 +31,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	private qualityStates = new Map<string, QualityState>();
 
 	private prevStats = new Map<string, { lost: number; recv: number }>();
+
+	private suppressedVideo = new Map<string, { userId: string; offAtTick: number }>();
+
+	private evalTick = 0;
 
 	private qualityIntervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -122,10 +127,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.updateStreams();
 	};
 
-	private evaluateQuality = (): Promise<void> =>
-		Promise.all(
+	private evaluateQuality = (): Promise<void> => {
+		this.evalTick += 1;
+		return Promise.all(
 			Array.from(this.videoReceivers.entries())
-				.filter(([key]) => !!this.streamsMap[key]?.mid)
+				.filter(([key]) => !!this.streamsMap[key]?.mid && !this.suppressedVideo.has(key))
 				.map(([key, { receiver, userId }]) => {
 					const mid = this.streamsMap[key]?.mid as string;
 					return receiver
@@ -152,16 +158,42 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							const dRecv = Math.max(0, recv - prev.recv);
 							this.prevStats.set(key, { lost, recv });
 							const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
+							rtcDebug(`feed=${key} lossRate=${lossRate.toFixed(3)} dLost=${dLost} dRecv=${dRecv}`);
 							const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
 							const next = decideSubstream(prevState, { lossRate });
 							this.qualityStates.set(key, next);
-							if (next.change !== undefined) {
+							if (next.change !== undefined && mid) {
 								requestVideoQuality(this.meetingId, userId, mid, next.change).catch(() => {});
+								rtcDebug(`feed=${key} -> substream ${next.change}`);
+							}
+							if (next.off) {
+								useStore
+									.getState()
+									.setRemoveSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
+								useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, true);
+								this.suppressedVideo.set(key, { userId, offAtTick: this.evalTick });
+								this.videoReceivers.delete(key);
+								this.qualityStates.delete(key);
+								this.prevStats.delete(key);
+								rtcDebug(`feed=${key} AUTO-OFF (unsubscribe) — sustained bad connection at low`);
 							}
 						})
 						.catch(() => {});
 				})
-		).then(() => undefined);
+		).then(() => {
+			Array.from(this.suppressedVideo.entries()).forEach(([key, { userId, offAtTick }]) => {
+				if (this.evalTick - offAtTick >= 10) {
+					useStore
+						.getState()
+						.setAddSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
+					useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
+					this.suppressedVideo.delete(key);
+					this.qualityStates.set(key, initialQualityState(0));
+					rtcDebug(`feed=${key} AUTO-ON re-probe (re-subscribe) after cooldown`);
+				}
+			});
+		});
+	};
 
 	private updateStreams(): void {
 		const completeStreams = filter(this.streamsMap, (stream) => !!stream.stream && !!stream.userId);
@@ -180,6 +212,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.videoReceivers.clear();
 		this.qualityStates.clear();
 		this.prevStats.clear();
+		this.suppressedVideo.clear();
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();
 	}

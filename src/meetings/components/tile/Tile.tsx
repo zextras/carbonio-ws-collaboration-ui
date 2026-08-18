@@ -17,7 +17,8 @@ import usePinnedTile from '../../../hooks/usePinnedTile';
 import {
 	getUserIsTalking,
 	getStream,
-	getUserHasHandRaised
+	getUserHasHandRaised,
+	getLocalVideoSuppressed
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
@@ -101,6 +102,13 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		)
 	);
 
+	const isVideoSuppressed = useStore(
+		(store) =>
+			!isScreenShare &&
+			store.session.id !== userId &&
+			getLocalVideoSuppressed(store, meetingId, userId)
+	);
+
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isStreamLoading, setIsStreamLoading] = useState<boolean>(true);
 	const [isPortraitVideo, setIsPortraitVideo] = useState<boolean>(false);
@@ -143,13 +151,13 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	useEffect(() => {
 		if (streamRef?.current) {
-			if (videoStream?.active && (videoStatus || isScreenShare)) {
+			if (!isVideoSuppressed && videoStream?.active && (videoStatus || isScreenShare)) {
 				streamRef.current.srcObject = videoStream;
 			} else {
 				streamRef.current.srcObject = null;
 			}
 		}
-	}, [isScreenShare, videoStatus, videoStream]);
+	}, [isScreenShare, isVideoSuppressed, videoStatus, videoStream]);
 
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = hoverRef;
@@ -217,12 +225,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				$isPortrait={isPortraitVideo}
 				onLoadedData={handleLoadedData}
 			/>
-			{!videoStreamEnabled && (
+			{(!videoStreamEnabled || isVideoSuppressed) && (
 				<CustomContainer data-testid="avatar_box" height="fit">
 					<TileAvatarComponent userId={userId} />
 				</CustomContainer>
 			)}
-			{videoStreamEnabled && isStreamLoading && <CustomShimmer width="100%" height="100%" />}
+			{videoStreamEnabled && !isVideoSuppressed && isStreamLoading && (
+				<CustomShimmer width="100%" height="100%" />
+			)}
 		</CustomTile>
 	);
 };
