@@ -52,6 +52,7 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 export type MeetingJoinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_JOINED;
 	userId: string;
+	connectionQuality?: 'good' | 'fair' | 'poor' | 'lost';
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {

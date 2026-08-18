@@ -36,14 +36,9 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 }) => {
 	const [t] = useTranslation();
 	const theme = useTheme();
-	const storedQuality = useStore((state) =>
-		getParticipantConnectionQuality(state, meetingId, userId)
-	);
+	const quality = useStore((state) => getParticipantConnectionQuality(state, meetingId, userId));
 
-	if (!meetingId || !userId) return null;
-	// server broadcasts only on a committed change; a stable-GOOD participant never emits,
-	// so default to good until the server reports otherwise (indicator shows on every tile)
-	const quality = storedQuality ?? 'good';
+	if (!quality) return null;
 
 	const { success, warning, error, gray6 } = theme.palette;
 

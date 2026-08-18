@@ -112,7 +112,8 @@ export const useMeetingsStoreSlice: StateCreator<
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false,
-						joinedAt: participant.joinedAt
+						joinedAt: participant.joinedAt,
+						connectionQuality: participant.connectionQuality
 					};
 				}
 			}),

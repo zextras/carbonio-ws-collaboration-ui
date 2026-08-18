@@ -26,7 +26,8 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 		userId: event.userId,
 		audioStreamOn: false,
 		videoStreamOn: false,
-		joinedAt: event.sentDate
+		joinedAt: event.sentDate,
+		connectionQuality: event.connectionQuality
 	};
 	state.addParticipant(event.meetingId, newParticipant);
 

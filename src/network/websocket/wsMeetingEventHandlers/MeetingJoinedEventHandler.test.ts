@@ -69,6 +69,18 @@ describe('meetingJoinedEventHandler tests', () => {
 		expect(meet.participants[event.userId]).toBeDefined();
 	});
 
+	test('connectionQuality from join event is stored in participant', () => {
+		const eventWithQuality: MeetingJoinedEvent = {
+			...event,
+			userId: 'qualityUser',
+			connectionQuality: 'fair'
+		};
+		meetingJoinedEventHandler(eventWithQuality);
+		const qualityUserId = eventWithQuality.userId;
+		const participant = useStore.getState().meetings[meeting.id].participants[qualityUserId];
+		expect(participant.connectionQuality).toBe('fair');
+	});
+
 	test('A custom event is sent if the joined user is the session user and the room is a one-to-one', () => {
 		event.userId = 'sessionUserId';
 		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
