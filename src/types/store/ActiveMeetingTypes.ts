@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -56,6 +57,7 @@ export type ActiveMeeting = {
 	videoScreenIn: IVideoScreenInConnection;
 	videoOutConn: IVideoOutConnection;
 	screenOutConn: IScreenOutConnection;
+	qualityMonitor: ConnectionQualityMonitor;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;

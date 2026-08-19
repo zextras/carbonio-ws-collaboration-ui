@@ -1,0 +1,92 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Zextras <https://www.zextras.com>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
+import { meetingParticipantConnectionQualityChangedEventHandler } from './MeetingParticipantConnectionQualityChangedEventHandler';
+import useStore from '../../../store/Store';
+import {
+	createMockMeeting,
+	createMockParticipants,
+	createMockRoom
+} from '../../../tests/createMock';
+import { WsEventType } from '../../../types/network/websocket/wsEvents';
+import { MeetingParticipantConnectionQualityChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+
+const room = createMockRoom({ id: 'roomId' });
+const participant = createMockParticipants({ userId: 'participantId' });
+const meeting = createMockMeeting({
+	id: 'meetingId',
+	roomId: room.id,
+	participants: [participant]
+});
+
+const baseEvent: MeetingParticipantConnectionQualityChangedEvent = {
+	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_QUALITY_CHANGED,
+	sentDate: '2026-01-01T00:00:00.000Z',
+	meetingId: meeting.id,
+	userId: participant.userId,
+	quality: 'optimal',
+	changedAt: 1000
+};
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+	store.addMeetings([meeting]);
+});
+
+describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
+	test('Quality and changedAt are stored for the participant', () => {
+		meetingParticipantConnectionQualityChangedEventHandler(baseEvent);
+		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
+		expect(stored.connectionQuality).toBe('optimal');
+		expect(stored.connectionQualityAt).toBe(1000);
+	});
+
+	test('All 6 quality levels are accepted', () => {
+		const levels = ['lost', 'terrible', 'poor', 'medium', 'high', 'optimal'] as const;
+		levels.forEach((quality, index) => {
+			meetingParticipantConnectionQualityChangedEventHandler({
+				...baseEvent,
+				quality,
+				changedAt: baseEvent.changedAt + index + 1
+			});
+			const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
+			expect(stored.connectionQuality).toBe(quality);
+		});
+	});
+
+	test('A newer changedAt overwrites an existing quality', () => {
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			quality: 'medium',
+			changedAt: 1000
+		});
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			quality: 'high',
+			changedAt: 2000
+		});
+		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
+		expect(stored.connectionQuality).toBe('high');
+		expect(stored.connectionQualityAt).toBe(2000);
+	});
+
+	test('An older changedAt does not overwrite a newer quality', () => {
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			quality: 'high',
+			changedAt: 2000
+		});
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			quality: 'terrible',
+			changedAt: 500
+		});
+		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
+		expect(stored.connectionQuality).toBe('high');
+		expect(stored.connectionQualityAt).toBe(2000);
+	});
+});

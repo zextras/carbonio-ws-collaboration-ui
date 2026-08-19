@@ -9,6 +9,7 @@ import { produce } from 'immer';
 import { forEach, includes, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import {
@@ -26,8 +27,7 @@ const mapParticipants = (participants: MeetingParticipantBe[]): MeetingParticipa
 			audioStreamOn: participant.audioStreamEnabled || false,
 			videoStreamOn: participant.videoStreamEnabled || false,
 			screenStreamOn: participant.screenStreamEnabled || false,
-			joinedAt: participant.joinedAt,
-			connectionQuality: participant.connectionQuality
+			joinedAt: participant.joinedAt
 		};
 		return acc;
 	}, {});
@@ -112,8 +112,7 @@ export const useMeetingsStoreSlice: StateCreator<
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false,
-						joinedAt: participant.joinedAt,
-						connectionQuality: participant.connectionQuality
+						joinedAt: participant.joinedAt
 					};
 				}
 			}),
@@ -239,13 +238,20 @@ export const useMeetingsStoreSlice: StateCreator<
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		quality: 'good' | 'fair' | 'poor' | 'lost'
+		quality: ConnectionQuality,
+		changedAt: number
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = draft.meetings[meetingId];
-				if (meeting?.participants[userId]) {
-					meeting.participants[userId].connectionQuality = quality;
+				const participant = meeting?.participants[userId];
+				if (
+					participant &&
+					(participant.connectionQualityAt === undefined ||
+						changedAt > participant.connectionQualityAt)
+				) {
+					participant.connectionQuality = quality;
+					participant.connectionQualityAt = changedAt;
 				}
 			}),
 			false,

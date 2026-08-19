@@ -9,5 +9,7 @@ import { MeetingParticipantConnectionQualityChangedEvent } from '../../../types/
 export const meetingParticipantConnectionQualityChangedEventHandler = (
 	event: MeetingParticipantConnectionQualityChangedEvent
 ): void => {
-	useStore.getState().setParticipantConnectionQuality(event.meetingId, event.userId, event.quality);
+	useStore
+		.getState()
+		.setParticipantConnectionQuality(event.meetingId, event.userId, event.quality, event.changedAt);
 };

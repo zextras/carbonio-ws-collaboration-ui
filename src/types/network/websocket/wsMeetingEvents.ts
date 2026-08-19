@@ -5,6 +5,7 @@
  */
 
 import { WsEventType } from './wsEvents';
+import { ConnectionQuality } from '../../../network/webRTC/connectionQualityScore';
 import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 
 export type WsMeetingEvent =
@@ -52,7 +53,6 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 export type MeetingJoinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_JOINED;
 	userId: string;
-	connectionQuality?: 'good' | 'fair' | 'poor' | 'lost';
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
@@ -168,5 +168,6 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 export type MeetingParticipantConnectionQualityChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_QUALITY_CHANGED;
 	userId: string;
-	quality: 'good' | 'fair' | 'poor' | 'lost';
+	quality: ConnectionQuality;
+	changedAt: number;
 };

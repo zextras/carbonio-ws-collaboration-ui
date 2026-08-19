@@ -14,6 +14,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
+import { ConnectionQuality } from '../webRTC/connectionQualityScore';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -66,6 +67,21 @@ export class WebSocketClient {
 		if (this._webSocket?.readyState === WsReadyState.OPEN) {
 			this._webSocket.send(JSON.stringify(message));
 		}
+	}
+
+	sendConnectionQuality(
+		meetingId: string,
+		quality: ConnectionQuality,
+		changedAt: number,
+		to?: string
+	): void {
+		this.send({
+			type: 'ConnectionQualityStatus',
+			meetingId,
+			quality,
+			changedAt,
+			...(to ? { to } : {})
+		});
 	}
 
 	_onOpen = (): void => {

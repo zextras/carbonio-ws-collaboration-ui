@@ -10,6 +10,7 @@ import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
@@ -47,23 +48,35 @@ export const useActiveMeetingSlice: StateCreator<
 			deviceId?: string;
 		}
 	): void => {
+		const audioConn = new BidirectionalConnectionAudioInOut(
+			meetingId,
+			!!audioStream?.enabled,
+			audioStream?.deviceId
+		);
+		const videoScreenIn = new VideoScreenInConnection(meetingId);
+		const videoOutConn = new VideoOutConnection(
+			meetingId,
+			!!videoStream?.enabled,
+			videoStream?.deviceId
+		);
+		const screenOutConn = new ScreenOutConnection(meetingId);
+		const qualityMonitor = new ConnectionQualityMonitor(
+			meetingId,
+			audioConn,
+			videoOutConn,
+			videoScreenIn,
+			screenOutConn
+		);
 		set(
 			produce((draft: RootStore) => {
 				draft.activeMeeting = {
 					meetingId,
 					// Peer connections and streams
-					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
-						meetingId,
-						!!audioStream?.enabled,
-						audioStream?.deviceId
-					),
-					videoScreenIn: new VideoScreenInConnection(meetingId),
-					videoOutConn: new VideoOutConnection(
-						meetingId,
-						!!videoStream?.enabled,
-						videoStream?.deviceId
-					),
-					screenOutConn: new ScreenOutConnection(meetingId),
+					bidirectionalAudioConn: audioConn,
+					videoScreenIn,
+					videoOutConn,
+					screenOutConn,
+					qualityMonitor,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -92,11 +105,13 @@ export const useActiveMeetingSlice: StateCreator<
 			false,
 			'AM/MEETING_CONNECTION'
 		);
+		qualityMonitor.emitInitial().catch(() => {});
 	},
 	meetingDisconnection: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.qualityMonitor.stop();
 				draft.activeMeeting.bidirectionalAudioConn?.closePeerConnection();
 				draft.activeMeeting.videoScreenIn?.closePeerConnection();
 				draft.activeMeeting.videoOutConn?.closePeerConnection();

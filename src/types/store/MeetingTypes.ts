@@ -5,6 +5,7 @@
  */
 
 import { STREAM_TYPE } from './ActiveMeetingTypes';
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingBe, MeetingType } from '../network/models/meetingBeTypes';
 
 export type MeetingsSlice = {
@@ -33,7 +34,8 @@ export type MeetingsSlice = {
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		quality: 'good' | 'fair' | 'poor' | 'lost'
+		quality: ConnectionQuality,
+		changedAt: number
 	) => void;
 };
 
@@ -63,5 +65,6 @@ export type MeetingParticipant = {
 	joinedAt: string;
 	dateScreenOn?: string;
 	handRaisedAt?: string;
-	connectionQuality?: 'good' | 'fair' | 'poor' | 'lost';
+	connectionQuality?: ConnectionQuality;
+	connectionQualityAt?: number;
 };

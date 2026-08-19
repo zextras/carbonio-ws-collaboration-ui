@@ -26,7 +26,6 @@ export type MeetingParticipantBe = {
 	screenStreamEnabled?: boolean;
 	joinedAt: string;
 	handRaisedAt?: string;
-	connectionQuality?: 'good' | 'fair' | 'poor' | 'lost';
 };
 
 export enum MeetingUserType {

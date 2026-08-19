@@ -30,6 +30,9 @@ const Bar = styled.div<{ $color: string; $height: string }>`
 	border-radius: 0.0625rem;
 `;
 
+// 5 bar heights, shortest to tallest
+const BAR_HEIGHTS = ['0.25rem', '0.375rem', '0.5rem', '0.6875rem', '0.875rem'] as const;
+
 const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = ({
 	meetingId,
 	userId
@@ -42,27 +45,42 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 
 	const { success, warning, error, gray6 } = theme.palette;
 
-	const barColors: [string, string, string] = ((): [string, string, string] => {
+	// Returns an array of 5 colors, active bars filled, inactive bars gray
+	const barColors = ((): [string, string, string, string, string] => {
 		switch (quality) {
-			case 'good':
-				return [success.regular, success.regular, success.regular];
-			case 'fair':
-				return [warning.regular, warning.regular, gray6.regular];
+			case 'optimal':
+				return [
+					success.regular,
+					success.regular,
+					success.regular,
+					success.regular,
+					success.regular
+				];
+			case 'high':
+				return [success.regular, success.regular, success.regular, success.regular, gray6.regular];
+			case 'medium':
+				return [warning.regular, warning.regular, warning.regular, gray6.regular, gray6.regular];
 			case 'poor':
-				return [error.regular, gray6.regular, gray6.regular];
+				return [error.regular, error.regular, gray6.regular, gray6.regular, gray6.regular];
+			case 'terrible':
+				return [error.regular, gray6.regular, gray6.regular, gray6.regular, gray6.regular];
 			default:
-				return [gray6.regular, gray6.regular, gray6.regular];
+				return [gray6.regular, gray6.regular, gray6.regular, gray6.regular, gray6.regular];
 		}
 	})();
 
 	const tooltipLabel = ((): string => {
 		switch (quality) {
-			case 'good':
-				return t('meeting.connectionQuality.good', 'Good connection');
-			case 'fair':
-				return t('meeting.connectionQuality.fair', 'Fair connection');
+			case 'optimal':
+				return t('meeting.connectionQuality.optimal', 'Optimal connection');
+			case 'high':
+				return t('meeting.connectionQuality.high', 'High connection');
+			case 'medium':
+				return t('meeting.connectionQuality.medium', 'Medium connection');
 			case 'poor':
 				return t('meeting.connectionQuality.poor', 'Poor connection');
+			case 'terrible':
+				return t('meeting.connectionQuality.terrible', 'Terrible connection');
 			default:
 				return t('meeting.connectionQuality.lost', 'Connection lost');
 		}
@@ -75,9 +93,9 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 					<Icon icon="WifiOff" color="error" size="medium" />
 				) : (
 					<BarsContainer>
-						<Bar $color={barColors[0]} $height="0.3125rem" />
-						<Bar $color={barColors[1]} $height="0.5625rem" />
-						<Bar $color={barColors[2]} $height="0.875rem" />
+						{BAR_HEIGHTS.map((height, index) => (
+							<Bar key={height} $color={barColors[index]} $height={height} />
+						))}
 					</BarsContainer>
 				)}
 			</CustomContainer>

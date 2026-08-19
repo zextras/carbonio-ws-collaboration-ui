@@ -26,8 +26,7 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 		userId: event.userId,
 		audioStreamOn: false,
 		videoStreamOn: false,
-		joinedAt: event.sentDate,
-		connectionQuality: event.connectionQuality
+		joinedAt: event.sentDate
 	};
 	state.addParticipant(event.meetingId, newParticipant);
 
@@ -48,5 +47,10 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 		Object.keys(meeting?.participants || {}).length < LARGE_MEETING_THRESHOLD
 	) {
 		playJoinNotification();
+	}
+
+	// Resync our connection quality to the newcomer so they see our current status immediately
+	if (isMeetingActive(event.meetingId) && !isMyId(event.userId)) {
+		state.activeMeeting?.qualityMonitor.resyncTo(event.userId).catch(() => {});
 	}
 };

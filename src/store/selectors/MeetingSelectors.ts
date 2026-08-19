@@ -6,6 +6,7 @@
 
 import { filter, find, reduce, size, some } from 'lodash';
 
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -77,7 +78,7 @@ export const getParticipantConnectionQuality = (
 	store: RootStore,
 	meetingId: string | undefined,
 	userId: string | undefined
-): 'good' | 'fair' | 'poor' | 'lost' | undefined => {
+): ConnectionQuality | undefined => {
 	if (!meetingId || !userId) return undefined;
 	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);

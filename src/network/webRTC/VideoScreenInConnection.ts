@@ -53,6 +53,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private videoReceivers = new Map<string, { receiver: RTCRtpReceiver; userId: string }>();
 
+	private screenReceiver: RTCRtpReceiver | null = null;
+
 	private qualityStates = new Map<string, QualityState>();
 
 	private prevStats = new Map<
@@ -135,6 +137,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.suppressedVideo.delete(key);
 				this.maskUntilTick.delete(key);
 			}
+			if (type === STREAM_TYPE.SCREEN) {
+				this.screenReceiver = null;
+			}
 		});
 	};
 
@@ -158,6 +163,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					if (this.qualityIntervalId == null) {
 						this.qualityIntervalId = setInterval(this.evaluateQuality, 2000);
 					}
+				}
+				if (type === STREAM_TYPE.SCREEN) {
+					this.screenReceiver = ev.receiver;
 				}
 			}
 		});
@@ -255,6 +263,28 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
 	}
 
+	public getVideoFeedsForQuality(): Array<{ substream: 0 | 1 | 2; off: boolean }> {
+		const feeds: Array<{ substream: 0 | 1 | 2; off: boolean }> = [];
+		Object.keys(this.streamsMap).forEach((key) => {
+			if (!key.endsWith('-video')) return;
+			if (this.suppressedVideo.has(key)) {
+				feeds.push({ substream: 0, off: true });
+			} else if (this.videoReceivers.has(key)) {
+				const state = this.qualityStates.get(key);
+				feeds.push({ substream: state?.substream ?? 2, off: false });
+			}
+		});
+		return feeds;
+	}
+
+	public getScreenReceiver(): RTCRtpReceiver | null {
+		return this.screenReceiver;
+	}
+
+	public hasScreenFeed(): boolean {
+		return Object.keys(this.streamsMap).some((k) => k.endsWith('-screen'));
+	}
+
 	public closePeerConnection(): void {
 		if (this.qualityIntervalId != null) {
 			clearInterval(this.qualityIntervalId);
@@ -265,6 +295,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.prevStats.clear();
 		this.suppressedVideo.clear();
 		this.maskUntilTick.clear();
+		this.screenReceiver = null;
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();
 	}

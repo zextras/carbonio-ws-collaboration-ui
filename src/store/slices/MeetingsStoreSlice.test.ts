@@ -89,20 +89,16 @@ describe('MeetingStoreSlice tests', () => {
 			expect(meeting1.startedAt).toBeUndefined();
 		});
 
-		test('Participant connectionQuality from payload is stored', () => {
-			const participantWithQuality = createMockParticipants({
-				userId: 'userId0',
-				connectionQuality: 'poor'
-			});
-			const meetingWithQuality = createMockMeeting({
-				id: 'meetingWithQuality',
+		test('Participant connectionQuality is not populated from the join payload (event-driven only)', () => {
+			const meeting = createMockMeeting({
+				id: 'meetingNoQuality',
 				roomId: room1.id,
-				participants: [participantWithQuality]
+				participants: [createMockParticipants({ userId: 'userId0' })]
 			});
-			useStore.getState().addMeetings([meetingWithQuality]);
+			useStore.getState().addMeetings([meeting]);
 
-			const stored = useStore.getState().meetings.meetingWithQuality.participants.userId0;
-			expect(stored.connectionQuality).toBe('poor');
+			const stored = useStore.getState().meetings.meetingNoQuality.participants.userId0;
+			expect(stored.connectionQuality).toBeUndefined();
 		});
 
 		test('Remove meeting', () => {
@@ -158,6 +154,49 @@ describe('MeetingStoreSlice tests', () => {
 			const { participants } = useStore.getState().meetings[mockMeeting0.id];
 			expect(size(participants)).toBe(1);
 			expect(participants[mockParticipant1.userId]).toBeUndefined();
+		});
+
+		test('setParticipantConnectionQuality applies last-writer-wins based on changedAt', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+
+			// First update at t=1000
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'medium', 1000);
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQuality
+			).toBe('medium');
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQualityAt
+			).toBe(1000);
+
+			// Newer update at t=2000 wins
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'optimal', 2000);
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQuality
+			).toBe('optimal');
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQualityAt
+			).toBe(2000);
+
+			// Older update at t=500 is ignored
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'terrible', 500);
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQuality
+			).toBe('optimal');
+			expect(
+				useStore.getState().meetings[mockMeeting0.id].participants[mockParticipant0.userId]
+					.connectionQualityAt
+			).toBe(2000);
 		});
 
 		test('Update participant stream status', () => {
