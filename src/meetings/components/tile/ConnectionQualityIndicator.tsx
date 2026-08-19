@@ -9,6 +9,7 @@ import styled from '@emotion/styled';
 import { Icon, Row, Tooltip, useTheme } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { isMyId } from '../../../network/websocket/eventHandlersUtilities';
 import { getParticipantConnectionQuality } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 
@@ -86,8 +87,17 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		}
 	})();
 
+	// DEBUG (temporary): append per-stream votes to tooltip for the current user's own tile
+	const debugSuffix = ((): string => {
+		if (userId == null || !isMyId(userId)) return '';
+		const votes = useStore.getState().activeMeeting?.qualityMonitor?.lastVotes;
+		if (votes == null) return '';
+		const fmt = (v: number | undefined): string => (v !== undefined ? v.toFixed(1) : '—');
+		return `\nDEBUG votes — up:${fmt(votes.webcamUp)} down:${fmt(votes.webcamDown)} audio:${fmt(votes.audio)} screen:${fmt(votes.screenshare)}`;
+	})();
+
 	return (
-		<Tooltip label={tooltipLabel}>
+		<Tooltip label={tooltipLabel + debugSuffix}>
 			<CustomContainer background="gray0" height="fit" width="fit" padding="0.5rem">
 				{quality === 'lost' ? (
 					<Icon icon="WifiOff" color="error" size="medium" />

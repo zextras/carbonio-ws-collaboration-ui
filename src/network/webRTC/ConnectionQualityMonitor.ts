@@ -114,6 +114,9 @@ export default class ConnectionQualityMonitor {
 
 	private betterStreak = 0;
 
+	// DEBUG (temporary): last computed per-stream votes + level; read by ConnectionQualityIndicator for own tile debug tooltip
+	public lastVotes: (StreamVotes & { level: ConnectionQuality }) | undefined = undefined;
+
 	private audioPrev: AudioPrevStats = {
 		packetsLost: 0,
 		packetsReceived: 0,
@@ -154,10 +157,11 @@ export default class ConnectionQualityMonitor {
 	}
 
 	async emitInitial(): Promise<void> {
-		const level = await this.computeQuality();
+		const { votes, level } = await this.computeQuality();
 		// bypass hysteresis for the initial broadcast
 		this.committed = level;
 		this.changedAt = Date.now();
+		this.lastVotes = { ...votes, level };
 		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt);
 	}
 
@@ -171,9 +175,12 @@ export default class ConnectionQualityMonitor {
 	}
 
 	private async evaluate(): Promise<void> {
-		const level = await this.computeQuality();
+		const { votes, level } = await this.computeQuality();
 		const { next, streak, changed } = stepHysteresis(level, this.committed, this.betterStreak);
 		this.betterStreak = streak;
+		if (next != null) {
+			this.lastVotes = { ...votes, level: next };
+		}
 		if (next != null && changed) {
 			this.committed = next;
 			this.changedAt = Date.now();
@@ -183,7 +190,7 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
-	private async computeQuality(): Promise<ConnectionQuality> {
+	private async computeQuality(): Promise<{ votes: StreamVotes; level: ConnectionQuality }> {
 		const votes: StreamVotes = {};
 
 		// iceConnected: audio PC connection state must not be failed/disconnected/closed
@@ -243,7 +250,7 @@ export default class ConnectionQualityMonitor {
 			}
 		}
 
-		return aggregateQuality(votes, iceConnected);
+		return { votes, level: aggregateQuality(votes, iceConnected) };
 	}
 
 	private computeWebcamUp(stats: RTCStatsReport): number {
