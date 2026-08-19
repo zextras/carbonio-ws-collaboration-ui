@@ -35,7 +35,7 @@ export const useActiveMeetingSlice: StateCreator<
 	[['zustand/devtools', never]],
 	[],
 	ActiveMeetingSlice
-> = (set) => ({
+> = (set, get) => ({
 	activeMeeting: undefined,
 	meetingConnection: (
 		meetingId: string,
@@ -48,6 +48,8 @@ export const useActiveMeetingSlice: StateCreator<
 			deviceId?: string;
 		}
 	): void => {
+		// stop a previous meeting's quality monitor if we reconnect without an explicit disconnect
+		get().activeMeeting?.qualityMonitor?.stop();
 		const audioConn = new BidirectionalConnectionAudioInOut(
 			meetingId,
 			!!audioStream?.enabled,

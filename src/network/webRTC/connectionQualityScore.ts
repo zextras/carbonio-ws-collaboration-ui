@@ -20,7 +20,7 @@ export function webcamUpVote(i: {
 	if (i.producibleRungs <= 0) return 10;
 	if (!i.limited) return 10;
 	if (i.topActiveRung < 0) return 0;
-	return round1(((i.topActiveRung + 1) / i.producibleRungs) * 10);
+	return round1(Math.min(1, (i.topActiveRung + 1) / i.producibleRungs) * 10);
 }
 
 // Webcam DOWN: per feed, the substream MY controller settled on vs the top (2); off = 0. Averaged.
