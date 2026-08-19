@@ -107,12 +107,15 @@ export const useMeetingsStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const meeting = draft.meetings[meetingId];
 				if (meeting) {
+					const existing = meeting.participants[participant.userId];
 					meeting.participants[participant.userId] = {
 						userId: participant.userId,
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false,
-						joinedAt: participant.joinedAt
+						joinedAt: participant.joinedAt,
+						connectionQuality: existing?.connectionQuality,
+						connectionQualityAt: existing?.connectionQualityAt
 					};
 				}
 			}),

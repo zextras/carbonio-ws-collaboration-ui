@@ -13,6 +13,7 @@ import {
 	webcamDownVote,
 	webcamUpVote
 } from './connectionQualityScore';
+import useStore from '../../store/Store';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -98,6 +99,11 @@ export function deltaLossRate(
 export default class ConnectionQualityMonitor {
 	private readonly meetingId: string;
 
+	// My own quality is computed locally, so it is authoritative for my tile: write it straight to the
+	// store instead of waiting for the WS echo (which can lose it if it lands before participants[me]
+	// exists or after an addParticipant overwrite). The WS broadcast still carries it to other clients.
+	private readonly myUserId: string | undefined;
+
 	private readonly audioConn: IBidirectionalConnectionAudioInOut;
 
 	private readonly videoOut: IVideoOutConnection;
@@ -140,6 +146,7 @@ export default class ConnectionQualityMonitor {
 		screenOut: IScreenOutConnection
 	) {
 		this.meetingId = meetingId;
+		this.myUserId = useStore.getState().session?.id;
 		this.audioConn = audioConn;
 		this.videoOut = videoOut;
 		this.videoIn = videoIn;
@@ -156,6 +163,15 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
+	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt
+	// guard; also re-populates my entry if an addParticipant overwrite wiped it.
+	private applyLocalQuality(level: ConnectionQuality): void {
+		if (this.myUserId == null) return;
+		useStore
+			.getState()
+			.setParticipantConnectionQuality(this.meetingId, this.myUserId, level, this.changedAt);
+	}
+
 	async emitInitial(): Promise<void> {
 		const { votes, level } = await this.computeQuality();
 		// bypass hysteresis for the initial broadcast
@@ -163,6 +179,7 @@ export default class ConnectionQualityMonitor {
 		this.changedAt = Date.now();
 		this.lastVotes = { ...votes, level };
 		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt);
+		this.applyLocalQuality(level);
 	}
 
 	async resyncTo(userId: string): Promise<void> {
@@ -187,6 +204,9 @@ export default class ConnectionQualityMonitor {
 			wsClient.sendConnectionQuality(this.meetingId, next, this.changedAt);
 		} else if (next != null) {
 			this.committed = next;
+		}
+		if (next != null) {
+			this.applyLocalQuality(next);
 		}
 	}
 
