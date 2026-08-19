@@ -79,6 +79,7 @@ export const useActiveMeetingSlice: StateCreator<
 					videoOutConn,
 					screenOutConn,
 					qualityMonitor,
+					connectionQuality: {},
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId

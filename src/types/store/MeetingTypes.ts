@@ -65,6 +65,4 @@ export type MeetingParticipant = {
 	joinedAt: string;
 	dateScreenOn?: string;
 	handRaisedAt?: string;
-	connectionQuality?: ConnectionQuality;
-	connectionQualityAt?: number;
 };

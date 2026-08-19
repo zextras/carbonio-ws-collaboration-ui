@@ -5,6 +5,7 @@
  */
 
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -58,6 +59,9 @@ export type ActiveMeeting = {
 	videoOutConn: IVideoOutConnection;
 	screenOutConn: IScreenOutConnection;
 	qualityMonitor: ConnectionQualityMonitor;
+	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
+	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
+	connectionQuality: Record<string, ConnectionQualityInfo>;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;
@@ -69,6 +73,11 @@ export type ActiveMeeting = {
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
 	pinnedTile?: PinnedTile;
+};
+
+export type ConnectionQualityInfo = {
+	quality: ConnectionQuality;
+	changedAt: number;
 };
 
 export enum MeetingAccordionType {

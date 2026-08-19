@@ -80,9 +80,9 @@ export const getParticipantConnectionQuality = (
 	userId: string | undefined
 ): ConnectionQuality | undefined => {
 	if (!meetingId || !userId) return undefined;
-	const meeting = store.meetings[meetingId];
-	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
-	return participant?.connectionQuality;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	return activeMeeting.connectionQuality[userId]?.quality;
 };
 
 export const getParticipantVideoStatus = (

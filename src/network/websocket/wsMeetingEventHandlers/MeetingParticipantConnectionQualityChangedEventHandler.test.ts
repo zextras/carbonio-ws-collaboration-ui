@@ -35,14 +35,16 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
+	// Connection quality lives on the active meeting, so an active meeting must exist to hold it.
+	store.meetingConnection(meeting.id);
 });
 
 describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
 	test('Quality and changedAt are stored for the participant', () => {
 		meetingParticipantConnectionQualityChangedEventHandler(baseEvent);
-		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
-		expect(stored.connectionQuality).toBe('optimal');
-		expect(stored.connectionQualityAt).toBe(1000);
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.quality).toBe('optimal');
+		expect(stored?.changedAt).toBe(1000);
 	});
 
 	test('All 6 quality levels are accepted', () => {
@@ -53,8 +55,8 @@ describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
 				quality,
 				changedAt: baseEvent.changedAt + index + 1
 			});
-			const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
-			expect(stored.connectionQuality).toBe(quality);
+			const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+			expect(stored?.quality).toBe(quality);
 		});
 	});
 
@@ -69,9 +71,9 @@ describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
 			quality: 'high',
 			changedAt: 2000
 		});
-		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
-		expect(stored.connectionQuality).toBe('high');
-		expect(stored.connectionQualityAt).toBe(2000);
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.quality).toBe('high');
+		expect(stored?.changedAt).toBe(2000);
 	});
 
 	test('An older changedAt does not overwrite a newer quality', () => {
@@ -85,8 +87,8 @@ describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
 			quality: 'terrible',
 			changedAt: 500
 		});
-		const stored = useStore.getState().meetings[meeting.id].participants[participant.userId];
-		expect(stored.connectionQuality).toBe('high');
-		expect(stored.connectionQualityAt).toBe(2000);
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.quality).toBe('high');
+		expect(stored?.changedAt).toBe(2000);
 	});
 });

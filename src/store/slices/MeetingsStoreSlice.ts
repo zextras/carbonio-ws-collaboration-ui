@@ -107,15 +107,12 @@ export const useMeetingsStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					const existing = meeting.participants[participant.userId];
 					meeting.participants[participant.userId] = {
 						userId: participant.userId,
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false,
-						joinedAt: participant.joinedAt,
-						connectionQuality: existing?.connectionQuality,
-						connectionQualityAt: existing?.connectionQualityAt
+						joinedAt: participant.joinedAt
 					};
 				}
 			}),
@@ -246,15 +243,11 @@ export const useMeetingsStoreSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = draft.meetings[meetingId];
-				const participant = meeting?.participants[userId];
-				if (
-					participant &&
-					(participant.connectionQualityAt === undefined ||
-						changedAt > participant.connectionQualityAt)
-				) {
-					participant.connectionQuality = quality;
-					participant.connectionQualityAt = changedAt;
+				const { activeMeeting } = draft;
+				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
+				const previous = activeMeeting.connectionQuality[userId];
+				if (previous === undefined || changedAt > previous.changedAt) {
+					activeMeeting.connectionQuality[userId] = { quality, changedAt };
 				}
 			}),
 			false,
