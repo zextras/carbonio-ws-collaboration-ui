@@ -121,6 +121,7 @@ describe('stepHysteresis', () => {
 
 const INBOUND_RTP = 'inbound-rtp';
 const OUTBOUND_RTP = 'outbound-rtp';
+const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 
 const report = (stats: Array<Record<string, unknown>>): RTCStatsReport =>
 	new Map(stats.map((s, i) => [String(i), s])) as unknown as RTCStatsReport;
@@ -174,8 +175,8 @@ const makeMonitor = (
 };
 
 describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
-	it('audio: maps down-loss, concealment and jitter (scaled by /200), clamped', async () => {
-		const worst = makeMonitor({
+	it('audio: scores down (loss/concealment/jitter) and up (fractionLost) independently while both flow', async () => {
+		const monitor = makeMonitor({
 			audioStats: () =>
 				Promise.resolve(
 					report([
@@ -188,17 +189,45 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 							totalSamplesReceived: 1000,
 							jitter: 0.1
 						},
-						{ type: 'remote-inbound-rtp', kind: 'audio', fractionLost: 0.2 }
+						{ type: OUTBOUND_RTP, kind: 'audio', packetsSent: 500 },
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.2 }
 					])
 				)
 		});
-		await worst.emitInitial();
-		// impairment = max(loss 0.1, concealment 0.3, jitter 100/200=0.5, up 0.2) = 0.5
-		expect(worst.lastVotes?.audio).toBe(5);
-		expect(worst.lastVotes?.level).toBe('medium');
-		expect(worst.committed).toBe('medium');
+		await monitor.emitInitial();
+		// down impairment = max(loss 0.1, concealment 0.3, jitter 100/200=0.5) = 0.5 -> 5
+		expect(monitor.lastVotes?.downlinkAudio).toBe(5);
+		// up (sending) = (1 - fractionLost 0.2) * 10 = 8
+		expect(monitor.lastVotes?.uplinkAudio).toBe(8);
+		expect(monitor.lastVotes?.level).toBe('medium');
+	});
 
-		const clamped = makeMonitor({
+	it('audio uplink is omitted when muted, so a stale far-end fractionLost cannot drag the score', async () => {
+		const monitor = makeMonitor({
+			audioStats: () =>
+				Promise.resolve(
+					report([
+						{ type: INBOUND_RTP, kind: 'audio', packetsLost: 0, packetsReceived: 100, jitter: 0 },
+						// no outbound-rtp audio -> not sending; the reported up-loss must be ignored
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.2 }
+					])
+				)
+		});
+		await monitor.emitInitial();
+		expect(monitor.lastVotes?.uplinkAudio).toBeUndefined();
+		expect(monitor.lastVotes?.downlinkAudio).toBe(10);
+	});
+
+	it('audio is fully omitted when nothing flows (alone + muted) -> optimal, never a phantom 10', async () => {
+		const monitor = makeMonitor({ audioStats: emptyReport });
+		await monitor.emitInitial();
+		expect(monitor.lastVotes?.uplinkAudio).toBeUndefined();
+		expect(monitor.lastVotes?.downlinkAudio).toBeUndefined();
+		expect(monitor.lastVotes?.level).toBe('optimal');
+	});
+
+	it('audio downlink clamps jitter at 200ms', async () => {
+		const monitor = makeMonitor({
 			audioStats: () =>
 				Promise.resolve(
 					report([
@@ -206,12 +235,12 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 					])
 				)
 		});
-		await clamped.emitInitial();
+		await monitor.emitInitial();
 		// jitter 250ms/200 clamps to 1 -> vote 0
-		expect(clamped.lastVotes?.audio).toBe(0);
+		expect(monitor.lastVotes?.downlinkAudio).toBe(0);
 	});
 
-	it('webcamUp: a bandwidth-limited sender maps its top active rung to a fractional vote', async () => {
+	it('webcam uplink: a bandwidth-limited sender maps its top active rung to a fractional vote', async () => {
 		const monitor = makeMonitor({
 			videoSender: {
 				track: { getSettings: () => ({ height: 720 }) },
@@ -233,10 +262,10 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		});
 		await monitor.emitInitial();
 		// producibleRungs 3, topActiveRung 1 (h inactive), limited -> min(1, 2/3)*10 = 6.7
-		expect(monitor.lastVotes?.webcamUp).toBe(6.7);
+		expect(monitor.lastVotes?.uplinkWebcam).toBe(6.7);
 	});
 
-	it('webcamDown: an off feed averages toward 0 with an active feed', async () => {
+	it('webcam downlink: an off feed averages toward 0 with an active feed', async () => {
 		const monitor = makeMonitor({
 			videoFeeds: [
 				{ substream: 0, off: true },
@@ -245,22 +274,22 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		});
 		await monitor.emitInitial();
 		// avg(0, 10) = 5
-		expect(monitor.lastVotes?.webcamDown).toBe(5);
+		expect(monitor.lastVotes?.downlinkWebcam).toBe(5);
 	});
 
-	it('screenshare (sending): fractionLost drives the vote', async () => {
+	it('screen uplink (sending): fractionLost drives the vote', async () => {
 		const monitor = makeMonitor({
 			screenSender: {
-				getStats: () =>
-					Promise.resolve(report([{ type: 'remote-inbound-rtp', fractionLost: 0.075 }]))
+				getStats: () => Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, fractionLost: 0.075 }]))
 			}
 		});
 		await monitor.emitInitial();
 		// lossRate 0.075 / 0.15 = 0.5 -> vote 5
-		expect(monitor.lastVotes?.screenshare).toBe(5);
+		expect(monitor.lastVotes?.uplinkScreen).toBe(5);
+		expect(monitor.lastVotes?.downlinkScreen).toBeUndefined();
 	});
 
-	it('screenshare (receiving): packet-loss delta drives the vote', async () => {
+	it('screen downlink (receiving): packet-loss delta drives the vote', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,
 			screenReceiverStats: () =>
@@ -278,10 +307,35 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		});
 		await monitor.emitInitial();
 		// lossRate 0.03 / 0.15 = 0.2 -> vote 8
-		expect(monitor.lastVotes?.screenshare).toBe(8);
+		expect(monitor.lastVotes?.downlinkScreen).toBe(8);
+		expect(monitor.lastVotes?.uplinkScreen).toBeUndefined();
 	});
 
-	it('screenshare (receiving): a freezeCount delta scales to per-minute and saturates the vote', async () => {
+	it('screen is scored in both directions when sharing and receiving at once', async () => {
+		const monitor = makeMonitor({
+			screenSender: {
+				getStats: () => Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, fractionLost: 0 }]))
+			},
+			hasScreenFeed: true,
+			screenReceiverStats: () =>
+				Promise.resolve(
+					report([
+						{
+							type: INBOUND_RTP,
+							kind: 'video',
+							packetsLost: 3,
+							packetsReceived: 97,
+							freezeCount: 0
+						}
+					])
+				)
+		});
+		await monitor.emitInitial();
+		expect(monitor.lastVotes?.uplinkScreen).toBe(10);
+		expect(monitor.lastVotes?.downlinkScreen).toBe(8);
+	});
+
+	it('screen downlink (receiving): a freezeCount delta scales to per-minute and saturates the vote', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,
 			screenReceiverStats: () =>
@@ -299,7 +353,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		});
 		await monitor.emitInitial();
 		// 1 freeze this tick -> 30/min -> /6 clamps to 1 -> vote 0
-		expect(monitor.lastVotes?.screenshare).toBe(0);
+		expect(monitor.lastVotes?.downlinkScreen).toBe(0);
 	});
 
 	it('resets the delta baseline across two ticks', async () => {
@@ -316,9 +370,9 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		});
 		await monitor.emitInitial();
 		// tick 1: delta loss 10/100 = 0.1 -> vote 9
-		expect(monitor.lastVotes?.audio).toBe(9);
+		expect(monitor.lastVotes?.downlinkAudio).toBe(9);
 		await monitor.emitInitial();
 		// tick 2: delta loss (15-10)/((15-10)+(185-90)) = 5/100 = 0.05 -> vote 9.5
-		expect(monitor.lastVotes?.audio).toBe(9.5);
+		expect(monitor.lastVotes?.downlinkAudio).toBe(9.5);
 	});
 });

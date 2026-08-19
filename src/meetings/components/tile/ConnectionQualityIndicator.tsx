@@ -20,19 +20,21 @@ const CustomContainer = styled(Row)`
 const BarsContainer = styled.div`
 	display: flex;
 	align-items: flex-end;
-	gap: 0.125rem;
+	justify-content: center;
+	gap: 0.0625rem;
+	width: 1rem;
 	height: 1rem;
 `;
 
 const Bar = styled.div<{ $color: string; $height: string }>`
-	width: 0.1875rem;
+	width: 0.125rem;
 	height: ${({ $height }): string => $height};
 	background-color: ${({ $color }): string => $color};
 	border-radius: 0.0625rem;
 `;
 
-// 5 bar heights, shortest to tallest
-const BAR_HEIGHTS = ['0.25rem', '0.375rem', '0.5rem', '0.6875rem', '0.875rem'] as const;
+// 5 bar heights, shortest to tallest, sized to a 1rem square so the badge matches a medium icon
+const BAR_HEIGHTS = ['0.25rem', '0.4375rem', '0.625rem', '0.8125rem', '1rem'] as const;
 
 const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = ({
 	meetingId,
@@ -87,17 +89,33 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		}
 	})();
 
-	// DEBUG (temporary): append per-stream votes to tooltip for the current user's own tile
-	const debugSuffix = ((): string => {
-		if (userId == null || !isMyId(userId)) return '';
+	// On the current user's own tile, expand the tooltip with the per-direction vote breakdown; a
+	// direction that is not flowing is omitted, matching how it is left out of the score.
+	const voteLines = ((): string[] => {
+		if (userId == null || !isMyId(userId)) return [];
 		const votes = useStore.getState().activeMeeting?.qualityMonitor?.lastVotes;
-		if (votes == null) return '';
-		const fmt = (v: number | undefined): string => (v !== undefined ? v.toFixed(1) : '—');
-		return `\nDEBUG votes — up:${fmt(votes.webcamUp)} down:${fmt(votes.webcamDown)} audio:${fmt(votes.audio)} screen:${fmt(votes.screenshare)}`;
+		if (votes == null) return [];
+		const line = (name: string, v: number | undefined): string | undefined =>
+			v !== undefined ? `${name}: ${v.toFixed(1)}` : undefined;
+		return [
+			line('Uplink webcam', votes.uplinkWebcam),
+			line('Downlink webcam', votes.downlinkWebcam),
+			line('Uplink audio', votes.uplinkAudio),
+			line('Downlink audio', votes.downlinkAudio),
+			line('Uplink screen', votes.uplinkScreen),
+			line('Downlink screen', votes.downlinkScreen)
+		].filter((l): l is string => l !== undefined);
 	})();
 
+	const label =
+		voteLines.length > 0 ? (
+			<div style={{ whiteSpace: 'pre-line' }}>{[tooltipLabel, ...voteLines].join('\n')}</div>
+		) : (
+			tooltipLabel
+		);
+
 	return (
-		<Tooltip label={tooltipLabel + debugSuffix}>
+		<Tooltip label={label}>
 			<CustomContainer background="gray0" height="fit" width="fit" padding="0.5rem">
 				{quality === 'lost' ? (
 					<Icon icon="WifiOff" color="error" size="medium" />

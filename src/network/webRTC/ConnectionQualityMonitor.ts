@@ -6,12 +6,14 @@
 
 import {
 	aggregateQuality,
-	audioVote,
+	calcDownlinkAudioVote,
+	calcDownlinkScreenVote,
+	calcDownlinkWebcamVote,
+	calcUplinkAudioVote,
+	calcUplinkScreenVote,
+	calcUplinkWebcamVote,
 	ConnectionQuality,
-	screenshareVote,
-	StreamVotes,
-	webcamDownVote,
-	webcamUpVote
+	StreamVotes
 } from './connectionQualityScore';
 import useStore from '../../store/Store';
 import {
@@ -34,6 +36,7 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 type AudioPrevStats = {
 	packetsLost: number;
 	packetsReceived: number;
+	packetsSent: number;
 	concealedSamples: number;
 	totalSamplesReceived: number;
 };
@@ -128,6 +131,7 @@ export default class ConnectionQualityMonitor {
 	private audioPrev: AudioPrevStats = {
 		packetsLost: 0,
 		packetsReceived: 0,
+		packetsSent: 0,
 		concealedSamples: 0,
 		totalSamplesReceived: 0
 	};
@@ -221,63 +225,62 @@ export default class ConnectionQualityMonitor {
 		const audioState = this.audioConn.peerConn?.connectionState;
 		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
 
-		// webcamUp: only if we have an active video sender
+		// webcam uplink: only while a video sender exists (camera on)
 		if (this.videoOut.rtpSender != null) {
 			try {
 				const stats = await this.videoOut.rtpSender.getStats();
-				votes.webcamUp = this.computeWebcamUp(stats);
+				votes.uplinkWebcam = this.calcUplinkWebcam(stats);
 			} catch {
-				// defensive: browser may refuse getStats when PC is closing; omit the vote
+				// defensive: browser may refuse getStats when the PC is closing; omit the vote
 			}
 		}
 
-		// webcamDown: from the in-connection's per-feed quality states
+		// webcam downlink: only while receiving feeds, from the in-connection's per-feed quality states
 		const videoFeeds = this.videoIn.getVideoFeedsForQuality();
 		if (videoFeeds.length > 0) {
-			votes.webcamDown = webcamDownVote(videoFeeds);
+			votes.downlinkWebcam = calcDownlinkWebcamVote(videoFeeds);
 		}
 
-		// audio: always active in a meeting
-		try {
-			if (this.audioConn.peerConn != null) {
-				const stats = await this.audioConn.peerConn.getStats();
-				votes.audio = this.computeAudioVote(stats);
-			} else {
-				votes.audio = audioVote({
-					downLossRate: 0,
-					concealmentRatio: 0,
-					jitterMs: 0,
-					upLossRate: 0
-				});
-			}
-		} catch {
-			votes.audio = audioVote({ downLossRate: 0, concealmentRatio: 0, jitterMs: 0, upLossRate: 0 });
-		}
-
-		// screenshare: active if I'm sending OR receiving a screen feed
-		const isSendingScreen = this.screenOut.rtpSender != null;
-		const isReceivingScreen = this.videoIn.hasScreenFeed();
-		if (isSendingScreen || isReceivingScreen) {
+		// audio: score each direction only while it is actually flowing, so a muted/idle channel is
+		// omitted rather than scored 10
+		if (this.audioConn.peerConn != null) {
 			try {
-				if (isSendingScreen) {
-					const stats = await this.screenOut.rtpSender!.getStats();
-					votes.screenshare = this.computeScreenshareOutVote(stats);
-				} else {
-					const receiver = this.videoIn.getScreenReceiver();
-					if (receiver != null) {
-						const stats = await receiver.getStats();
-						votes.screenshare = this.computeScreenshareInVote(stats);
-					}
-				}
+				const stats = await this.audioConn.peerConn.getStats();
+				const { uplink, downlink } = this.calcAudioVotes(stats);
+				if (uplink != null) votes.uplinkAudio = uplink;
+				if (downlink != null) votes.downlinkAudio = downlink;
 			} catch {
-				// defensive: omit screenshare vote on error
+				// defensive: omit audio votes on error
+			}
+		}
+
+		// screen uplink: only while sharing
+		if (this.screenOut.rtpSender != null) {
+			try {
+				const stats = await this.screenOut.rtpSender.getStats();
+				votes.uplinkScreen = this.calcUplinkScreen(stats);
+			} catch {
+				// defensive: omit the vote
+			}
+		}
+
+		// screen downlink: only while receiving a shared screen
+		if (this.videoIn.hasScreenFeed()) {
+			const receiver = this.videoIn.getScreenReceiver();
+			if (receiver != null) {
+				try {
+					const stats = await receiver.getStats();
+					votes.downlinkScreen = this.calcDownlinkScreen(stats);
+				} catch {
+					// defensive: omit the vote
+				}
 			}
 		}
 
 		return { votes, level: aggregateQuality(votes, iceConnected) };
 	}
 
-	private computeWebcamUp(stats: RTCStatsReport): number {
+	private calcUplinkWebcam(stats: RTCStatsReport): number {
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
 			this.videoPrev.bytesSent = {};
 			this.lastVideoSender = this.videoOut.rtpSender;
@@ -320,13 +323,19 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		return webcamUpVote({ producibleRungs, topActiveRung, limited });
+		return calcUplinkWebcamVote({ producibleRungs, topActiveRung, limited });
 	}
 
-	private computeAudioVote(stats: RTCStatsReport): number {
-		let downLossRate = 0;
-		let concealmentRatio = 0;
-		let jitterMs = 0;
+	// Audio up and down are scored independently. Uplink loss is only observable via the far end's RTCP
+	// report (remote-inbound-rtp.fractionLost), a point-in-time value that freezes when I stop sending;
+	// so the uplink vote is emitted only while I am actively sending (outbound packets growing) and
+	// omitted when muted. The downlink vote is emitted only while inbound audio exists (someone audible).
+	private calcAudioVotes(stats: RTCStatsReport): {
+		uplink: number | undefined;
+		downlink: number | undefined;
+	} {
+		let downlink: number | undefined;
+		let sendingAudio = false;
 		let upLossRate = 0;
 
 		stats.forEach(
@@ -335,6 +344,7 @@ export default class ConnectionQualityMonitor {
 					kind?: string;
 					packetsLost?: number;
 					packetsReceived?: number;
+					packetsSent?: number;
 					concealedSamples?: number;
 					totalSamplesReceived?: number;
 					jitter?: number;
@@ -350,21 +360,25 @@ export default class ConnectionQualityMonitor {
 					const dConcealed = Math.max(0, concealed - this.audioPrev.concealedSamples);
 					const dTotalSamples = Math.max(0, totalSamples - this.audioPrev.totalSamplesReceived);
 
-					downLossRate = deltaLossRate(
+					const lossRate = deltaLossRate(
 						lost,
 						recv,
 						this.audioPrev.packetsLost,
 						this.audioPrev.packetsReceived
 					);
-					concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
-					jitterMs = (r.jitter ?? 0) * 1000;
+					const concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
+					const jitterMs = (r.jitter ?? 0) * 1000;
+					downlink = calcDownlinkAudioVote({ lossRate, concealmentRatio, jitterMs });
 
-					this.audioPrev = {
-						packetsLost: lost,
-						packetsReceived: recv,
-						concealedSamples: concealed,
-						totalSamplesReceived: totalSamples
-					};
+					this.audioPrev.packetsLost = lost;
+					this.audioPrev.packetsReceived = recv;
+					this.audioPrev.concealedSamples = concealed;
+					this.audioPrev.totalSamplesReceived = totalSamples;
+				}
+				if (r.type === 'outbound-rtp' && r.kind === 'audio') {
+					const sent = r.packetsSent ?? 0;
+					if (sent > this.audioPrev.packetsSent) sendingAudio = true;
+					this.audioPrev.packetsSent = sent;
 				}
 				if (r.type === 'remote-inbound-rtp' && r.kind === 'audio') {
 					upLossRate = r.fractionLost ?? 0;
@@ -372,30 +386,24 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		return audioVote({ downLossRate, concealmentRatio, jitterMs, upLossRate });
+		const uplink = sendingAudio ? calcUplinkAudioVote({ lossRate: upLossRate }) : undefined;
+		return { uplink, downlink };
 	}
 
-	private computeScreenshareOutVote(stats: RTCStatsReport): number {
+	private calcUplinkScreen(stats: RTCStatsReport): number {
 		let lossRate = 0;
 
-		stats.forEach(
-			(
-				r: RTCStats & {
-					fractionLost?: number;
-					kind?: string;
-				}
-			) => {
-				// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1)
-				if (r.type === 'remote-inbound-rtp') {
-					lossRate = Math.max(lossRate, r.fractionLost ?? 0);
-				}
+		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
+			// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1)
+			if (r.type === 'remote-inbound-rtp') {
+				lossRate = Math.max(lossRate, r.fractionLost ?? 0);
 			}
-		);
+		});
 
-		return screenshareVote({ lossRate, freezesPerMin: 0 });
+		return calcUplinkScreenVote({ lossRate });
 	}
 
-	private computeScreenshareInVote(stats: RTCStatsReport): number {
+	private calcDownlinkScreen(stats: RTCStatsReport): number {
 		let lossRate = 0;
 		let freezesPerMin = 0;
 
@@ -428,6 +436,6 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		return screenshareVote({ lossRate, freezesPerMin });
+		return calcDownlinkScreenVote({ lossRate, freezesPerMin });
 	}
 }
