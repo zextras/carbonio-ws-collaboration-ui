@@ -55,13 +55,16 @@ export function stepHysteresis(
 	raw: ConnectionQuality,
 	committed: ConnectionQuality | null,
 	betterStreak: number
-): { next: ConnectionQuality | null; streak: number; changed: boolean } {
+): { next: ConnectionQuality; streak: number; changed: boolean } {
 	if (committed == null) {
 		return { next: raw, streak: 0, changed: true };
 	}
 	if (raw === 'lost') {
 		const changed = committed !== 'lost';
 		return { next: 'lost', streak: 0, changed };
+	}
+	if (committed === 'lost') {
+		return { next: raw, streak: 0, changed: true };
 	}
 	const rawRank = QUALITY_RANK[raw];
 	const committedRank = QUALITY_RANK[committed];
@@ -99,9 +102,8 @@ export function deltaLossRate(
 export default class ConnectionQualityMonitor {
 	private readonly meetingId: string;
 
-	// My own quality is computed locally, so it is authoritative for my tile: write it straight to the
-	// store instead of waiting for the WS echo (which can lose it if it lands before participants[me]
-	// exists or after an addParticipant overwrite). The WS broadcast still carries it to other clients.
+	// My own quality is computed locally and is authoritative for my own tile, so it is written straight
+	// to the store immediately (no round-trip). The WS broadcast still carries it to other clients.
 	private readonly myUserId: string | undefined;
 
 	private readonly audioConn: IBidirectionalConnectionAudioInOut;
@@ -138,6 +140,8 @@ export default class ConnectionQualityMonitor {
 
 	private videoPrev: VideoPrevStats = { bytesSent: {} };
 
+	private lastVideoSender: RTCRtpSender | null = null;
+
 	constructor(
 		meetingId: string,
 		audioConn: IBidirectionalConnectionAudioInOut,
@@ -164,7 +168,7 @@ export default class ConnectionQualityMonitor {
 	}
 
 	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt
-	// guard; also re-populates my entry if an addParticipant overwrite wiped it.
+	// guard.
 	private applyLocalQuality(level: ConnectionQuality): void {
 		if (this.myUserId == null) return;
 		useStore
@@ -176,7 +180,7 @@ export default class ConnectionQualityMonitor {
 		const { votes, level } = await this.computeQuality();
 		// bypass hysteresis for the initial broadcast
 		this.committed = level;
-		this.changedAt = Date.now();
+		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 		this.lastVotes = { ...votes, level };
 		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt);
 		this.applyLocalQuality(level);
@@ -191,23 +195,23 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
+	rebroadcast(): void {
+		if (this.committed != null) {
+			wsClient.sendConnectionQuality(this.meetingId, this.committed, this.changedAt);
+		}
+	}
+
 	private async evaluate(): Promise<void> {
 		const { votes, level } = await this.computeQuality();
 		const { next, streak, changed } = stepHysteresis(level, this.committed, this.betterStreak);
 		this.betterStreak = streak;
-		if (next != null) {
-			this.lastVotes = { ...votes, level: next };
-		}
-		if (next != null && changed) {
+		this.lastVotes = { ...votes, level: next };
+		if (changed) {
 			this.committed = next;
-			this.changedAt = Date.now();
+			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 			wsClient.sendConnectionQuality(this.meetingId, next, this.changedAt);
-		} else if (next != null) {
-			this.committed = next;
 		}
-		if (next != null) {
-			this.applyLocalQuality(next);
-		}
+		this.applyLocalQuality(next);
 	}
 
 	private async computeQuality(): Promise<{ votes: StreamVotes; level: ConnectionQuality }> {
@@ -274,6 +278,10 @@ export default class ConnectionQualityMonitor {
 	}
 
 	private computeWebcamUp(stats: RTCStatsReport): number {
+		if (this.videoOut.rtpSender !== this.lastVideoSender) {
+			this.videoPrev.bytesSent = {};
+			this.lastVideoSender = this.videoOut.rtpSender;
+		}
 		const track = this.videoOut.rtpSender?.track;
 		let producibleRungs = 1;
 		if (track && typeof (track as MediaStreamTrack).getSettings === 'function') {

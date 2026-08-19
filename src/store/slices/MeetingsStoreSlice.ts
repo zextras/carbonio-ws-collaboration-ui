@@ -127,6 +127,10 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (meeting) {
 					delete meeting.participants[userId];
 				}
+				const { activeMeeting } = draft;
+				if (activeMeeting?.meetingId === meetingId) {
+					delete activeMeeting.connectionQuality[userId];
+				}
 			}),
 			false,
 			'MEETINGS/REMOVE_PARTICIPANT'

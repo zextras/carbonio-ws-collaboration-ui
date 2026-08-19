@@ -49,7 +49,14 @@ export const useActiveMeetingSlice: StateCreator<
 		}
 	): void => {
 		// stop a previous meeting's quality monitor if we reconnect without an explicit disconnect
-		get().activeMeeting?.qualityMonitor?.stop();
+		const prev = get().activeMeeting;
+		if (prev) {
+			prev.qualityMonitor?.stop();
+			prev.bidirectionalAudioConn?.closePeerConnection();
+			prev.videoScreenIn?.closePeerConnection();
+			prev.videoOutConn?.closePeerConnection();
+			prev.screenOutConn?.closePeerConnection();
+		}
 		const audioConn = new BidirectionalConnectionAudioInOut(
 			meetingId,
 			!!audioStream?.enabled,

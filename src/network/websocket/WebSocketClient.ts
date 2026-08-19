@@ -99,6 +99,7 @@ export class WebSocketClient {
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
+		useStore.getState().activeMeeting?.qualityMonitor?.rebroadcast();
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
 		}

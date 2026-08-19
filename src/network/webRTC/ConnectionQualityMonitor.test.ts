@@ -4,10 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { deltaLossRate, stepHysteresis } from './ConnectionQualityMonitor';
+import ConnectionQualityMonitor, {
+	deltaLossRate,
+	stepHysteresis
+} from './ConnectionQualityMonitor';
 import { ConnectionQuality } from './connectionQualityScore';
+import {
+	IBidirectionalConnectionAudioInOut,
+	IScreenOutConnection,
+	IVideoOutConnection,
+	IVideoScreenInConnection
+} from '../../types/network/webRTC/webRTC';
+
+// setupTests.ts stubs the default export for component tests; exercise the real class here
+vi.unmock('./ConnectionQualityMonitor');
 
 describe('deltaLossRate', () => {
 	it('returns 0 when there are fewer than minSamples total packets', () => {
@@ -50,6 +62,11 @@ describe('stepHysteresis', () => {
 		const r = stepHysteresis('lost', 'lost', 0);
 		expect(r.changed).toBe(false);
 		expect(r.next).toBe('lost');
+	});
+
+	it('leaves "lost" in a single tick when a non-lost level arrives (no better-streak)', () => {
+		const r = stepHysteresis('poor', 'lost', 0);
+		expect(r).toEqual({ next: 'poor', streak: 0, changed: true });
 	});
 
 	it('commits a worsening level immediately (1 tick)', () => {
@@ -99,5 +116,209 @@ describe('stepHysteresis', () => {
 	it('unchanged same-level produces changed: false', () => {
 		const r = stepHysteresis('medium', 'medium', 0);
 		expect(r).toEqual({ next: 'medium', streak: 0, changed: false });
+	});
+});
+
+const INBOUND_RTP = 'inbound-rtp';
+const OUTBOUND_RTP = 'outbound-rtp';
+
+const report = (stats: Array<Record<string, unknown>>): RTCStatsReport =>
+	new Map(stats.map((s, i) => [String(i), s])) as unknown as RTCStatsReport;
+
+const emptyReport = (): Promise<RTCStatsReport> => Promise.resolve(report([]));
+
+const makeMonitor = (
+	parts: {
+		audioConnectionState?: RTCPeerConnectionState;
+		audioStats?: () => Promise<RTCStatsReport>;
+		videoSender?: {
+			track?: { getSettings: () => { height: number } };
+			getStats: () => Promise<RTCStatsReport>;
+		};
+		videoFeeds?: Array<{ substream: 0 | 1 | 2; off: boolean }>;
+		hasScreenFeed?: boolean;
+		screenReceiverStats?: () => Promise<RTCStatsReport>;
+		screenSender?: { getStats: () => Promise<RTCStatsReport> };
+	} = {}
+): ConnectionQualityMonitor => {
+	const audioConn = {
+		peerConn: {
+			connectionState: parts.audioConnectionState ?? 'connected',
+			getStats: parts.audioStats ?? emptyReport
+		}
+	} as unknown as IBidirectionalConnectionAudioInOut;
+	const videoOut = {
+		rtpSender: parts.videoSender ?? null
+	} as unknown as IVideoOutConnection;
+	const screenReceiver = parts.screenReceiverStats
+		? ({ getStats: parts.screenReceiverStats } as unknown as RTCRtpReceiver)
+		: null;
+	const videoIn = {
+		getVideoFeedsForQuality: () => parts.videoFeeds ?? [],
+		hasScreenFeed: () => parts.hasScreenFeed ?? false,
+		getScreenReceiver: () => screenReceiver
+	} as unknown as IVideoScreenInConnection;
+	const screenOut = {
+		rtpSender: parts.screenSender ?? null
+	} as unknown as IScreenOutConnection;
+	const monitor = new ConnectionQualityMonitor(
+		'meetingId',
+		audioConn,
+		videoOut,
+		videoIn,
+		screenOut
+	);
+	// stop the 2 s evaluation timer; the getStats mappers are exercised via emitInitial()
+	monitor.stop();
+	return monitor;
+};
+
+describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
+	it('audio: maps down-loss, concealment and jitter (scaled by /200), clamped', async () => {
+		const worst = makeMonitor({
+			audioStats: () =>
+				Promise.resolve(
+					report([
+						{
+							type: INBOUND_RTP,
+							kind: 'audio',
+							packetsLost: 10,
+							packetsReceived: 90,
+							concealedSamples: 300,
+							totalSamplesReceived: 1000,
+							jitter: 0.1
+						},
+						{ type: 'remote-inbound-rtp', kind: 'audio', fractionLost: 0.2 }
+					])
+				)
+		});
+		await worst.emitInitial();
+		// impairment = max(loss 0.1, concealment 0.3, jitter 100/200=0.5, up 0.2) = 0.5
+		expect(worst.lastVotes?.audio).toBe(5);
+		expect(worst.lastVotes?.level).toBe('medium');
+		expect(worst.committed).toBe('medium');
+
+		const clamped = makeMonitor({
+			audioStats: () =>
+				Promise.resolve(
+					report([
+						{ type: INBOUND_RTP, kind: 'audio', packetsLost: 0, packetsReceived: 100, jitter: 0.25 }
+					])
+				)
+		});
+		await clamped.emitInitial();
+		// jitter 250ms/200 clamps to 1 -> vote 0
+		expect(clamped.lastVotes?.audio).toBe(0);
+	});
+
+	it('webcamUp: a bandwidth-limited sender maps its top active rung to a fractional vote', async () => {
+		const monitor = makeMonitor({
+			videoSender: {
+				track: { getSettings: () => ({ height: 720 }) },
+				getStats: () =>
+					Promise.resolve(
+						report([
+							{
+								type: OUTBOUND_RTP,
+								rid: 'l',
+								bytesSent: 1000,
+								active: true,
+								qualityLimitationReason: 'bandwidth'
+							},
+							{ type: OUTBOUND_RTP, rid: 'm', bytesSent: 2000, active: true },
+							{ type: OUTBOUND_RTP, rid: 'h', bytesSent: 0, active: false }
+						])
+					)
+			}
+		});
+		await monitor.emitInitial();
+		// producibleRungs 3, topActiveRung 1 (h inactive), limited -> min(1, 2/3)*10 = 6.7
+		expect(monitor.lastVotes?.webcamUp).toBe(6.7);
+	});
+
+	it('webcamDown: an off feed averages toward 0 with an active feed', async () => {
+		const monitor = makeMonitor({
+			videoFeeds: [
+				{ substream: 0, off: true },
+				{ substream: 2, off: false }
+			]
+		});
+		await monitor.emitInitial();
+		// avg(0, 10) = 5
+		expect(monitor.lastVotes?.webcamDown).toBe(5);
+	});
+
+	it('screenshare (sending): fractionLost drives the vote', async () => {
+		const monitor = makeMonitor({
+			screenSender: {
+				getStats: () =>
+					Promise.resolve(report([{ type: 'remote-inbound-rtp', fractionLost: 0.075 }]))
+			}
+		});
+		await monitor.emitInitial();
+		// lossRate 0.075 / 0.15 = 0.5 -> vote 5
+		expect(monitor.lastVotes?.screenshare).toBe(5);
+	});
+
+	it('screenshare (receiving): packet-loss delta drives the vote', async () => {
+		const monitor = makeMonitor({
+			hasScreenFeed: true,
+			screenReceiverStats: () =>
+				Promise.resolve(
+					report([
+						{
+							type: INBOUND_RTP,
+							kind: 'video',
+							packetsLost: 3,
+							packetsReceived: 97,
+							freezeCount: 0
+						}
+					])
+				)
+		});
+		await monitor.emitInitial();
+		// lossRate 0.03 / 0.15 = 0.2 -> vote 8
+		expect(monitor.lastVotes?.screenshare).toBe(8);
+	});
+
+	it('screenshare (receiving): a freezeCount delta scales to per-minute and saturates the vote', async () => {
+		const monitor = makeMonitor({
+			hasScreenFeed: true,
+			screenReceiverStats: () =>
+				Promise.resolve(
+					report([
+						{
+							type: INBOUND_RTP,
+							kind: 'video',
+							packetsLost: 0,
+							packetsReceived: 100,
+							freezeCount: 1
+						}
+					])
+				)
+		});
+		await monitor.emitInitial();
+		// 1 freeze this tick -> 30/min -> /6 clamps to 1 -> vote 0
+		expect(monitor.lastVotes?.screenshare).toBe(0);
+	});
+
+	it('resets the delta baseline across two ticks', async () => {
+		let tick = 0;
+		const monitor = makeMonitor({
+			audioStats: () => {
+				tick += 1;
+				const packetsLost = tick === 1 ? 10 : 15;
+				const packetsReceived = tick === 1 ? 90 : 185;
+				return Promise.resolve(
+					report([{ type: INBOUND_RTP, kind: 'audio', packetsLost, packetsReceived }])
+				);
+			}
+		});
+		await monitor.emitInitial();
+		// tick 1: delta loss 10/100 = 0.1 -> vote 9
+		expect(monitor.lastVotes?.audio).toBe(9);
+		await monitor.emitInitial();
+		// tick 2: delta loss (15-10)/((15-10)+(185-90)) = 5/100 = 0.05 -> vote 9.5
+		expect(monitor.lastVotes?.audio).toBe(9.5);
 	});
 });

@@ -144,6 +144,22 @@ describe('MeetingStoreSlice tests', () => {
 			expect(participants[mockParticipant1.userId]).toBeUndefined();
 		});
 
+		test('Remove a participant clears its connection quality entry', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant1.userId, 'medium', 1000);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant1.userId]
+			).toBeDefined();
+
+			useStore.getState().removeParticipant(mockMeeting0.id, mockParticipant1.userId);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant1.userId]
+			).toBeUndefined();
+		});
+
 		test('setParticipantConnectionQuality applies last-writer-wins based on changedAt', () => {
 			useStore.getState().addMeetings([mockMeeting0]);
 			useStore.getState().meetingConnection(mockMeeting0.id);
