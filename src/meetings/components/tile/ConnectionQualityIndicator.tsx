@@ -9,8 +9,8 @@ import styled from '@emotion/styled';
 import { Icon, Row, Tooltip, useTheme } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { isMyId } from '../../../network/websocket/eventHandlersUtilities';
 import { getParticipantConnectionQuality } from '../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 
 const CustomContainer = styled(Row)`
@@ -43,6 +43,11 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 	const [t] = useTranslation();
 	const theme = useTheme();
 	const quality = useStore((state) => getParticipantConnectionQuality(state, meetingId, userId));
+	const ownVotes = useStore((store) =>
+		userId != null && userId === getUserId(store)
+			? store.activeMeeting?.connectionQualityVotes
+			: undefined
+	);
 
 	if (!quality) return null;
 
@@ -89,30 +94,22 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		}
 	})();
 
-	// On the current user's own tile, expand the tooltip with the per-direction vote breakdown; a
-	// direction that is not flowing is omitted, matching how it is left out of the score.
-	const voteLines = ((): string[] => {
-		if (userId == null || !isMyId(userId)) return [];
-		const votes = useStore.getState().activeMeeting?.qualityMonitor?.lastVotes;
-		if (votes == null) return [];
-		const line = (name: string, v: number | undefined): string | undefined =>
-			v !== undefined ? `${name}: ${v.toFixed(1)}` : undefined;
-		return [
-			line('Uplink webcam', votes.uplinkWebcam),
-			line('Downlink webcam', votes.downlinkWebcam),
-			line('Uplink audio', votes.uplinkAudio),
-			line('Downlink audio', votes.downlinkAudio),
-			line('Uplink screen', votes.uplinkScreen),
-			line('Downlink screen', votes.downlinkScreen)
-		].filter((l): l is string => l !== undefined);
+	// On the current user's own tile, expand the tooltip with the full per-direction vote breakdown,
+	// refreshed live every monitor tick. A direction not currently voting shows a single dash.
+	const label = ((): string | React.ReactElement => {
+		if (ownVotes == null) return tooltipLabel;
+		const fmt = (v: number | undefined): string => (v !== undefined ? v.toFixed(1) : '-');
+		const lines = [
+			tooltipLabel,
+			`Uplink webcam: ${fmt(ownVotes.uplinkWebcam)}`,
+			`Downlink webcam: ${fmt(ownVotes.downlinkWebcam)}`,
+			`Uplink audio: ${fmt(ownVotes.uplinkAudio)}`,
+			`Downlink audio: ${fmt(ownVotes.downlinkAudio)}`,
+			`Uplink screen: ${fmt(ownVotes.uplinkScreen)}`,
+			`Downlink screen: ${fmt(ownVotes.downlinkScreen)}`
+		];
+		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();
-
-	const label =
-		voteLines.length > 0 ? (
-			<div style={{ whiteSpace: 'pre-line' }}>{[tooltipLabel, ...voteLines].join('\n')}</div>
-		) : (
-			tooltipLabel
-		);
 
 	return (
 		<Tooltip label={label}>

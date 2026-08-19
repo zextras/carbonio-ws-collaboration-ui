@@ -36,7 +36,6 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 type AudioPrevStats = {
 	packetsLost: number;
 	packetsReceived: number;
-	packetsSent: number;
 	concealedSamples: number;
 	totalSamplesReceived: number;
 };
@@ -125,13 +124,9 @@ export default class ConnectionQualityMonitor {
 
 	private betterStreak = 0;
 
-	// DEBUG (temporary): last computed per-stream votes + level; read by ConnectionQualityIndicator for own tile debug tooltip
-	public lastVotes: (StreamVotes & { level: ConnectionQuality }) | undefined = undefined;
-
 	private audioPrev: AudioPrevStats = {
 		packetsLost: 0,
 		packetsReceived: 0,
-		packetsSent: 0,
 		concealedSamples: 0,
 		totalSamplesReceived: 0
 	};
@@ -185,7 +180,7 @@ export default class ConnectionQualityMonitor {
 		// bypass hysteresis for the initial broadcast
 		this.committed = level;
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-		this.lastVotes = { ...votes, level };
+		useStore.getState().setConnectionQualityVotes(votes);
 		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt);
 		this.applyLocalQuality(level);
 	}
@@ -209,7 +204,7 @@ export default class ConnectionQualityMonitor {
 		const { votes, level } = await this.computeQuality();
 		const { next, streak, changed } = stepHysteresis(level, this.committed, this.betterStreak);
 		this.betterStreak = streak;
-		this.lastVotes = { ...votes, level: next };
+		useStore.getState().setConnectionQualityVotes(votes);
 		if (changed) {
 			this.committed = next;
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
@@ -224,6 +219,15 @@ export default class ConnectionQualityMonitor {
 		// iceConnected: audio PC connection state must not be failed/disconnected/closed
 		const audioState = this.audioConn.peerConn?.connectionState;
 		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
+
+		// Audio presence is decided by app state (see the audio block below), not by packet flow.
+		const participants = Object.values(
+			useStore.getState().meetings[this.meetingId]?.participants ?? {}
+		);
+		const myAudioOn =
+			this.myUserId != null &&
+			(participants.find((p) => p.userId === this.myUserId)?.audioStreamOn ?? false);
+		const hasOtherParticipant = participants.some((p) => p.userId !== this.myUserId);
 
 		// webcam uplink: only while a video sender exists (camera on)
 		if (this.videoOut.rtpSender != null) {
@@ -241,14 +245,15 @@ export default class ConnectionQualityMonitor {
 			votes.downlinkWebcam = calcDownlinkWebcamVote(videoFeeds);
 		}
 
-		// audio: score each direction only while it is actually flowing, so a muted/idle channel is
-		// omitted rather than scored 10
-		if (this.audioConn.peerConn != null) {
+		// audio is one bidirectional AudioBridge channel that is always up in a meeting, so presence is
+		// decided by app state, not packet flow: uplink only while my mic is on, downlink only while
+		// there is someone else to hear. getStats still supplies the impairment numbers.
+		if (this.audioConn.peerConn != null && (myAudioOn || hasOtherParticipant)) {
 			try {
 				const stats = await this.audioConn.peerConn.getStats();
 				const { uplink, downlink } = this.calcAudioVotes(stats);
-				if (uplink != null) votes.uplinkAudio = uplink;
-				if (downlink != null) votes.downlinkAudio = downlink;
+				if (myAudioOn) votes.uplinkAudio = uplink;
+				if (hasOtherParticipant) votes.downlinkAudio = downlink;
 			} catch {
 				// defensive: omit audio votes on error
 			}
@@ -326,16 +331,14 @@ export default class ConnectionQualityMonitor {
 		return calcUplinkWebcamVote({ producibleRungs, topActiveRung, limited });
 	}
 
-	// Audio up and down are scored independently. Uplink loss is only observable via the far end's RTCP
-	// report (remote-inbound-rtp.fractionLost), a point-in-time value that freezes when I stop sending;
-	// so the uplink vote is emitted only while I am actively sending (outbound packets growing) and
-	// omitted when muted. The downlink vote is emitted only while inbound audio exists (someone audible).
-	private calcAudioVotes(stats: RTCStatsReport): {
-		uplink: number | undefined;
-		downlink: number | undefined;
-	} {
-		let downlink: number | undefined;
-		let sendingAudio = false;
+	// Audio up and down are scored from getStats: inbound-rtp for the downlink mix (loss/concealment/
+	// jitter) and the far end's remote-inbound-rtp report for the uplink (fractionLost). Which of the two
+	// is actually included is decided by the caller from app state (mic on / others present); until a
+	// direction has real samples the numbers default to clean.
+	private calcAudioVotes(stats: RTCStatsReport): { uplink: number; downlink: number } {
+		let downLossRate = 0;
+		let concealmentRatio = 0;
+		let jitterMs = 0;
 		let upLossRate = 0;
 
 		stats.forEach(
@@ -344,7 +347,6 @@ export default class ConnectionQualityMonitor {
 					kind?: string;
 					packetsLost?: number;
 					packetsReceived?: number;
-					packetsSent?: number;
 					concealedSamples?: number;
 					totalSamplesReceived?: number;
 					jitter?: number;
@@ -360,25 +362,19 @@ export default class ConnectionQualityMonitor {
 					const dConcealed = Math.max(0, concealed - this.audioPrev.concealedSamples);
 					const dTotalSamples = Math.max(0, totalSamples - this.audioPrev.totalSamplesReceived);
 
-					const lossRate = deltaLossRate(
+					downLossRate = deltaLossRate(
 						lost,
 						recv,
 						this.audioPrev.packetsLost,
 						this.audioPrev.packetsReceived
 					);
-					const concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
-					const jitterMs = (r.jitter ?? 0) * 1000;
-					downlink = calcDownlinkAudioVote({ lossRate, concealmentRatio, jitterMs });
+					concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
+					jitterMs = (r.jitter ?? 0) * 1000;
 
 					this.audioPrev.packetsLost = lost;
 					this.audioPrev.packetsReceived = recv;
 					this.audioPrev.concealedSamples = concealed;
 					this.audioPrev.totalSamplesReceived = totalSamples;
-				}
-				if (r.type === 'outbound-rtp' && r.kind === 'audio') {
-					const sent = r.packetsSent ?? 0;
-					if (sent > this.audioPrev.packetsSent) sendingAudio = true;
-					this.audioPrev.packetsSent = sent;
 				}
 				if (r.type === 'remote-inbound-rtp' && r.kind === 'audio') {
 					upLossRate = r.fractionLost ?? 0;
@@ -386,8 +382,10 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		const uplink = sendingAudio ? calcUplinkAudioVote({ lossRate: upLossRate }) : undefined;
-		return { uplink, downlink };
+		return {
+			uplink: calcUplinkAudioVote({ lossRate: upLossRate }),
+			downlink: calcDownlinkAudioVote({ lossRate: downLossRate, concealmentRatio, jitterMs })
+		};
 	}
 
 	private calcUplinkScreen(stats: RTCStatsReport): number {

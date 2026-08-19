@@ -39,11 +39,11 @@ vi.mock('../network/webRTC/ConnectionQualityMonitor', async (importOriginal) => 
 
 			changedAt = 0;
 
-			lastVotes = undefined;
-
 			emitInitial = vi.fn(() => Promise.resolve());
 
 			resyncTo = vi.fn(() => Promise.resolve());
+
+			rebroadcast = vi.fn();
 
 			stop = vi.fn();
 		}
