@@ -58,9 +58,9 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
 	getVideoFeedsForQuality(): Array<{
-		requestedRung: number;
+		userId: string;
+		frameHeight: number;
 		inboundLossRate: number;
-		freezeFraction: number;
 	}>;
 	getScreenReceiver(): RTCRtpReceiver | null;
 	hasScreenFeed(): boolean;

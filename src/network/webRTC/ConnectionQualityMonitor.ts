@@ -53,10 +53,8 @@ function winPush<T>(ring: Timed<T>[], ts: number, data: T): void {
 }
 
 type AudioDownSnap = {
-	concealedSamples: number;
-	totalSamplesReceived: number;
-	jbDelay: number;
-	jbEmitted: number;
+	packetsLost: number;
+	packetsReceived: number;
 };
 
 type AudioUpSnap = { fractionLost: number; roundTripTime: number };
@@ -173,6 +171,12 @@ export default class ConnectionQualityMonitor {
 
 	private lastVideoSender: RTCRtpSender | null = null;
 
+	// topActiveRung computed this tick (null = video sender absent)
+	private currentTopActiveRung: number | null = null;
+
+	// maxTier value included in the last WS send — compared each tick to detect changes
+	private lastSentMaxTier: 'best' | 'medium' | 'low' | undefined = undefined;
+
 	constructor(
 		meetingId: string,
 		audioConn: IBidirectionalConnectionAudioInOut,
@@ -186,7 +190,7 @@ export default class ConnectionQualityMonitor {
 		this.audioDownRing = [
 			{
 				ts: t0,
-				data: { concealedSamples: 0, totalSamplesReceived: 0, jbDelay: 0, jbEmitted: 0 }
+				data: { packetsLost: 0, packetsReceived: 0 }
 			}
 		];
 		this.screenDownRing = [
@@ -220,13 +224,26 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
+	private getMaxTier(): 'best' | 'medium' | 'low' | undefined {
+		if (this.currentTopActiveRung == null || this.currentTopActiveRung < 0) return undefined;
+		if (this.currentTopActiveRung >= 2) return 'best';
+		if (this.currentTopActiveRung === 1) return 'medium';
+		return 'low';
+	}
+
 	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt
 	// guard.
 	private applyLocalQuality(level: ConnectionQuality): void {
 		if (this.myUserId == null) return;
 		useStore
 			.getState()
-			.setParticipantConnectionQuality(this.meetingId, this.myUserId, level, this.changedAt);
+			.setParticipantConnectionQuality(
+				this.meetingId,
+				this.myUserId,
+				level,
+				this.changedAt,
+				this.lastSentMaxTier
+			);
 	}
 
 	async emitInitial(): Promise<void> {
@@ -234,8 +251,10 @@ export default class ConnectionQualityMonitor {
 		// bypass hysteresis for the initial broadcast
 		this.committed = level;
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
+		const maxTier = this.getMaxTier();
+		this.lastSentMaxTier = maxTier;
 		useStore.getState().setConnectionQualityVotes(votes);
-		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt);
+		wsClient.sendConnectionQuality(this.meetingId, level, this.changedAt, undefined, maxTier);
 		this.applyLocalQuality(level);
 	}
 
@@ -244,25 +263,48 @@ export default class ConnectionQualityMonitor {
 			await this.emitInitial();
 		}
 		if (this.committed != null) {
-			wsClient.sendConnectionQuality(this.meetingId, this.committed, this.changedAt, userId);
+			wsClient.sendConnectionQuality(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				userId,
+				this.lastSentMaxTier
+			);
 		}
 	}
 
 	rebroadcast(): void {
 		if (this.committed != null) {
-			wsClient.sendConnectionQuality(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendConnectionQuality(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				undefined,
+				this.lastSentMaxTier
+			);
 		}
 	}
 
 	private async evaluate(): Promise<void> {
 		const { votes, level } = await this.computeQuality();
 		const { next, streak, changed } = stepHysteresis(level, this.committed, this.betterStreak);
+		const maxTier = this.getMaxTier();
+		const maxTierChanged = maxTier !== this.lastSentMaxTier;
 		this.betterStreak = streak;
 		useStore.getState().setConnectionQualityVotes(votes);
 		if (changed) {
 			this.committed = next;
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-			wsClient.sendConnectionQuality(this.meetingId, next, this.changedAt);
+		}
+		if (changed || maxTierChanged) {
+			this.lastSentMaxTier = maxTier;
+			wsClient.sendConnectionQuality(
+				this.meetingId,
+				this.committed ?? next,
+				this.changedAt,
+				undefined,
+				maxTier
+			);
 		}
 		this.applyLocalQuality(next);
 	}
@@ -286,6 +328,7 @@ export default class ConnectionQualityMonitor {
 		);
 
 		// webcam uplink: only while a video sender exists (camera on)
+		this.currentTopActiveRung = null;
 		if (this.videoOut.rtpSender != null) {
 			try {
 				const stats = await this.videoOut.rtpSender.getStats();
@@ -296,9 +339,24 @@ export default class ConnectionQualityMonitor {
 		}
 
 		// webcam downlink: only while receiving feeds, from the in-connection's per-feed quality states
+		const tierMap: Record<'best' | 'medium' | 'low', number> = { best: 2, medium: 1, low: 0 };
 		const videoFeeds = this.videoIn.getVideoFeedsForQuality();
 		if (videoFeeds.length > 0) {
-			votes.downlinkWebcam = calcDownlinkWebcamVote(videoFeeds);
+			const mappedFeeds = videoFeeds.map((f) => {
+				let shownTierIdx: number;
+				if (f.frameHeight >= 720) {
+					shownTierIdx = 2;
+				} else if (f.frameHeight >= 360) {
+					shownTierIdx = 1;
+				} else {
+					shownTierIdx = 0;
+				}
+				const ownerMaxTier =
+					useStore.getState().activeMeeting?.connectionQuality[f.userId]?.maxTier;
+				const senderMaxTierIdx = ownerMaxTier != null ? (tierMap[ownerMaxTier] ?? -1) : -1;
+				return { shownTierIdx, senderMaxTierIdx, inboundLossRate: f.inboundLossRate };
+			});
+			votes.downlinkWebcam = calcDownlinkWebcamVote(mappedFeeds);
 		}
 
 		// audio is one bidirectional AudioBridge channel that is always up in a meeting, so presence is
@@ -350,11 +408,20 @@ export default class ConnectionQualityMonitor {
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
 		const track = this.videoOut.rtpSender?.track;
-		let producibleRungs = 1;
-		if (track && typeof (track as MediaStreamTrack).getSettings === 'function') {
-			const height = (track as MediaStreamTrack).getSettings().height ?? 0;
-			if (height >= 720) producibleRungs = 3;
-			else if (height >= 360) producibleRungs = 2;
+		const captureHeight =
+			track && typeof (track as MediaStreamTrack).getSettings === 'function'
+				? ((track as MediaStreamTrack).getSettings().height ?? 0)
+				: 0;
+		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+		let producibleRungs: number;
+		if (tiers && tiers.length > 0) {
+			producibleRungs = tiers.filter((t) => captureHeight >= t.height).length;
+		} else if (captureHeight >= 720) {
+			producibleRungs = 3;
+		} else if (captureHeight >= 360) {
+			producibleRungs = 2;
+		} else {
+			producibleRungs = 1;
 		}
 
 		const ridToIndex: Record<string, 0 | 1 | 2> = { l: 0, m: 1, h: 2 };
@@ -407,6 +474,7 @@ export default class ConnectionQualityMonitor {
 			);
 			this.lastTopActiveRung = topActiveRung;
 		}
+		this.currentTopActiveRung = topActiveRung;
 
 		// remote-inbound-rtp video fractionLost is instantaneous — average over the window
 		stats.forEach((r: RTCStats & { kind?: string; fractionLost?: number }) => {
@@ -428,9 +496,8 @@ export default class ConnectionQualityMonitor {
 		});
 	}
 
-	// Audio up and down are scored from getStats: inbound-rtp for the downlink mix
-	// (concealmentRatio + jbDelayPerFrameSec) and the far end's remote-inbound-rtp report for the
-	// uplink (fractionLost + roundTripTime). Which of the two is actually included is decided by the
+	// Audio up and down are scored from getStats: inbound-rtp for the downlink (delta packetsLost)
+	// and remote-inbound-rtp for the uplink (fractionLost). Which is included is decided by the
 	// caller from app state (mic on / others present).
 	private calcAudioVotes(stats: RTCStatsReport): { uplink: number; downlink: number } {
 		const now = Date.now();
@@ -442,20 +509,16 @@ export default class ConnectionQualityMonitor {
 			(
 				r: RTCStats & {
 					kind?: string;
-					concealedSamples?: number;
-					totalSamplesReceived?: number;
-					jitterBufferDelay?: number;
-					jitterBufferEmittedCount?: number;
+					packetsLost?: number;
+					packetsReceived?: number;
 					fractionLost?: number;
 					roundTripTime?: number;
 				}
 			) => {
 				if (r.type === INBOUND_RTP && r.kind === 'audio') {
 					downSnap = {
-						concealedSamples: r.concealedSamples ?? 0,
-						totalSamplesReceived: r.totalSamplesReceived ?? 0,
-						jbDelay: r.jitterBufferDelay ?? 0,
-						jbEmitted: r.jitterBufferEmittedCount ?? 0
+						packetsLost: r.packetsLost ?? 0,
+						packetsReceived: r.packetsReceived ?? 0
 					};
 				}
 				if (r.type === REMOTE_INBOUND_RTP && r.kind === 'audio') {
@@ -467,31 +530,25 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		// uplink: average instantaneous fractionLost + roundTripTime over the window
+		// uplink: average instantaneous fractionLost over the window
 		let uplinkScore = 10;
 		if (upSnap != null) {
 			winPush(this.audioUpRing, now, upSnap as AudioUpSnap);
 			const avgLoss =
 				this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / this.audioUpRing.length;
-			const avgRttMs =
-				(this.audioUpRing.reduce((s, e) => s + e.data.roundTripTime, 0) / this.audioUpRing.length) *
-				1000;
-			uplinkScore = calcUplinkAudioVote({ lossRate: avgLoss, rttMs: avgRttMs });
+			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss });
 		}
 
-		// downlink: compute deltas over the 5 s window
+		// downlink: windowed delta packetsLost / (packetsLost + packetsReceived)
 		let downlinkScore = 10;
 		if (downSnap != null) {
 			winPush(this.audioDownRing, now, downSnap as AudioDownSnap);
 			const base = this.audioDownRing[0].data;
 			const cur = downSnap as AudioDownSnap;
-			const dConcealed = Math.max(0, cur.concealedSamples - base.concealedSamples);
-			const dTotalSamples = Math.max(0, cur.totalSamplesReceived - base.totalSamplesReceived);
-			const dJbDelay = Math.max(0, cur.jbDelay - base.jbDelay);
-			const dJbEmitted = Math.max(0, cur.jbEmitted - base.jbEmitted);
-			const concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
-			const jbDelayPerFrameSec = dJbEmitted > 0 ? dJbDelay / dJbEmitted : 0;
-			downlinkScore = calcDownlinkAudioVote({ concealmentRatio, jbDelayPerFrameSec });
+			const dLost = Math.max(0, cur.packetsLost - base.packetsLost);
+			const dRecv = Math.max(0, cur.packetsReceived - base.packetsReceived);
+			const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
+			downlinkScore = calcDownlinkAudioVote({ lossRate });
 		}
 
 		return { uplink: uplinkScore, downlink: downlinkScore };
@@ -507,15 +564,12 @@ export default class ConnectionQualityMonitor {
 			}
 		});
 
-		const lossRate =
+		const fractionLost =
 			this.screenUpLossRing.length > 0
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
 
-		// bwFpsImpairment: omitted. A reliable fps target under 'bandwidth' limitation requires a
-		// rolling max of framesPerSecond observed while unlimited, which is not yet tracked here.
-		// Pass undefined (defaults to 0 in the vote function).
-		return calcUplinkScreenVote({ lossRate });
+		return calcUplinkScreenVote({ fractionLost });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport): number {
@@ -550,18 +604,10 @@ export default class ConnectionQualityMonitor {
 		winPush(this.screenDownRing, now, snap as ScreenDownSnap);
 		const base = this.screenDownRing[0].data;
 		const cur = snap as ScreenDownSnap;
-		const windowSec = Math.max((now - this.screenDownRing[0].ts) / 1000, 0.1);
-
-		const dFreeze = Math.max(0, cur.totalFreezesDuration - base.totalFreezesDuration);
-		const dQpSum = Math.max(0, cur.qpSum - base.qpSum);
-		const dFrames = Math.max(0, cur.framesDecoded - base.framesDecoded);
 		const dPktLost = Math.max(0, cur.packetsLost - base.packetsLost);
 		const dPktRecv = Math.max(0, cur.packetsReceived - base.packetsReceived);
+		const lossRate = dPktLost + dPktRecv > 0 ? dPktLost / (dPktLost + dPktRecv) : 0;
 
-		const freezeFraction = dFreeze / windowSec;
-		const qp = dFrames > 0 ? dQpSum / dFrames : undefined;
-		const lossRate = dPktLost + dPktRecv > 0 ? dPktLost / (dPktLost + dPktRecv) : undefined;
-
-		return calcDownlinkScreenVote({ freezeFraction, qp, lossRate });
+		return calcDownlinkScreenVote({ lossRate });
 	}
 }

@@ -73,14 +73,16 @@ export class WebSocketClient {
 		meetingId: string,
 		quality: ConnectionQuality,
 		changedAt: number,
-		to?: string
+		to?: string,
+		maxTier?: 'best' | 'medium' | 'low'
 	): void {
 		this.send({
 			type: 'ConnectionQualityStatus',
 			meetingId,
 			quality,
 			changedAt,
-			...(to ? { to } : {})
+			...(to ? { to } : {}),
+			...(maxTier != null ? { maxTier } : {})
 		});
 	}
 

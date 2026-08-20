@@ -11,5 +11,11 @@ export const meetingParticipantConnectionQualityChangedEventHandler = (
 ): void => {
 	useStore
 		.getState()
-		.setParticipantConnectionQuality(event.meetingId, event.userId, event.quality, event.changedAt);
+		.setParticipantConnectionQuality(
+			event.meetingId,
+			event.userId,
+			event.quality,
+			event.changedAt,
+			event.maxTier
+		);
 };

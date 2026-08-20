@@ -18,4 +18,5 @@ export type WsConnectionQualityStatusMessage = {
 	quality: ConnectionQuality;
 	changedAt: number;
 	to?: string;
+	maxTier?: 'best' | 'medium' | 'low';
 };

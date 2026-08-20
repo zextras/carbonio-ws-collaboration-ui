@@ -23,6 +23,7 @@ type InboundVideoStats = {
 	jbDelay: number;
 	jbEmitted: number;
 	totalFreezesDuration: number;
+	frameHeight: number;
 };
 
 // Cumulative snapshot for the 5 s sliding-window used to compute per-feed vote inputs.
@@ -44,7 +45,8 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 		recv: 0,
 		jbDelay: 0,
 		jbEmitted: 0,
-		totalFreezesDuration: 0
+		totalFreezesDuration: 0,
+		frameHeight: 0
 	};
 	report.forEach(
 		(
@@ -54,6 +56,7 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				jitterBufferDelay?: number;
 				jitterBufferEmittedCount?: number;
 				totalFreezesDuration?: number;
+				frameHeight?: number;
 				kind?: string;
 			}
 		) => {
@@ -63,6 +66,7 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				s.jbDelay = r.jitterBufferDelay ?? 0;
 				s.jbEmitted = r.jitterBufferEmittedCount ?? 0;
 				s.totalFreezesDuration = r.totalFreezesDuration ?? 0;
+				s.frameHeight = r.frameHeight ?? 0;
 			}
 		}
 	);
@@ -97,7 +101,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	>();
 
 	// per-feed quality data for the connection-quality vote (windowed over 5 s)
-	private feedQualityData = new Map<string, { inboundLossRate: number; freezeFraction: number }>();
+	private feedQualityData = new Map<string, { inboundLossRate: number; frameHeight: number }>();
 
 	// per-feed 5 s sliding window of cumulative stats for windowed vote computation
 	private feedCumRing = new Map<string, FeedCumSnap[]>();
@@ -224,7 +228,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					return receiver
 						.getStats()
 						.then((report) => {
-							const { lost, recv, jbDelay, jbEmitted, totalFreezesDuration } =
+							const { lost, recv, jbDelay, jbEmitted, totalFreezesDuration, frameHeight } =
 								readInboundVideoStats(report);
 							const prev = this.prevStats.get(key) ?? {
 								lost: 0,
@@ -251,13 +255,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							feedWinPush(ring, { ts: now, lost, recv, totalFreezesDuration });
 							this.feedCumRing.set(key, ring);
 							const base = ring[0];
-							const windowSec = Math.max((now - base.ts) / 1000, 0.1);
 							const dLostW = Math.max(0, lost - base.lost);
 							const dRecvW = Math.max(0, recv - base.recv);
-							const dFreezeW = Math.max(0, totalFreezesDuration - base.totalFreezesDuration);
 							this.feedQualityData.set(key, {
 								inboundLossRate: dLostW + dRecvW > 0 ? dLostW / (dLostW + dRecvW) : 0,
-								freezeFraction: dFreezeW / windowSec
+								frameHeight
 							});
 							this.prevStats.set(key, {
 								lost,
@@ -329,20 +331,19 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	public getVideoFeedsForQuality(): Array<{
-		requestedRung: number;
+		userId: string;
+		frameHeight: number;
 		inboundLossRate: number;
-		freezeFraction: number;
 	}> {
-		const feeds: Array<{ requestedRung: number; inboundLossRate: number; freezeFraction: number }> =
-			[];
+		const feeds: Array<{ userId: string; frameHeight: number; inboundLossRate: number }> = [];
 		Object.keys(this.streamsMap).forEach((key) => {
 			if (!key.endsWith('-video')) return;
 			// suppressed feeds are excluded — active feeds only
 			if (this.suppressedVideo.has(key)) return;
-			if (this.videoReceivers.has(key)) {
-				const state = this.qualityStates.get(key);
-				const qd = this.feedQualityData.get(key) ?? { inboundLossRate: 0, freezeFraction: 0 };
-				feeds.push({ requestedRung: state?.substream ?? 2, ...qd });
+			const entry = this.videoReceivers.get(key);
+			if (entry != null) {
+				const qd = this.feedQualityData.get(key) ?? { inboundLossRate: 0, frameHeight: 0 };
+				feeds.push({ userId: entry.userId, ...qd });
 			}
 		});
 		return feeds;

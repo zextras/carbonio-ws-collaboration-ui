@@ -10,6 +10,7 @@ import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { rtcDebug } from '../../utils/debug';
 import { getVideoStream } from '../../utils/UserMediaManager';
 import { videoIceRestart, updateMediaOffer } from '../apis/MeetingsApi';
 
@@ -92,18 +93,27 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	private addSimulcastTransceiver(videoTrack: MediaStreamTrack, stream: MediaStream): void {
-		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers ?? [
-			{ rid: 'h', scaleResolutionDownBy: 1 },
-			{ rid: 'm', scaleResolutionDownBy: 2 },
-			{ rid: 'l', scaleResolutionDownBy: 4 }
-		];
+		const ridMap: Record<'best' | 'medium' | 'low', string> = { best: 'h', medium: 'm', low: 'l' };
+		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+		const captureHeight =
+			(typeof videoTrack?.getSettings === 'function'
+				? videoTrack.getSettings().height
+				: undefined) ?? 0;
+		const producible = tiers ? tiers.filter((t) => captureHeight >= t.height) : [];
+		let sendEncodings: RTCRtpEncodingParameters[];
+		if (!tiers || tiers.length === 0 || producible.length === 0) {
+			rtcDebug('addSimulcastTransceiver: no producible tiers — falling back to single h layer');
+			sendEncodings = [{ rid: 'h', scaleResolutionDownBy: 1 }];
+		} else {
+			sendEncodings = producible.map((t) => ({
+				rid: ridMap[t.name],
+				scaleResolutionDownBy: t.mode === 'from' ? 1 : captureHeight / t.height
+			}));
+		}
 		const transceiver = this.peerConn!.addTransceiver(videoTrack, {
 			direction: 'sendonly',
 			streams: [stream],
-			sendEncodings: tiers.map((t) => ({
-				rid: t.rid,
-				scaleResolutionDownBy: t.scaleResolutionDownBy
-			}))
+			sendEncodings
 		});
 		this.rtpSender = transceiver.sender;
 		try {

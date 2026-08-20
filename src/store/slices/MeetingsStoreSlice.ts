@@ -243,7 +243,8 @@ export const useMeetingsStoreSlice: StateCreator<
 		meetingId: string,
 		userId: string,
 		quality: ConnectionQuality,
-		changedAt: number
+		changedAt: number,
+		maxTier?: 'best' | 'medium' | 'low'
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -251,7 +252,11 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
-					activeMeeting.connectionQuality[userId] = { quality, changedAt };
+					activeMeeting.connectionQuality[userId] = {
+						quality,
+						changedAt,
+						...(maxTier != null ? { maxTier } : {})
+					};
 				}
 			}),
 			false,

@@ -141,7 +141,7 @@ const makeMonitor = (
 			track?: { getSettings: () => { height: number } };
 			getStats: () => Promise<RTCStatsReport>;
 		};
-		videoFeeds?: Array<{ requestedRung: number; inboundLossRate: number; freezeFraction: number }>;
+		videoFeeds?: Array<{ userId: string; frameHeight: number; inboundLossRate: number }>;
 		hasScreenFeed?: boolean;
 		screenReceiverStats?: () => Promise<RTCStatsReport>;
 		screenSender?: { getStats: () => Promise<RTCStatsReport> };
@@ -198,7 +198,7 @@ const publishedVotes = (): StreamVotes =>
 	useStore.getState().activeMeeting?.connectionQualityVotes ?? {};
 
 describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
-	it('audio: scores down (concealmentRatio) and up (fractionLost + rtt) independently while both flow', async () => {
+	it('audio: scores down (packet loss) and up (fractionLost) independently while both flow', async () => {
 		const monitor = makeMonitor({
 			myAudioOn: true,
 			otherParticipant: true,
@@ -208,21 +208,17 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'audio',
-							concealedSamples: 100,
-							totalSamplesReceived: 1000,
-							jitterBufferDelay: 0,
-							jitterBufferEmittedCount: 0
+							// delta from zero baseline: 250/1000=0.25 -> round1(10*(1-0.25/0.5))=5
+							packetsLost: 250,
+							packetsReceived: 750
 						},
-						// fractionLost 0.15, no rtt -> uplinkAudio = score(max(0.15/0.30,0)) = 5
-						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.15, roundTripTime: 0 }
+						// fractionLost 0.25 -> uplinkAudio = round1(10*(1-0.25/0.5)) = 5
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.25, roundTripTime: 0 }
 					])
 				)
 		});
 		await monitor.emitInitial();
-		// concealmentRatio = 100/1000 = 0.1, jbDelayPerFrameSec = 0
-		// down impairment = max(0.1/0.20, 0) = 0.5 -> score = 5
 		expect(publishedVotes().downlinkAudio).toBe(5);
-		// up = score(max(0.15/0.30, (0-300)/700)) = score(0.5) = 5
 		expect(publishedVotes().uplinkAudio).toBe(5);
 		expect(monitor.committed).toBe('medium');
 	});
@@ -287,7 +283,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().uplinkAudio).toBeUndefined();
 	});
 
-	it('audio downlink: jbDelayPerFrameSec at the BAD threshold saturates the vote to 0', async () => {
+	it('audio downlink: loss at TOL_AUDIO (0.50) saturates the vote to 0', async () => {
 		const monitor = makeMonitor({
 			otherParticipant: true,
 			audioStats: () =>
@@ -296,17 +292,14 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'audio',
-							concealedSamples: 0,
-							totalSamplesReceived: 0,
-							// 0.50 s/frame over 100 frames = JB_BAD
-							jitterBufferDelay: 50,
-							jitterBufferEmittedCount: 100
+							packetsLost: 50,
+							packetsReceived: 50
 						}
 					])
 				)
 		});
 		await monitor.emitInitial();
-		// jbDelayPerFrameSec = 50/100 = 0.50 = JB_BAD -> impairment = 1 -> vote 0
+		// delta from zero baseline: dLost=50, dRecv=50 -> lossRate=0.5 = TOL_AUDIO -> vote 0
 		expect(publishedVotes().downlinkAudio).toBe(0);
 	});
 
@@ -427,15 +420,29 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().uplinkWebcam).toBe(6.7);
 	});
 
-	it('webcam downlink: vote is computed from requestedRung, inboundLossRate, and freezeFraction', async () => {
+	it('webcam downlink: vote uses shownTierIdx vs senderMaxTierIdx and inboundLossRate', async () => {
 		const monitor = makeMonitor({
 			videoFeeds: [
-				{ requestedRung: 2, inboundLossRate: 0, freezeFraction: 0 },
-				{ requestedRung: 0, inboundLossRate: 0, freezeFraction: 0 }
+				{ userId: 'user1', frameHeight: 720, inboundLossRate: 0 },
+				{ userId: 'user2', frameHeight: 144, inboundLossRate: 0 }
 			]
 		});
+		// prime the store with maxTier='best' for both senders
+		useStore.setState((s) => ({
+			...s,
+			activeMeeting: s.activeMeeting
+				? {
+						...s.activeMeeting,
+						connectionQuality: {
+							user1: { quality: 'optimal', changedAt: 1, maxTier: 'best' },
+							user2: { quality: 'optimal', changedAt: 1, maxTier: 'best' }
+						}
+					}
+				: s.activeMeeting
+		}));
 		await monitor.emitInitial();
-		// feed1: tierVote=10*(1-0)=10; feed2: tierVote=3.3*(1-0)=3.3; avg=6.7
+		// user1: shownTierIdx=2, senderMaxTierIdx=2 -> ceiling=10; loss=0 -> 10
+		// user2: shownTierIdx=0, senderMaxTierIdx=2 -> ceiling=1/3*10=3.3; loss=0 -> 3.3; avg=6.7
 		expect(publishedVotes().downlinkWebcam).toBe(6.7);
 	});
 
@@ -501,7 +508,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().downlinkScreen).toBe(8);
 	});
 
-	it('screen downlink: a totalFreezesDuration delta saturates the freeze fraction vote', async () => {
+	it('screen downlink: loss at TOL_SCREEN (0.15) saturates the vote to 0', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,
 			screenReceiverStats: () =>
@@ -510,10 +517,9 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'video',
-							packetsLost: 0,
-							packetsReceived: 100,
-							// 1 second frozen — large enough to saturate freezeFraction regardless of windowSec
-							totalFreezesDuration: 1,
+							packetsLost: 15,
+							packetsReceived: 85,
+							totalFreezesDuration: 0,
 							qpSum: 0,
 							framesDecoded: 0
 						}
@@ -521,7 +527,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				)
 		});
 		await monitor.emitInitial();
-		// dFreeze/windowSec >= FREEZE_UNUSABLE (0.20) -> clamped to 1 -> vote 0
+		// delta from zero baseline: dLost=15, dRecv=85 -> lossRate=0.15 = TOL_SCREEN -> vote 0
 		expect(publishedVotes().downlinkScreen).toBe(0);
 	});
 
@@ -531,28 +537,26 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 			otherParticipant: true,
 			audioStats: () => {
 				tick += 1;
-				// cumulative counters grow across ticks
-				const concealedSamples = tick === 1 ? 1000 : 2000;
-				const totalSamplesReceived = tick === 1 ? 10000 : 20000;
+				// cumulative counters grow across ticks; lossRate stays at 0.25 each tick
+				const packetsLost = tick === 1 ? 250 : 500;
+				const packetsReceived = tick === 1 ? 750 : 1500;
 				return Promise.resolve(
 					report([
 						{
 							type: INBOUND_RTP,
 							kind: 'audio',
-							concealedSamples,
-							totalSamplesReceived,
-							jitterBufferDelay: 0,
-							jitterBufferEmittedCount: 0
+							packetsLost,
+							packetsReceived
 						}
 					])
 				);
 			}
 		});
 		await monitor.emitInitial();
-		// tick 1: delta from zero baseline -> 1000/10000=0.1 -> score(0.5)=5
+		// tick 1: delta from zero baseline -> 250/1000=0.25 -> round1(10*(1-0.25/0.5))=5
 		expect(publishedVotes().downlinkAudio).toBe(5);
 		await monitor.emitInitial();
-		// tick 2: baseline still zero (both within 5 s window) -> 2000/20000=0.1 -> score 5
+		// tick 2: baseline still zero (both within 5 s window) -> 500/2000=0.25 -> vote 5
 		expect(publishedVotes().downlinkAudio).toBe(5);
 	});
 });

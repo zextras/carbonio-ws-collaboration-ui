@@ -18,43 +18,39 @@ import {
 } from './connectionQualityScore';
 
 describe('calcUplinkAudioVote', () => {
-	it('returns 10 for no loss and RTT at threshold', () => {
-		expect(calcUplinkAudioVote({ lossRate: 0, rttMs: 300 })).toBe(10);
+	it('returns 10 for no loss (TOL_AUDIO=0.5)', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0 })).toBe(10);
 	});
 
-	it('returns 5.0 at half the loss threshold (0.15/0.30)', () => {
-		expect(calcUplinkAudioVote({ lossRate: 0.15, rttMs: 300 })).toBe(5);
+	it('returns 5 at half the loss tolerance (0.25/0.50)', () => {
+		// 1 - 0.25/0.5 = 0.5 -> 5
+		expect(calcUplinkAudioVote({ fractionLost: 0.25 })).toBe(5);
 	});
 
-	it('returns 0 at full loss threshold (0.30)', () => {
-		expect(calcUplinkAudioVote({ lossRate: 0.3 })).toBe(0);
+	it('returns 0 at full loss tolerance (0.50)', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0.5 })).toBe(0);
 	});
 
-	it('returns 5.0 when RTT is halfway through the bad range (650 ms)', () => {
-		expect(calcUplinkAudioVote({ lossRate: 0, rttMs: 650 })).toBe(5);
-	});
-
-	it('returns 8.0 for 6% loss with RTT at threshold', () => {
-		expect(calcUplinkAudioVote({ lossRate: 0.06, rttMs: 300 })).toBe(8);
+	it('uplink audio: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 1 })).toBe(0);
 	});
 });
 
 describe('calcUplinkScreenVote', () => {
-	it('returns 10 for no loss', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0 })).toBe(10);
+	it('returns 10 for no loss (TOL_SCREEN=0.15)', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0 })).toBe(10);
 	});
 
-	it('returns 5.0 at half the threshold (0.075)', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0.075 })).toBe(5);
+	it('returns 5 at half the loss tolerance (0.075/0.15)', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0.075 })).toBe(5);
 	});
 
-	it('returns 0 at full loss threshold (0.15)', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0.15 })).toBe(0);
+	it('returns 0 at full loss tolerance (0.15)', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0.15 })).toBe(0);
 	});
 
-	it('uses bwFpsImpairment when it is the dominant signal', () => {
-		// max(loss=0.5, bwFps=0.8) -> 0.8 -> score = round1((1-0.8)*10) = 2.0
-		expect(calcUplinkScreenVote({ lossRate: 0.075, bwFpsImpairment: 0.8 })).toBe(2);
+	it('uplink screen: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 1 })).toBe(0);
 	});
 });
 
@@ -73,8 +69,8 @@ describe('calcUplinkWebcamVote', () => {
 		).toBe(10);
 	});
 
-	it('returns 9.5 when at top rung but 5% loss', () => {
-		// tierVote=10; round1(10*(1-0.05))=9.5
+	it('returns 8.3 when at top rung but 5% loss (TOL_WEBCAM=0.3)', () => {
+		// ceiling=10; round1(10*(1-0.05/0.3))=round1(10*0.833)=8.3
 		expect(
 			calcUplinkWebcamVote({
 				topActiveRung: 2,
@@ -82,7 +78,7 @@ describe('calcUplinkWebcamVote', () => {
 				bwLimitedFraction: 0,
 				lossRate: 0.05
 			})
-		).toBe(9.5);
+		).toBe(8.3);
 	});
 
 	it('returns 6.7 when BW-limited to rung 1 of 3 with no loss', () => {
@@ -98,8 +94,8 @@ describe('calcUplinkWebcamVote', () => {
 		).toBe(6.7);
 	});
 
-	it('returns 6.0 when BW-limited to rung 1 of 3 with 10% loss', () => {
-		// tierVote=6.7; round1(6.7*(1-0.10)) = round1(6.0) = 6.0
+	it('returns 4.4 when BW-limited to rung 1 of 3 with 10% loss (TOL_WEBCAM=0.3)', () => {
+		// ceiling=(2/3)*10=6.67; round1(6.67*(1-0.1/0.3))=round1(6.67*0.667)=round1(4.44)=4.4
 		expect(
 			calcUplinkWebcamVote({
 				topActiveRung: 1,
@@ -107,7 +103,7 @@ describe('calcUplinkWebcamVote', () => {
 				bwLimitedFraction: 1,
 				lossRate: 0.1
 			})
-		).toBe(6);
+		).toBe(4.4);
 	});
 
 	it('returns 3.3 when BW-limited to rung 0 of 3 with no loss', () => {
@@ -192,47 +188,54 @@ describe('calcUplinkWebcamVote', () => {
 });
 
 describe('calcDownlinkWebcamVote', () => {
-	it('returns 10 for a single feed at top requested rung with no loss and no freeze', () => {
+	it('returns 10 when sender offers top tier and we show top tier, no loss', () => {
+		// ceiling=min(1,3/3)*10=10; loss=0 -> 10
 		expect(
-			calcDownlinkWebcamVote([{ requestedRung: 2, inboundLossRate: 0, freezeFraction: 0 }])
+			calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0 }])
 		).toBe(10);
 	});
 
-	it('returns 6.7 for a single feed at middle rung with no degradation', () => {
-		// tierVote=(2/3)*10=6.7; lossFactor=0
+	it('returns 6.7 when showing medium of three offered tiers, no loss', () => {
+		// ceiling=min(1,2/3)*10=6.7; loss=0 -> 6.7
 		expect(
-			calcDownlinkWebcamVote([{ requestedRung: 1, inboundLossRate: 0, freezeFraction: 0 }])
+			calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: 2, inboundLossRate: 0 }])
 		).toBe(6.7);
 	});
 
-	it('returns 3.3 for a single feed at bottom rung with no degradation', () => {
-		// tierVote=(1/3)*10=3.3; lossFactor=0
+	it('returns 10 when sender only offers medium and we show medium (not penalized)', () => {
+		// ceiling=min(1,2/2)*10=10; sender never offered higher -> no penalty
 		expect(
-			calcDownlinkWebcamVote([{ requestedRung: 0, inboundLossRate: 0, freezeFraction: 0 }])
+			calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: 1, inboundLossRate: 0 }])
+		).toBe(10);
+	});
+
+	it('returns 3.3 when showing low of three offered tiers, no loss', () => {
+		// ceiling=min(1,1/3)*10=3.3; loss=0 -> 3.3
+		expect(
+			calcDownlinkWebcamVote([{ shownTierIdx: 0, senderMaxTierIdx: 2, inboundLossRate: 0 }])
 		).toBe(3.3);
 	});
 
-	it('returns 9.2 when top rung but 8% inbound loss (loss compounds on the tier)', () => {
-		// tierVote=10; lossFactor=0.08; round1(10*0.92)=9.2
+	it('returns 10 when senderMaxTierIdx is -1 (unknown sender, no penalty)', () => {
 		expect(
-			calcDownlinkWebcamVote([{ requestedRung: 2, inboundLossRate: 0.08, freezeFraction: 0 }])
-		).toBe(9.2);
+			calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: -1, inboundLossRate: 0 }])
+		).toBe(10);
 	});
 
-	it('returns 5.0 when top rung but 50% freeze fraction', () => {
-		// tierVote=10; lossFactor=max(0,0.5)=0.5; round1(10*0.5)=5.0
+	it('returns 5 when showing top of top and 15% inbound loss (half TOL_WEBCAM=0.3)', () => {
+		// ceiling=10; 10*(1-0.15/0.3)=10*0.5=5
 		expect(
-			calcDownlinkWebcamVote([{ requestedRung: 2, inboundLossRate: 0, freezeFraction: 0.5 }])
+			calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0.15 }])
 		).toBe(5);
 	});
 
-	it('averages feed votes: top-rung perfect feed + bottom-rung degraded feed', () => {
-		// feed1: tierVote=10, lossFactor=0 → 10; feed2: tierVote=3.3, lossFactor=0 → 3.3
-		// avg(10, 3.33) = 6.67 → round1 = 6.7
+	it('averages feed votes across multiple feeds', () => {
+		// feed1: ceiling=10, loss=0 -> 10; feed2: ceiling=min(1,1/3)*10=3.3, loss=0 -> 3.3
+		// avg(10, 3.33) = 6.67 -> round1 = 6.7
 		expect(
 			calcDownlinkWebcamVote([
-				{ requestedRung: 2, inboundLossRate: 0, freezeFraction: 0 },
-				{ requestedRung: 0, inboundLossRate: 0, freezeFraction: 0 }
+				{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0 },
+				{ shownTierIdx: 0, senderMaxTierIdx: 2, inboundLossRate: 0 }
 			])
 		).toBe(6.7);
 	});
@@ -243,40 +246,39 @@ describe('calcDownlinkWebcamVote', () => {
 });
 
 describe('calcDownlinkAudioVote', () => {
-	it('returns 10 for zero concealment at the JB_OK threshold', () => {
-		expect(calcDownlinkAudioVote({ concealmentRatio: 0, jbDelayPerFrameSec: 0.1 })).toBe(10);
+	it('returns 10 for zero loss (TOL_AUDIO=0.5)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0 })).toBe(10);
 	});
 
-	it('returns 5.0 at half the concealment unusable threshold (0.10/0.20)', () => {
-		expect(calcDownlinkAudioVote({ concealmentRatio: 0.1 })).toBe(5);
+	it('returns 5 at half the loss tolerance (0.25/0.50)', () => {
+		// 1 - 0.25/0.5 = 0.5 -> 5
+		expect(calcDownlinkAudioVote({ lossRate: 0.25 })).toBe(5);
 	});
 
-	it('returns 0 at the full concealment unusable threshold (0.20)', () => {
-		expect(calcDownlinkAudioVote({ concealmentRatio: 0.2 })).toBe(0);
+	it('returns 0 at full loss tolerance (0.50)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0.5 })).toBe(0);
 	});
 
-	it('returns 5.0 when jbDelayPerFrameSec is halfway through the bad range (0.30 s)', () => {
-		// (0.30 - 0.10) / (0.50 - 0.10) = 0.5 -> score(0.5) = 5.0
-		expect(calcDownlinkAudioVote({ concealmentRatio: 0, jbDelayPerFrameSec: 0.3 })).toBe(5);
+	it('downlink audio: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 1 })).toBe(0);
 	});
 });
 
 describe('calcDownlinkScreenVote', () => {
-	it('returns 10 for perfect conditions', () => {
-		expect(calcDownlinkScreenVote({ freezeFraction: 0, qp: 50, lossRate: 0 })).toBe(10);
+	it('returns 10 for zero loss (TOL_SCREEN=0.15)', () => {
+		expect(calcDownlinkScreenVote({ lossRate: 0 })).toBe(10);
 	});
 
-	it('returns 5.0 when freeze fraction is half the unusable threshold (0.10/0.20)', () => {
-		expect(calcDownlinkScreenVote({ freezeFraction: 0.1 })).toBe(5);
-	});
-
-	it('returns 5.0 when QP is halfway through the bad range (75)', () => {
-		// (75 - 50) / (100 - 50) = 0.5 -> score(0.5) = 5.0
-		expect(calcDownlinkScreenVote({ qp: 75 })).toBe(5);
-	});
-
-	it('returns 5.0 when loss is half the LOSS_VIDEO threshold (0.075)', () => {
+	it('returns 5 at half the loss tolerance (0.075/0.15)', () => {
 		expect(calcDownlinkScreenVote({ lossRate: 0.075 })).toBe(5);
+	});
+
+	it('returns 0 at full loss tolerance (0.15)', () => {
+		expect(calcDownlinkScreenVote({ lossRate: 0.15 })).toBe(0);
+	});
+
+	it('downlink screen: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
+		expect(calcDownlinkScreenVote({ lossRate: 1 })).toBe(0);
 	});
 });
 
@@ -315,10 +317,10 @@ describe('aggregateQuality', () => {
 		expect(aggregateQuality({ uplinkAudio: 5 }, true)).toBe('medium');
 	});
 
-	it('plain mean: a single bad audio vote is diluted but still maps high (no worst-aware min)', () => {
-		// mean(2, 10, 10) = 7.33 -> high
+	it('worst-aware blend: a single bad audio vote pulls the level down, not diluted to high', () => {
+		// mean(2,10,10)=7.33, min=2 -> 0.6*7.33 + 0.4*2 = 5.2 -> medium
 		expect(aggregateQuality({ uplinkAudio: 2, downlinkWebcam: 10, uplinkWebcam: 10 }, true)).toBe(
-			'high'
+			'medium'
 		);
 	});
 

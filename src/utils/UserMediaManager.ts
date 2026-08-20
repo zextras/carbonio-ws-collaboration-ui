@@ -65,13 +65,9 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		// Cap webcam capture at 720p so the top simulcast layer (scaleResolutionDownBy=1) stays
-		// bounded and uniform across publishers (a 1080p/4K camera would make a monster top layer).
-		const maxHeight = 720;
 		const videoConstraints: MediaTrackConstraints = {
-			aspectRatio: 1.7777,
-			width: { max: Math.round((maxHeight * 16) / 9) },
-			height: { max: maxHeight }
+			width: { ideal: 3840 },
+			height: { ideal: 2160 }
 		};
 		const constraints = deviceId
 			? { video: { deviceId: { exact: deviceId }, ...videoConstraints } }

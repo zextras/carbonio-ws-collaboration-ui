@@ -49,7 +49,11 @@ export type Session = {
 
 export type Version = `${number}.${number}.${number}`;
 
-export type SimulcastTier = { rid: string; scaleResolutionDownBy: number };
+export type SimulcastTier = {
+	name: 'best' | 'medium' | 'low';
+	height: number;
+	mode: 'from' | 'fixed';
+};
 
 export type AttributesList = {
 	privateChatCreationEnabled: boolean;
