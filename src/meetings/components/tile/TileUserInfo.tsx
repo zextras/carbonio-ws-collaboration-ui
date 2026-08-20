@@ -96,7 +96,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 						<Icon icon="ScreenSharingOnOutline" color="gray6" size="medium" />
 					</CustomContainer>
 				)}
-				<ConnectionQualityIndicator meetingId={meetingId} userId={userId} />
+				{!isScreenShare && <ConnectionQualityIndicator meetingId={meetingId} userId={userId} />}
 			</>
 		),
 		[
