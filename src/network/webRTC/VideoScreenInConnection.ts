@@ -274,11 +274,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							if ((this.maskUntilTick.get(key) ?? 0) > this.evalTick) return;
 
 							const lossRate = dLost / (dLost + dRecv);
-							rtcDebug(
-								`feed=${key} loss=${lossRate.toFixed(3)} jbdAvg=${jbdAvg.toFixed(
-									1
-								)} rising=${jbdRising}`
-							);
 							const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
 							const next = decideSubstream(prevState, { lossRate, jbdRising });
 							this.qualityStates.set(key, next);
@@ -288,7 +283,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 								// for one tick, so mask 2 ticks to get a clean same-layer jbdAvg baseline (not just
 								// the keyframe settle) — reducing this to +1 would fabricate a spurious jbdRising.
 								this.maskUntilTick.set(key, this.evalTick + 2);
-								rtcDebug(`feed=${key} -> substream ${next.change}`);
+								rtcDebug(`DOWNLINK TIER CHANGE: feed=${key} -> substream ${next.change}`);
 							}
 							if (next.off) {
 								this.suppressFeed(key, userId);
@@ -305,7 +300,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
 					this.suppressedVideo.delete(key);
 					this.qualityStates.set(key, initialQualityState(0));
-					rtcDebug(`feed=${key} AUTO-ON re-probe (re-subscribe) after cooldown`);
+					rtcDebug(`DOWNLINK feed=${key} AUTO-ON (re-probe)`);
 				}
 			});
 		});
@@ -321,7 +316,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.maskUntilTick.delete(key);
 		this.feedQualityData.delete(key);
 		this.feedCumRing.delete(key);
-		rtcDebug(`feed=${key} AUTO-OFF (unsubscribe) — sustained bad connection at low`);
+		rtcDebug(`DOWNLINK feed=${key} AUTO-OFF (below lowest)`);
 	}
 
 	private updateStreams(): void {

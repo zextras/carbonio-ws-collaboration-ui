@@ -163,9 +163,6 @@ export default class ConnectionQualityMonitor {
 	// instantaneous fractionLost samples for webcam uplink (remote-inbound-rtp video)
 	private videoUpLossRing: Timed<number>[] = [];
 
-	// bytesSent per rid — kept for the diagnostic log; NOT used to gate topActiveRung
-	private videoBytesSent: Record<string, number> = {};
-
 	// framesEncoded per rid — the reliable "is this layer producing video" signal.
 	// RTX/padding keep bytesSent growing and active=true on GCC-deallocated layers;
 	// only framesEncoded increments when the encoder actually produces frames.
@@ -347,7 +344,6 @@ export default class ConnectionQualityMonitor {
 
 	private calcUplinkWebcam(stats: RTCStatsReport): number {
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
-			this.videoBytesSent = {};
 			this.videoFramesEncoded = {};
 			this.videoUpLossRing.length = 0;
 			this.videoUpRing.length = 0;
@@ -371,7 +367,6 @@ export default class ConnectionQualityMonitor {
 			(
 				r: RTCStats & {
 					rid?: string;
-					bytesSent?: number;
 					framesEncoded?: number;
 					active?: boolean;
 					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
@@ -384,10 +379,6 @@ export default class ConnectionQualityMonitor {
 				const rid = r.rid ?? '';
 				const idx = ridToIndex[rid];
 				if (idx == null) return;
-				// bytesSent — tracked for the diagnostic log only
-				const prevBytes = this.videoBytesSent[rid] ?? 0;
-				const currentBytes = r.bytesSent ?? 0;
-				this.videoBytesSent[rid] = currentBytes;
 				// framesEncoded is the reliable "is this layer producing video" signal:
 				// GCC-disabled layers keep active=true and trickle RTX/padding bytes,
 				// but their encoder produces 0 frames — only framesEncoded reveals this.
@@ -395,11 +386,6 @@ export default class ConnectionQualityMonitor {
 				const currentFrames = r.framesEncoded ?? 0;
 				this.videoFramesEncoded[rid] = currentFrames;
 				const framesGrew = currentFrames > prevFrames;
-				const kbps = Math.round(((currentBytes - prevBytes) * 8) / 1000);
-				const framesDelta = currentFrames - prevFrames;
-				rtcDebug(
-					`webcam out rid=${rid} active=${r.active !== false} kbps=${kbps} framesΔ=${framesDelta}`
-				);
 				if (r.active !== false && framesGrew && idx > topActiveRung) {
 					topActiveRung = idx;
 				}
@@ -413,13 +399,8 @@ export default class ConnectionQualityMonitor {
 		const bwLimitedFraction = Math.max(0, bwDuration - base.bwDuration) / windowSec;
 		const cpuLimitedFraction = Math.max(0, cpuDuration - base.cpuDuration) / windowSec;
 
-		// tier-change diagnostic: one line per state plus a distinct change line
-		const rungLabel = (r: number): string => ['l', 'm', 'h'][r] ?? `rung${r}`;
-		rtcDebug(
-			`webcam uplink topActiveRung=${topActiveRung} producibleRungs=${producibleRungs}` +
-				` bwFrac=${bwLimitedFraction.toFixed(2)} cpuFrac=${cpuLimitedFraction.toFixed(2)}`
-		);
 		if (topActiveRung !== this.lastTopActiveRung) {
+			const rungLabel = (r: number): string => ['l', 'm', 'h'][r] ?? `rung${r}`;
 			rtcDebug(
 				`UPLINK WEBCAM TIER CHANGE: ${rungLabel(this.lastTopActiveRung)} -> ${rungLabel(topActiveRung)}` +
 					` (topActiveRung=${topActiveRung}, producibleRungs=${producibleRungs})`
