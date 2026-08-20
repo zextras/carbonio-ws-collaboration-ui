@@ -33,22 +33,44 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 	optimal: 5
 };
 
-type AudioPrevStats = {
-	packetsLost: number;
-	packetsReceived: number;
+const INBOUND_RTP = 'inbound-rtp';
+const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
+const OUTBOUND_RTP = 'outbound-rtp';
+
+// 5-second sliding-window ring buffer. Each entry is a timestamped snapshot.
+// Baseline = oldest entry within WINDOW_MS; if <5 s of history, oldest available is used.
+// No thin-sample guard, no hysteresis — the window is the only smoothing mechanism.
+const WINDOW_MS = 5000;
+
+type Timed<T> = { ts: number; data: T };
+
+function winPush<T>(ring: Timed<T>[], ts: number, data: T): void {
+	ring.push({ ts, data });
+	while (ring.length > 1 && ts - ring[0].ts > WINDOW_MS) {
+		ring.shift();
+	}
+}
+
+type AudioDownSnap = {
 	concealedSamples: number;
 	totalSamplesReceived: number;
+	jbDelay: number;
+	jbEmitted: number;
 };
 
-type ScreenPrevStats = {
+type AudioUpSnap = { fractionLost: number; roundTripTime: number };
+
+type ScreenDownSnap = {
 	packetsLost: number;
 	packetsReceived: number;
-	freezeCount: number;
+	totalFreezesDuration: number;
+	qpSum: number;
+	framesDecoded: number;
 };
 
-type VideoPrevStats = {
-	bytesSent: Record<string, number>;
-};
+// qualityLimitationDurations.bandwidth/.cpu are cumulative seconds; windowed Δ ÷ windowSec gives
+// the fraction of time the encoder was limited in the observation window.
+type VideoUpSnap = { bwDuration: number; cpuDuration: number };
 
 // Exported for testing: determines the next committed quality level given the current raw level and
 // the previous committed level. Returns the new committed level (may be unchanged) and the updated
@@ -124,20 +146,24 @@ export default class ConnectionQualityMonitor {
 
 	private betterStreak = 0;
 
-	private audioPrev: AudioPrevStats = {
-		packetsLost: 0,
-		packetsReceived: 0,
-		concealedSamples: 0,
-		totalSamplesReceived: 0
-	};
+	// 5 s ring buffers — one per stats direction.
+	private audioDownRing: Timed<AudioDownSnap>[];
 
-	private screenPrev: ScreenPrevStats = {
-		packetsLost: 0,
-		packetsReceived: 0,
-		freezeCount: 0
-	};
+	private audioUpRing: Timed<AudioUpSnap>[] = [];
 
-	private videoPrev: VideoPrevStats = { bytesSent: {} };
+	private screenDownRing: Timed<ScreenDownSnap>[];
+
+	// Webcam uplink: windowed qualityLimitationDurations for BW/CPU fraction computation.
+	private videoUpRing: Timed<VideoUpSnap>[];
+
+	// instantaneous fractionLost samples for screen uplink (remote-inbound-rtp)
+	private screenUpLossRing: Timed<number>[] = [];
+
+	// instantaneous fractionLost samples for webcam uplink (remote-inbound-rtp video)
+	private videoUpLossRing: Timed<number>[] = [];
+
+	// bytesSent per rid — used only to detect growing (active) layers, not windowed
+	private videoBytesSent: Record<string, number> = {};
 
 	private lastVideoSender: RTCRtpSender | null = null;
 
@@ -148,6 +174,28 @@ export default class ConnectionQualityMonitor {
 		videoIn: IVideoScreenInConnection,
 		screenOut: IScreenOutConnection
 	) {
+		// Pre-seed rings with a zero baseline at construction time so the first tick computes a
+		// meaningful delta from the start of monitoring rather than from nothing.
+		const t0 = Date.now();
+		this.audioDownRing = [
+			{
+				ts: t0,
+				data: { concealedSamples: 0, totalSamplesReceived: 0, jbDelay: 0, jbEmitted: 0 }
+			}
+		];
+		this.screenDownRing = [
+			{
+				ts: t0,
+				data: {
+					packetsLost: 0,
+					packetsReceived: 0,
+					totalFreezesDuration: 0,
+					qpSum: 0,
+					framesDecoded: 0
+				}
+			}
+		];
+		this.videoUpRing = [{ ts: t0, data: { bwDuration: 0, cpuDuration: 0 } }];
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session?.id;
 		this.audioConn = audioConn;
@@ -290,7 +338,9 @@ export default class ConnectionQualityMonitor {
 
 	private calcUplinkWebcam(stats: RTCStatsReport): number {
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
-			this.videoPrev.bytesSent = {};
+			this.videoBytesSent = {};
+			this.videoUpLossRing.length = 0;
+			this.videoUpRing.length = 0;
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
 		const track = this.videoOut.rtpSender?.track;
@@ -303,27 +353,29 @@ export default class ConnectionQualityMonitor {
 
 		const ridToIndex: Record<string, 0 | 1 | 2> = { l: 0, m: 1, h: 2 };
 		let topActiveRung = -1;
-		let limited = false;
+		let bwDuration = 0;
+		let cpuDuration = 0;
 
+		const now = Date.now();
 		stats.forEach(
 			(
 				r: RTCStats & {
 					rid?: string;
 					bytesSent?: number;
 					active?: boolean;
-					qualityLimitationReason?: string;
+					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
 				}
 			) => {
-				if (r.type !== 'outbound-rtp') return;
-				if (r.qualityLimitationReason === 'bandwidth' || r.qualityLimitationReason === 'cpu') {
-					limited = true;
-				}
+				if (r.type !== OUTBOUND_RTP) return;
+				// qualityLimitationDurations are cumulative — read from any layer (same encoder)
+				bwDuration = Math.max(bwDuration, r.qualityLimitationDurations?.bandwidth ?? 0);
+				cpuDuration = Math.max(cpuDuration, r.qualityLimitationDurations?.cpu ?? 0);
 				const rid = r.rid ?? '';
 				const idx = ridToIndex[rid];
 				if (idx == null) return;
-				const prevBytes = this.videoPrev.bytesSent[rid] ?? 0;
+				const prevBytes = this.videoBytesSent[rid] ?? 0;
 				const currentBytes = r.bytesSent ?? 0;
-				this.videoPrev.bytesSent[rid] = currentBytes;
+				this.videoBytesSent[rid] = currentBytes;
 				const growing = currentBytes > prevBytes;
 				if (r.active !== false && growing && idx > topActiveRung) {
 					topActiveRung = idx;
@@ -331,112 +383,167 @@ export default class ConnectionQualityMonitor {
 			}
 		);
 
-		return calcUplinkWebcamVote({ producibleRungs, topActiveRung, limited });
+		// windowed bwLimitedFraction and cpuLimitedFraction
+		winPush(this.videoUpRing, now, { bwDuration, cpuDuration });
+		const base = this.videoUpRing[0].data;
+		const windowSec = Math.max((now - this.videoUpRing[0].ts) / 1000, 0.1);
+		const bwLimitedFraction = Math.max(0, bwDuration - base.bwDuration) / windowSec;
+		const cpuLimitedFraction = Math.max(0, cpuDuration - base.cpuDuration) / windowSec;
+
+		// remote-inbound-rtp video fractionLost is instantaneous — average over the window
+		stats.forEach((r: RTCStats & { kind?: string; fractionLost?: number }) => {
+			if (r.type === REMOTE_INBOUND_RTP && r.kind === 'video') {
+				winPush(this.videoUpLossRing, now, r.fractionLost ?? 0);
+			}
+		});
+		const lossRate =
+			this.videoUpLossRing.length > 0
+				? this.videoUpLossRing.reduce((s, e) => s + e.data, 0) / this.videoUpLossRing.length
+				: 0;
+
+		return calcUplinkWebcamVote({
+			topActiveRung,
+			producibleRungs,
+			bwLimitedFraction,
+			cpuLimitedFraction,
+			lossRate
+		});
 	}
 
-	// Audio up and down are scored from getStats: inbound-rtp for the downlink mix (loss/concealment/
-	// jitter) and the far end's remote-inbound-rtp report for the uplink (fractionLost). Which of the two
-	// is actually included is decided by the caller from app state (mic on / others present); until a
-	// direction has real samples the numbers default to clean.
+	// Audio up and down are scored from getStats: inbound-rtp for the downlink mix
+	// (concealmentRatio + jbDelayPerFrameSec) and the far end's remote-inbound-rtp report for the
+	// uplink (fractionLost + roundTripTime). Which of the two is actually included is decided by the
+	// caller from app state (mic on / others present).
 	private calcAudioVotes(stats: RTCStatsReport): { uplink: number; downlink: number } {
-		let downLossRate = 0;
-		let concealmentRatio = 0;
-		let jitterMs = 0;
-		let upLossRate = 0;
+		const now = Date.now();
+
+		let downSnap: AudioDownSnap | null = null;
+		let upSnap: AudioUpSnap | null = null;
 
 		stats.forEach(
 			(
 				r: RTCStats & {
 					kind?: string;
-					packetsLost?: number;
-					packetsReceived?: number;
 					concealedSamples?: number;
 					totalSamplesReceived?: number;
-					jitter?: number;
+					jitterBufferDelay?: number;
+					jitterBufferEmittedCount?: number;
 					fractionLost?: number;
+					roundTripTime?: number;
 				}
 			) => {
-				if (r.type === 'inbound-rtp' && r.kind === 'audio') {
-					const lost = r.packetsLost ?? 0;
-					const recv = r.packetsReceived ?? 0;
-					const concealed = r.concealedSamples ?? 0;
-					const totalSamples = r.totalSamplesReceived ?? 0;
-
-					const dConcealed = Math.max(0, concealed - this.audioPrev.concealedSamples);
-					const dTotalSamples = Math.max(0, totalSamples - this.audioPrev.totalSamplesReceived);
-
-					downLossRate = deltaLossRate(
-						lost,
-						recv,
-						this.audioPrev.packetsLost,
-						this.audioPrev.packetsReceived
-					);
-					concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
-					jitterMs = (r.jitter ?? 0) * 1000;
-
-					this.audioPrev.packetsLost = lost;
-					this.audioPrev.packetsReceived = recv;
-					this.audioPrev.concealedSamples = concealed;
-					this.audioPrev.totalSamplesReceived = totalSamples;
+				if (r.type === INBOUND_RTP && r.kind === 'audio') {
+					downSnap = {
+						concealedSamples: r.concealedSamples ?? 0,
+						totalSamplesReceived: r.totalSamplesReceived ?? 0,
+						jbDelay: r.jitterBufferDelay ?? 0,
+						jbEmitted: r.jitterBufferEmittedCount ?? 0
+					};
 				}
-				if (r.type === 'remote-inbound-rtp' && r.kind === 'audio') {
-					upLossRate = r.fractionLost ?? 0;
+				if (r.type === REMOTE_INBOUND_RTP && r.kind === 'audio') {
+					upSnap = {
+						fractionLost: r.fractionLost ?? 0,
+						roundTripTime: r.roundTripTime ?? 0
+					};
 				}
 			}
 		);
 
-		return {
-			uplink: calcUplinkAudioVote({ lossRate: upLossRate }),
-			downlink: calcDownlinkAudioVote({ lossRate: downLossRate, concealmentRatio, jitterMs })
-		};
+		// uplink: average instantaneous fractionLost + roundTripTime over the window
+		let uplinkScore = 10;
+		if (upSnap != null) {
+			winPush(this.audioUpRing, now, upSnap as AudioUpSnap);
+			const avgLoss =
+				this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / this.audioUpRing.length;
+			const avgRttMs =
+				(this.audioUpRing.reduce((s, e) => s + e.data.roundTripTime, 0) / this.audioUpRing.length) *
+				1000;
+			uplinkScore = calcUplinkAudioVote({ lossRate: avgLoss, rttMs: avgRttMs });
+		}
+
+		// downlink: compute deltas over the 5 s window
+		let downlinkScore = 10;
+		if (downSnap != null) {
+			winPush(this.audioDownRing, now, downSnap as AudioDownSnap);
+			const base = this.audioDownRing[0].data;
+			const cur = downSnap as AudioDownSnap;
+			const dConcealed = Math.max(0, cur.concealedSamples - base.concealedSamples);
+			const dTotalSamples = Math.max(0, cur.totalSamplesReceived - base.totalSamplesReceived);
+			const dJbDelay = Math.max(0, cur.jbDelay - base.jbDelay);
+			const dJbEmitted = Math.max(0, cur.jbEmitted - base.jbEmitted);
+			const concealmentRatio = dTotalSamples > 0 ? dConcealed / dTotalSamples : 0;
+			const jbDelayPerFrameSec = dJbEmitted > 0 ? dJbDelay / dJbEmitted : 0;
+			downlinkScore = calcDownlinkAudioVote({ concealmentRatio, jbDelayPerFrameSec });
+		}
+
+		return { uplink: uplinkScore, downlink: downlinkScore };
 	}
 
 	private calcUplinkScreen(stats: RTCStatsReport): number {
-		let lossRate = 0;
+		const now = Date.now();
 
 		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
 			// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1)
-			if (r.type === 'remote-inbound-rtp') {
-				lossRate = Math.max(lossRate, r.fractionLost ?? 0);
+			if (r.type === REMOTE_INBOUND_RTP) {
+				winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
 			}
 		});
 
+		const lossRate =
+			this.screenUpLossRing.length > 0
+				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
+				: 0;
+
+		// bwFpsImpairment: omitted. A reliable fps target under 'bandwidth' limitation requires a
+		// rolling max of framesPerSecond observed while unlimited, which is not yet tracked here.
+		// Pass undefined (defaults to 0 in the vote function).
 		return calcUplinkScreenVote({ lossRate });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport): number {
-		let lossRate = 0;
-		let freezesPerMin = 0;
+		const now = Date.now();
 
+		let snap: ScreenDownSnap | null = null;
 		stats.forEach(
 			(
 				r: RTCStats & {
 					kind?: string;
 					packetsLost?: number;
 					packetsReceived?: number;
-					freezeCount?: number;
+					totalFreezesDuration?: number;
+					qpSum?: number;
+					framesDecoded?: number;
 				}
 			) => {
-				if (r.type === 'inbound-rtp' && r.kind === 'video') {
-					const lost = r.packetsLost ?? 0;
-					const recv = r.packetsReceived ?? 0;
-					const freeze = r.freezeCount ?? 0;
-
-					lossRate = deltaLossRate(
-						lost,
-						recv,
-						this.screenPrev.packetsLost,
-						this.screenPrev.packetsReceived
-					);
-					const dFreeze = Math.max(0, freeze - this.screenPrev.freezeCount);
-					// tick is 2 s → ×30 to scale to per-minute
-					freezesPerMin = dFreeze * 30;
-
-					this.screenPrev = { packetsLost: lost, packetsReceived: recv, freezeCount: freeze };
+				if (r.type === INBOUND_RTP && r.kind === 'video') {
+					snap = {
+						packetsLost: r.packetsLost ?? 0,
+						packetsReceived: r.packetsReceived ?? 0,
+						totalFreezesDuration: r.totalFreezesDuration ?? 0,
+						qpSum: r.qpSum ?? 0,
+						framesDecoded: r.framesDecoded ?? 0
+					};
 				}
 			}
 		);
 
-		return calcDownlinkScreenVote({ lossRate, freezesPerMin });
+		if (snap == null) return 10;
+
+		winPush(this.screenDownRing, now, snap as ScreenDownSnap);
+		const base = this.screenDownRing[0].data;
+		const cur = snap as ScreenDownSnap;
+		const windowSec = Math.max((now - this.screenDownRing[0].ts) / 1000, 0.1);
+
+		const dFreeze = Math.max(0, cur.totalFreezesDuration - base.totalFreezesDuration);
+		const dQpSum = Math.max(0, cur.qpSum - base.qpSum);
+		const dFrames = Math.max(0, cur.framesDecoded - base.framesDecoded);
+		const dPktLost = Math.max(0, cur.packetsLost - base.packetsLost);
+		const dPktRecv = Math.max(0, cur.packetsReceived - base.packetsReceived);
+
+		const freezeFraction = dFreeze / windowSec;
+		const qp = dFrames > 0 ? dQpSum / dFrames : undefined;
+		const lossRate = dPktLost + dPktRecv > 0 ? dPktLost / (dPktLost + dPktRecv) : undefined;
+
+		return calcDownlinkScreenVote({ freezeFraction, qp, lossRate });
 	}
 }

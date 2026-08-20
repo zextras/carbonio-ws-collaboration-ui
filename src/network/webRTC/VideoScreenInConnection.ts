@@ -17,10 +17,35 @@ import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMee
 import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
-type InboundVideoStats = { lost: number; recv: number; jbDelay: number; jbEmitted: number };
+type InboundVideoStats = {
+	lost: number;
+	recv: number;
+	jbDelay: number;
+	jbEmitted: number;
+	totalFreezesDuration: number;
+};
+
+// Cumulative snapshot for the 5 s sliding-window used to compute per-feed vote inputs.
+// Mirrors the monitor's Timed<T> / winPush pattern; ts is wall-clock Date.now().
+type FeedCumSnap = { ts: number; lost: number; recv: number; totalFreezesDuration: number };
+
+const FEED_WINDOW_MS = 5000;
+
+function feedWinPush(ring: FeedCumSnap[], snap: FeedCumSnap): void {
+	ring.push(snap);
+	while (ring.length > 1 && snap.ts - ring[0].ts > FEED_WINDOW_MS) {
+		ring.shift();
+	}
+}
 
 const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
-	const s: InboundVideoStats = { lost: 0, recv: 0, jbDelay: 0, jbEmitted: 0 };
+	const s: InboundVideoStats = {
+		lost: 0,
+		recv: 0,
+		jbDelay: 0,
+		jbEmitted: 0,
+		totalFreezesDuration: 0
+	};
 	report.forEach(
 		(
 			r: RTCStats & {
@@ -28,6 +53,7 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				packetsReceived?: number;
 				jitterBufferDelay?: number;
 				jitterBufferEmittedCount?: number;
+				totalFreezesDuration?: number;
 				kind?: string;
 			}
 		) => {
@@ -36,6 +62,7 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				s.recv = r.packetsReceived ?? 0;
 				s.jbDelay = r.jitterBufferDelay ?? 0;
 				s.jbEmitted = r.jitterBufferEmittedCount ?? 0;
+				s.totalFreezesDuration = r.totalFreezesDuration ?? 0;
 			}
 		}
 	);
@@ -59,8 +86,21 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private prevStats = new Map<
 		string,
-		{ lost: number; recv: number; jbDelay: number; jbEmitted: number; jbdAvg: number }
+		{
+			lost: number;
+			recv: number;
+			jbDelay: number;
+			jbEmitted: number;
+			jbdAvg: number;
+			totalFreezesDuration: number;
+		}
 	>();
+
+	// per-feed quality data for the connection-quality vote (windowed over 5 s)
+	private feedQualityData = new Map<string, { inboundLossRate: number; freezeFraction: number }>();
+
+	// per-feed 5 s sliding window of cumulative stats for windowed vote computation
+	private feedCumRing = new Map<string, FeedCumSnap[]>();
 
 	private maskUntilTick = new Map<string, number>();
 
@@ -136,6 +176,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.qualityStates.delete(key);
 				this.suppressedVideo.delete(key);
 				this.maskUntilTick.delete(key);
+				this.feedQualityData.delete(key);
+				this.feedCumRing.delete(key);
 			}
 			if (type === STREAM_TYPE.SCREEN) {
 				this.screenReceiver = null;
@@ -182,13 +224,15 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					return receiver
 						.getStats()
 						.then((report) => {
-							const { lost, recv, jbDelay, jbEmitted } = readInboundVideoStats(report);
+							const { lost, recv, jbDelay, jbEmitted, totalFreezesDuration } =
+								readInboundVideoStats(report);
 							const prev = this.prevStats.get(key) ?? {
 								lost: 0,
 								recv: 0,
 								jbDelay: 0,
 								jbEmitted: 0,
-								jbdAvg: 0
+								jbdAvg: 0,
+								totalFreezesDuration: 0
 							};
 							const dLost = Math.max(0, lost - prev.lost);
 							const dRecv = Math.max(0, recv - prev.recv);
@@ -198,7 +242,31 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							// (rejects Wi-Fi/cellular random loss) — no magnitude threshold on purpose.
 							const jbdAvg = dJbEmitted > 0 ? (dJbDelay / dJbEmitted) * 1000 : prev.jbdAvg;
 							const jbdRising = dJbEmitted > 0 && jbdAvg > prev.jbdAvg;
-							this.prevStats.set(key, { lost, recv, jbDelay, jbEmitted, jbdAvg });
+							// windowed inbound loss rate and freeze fraction for the connection-quality vote.
+							// Uses a 5 s ring (same WINDOW_MS semantics as the monitor) so both signals
+							// smooth over the same horizon. The per-2 s tick lossRate below is kept for
+							// the substream controller — that consumer has its own decision cadence.
+							const now = Date.now();
+							const ring = this.feedCumRing.get(key) ?? [];
+							feedWinPush(ring, { ts: now, lost, recv, totalFreezesDuration });
+							this.feedCumRing.set(key, ring);
+							const base = ring[0];
+							const windowSec = Math.max((now - base.ts) / 1000, 0.1);
+							const dLostW = Math.max(0, lost - base.lost);
+							const dRecvW = Math.max(0, recv - base.recv);
+							const dFreezeW = Math.max(0, totalFreezesDuration - base.totalFreezesDuration);
+							this.feedQualityData.set(key, {
+								inboundLossRate: dLostW + dRecvW > 0 ? dLostW / (dLostW + dRecvW) : 0,
+								freezeFraction: dFreezeW / windowSec
+							});
+							this.prevStats.set(key, {
+								lost,
+								recv,
+								jbDelay,
+								jbEmitted,
+								jbdAvg,
+								totalFreezesDuration
+							});
 
 							// too few packets this tick => not statistically meaningful; keep baselines, skip
 							if (dLost + dRecv < 20) return;
@@ -251,6 +319,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.qualityStates.delete(key);
 		this.prevStats.delete(key);
 		this.maskUntilTick.delete(key);
+		this.feedQualityData.delete(key);
+		this.feedCumRing.delete(key);
 		rtcDebug(`feed=${key} AUTO-OFF (unsubscribe) — sustained bad connection at low`);
 	}
 
@@ -263,15 +333,21 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
 	}
 
-	public getVideoFeedsForQuality(): Array<{ substream: 0 | 1 | 2; off: boolean }> {
-		const feeds: Array<{ substream: 0 | 1 | 2; off: boolean }> = [];
+	public getVideoFeedsForQuality(): Array<{
+		requestedRung: number;
+		inboundLossRate: number;
+		freezeFraction: number;
+	}> {
+		const feeds: Array<{ requestedRung: number; inboundLossRate: number; freezeFraction: number }> =
+			[];
 		Object.keys(this.streamsMap).forEach((key) => {
 			if (!key.endsWith('-video')) return;
-			if (this.suppressedVideo.has(key)) {
-				feeds.push({ substream: 0, off: true });
-			} else if (this.videoReceivers.has(key)) {
+			// suppressed feeds are excluded — active feeds only
+			if (this.suppressedVideo.has(key)) return;
+			if (this.videoReceivers.has(key)) {
 				const state = this.qualityStates.get(key);
-				feeds.push({ substream: state?.substream ?? 2, off: false });
+				const qd = this.feedQualityData.get(key) ?? { inboundLossRate: 0, freezeFraction: 0 };
+				feeds.push({ requestedRung: state?.substream ?? 2, ...qd });
 			}
 		});
 		return feeds;
