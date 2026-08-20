@@ -136,6 +136,7 @@ const makeMonitor = (
 		audioStats?: () => Promise<RTCStatsReport>;
 		myAudioOn?: boolean;
 		otherParticipant?: boolean;
+		otherAudioOn?: boolean;
 		videoSender?: {
 			track?: { getSettings: () => { height: number } };
 			getStats: () => Promise<RTCStatsReport>;
@@ -152,7 +153,7 @@ const makeMonitor = (
 		me: { userId: 'me', audioStreamOn: parts.myAudioOn ?? false }
 	};
 	if (parts.otherParticipant) {
-		participants.other = { userId: 'other', audioStreamOn: true };
+		participants.other = { userId: 'other', audioStreamOn: parts.otherAudioOn ?? true };
 	}
 	useStore.setState({
 		session: { id: 'me' },
@@ -261,6 +262,23 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		await monitor.emitInitial();
 		expect(publishedVotes().uplinkAudio).toBe(10);
 		expect(publishedVotes().downlinkAudio).toBeUndefined();
+	});
+
+	it('audio downlink omitted when the only other participant has their mic off (nothing to hear)', async () => {
+		const monitor = makeMonitor({
+			myAudioOn: false,
+			otherParticipant: true,
+			otherAudioOn: false,
+			audioStats: () =>
+				Promise.resolve(
+					report([
+						{ type: INBOUND_RTP, kind: 'audio', packetsLost: 0, packetsReceived: 100, jitter: 0 }
+					])
+				)
+		});
+		await monitor.emitInitial();
+		expect(publishedVotes().downlinkAudio).toBeUndefined();
+		expect(publishedVotes().uplinkAudio).toBeUndefined();
 	});
 
 	it('audio downlink clamps jitter at 200ms', async () => {

@@ -227,7 +227,9 @@ export default class ConnectionQualityMonitor {
 		const myAudioOn =
 			this.myUserId != null &&
 			(participants.find((p) => p.userId === this.myUserId)?.audioStreamOn ?? false);
-		const hasOtherParticipant = participants.some((p) => p.userId !== this.myUserId);
+		const someoneElseAudioOn = participants.some(
+			(p) => p.userId !== this.myUserId && (p.audioStreamOn ?? false)
+		);
 
 		// webcam uplink: only while a video sender exists (camera on)
 		if (this.videoOut.rtpSender != null) {
@@ -247,13 +249,14 @@ export default class ConnectionQualityMonitor {
 
 		// audio is one bidirectional AudioBridge channel that is always up in a meeting, so presence is
 		// decided by app state, not packet flow: uplink only while my mic is on, downlink only while
-		// there is someone else to hear. getStats still supplies the impairment numbers.
-		if (this.audioConn.peerConn != null && (myAudioOn || hasOtherParticipant)) {
+		// someone else actually has their mic on (nothing to hear otherwise). getStats supplies the
+		// impairment numbers.
+		if (this.audioConn.peerConn != null && (myAudioOn || someoneElseAudioOn)) {
 			try {
 				const stats = await this.audioConn.peerConn.getStats();
 				const { uplink, downlink } = this.calcAudioVotes(stats);
 				if (myAudioOn) votes.uplinkAudio = uplink;
-				if (hasOtherParticipant) votes.downlinkAudio = downlink;
+				if (someoneElseAudioOn) votes.downlinkAudio = downlink;
 			} catch {
 				// defensive: omit audio votes on error
 			}
