@@ -321,11 +321,12 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 								type: OUTBOUND_RTP,
 								rid: 'l',
 								bytesSent: 1000,
+								framesEncoded: 100,
 								active: true,
 								// qualityLimitationDurations provide windowed BW/CPU fractions
 								qualityLimitationDurations: { bandwidth: 2, cpu: 0 }
 							},
-							{ type: OUTBOUND_RTP, rid: 'm', bytesSent: 2000, active: true },
+							{ type: OUTBOUND_RTP, rid: 'm', bytesSent: 2000, framesEncoded: 200, active: true },
 							{ type: OUTBOUND_RTP, rid: 'h', bytesSent: 0, active: false }
 						])
 					)
@@ -356,10 +357,17 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 								type: OUTBOUND_RTP,
 								rid: 'l',
 								bytesSent: 500 * bytesMultiplier,
+								framesEncoded: 100 * bytesMultiplier,
 								active: true,
 								qualityLimitationDurations: { bandwidth: 0, cpu: cpuCounter }
 							},
-							{ type: OUTBOUND_RTP, rid: 'm', bytesSent: 1000 * bytesMultiplier, active: true },
+							{
+								type: OUTBOUND_RTP,
+								rid: 'm',
+								bytesSent: 1000 * bytesMultiplier,
+								framesEncoded: 100 * bytesMultiplier,
+								active: true
+							},
 							{ type: OUTBOUND_RTP, rid: 'h', bytesSent: 0, active: false }
 						])
 					);
@@ -370,6 +378,53 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		await monitor.emitInitial(); // tick 2: Δcpu > 0, Δbw = 0 → cpuLimitedFraction >> bwLimitedFraction
 		// topActiveRung=1, scaledDown=true, byCpu=true → tierVote=10
 		expect(publishedVotes().uplinkWebcam).toBe(10);
+	});
+
+	it('webcam uplink: GCC-trickle top layer (bytesSent growing, framesEncoded flat) is not counted as active', async () => {
+		// RTX/padding keep bytesSent growing and active=true on a GCC-disabled layer; only
+		// framesEncoded reveals that the encoder stopped producing frames for that layer.
+		// tick 1: h and m both "grew" from 0 baseline → topActiveRung=2 (both look active).
+		// tick 2: h.framesEncoded flat (5→5), m.framesEncoded grew (10→20) → topActiveRung=1 (m wins).
+		let tick = 0;
+		const monitor = makeMonitor({
+			videoSender: {
+				track: { getSettings: () => ({ height: 720 }) },
+				getStats: () => {
+					tick += 1;
+					return Promise.resolve(
+						report([
+							{
+								type: OUTBOUND_RTP,
+								rid: 'l',
+								bytesSent: 500 * tick,
+								framesEncoded: 50 * tick,
+								active: true
+							},
+							{
+								type: OUTBOUND_RTP,
+								rid: 'm',
+								bytesSent: 1000 * tick,
+								// framesEncoded grows each tick — real video
+								framesEncoded: 10 * tick,
+								active: true
+							},
+							{
+								type: OUTBOUND_RTP,
+								rid: 'h',
+								// bytesSent grows (RTX/padding trickle) but framesEncoded is flat
+								bytesSent: 200 * tick,
+								framesEncoded: 5,
+								active: true
+							}
+						])
+					);
+				}
+			}
+		});
+		await monitor.emitInitial(); // tick 1: all "grew" from 0 → topActiveRung=2 (h)
+		await monitor.emitInitial(); // tick 2: h framesEncoded flat → topActiveRung=1 (m)
+		// topActiveRung=1, producibleRungs=3, no BW limitation → tierVote=2/3*10=6.7, loss=0 → 6.7
+		expect(publishedVotes().uplinkWebcam).toBe(6.7);
 	});
 
 	it('webcam downlink: vote is computed from requestedRung, inboundLossRate, and freezeFraction', async () => {
