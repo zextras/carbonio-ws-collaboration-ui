@@ -18,39 +18,43 @@ import {
 } from './connectionQualityScore';
 
 describe('calcUplinkAudioVote', () => {
-	it('returns 10 for no loss (TOL_AUDIO=0.5)', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 0 })).toBe(10);
+	it('returns 10 for no loss and no jitter', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0 })).toBe(10);
 	});
 
-	it('returns 5 at half the loss tolerance (0.25/0.50)', () => {
-		// 1 - 0.25/0.5 = 0.5 -> 5
-		expect(calcUplinkAudioVote({ fractionLost: 0.25 })).toBe(5);
+	it('returns 5 at half the loss tolerance (0.25/0.50), jitter 0', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0.25, jitter: 0 })).toBe(5);
 	});
 
-	it('returns 0 at full loss tolerance (0.50)', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 0.5 })).toBe(0);
+	it('returns 0 at full loss tolerance (0.50), jitter 0', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0.5, jitter: 0 })).toBe(0);
 	});
 
-	it('uplink audio: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 1 })).toBe(0);
+	it('jitter alone caps its impairment at 0.5 (half weight): full jitter, no loss -> 5', () => {
+		// 0.5 * clamp01(0.1/0.1) = 0.5 -> vote 5
+		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0.1 })).toBe(5);
+	});
+
+	it('loss and jitter ADD (jitter half weight): 0.25 loss + full jitter -> 0.5 + 0.5 = 1 -> 0', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0.25, jitter: 0.1 })).toBe(0);
 	});
 });
 
 describe('calcUplinkScreenVote', () => {
-	it('returns 10 for no loss (TOL_SCREEN=0.15)', () => {
-		expect(calcUplinkScreenVote({ fractionLost: 0 })).toBe(10);
+	it('returns 10 for no loss and no jitter', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0, jitter: 0 })).toBe(10);
 	});
 
-	it('returns 5 at half the loss tolerance (0.075/0.15)', () => {
-		expect(calcUplinkScreenVote({ fractionLost: 0.075 })).toBe(5);
+	it('returns 5 at half the loss tolerance (0.075/0.15), jitter 0', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0.075, jitter: 0 })).toBe(5);
 	});
 
-	it('returns 0 at full loss tolerance (0.15)', () => {
-		expect(calcUplinkScreenVote({ fractionLost: 0.15 })).toBe(0);
+	it('jitter equal weight: half the jitter tolerance (0.1/0.2), no loss -> 5', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0, jitter: 0.1 })).toBe(5);
 	});
 
-	it('uplink screen: returns 0 when loss exceeds tolerance (clamped at 1)', () => {
-		expect(calcUplinkScreenVote({ fractionLost: 1 })).toBe(0);
+	it('loss and jitter ADD equally (same freeze effect): 0.075 loss + 0.1 jitter -> 0.5 + 0.5 = 1 -> 0', () => {
+		expect(calcUplinkScreenVote({ fractionLost: 0.075, jitter: 0.1 })).toBe(0);
 	});
 });
 

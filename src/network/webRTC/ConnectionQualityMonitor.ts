@@ -57,7 +57,7 @@ type AudioDownSnap = {
 	packetsReceived: number;
 };
 
-type AudioUpSnap = { fractionLost: number; roundTripTime: number };
+type AudioUpSnap = { fractionLost: number; jitter: number };
 
 type ScreenDownSnap = {
 	packetsLost: number;
@@ -157,6 +157,9 @@ export default class ConnectionQualityMonitor {
 
 	// instantaneous fractionLost samples for screen uplink (remote-inbound-rtp)
 	private screenUpLossRing: Timed<number>[] = [];
+
+	// instantaneous jitter (s) samples for screen uplink (remote-inbound-rtp)
+	private screenUpJitterRing: Timed<number>[] = [];
 
 	// instantaneous fractionLost samples for webcam uplink (remote-inbound-rtp video)
 	private videoUpLossRing: Timed<number>[] = [];
@@ -512,7 +515,7 @@ export default class ConnectionQualityMonitor {
 					packetsLost?: number;
 					packetsReceived?: number;
 					fractionLost?: number;
-					roundTripTime?: number;
+					jitter?: number;
 				}
 			) => {
 				if (r.type === INBOUND_RTP && r.kind === 'audio') {
@@ -524,7 +527,7 @@ export default class ConnectionQualityMonitor {
 				if (r.type === REMOTE_INBOUND_RTP && r.kind === 'audio') {
 					upSnap = {
 						fractionLost: r.fractionLost ?? 0,
-						roundTripTime: r.roundTripTime ?? 0
+						jitter: r.jitter ?? 0
 					};
 				}
 			}
@@ -534,9 +537,10 @@ export default class ConnectionQualityMonitor {
 		let uplinkScore = 10;
 		if (upSnap != null) {
 			winPush(this.audioUpRing, now, upSnap as AudioUpSnap);
-			const avgLoss =
-				this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / this.audioUpRing.length;
-			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss });
+			const n = this.audioUpRing.length;
+			const avgLoss = this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / n;
+			const avgJitter = this.audioUpRing.reduce((s, e) => s + e.data.jitter, 0) / n;
+			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss, jitter: avgJitter });
 		}
 
 		// downlink: windowed delta packetsLost / (packetsLost + packetsReceived)
@@ -557,10 +561,11 @@ export default class ConnectionQualityMonitor {
 	private calcUplinkScreen(stats: RTCStatsReport): number {
 		const now = Date.now();
 
-		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
-			// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1)
+		stats.forEach((r: RTCStats & { fractionLost?: number; jitter?: number }) => {
+			// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1) + jitter (s)
 			if (r.type === REMOTE_INBOUND_RTP) {
 				winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
+				winPush(this.screenUpJitterRing, now, r.jitter ?? 0);
 			}
 		});
 
@@ -568,8 +573,12 @@ export default class ConnectionQualityMonitor {
 			this.screenUpLossRing.length > 0
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
+		const jitter =
+			this.screenUpJitterRing.length > 0
+				? this.screenUpJitterRing.reduce((s, e) => s + e.data, 0) / this.screenUpJitterRing.length
+				: 0;
 
-		return calcUplinkScreenVote({ fractionLost });
+		return calcUplinkScreenVote({ fractionLost, jitter });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport): number {

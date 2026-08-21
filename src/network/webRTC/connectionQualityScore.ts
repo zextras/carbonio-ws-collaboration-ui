@@ -14,9 +14,18 @@ const avg = (xs: number[]): number => (xs.length ? xs.reduce((a, b) => a + b, 0)
 const TOL_AUDIO = 0.5; // audio+PLC stays usable to ~50% loss
 const TOL_SCREEN = 0.15; // video-like: artifacts persist to next keyframe
 const TOL_WEBCAM = 0.3; // adaptive: loss is secondary, the tier ceiling carries congestion
+// Uplink jitter (RFC3550 interarrival, seconds) -> 0..1 impairment via a "perceptibly-bad" threshold.
+// Loss and jitter count DISJOINT packets (a packet is either never-arrived=loss, or arrived-late=jitter
+// — never both), so their harms fall on different packets and ADD (never max'd). Video tolerates timing.
+const JITTER_AUDIO = 0.1; // s — audio jitter this large ≈ unusable (buffer grows / concealment)
+const JITTER_SCREEN = 0.2; // s — video absorbs more timing before frames arrive too late to show
 
-export function calcUplinkAudioVote(i: { fractionLost: number }): number {
-	return round1(10 * (1 - clamp01(i.fractionLost / TOL_AUDIO)));
+// Audio uplink — two DIFFERENT effects that ADD: loss -> voice gaps/choppiness; jitter -> conversational
+// lag + roughness. Jitter weighs HALF of loss (arbitrary UX call: a dropout hurts intelligibility more
+// than added latency), so jitter alone caps its impairment at 0.5.
+export function calcUplinkAudioVote(i: { fractionLost: number; jitter: number }): number {
+	const impair = clamp01(i.fractionLost / TOL_AUDIO + 0.5 * clamp01(i.jitter / JITTER_AUDIO));
+	return round1(10 * (1 - impair));
 }
 
 // Downlink audio/screen score ONLY loss on the Janus->us leg (inbound packetsLost). A sender's own
@@ -27,8 +36,11 @@ export function calcDownlinkAudioVote(i: { lossRate: number }): number {
 	return round1(10 * (1 - clamp01(i.lossRate / TOL_AUDIO)));
 }
 
-export function calcUplinkScreenVote(i: { fractionLost: number }): number {
-	return round1(10 * (1 - clamp01(i.fractionLost / TOL_SCREEN)));
+// Screen uplink — loss and jitter cause the SAME effect (receiver freeze: loss = missing frame data,
+// jitter = frames arriving too late), so they ADD with EQUAL weight.
+export function calcUplinkScreenVote(i: { fractionLost: number; jitter: number }): number {
+	const impair = clamp01(i.fractionLost / TOL_SCREEN + i.jitter / JITTER_SCREEN);
+	return round1(10 * (1 - impair));
 }
 
 export function calcDownlinkScreenVote(i: { lossRate: number }): number {
