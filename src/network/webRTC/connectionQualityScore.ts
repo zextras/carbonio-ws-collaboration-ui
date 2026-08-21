@@ -26,12 +26,49 @@ const JITTER_SCREEN = 0.2; // s — video absorbs more timing before frames arri
 // our controller uses a binary full/base temporal target; make it proportional if that becomes graduated.
 const TEMPORAL_DROP_PENALTY = 0.15;
 
-// Audio uplink — two DIFFERENT effects that ADD: loss -> voice gaps/choppiness; jitter -> conversational
-// lag + roughness. Jitter weighs HALF of loss (arbitrary UX call: a dropout hurts intelligibility more
-// than added latency), so jitter alone caps its impairment at 0.5.
-export function calcUplinkAudioVote(i: { fractionLost: number; jitter: number }): number {
+// Audio quality (fidelity) — empirical Opus-voice curve mapping the encoded bitrate to how good it sounds
+// to the human ear: >= AUDIO_KBPS_FULL is transparent for speech (factor 1), <= AUDIO_KBPS_MIN is heavily
+// muffled (factor 0), linear between. Absolute + perceptual — the audio analog of the webcam tier ceiling.
+const AUDIO_KBPS_FULL = 24;
+const AUDIO_KBPS_MIN = 6;
+// Below this many PAYLOAD bytes per packet the stream is Opus DTX comfort-noise (silence), not speech, so
+// fidelity is NOT scored. Speech frames are far larger (tens of bytes); comfort noise is a few bytes.
+const AUDIO_COMFORT_BYTES_PER_PACKET = 15;
+// WebRTC Opus default packetization = 20 ms => 50 packets/s (our stack does not renegotiate ptime).
+const OPUS_PACKETS_PER_SEC = 50;
+
+// DTX-robust encoded audio bitrate from RAW, always-exposed getStats fields (bytesSent/headerBytesSent/
+// packetsSent deltas — no dependency on targetBitrate/BWE estimates the browser may not expose). Uses
+// bytes-PER-PACKET (the encoded frame size), which is silence-robust: DTX comfort-noise packets are few
+// and tiny, so the per-packet size still reflects the active speech frame. Returns undefined during
+// silence/comfort-noise (below the floor), so fidelity is simply not scored then.
+export function activeAudioKbps(i: {
+	payloadBytesDelta: number;
+	packetsDelta: number;
+}): number | undefined {
+	if (i.packetsDelta <= 0) return undefined;
+	const bytesPerPacket = i.payloadBytesDelta / i.packetsDelta;
+	if (bytesPerPacket < AUDIO_COMFORT_BYTES_PER_PACKET) return undefined;
+	return (bytesPerPacket * OPUS_PACKETS_PER_SEC * 8) / 1000;
+}
+
+export function audioQualityFactor(activeKbps: number): number {
+	return clamp01((activeKbps - AUDIO_KBPS_MIN) / (AUDIO_KBPS_FULL - AUDIO_KBPS_MIN));
+}
+
+// Audio uplink — quality is a CEILING (fidelity from the encoded bitrate), loss+jitter are impairment that
+// ADD (jitter at HALF of loss: a dropout hurts intelligibility more than added latency). A muffled but
+// loss-free stream scores < 10 via the ceiling; loss/jitter cut further. activeKbps undefined (silence,
+// or field unavailable) => no quality penalty (ceiling 1). Only OUR encoder's network-forced bitrate drop
+// lowers it (Opus reduces bitrate for bandwidth, not CPU), so this is a clean network-fidelity signal.
+export function calcUplinkAudioVote(i: {
+	fractionLost: number;
+	jitter: number;
+	activeKbps?: number;
+}): number {
 	const impair = clamp01(i.fractionLost / TOL_AUDIO + 0.5 * clamp01(i.jitter / JITTER_AUDIO));
-	return round1(10 * (1 - impair));
+	const quality = i.activeKbps === undefined ? 1 : audioQualityFactor(i.activeKbps);
+	return round1(10 * quality * (1 - impair));
 }
 
 // Downlink audio/screen score ONLY loss on the Janus->us leg (inbound packetsLost). A sender's own

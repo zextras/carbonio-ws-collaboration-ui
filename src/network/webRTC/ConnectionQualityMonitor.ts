@@ -5,6 +5,7 @@
  */
 
 import {
+	activeAudioKbps,
 	aggregateQuality,
 	calcDownlinkAudioVote,
 	calcDownlinkScreenVote,
@@ -173,6 +174,9 @@ export default class ConnectionQualityMonitor {
 	private lastTopActiveRung = -2;
 
 	private lastVideoSender: RTCRtpSender | null = null;
+
+	// previous outbound-audio cumulative counters, for the DTX-robust encoded-bitrate delta (uplink fidelity)
+	private prevAudioOut: { bytes: number; headerBytes: number; packets: number } | null = null;
 
 	// topActiveRung computed this tick (null = video sender absent)
 	private currentTopActiveRung: number | null = null;
@@ -523,6 +527,7 @@ export default class ConnectionQualityMonitor {
 
 		let downSnap: AudioDownSnap | null = null;
 		let upSnap: AudioUpSnap | null = null;
+		let outSnap: { bytes: number; headerBytes: number; packets: number } | null = null;
 
 		stats.forEach(
 			(
@@ -532,6 +537,9 @@ export default class ConnectionQualityMonitor {
 					packetsReceived?: number;
 					fractionLost?: number;
 					jitter?: number;
+					bytesSent?: number;
+					headerBytesSent?: number;
+					packetsSent?: number;
 				}
 			) => {
 				if (r.type === INBOUND_RTP && r.kind === 'audio') {
@@ -546,17 +554,44 @@ export default class ConnectionQualityMonitor {
 						jitter: r.jitter ?? 0
 					};
 				}
+				if (r.type === OUTBOUND_RTP && r.kind === 'audio') {
+					outSnap = {
+						bytes: r.bytesSent ?? 0,
+						headerBytes: r.headerBytesSent ?? 0,
+						packets: r.packetsSent ?? 0
+					};
+				}
 			}
 		);
 
-		// uplink: average instantaneous fractionLost over the window
+		// uplink fidelity: DTX-robust encoded bitrate from the outbound-audio counter deltas (undefined
+		// while silent / on a counter reset -> no quality penalty). Measured on OUR outbound = the leg
+		// where the muffling happens; the AudioBridge re-encode makes the inbound useless for this.
+		let activeKbps: number | undefined;
+		if (outSnap != null) {
+			const cur = outSnap as { bytes: number; headerBytes: number; packets: number };
+			const prev = this.prevAudioOut;
+			if (prev != null && cur.packets >= prev.packets && cur.bytes >= prev.bytes) {
+				const payloadBytesDelta = Math.max(
+					0,
+					cur.bytes - cur.headerBytes - (prev.bytes - prev.headerBytes)
+				);
+				activeKbps = activeAudioKbps({
+					payloadBytesDelta,
+					packetsDelta: cur.packets - prev.packets
+				});
+			}
+			this.prevAudioOut = cur;
+		}
+
+		// uplink: average instantaneous fractionLost over the window; quality (bitrate) as the ceiling
 		let uplinkScore = 10;
 		if (upSnap != null) {
 			winPush(this.audioUpRing, now, upSnap as AudioUpSnap);
 			const n = this.audioUpRing.length;
 			const avgLoss = this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / n;
 			const avgJitter = this.audioUpRing.reduce((s, e) => s + e.data.jitter, 0) / n;
-			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss, jitter: avgJitter });
+			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss, jitter: avgJitter, activeKbps });
 		}
 
 		// downlink: windowed delta packetsLost / (packetsLost + packetsReceived)
