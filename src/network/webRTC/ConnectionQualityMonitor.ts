@@ -481,13 +481,15 @@ export default class ConnectionQualityMonitor {
 		const cpuLimitedFraction = Math.max(0, cpuDuration - base.cpuDuration) / windowSec;
 
 		if (topActiveRung !== this.lastTopActiveRung) {
-			const rungLabel = (r: number): string => ['l', 'm', 'h'][r] ?? 'none';
+			const tierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
+			const ridName: Record<string, string> = { h: 'high', m: 'medium', l: 'low' };
+			const bestPossible = producibleRungs > 0 ? tierName(producibleRungs - 1) : 'none';
 			const temporal = Object.keys(scal)
-				.map((r) => `${r}:${scal[r]}`)
+				.map((r) => `${ridName[r] ?? r}:${scal[r]}`)
 				.join(' ');
 			rtcDebug(
-				`UPLINK WEBCAM CHANGE: top ${rungLabel(this.lastTopActiveRung)} -> ${rungLabel(topActiveRung)}` +
-					` (producibleRungs=${producibleRungs}) | temporal ${temporal}`
+				`UPLINK WEBCAM CHANGE: best tier possible ${bestPossible}, uploaded ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)}` +
+					` | temporal ${temporal}`
 			);
 			this.lastTopActiveRung = topActiveRung;
 		}

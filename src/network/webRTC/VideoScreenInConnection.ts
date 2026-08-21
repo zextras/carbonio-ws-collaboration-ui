@@ -11,6 +11,7 @@ import {
 	decideQuality,
 	initialQualityState,
 	isReducedFramerate,
+	layersOf,
 	QualityState
 } from './inboundQualityController';
 import { PeerConnConfig } from './PeerConnConfig';
@@ -21,6 +22,10 @@ import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
 import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
+
+// downlink debug-log helpers: substream index -> tier name, temporal target -> fps label
+const tierName = (substream: number): string => ['low', 'medium', 'high'][substream] ?? '?';
+const fpsLabel = (temporal: number | undefined): string => (temporal === 0 ? 'base' : 'full');
 
 type InboundVideoStats = {
 	lost: number;
@@ -298,9 +303,12 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 								// drop) is freeze-free and same-SSRC, so it needs NO mask — keep evaluating.
 								if (next.substreamChanged) this.maskUntilTick.set(key, this.evalTick + 2);
 								const dim = next.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
-								const fps = next.changeTemporal === 0 ? 'base' : 'full';
+								const from = layersOf(prevState.rung);
+								const senderOffers =
+									useStore.getState().activeMeeting?.connectionQuality[userId]?.maxTier ??
+									'unknown';
 								rtcDebug(
-									`DOWNLINK WEBCAM CHANGE [${dim}] feed=${key} -> substream ${next.changeSubstream} temporal ${next.changeTemporal} (${fps} fps)`
+									`DOWNLINK WEBCAM feed=${key} [${dim}]: sender offers ${senderOffers}, showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
 								);
 							}
 							if (next.off) {
