@@ -180,8 +180,9 @@ export default class ConnectionQualityMonitor {
 
 	private lastVideoSender: RTCRtpSender | null = null;
 
-	// previous outbound-audio cumulative counters, for the DTX-robust encoded-bitrate delta (uplink fidelity)
-	private prevAudioOut: { bytes: number; headerBytes: number; packets: number } | null = null;
+	// previous outbound-audio cumulative counters, for the encoded-bitrate delta (uplink fidelity).
+	// bytes = bytesSent (PAYLOAD-only per RFC 3550; header is a disjoint counter, not subtracted).
+	private prevAudioOut: { bytes: number; packets: number } | null = null;
 
 	// topActiveRung computed this tick (null = video sender absent)
 	private currentTopActiveRung: number | null = null;
@@ -532,7 +533,7 @@ export default class ConnectionQualityMonitor {
 
 		let downSnap: AudioDownSnap | null = null;
 		let upSnap: AudioUpSnap | null = null;
-		let outSnap: { bytes: number; headerBytes: number; packets: number } | null = null;
+		let outSnap: { bytes: number; packets: number } | null = null;
 		let audioLevel = 0;
 
 		stats.forEach(
@@ -544,7 +545,6 @@ export default class ConnectionQualityMonitor {
 					fractionLost?: number;
 					jitter?: number;
 					bytesSent?: number;
-					headerBytesSent?: number;
 					packetsSent?: number;
 					audioLevel?: number;
 				}
@@ -564,7 +564,6 @@ export default class ConnectionQualityMonitor {
 				if (r.type === OUTBOUND_RTP && r.kind === 'audio') {
 					outSnap = {
 						bytes: r.bytesSent ?? 0,
-						headerBytes: r.headerBytesSent ?? 0,
 						packets: r.packetsSent ?? 0
 					};
 				}
@@ -582,15 +581,14 @@ export default class ConnectionQualityMonitor {
 		const speaking = audioLevel > AUDIO_SPEECH_LEVEL;
 		let activeKbps: number | undefined;
 		if (outSnap != null) {
-			const cur = outSnap as { bytes: number; headerBytes: number; packets: number };
+			const cur = outSnap as { bytes: number; packets: number };
 			const prev = this.prevAudioOut;
 			if (speaking && prev != null && cur.packets >= prev.packets && cur.bytes >= prev.bytes) {
-				const payloadBytesDelta = Math.max(
-					0,
-					cur.bytes - cur.headerBytes - (prev.bytes - prev.headerBytes)
-				);
+				// bytesSent is PAYLOAD-only (RFC 3550 §6.4.1); headerBytesSent is a DISJOINT counter, so
+				// subtracting it would double-count the header and ~halve small audio packets. Audio has
+				// no RTX, so the bytesSent delta is already the pure Opus payload.
 				activeKbps = activeAudioKbps({
-					payloadBytesDelta,
+					payloadBytesDelta: Math.max(0, cur.bytes - prev.bytes),
 					packetsDelta: cur.packets - prev.packets
 				});
 			}

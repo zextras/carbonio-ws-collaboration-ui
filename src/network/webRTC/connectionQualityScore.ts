@@ -26,11 +26,14 @@ const JITTER_SCREEN = 0.2; // s — video absorbs more timing before frames arri
 // our controller uses a binary full/base temporal target; make it proportional if that becomes graduated.
 const TEMPORAL_DROP_PENALTY = 0.15;
 
-// Audio quality (fidelity) — empirical Opus-voice curve mapping the encoded bitrate to how good it sounds
-// to the human ear: >= AUDIO_KBPS_FULL is transparent for speech (factor 1), <= AUDIO_KBPS_MIN is heavily
-// muffled (factor 0), linear between. Absolute + perceptual — the audio analog of the webcam tier ceiling.
-const AUDIO_KBPS_FULL = 24;
-const AUDIO_KBPS_MIN = 6;
+// Audio quality (fidelity) — empirical Opus mono-VOICE curve mapping the encoded bitrate to how good it
+// sounds: >= AUDIO_KBPS_FULL = healthy wideband/HD voice (factor 1); <= AUDIO_KBPS_MIN = narrowband/
+// telephone, i.e. the network is compressing the voice (factor 0); linear between. Anchors calibrated to
+// REAL WebRTC mono Opus (VBR+DTX averages ~16-24 kbps active on a healthy call; RFC 7587 WB sweet spot
+// 16-20), so "full" is 16 kbps (actually reachable) and only < 8 kbps (Opus floor 6) signals a genuine
+// network throttle. NB 24 kbps would be near-music grade and unreachable on VBR voice -> false "muffled".
+const AUDIO_KBPS_FULL = 16;
+const AUDIO_KBPS_MIN = 8;
 // WebRTC Opus default packetization = 20 ms => 50 packets/s (our stack does not renegotiate ptime).
 const OPUS_PACKETS_PER_SEC = 50;
 

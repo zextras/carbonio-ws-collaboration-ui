@@ -62,19 +62,19 @@ describe('activeAudioKbps (DTX-robust encoded bitrate from raw getStats fields)'
 	});
 });
 
-describe('audioQualityFactor (empirical Opus-voice fidelity curve)', () => {
-	it('is 1.0 at/above the full-fidelity bitrate (24 kbps)', () => {
+describe('audioQualityFactor (empirical Opus mono-voice fidelity curve, anchors 8/16 kbps)', () => {
+	it('is 1.0 at/above the full-fidelity bitrate (16 kbps)', () => {
+		expect(audioQualityFactor(16)).toBe(1);
 		expect(audioQualityFactor(24)).toBe(1);
-		expect(audioQualityFactor(40)).toBe(1);
 	});
 
-	it('is 0.5 at the mid point (15 kbps)', () => {
-		expect(audioQualityFactor(15)).toBe(0.5);
+	it('is 0.5 at the mid point (12 kbps)', () => {
+		expect(audioQualityFactor(12)).toBe(0.5);
 	});
 
-	it('is 0 at/below the floor (6 kbps)', () => {
-		expect(audioQualityFactor(6)).toBe(0);
-		expect(audioQualityFactor(3)).toBe(0);
+	it('is 0 at/below the floor (8 kbps)', () => {
+		expect(audioQualityFactor(8)).toBe(0);
+		expect(audioQualityFactor(4)).toBe(0);
 	});
 });
 
@@ -83,20 +83,24 @@ describe('calcUplinkAudioVote — quality (bitrate) ceiling', () => {
 		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0 })).toBe(10);
 	});
 
-	it('full-fidelity bitrate, no loss/jitter -> 10', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0, activeKbps: 24 })).toBe(10);
+	it('a healthy WebRTC mono-voice bitrate (~22 kbps) scores 10 (no false "muffled")', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0, activeKbps: 22 })).toBe(10);
 	});
 
-	it('muffled (15 kbps), no loss/jitter -> 5 (quality ceiling halves it)', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0, activeKbps: 15 })).toBe(5);
+	it('full-fidelity bitrate (16 kbps), no loss/jitter -> 10', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0, activeKbps: 16 })).toBe(10);
 	});
 
-	it('quality is a CEILING: 15 kbps AND 0.25 loss -> 10*0.5*0.5 = 2.5', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 0.25, jitter: 0, activeKbps: 15 })).toBe(2.5);
+	it('muffled (12 kbps), no loss/jitter -> 5 (quality ceiling halves it)', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0, jitter: 0, activeKbps: 12 })).toBe(5);
+	});
+
+	it('quality is a CEILING: 12 kbps AND 0.25 loss -> 10*0.5*0.5 = 2.5', () => {
+		expect(calcUplinkAudioVote({ fractionLost: 0.25, jitter: 0, activeKbps: 12 })).toBe(2.5);
 	});
 
 	it('stays in [0,10]: floor bitrate + full loss -> 0', () => {
-		expect(calcUplinkAudioVote({ fractionLost: 1, jitter: 0, activeKbps: 6 })).toBe(0);
+		expect(calcUplinkAudioVote({ fractionLost: 1, jitter: 0, activeKbps: 8 })).toBe(0);
 	});
 });
 
