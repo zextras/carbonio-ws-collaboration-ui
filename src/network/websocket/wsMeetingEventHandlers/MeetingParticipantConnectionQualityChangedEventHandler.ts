@@ -5,17 +5,31 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingParticipantConnectionQualityChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { isMyId } from '../eventHandlersUtilities';
 
 export const meetingParticipantConnectionQualityChangedEventHandler = (
 	event: MeetingParticipantConnectionQualityChangedEvent
 ): void => {
-	useStore
-		.getState()
-		.setParticipantConnectionQuality(
-			event.meetingId,
-			event.userId,
-			event.quality,
-			event.changedAt,
-			event.maxTier
-		);
+	const state = useStore.getState();
+	// First time we learn this participant's quality — e.g. someone already in the meeting when we
+	// joined, whose status we only receive now. We reciprocate below so the exchange is symmetric.
+	const isFirstContact =
+		state.activeMeeting?.meetingId === event.meetingId &&
+		state.activeMeeting?.connectionQuality[event.userId] === undefined;
+
+	state.setParticipantConnectionQuality(
+		event.meetingId,
+		event.userId,
+		event.quality,
+		event.changedAt,
+		event.maxTier
+	);
+
+	// Reciprocate on first contact (never to ourselves): when we join an ongoing meeting our initial
+	// broadcast reaches the participants already there, and this makes each of them send us their
+	// current quality back (and vice versa) — independently of who finished setting up first. It settles
+	// after one exchange, since the reply is no longer first-contact for the other side.
+	if (isFirstContact && !isMyId(event.userId)) {
+		state.activeMeeting?.qualityMonitor?.resyncTo(event.userId).catch(() => {});
+	}
 };

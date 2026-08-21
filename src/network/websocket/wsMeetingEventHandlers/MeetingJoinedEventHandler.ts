@@ -48,9 +48,4 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	) {
 		playJoinNotification();
 	}
-
-	// Resync our connection quality to the newcomer so they see our current status immediately
-	if (isMeetingActive(event.meetingId) && !isMyId(event.userId)) {
-		state.activeMeeting?.qualityMonitor.resyncTo(event.userId).catch(() => {});
-	}
 };

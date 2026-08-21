@@ -91,4 +91,27 @@ describe('meetingParticipantConnectionQualityChangedEventHandler tests', () => {
 		expect(stored?.quality).toBe('high');
 		expect(stored?.changedAt).toBe(2000);
 	});
+
+	test('reciprocates our quality on first contact with a participant, once (not twice)', () => {
+		const monitor = useStore.getState().activeMeeting?.qualityMonitor;
+		expect(monitor).toBeDefined();
+		const spy = vi.spyOn(monitor!, 'resyncTo').mockResolvedValue(undefined);
+
+		// first time we learn 'otherUser' -> send ours back so they see us too
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			userId: 'otherUser',
+			changedAt: 1000
+		});
+		expect(spy).toHaveBeenCalledWith('otherUser');
+
+		// already known -> no second reciprocation (the exchange has settled)
+		spy.mockClear();
+		meetingParticipantConnectionQualityChangedEventHandler({
+			...baseEvent,
+			userId: 'otherUser',
+			changedAt: 2000
+		});
+		expect(spy).not.toHaveBeenCalled();
+	});
 });
