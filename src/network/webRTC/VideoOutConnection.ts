@@ -93,12 +93,15 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	private addSimulcastTransceiver(videoTrack: MediaStreamTrack, stream: MediaStream): void {
-		const ridMap: Record<'best' | 'medium' | 'low', string> = { best: 'h', medium: 'm', low: 'l' };
+		const ridMap: Record<'high' | 'medium' | 'low', string> = { high: 'h', medium: 'm', low: 'l' };
 		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
 		const captureHeight =
 			(typeof videoTrack?.getSettings === 'function'
 				? videoTrack.getSettings().height
 				: undefined) ?? 0;
+		// A tier is producible only if the capture has at least its height (scaleResolutionDownBy must be
+		// >= 1 — we downscale, never upscale). A camera that can't produce a tier simply drops to the
+		// lower tiers, so a 480p camera has no 720 'high' and its top becomes 'medium' (360).
 		const producible = tiers ? tiers.filter((t) => captureHeight >= t.height) : [];
 		let sendEncodings: RTCRtpEncodingParameters[];
 		if (!tiers || tiers.length === 0 || producible.length === 0) {
@@ -107,7 +110,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		} else {
 			sendEncodings = producible.map((t) => ({
 				rid: ridMap[t.name],
-				scaleResolutionDownBy: t.mode === 'from' ? 1 : captureHeight / t.height
+				scaleResolutionDownBy: captureHeight / t.height
 			}));
 		}
 		// No scalabilityMode on purpose: VP8 simulcast already emits temporal layers by default, and setting it is unshipped on Firefox / ignored on Safari.

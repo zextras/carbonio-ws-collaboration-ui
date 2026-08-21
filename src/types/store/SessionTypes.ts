@@ -50,9 +50,8 @@ export type Session = {
 export type Version = `${number}.${number}.${number}`;
 
 export type SimulcastTier = {
-	name: 'best' | 'medium' | 'low';
+	name: 'high' | 'medium' | 'low';
 	height: number;
-	mode: 'from' | 'fixed';
 };
 
 export type AttributesList = {
