@@ -436,6 +436,9 @@ export default class ConnectionQualityMonitor {
 		let topActiveRung = -1;
 		let bwDuration = 0;
 		let cpuDuration = 0;
+		// per-rid temporal structure (scalabilityMode@fps) — snapshotted here, logged ONLY on a tier
+		// change (below), so it captures "what we're producing" without the per-tick fps-jitter spam.
+		const scal: Record<string, string> = {};
 
 		const now = Date.now();
 		stats.forEach(
@@ -443,6 +446,8 @@ export default class ConnectionQualityMonitor {
 				r: RTCStats & {
 					rid?: string;
 					framesEncoded?: number;
+					framesPerSecond?: number;
+					scalabilityMode?: string;
 					active?: boolean;
 					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
 				}
@@ -454,6 +459,7 @@ export default class ConnectionQualityMonitor {
 				const rid = r.rid ?? '';
 				const idx = ridToIndex[rid];
 				if (idx == null) return;
+				scal[rid] = `${r.scalabilityMode ?? '?'}@${Math.round(r.framesPerSecond ?? 0)}fps`;
 				// framesEncoded is the reliable "is this layer producing video" signal:
 				// GCC-disabled layers keep active=true and trickle RTX/padding bytes,
 				// but their encoder produces 0 frames — only framesEncoded reveals this.
@@ -476,9 +482,12 @@ export default class ConnectionQualityMonitor {
 
 		if (topActiveRung !== this.lastTopActiveRung) {
 			const rungLabel = (r: number): string => ['l', 'm', 'h'][r] ?? 'none';
+			const temporal = Object.keys(scal)
+				.map((r) => `${r}:${scal[r]}`)
+				.join(' ');
 			rtcDebug(
-				`UPLINK WEBCAM TIER CHANGE: ${rungLabel(this.lastTopActiveRung)} -> ${rungLabel(topActiveRung)}` +
-					` (topActiveRung=${topActiveRung}, producibleRungs=${producibleRungs})`
+				`UPLINK WEBCAM CHANGE: top ${rungLabel(this.lastTopActiveRung)} -> ${rungLabel(topActiveRung)}` +
+					` (producibleRungs=${producibleRungs}) | temporal ${temporal}`
 			);
 			this.lastTopActiveRung = topActiveRung;
 		}
