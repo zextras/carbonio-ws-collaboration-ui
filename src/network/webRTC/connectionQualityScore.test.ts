@@ -285,6 +285,21 @@ describe('calcDownlinkWebcamVote — framerate (temporal) penalty', () => {
 			])
 		).toBe(10);
 	});
+
+	it('stays in [0,10]: full loss WITH a framerate drop clamps to 0, never negative', () => {
+		// the penalty is multiplicative (x0.85) and the loss term is clamped to [0,1], so the product
+		// of non-negative factors can never go below 0 (nor above 10).
+		expect(
+			calcDownlinkWebcamVote([
+				{ shownTierIdx: 0, senderMaxTierIdx: 2, inboundLossRate: 1, temporalReduced: true }
+			])
+		).toBe(0);
+		expect(
+			calcDownlinkWebcamVote([
+				{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 5, temporalReduced: true }
+			])
+		).toBe(0);
+	});
 });
 
 describe('calcDownlinkAudioVote', () => {
