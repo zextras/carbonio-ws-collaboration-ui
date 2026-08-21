@@ -10,6 +10,7 @@ import {
 	calcDownlinkAudioVote,
 	calcDownlinkScreenVote,
 	calcDownlinkWebcamVote,
+	calcRttVote,
 	calcUplinkAudioVote,
 	calcUplinkScreenVote,
 	calcUplinkWebcamVote,
@@ -39,6 +40,7 @@ const INBOUND_RTP = 'inbound-rtp';
 const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 const OUTBOUND_RTP = 'outbound-rtp';
 const MEDIA_SOURCE = 'media-source';
+const CANDIDATE_PAIR = 'candidate-pair';
 // media-source.audioLevel (RMS 0..1) above this = local voice (client-side, real-time VAD — no wait for
 // the Janus talking event). Below it (silence / typing / faint noise) we do NOT score audio fidelity,
 // so a good connection stays 10 instead of flickering when you make occasional noise. Tunable.
@@ -62,8 +64,6 @@ type AudioDownSnap = {
 	packetsLost: number;
 	packetsReceived: number;
 };
-
-type AudioUpSnap = { fractionLost: number; jitter: number };
 
 type ScreenDownSnap = {
 	packetsLost: number;
@@ -154,8 +154,6 @@ export default class ConnectionQualityMonitor {
 	// 5 s ring buffers — one per stats direction.
 	private audioDownRing: Timed<AudioDownSnap>[];
 
-	private audioUpRing: Timed<AudioUpSnap>[] = [];
-
 	private screenDownRing: Timed<ScreenDownSnap>[];
 
 	// Webcam uplink: windowed qualityLimitationDurations for BW/CPU fraction computation.
@@ -164,11 +162,8 @@ export default class ConnectionQualityMonitor {
 	// instantaneous fractionLost samples for screen uplink (remote-inbound-rtp)
 	private screenUpLossRing: Timed<number>[] = [];
 
-	// instantaneous jitter (s) samples for screen uplink (remote-inbound-rtp)
-	private screenUpJitterRing: Timed<number>[] = [];
-
-	// instantaneous fractionLost samples for webcam uplink (remote-inbound-rtp video)
-	private videoUpLossRing: Timed<number>[] = [];
+	// candidate-pair currentRoundTripTime (ms) samples — the global me<->Janus RTT vote
+	private rttRing: Timed<number>[] = [];
 
 	// framesEncoded per rid — the reliable "is this layer producing video" signal.
 	// RTX/padding keep bytesSent growing and active=true on GCC-deallocated layers;
@@ -377,18 +372,22 @@ export default class ConnectionQualityMonitor {
 			votes.downlinkWebcam = calcDownlinkWebcamVote(mappedFeeds);
 		}
 
-		// audio is one bidirectional AudioBridge channel that is always up in a meeting, so presence is
-		// decided by app state, not packet flow: uplink only while my mic is on, downlink only while
-		// someone else actually has their mic on (nothing to hear otherwise). getStats supplies the
-		// impairment numbers.
-		if (this.audioConn.peerConn != null && (myAudioOn || someoneElseAudioOn)) {
+		// The audio AudioBridge PC is the always-up channel, so we read it every tick: the global RTT vote
+		// from its candidate-pair (the whole me<->Janus pipe), plus the audio votes when a direction is
+		// actually active — uplink while my mic is on, downlink while someone else's is (presence is app
+		// state, not packet flow).
+		if (this.audioConn.peerConn != null) {
 			try {
 				const stats = await this.audioConn.peerConn.getStats();
-				const { uplink, downlink } = this.calcAudioVotes(stats);
-				if (myAudioOn) votes.uplinkAudio = uplink;
-				if (someoneElseAudioOn) votes.downlinkAudio = downlink;
+				const rttMs = this.readRttMs(stats);
+				if (rttMs !== undefined) votes.rtt = calcRttVote(rttMs);
+				if (myAudioOn || someoneElseAudioOn) {
+					const { uplink, downlink } = this.calcAudioVotes(stats);
+					if (myAudioOn) votes.uplinkAudio = uplink;
+					if (someoneElseAudioOn) votes.downlinkAudio = downlink;
+				}
 			} catch {
-				// defensive: omit audio votes on error
+				// defensive: omit audio/RTT votes on error
 			}
 		}
 
@@ -421,7 +420,6 @@ export default class ConnectionQualityMonitor {
 	private calcUplinkWebcam(stats: RTCStatsReport): number {
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
 			this.videoFramesEncoded = {};
-			this.videoUpLossRing.length = 0;
 			this.videoUpRing.length = 0;
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
@@ -505,23 +503,11 @@ export default class ConnectionQualityMonitor {
 		}
 		this.currentTopActiveRung = topActiveRung;
 
-		// remote-inbound-rtp video fractionLost is instantaneous — average over the window
-		stats.forEach((r: RTCStats & { kind?: string; fractionLost?: number }) => {
-			if (r.type === REMOTE_INBOUND_RTP && r.kind === 'video') {
-				winPush(this.videoUpLossRing, now, r.fractionLost ?? 0);
-			}
-		});
-		const lossRate =
-			this.videoUpLossRing.length > 0
-				? this.videoUpLossRing.reduce((s, e) => s + e.data, 0) / this.videoUpLossRing.length
-				: 0;
-
 		return calcUplinkWebcamVote({
 			topActiveRung,
 			producibleRungs,
 			bwLimitedFraction,
-			cpuLimitedFraction,
-			lossRate
+			cpuLimitedFraction
 		});
 	}
 
@@ -532,7 +518,6 @@ export default class ConnectionQualityMonitor {
 		const now = Date.now();
 
 		let downSnap: AudioDownSnap | null = null;
-		let upSnap: AudioUpSnap | null = null;
 		let outSnap: { bytes: number; packets: number } | null = null;
 		let audioLevel = 0;
 
@@ -542,8 +527,6 @@ export default class ConnectionQualityMonitor {
 					kind?: string;
 					packetsLost?: number;
 					packetsReceived?: number;
-					fractionLost?: number;
-					jitter?: number;
 					bytesSent?: number;
 					packetsSent?: number;
 					audioLevel?: number;
@@ -553,12 +536,6 @@ export default class ConnectionQualityMonitor {
 					downSnap = {
 						packetsLost: r.packetsLost ?? 0,
 						packetsReceived: r.packetsReceived ?? 0
-					};
-				}
-				if (r.type === REMOTE_INBOUND_RTP && r.kind === 'audio') {
-					upSnap = {
-						fractionLost: r.fractionLost ?? 0,
-						jitter: r.jitter ?? 0
 					};
 				}
 				if (r.type === OUTBOUND_RTP && r.kind === 'audio') {
@@ -595,15 +572,8 @@ export default class ConnectionQualityMonitor {
 			this.prevAudioOut = cur;
 		}
 
-		// uplink: average instantaneous fractionLost over the window; quality (bitrate) as the ceiling
-		let uplinkScore = 10;
-		if (upSnap != null) {
-			winPush(this.audioUpRing, now, upSnap as AudioUpSnap);
-			const n = this.audioUpRing.length;
-			const avgLoss = this.audioUpRing.reduce((s, e) => s + e.data.fractionLost, 0) / n;
-			const avgJitter = this.audioUpRing.reduce((s, e) => s + e.data.jitter, 0) / n;
-			uplinkScore = calcUplinkAudioVote({ fractionLost: avgLoss, jitter: avgJitter, activeKbps });
-		}
+		// uplink: fidelity from the encoded bitrate only (loss/jitter dropped — see connectionQualityScore)
+		const uplinkScore = calcUplinkAudioVote({ activeKbps });
 
 		// downlink: windowed delta packetsLost / (packetsLost + packetsReceived)
 		let downlinkScore = 10;
@@ -620,27 +590,51 @@ export default class ConnectionQualityMonitor {
 		return { uplink: uplinkScore, downlink: downlinkScore };
 	}
 
+	// Global RTT (ms) from the selected candidate-pair of the always-up audio PC — the whole
+	// me<->Janus round-trip, averaged over the window. Not per-direction (a round-trip can't be split
+	// up/down) but ours alone: other participants have separate pipes to Janus.
+	private readRttMs(stats: RTCStatsReport): number | undefined {
+		const now = Date.now();
+		let sample: number | undefined;
+		stats.forEach(
+			(
+				r: RTCStats & {
+					nominated?: boolean;
+					state?: string;
+					currentRoundTripTime?: number;
+				}
+			) => {
+				if (
+					r.type === CANDIDATE_PAIR &&
+					r.nominated === true &&
+					r.state === 'succeeded' &&
+					r.currentRoundTripTime != null
+				) {
+					sample = r.currentRoundTripTime * 1000;
+				}
+			}
+		);
+		if (sample === undefined) return undefined;
+		winPush(this.rttRing, now, sample);
+		return this.rttRing.reduce((s, e) => s + e.data, 0) / this.rttRing.length;
+	}
+
 	private calcUplinkScreen(stats: RTCStatsReport): number {
 		const now = Date.now();
 
-		stats.forEach((r: RTCStats & { fractionLost?: number; jitter?: number }) => {
-			// remote-inbound-rtp carries the sender's view of loss (fractionLost 0..1) + jitter (s)
+		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
+			// remote-inbound-rtp carries the sender's view of loss on OUR uplink leg (fractionLost 0..1)
 			if (r.type === REMOTE_INBOUND_RTP) {
 				winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
-				winPush(this.screenUpJitterRing, now, r.jitter ?? 0);
 			}
 		});
 
-		const fractionLost =
+		const lossRate =
 			this.screenUpLossRing.length > 0
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
-		const jitter =
-			this.screenUpJitterRing.length > 0
-				? this.screenUpJitterRing.reduce((s, e) => s + e.data, 0) / this.screenUpJitterRing.length
-				: 0;
 
-		return calcUplinkScreenVote({ fractionLost, jitter });
+		return calcUplinkScreenVote({ lossRate });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport): number {
