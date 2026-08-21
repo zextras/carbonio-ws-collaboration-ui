@@ -7,7 +7,12 @@
 import { filter, forEach, keyBy } from 'lodash';
 import { gte } from 'semver';
 
-import { decideSubstream, initialQualityState, QualityState } from './inboundQualityController';
+import {
+	decideQuality,
+	initialQualityState,
+	isReducedFramerate,
+	QualityState
+} from './inboundQualityController';
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
 import useStore from '../../store/Store';
@@ -276,16 +281,27 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							if ((this.maskUntilTick.get(key) ?? 0) > this.evalTick) return;
 
 							const lossRate = dLost / (dLost + dRecv);
-							const prevState = this.qualityStates.get(key) ?? initialQualityState(2);
-							const next = decideSubstream(prevState, { lossRate, jbdRising });
+							const prevState = this.qualityStates.get(key) ?? initialQualityState();
+							const next = decideQuality(prevState, { lossRate, jbdRising });
 							this.qualityStates.set(key, next);
-							if (next.change !== undefined && mid) {
-								requestVideoQuality(this.meetingId, userId, mid, next.change).catch(() => {});
-								// +2: after a switch the same-SSRC cumulative jitterBufferDelay spans both layers
-								// for one tick, so mask 2 ticks to get a clean same-layer jbdAvg baseline (not just
-								// the keyframe settle) — reducing this to +1 would fabricate a spurious jbdRising.
-								this.maskUntilTick.set(key, this.evalTick + 2);
-								rtcDebug(`DOWNLINK TIER CHANGE: feed=${key} -> substream ${next.change}`);
+							if (next.changeSubstream !== undefined && mid) {
+								requestVideoQuality(
+									this.meetingId,
+									userId,
+									mid,
+									next.changeSubstream,
+									next.changeTemporal
+								).catch(() => {});
+								// A RESOLUTION switch changes the SSRC/substream -> needs a keyframe (brief freeze),
+								// and the same-SSRC cumulative jitterBufferDelay spans both layers for one tick; mask
+								// 2 ticks for the keyframe + a clean jbdAvg baseline. A FRAMERATE step (temporal-layer
+								// drop) is freeze-free and same-SSRC, so it needs NO mask — keep evaluating.
+								if (next.substreamChanged) this.maskUntilTick.set(key, this.evalTick + 2);
+								const dim = next.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
+								const fps = next.changeTemporal === 0 ? 'base' : 'full';
+								rtcDebug(
+									`DOWNLINK WEBCAM CHANGE [${dim}] feed=${key} -> substream ${next.changeSubstream} temporal ${next.changeTemporal} (${fps} fps)`
+								);
 							}
 							if (next.off) {
 								this.suppressFeed(key, userId);
@@ -334,8 +350,14 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		userId: string;
 		frameHeight: number;
 		inboundLossRate: number;
+		temporalReduced: boolean;
 	}> {
-		const feeds: Array<{ userId: string; frameHeight: number; inboundLossRate: number }> = [];
+		const feeds: Array<{
+			userId: string;
+			frameHeight: number;
+			inboundLossRate: number;
+			temporalReduced: boolean;
+		}> = [];
 		Object.keys(this.streamsMap).forEach((key) => {
 			if (!key.endsWith('-video')) return;
 			// suppressed feeds are excluded — active feeds only
@@ -343,7 +365,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			const entry = this.videoReceivers.get(key);
 			if (entry != null) {
 				const qd = this.feedQualityData.get(key) ?? { inboundLossRate: 0, frameHeight: 0 };
-				feeds.push({ userId: entry.userId, ...qd });
+				// framerate (temporal) is not observable from frameHeight, so the vote reads the controller's
+				// current temporal target for this feed: reduced == our controller forced the framerate down.
+				const state = this.qualityStates.get(key);
+				const temporalReduced = state != null ? isReducedFramerate(state.rung) : false;
+				feeds.push({ userId: entry.userId, ...qd, temporalReduced });
 			}
 		});
 		return feeds;

@@ -110,6 +110,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 				scaleResolutionDownBy: t.mode === 'from' ? 1 : captureHeight / t.height
 			}));
 		}
+		// No scalabilityMode on purpose: VP8 simulcast already emits temporal layers by default, and setting it is unshipped on Firefox / ignored on Safari.
 		const transceiver = this.peerConn!.addTransceiver(videoTrack, {
 			direction: 'sendonly',
 			streams: [stream],

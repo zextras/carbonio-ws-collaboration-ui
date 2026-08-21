@@ -19,6 +19,12 @@ const TOL_WEBCAM = 0.3; // adaptive: loss is secondary, the tier ceiling carries
 // — never both), so their harms fall on different packets and ADD (never max'd). Video tolerates timing.
 const JITTER_AUDIO = 0.1; // s — audio jitter this large ≈ unusable (buffer grows / concealment)
 const JITTER_SCREEN = 0.2; // s — video absorbs more timing before frames arrive too late to show
+// A network-forced FRAMERATE drop (our controller shed the VP8 temporal layer to relieve congestion)
+// lowers the webcam-down vote, but by a small FIXED amount — much less than a RESOLUTION step, which
+// already scales the ceiling by the tier ratio. A framerate cut is a milder, freeze-free degradation
+// than a resolution cut, so it should show on the indicator without dominating it. Discrete because
+// our controller uses a binary full/base temporal target; make it proportional if that becomes graduated.
+const TEMPORAL_DROP_PENALTY = 0.15;
 
 // Audio uplink — two DIFFERENT effects that ADD: loss -> voice gaps/choppiness; jitter -> conversational
 // lag + roughness. Jitter weighs HALF of loss (arbitrary UX call: a dropout hurts intelligibility more
@@ -73,15 +79,24 @@ export function calcUplinkWebcamVote(i: {
 
 // Webcam downlink — network-health only, remote-low publisher excluded.
 // ceiling = shown tier / sender's offered top -> a sender who never offers a higher tier is never penalized; loss/TOL_WEBCAM = residual congestion we could not escape by dropping.
+// temporalReduced = our controller forced the framerate down (network-driven) -> a small extra penalty
+// on top of the resolution ceiling (see TEMPORAL_DROP_PENALTY). Only OUR forced framerate cut is
+// penalized; a sender who simply produces one temporal layer never reaches this (we stay at full).
 export function calcDownlinkWebcamVote(
-	feeds: Array<{ shownTierIdx: number; senderMaxTierIdx: number; inboundLossRate: number }>
+	feeds: Array<{
+		shownTierIdx: number;
+		senderMaxTierIdx: number;
+		inboundLossRate: number;
+		temporalReduced?: boolean;
+	}>
 ): number {
 	if (feeds.length === 0) return 10;
 	const feedVotes = feeds.map((f) => {
-		const ceiling =
+		const spatialCeiling =
 			f.senderMaxTierIdx < 0
 				? 10
 				: Math.min(1, (f.shownTierIdx + 1) / (f.senderMaxTierIdx + 1)) * 10;
+		const ceiling = spatialCeiling * (f.temporalReduced ? 1 - TEMPORAL_DROP_PENALTY : 1);
 		return ceiling * (1 - clamp01(f.inboundLossRate / TOL_WEBCAM));
 	});
 	return round1(avg(feedVotes));

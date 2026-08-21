@@ -61,6 +61,7 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 		userId: string;
 		frameHeight: number;
 		inboundLossRate: number;
+		temporalReduced: boolean;
 	}>;
 	getScreenReceiver(): RTCRtpReceiver | null;
 	hasScreenFeed(): boolean;

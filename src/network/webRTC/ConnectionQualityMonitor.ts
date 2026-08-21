@@ -172,6 +172,10 @@ export default class ConnectionQualityMonitor {
 	// last committed topActiveRung — used to detect tier changes for the debug log
 	private lastTopActiveRung = -2;
 
+	// last logged per-rid scalabilityMode@fps map — surfaces the publisher's VP8 temporal-layer
+	// config live (e.g. L1T2 vs L1T3) so an E2E test can read the actual uplink temporal structure.
+	private lastScalabilityLog = '';
+
 	private lastVideoSender: RTCRtpSender | null = null;
 
 	// topActiveRung computed this tick (null = video sender absent)
@@ -357,7 +361,12 @@ export default class ConnectionQualityMonitor {
 				const ownerMaxTier =
 					useStore.getState().activeMeeting?.connectionQuality[f.userId]?.maxTier;
 				const senderMaxTierIdx = ownerMaxTier != null ? (tierMap[ownerMaxTier] ?? -1) : -1;
-				return { shownTierIdx, senderMaxTierIdx, inboundLossRate: f.inboundLossRate };
+				return {
+					shownTierIdx,
+					senderMaxTierIdx,
+					inboundLossRate: f.inboundLossRate,
+					temporalReduced: f.temporalReduced
+				};
 			});
 			votes.downlinkWebcam = calcDownlinkWebcamVote(mappedFeeds);
 		}
@@ -431,6 +440,8 @@ export default class ConnectionQualityMonitor {
 		let topActiveRung = -1;
 		let bwDuration = 0;
 		let cpuDuration = 0;
+		// per-rid scalabilityMode@fps for the uplink temporal-structure debug log (see below)
+		const scal: Record<string, string> = {};
 
 		const now = Date.now();
 		stats.forEach(
@@ -438,6 +449,8 @@ export default class ConnectionQualityMonitor {
 				r: RTCStats & {
 					rid?: string;
 					framesEncoded?: number;
+					framesPerSecond?: number;
+					scalabilityMode?: string;
 					active?: boolean;
 					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
 				}
@@ -449,6 +462,9 @@ export default class ConnectionQualityMonitor {
 				const rid = r.rid ?? '';
 				const idx = ridToIndex[rid];
 				if (idx == null) return;
+				// scalabilityMode reflects the encoder's ACTUAL temporal config (e.g. L1T2 / L1T3);
+				// undefined on browsers that don't expose it (Firefox default path, old Chrome).
+				scal[rid] = `${r.scalabilityMode ?? '?'}@${Math.round(r.framesPerSecond ?? 0)}fps`;
 				// framesEncoded is the reliable "is this layer producing video" signal:
 				// GCC-disabled layers keep active=true and trickle RTX/padding bytes,
 				// but their encoder produces 0 frames — only framesEncoded reveals this.
@@ -476,6 +492,14 @@ export default class ConnectionQualityMonitor {
 					` (topActiveRung=${topActiveRung}, producibleRungs=${producibleRungs})`
 			);
 			this.lastTopActiveRung = topActiveRung;
+		}
+		// Log the publisher's per-rid VP8 temporal structure whenever it changes: reveals whether the
+		// upload actually emits temporal layers (L1T2/L1T3) — the live confirmation that a downlink
+		// temporal step-down is even possible for this sender — plus the per-layer framerate.
+		const scalLog = JSON.stringify(scal);
+		if (scalLog !== this.lastScalabilityLog) {
+			rtcDebug(`UPLINK WEBCAM TEMPORAL: ${scalLog}`);
+			this.lastScalabilityLog = scalLog;
 		}
 		this.currentTopActiveRung = topActiveRung;
 

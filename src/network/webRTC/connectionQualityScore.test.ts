@@ -249,6 +249,44 @@ describe('calcDownlinkWebcamVote', () => {
 	});
 });
 
+describe('calcDownlinkWebcamVote — framerate (temporal) penalty', () => {
+	it('a framerate drop at the top tier lowers the vote by a small fixed amount (10 -> 8.5)', () => {
+		expect(
+			calcDownlinkWebcamVote([
+				{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0, temporalReduced: true }
+			])
+		).toBe(8.5);
+	});
+
+	it('a framerate drop is penalized LESS than a resolution step (8.5 > 6.7)', () => {
+		const framerateOnly = calcDownlinkWebcamVote([
+			{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0, temporalReduced: true }
+		]);
+		const resolutionStep = calcDownlinkWebcamVote([
+			{ shownTierIdx: 1, senderMaxTierIdx: 2, inboundLossRate: 0, temporalReduced: false }
+		]);
+		expect(framerateOnly).toBe(8.5);
+		expect(resolutionStep).toBe(6.7);
+		expect(framerateOnly).toBeGreaterThan(resolutionStep);
+	});
+
+	it('resolution AND framerate drop compound (medium tier at base fps -> 5.7)', () => {
+		expect(
+			calcDownlinkWebcamVote([
+				{ shownTierIdx: 1, senderMaxTierIdx: 2, inboundLossRate: 0, temporalReduced: true }
+			])
+		).toBe(5.7);
+	});
+
+	it('temporalReduced false (or absent) applies no framerate penalty', () => {
+		expect(
+			calcDownlinkWebcamVote([
+				{ shownTierIdx: 2, senderMaxTierIdx: 2, inboundLossRate: 0, temporalReduced: false }
+			])
+		).toBe(10);
+	});
+});
+
 describe('calcDownlinkAudioVote', () => {
 	it('returns 10 for zero loss (TOL_AUDIO=0.5)', () => {
 		expect(calcDownlinkAudioVote({ lossRate: 0 })).toBe(10);
