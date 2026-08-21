@@ -31,24 +31,21 @@ const TEMPORAL_DROP_PENALTY = 0.15;
 // muffled (factor 0), linear between. Absolute + perceptual — the audio analog of the webcam tier ceiling.
 const AUDIO_KBPS_FULL = 24;
 const AUDIO_KBPS_MIN = 6;
-// Below this many PAYLOAD bytes per packet the stream is Opus DTX comfort-noise (silence), not speech, so
-// fidelity is NOT scored. Speech frames are far larger (tens of bytes); comfort noise is a few bytes.
-const AUDIO_COMFORT_BYTES_PER_PACKET = 15;
 // WebRTC Opus default packetization = 20 ms => 50 packets/s (our stack does not renegotiate ptime).
 const OPUS_PACKETS_PER_SEC = 50;
 
-// DTX-robust encoded audio bitrate from RAW, always-exposed getStats fields (bytesSent/headerBytesSent/
-// packetsSent deltas — no dependency on targetBitrate/BWE estimates the browser may not expose). Uses
-// bytes-PER-PACKET (the encoded frame size), which is silence-robust: DTX comfort-noise packets are few
-// and tiny, so the per-packet size still reflects the active speech frame. Returns undefined during
-// silence/comfort-noise (below the floor), so fidelity is simply not scored then.
+// Encoded audio bitrate from RAW, always-exposed getStats fields (bytesSent/headerBytesSent/packetsSent
+// deltas — no dependency on targetBitrate/BWE estimates the browser may not expose). Uses bytes-PER-PACKET
+// (the encoded frame size) so it is robust to short silences within the window. SILENCE/non-speech is
+// gated UPSTREAM: the monitor only calls this while the local mic level (media-source.audioLevel, a
+// real-time client-side VAD) indicates real speech — so a low value here means the network is compressing
+// actual voice, not that the audio is merely quiet (which would otherwise false-flag a good connection).
 export function activeAudioKbps(i: {
 	payloadBytesDelta: number;
 	packetsDelta: number;
 }): number | undefined {
 	if (i.packetsDelta <= 0) return undefined;
 	const bytesPerPacket = i.payloadBytesDelta / i.packetsDelta;
-	if (bytesPerPacket < AUDIO_COMFORT_BYTES_PER_PACKET) return undefined;
 	return (bytesPerPacket * OPUS_PACKETS_PER_SEC * 8) / 1000;
 }
 

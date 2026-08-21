@@ -38,6 +38,11 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 const INBOUND_RTP = 'inbound-rtp';
 const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 const OUTBOUND_RTP = 'outbound-rtp';
+const MEDIA_SOURCE = 'media-source';
+// media-source.audioLevel (RMS 0..1) above this = local voice (client-side, real-time VAD — no wait for
+// the Janus talking event). Below it (silence / typing / faint noise) we do NOT score audio fidelity,
+// so a good connection stays 10 instead of flickering when you make occasional noise. Tunable.
+const AUDIO_SPEECH_LEVEL = 0.05;
 
 // 5-second sliding-window ring buffer. Each entry is a timestamped snapshot.
 // Baseline = oldest entry within WINDOW_MS; if <5 s of history, oldest available is used.
@@ -528,6 +533,7 @@ export default class ConnectionQualityMonitor {
 		let downSnap: AudioDownSnap | null = null;
 		let upSnap: AudioUpSnap | null = null;
 		let outSnap: { bytes: number; headerBytes: number; packets: number } | null = null;
+		let audioLevel = 0;
 
 		stats.forEach(
 			(
@@ -540,6 +546,7 @@ export default class ConnectionQualityMonitor {
 					bytesSent?: number;
 					headerBytesSent?: number;
 					packetsSent?: number;
+					audioLevel?: number;
 				}
 			) => {
 				if (r.type === INBOUND_RTP && r.kind === 'audio') {
@@ -561,17 +568,23 @@ export default class ConnectionQualityMonitor {
 						packets: r.packetsSent ?? 0
 					};
 				}
+				if (r.type === MEDIA_SOURCE && r.kind === 'audio') {
+					audioLevel = r.audioLevel ?? 0;
+				}
 			}
 		);
 
-		// uplink fidelity: DTX-robust encoded bitrate from the outbound-audio counter deltas (undefined
-		// while silent / on a counter reset -> no quality penalty). Measured on OUR outbound = the leg
-		// where the muffling happens; the AudioBridge re-encode makes the inbound useless for this.
+		// uplink fidelity: encoded bitrate from the outbound-audio counter deltas, scored ONLY while the
+		// local mic level indicates real speech (client-side, real-time VAD via media-source.audioLevel) —
+		// so silence/typing on a good connection is never mistaken for a muffled voice. Measured on OUR
+		// outbound = the leg where muffling happens; the AudioBridge re-encode makes the inbound useless.
+		// undefined (not speaking / counter reset) -> no quality penalty. Baseline advances every tick.
+		const speaking = audioLevel > AUDIO_SPEECH_LEVEL;
 		let activeKbps: number | undefined;
 		if (outSnap != null) {
 			const cur = outSnap as { bytes: number; headerBytes: number; packets: number };
 			const prev = this.prevAudioOut;
-			if (prev != null && cur.packets >= prev.packets && cur.bytes >= prev.bytes) {
+			if (speaking && prev != null && cur.packets >= prev.packets && cur.bytes >= prev.bytes) {
 				const payloadBytesDelta = Math.max(
 					0,
 					cur.bytes - cur.headerBytes - (prev.bytes - prev.headerBytes)

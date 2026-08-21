@@ -52,9 +52,9 @@ describe('activeAudioKbps (DTX-robust encoded bitrate from raw getStats fields)'
 		expect(activeAudioKbps({ payloadBytesDelta: 3000, packetsDelta: 100 })).toBe(12);
 	});
 
-	it('returns undefined for comfort-noise / silence (bytes-per-packet below the floor)', () => {
-		// DTX comfort noise ~3 B/pkt -> not speech -> omit (do not score fidelity)
-		expect(activeAudioKbps({ payloadBytesDelta: 30, packetsDelta: 10 })).toBeUndefined();
+	it('computes low kbps for tiny frames (silence is gated upstream via audioLevel, not here)', () => {
+		// 3 B/pkt -> 3*50*8/1000 = 1.2 kbps; the monitor simply does not call this while not speaking
+		expect(activeAudioKbps({ payloadBytesDelta: 30, packetsDelta: 10 })).toBe(1.2);
 	});
 
 	it('returns undefined when there are no packets', () => {
