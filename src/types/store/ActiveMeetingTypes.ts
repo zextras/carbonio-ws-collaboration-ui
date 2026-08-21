@@ -82,7 +82,7 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
-	maxTier?: 'best' | 'medium' | 'low';
+	maxTier?: 'high' | 'medium' | 'low';
 };
 
 export enum MeetingAccordionType {

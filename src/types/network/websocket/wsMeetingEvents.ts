@@ -170,5 +170,5 @@ export type MeetingParticipantConnectionQualityChangedEvent = BasicMeetingEvent 
 	userId: string;
 	quality: ConnectionQuality;
 	changedAt: number;
-	maxTier?: 'best' | 'medium' | 'low';
+	maxTier?: 'high' | 'medium' | 'low';
 };

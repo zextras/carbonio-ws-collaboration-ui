@@ -427,15 +427,15 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				{ userId: 'user2', frameHeight: 144, inboundLossRate: 0 }
 			]
 		});
-		// prime the store with maxTier='best' for both senders
+		// prime the store with maxTier='high' for both senders
 		useStore.setState((s) => ({
 			...s,
 			activeMeeting: s.activeMeeting
 				? {
 						...s.activeMeeting,
 						connectionQuality: {
-							user1: { quality: 'optimal', changedAt: 1, maxTier: 'best' },
-							user2: { quality: 'optimal', changedAt: 1, maxTier: 'best' }
+							user1: { quality: 'optimal', changedAt: 1, maxTier: 'high' },
+							user2: { quality: 'optimal', changedAt: 1, maxTier: 'high' }
 						}
 					}
 				: s.activeMeeting

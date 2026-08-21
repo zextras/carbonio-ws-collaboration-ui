@@ -74,7 +74,7 @@ export class WebSocketClient {
 		quality: ConnectionQuality,
 		changedAt: number,
 		to?: string,
-		maxTier?: 'best' | 'medium' | 'low'
+		maxTier?: 'high' | 'medium' | 'low'
 	): void {
 		this.send({
 			type: 'ConnectionQualityStatus',

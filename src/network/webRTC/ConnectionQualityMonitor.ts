@@ -178,7 +178,7 @@ export default class ConnectionQualityMonitor {
 	private currentTopActiveRung: number | null = null;
 
 	// maxTier value included in the last WS send — compared each tick to detect changes
-	private lastSentMaxTier: 'best' | 'medium' | 'low' | undefined = undefined;
+	private lastSentMaxTier: 'high' | 'medium' | 'low' | undefined = undefined;
 
 	constructor(
 		meetingId: string,
@@ -227,9 +227,9 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
-	private getMaxTier(): 'best' | 'medium' | 'low' | undefined {
+	private getMaxTier(): 'high' | 'medium' | 'low' | undefined {
 		if (this.currentTopActiveRung == null || this.currentTopActiveRung < 0) return undefined;
-		if (this.currentTopActiveRung >= 2) return 'best';
+		if (this.currentTopActiveRung >= 2) return 'high';
 		if (this.currentTopActiveRung === 1) return 'medium';
 		return 'low';
 	}
@@ -342,7 +342,7 @@ export default class ConnectionQualityMonitor {
 		}
 
 		// webcam downlink: only while receiving feeds, from the in-connection's per-feed quality states
-		const tierMap: Record<'best' | 'medium' | 'low', number> = { best: 2, medium: 1, low: 0 };
+		const tierMap: Record<'high' | 'medium' | 'low', number> = { high: 2, medium: 1, low: 0 };
 		const videoFeeds = this.videoIn.getVideoFeedsForQuality();
 		if (videoFeeds.length > 0) {
 			const mappedFeeds = videoFeeds.map((f) => {
