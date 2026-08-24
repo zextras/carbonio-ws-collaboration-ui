@@ -80,11 +80,24 @@ export function calcDownlinkAudioVote(i: { lossRate: number; rttMs?: number }): 
 const SCREEN_LOSS_K = 0.02;
 // Screen freeze tolerance — fraction of the window spent frozen at which the vote hits ~1/e of its range.
 const SCREEN_FREEZE_TOL = 0.15;
+// Screenshare has no simulcast tier; under uplink bandwidth pressure the encoder holds resolution and
+// raises the quantizer (QP) instead — blurrier text. QP is the loop's OUTPUT (the analog of the webcam
+// tier / audio bitrate). VP8 QP: <= GOOD crisp (quality 1), >= BAD heavily blurred (quality 0).
+const SCREEN_QP_GOOD = 50;
+const SCREEN_QP_BAD = 100;
 
-// Screen uplink — as sender we cannot see the receiver's freezes, only the loss it reports
-// (remote-inbound fractionLost). Exponential loss x the small screen delay factor.
-export function calcUplinkScreenVote(i: { lossRate: number; rttMs?: number }): number {
-	return round1(10 * Math.exp(-i.lossRate / SCREEN_LOSS_K) * delayFactor(i.rttMs, W_SCREEN));
+// Screen uplink — as sender we read two DISJOINT failure modes and take the WORSE: (1) the QUALITY the
+// GCC forced by raising QP under bandwidth pressure (the loop's output — loss self-erases in this mode);
+// (2) transit LOSS the loop cannot hide (random/bursty uplink loss makes the far-end freeze; video has
+// no PLC to mask it, unlike audio). Then x the small screen delay factor. qp undefined (no frames
+// encoded / static screen) -> no QP penalty, loss-only.
+export function calcUplinkScreenVote(i: { lossRate: number; qp?: number; rttMs?: number }): number {
+	const lossQuality = 10 * Math.exp(-i.lossRate / SCREEN_LOSS_K);
+	const qpQuality =
+		i.qp === undefined
+			? 10
+			: 10 * clamp01((SCREEN_QP_BAD - i.qp) / (SCREEN_QP_BAD - SCREEN_QP_GOOD));
+	return round1(Math.min(lossQuality, qpQuality) * delayFactor(i.rttMs, W_SCREEN));
 }
 
 // Screen downlink — degradation is the FREEZE RATIO (a post-recovery measured outcome: RTT's recovery

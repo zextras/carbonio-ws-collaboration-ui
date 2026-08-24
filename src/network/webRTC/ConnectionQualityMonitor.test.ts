@@ -473,6 +473,20 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().downlinkScreen).toBeUndefined();
 	});
 
+	it('screen uplink (sending): GCC-raised QP (blur) drives the vote when loss is clean', async () => {
+		const monitor = makeMonitor({
+			screenSender: {
+				getStats: () =>
+					Promise.resolve(
+						report([{ type: OUTBOUND_RTP, kind: 'video', qpSum: 7500, framesEncoded: 100 }])
+					)
+			}
+		});
+		await monitor.emitInitial();
+		// mean QP = 7500/100 = 75 -> quality (100-75)/50 = 0.5 -> 5.0; no loss -> loss term 10; min = 5
+		expect(publishedVotes().uplinkScreen).toBe(5);
+	});
+
 	it('screen downlink (receiving): a sustained freeze collapses the vote to 0', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,

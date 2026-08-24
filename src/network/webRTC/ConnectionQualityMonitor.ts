@@ -161,6 +161,9 @@ export default class ConnectionQualityMonitor {
 	// instantaneous fractionLost samples for screen uplink (remote-inbound-rtp)
 	private screenUpLossRing: Timed<number>[] = [];
 
+	// windowed qpSum/framesEncoded snapshots for screen uplink blur (mean QP = Δqp/Δframes)
+	private screenUpQpRing: Timed<{ qpSum: number; framesEncoded: number }>[] = [];
+
 	// candidate-pair currentRoundTripTime (ms) samples — the global me<->Janus RTT vote
 	private rttRing: Timed<number>[] = [];
 
@@ -213,6 +216,7 @@ export default class ConnectionQualityMonitor {
 			}
 		];
 		this.videoUpRing = [{ ts: t0, data: { bwDuration: 0, cpuDuration: 0 } }];
+		this.screenUpQpRing = [{ ts: t0, data: { qpSum: 0, framesEncoded: 0 } }];
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session?.id;
 		this.audioConn = audioConn;
@@ -696,22 +700,50 @@ export default class ConnectionQualityMonitor {
 	private calcUplinkScreen(stats: RTCStatsReport): number {
 		const now = Date.now();
 		let rttMs: number | undefined;
+		let qpSum: number | undefined;
+		let framesEncoded: number | undefined;
 
-		stats.forEach((r: RTCStats & { fractionLost?: number; roundTripTime?: number }) => {
-			// remote-inbound-rtp carries the sender's view of loss on OUR uplink leg (fractionLost 0..1)
-			// plus the per-SSRC round-trip time on this stream's own transport.
-			if (r.type === REMOTE_INBOUND_RTP) {
-				winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
-				if (r.roundTripTime != null) rttMs = r.roundTripTime * 1000;
+		stats.forEach(
+			(
+				r: RTCStats & {
+					kind?: string;
+					fractionLost?: number;
+					roundTripTime?: number;
+					qpSum?: number;
+					framesEncoded?: number;
+				}
+			) => {
+				// remote-inbound-rtp carries the sender's view of loss on OUR uplink leg (fractionLost 0..1)
+				// plus the per-SSRC round-trip time on this stream's own transport.
+				if (r.type === REMOTE_INBOUND_RTP) {
+					winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
+					if (r.roundTripTime != null) rttMs = r.roundTripTime * 1000;
+				}
+				// outbound-rtp carries our encoder's quantizer sum + frame count -> mean QP (blur)
+				if (r.type === OUTBOUND_RTP && r.kind === 'video') {
+					qpSum = r.qpSum ?? 0;
+					framesEncoded = r.framesEncoded ?? 0;
+				}
 			}
-		});
+		);
 
 		const lossRate =
 			this.screenUpLossRing.length > 0
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
 
-		return calcUplinkScreenVote({ lossRate, rttMs });
+		// windowed mean QP = ΔqpSum / ΔframesEncoded; undefined if no new frames (static screen) ->
+		// the vote skips the QP term and scores loss only.
+		let qp: number | undefined;
+		if (framesEncoded !== undefined) {
+			winPush(this.screenUpQpRing, now, { qpSum: qpSum ?? 0, framesEncoded });
+			const base = this.screenUpQpRing[0].data;
+			const dFrames = framesEncoded - base.framesEncoded;
+			const dQp = (qpSum ?? 0) - base.qpSum;
+			if (dFrames > 0) qp = dQp / dFrames;
+		}
+
+		return calcUplinkScreenVote({ lossRate, qp, rttMs });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport, rttMs?: number): number {
