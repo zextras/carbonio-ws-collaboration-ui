@@ -200,7 +200,7 @@ const publishedVotes = (): StreamVotes =>
 	useStore.getState().activeMeeting?.connectionQualityVotes ?? {};
 
 describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
-	it('audio: downlink scored from loss, uplink from encoded bitrate while speaking', async () => {
+	it('audio: downlink from loss (exp), uplink from encoded bitrate while speaking (BWE-armed)', async () => {
 		let tick = 0;
 		const monitor = makeMonitor({
 			myAudioOn: true,
@@ -209,7 +209,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				tick += 1;
 				return Promise.resolve(
 					report([
-						// downlink: delta from zero baseline -> 275/1000=0.275 -> round1(10*(1-0.275/0.55))=5
+						// downlink: delta from zero baseline -> 275/1000=0.275 -> round1(10*exp(-6*0.275))=1.9
 						{
 							type: INBOUND_RTP,
 							kind: 'audio',
@@ -219,16 +219,23 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						// uplink: encoded bitrate from the outbound delta = 30 B/pkt -> 30*50*8/1000 = 12 kbps
 						{ type: OUTBOUND_RTP, kind: 'audio', bytesSent: 3000 * tick, packetsSent: 100 * tick },
 						// local mic level above the speech gate -> the bitrate is actually scored
-						{ type: MEDIA_SOURCE, kind: 'audio', audioLevel: 0.2 }
+						{ type: MEDIA_SOURCE, kind: 'audio', audioLevel: 0.2 },
+						// BWE below the good-voice floor -> the fidelity penalty is armed (real throttling)
+						{
+							type: CANDIDATE_PAIR,
+							nominated: true,
+							state: 'succeeded',
+							availableOutgoingBitrate: 30000
+						}
 					])
 				);
 			}
 		});
 		await monitor.emitInitial(); // tick 1: prevAudioOut null -> uplink ceiling (10)
 		await monitor.emitInitial(); // tick 2: bitrate delta -> 12 kbps -> fidelity 0.5 -> 5
-		expect(publishedVotes().downlinkAudio).toBe(5);
+		expect(publishedVotes().downlinkAudio).toBe(1.9);
 		expect(publishedVotes().uplinkAudio).toBe(5);
-		expect(monitor.committed).toBe('medium');
+		expect(monitor.committed).toBe('poor');
 	});
 
 	it('audio uplink is omitted when my mic is off (never scored on a channel I am not using)', async () => {
@@ -291,7 +298,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().uplinkAudio).toBeUndefined();
 	});
 
-	it('audio downlink: loss at TOL_AUDIO (0.55) saturates the vote to 0', async () => {
+	it('audio downlink: heavy loss (55%) collapses the vote toward zero (exp curve)', async () => {
 		const monitor = makeMonitor({
 			otherParticipant: true,
 			audioStats: () =>
@@ -307,8 +314,8 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				)
 		});
 		await monitor.emitInitial();
-		// delta from zero baseline: dLost=55, dRecv=45 -> lossRate=0.55 = TOL_AUDIO -> vote 0
-		expect(publishedVotes().downlinkAudio).toBe(0);
+		// delta from zero baseline: dLost=55, dRecv=45 -> lossRate=0.55 -> round1(10*exp(-6*0.55))=0.4
+		expect(publishedVotes().downlinkAudio).toBe(0.4);
 	});
 
 	it('webcam uplink: a BW-limited sender maps its top active rung to a fractional vote', async () => {
@@ -454,19 +461,19 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().downlinkWebcam).toBe(6.7);
 	});
 
-	it('screen uplink (sending): fractionLost drives the vote', async () => {
+	it('screen uplink (sending): fractionLost drives the vote (exp curve)', async () => {
 		const monitor = makeMonitor({
 			screenSender: {
 				getStats: () => Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, fractionLost: 0.1 }]))
 			}
 		});
 		await monitor.emitInitial();
-		// lossRate avg = 0.1; score(0.1/0.2) = 5
-		expect(publishedVotes().uplinkScreen).toBe(5);
+		// lossRate avg = 0.1 -> round1(10*exp(-0.1/0.02)) = 0.1 (10% loss is unusable for video)
+		expect(publishedVotes().uplinkScreen).toBe(0.1);
 		expect(publishedVotes().downlinkScreen).toBeUndefined();
 	});
 
-	it('screen downlink (receiving): packet-loss delta drives the vote', async () => {
+	it('screen downlink (receiving): a sustained freeze collapses the vote to 0', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,
 			screenReceiverStats: () =>
@@ -475,18 +482,18 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'video',
-							packetsLost: 3,
-							packetsReceived: 97,
-							totalFreezesDuration: 0,
+							packetsLost: 0,
+							packetsReceived: 100,
+							totalFreezesDuration: 1,
 							qpSum: 0,
-							framesDecoded: 0
+							framesDecoded: 30
 						}
 					])
 				)
 		});
 		await monitor.emitInitial();
-		// lossRate=3/100=0.03 -> round1(10*(1-0.03/0.2)) = 8.5
-		expect(publishedVotes().downlinkScreen).toBe(8.5);
+		// 1 s of freeze over a sub-second window -> freezeRatio clamps to 1 -> vote 0
+		expect(publishedVotes().downlinkScreen).toBe(0);
 		expect(publishedVotes().uplinkScreen).toBeUndefined();
 	});
 
@@ -502,21 +509,21 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'video',
-							packetsLost: 3,
-							packetsReceived: 97,
+							packetsLost: 0,
+							packetsReceived: 100,
 							totalFreezesDuration: 0,
 							qpSum: 0,
-							framesDecoded: 0
+							framesDecoded: 30
 						}
 					])
 				)
 		});
 		await monitor.emitInitial();
 		expect(publishedVotes().uplinkScreen).toBe(10);
-		expect(publishedVotes().downlinkScreen).toBe(8.5);
+		expect(publishedVotes().downlinkScreen).toBe(10);
 	});
 
-	it('screen downlink: loss at TOL_SCREEN (0.20) saturates the vote to 0', async () => {
+	it('screen downlink: static content (no freeze) stays perfect (10)', async () => {
 		const monitor = makeMonitor({
 			hasScreenFeed: true,
 			screenReceiverStats: () =>
@@ -525,18 +532,17 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 						{
 							type: INBOUND_RTP,
 							kind: 'video',
-							packetsLost: 20,
-							packetsReceived: 80,
+							packetsLost: 0,
+							packetsReceived: 100,
 							totalFreezesDuration: 0,
 							qpSum: 0,
-							framesDecoded: 0
+							framesDecoded: 15
 						}
 					])
 				)
 		});
 		await monitor.emitInitial();
-		// delta from zero baseline: dLost=20, dRecv=80 -> lossRate=0.20 = TOL_SCREEN -> vote 0
-		expect(publishedVotes().downlinkScreen).toBe(0);
+		expect(publishedVotes().downlinkScreen).toBe(10);
 	});
 
 	it('audio: 5 s window — baseline stays at zero across two ticks within the window', async () => {
@@ -561,20 +567,21 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 			}
 		});
 		await monitor.emitInitial();
-		// tick 1: delta from zero baseline -> 275/1000=0.275 -> round1(10*(1-0.275/0.55))=5
-		expect(publishedVotes().downlinkAudio).toBe(5);
+		// tick 1: delta from zero baseline -> 275/1000=0.275 -> round1(10*exp(-6*0.275))=1.9
+		expect(publishedVotes().downlinkAudio).toBe(1.9);
 		await monitor.emitInitial();
-		// tick 2: baseline still zero (both within 5 s window) -> 550/2000=0.275 -> vote 5
-		expect(publishedVotes().downlinkAudio).toBe(5);
+		// tick 2: baseline still zero (both within 5 s window) -> 550/2000=0.275 -> vote 1.9
+		expect(publishedVotes().downlinkAudio).toBe(1.9);
 	});
 
-	it('rtt: the global vote comes from the candidate-pair round-trip time', async () => {
+	it('rtt folds into each stream as a delay factor (audio downlink scaled by RTT)', async () => {
 		const monitor = makeMonitor({
 			otherParticipant: true,
 			audioStats: () =>
 				Promise.resolve(
 					report([
-						// 0.45 s round-trip -> 450 ms -> round1(10*((700-450)/500)) = 5
+						// clean audio (no loss) but a 450 ms round-trip on the audio PC candidate-pair
+						{ type: INBOUND_RTP, kind: 'audio', packetsLost: 0, packetsReceived: 100 },
 						{
 							type: CANDIDATE_PAIR,
 							nominated: true,
@@ -585,6 +592,7 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				)
 		});
 		await monitor.emitInitial();
-		expect(publishedVotes().rtt).toBe(5);
+		// no loss -> exp term 1; delay(450, 1.0) = 0.25 -> downlinkAudio = 10 * 1 * 0.25 = 2.5
+		expect(publishedVotes().downlinkAudio).toBe(2.5);
 	});
 });

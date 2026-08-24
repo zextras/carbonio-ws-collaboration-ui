@@ -13,10 +13,10 @@ import {
 	calcDownlinkAudioVote,
 	calcDownlinkScreenVote,
 	calcDownlinkWebcamVote,
-	calcRttVote,
 	calcUplinkAudioVote,
 	calcUplinkScreenVote,
 	calcUplinkWebcamVote,
+	delayFactor,
 	scoreToLevel
 } from './connectionQualityScore';
 
@@ -35,132 +35,144 @@ describe('activeAudioKbps (DTX-robust encoded bitrate from raw getStats fields)'
 	});
 });
 
-describe('audioQualityFactor (empirical Opus mono-voice fidelity curve, anchors 8/16 kbps)', () => {
-	it('is 1.0 at/above the full-fidelity bitrate (16 kbps)', () => {
-		expect(audioQualityFactor(16)).toBe(1);
-		expect(audioQualityFactor(24)).toBe(1);
+describe('delayFactor — convex RTT knee, weighted per medium (200 ms good, 700 ms bad)', () => {
+	it('is 1 (no penalty) when RTT is unknown', () => {
+		expect(delayFactor(undefined, 1)).toBe(1);
 	});
 
-	it('is 0.5 at the mid point (12 kbps)', () => {
-		expect(audioQualityFactor(12)).toBe(0.5);
+	it('is 1 at/below the good threshold (200 ms) for any weight', () => {
+		expect(delayFactor(200, 1)).toBe(1);
+		expect(delayFactor(100, 0.6)).toBe(1);
 	});
 
-	it('is 0 at/below the floor (8 kbps)', () => {
-		expect(audioQualityFactor(8)).toBe(0);
-		expect(audioQualityFactor(4)).toBe(0);
+	it('bottoms out at (1 - weight) at/above the bad threshold (700 ms)', () => {
+		expect(delayFactor(700, 1)).toBe(0);
+		expect(delayFactor(700, 0.6)).toBeCloseTo(0.4, 10);
+		expect(delayFactor(700, 0.3)).toBeCloseTo(0.7, 10);
+		expect(delayFactor(900, 0.15)).toBeCloseTo(0.85, 10);
+	});
+
+	it('follows a convex knee in between (x squared)', () => {
+		// x=(700-450)/500=0.5, x^2=0.25 -> 1 - 1*(1-0.25) = 0.25
+		expect(delayFactor(450, 1)).toBeCloseTo(0.25, 10);
+		// x=(700-300)/500=0.8, x^2=0.64 -> 1 - 0.6*(1-0.64) = 0.784
+		expect(delayFactor(300, 0.6)).toBeCloseTo(0.784, 10);
 	});
 });
 
-describe('calcUplinkAudioVote — bitrate fidelity only (loss/jitter dropped)', () => {
-	it('no activeKbps given -> ceiling 1 -> 10 (silence never reads as muffled)', () => {
+describe('audioQualityFactor (concave log Opus mono-voice curve, 6 floor / 24 transparent)', () => {
+	it('is 1.0 at/above the transparent bitrate (24 kbps)', () => {
+		expect(audioQualityFactor(24)).toBe(1);
+		expect(audioQualityFactor(48)).toBe(1);
+	});
+
+	it('is 0.5 at the log-midpoint (12 kbps)', () => {
+		expect(audioQualityFactor(12)).toBeCloseTo(0.5, 10);
+	});
+
+	it('is 0 at/below the floor (6 kbps)', () => {
+		expect(audioQualityFactor(6)).toBe(0);
+		expect(audioQualityFactor(3)).toBe(0);
+	});
+});
+
+describe('calcUplinkAudioVote — fidelity (BWE-armed) x uplink delay', () => {
+	it('no activeKbps given -> ceiling (silence never reads as muffled)', () => {
 		expect(calcUplinkAudioVote({})).toBe(10);
 	});
 
-	it('a healthy WebRTC mono-voice bitrate (~22 kbps) scores 10 (no false "muffled")', () => {
-		expect(calcUplinkAudioVote({ activeKbps: 22 })).toBe(10);
+	it('low bitrate but NOT network-constrained -> ceiling (VBR on easy speech is trusted)', () => {
+		expect(calcUplinkAudioVote({ activeKbps: 10, networkConstrained: false })).toBe(10);
 	});
 
-	it('full-fidelity bitrate (16 kbps) -> 10', () => {
-		expect(calcUplinkAudioVote({ activeKbps: 16 })).toBe(10);
+	it('network-constrained: healthy bitrate (22 kbps) still near full', () => {
+		// log(22/6)/log(4) = 0.9372 -> 9.4
+		expect(calcUplinkAudioVote({ activeKbps: 22, networkConstrained: true })).toBe(9.4);
 	});
 
-	it('muffled (12 kbps) -> 5', () => {
-		expect(calcUplinkAudioVote({ activeKbps: 12 })).toBe(5);
+	it('network-constrained: muffled (12 kbps) -> 5', () => {
+		expect(calcUplinkAudioVote({ activeKbps: 12, networkConstrained: true })).toBe(5);
 	});
 
-	it('at the floor bitrate (8 kbps) -> 0', () => {
-		expect(calcUplinkAudioVote({ activeKbps: 8 })).toBe(0);
+	it('network-constrained: at the floor (6 kbps) -> 0', () => {
+		expect(calcUplinkAudioVote({ activeKbps: 6, networkConstrained: true })).toBe(0);
+	});
+
+	it('applies the uplink delay factor (weight 0.6) on top of fidelity', () => {
+		// fidelity(12)=0.5 -> 5, delay(700,0.6)=0.4 -> 2.0
+		expect(calcUplinkAudioVote({ activeKbps: 12, networkConstrained: true, rttMs: 700 })).toBe(2);
 	});
 });
 
-describe('calcUplinkScreenVote — loss only (TOL_SCREEN=0.2, video freezes early)', () => {
+describe('calcDownlinkAudioVote — exponential loss x conversational delay (weight 1.0)', () => {
+	it('returns 10 for zero loss and good/unknown RTT', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0 })).toBe(10);
+	});
+
+	it('10% loss -> ~5.5 (front-loaded exponential, not linear)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0.1 })).toBe(5.5);
+	});
+
+	it('20% loss -> ~3.0 (below the linear model that read it 6.4)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0.2 })).toBe(3);
+	});
+
+	it('50% loss -> ~0.5 (near unusable)', () => {
+		expect(calcDownlinkAudioVote({ lossRate: 0.5 })).toBe(0.5);
+	});
+
+	it('full conversational delay scales the whole curve down (20% loss @ 450 ms)', () => {
+		// exp(-6*0.2)=0.3012 -> 3.01, delay(450,1)=0.25 -> 0.75 -> 0.8
+		expect(calcDownlinkAudioVote({ lossRate: 0.2, rttMs: 450 })).toBe(0.8);
+	});
+});
+
+describe('calcUplinkScreenVote — exponential loss x small screen delay (weight 0.15)', () => {
 	it('returns 10 for no loss', () => {
 		expect(calcUplinkScreenVote({ lossRate: 0 })).toBe(10);
 	});
 
-	it('returns 5 at half the loss tolerance (0.1/0.2)', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0.1 })).toBe(5);
+	it('2% loss -> ~3.7 (steep front-loaded decay)', () => {
+		expect(calcUplinkScreenVote({ lossRate: 0.02 })).toBe(3.7);
 	});
 
-	it('returns 0 at the loss tolerance (0.2)', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0.2 })).toBe(0);
+	it('5% loss -> ~0.8 (effectively unusable, matching the industry threshold)', () => {
+		expect(calcUplinkScreenVote({ lossRate: 0.05 })).toBe(0.8);
 	});
 
-	it('returns 0 when loss exceeds the tolerance (clamped)', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0.5 })).toBe(0);
-	});
-});
-
-describe('calcDownlinkScreenVote — loss only (TOL_SCREEN=0.2)', () => {
-	it('returns 10 for zero loss', () => {
-		expect(calcDownlinkScreenVote({ lossRate: 0 })).toBe(10);
-	});
-
-	it('returns 5 at half the loss tolerance (0.1/0.2)', () => {
-		expect(calcDownlinkScreenVote({ lossRate: 0.1 })).toBe(5);
-	});
-
-	it('returns 0 at/above the loss tolerance (0.2)', () => {
-		expect(calcDownlinkScreenVote({ lossRate: 0.2 })).toBe(0);
-		expect(calcDownlinkScreenVote({ lossRate: 1 })).toBe(0);
+	it('applies the small screen delay factor', () => {
+		// exp(-0.05/0.02)=0.0821 -> 0.821, delay(700,0.15)=0.85 -> 0.698 -> 0.7
+		expect(calcUplinkScreenVote({ lossRate: 0.05, rttMs: 700 })).toBe(0.7);
 	});
 });
 
-describe('calcDownlinkAudioVote — loss only (TOL_AUDIO=0.55, audio+PLC rides out more loss)', () => {
-	it('returns 10 for zero loss', () => {
-		expect(calcDownlinkAudioVote({ lossRate: 0 })).toBe(10);
+describe('calcDownlinkScreenVote — freeze ratio (post-recovery) x small screen delay', () => {
+	it('returns 10 for no freeze (static content stays perfect)', () => {
+		expect(calcDownlinkScreenVote({ freezeRatio: 0 })).toBe(10);
 	});
 
-	it('returns 5 at half the loss tolerance (0.275/0.55)', () => {
-		expect(calcDownlinkAudioVote({ lossRate: 0.275 })).toBe(5);
+	it('15% of the window frozen -> ~3.7', () => {
+		expect(calcDownlinkScreenVote({ freezeRatio: 0.15 })).toBe(3.7);
 	});
 
-	it('50% loss is near the floor but not quite 0 (~1)', () => {
-		// 10*(1-0.5/0.55) = 0.909 -> round1 = 0.9
-		expect(calcDownlinkAudioVote({ lossRate: 0.5 })).toBe(0.9);
+	it('30% frozen -> ~1.4', () => {
+		expect(calcDownlinkScreenVote({ freezeRatio: 0.3 })).toBe(1.4);
 	});
 
-	it('returns 0 at/above the loss tolerance (0.55)', () => {
-		expect(calcDownlinkAudioVote({ lossRate: 0.55 })).toBe(0);
-		expect(calcDownlinkAudioVote({ lossRate: 1 })).toBe(0);
-	});
-});
-
-describe('screen is harsher than audio at equal loss (video is more loss-fragile)', () => {
-	it('at 20% loss screen is 0 while audio is still usable (>0)', () => {
-		expect(calcDownlinkScreenVote({ lossRate: 0.2 })).toBe(0);
-		expect(calcDownlinkAudioVote({ lossRate: 0.2 })).toBeGreaterThan(0);
+	it('applies the small screen delay factor on top of freeze', () => {
+		// exp(-0.15/0.15)=0.3679 -> 3.679, delay(700,0.15)=0.85 -> 3.127 -> 3.1
+		expect(calcDownlinkScreenVote({ freezeRatio: 0.15, rttMs: 700 })).toBe(3.1);
 	});
 });
 
-describe('calcRttVote — global round-trip curve (200 ms -> 10, 700 ms -> 0)', () => {
-	it('returns 10 at/below the good threshold (200 ms)', () => {
-		expect(calcRttVote(200)).toBe(10);
-		expect(calcRttVote(100)).toBe(10);
-	});
-
-	it('returns 5 at the midpoint (450 ms)', () => {
-		// (700-450)/500 = 0.5 -> 5
-		expect(calcRttVote(450)).toBe(5);
-	});
-
-	it('returns 0 at/above the bad threshold (700 ms)', () => {
-		expect(calcRttVote(700)).toBe(0);
-		expect(calcRttVote(900)).toBe(0);
-	});
-});
-
-describe('calcUplinkWebcamVote — tier ceiling only (loss dropped)', () => {
-	// prodRungs=3 unless stated; bwLimitedFraction/cpuLimitedFraction default to 0
-
-	it('returns 10 when at top rung with no BW limitation', () => {
+describe('calcUplinkWebcamVote — tier ratio x mild webcam delay (weight 0.3)', () => {
+	it('returns 10 at top rung, no BW limitation, good/unknown RTT', () => {
 		expect(
 			calcUplinkWebcamVote({ topActiveRung: 2, producibleRungs: 3, bwLimitedFraction: 0 })
 		).toBe(10);
 	});
 
 	it('returns 6.7 when BW-limited to rung 1 of 3', () => {
-		// ratio=2/3, bwLimitedFraction=1 > cpuLimitedFraction=0 -> 6.7
 		expect(
 			calcUplinkWebcamVote({
 				topActiveRung: 1,
@@ -169,12 +181,6 @@ describe('calcUplinkWebcamVote — tier ceiling only (loss dropped)', () => {
 				cpuLimitedFraction: 0
 			})
 		).toBe(6.7);
-	});
-
-	it('returns 3.3 when BW-limited to rung 0 of 3', () => {
-		expect(
-			calcUplinkWebcamVote({ topActiveRung: 0, producibleRungs: 3, bwLimitedFraction: 1 })
-		).toBe(3.3);
 	});
 
 	it('returns 10 when CPU-dominant scale-down (CPU excluded — not a network fact)', () => {
@@ -188,18 +194,6 @@ describe('calcUplinkWebcamVote — tier ceiling only (loss dropped)', () => {
 		).toBe(10);
 	});
 
-	it('returns 10 for a 360p camera at its top rung (small-camera sending its best)', () => {
-		expect(
-			calcUplinkWebcamVote({ topActiveRung: 1, producibleRungs: 2, bwLimitedFraction: 0 })
-		).toBe(10);
-	});
-
-	it('returns 5.0 when BW-limited to rung 0 of 2', () => {
-		expect(
-			calcUplinkWebcamVote({ topActiveRung: 0, producibleRungs: 2, bwLimitedFraction: 1 })
-		).toBe(5);
-	});
-
 	it('returns 0 when sending nothing (topActiveRung -1)', () => {
 		expect(
 			calcUplinkWebcamVote({ topActiveRung: -1, producibleRungs: 3, bwLimitedFraction: 0 })
@@ -211,9 +205,21 @@ describe('calcUplinkWebcamVote — tier ceiling only (loss dropped)', () => {
 			calcUplinkWebcamVote({ topActiveRung: 0, producibleRungs: 0, bwLimitedFraction: 1 })
 		).toBe(10);
 	});
+
+	it('applies the mild delay factor', () => {
+		// tier 6.667 (rung1/3) * delay(700,0.3)=0.7 -> 4.667 -> 4.7
+		expect(
+			calcUplinkWebcamVote({
+				topActiveRung: 1,
+				producibleRungs: 3,
+				bwLimitedFraction: 1,
+				rttMs: 700
+			})
+		).toBe(4.7);
+	});
 });
 
-describe('calcDownlinkWebcamVote — tier x framerate only (loss dropped)', () => {
+describe('calcDownlinkWebcamVote — tier x framerate x mild webcam delay', () => {
 	it('returns 10 when sender offers top tier and we show top tier', () => {
 		expect(calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2 }])).toBe(10);
 	});
@@ -222,20 +228,17 @@ describe('calcDownlinkWebcamVote — tier x framerate only (loss dropped)', () =
 		expect(calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: 2 }])).toBe(6.7);
 	});
 
-	it('returns 10 when sender only offers medium and we show medium (not penalized)', () => {
-		expect(calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: 1 }])).toBe(10);
-	});
-
-	it('returns 3.3 when showing low of three offered tiers', () => {
-		expect(calcDownlinkWebcamVote([{ shownTierIdx: 0, senderMaxTierIdx: 2 }])).toBe(3.3);
-	});
-
 	it('returns 10 when senderMaxTierIdx is -1 (unknown sender, no penalty)', () => {
 		expect(calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: -1 }])).toBe(10);
 	});
 
+	it('a framerate drop at the top tier lowers the vote by a small fixed amount (10 -> 8.5)', () => {
+		expect(
+			calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2, temporalReduced: true }])
+		).toBe(8.5);
+	});
+
 	it('averages feed votes across multiple feeds', () => {
-		// feed1: 10; feed2: min(1,1/3)*10=3.3 -> avg(10, 3.33) = 6.7
 		expect(
 			calcDownlinkWebcamVote([
 				{ shownTierIdx: 2, senderMaxTierIdx: 2 },
@@ -247,37 +250,10 @@ describe('calcDownlinkWebcamVote — tier x framerate only (loss dropped)', () =
 	it('returns 10 for an empty feed list (nothing flowing)', () => {
 		expect(calcDownlinkWebcamVote([])).toBe(10);
 	});
-});
 
-describe('calcDownlinkWebcamVote — framerate (temporal) penalty', () => {
-	it('a framerate drop at the top tier lowers the vote by a small fixed amount (10 -> 8.5)', () => {
-		expect(
-			calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2, temporalReduced: true }])
-		).toBe(8.5);
-	});
-
-	it('a framerate drop is penalized LESS than a resolution step (8.5 > 6.7)', () => {
-		const framerateOnly = calcDownlinkWebcamVote([
-			{ shownTierIdx: 2, senderMaxTierIdx: 2, temporalReduced: true }
-		]);
-		const resolutionStep = calcDownlinkWebcamVote([
-			{ shownTierIdx: 1, senderMaxTierIdx: 2, temporalReduced: false }
-		]);
-		expect(framerateOnly).toBe(8.5);
-		expect(resolutionStep).toBe(6.7);
-		expect(framerateOnly).toBeGreaterThan(resolutionStep);
-	});
-
-	it('resolution AND framerate drop compound (medium tier at base fps -> 5.7)', () => {
-		expect(
-			calcDownlinkWebcamVote([{ shownTierIdx: 1, senderMaxTierIdx: 2, temporalReduced: true }])
-		).toBe(5.7);
-	});
-
-	it('temporalReduced false (or absent) applies no framerate penalty', () => {
-		expect(
-			calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2, temporalReduced: false }])
-		).toBe(10);
+	it('applies the mild delay factor to the averaged tier vote', () => {
+		// top tier 10 * delay(700,0.3)=0.7 -> 7.0
+		expect(calcDownlinkWebcamVote([{ shownTierIdx: 2, senderMaxTierIdx: 2 }], 700)).toBe(7);
 	});
 });
 
@@ -285,25 +261,21 @@ describe('scoreToLevel', () => {
 	it('maps 1.9 to terrible', () => {
 		expect(scoreToLevel(1.9)).toBe('terrible');
 	});
-
 	it('maps 3 to poor', () => {
 		expect(scoreToLevel(3)).toBe('poor');
 	});
-
 	it('maps 5 to medium', () => {
 		expect(scoreToLevel(5)).toBe('medium');
 	});
-
 	it('maps 7 to high', () => {
 		expect(scoreToLevel(7)).toBe('high');
 	});
-
 	it('maps 9 to optimal', () => {
 		expect(scoreToLevel(9)).toBe('optimal');
 	});
 });
 
-describe('aggregateQuality', () => {
+describe('aggregateQuality — worst-aware weighted blend (audio x2), no RTT vote', () => {
 	it('returns lost when ICE is not connected', () => {
 		expect(aggregateQuality({ downlinkAudio: 8 }, false)).toBe('lost');
 	});
@@ -316,19 +288,23 @@ describe('aggregateQuality', () => {
 		expect(aggregateQuality({ uplinkAudio: 5 }, true)).toBe('medium');
 	});
 
-	it('worst-aware blend: a single bad audio vote pulls the level down, not diluted to high', () => {
-		// mean(2,10,10)=7.33, min=2 -> 0.6*7.33 + 0.4*2 = 5.2 -> medium
+	it('a bad AUDIO vote pulls harder than a bad video vote (audio weight 2)', () => {
+		// audio 2 (w2), webcam 10 (w1), webcam 10 (w1): mean=(4+10+10)/4=6.0, min=2
+		// 0.6*6 + 0.4*2 = 4.4 -> poor
 		expect(aggregateQuality({ uplinkAudio: 2, downlinkWebcam: 10, uplinkWebcam: 10 }, true)).toBe(
+			'poor'
+		);
+	});
+
+	it('a single bad video vote still pulls the level down to medium', () => {
+		// screen 2 (w1), audio 10 (w2), audio 10 (w2): mean=(2+20+20)/5=8.4, min=2
+		// 0.6*8.4 + 0.4*2 = 5.84 -> medium
+		expect(aggregateQuality({ downlinkScreen: 2, downlinkAudio: 10, uplinkAudio: 10 }, true)).toBe(
 			'medium'
 		);
 	});
 
-	it('the global RTT vote participates like any other vote (bad RTT pulls the level down)', () => {
-		// mean(3,10,10)=7.67, min=3 -> 0.6*7.67 + 0.4*3 = 5.8 -> medium
-		expect(aggregateQuality({ rtt: 3, uplinkWebcam: 10, downlinkAudio: 10 }, true)).toBe('medium');
-	});
-
-	it('returns optimal when all votes (six streams + RTT) are 10', () => {
+	it('returns optimal when all six stream votes are 10', () => {
 		expect(
 			aggregateQuality(
 				{
@@ -337,8 +313,7 @@ describe('aggregateQuality', () => {
 					uplinkAudio: 10,
 					downlinkAudio: 10,
 					uplinkScreen: 10,
-					downlinkScreen: 10,
-					rtt: 10
+					downlinkScreen: 10
 				},
 				true
 			)

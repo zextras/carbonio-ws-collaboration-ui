@@ -106,8 +106,7 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 			`Uplink audio: ${fmt(ownVotes.uplinkAudio)}`,
 			`Downlink audio: ${fmt(ownVotes.downlinkAudio)}`,
 			`Uplink screen: ${fmt(ownVotes.uplinkScreen)}`,
-			`Downlink screen: ${fmt(ownVotes.downlinkScreen)}`,
-			`RTT: ${fmt(ownVotes.rtt)}`
+			`Downlink screen: ${fmt(ownVotes.downlinkScreen)}`
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

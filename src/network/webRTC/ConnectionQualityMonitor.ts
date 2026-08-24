@@ -10,7 +10,6 @@ import {
 	calcDownlinkAudioVote,
 	calcDownlinkScreenVote,
 	calcDownlinkWebcamVote,
-	calcRttVote,
 	calcUplinkAudioVote,
 	calcUplinkScreenVote,
 	calcUplinkWebcamVote,
@@ -346,6 +345,17 @@ export default class ConnectionQualityMonitor {
 			}
 		}
 
+		// downlink RTT for webcam/screen receive — measured on the video-in PC's own candidate-pair
+		// (each stream is a separate peer-connection, so its RTT is its own). Undefined -> no penalty.
+		let videoInRttMs: number | undefined;
+		if (this.videoIn.peerConn != null) {
+			try {
+				videoInRttMs = this.readInstantCandidateRtt(await this.videoIn.peerConn.getStats());
+			} catch {
+				// defensive: leave undefined
+			}
+		}
+
 		// webcam downlink: only while receiving feeds, from the in-connection's per-feed quality states
 		const tierMap: Record<'high' | 'medium' | 'low', number> = { high: 2, medium: 1, low: 0 };
 		const videoFeeds = this.videoIn.getVideoFeedsForQuality();
@@ -369,7 +379,7 @@ export default class ConnectionQualityMonitor {
 					temporalReduced: f.temporalReduced
 				};
 			});
-			votes.downlinkWebcam = calcDownlinkWebcamVote(mappedFeeds);
+			votes.downlinkWebcam = calcDownlinkWebcamVote(mappedFeeds, videoInRttMs);
 		}
 
 		// The audio AudioBridge PC is the always-up channel, so we read it every tick: the global RTT vote
@@ -380,14 +390,14 @@ export default class ConnectionQualityMonitor {
 			try {
 				const stats = await this.audioConn.peerConn.getStats();
 				const rttMs = this.readRttMs(stats);
-				if (rttMs !== undefined) votes.rtt = calcRttVote(rttMs);
+				const networkConstrained = this.isUplinkBandwidthConstrained(stats);
 				if (myAudioOn || someoneElseAudioOn) {
-					const { uplink, downlink } = this.calcAudioVotes(stats);
+					const { uplink, downlink } = this.calcAudioVotes(stats, rttMs, networkConstrained);
 					if (myAudioOn) votes.uplinkAudio = uplink;
 					if (someoneElseAudioOn) votes.downlinkAudio = downlink;
 				}
 			} catch {
-				// defensive: omit audio/RTT votes on error
+				// defensive: omit audio votes on error
 			}
 		}
 
@@ -407,7 +417,7 @@ export default class ConnectionQualityMonitor {
 			if (receiver != null) {
 				try {
 					const stats = await receiver.getStats();
-					votes.downlinkScreen = this.calcDownlinkScreen(stats);
+					votes.downlinkScreen = this.calcDownlinkScreen(stats, videoInRttMs);
 				} catch {
 					// defensive: omit the vote
 				}
@@ -444,6 +454,8 @@ export default class ConnectionQualityMonitor {
 		let topActiveRung = -1;
 		let bwDuration = 0;
 		let cpuDuration = 0;
+		// uplink RTT for this stream from its own remote-inbound report (Janus's view of our send leg)
+		let videoUpRttMs: number | undefined;
 		// per-rid temporal structure (scalabilityMode@fps) — snapshotted here, logged ONLY on a tier
 		// change (below), so it captures "what we're producing" without the per-tick fps-jitter spam.
 		const scal: Record<string, string> = {};
@@ -458,8 +470,12 @@ export default class ConnectionQualityMonitor {
 					scalabilityMode?: string;
 					active?: boolean;
 					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
+					roundTripTime?: number;
 				}
 			) => {
+				if (r.type === REMOTE_INBOUND_RTP && r.roundTripTime != null) {
+					videoUpRttMs = r.roundTripTime * 1000;
+				}
 				if (r.type !== OUTBOUND_RTP) return;
 				// qualityLimitationDurations are cumulative — read from any layer (same encoder)
 				bwDuration = Math.max(bwDuration, r.qualityLimitationDurations?.bandwidth ?? 0);
@@ -507,14 +523,19 @@ export default class ConnectionQualityMonitor {
 			topActiveRung,
 			producibleRungs,
 			bwLimitedFraction,
-			cpuLimitedFraction
+			cpuLimitedFraction,
+			rttMs: videoUpRttMs
 		});
 	}
 
 	// Audio up and down are scored from getStats: inbound-rtp for the downlink (delta packetsLost)
 	// and remote-inbound-rtp for the uplink (fractionLost). Which is included is decided by the
 	// caller from app state (mic on / others present).
-	private calcAudioVotes(stats: RTCStatsReport): { uplink: number; downlink: number } {
+	private calcAudioVotes(
+		stats: RTCStatsReport,
+		rttMs: number | undefined,
+		networkConstrained: boolean
+	): { uplink: number; downlink: number } {
 		const now = Date.now();
 
 		let downSnap: AudioDownSnap | null = null;
@@ -572,8 +593,9 @@ export default class ConnectionQualityMonitor {
 			this.prevAudioOut = cur;
 		}
 
-		// uplink: fidelity from the encoded bitrate only (loss/jitter dropped — see connectionQualityScore)
-		const uplinkScore = calcUplinkAudioVote({ activeKbps });
+		// uplink: fidelity from the encoded bitrate (armed only when the network is capping the send
+		// rate — see isUplinkBandwidthConstrained) x the uplink delay factor
+		const uplinkScore = calcUplinkAudioVote({ activeKbps, networkConstrained, rttMs });
 
 		// downlink: windowed delta packetsLost / (packetsLost + packetsReceived)
 		let downlinkScore = 10;
@@ -584,7 +606,7 @@ export default class ConnectionQualityMonitor {
 			const dLost = Math.max(0, cur.packetsLost - base.packetsLost);
 			const dRecv = Math.max(0, cur.packetsReceived - base.packetsReceived);
 			const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
-			downlinkScore = calcDownlinkAudioVote({ lossRate });
+			downlinkScore = calcDownlinkAudioVote({ lossRate, rttMs });
 		}
 
 		return { uplink: uplinkScore, downlink: downlinkScore };
@@ -619,13 +641,68 @@ export default class ConnectionQualityMonitor {
 		return this.rttRing.reduce((s, e) => s + e.data, 0) / this.rttRing.length;
 	}
 
+	// Instantaneous RTT (ms) from a PC's own selected candidate-pair — used for the receive-side PCs
+	// (webcam/screen downlink), each measured on its own transport. Undefined if not yet nominated.
+	private readInstantCandidateRtt(stats: RTCStatsReport): number | undefined {
+		let rttMs: number | undefined;
+		stats.forEach(
+			(
+				r: RTCStats & {
+					nominated?: boolean;
+					state?: string;
+					currentRoundTripTime?: number;
+				}
+			) => {
+				if (
+					r.type === CANDIDATE_PAIR &&
+					r.nominated === true &&
+					r.state === 'succeeded' &&
+					r.currentRoundTripTime != null
+				) {
+					rttMs = r.currentRoundTripTime * 1000;
+				}
+			}
+		);
+		return rttMs;
+	}
+
+	// BWE gate for the audio-uplink fidelity vote: is the network capping our send rate? The selected
+	// candidate-pair's availableOutgoingBitrate below the good-voice band means real throttling (arm the
+	// fidelity penalty). Undefined -> we cannot tell -> trust VBR (no penalty). Threshold to validate E2E.
+	private isUplinkBandwidthConstrained(stats: RTCStatsReport): boolean {
+		const AUDIO_BWE_FLOOR_BPS = 40000;
+		let available: number | undefined;
+		stats.forEach(
+			(
+				r: RTCStats & {
+					nominated?: boolean;
+					state?: string;
+					availableOutgoingBitrate?: number;
+				}
+			) => {
+				if (
+					r.type === CANDIDATE_PAIR &&
+					r.nominated === true &&
+					r.state === 'succeeded' &&
+					r.availableOutgoingBitrate != null
+				) {
+					available = r.availableOutgoingBitrate;
+				}
+			}
+		);
+		return available !== undefined && available < AUDIO_BWE_FLOOR_BPS;
+	}
+
 	private calcUplinkScreen(stats: RTCStatsReport): number {
 		const now = Date.now();
+		let rttMs: number | undefined;
 
-		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
+		stats.forEach((r: RTCStats & { fractionLost?: number; roundTripTime?: number }) => {
 			// remote-inbound-rtp carries the sender's view of loss on OUR uplink leg (fractionLost 0..1)
+			// plus the per-SSRC round-trip time on this stream's own transport.
 			if (r.type === REMOTE_INBOUND_RTP) {
 				winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
+				if (r.roundTripTime != null) rttMs = r.roundTripTime * 1000;
 			}
 		});
 
@@ -634,10 +711,10 @@ export default class ConnectionQualityMonitor {
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
 
-		return calcUplinkScreenVote({ lossRate });
+		return calcUplinkScreenVote({ lossRate, rttMs });
 	}
 
-	private calcDownlinkScreen(stats: RTCStatsReport): number {
+	private calcDownlinkScreen(stats: RTCStatsReport, rttMs?: number): number {
 		const now = Date.now();
 
 		let snap: ScreenDownSnap | null = null;
@@ -669,10 +746,12 @@ export default class ConnectionQualityMonitor {
 		winPush(this.screenDownRing, now, snap as ScreenDownSnap);
 		const base = this.screenDownRing[0].data;
 		const cur = snap as ScreenDownSnap;
-		const dPktLost = Math.max(0, cur.packetsLost - base.packetsLost);
-		const dPktRecv = Math.max(0, cur.packetsReceived - base.packetsReceived);
-		const lossRate = dPktLost + dPktRecv > 0 ? dPktLost / (dPktLost + dPktRecv) : 0;
+		// degradation = freeze ratio: fraction of the window the decoder was stalled. A post-recovery
+		// outcome (RTT's recovery damage is already inside it), ~0 on static content.
+		const windowSec = Math.max((now - this.screenDownRing[0].ts) / 1000, 0.1);
+		const dFreeze = Math.max(0, cur.totalFreezesDuration - base.totalFreezesDuration);
+		const freezeRatio = Math.max(0, Math.min(1, dFreeze / windowSec));
 
-		return calcDownlinkScreenVote({ lossRate });
+		return calcDownlinkScreenVote({ freezeRatio, rttMs });
 	}
 }
