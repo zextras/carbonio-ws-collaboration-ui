@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import ConnectionQualityMonitor, {
-	deltaLossRate,
-	stepHysteresis
-} from './ConnectionQualityMonitor';
-import { ConnectionQuality, StreamVotes } from './connectionQualityScore';
+import ConnectionQualityMonitor, { stepHysteresis } from './ConnectionQualityMonitor';
+import { ConnectionQuality, LinkSample } from './connectionQualityScore';
 import useStore from '../../store/Store';
 import {
 	IBidirectionalConnectionAudioInOut,
@@ -23,41 +20,17 @@ import { RootStore } from '../../types/store/StoreTypes';
 // setupTests.ts stubs the default export for component tests; exercise the real class here
 vi.unmock('./ConnectionQualityMonitor');
 
-describe('deltaLossRate', () => {
-	it('returns 0 when there are fewer than minSamples total packets', () => {
-		expect(deltaLossRate(2, 2, 0, 0)).toBe(0);
-	});
-
-	it('computes the delta loss fraction when denominator meets the threshold', () => {
-		// 5 new lost, 15 new received → loss = 5/20 = 0.25
-		expect(deltaLossRate(5, 15, 0, 0)).toBe(0.25);
-	});
-
-	it('clamps negative deltas to 0', () => {
-		// prevLost > currentLost is a reset/reorder artifact; treat as 0 new loss
-		expect(deltaLossRate(0, 20, 10, 0)).toBe(0);
-	});
-
-	it('returns 0 on a clean tick', () => {
-		expect(deltaLossRate(10, 110, 10, 100)).toBe(0);
-	});
-
-	it('uses a custom minSamples threshold', () => {
-		// 4 total packets < default 5 → 0, but >= custom 3 → actual rate
-		expect(deltaLossRate(1, 3, 0, 0, 3)).toBeCloseTo(0.25);
-		expect(deltaLossRate(1, 3, 0, 0, 5)).toBe(0);
-	});
-});
-
 describe('stepHysteresis', () => {
 	it('commits the first level immediately regardless of direction', () => {
-		const r = stepHysteresis('medium', null, 0);
-		expect(r).toEqual({ next: 'medium', streak: 0, changed: true });
+		expect(stepHysteresis('medium', null, 0)).toEqual({ next: 'medium', streak: 0, changed: true });
 	});
 
 	it('commits to "lost" immediately even when currently optimal', () => {
-		const r = stepHysteresis('lost', 'optimal', 0);
-		expect(r).toEqual({ next: 'lost', streak: 0, changed: true });
+		expect(stepHysteresis('lost', 'optimal', 0)).toEqual({
+			next: 'lost',
+			streak: 0,
+			changed: true
+		});
 	});
 
 	it('does not fire changed when level is already "lost"', () => {
@@ -67,13 +40,15 @@ describe('stepHysteresis', () => {
 	});
 
 	it('leaves "lost" in a single tick when a non-lost level arrives (no better-streak)', () => {
-		const r = stepHysteresis('poor', 'lost', 0);
-		expect(r).toEqual({ next: 'poor', streak: 0, changed: true });
+		expect(stepHysteresis('poor', 'lost', 0)).toEqual({ next: 'poor', streak: 0, changed: true });
 	});
 
 	it('commits a worsening level immediately (1 tick)', () => {
-		const r = stepHysteresis('poor', 'optimal', 0);
-		expect(r).toEqual({ next: 'poor', streak: 0, changed: true });
+		expect(stepHysteresis('poor', 'optimal', 0)).toEqual({
+			next: 'poor',
+			streak: 0,
+			changed: true
+		});
 	});
 
 	it('does not commit an improvement until the 3rd consecutive better tick', () => {
@@ -116,19 +91,22 @@ describe('stepHysteresis', () => {
 	});
 
 	it('unchanged same-level produces changed: false', () => {
-		const r = stepHysteresis('medium', 'medium', 0);
-		expect(r).toEqual({ next: 'medium', streak: 0, changed: false });
+		expect(stepHysteresis('medium', 'medium', 0)).toEqual({
+			next: 'medium',
+			streak: 0,
+			changed: false
+		});
 	});
 });
 
 const INBOUND_RTP = 'inbound-rtp';
-const OUTBOUND_RTP = 'outbound-rtp';
 const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
-const MEDIA_SOURCE = 'media-source';
+const REMOTE_OUTBOUND_RTP = 'remote-outbound-rtp';
 const CANDIDATE_PAIR = 'candidate-pair';
 
 const report = (stats: Array<Record<string, unknown>>): RTCStatsReport =>
-	new Map(stats.map((s, i) => [String(i), s])) as unknown as RTCStatsReport;
+	// the id used by the SR-escape pairing is the stat's own `id` field, not the Map key
+	new Map(stats.map((s, i) => [String(s.id ?? i), s])) as unknown as RTCStatsReport;
 
 const emptyReport = (): Promise<RTCStatsReport> => Promise.resolve(report([]));
 
@@ -136,31 +114,20 @@ const makeMonitor = (
 	parts: {
 		audioConnectionState?: RTCPeerConnectionState;
 		audioStats?: () => Promise<RTCStatsReport>;
-		myAudioOn?: boolean;
-		otherParticipant?: boolean;
-		otherAudioOn?: boolean;
-		videoSender?: {
-			track?: { getSettings: () => { height: number } };
-			getStats: () => Promise<RTCStatsReport>;
-		};
-		videoFeeds?: Array<{ userId: string; frameHeight: number; inboundLossRate: number }>;
-		hasScreenFeed?: boolean;
-		screenReceiverStats?: () => Promise<RTCStatsReport>;
+		videoSender?: { getStats: () => Promise<RTCStatsReport> };
 		screenSender?: { getStats: () => Promise<RTCStatsReport> };
+		videoInStats?: () => Promise<RTCStatsReport>;
 	} = {}
 ): ConnectionQualityMonitor => {
-	// Audio presence is read from participant/session state, so the store must be primed before the
-	// monitor reads it. Votes are published to activeMeeting.connectionQualityVotes and read from there.
-	const participants: Record<string, { userId: string; audioStreamOn: boolean }> = {
-		me: { userId: 'me', audioStreamOn: parts.myAudioOn ?? false }
-	};
-	if (parts.otherParticipant) {
-		participants.other = { userId: 'other', audioStreamOn: parts.otherAudioOn ?? true };
-	}
+	// setState MERGES, so the store's real action methods (setConnectionScoreDetail, ...) survive; only
+	// session/activeMeeting are replaced with the fixture the monitor reads/writes.
 	useStore.setState({
 		session: { id: 'me' },
-		meetings: { meetingId: { participants } },
-		activeMeeting: { meetingId: 'meetingId', connectionQuality: {}, connectionQualityVotes: {} }
+		activeMeeting: {
+			meetingId: 'meetingId',
+			connectionQuality: {},
+			connectionScoreDetail: undefined
+		}
 	} as unknown as RootStore);
 
 	const audioConn = {
@@ -169,20 +136,11 @@ const makeMonitor = (
 			getStats: parts.audioStats ?? emptyReport
 		}
 	} as unknown as IBidirectionalConnectionAudioInOut;
-	const videoOut = {
-		rtpSender: parts.videoSender ?? null
-	} as unknown as IVideoOutConnection;
-	const screenReceiver = parts.screenReceiverStats
-		? ({ getStats: parts.screenReceiverStats } as unknown as RTCRtpReceiver)
-		: null;
+	const videoOut = { rtpSender: parts.videoSender ?? null } as unknown as IVideoOutConnection;
 	const videoIn = {
-		getVideoFeedsForQuality: () => parts.videoFeeds ?? [],
-		hasScreenFeed: () => parts.hasScreenFeed ?? false,
-		getScreenReceiver: () => screenReceiver
+		peerConn: parts.videoInStats ? { getStats: parts.videoInStats } : null
 	} as unknown as IVideoScreenInConnection;
-	const screenOut = {
-		rtpSender: parts.screenSender ?? null
-	} as unknown as IScreenOutConnection;
+	const screenOut = { rtpSender: parts.screenSender ?? null } as unknown as IScreenOutConnection;
 	const monitor = new ConnectionQualityMonitor(
 		'meetingId',
 		audioConn,
@@ -190,442 +148,37 @@ const makeMonitor = (
 		videoIn,
 		screenOut
 	);
-	// stop the 2 s evaluation timer; the getStats mappers are exercised via emitInitial()
+	// stop the 2 s timer; the getStats mappers are exercised via emitInitial()
 	monitor.stop();
 	return monitor;
 };
 
-// The votes the monitor last published to the store.
-const publishedVotes = (): StreamVotes =>
-	useStore.getState().activeMeeting?.connectionQualityVotes ?? {};
+const publishedDetail = (): LinkSample =>
+	useStore.getState().activeMeeting?.connectionScoreDetail ?? {};
 
-describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
-	it('audio: downlink from loss (exp), uplink from encoded bitrate while speaking (BWE-armed)', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			myAudioOn: true,
-			otherParticipant: true,
-			audioStats: () => {
-				tick += 1;
-				return Promise.resolve(
-					report([
-						// downlink: delta from zero baseline -> 275/1000=0.275 -> round1(10*exp(-6*0.275))=1.9
-						{
-							type: INBOUND_RTP,
-							kind: 'audio',
-							packetsLost: 275 * tick,
-							packetsReceived: 725 * tick
-						},
-						// uplink: encoded bitrate from the outbound delta = 30 B/pkt -> 30*50*8/1000 = 12 kbps
-						{ type: OUTBOUND_RTP, kind: 'audio', bytesSent: 3000 * tick, packetsSent: 100 * tick },
-						// local mic level above the speech gate -> the bitrate is actually scored
-						{ type: MEDIA_SOURCE, kind: 'audio', audioLevel: 0.2 },
-						// BWE below the good-voice floor -> the fidelity penalty is armed (real throttling)
-						{
-							type: CANDIDATE_PAIR,
-							nominated: true,
-							state: 'succeeded',
-							availableOutgoingBitrate: 30000
-						}
-					])
-				);
-			}
-		});
-		await monitor.emitInitial(); // tick 1: prevAudioOut null -> uplink ceiling (10)
-		await monitor.emitInitial(); // tick 2: bitrate delta -> 12 kbps -> fidelity 0.5 -> 5
-		expect(publishedVotes().downlinkAudio).toBe(1.9);
-		expect(publishedVotes().uplinkAudio).toBe(5);
-		expect(monitor.committed).toBe('poor');
+describe('ConnectionQualityMonitor (RTT + loss via emitInitial)', () => {
+	it('is "lost" when the audio PC connection is failed, regardless of stats', async () => {
+		const monitor = makeMonitor({ audioConnectionState: 'failed' });
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
 	});
 
-	it('audio uplink is omitted when my mic is off (never scored on a channel I am not using)', async () => {
-		const monitor = makeMonitor({
-			myAudioOn: false,
-			otherParticipant: true,
-			audioStats: () =>
-				Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'audio',
-							concealedSamples: 0,
-							totalSamplesReceived: 100
-						},
-						// the far-end up-loss report must be ignored while my mic is off
-						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.2 }
-					])
-				)
-		});
+	it('is "optimal" with no signal at all (idle, muted, nothing sent or received)', async () => {
+		const monitor = makeMonitor({});
 		await monitor.emitInitial();
-		expect(publishedVotes().uplinkAudio).toBeUndefined();
-		expect(publishedVotes().downlinkAudio).toBe(10);
-	});
-
-	it('audio is fully omitted when alone and mic off -> optimal, never a phantom 10', async () => {
-		const monitor = makeMonitor({ myAudioOn: false, otherParticipant: false });
-		await monitor.emitInitial();
-		expect(publishedVotes().uplinkAudio).toBeUndefined();
-		expect(publishedVotes().downlinkAudio).toBeUndefined();
 		expect(monitor.committed).toBe('optimal');
-	});
-
-	it('audio uplink present alone when my mic is on; downlink still omitted (no one to hear)', async () => {
-		const monitor = makeMonitor({
-			myAudioOn: true,
-			otherParticipant: false,
-			audioStats: () =>
-				Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0 }]))
+		expect(publishedDetail()).toEqual({
+			rttMs: undefined,
+			lossUp: undefined,
+			lossDown: undefined
 		});
-		await monitor.emitInitial();
-		expect(publishedVotes().uplinkAudio).toBe(10);
-		expect(publishedVotes().downlinkAudio).toBeUndefined();
 	});
 
-	it('audio downlink omitted when the only other participant has their mic off (nothing to hear)', async () => {
+	it('reads RTT from the audio PC candidate-pair; bad RTT alone drops the level', async () => {
 		const monitor = makeMonitor({
-			myAudioOn: false,
-			otherParticipant: true,
-			otherAudioOn: false,
 			audioStats: () =>
 				Promise.resolve(
 					report([
-						{ type: INBOUND_RTP, kind: 'audio', concealedSamples: 0, totalSamplesReceived: 100 }
-					])
-				)
-		});
-		await monitor.emitInitial();
-		expect(publishedVotes().downlinkAudio).toBeUndefined();
-		expect(publishedVotes().uplinkAudio).toBeUndefined();
-	});
-
-	it('audio downlink: heavy loss (55%) collapses the vote toward zero (exp curve)', async () => {
-		const monitor = makeMonitor({
-			otherParticipant: true,
-			audioStats: () =>
-				Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'audio',
-							packetsLost: 55,
-							packetsReceived: 45
-						}
-					])
-				)
-		});
-		await monitor.emitInitial();
-		// delta from zero baseline: dLost=55, dRecv=45 -> lossRate=0.55 -> round1(10*exp(-6*0.55))=0.4
-		expect(publishedVotes().downlinkAudio).toBe(0.4);
-	});
-
-	it('webcam uplink: a BW-limited sender maps its top active rung to a fractional vote', async () => {
-		const monitor = makeMonitor({
-			videoSender: {
-				track: { getSettings: () => ({ height: 720 }) },
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{
-								type: OUTBOUND_RTP,
-								rid: 'l',
-								bytesSent: 1000,
-								framesEncoded: 100,
-								active: true,
-								// qualityLimitationDurations provide windowed BW/CPU fractions
-								qualityLimitationDurations: { bandwidth: 2, cpu: 0 }
-							},
-							{ type: OUTBOUND_RTP, rid: 'm', bytesSent: 2000, framesEncoded: 200, active: true },
-							{ type: OUTBOUND_RTP, rid: 'h', bytesSent: 0, active: false }
-						])
-					)
-			}
-		});
-		await monitor.emitInitial();
-		// producibleRungs=3, topActiveRung=1 (h inactive), bwLimitedFraction >> cpuLimitedFraction
-		// → tierVote = 2/3*10 = 6.7, lossRate=0 → vote = 6.7
-		expect(publishedVotes().uplinkWebcam).toBe(6.7);
-	});
-
-	it('webcam uplink: CPU-dominant limitation is excluded (CPU is not a network fact)', async () => {
-		// The windowed fraction requires TWO ticks to compute a meaningful delta:
-		// tick 1 — new sender resets the ring; snapshot {cpu:2} becomes the baseline.
-		// tick 2 — counter grew to {cpu:4}; cpuLimitedFraction = Δ2/windowSec >> bwLimitedFraction=0
-		//           → byCpu=true → tierVote=10 (scale-down attributed to CPU, excluded from score).
-		let cpuCounter = 0;
-		let bytesMultiplier = 0;
-		const monitor = makeMonitor({
-			videoSender: {
-				track: { getSettings: () => ({ height: 720 }) },
-				getStats: () => {
-					cpuCounter += 2;
-					bytesMultiplier += 1;
-					return Promise.resolve(
-						report([
-							{
-								type: OUTBOUND_RTP,
-								rid: 'l',
-								bytesSent: 500 * bytesMultiplier,
-								framesEncoded: 100 * bytesMultiplier,
-								active: true,
-								qualityLimitationDurations: { bandwidth: 0, cpu: cpuCounter }
-							},
-							{
-								type: OUTBOUND_RTP,
-								rid: 'm',
-								bytesSent: 1000 * bytesMultiplier,
-								framesEncoded: 100 * bytesMultiplier,
-								active: true
-							},
-							{ type: OUTBOUND_RTP, rid: 'h', bytesSent: 0, active: false }
-						])
-					);
-				}
-			}
-		});
-		await monitor.emitInitial(); // tick 1: baseline established (fractions = 0 after ring reset)
-		await monitor.emitInitial(); // tick 2: Δcpu > 0, Δbw = 0 → cpuLimitedFraction >> bwLimitedFraction
-		// topActiveRung=1, scaledDown=true, byCpu=true → tierVote=10
-		expect(publishedVotes().uplinkWebcam).toBe(10);
-	});
-
-	it('webcam uplink: GCC-trickle top layer (bytesSent growing, framesEncoded flat) is not counted as active', async () => {
-		// RTX/padding keep bytesSent growing and active=true on a GCC-disabled layer; only
-		// framesEncoded reveals that the encoder stopped producing frames for that layer.
-		// tick 1: h and m both "grew" from 0 baseline → topActiveRung=2 (both look active).
-		// tick 2: h.framesEncoded flat (5→5), m.framesEncoded grew (10→20) → topActiveRung=1 (m wins).
-		let tick = 0;
-		const monitor = makeMonitor({
-			videoSender: {
-				track: { getSettings: () => ({ height: 720 }) },
-				getStats: () => {
-					tick += 1;
-					return Promise.resolve(
-						report([
-							{
-								type: OUTBOUND_RTP,
-								rid: 'l',
-								bytesSent: 500 * tick,
-								framesEncoded: 50 * tick,
-								active: true
-							},
-							{
-								type: OUTBOUND_RTP,
-								rid: 'm',
-								bytesSent: 1000 * tick,
-								// framesEncoded grows each tick — real video
-								framesEncoded: 10 * tick,
-								active: true
-							},
-							{
-								type: OUTBOUND_RTP,
-								rid: 'h',
-								// bytesSent grows (RTX/padding trickle) but framesEncoded is flat
-								bytesSent: 200 * tick,
-								framesEncoded: 5,
-								active: true
-							}
-						])
-					);
-				}
-			}
-		});
-		await monitor.emitInitial(); // tick 1: all "grew" from 0 → topActiveRung=2 (h)
-		await monitor.emitInitial(); // tick 2: h framesEncoded flat → topActiveRung=1 (m)
-		// topActiveRung=1, producibleRungs=3, no BW limitation → tierVote=2/3*10=6.7, loss=0 → 6.7
-		expect(publishedVotes().uplinkWebcam).toBe(6.7);
-	});
-
-	it('webcam downlink: vote uses shownTierIdx vs senderMaxTierIdx and inboundLossRate', async () => {
-		const monitor = makeMonitor({
-			videoFeeds: [
-				{ userId: 'user1', frameHeight: 720, inboundLossRate: 0 },
-				{ userId: 'user2', frameHeight: 144, inboundLossRate: 0 }
-			]
-		});
-		// prime the store with maxTier='high' for both senders
-		useStore.setState((s) => ({
-			...s,
-			activeMeeting: s.activeMeeting
-				? {
-						...s.activeMeeting,
-						connectionQuality: {
-							user1: { quality: 'optimal', changedAt: 1, maxTier: 'high' },
-							user2: { quality: 'optimal', changedAt: 1, maxTier: 'high' }
-						}
-					}
-				: s.activeMeeting
-		}));
-		await monitor.emitInitial();
-		// user1: shownTierIdx=2, senderMaxTierIdx=2 -> ceiling=10; loss=0 -> 10
-		// user2: shownTierIdx=0, senderMaxTierIdx=2 -> ceiling=1/3*10=3.3; loss=0 -> 3.3; avg=6.7
-		expect(publishedVotes().downlinkWebcam).toBe(6.7);
-	});
-
-	it('screen uplink (sending): fractionLost drives the vote (exp curve)', async () => {
-		const monitor = makeMonitor({
-			screenSender: {
-				getStats: () => Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, fractionLost: 0.1 }]))
-			}
-		});
-		await monitor.emitInitial();
-		// lossRate avg = 0.1 -> round1(10*exp(-0.1/0.02)) = 0.1 (10% loss is unusable for video)
-		expect(publishedVotes().uplinkScreen).toBe(0.1);
-		expect(publishedVotes().downlinkScreen).toBeUndefined();
-	});
-
-	it('screen uplink (sending): GCC-raised QP (blur, bandwidth-limited) drives the vote when loss is clean', async () => {
-		const monitor = makeMonitor({
-			screenSender: {
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{
-								type: OUTBOUND_RTP,
-								kind: 'video',
-								qpSum: 7500,
-								framesEncoded: 100,
-								qualityLimitationDurations: { bandwidth: 2, cpu: 0 }
-							}
-						])
-					)
-			}
-		});
-		await monitor.emitInitial();
-		// mean QP = 7500/100 = 75; bandwidth-limited -> quality (100-75)/50 = 0.5 -> 5.0; no loss -> min = 5
-		expect(publishedVotes().uplinkScreen).toBe(5);
-	});
-
-	it('screen uplink: a high QP limited by CPU (not bandwidth) is ignored -> 10 (the gate)', async () => {
-		const monitor = makeMonitor({
-			screenSender: {
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{
-								type: OUTBOUND_RTP,
-								kind: 'video',
-								qpSum: 9000,
-								framesEncoded: 100,
-								qualityLimitationDurations: { bandwidth: 0, cpu: 2 }
-							}
-						])
-					)
-			}
-		});
-		await monitor.emitInitial();
-		// QP 90 would be bad, but the limitation is CPU not bandwidth -> QP term neutral -> 10
-		expect(publishedVotes().uplinkScreen).toBe(10);
-	});
-
-	it('screen downlink (receiving): a sustained freeze collapses the vote to 0', async () => {
-		const monitor = makeMonitor({
-			hasScreenFeed: true,
-			screenReceiverStats: () =>
-				Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'video',
-							packetsLost: 0,
-							packetsReceived: 100,
-							totalFreezesDuration: 1,
-							qpSum: 0,
-							framesDecoded: 30
-						}
-					])
-				)
-		});
-		await monitor.emitInitial();
-		// 1 s of freeze over a sub-second window -> freezeRatio clamps to 1 -> vote 0
-		expect(publishedVotes().downlinkScreen).toBe(0);
-		expect(publishedVotes().uplinkScreen).toBeUndefined();
-	});
-
-	it('screen is scored in both directions when sharing and receiving at once', async () => {
-		const monitor = makeMonitor({
-			screenSender: {
-				getStats: () => Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, fractionLost: 0 }]))
-			},
-			hasScreenFeed: true,
-			screenReceiverStats: () =>
-				Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'video',
-							packetsLost: 0,
-							packetsReceived: 100,
-							totalFreezesDuration: 0,
-							qpSum: 0,
-							framesDecoded: 30
-						}
-					])
-				)
-		});
-		await monitor.emitInitial();
-		expect(publishedVotes().uplinkScreen).toBe(10);
-		expect(publishedVotes().downlinkScreen).toBe(10);
-	});
-
-	it('screen downlink: static content (no freeze) stays perfect (10)', async () => {
-		const monitor = makeMonitor({
-			hasScreenFeed: true,
-			screenReceiverStats: () =>
-				Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'video',
-							packetsLost: 0,
-							packetsReceived: 100,
-							totalFreezesDuration: 0,
-							qpSum: 0,
-							framesDecoded: 15
-						}
-					])
-				)
-		});
-		await monitor.emitInitial();
-		expect(publishedVotes().downlinkScreen).toBe(10);
-	});
-
-	it('audio: 5 s window — baseline stays at zero across two ticks within the window', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			otherParticipant: true,
-			audioStats: () => {
-				tick += 1;
-				// cumulative counters grow across ticks; lossRate stays at 0.275 each tick
-				const packetsLost = tick === 1 ? 275 : 550;
-				const packetsReceived = tick === 1 ? 725 : 1450;
-				return Promise.resolve(
-					report([
-						{
-							type: INBOUND_RTP,
-							kind: 'audio',
-							packetsLost,
-							packetsReceived
-						}
-					])
-				);
-			}
-		});
-		await monitor.emitInitial();
-		// tick 1: delta from zero baseline -> 275/1000=0.275 -> round1(10*exp(-6*0.275))=1.9
-		expect(publishedVotes().downlinkAudio).toBe(1.9);
-		await monitor.emitInitial();
-		// tick 2: baseline still zero (both within 5 s window) -> 550/2000=0.275 -> vote 1.9
-		expect(publishedVotes().downlinkAudio).toBe(1.9);
-	});
-
-	it('rtt folds into each stream as a delay factor (audio downlink scaled by RTT)', async () => {
-		const monitor = makeMonitor({
-			otherParticipant: true,
-			audioStats: () =>
-				Promise.resolve(
-					report([
-						// clean audio (no loss) but a 450 ms round-trip on the audio PC candidate-pair
-						{ type: INBOUND_RTP, kind: 'audio', packetsLost: 0, packetsReceived: 100 },
 						{
 							type: CANDIDATE_PAIR,
 							nominated: true,
@@ -636,7 +189,97 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 				)
 		});
 		await monitor.emitInitial();
-		// no loss -> exp term 1; delay(450, 1.0) = 0.25 -> downlinkAudio = 10 * 1 * 0.25 = 2.5
-		expect(publishedVotes().downlinkAudio).toBe(2.5);
+		expect(publishedDetail().rttMs).toBeCloseTo(450, 5);
+		// rttScore(450)=2.5, loss unknown -> lossScore 10; blend 4.4 -> poor
+		expect(monitor.committed).toBe('poor');
+	});
+
+	it('takes uplink loss as the worst fractionLost across my sent streams', async () => {
+		const monitor = makeMonitor({
+			audioStats: () =>
+				Promise.resolve(
+					report([
+						{
+							type: CANDIDATE_PAIR,
+							nominated: true,
+							state: 'succeeded',
+							currentRoundTripTime: 0.02
+						},
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0.05 }
+					])
+				),
+			videoSender: {
+				getStats: () =>
+					Promise.resolve(report([{ type: REMOTE_INBOUND_RTP, kind: 'video', fractionLost: 0.3 }]))
+			}
+		});
+		await monitor.emitInitial();
+		// worst of 0.05 (audio) and 0.3 (video) = 0.3
+		expect(publishedDetail().lossUp).toBeCloseTo(0.3, 5);
+		expect(monitor.committed).toBe('poor');
+	});
+
+	it('reads downlink loss via the SR escape, immune to the publisher upstream loss', async () => {
+		let tick = 0;
+		const monitor = makeMonitor({
+			audioStats: () => {
+				tick += 1;
+				// forwarded (Janus->me) grows 1000/tick; received grows cleanly on tick 1, then loses 100
+				const sent = 1000 * tick;
+				const recv = tick === 1 ? 1000 : 1900;
+				return Promise.resolve(
+					report([
+						{
+							type: CANDIDATE_PAIR,
+							nominated: true,
+							state: 'succeeded',
+							currentRoundTripTime: 0.02
+						},
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0 },
+						{ type: REMOTE_OUTBOUND_RTP, id: 'ro1', packetsSent: sent },
+						// packetsLost is huge (publisher's own uplink loss) — it MUST NOT affect our downlink
+						{
+							type: INBOUND_RTP,
+							kind: 'audio',
+							remoteId: 'ro1',
+							packetsReceived: recv,
+							packetsLost: 5000
+						}
+					])
+				);
+			}
+		});
+		await monitor.emitInitial(); // tick 1: baseline pool {sent:1000, recv:1000}
+		await monitor.emitInitial(); // tick 2: Δsent=1000, Δrecv=900 -> 10% forwarded-but-lost
+		expect(publishedDetail().lossDown).toBeCloseTo(0.1, 5);
+		expect(publishedDetail().lossUp).toBe(0);
+		expect(monitor.committed).toBe('poor');
+	});
+
+	it('is "optimal" on a clean, low-latency link that both sends and receives', async () => {
+		let tick = 0;
+		const monitor = makeMonitor({
+			audioStats: () => {
+				tick += 1;
+				return Promise.resolve(
+					report([
+						{
+							type: CANDIDATE_PAIR,
+							nominated: true,
+							state: 'succeeded',
+							currentRoundTripTime: 0.03
+						},
+						{ type: REMOTE_INBOUND_RTP, kind: 'audio', fractionLost: 0 },
+						{ type: REMOTE_OUTBOUND_RTP, id: 'ro1', packetsSent: 1000 * tick },
+						{ type: INBOUND_RTP, kind: 'audio', remoteId: 'ro1', packetsReceived: 1000 * tick }
+					])
+				);
+			}
+		});
+		await monitor.emitInitial();
+		await monitor.emitInitial();
+		expect(publishedDetail().lossUp).toBe(0);
+		expect(publishedDetail().lossDown).toBe(0);
+		expect(monitor.committed).toBe('optimal');
 	});
 });

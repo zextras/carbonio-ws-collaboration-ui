@@ -304,11 +304,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 								if (next.substreamChanged) this.maskUntilTick.set(key, this.evalTick + 2);
 								const dim = next.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
 								const from = layersOf(prevState.rung);
-								const senderOffers =
-									useStore.getState().activeMeeting?.connectionQuality[userId]?.maxTier ??
-									'unknown';
 								rtcDebug(
-									`DOWNLINK WEBCAM feed=${key} [${dim}]: sender offers ${senderOffers}, showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
+									`DOWNLINK WEBCAM feed=${key} [${dim}]: showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
 								);
 							}
 							if (next.off) {

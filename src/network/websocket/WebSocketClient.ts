@@ -69,20 +69,18 @@ export class WebSocketClient {
 		}
 	}
 
-	sendConnectionQuality(
+	sendConnectionScore(
 		meetingId: string,
-		quality: ConnectionQuality,
+		score: ConnectionQuality,
 		changedAt: number,
-		to?: string,
-		maxTier?: 'high' | 'medium' | 'low'
+		to?: string
 	): void {
 		this.send({
-			type: 'ConnectionQualityStatus',
+			type: 'ConnectionScoreStatus',
 			meetingId,
-			quality,
+			score,
 			changedAt,
-			...(to ? { to } : {}),
-			...(maxTier != null ? { maxTier } : {})
+			...(to ? { to } : {})
 		});
 	}
 

@@ -11,7 +11,7 @@ import { meetingJoinedEventHandler } from './MeetingJoinedEventHandler';
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';
 import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
-import { meetingParticipantConnectionQualityChangedEventHandler } from './MeetingParticipantConnectionQualityChangedEventHandler';
+import { meetingParticipantConnectionScoreChangedEventHandler } from './MeetingParticipantConnectionScoreChangedEventHandler';
 import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
 import { meetingParticipantSubscribedEventHandler } from './MeetingParticipantSubscribedEventHandler';
 import { meetingParticipantTalkingEventHandler } from './MeetingParticipantTalkingHandler';
@@ -135,8 +135,8 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 			meetingDeclinedEventHandler(event);
 			break;
 		}
-		case WsEventType.MEETING_PARTICIPANT_CONNECTION_QUALITY_CHANGED: {
-			meetingParticipantConnectionQualityChangedEventHandler(event);
+		case WsEventType.MEETING_PARTICIPANT_CONNECTION_SCORE_CHANGED: {
+			meetingParticipantConnectionScoreChangedEventHandler(event);
 			break;
 		}
 		default: {

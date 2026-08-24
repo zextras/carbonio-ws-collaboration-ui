@@ -6,17 +6,16 @@
 
 import { ConnectionQuality } from '../../../network/webRTC/connectionQualityScore';
 
-export type WsMessage = WsPingMessage | WsConnectionQualityStatusMessage;
+export type WsMessage = WsPingMessage | WsConnectionScoreStatusMessage;
 
 export type WsPingMessage = {
 	type: 'ping' | 'Ping';
 };
 
-export type WsConnectionQualityStatusMessage = {
-	type: 'ConnectionQualityStatus';
+export type WsConnectionScoreStatusMessage = {
+	type: 'ConnectionScoreStatus';
 	meetingId: string;
-	quality: ConnectionQuality;
+	score: ConnectionQuality;
 	changedAt: number;
 	to?: string;
-	maxTier?: 'high' | 'medium' | 'low';
 };

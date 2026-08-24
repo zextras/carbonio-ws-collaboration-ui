@@ -47,7 +47,7 @@ export enum WsEventType {
 	MEETING_PARTICIPANT_HAND_RAISED = 'MeetingParticipantHandRaised',
 	MEETING_PARTICIPANT_HAND_RAISED_LIST = 'MeetingParticipantHandRaisedList',
 	MEETING_DECLINED = 'MeetingDeclined',
-	MEETING_PARTICIPANT_CONNECTION_QUALITY_CHANGED = 'MeetingParticipantConnectionQualityChanged'
+	MEETING_PARTICIPANT_CONNECTION_SCORE_CHANGED = 'MeetingParticipantConnectionScoreChanged'
 }
 
 export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent;

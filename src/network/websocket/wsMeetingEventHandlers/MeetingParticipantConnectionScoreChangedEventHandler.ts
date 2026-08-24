@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import useStore from '../../../store/Store';
-import { MeetingParticipantConnectionQualityChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingParticipantConnectionScoreChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMyId } from '../eventHandlersUtilities';
 
-export const meetingParticipantConnectionQualityChangedEventHandler = (
-	event: MeetingParticipantConnectionQualityChangedEvent
+export const meetingParticipantConnectionScoreChangedEventHandler = (
+	event: MeetingParticipantConnectionScoreChangedEvent
 ): void => {
 	const state = useStore.getState();
-	// First time we learn this participant's quality — e.g. someone already in the meeting when we
+	// First time we learn this participant's score — e.g. someone already in the meeting when we
 	// joined, whose status we only receive now. We reciprocate below so the exchange is symmetric.
 	const isFirstContact =
 		state.activeMeeting?.meetingId === event.meetingId &&
@@ -20,14 +20,13 @@ export const meetingParticipantConnectionQualityChangedEventHandler = (
 	state.setParticipantConnectionQuality(
 		event.meetingId,
 		event.userId,
-		event.quality,
-		event.changedAt,
-		event.maxTier
+		event.score,
+		event.changedAt
 	);
 
 	// Reciprocate on first contact (never to ourselves): when we join an ongoing meeting our initial
 	// broadcast reaches the participants already there, and this makes each of them send us their
-	// current quality back (and vice versa) — independently of who finished setting up first. It settles
+	// current score back (and vice versa) — independently of who finished setting up first. It settles
 	// after one exchange, since the reply is no longer first-contact for the other side.
 	if (isFirstContact && !isMyId(event.userId)) {
 		state.activeMeeting?.qualityMonitor?.resyncTo(event.userId).catch(() => {});

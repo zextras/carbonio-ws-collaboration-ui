@@ -43,9 +43,9 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 	const [t] = useTranslation();
 	const theme = useTheme();
 	const quality = useStore((state) => getParticipantConnectionQuality(state, meetingId, userId));
-	const ownVotes = useStore((store) =>
+	const ownDetail = useStore((store) =>
 		userId != null && userId === getUserId(store)
-			? store.activeMeeting?.connectionQualityVotes
+			? store.activeMeeting?.connectionScoreDetail
 			: undefined
 	);
 
@@ -94,19 +94,18 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		}
 	})();
 
-	// On the current user's own tile, expand the tooltip with the full per-direction vote breakdown,
-	// refreshed live every monitor tick. A direction not currently voting shows a single dash.
+	// On the current user's own tile, expand the tooltip with the raw link measurement (RTT + up/down
+	// packet loss) the monitor refreshes every tick. A signal not currently measurable shows a dash.
 	const label = ((): string | React.ReactElement => {
-		if (ownVotes == null) return tooltipLabel;
-		const fmt = (v: number | undefined): string => (v !== undefined ? v.toFixed(1) : '-');
+		if (ownDetail == null) return tooltipLabel;
+		const pct = (v: number | undefined): string =>
+			v !== undefined ? `${(v * 100).toFixed(1)}%` : '-';
+		const ms = (v: number | undefined): string => (v !== undefined ? `${v.toFixed(0)} ms` : '-');
 		const lines = [
 			tooltipLabel,
-			`Uplink webcam: ${fmt(ownVotes.uplinkWebcam)}`,
-			`Downlink webcam: ${fmt(ownVotes.downlinkWebcam)}`,
-			`Uplink audio: ${fmt(ownVotes.uplinkAudio)}`,
-			`Downlink audio: ${fmt(ownVotes.downlinkAudio)}`,
-			`Uplink screen: ${fmt(ownVotes.uplinkScreen)}`,
-			`Downlink screen: ${fmt(ownVotes.downlinkScreen)}`
+			`RTT: ${ms(ownDetail.rttMs)}`,
+			`Loss up: ${pct(ownDetail.lossUp)}`,
+			`Loss down: ${pct(ownDetail.lossDown)}`
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

@@ -5,7 +5,7 @@
  */
 
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { ConnectionQuality, StreamVotes } from '../../network/webRTC/connectionQualityScore';
+import { ConnectionQuality, LinkSample } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -50,7 +50,7 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
-	setConnectionQualityVotes: (votes: StreamVotes) => void;
+	setConnectionScoreDetail: (detail: LinkSample) => void;
 };
 
 export type ActiveMeeting = {
@@ -63,9 +63,9 @@ export type ActiveMeeting = {
 	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
 	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
 	connectionQuality: Record<string, ConnectionQualityInfo>;
-	// My own per-direction vote breakdown, republished by the quality monitor each tick so the own-tile
-	// indicator can render it live.
-	connectionQualityVotes: StreamVotes;
+	// My own raw link measurement (RTT + up/down loss), republished by the monitor each tick so the
+	// own-tile indicator can render it live.
+	connectionScoreDetail: LinkSample | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;
@@ -82,7 +82,6 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
-	maxTier?: 'high' | 'medium' | 'low';
 };
 
 export enum MeetingAccordionType {

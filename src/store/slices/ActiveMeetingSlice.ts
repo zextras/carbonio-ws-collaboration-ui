@@ -11,7 +11,7 @@ import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { StreamVotes } from '../../network/webRTC/connectionQualityScore';
+import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
@@ -88,7 +88,7 @@ export const useActiveMeetingSlice: StateCreator<
 					screenOutConn,
 					qualityMonitor,
 					connectionQuality: {},
-					connectionQualityVotes: {},
+					connectionScoreDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -384,14 +384,14 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_USER_WITH_HAND_RAISED'
 		);
 	},
-	setConnectionQualityVotes: (votes: StreamVotes): void => {
+	setConnectionScoreDetail: (detail: LinkSample): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.activeMeeting) return;
-				draft.activeMeeting.connectionQualityVotes = votes;
+				draft.activeMeeting.connectionScoreDetail = detail;
 			}),
 			false,
-			'AM/SET_CONNECTION_QUALITY_VOTES'
+			'AM/SET_CONNECTION_SCORE_DETAIL'
 		);
 	}
 });
