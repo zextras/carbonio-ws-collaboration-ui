@@ -473,18 +473,48 @@ describe('ConnectionQualityMonitor getStats mappers (via emitInitial)', () => {
 		expect(publishedVotes().downlinkScreen).toBeUndefined();
 	});
 
-	it('screen uplink (sending): GCC-raised QP (blur) drives the vote when loss is clean', async () => {
+	it('screen uplink (sending): GCC-raised QP (blur, bandwidth-limited) drives the vote when loss is clean', async () => {
 		const monitor = makeMonitor({
 			screenSender: {
 				getStats: () =>
 					Promise.resolve(
-						report([{ type: OUTBOUND_RTP, kind: 'video', qpSum: 7500, framesEncoded: 100 }])
+						report([
+							{
+								type: OUTBOUND_RTP,
+								kind: 'video',
+								qpSum: 7500,
+								framesEncoded: 100,
+								qualityLimitationDurations: { bandwidth: 2, cpu: 0 }
+							}
+						])
 					)
 			}
 		});
 		await monitor.emitInitial();
-		// mean QP = 7500/100 = 75 -> quality (100-75)/50 = 0.5 -> 5.0; no loss -> loss term 10; min = 5
+		// mean QP = 7500/100 = 75; bandwidth-limited -> quality (100-75)/50 = 0.5 -> 5.0; no loss -> min = 5
 		expect(publishedVotes().uplinkScreen).toBe(5);
+	});
+
+	it('screen uplink: a high QP limited by CPU (not bandwidth) is ignored -> 10 (the gate)', async () => {
+		const monitor = makeMonitor({
+			screenSender: {
+				getStats: () =>
+					Promise.resolve(
+						report([
+							{
+								type: OUTBOUND_RTP,
+								kind: 'video',
+								qpSum: 9000,
+								framesEncoded: 100,
+								qualityLimitationDurations: { bandwidth: 0, cpu: 2 }
+							}
+						])
+					)
+			}
+		});
+		await monitor.emitInitial();
+		// QP 90 would be bad, but the limitation is CPU not bandwidth -> QP term neutral -> 10
+		expect(publishedVotes().uplinkScreen).toBe(10);
 	});
 
 	it('screen downlink (receiving): a sustained freeze collapses the vote to 0', async () => {

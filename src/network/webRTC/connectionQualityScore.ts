@@ -89,12 +89,19 @@ const SCREEN_QP_BAD = 100;
 // Screen uplink — as sender we read two DISJOINT failure modes and take the WORSE: (1) the QUALITY the
 // GCC forced by raising QP under bandwidth pressure (the loop's output — loss self-erases in this mode);
 // (2) transit LOSS the loop cannot hide (random/bursty uplink loss makes the far-end freeze; video has
-// no PLC to mask it, unlike audio). Then x the small screen delay factor. qp undefined (no frames
-// encoded / static screen) -> no QP penalty, loss-only.
-export function calcUplinkScreenVote(i: { lossRate: number; qp?: number; rttMs?: number }): number {
+// no PLC to mask it, unlike audio). Then x the small screen delay factor. The QP term is ARMED only when
+// the encoder is bandwidth-limited (the network is capping us) — exactly like the audio-uplink BWE gate:
+// a high QP from merely-complex content on a healthy link is not our network's fault. qp undefined
+// (no frames encoded / static screen) OR not bandwidth-limited -> QP term neutral, loss-only.
+export function calcUplinkScreenVote(i: {
+	lossRate: number;
+	qp?: number;
+	bandwidthLimited?: boolean;
+	rttMs?: number;
+}): number {
 	const lossQuality = 10 * Math.exp(-i.lossRate / SCREEN_LOSS_K);
 	const qpQuality =
-		i.qp === undefined
+		i.qp === undefined || !i.bandwidthLimited
 			? 10
 			: 10 * clamp01((SCREEN_QP_BAD - i.qp) / (SCREEN_QP_BAD - SCREEN_QP_GOOD));
 	return round1(Math.min(lossQuality, qpQuality) * delayFactor(i.rttMs, W_SCREEN));

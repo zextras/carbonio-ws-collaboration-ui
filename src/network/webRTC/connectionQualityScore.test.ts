@@ -145,32 +145,38 @@ describe('calcUplinkScreenVote — worst-of(QP-quality, loss) x small screen del
 		expect(calcUplinkScreenVote({ lossRate: 0.05, rttMs: 700 })).toBe(0.7);
 	});
 
-	it('crisp screen (QP 50, no loss) -> 10', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0, qp: 50 })).toBe(10);
+	it('crisp screen (QP 50, bandwidth-limited, no loss) -> 10', () => {
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 50, bandwidthLimited: true })).toBe(10);
 	});
 
-	it('blurry screen from GCC (QP 75, no loss) -> 5 (the loop-output quality axis)', () => {
+	it('blurry screen from GCC (QP 75, bandwidth-limited) -> 5 (the loop-output quality axis)', () => {
 		// (100-75)/(100-50)=0.5 -> 5
-		expect(calcUplinkScreenVote({ lossRate: 0, qp: 75 })).toBe(5);
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 75, bandwidthLimited: true })).toBe(5);
 	});
 
-	it('heavily blurred (QP 100) -> 0', () => {
-		expect(calcUplinkScreenVote({ lossRate: 0, qp: 100 })).toBe(0);
+	it('heavily blurred (QP 100, bandwidth-limited) -> 0', () => {
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 100, bandwidthLimited: true })).toBe(0);
+	});
+
+	it('GATE: a high QP that is NOT bandwidth-limited is ignored (complex content, not our network) -> 10', () => {
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 90, bandwidthLimited: false })).toBe(10);
 	});
 
 	it('takes the WORSE of the two: transit loss dominates a mildly-raised QP', () => {
 		// lossQ = 10*exp(-0.05/0.02)=0.82 ; qpQ(60)=10*(40/50)=8 -> min = 0.8
-		expect(calcUplinkScreenVote({ lossRate: 0.05, qp: 60 })).toBe(0.8);
+		expect(calcUplinkScreenVote({ lossRate: 0.05, qp: 60, bandwidthLimited: true })).toBe(0.8);
 	});
 
 	it('takes the WORSE of the two: QP blur dominates when loss is clean', () => {
 		// qpQ(80)=10*(20/50)=4 ; lossQ(0)=10 -> min = 4
-		expect(calcUplinkScreenVote({ lossRate: 0, qp: 80 })).toBe(4);
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 80, bandwidthLimited: true })).toBe(4);
 	});
 
 	it('applies the delay factor on top of the QP quality', () => {
 		// qpQ(75)=5, delay(700,0.15)=0.85 -> 4.25 -> 4.3
-		expect(calcUplinkScreenVote({ lossRate: 0, qp: 75, rttMs: 700 })).toBe(4.3);
+		expect(calcUplinkScreenVote({ lossRate: 0, qp: 75, bandwidthLimited: true, rttMs: 700 })).toBe(
+			4.3
+		);
 	});
 });
 

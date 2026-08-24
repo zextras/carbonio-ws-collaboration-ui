@@ -161,8 +161,13 @@ export default class ConnectionQualityMonitor {
 	// instantaneous fractionLost samples for screen uplink (remote-inbound-rtp)
 	private screenUpLossRing: Timed<number>[] = [];
 
-	// windowed qpSum/framesEncoded snapshots for screen uplink blur (mean QP = Δqp/Δframes)
-	private screenUpQpRing: Timed<{ qpSum: number; framesEncoded: number }>[] = [];
+	// windowed screen-uplink encoder snapshots: mean QP (Δqp/Δframes) + bandwidth/cpu limitation durations
+	private screenUpQpRing: Timed<{
+		qpSum: number;
+		framesEncoded: number;
+		bwDuration: number;
+		cpuDuration: number;
+	}>[] = [];
 
 	// candidate-pair currentRoundTripTime (ms) samples — the global me<->Janus RTT vote
 	private rttRing: Timed<number>[] = [];
@@ -216,7 +221,9 @@ export default class ConnectionQualityMonitor {
 			}
 		];
 		this.videoUpRing = [{ ts: t0, data: { bwDuration: 0, cpuDuration: 0 } }];
-		this.screenUpQpRing = [{ ts: t0, data: { qpSum: 0, framesEncoded: 0 } }];
+		this.screenUpQpRing = [
+			{ ts: t0, data: { qpSum: 0, framesEncoded: 0, bwDuration: 0, cpuDuration: 0 } }
+		];
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session?.id;
 		this.audioConn = audioConn;
@@ -702,6 +709,8 @@ export default class ConnectionQualityMonitor {
 		let rttMs: number | undefined;
 		let qpSum: number | undefined;
 		let framesEncoded: number | undefined;
+		let bwDuration = 0;
+		let cpuDuration = 0;
 
 		stats.forEach(
 			(
@@ -711,6 +720,7 @@ export default class ConnectionQualityMonitor {
 					roundTripTime?: number;
 					qpSum?: number;
 					framesEncoded?: number;
+					qualityLimitationDurations?: { bandwidth?: number; cpu?: number };
 				}
 			) => {
 				// remote-inbound-rtp carries the sender's view of loss on OUR uplink leg (fractionLost 0..1)
@@ -719,10 +729,13 @@ export default class ConnectionQualityMonitor {
 					winPush(this.screenUpLossRing, now, r.fractionLost ?? 0);
 					if (r.roundTripTime != null) rttMs = r.roundTripTime * 1000;
 				}
-				// outbound-rtp carries our encoder's quantizer sum + frame count -> mean QP (blur)
+				// outbound-rtp carries our encoder's quantizer sum + frame count -> mean QP (blur), plus the
+				// bandwidth/cpu quality-limitation durations that gate the QP term.
 				if (r.type === OUTBOUND_RTP && r.kind === 'video') {
 					qpSum = r.qpSum ?? 0;
 					framesEncoded = r.framesEncoded ?? 0;
+					bwDuration = r.qualityLimitationDurations?.bandwidth ?? 0;
+					cpuDuration = r.qualityLimitationDurations?.cpu ?? 0;
 				}
 			}
 		);
@@ -732,18 +745,27 @@ export default class ConnectionQualityMonitor {
 				? this.screenUpLossRing.reduce((s, e) => s + e.data, 0) / this.screenUpLossRing.length
 				: 0;
 
-		// windowed mean QP = ΔqpSum / ΔframesEncoded; undefined if no new frames (static screen) ->
-		// the vote skips the QP term and scores loss only.
+		// windowed mean QP = ΔqpSum / ΔframesEncoded, and whether the encoder was BANDWIDTH-limited (not
+		// cpu) over the window — the QP penalty is armed only then (see calcUplinkScreenVote). qp undefined
+		// if no new frames (static screen) -> loss-only.
 		let qp: number | undefined;
+		let bandwidthLimited = false;
 		if (framesEncoded !== undefined) {
-			winPush(this.screenUpQpRing, now, { qpSum: qpSum ?? 0, framesEncoded });
+			winPush(this.screenUpQpRing, now, {
+				qpSum: qpSum ?? 0,
+				framesEncoded,
+				bwDuration,
+				cpuDuration
+			});
 			const base = this.screenUpQpRing[0].data;
 			const dFrames = framesEncoded - base.framesEncoded;
-			const dQp = (qpSum ?? 0) - base.qpSum;
-			if (dFrames > 0) qp = dQp / dFrames;
+			if (dFrames > 0) qp = ((qpSum ?? 0) - base.qpSum) / dFrames;
+			const dBw = Math.max(0, bwDuration - base.bwDuration);
+			const dCpu = Math.max(0, cpuDuration - base.cpuDuration);
+			bandwidthLimited = dBw > dCpu && dBw > 0;
 		}
 
-		return calcUplinkScreenVote({ lossRate, qp, rttMs });
+		return calcUplinkScreenVote({ lossRate, qp, bandwidthLimited, rttMs });
 	}
 
 	private calcDownlinkScreen(stats: RTCStatsReport, rttMs?: number): number {
