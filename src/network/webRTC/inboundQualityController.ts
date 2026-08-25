@@ -17,11 +17,14 @@
  * receiving browser either. Consequence: the receiver cannot MEASURE its available downlink
  * capacity; it can only INFER it passively from packet loss. This controller is a deliberate
  * hand-rolled stand-in for the missing GCC: it applies the classic GCC loss-controller bands
- * (clear < 2%, hold 2-10%, congested > 10%) with asymmetric hysteresis (drop fast, climb slow
- * with an escalating patience that doubles after a failed climb) so it does not oscillate.
- * Up-climbing is inherently a probe (try the higher rung, watch for loss) because the receiver
- * has no way to measure headroom in advance. If Janus ever ships subscriber BWE (cf. unmerged
- * PR meetecho/janus-gateway#3278) this belongs server-side and this controller should be revisited.
+ * (clear < 2%, hold 2-5%, congested > 5%) — dropping one rung immediately on a congested tick
+ * and climbing only after an escalating clean streak (exponential backoff: UP_BASE * 2^failCount
+ * capped at UP_MAX) so it does not oscillate. A drop within OBSERVE ticks of a climb marks that
+ * climb as failed and raises the patience on that boundary. A climb that survives OBSERVE ticks
+ * forgives one failure. Up-climbing is inherently a probe (try the higher rung, watch for loss)
+ * because the receiver has no way to measure headroom in advance. If Janus ever ships subscriber
+ * BWE (cf. unmerged PR meetecho/janus-gateway#3278) this belongs server-side and this controller
+ * should be revisited.
  *
  * TWO-DIMENSIONAL rung ladder (resolution before framerate). Each of the 3 VP8 simulcast
  * substreams (spatial: 720/360/144) is split into a FULL and a BASE (temporal) rung, giving a
@@ -39,10 +42,7 @@
 export type QualityState = {
 	// combined ladder position: 5 = best (sub2, full fps) down to 0 = (sub0, base fps); OFF is below 0
 	rung: number;
-	goodStreak: number;
-	badStreak: number;
-	// consecutive-ish high-loss pressure; forces a drop when a lossy link plateaus (jbd not rising)
-	highLossStreak: number;
+	cleanStreak: number;
 	// escalating up-patience per boundary b (climb rung b -> b+1), 5 boundaries [0..4]
 	failCount: number[];
 	ticksSinceChange: number;
@@ -58,17 +58,11 @@ export type QualityState = {
 // GCC loss bands (draft-ietf-rmcat-gcc-02 s6): standard, not arbitrary.
 const LOSS_LOW = 0.02; // < 2% => clear, may climb
 const LOSS_HIGH = 0.05; // > 5% => congested — drop downlink webcam EARLY to protect the un-adaptable audio (over-eager on purpose)
-const LOSS_CATA = 0.25; // > 25% => catastrophic, drop even without the guard
-const DOWN_TICKS = 2; // consecutive congested ticks before dropping (or turning off at the bottom)
 const UP_BASE = 8; // base clean-tick streak to climb one rung — slow climb-back to avoid the medium<->high bounce
 const UP_MAX = 32; // cap for the escalating patience
 const OBSERVE = 4; // a drop within this many ticks of a climb = the climb failed
-const FAIL_MAX = 5;
-// high-loss ticks that force a drop even without a rising jitter buffer. 1 = the Wi-Fi guard is
-// deliberately relaxed: any tick above LOSS_HIGH counts as congestion, so we shed the webcam EARLY on
-// random loss too (accepting occasional over-eager downgrades) rather than leave the un-adaptable audio exposed.
-const FORCE_DROP_TICKS = 1;
 
+const FAIL_MAX = 5;
 const TOP_RUNG = 5;
 const N_BOUNDARIES = 5;
 
@@ -88,9 +82,7 @@ const upNeed = (boundary: number, failCount: number[]): number =>
 
 export const initialQualityState = (startRung: number = TOP_RUNG): QualityState => ({
 	rung: startRung,
-	goodStreak: 0,
-	badStreak: 0,
-	highLossStreak: 0,
+	cleanStreak: 0,
 	failCount: new Array(N_BOUNDARIES).fill(0),
 	ticksSinceChange: 0,
 	lastChangeUp: false
@@ -108,60 +100,13 @@ function changeFields(
 	};
 }
 
-// Congested tick: count it; drop one rung (or turn off at the bottom) after DOWN_TICKS in a row.
-// A drop within OBSERVE ticks of a climb means that climb failed -> raise that boundary's patience.
-function applyCongested(prev: QualityState): QualityState {
-	const st: QualityState = { ...prev, failCount: [...prev.failCount] };
-	st.badStreak += 1;
-	st.goodStreak = 0;
-	if (st.badStreak < DOWN_TICKS) return st;
-	st.badStreak = 0;
-	if (st.rung === 0) {
-		st.off = true;
-		return st;
-	}
-	if (st.lastChangeUp && st.ticksSinceChange <= OBSERVE) {
-		const b = st.rung - 1;
-		st.failCount[b] = Math.min(st.failCount[b] + 1, FAIL_MAX);
-	}
-	const from = st.rung;
-	st.rung -= 1;
-	Object.assign(st, changeFields(st.rung, from));
-	st.ticksSinceChange = 0;
-	st.lastChangeUp = false;
-	return st;
-}
-
-// Clear tick: count it; a climb that has survived OBSERVE ticks forgives one failure on its
-// boundary; climb one rung once the (escalating) clean streak is met and the buffer is not rising.
-function applyClear(prev: QualityState, jbdRising: boolean): QualityState {
-	const st: QualityState = { ...prev, failCount: [...prev.failCount] };
-	st.goodStreak += 1;
-	st.badStreak = 0;
-	if (st.lastChangeUp && st.ticksSinceChange >= OBSERVE && st.rung > 0) {
-		const b = st.rung - 1;
-		st.failCount[b] = Math.max(0, st.failCount[b] - 1);
-		st.lastChangeUp = false; // climb survived; a later drop is fresh congestion, not this climb failing
-	}
-	if (st.rung >= TOP_RUNG || jbdRising) return st;
-	const b = st.rung;
-	if (st.goodStreak < upNeed(b, st.failCount)) return st;
-	const from = st.rung;
-	st.rung += 1;
-	Object.assign(st, changeFields(st.rung, from));
-	st.goodStreak = 0;
-	st.ticksSinceChange = 0;
-	st.lastChangeUp = true;
-	return st;
-}
-
 /**
  * One evaluation tick. `lossRate` is the delta loss fraction over the tick; `jbdRising` is
- * true when the receiver's jitter-buffer delay is trending up (a congestion confirmer that
- * lets us reject Wi-Fi/cellular random loss — direction only, no magnitude threshold).
- * Returns the next state; `changeSubstream`/`changeTemporal` are set to the desired layers when
- * the rung changed (so the caller relays them to Janus), `substreamChanged` flags a resolution
- * switch (keyframe -> mask), `off` is set when a feed at the lowest rung is still unusable.
+ * true when the receiver's jitter-buffer delay is trending up (a congestion confirmer used to
+ * gate climbs). Returns the next state; `changeSubstream`/`changeTemporal` are set to the
+ * desired layers when the rung changed (so the caller relays them to Janus), `substreamChanged`
+ * flags a resolution switch (keyframe -> mask), `off` is set when a feed at the lowest rung is
+ * still unusable.
  */
 export function decideQuality(
 	prev: QualityState,
@@ -177,19 +122,44 @@ export function decideQuality(
 	};
 	base.ticksSinceChange += 1;
 
-	const highLoss = sample.lossRate > LOSS_HIGH;
-	// build on high loss, decay slowly through the dead band, reset on a genuinely clean tick
-	if (highLoss) base.highLossStreak = prev.highLossStreak + 1;
-	else if (sample.lossRate < LOSS_LOW) base.highLossStreak = 0;
-	else base.highLossStreak = Math.max(0, prev.highLossStreak - 1);
+	const congested = sample.lossRate > LOSS_HIGH;
+	const clean = sample.lossRate < LOSS_LOW;
 
-	const congested =
-		highLoss &&
-		(sample.jbdRising || sample.lossRate > LOSS_CATA || base.highLossStreak >= FORCE_DROP_TICKS);
-	const clear = sample.lossRate < LOSS_LOW;
+	if (congested) {
+		if (base.lastChangeUp && base.ticksSinceChange <= OBSERVE && base.rung > 0) {
+			base.failCount[base.rung - 1] = Math.min(base.failCount[base.rung - 1] + 1, FAIL_MAX);
+		}
+		base.cleanStreak = 0;
+		base.lastChangeUp = false;
+		if (base.rung === 0) {
+			base.off = true;
+			return base;
+		}
+		const from = base.rung;
+		base.rung -= 1;
+		Object.assign(base, changeFields(base.rung, from));
+		base.ticksSinceChange = 0;
+		return base;
+	}
 
-	if (congested) return applyCongested(base);
-	if (clear) return applyClear(base, sample.jbdRising);
-	// dead band (2-10%): hold, require a fresh clean run before climbing again.
-	return { ...base, badStreak: 0, goodStreak: 0 };
+	if (clean && !sample.jbdRising) {
+		base.cleanStreak += 1;
+		if (base.lastChangeUp && base.ticksSinceChange >= OBSERVE && base.rung > 0) {
+			base.failCount[base.rung - 1] = Math.max(0, base.failCount[base.rung - 1] - 1);
+			base.lastChangeUp = false;
+		}
+		if (base.rung < TOP_RUNG && base.cleanStreak >= upNeed(base.rung, base.failCount)) {
+			const from = base.rung;
+			base.rung += 1;
+			Object.assign(base, changeFields(base.rung, from));
+			base.cleanStreak = 0;
+			base.lastChangeUp = true;
+			base.ticksSinceChange = 0;
+		}
+		return base;
+	}
+
+	// dead band (LOSS_LOW..LOSS_HIGH) OR jbdRising: hold, reset the clean streak
+	base.cleanStreak = 0;
+	return base;
 }

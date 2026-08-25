@@ -31,7 +31,6 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 	optimal: 5
 };
 
-const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 const OUTBOUND_RTP = 'outbound-rtp';
 const MEDIA_SOURCE = 'media-source';
 
@@ -379,9 +378,7 @@ export default class ConnectionQualityMonitor {
 			useStore.getState().session.attributes?.videoSimulcastTiers
 		);
 
-		const fractionLost = this.readMaxFractionLost(stats);
-
-		return webcamUplinkVote({ producibleRungs, topActiveRung, bandwidthLimited, fractionLost });
+		return webcamUplinkVote({ producibleRungs, topActiveRung, bandwidthLimited });
 	}
 
 	private computeScreenVote(stats: RTCStatsReport, now: number): number {
@@ -414,9 +411,7 @@ export default class ConnectionQualityMonitor {
 				? this.screenOut.rtpSender.track.getSettings().frameRate
 				: undefined;
 
-		const fractionLost = this.readMaxFractionLost(stats);
-
-		return screenUplinkVote({ bandwidthLimited, captureFps, encodedFps, fractionLost });
+		return screenUplinkVote({ bandwidthLimited, captureFps, encodedFps });
 	}
 
 	// Returns undefined when no meaningful kbps can be computed yet (first tick, no targetBitrate).
@@ -424,7 +419,6 @@ export default class ConnectionQualityMonitor {
 		let speaking = false;
 		let targetBitrateKbps: number | undefined;
 		let bytesSent = 0;
-		let fractionLost = 0;
 
 		stats.forEach(
 			(
@@ -433,7 +427,6 @@ export default class ConnectionQualityMonitor {
 					audioLevel?: number;
 					bytesSent?: number;
 					targetBitrate?: number;
-					fractionLost?: number;
 				}
 			) => {
 				if (r.type === MEDIA_SOURCE && r.kind === 'audio') {
@@ -442,9 +435,6 @@ export default class ConnectionQualityMonitor {
 				if (r.type === OUTBOUND_RTP && r.kind === 'audio') {
 					bytesSent = r.bytesSent ?? bytesSent;
 					if (r.targetBitrate != null) targetBitrateKbps = r.targetBitrate / 1000;
-				}
-				if (r.type === REMOTE_INBOUND_RTP && r.fractionLost != null) {
-					fractionLost = Math.max(fractionLost, r.fractionLost);
 				}
 			}
 		);
@@ -465,17 +455,6 @@ export default class ConnectionQualityMonitor {
 
 		if (actualKbps === undefined) return undefined;
 
-		return audioUplinkVote({ speaking, actualKbps, fractionLost });
-	}
-
-	// Worst uplink fractionLost (0..1) across the remote-inbound reports in a stats set.
-	private readMaxFractionLost(stats: RTCStatsReport): number {
-		let worst = 0;
-		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
-			if (r.type === REMOTE_INBOUND_RTP && r.fractionLost != null) {
-				worst = Math.max(worst, r.fractionLost);
-			}
-		});
-		return worst;
+		return audioUplinkVote({ speaking, actualKbps });
 	}
 }

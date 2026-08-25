@@ -100,7 +100,6 @@ describe('stepHysteresis', () => {
 });
 
 const OUTBOUND_RTP = 'outbound-rtp';
-const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 const MEDIA_SOURCE = 'media-source';
 
 const report = (stats: Array<Record<string, unknown>>): RTCStatsReport =>
@@ -323,11 +322,10 @@ describe('ConnectionQualityMonitor — webcam uplink signals', () => {
 		const t1Vote = publishedDetail().webcam;
 		await monitor.emitInitial(); // tick 2: dBandwidth=4 > dCpu=0 → bandwidthLimited
 		const t2Vote = publishedDetail().webcam;
-		// tick 1: not limited → quality=10, loss=0 → vote=10
+		// tick 1: not limited → quality=10 → vote=10
 		expect(t1Vote).toBe(10);
 		// tick 2: limited, topActiveRung=2 ('h', idx=2), producibleRungs=1 (captureHeight=0) →
-		// quality = 10*(2+1)/1 = 30 → min(30, lossVote(0,0.05,0.35)) = min(30,10) = 10
-		// Still 10 because producibleRungs=1 and 10*(r+1)/1 ≥ 10 for any r≥0.
+		// quality = 10*(2+1)/1 = 30; producibleRungs=1 means any active rung produces ≥ 10.
 		expect(t2Vote).toBeDefined();
 	});
 
@@ -360,25 +358,6 @@ describe('ConnectionQualityMonitor — webcam uplink signals', () => {
 		// Not bandwidthLimited → quality=10 → vote=10
 		expect(publishedDetail().webcam).toBe(10);
 	});
-
-	it('fractionLost on webcam reduces vote via loss axis', async () => {
-		const monitor = makeMonitor({
-			audioTrackEnabled: false,
-			videoSender: {
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{ type: OUTBOUND_RTP, rid: 'h', framesEncoded: 50 },
-							{ type: REMOTE_INBOUND_RTP, fractionLost: 0.35 } // WEBCAM_LOSS_BAD → lossVote=0
-						])
-					)
-			},
-			screenSender: null
-		});
-		await monitor.emitInitial();
-		// lossVote(0.35, 0.05, 0.35) = 0 → vote = min(quality, 0) = 0
-		expect(publishedDetail().webcam).toBe(0);
-	});
 });
 
 describe('ConnectionQualityMonitor — audio uplink signals', () => {
@@ -396,7 +375,7 @@ describe('ConnectionQualityMonitor — audio uplink signals', () => {
 				)
 		});
 		await monitor.emitInitial();
-		// speaking=false → quality=10, lossVote=10 → vote=10
+		// speaking=false → quality=10 → vote=10
 		expect(publishedDetail().audio).toBe(10);
 	});
 
@@ -415,7 +394,7 @@ describe('ConnectionQualityMonitor — audio uplink signals', () => {
 				)
 		});
 		await monitor.emitInitial();
-		// First tick: actualKbps = targetBitrateKbps = 24 → quality=10, loss=0 → vote=10
+		// First tick: actualKbps = targetBitrateKbps = 24 → quality=10 → vote=10
 		expect(publishedDetail().audio).toBe(10);
 	});
 
@@ -469,27 +448,6 @@ describe('ConnectionQualityMonitor — audio uplink signals', () => {
 		expect(monitor.committed).toBe('optimal');
 	});
 
-	it('audio fractionLost penalises the vote via loss axis', async () => {
-		const monitor = makeMonitor({
-			audioTrackEnabled: true,
-			videoSender: null,
-			screenSender: null,
-			audioStats: () =>
-				Promise.resolve(
-					report([
-						{ type: MEDIA_SOURCE, kind: 'audio', audioLevel: 0.01 }, // not speaking
-						{ type: OUTBOUND_RTP, kind: 'audio', bytesSent: 0, targetBitrate: 24000 },
-						// AUDIO_LOSS_BAD = 0.28 → lossVote = 0
-						{ type: REMOTE_INBOUND_RTP, fractionLost: 0.28 }
-					])
-				)
-		});
-		await monitor.emitInitial();
-		// quality=10 (not speaking), lossVote(0.28, 0.1, 0.28) = 0 → vote=0
-		expect(publishedDetail().audio).toBe(0);
-		expect(monitor.committed).toBe('terrible');
-	});
-
 	it('bytesSent delta is used for actualKbps on second tick (no targetBitrate)', async () => {
 		let tick = 0;
 		const monitor = makeMonitor({
@@ -510,14 +468,14 @@ describe('ConnectionQualityMonitor — audio uplink signals', () => {
 		});
 		await monitor.emitInitial(); // tick 1: no prev, no targetBitrate → skip
 		await monitor.emitInitial(); // tick 2: Δbytes=3000, actualKbps huge → clamped → quality=10
-		// speaking=true, quality=10, loss=0 → vote=10
+		// speaking=true, quality=10 → vote=10
 		expect(publishedDetail().audio).toBe(10);
 		expect(monitor.committed).toBe('optimal');
 	});
 });
 
 describe('ConnectionQualityMonitor — screen uplink signals', () => {
-	it('screen vote is 10 when not bandwidthLimited and no loss', async () => {
+	it('screen vote is 10 when not bandwidthLimited', async () => {
 		const monitor = makeMonitor({
 			audioTrackEnabled: false,
 			videoSender: null,
@@ -527,27 +485,8 @@ describe('ConnectionQualityMonitor — screen uplink signals', () => {
 			}
 		});
 		await monitor.emitInitial();
-		// not bandwidthLimited → quality=10, loss=0 → vote=10
+		// not bandwidthLimited → quality=10 → vote=10
 		expect(publishedDetail().screen).toBe(10);
-	});
-
-	it('screen fractionLost at SCREEN_LOSS_BAD reduces vote to 0', async () => {
-		const monitor = makeMonitor({
-			audioTrackEnabled: false,
-			videoSender: null,
-			screenSender: {
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{ type: OUTBOUND_RTP, framesPerSecond: 15 },
-							{ type: REMOTE_INBOUND_RTP, fractionLost: 0.13 } // SCREEN_LOSS_BAD → lossVote=0
-						])
-					)
-			}
-		});
-		await monitor.emitInitial();
-		// lossVote(0.13, 0.03, 0.13) = 0 → vote=0
-		expect(publishedDetail().screen).toBe(0);
 	});
 
 	it('screen bandwidthLimited with encodedFps = captureFps gives quality=10', async () => {
@@ -574,13 +513,13 @@ describe('ConnectionQualityMonitor — screen uplink signals', () => {
 		// captureFps is undefined (no track on mock rtpSender=null-bodied sender)
 		await monitor.emitInitial();
 		await monitor.emitInitial(); // tick 2: bandwidthLimited, captureFps=undefined → quality=10
-		// When captureFps is undefined: quality=10 (spec: rely on LOSS only)
+		// When captureFps is undefined and bandwidthLimited: quality=10
 		expect(publishedDetail().screen).toBe(10);
 	});
 });
 
 describe('ConnectionQualityMonitor — aggregation', () => {
-	it('with only webcam active and no loss, level is "optimal"', async () => {
+	it('with only webcam active, level is "optimal"', async () => {
 		const monitor = makeMonitor({
 			audioTrackEnabled: false,
 			videoSender: {
@@ -591,24 +530,5 @@ describe('ConnectionQualityMonitor — aggregation', () => {
 		});
 		await monitor.emitInitial();
 		expect(monitor.committed).toBe('optimal');
-	});
-
-	it('webcam loss at WEBCAM_LOSS_BAD (0.35) makes level "terrible"', async () => {
-		const monitor = makeMonitor({
-			audioTrackEnabled: false,
-			videoSender: {
-				getStats: () =>
-					Promise.resolve(
-						report([
-							{ type: OUTBOUND_RTP, rid: 'h', framesEncoded: 50 },
-							{ type: REMOTE_INBOUND_RTP, fractionLost: 0.35 }
-						])
-					)
-			},
-			screenSender: null
-		});
-		await monitor.emitInitial();
-		// webcam vote=0 → aggregateUplinkQuality({webcam:0}, true) → scoreToLevel(0) → 'terrible'
-		expect(monitor.committed).toBe('terrible');
 	});
 });

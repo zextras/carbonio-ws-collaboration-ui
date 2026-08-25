@@ -17,26 +17,6 @@ export function scoreToLevel(s: number): ConnectionQuality {
 	return 'optimal';
 }
 
-// Shared piecewise-linear loss vote: 10 at/below ok, 0 at/above bad, linear between.
-export function lossVote(loss: number, ok: number, bad: number): number {
-	return 10 * clamp01((bad - loss) / (bad - ok));
-}
-
-// Webcam artifacts are the most tolerable — forgiving floor before penalty starts.
-export const WEBCAM_LOSS_OK = 0.05;
-// Wide band keeps the webcam vote gentle; collapses only at heavy packet loss.
-export const WEBCAM_LOSS_BAD = 0.35;
-
-// Broken text/code becomes unreadable fast — steep knee starts at 3% loss.
-export const SCREEN_LOSS_OK = 0.03;
-// Narrow band; 13% loss already destroys legibility of code/slides.
-export const SCREEN_LOSS_BAD = 0.13;
-
-// PLC masks early loss — hold until 10% before penalising voice quality.
-export const AUDIO_LOSS_OK = 0.1;
-// PLC fails above ~28% loss; voice becomes unusable — the cliff end.
-export const AUDIO_LOSS_BAD = 0.28;
-
 // Opus useful floor for mono voice; below this fidelity is effectively 0.
 export const AUDIO_FLOOR_KBPS = 6;
 // No perceptual gain beyond 24 kbps for mono speech — the ceiling.
@@ -45,69 +25,54 @@ export const AUDIO_TRANSPARENT_KBPS = 24;
 // Importance weights: audio dominates QoE (2×); screen text legibility > webcam motion (1 vs 0.5).
 export const AGG_WEIGHTS = { webcam: 0.5, screen: 1.0, audio: 2.0 } as const;
 
-// 0.6 weighted-mean + 0.4 min — min floor stops a single bad stream hiding behind good others.
-export const BLEND_MEAN = 0.6;
-export const BLEND_MIN = 0.4;
+// 0.3 weighted-mean + 0.7 min — lower-voted stream dominates the dot (worst-aware),
+// so a good silent-audio (10, weight 2) no longer masks a degraded webcam.
+export const BLEND_MEAN = 0.3;
+export const BLEND_MIN = 0.7;
 
 export interface WebcamUplinkSignals {
 	producibleRungs: number;
 	topActiveRung: number;
 	bandwidthLimited: boolean;
-	fractionLost: number;
 }
 
 export interface ScreenUplinkSignals {
 	bandwidthLimited: boolean;
 	captureFps: number | undefined;
 	encodedFps: number;
-	fractionLost: number;
 }
 
 export interface AudioUplinkSignals {
 	speaking: boolean;
 	actualKbps: number;
-	fractionLost: number;
 }
 
 export function webcamUplinkVote(s: WebcamUplinkSignals): number {
 	// Gate first: only the NETWORK counts. Without bandwidth limitation a low/absent rung is CPU,
 	// weak hardware or an easy scene — not our network's fault → full marks even if topActiveRung < 0.
-	let quality: number;
-	if (!s.bandwidthLimited) {
-		quality = 10;
-	} else if (s.topActiveRung < 0) {
-		quality = 0;
-	} else {
-		quality = (10 * (s.topActiveRung + 1)) / s.producibleRungs;
-	}
-	return Math.min(quality, lossVote(s.fractionLost, WEBCAM_LOSS_OK, WEBCAM_LOSS_BAD));
+	if (!s.bandwidthLimited) return 10;
+	if (s.topActiveRung < 0) return 0;
+	return (10 * (s.topActiveRung + 1)) / s.producibleRungs;
 }
 
 export function screenUplinkVote(s: ScreenUplinkSignals): number {
-	let quality: number;
 	if (s.bandwidthLimited) {
-		quality = s.captureFps ? 10 * clamp01(s.encodedFps / s.captureFps) : 10;
-	} else {
-		quality = 10;
+		return s.captureFps ? 10 * clamp01(s.encodedFps / s.captureFps) : 10;
 	}
-	return Math.min(quality, lossVote(s.fractionLost, SCREEN_LOSS_OK, SCREEN_LOSS_BAD));
+	return 10;
 }
 
 export function audioUplinkVote(s: AudioUplinkSignals): number {
-	let quality: number;
-	if (s.speaking) {
-		quality =
-			s.actualKbps <= 0
-				? 0
-				: 10 *
-					clamp01(
-						Math.log(s.actualKbps / AUDIO_FLOOR_KBPS) /
-							Math.log(AUDIO_TRANSPARENT_KBPS / AUDIO_FLOOR_KBPS)
-					);
-	} else {
-		quality = 10;
-	}
-	return Math.min(quality, lossVote(s.fractionLost, AUDIO_LOSS_OK, AUDIO_LOSS_BAD));
+	// Silent track is considered fine (like a static screenshare) — full marks when not speaking.
+	if (!s.speaking) return 10;
+	if (s.actualKbps <= 0) return 0;
+	return (
+		10 *
+		clamp01(
+			Math.log(s.actualKbps / AUDIO_FLOOR_KBPS) /
+				Math.log(AUDIO_TRANSPARENT_KBPS / AUDIO_FLOOR_KBPS)
+		)
+	);
 }
 
 export interface UplinkVotes {
