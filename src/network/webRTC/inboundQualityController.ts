@@ -57,16 +57,17 @@ export type QualityState = {
 
 // GCC loss bands (draft-ietf-rmcat-gcc-02 s6): standard, not arbitrary.
 const LOSS_LOW = 0.02; // < 2% => clear, may climb
-const LOSS_HIGH = 0.1; // > 10% => congested (with Wi-Fi guard), must drop
+const LOSS_HIGH = 0.05; // > 5% => congested — drop downlink webcam EARLY to protect the un-adaptable audio (over-eager on purpose)
 const LOSS_CATA = 0.25; // > 25% => catastrophic, drop even without the guard
 const DOWN_TICKS = 2; // consecutive congested ticks before dropping (or turning off at the bottom)
-const UP_BASE = 4; // base clean-tick streak to climb one rung
+const UP_BASE = 8; // base clean-tick streak to climb one rung — slow climb-back to avoid the medium<->high bounce
 const UP_MAX = 32; // cap for the escalating patience
 const OBSERVE = 4; // a drop within this many ticks of a climb = the climb failed
 const FAIL_MAX = 5;
-// consecutive high-loss ticks that force a drop even without a rising jitter buffer, so a link
-// stuck at a stable-but-lossy level (jbdRising false) does not hold its rung forever.
-const FORCE_DROP_TICKS = 4;
+// high-loss ticks that force a drop even without a rising jitter buffer. 1 = the Wi-Fi guard is
+// deliberately relaxed: any tick above LOSS_HIGH counts as congestion, so we shed the webcam EARLY on
+// random loss too (accepting occasional over-eager downgrades) rather than leave the un-adaptable audio exposed.
+const FORCE_DROP_TICKS = 1;
 
 const TOP_RUNG = 5;
 const N_BOUNDARIES = 5;
