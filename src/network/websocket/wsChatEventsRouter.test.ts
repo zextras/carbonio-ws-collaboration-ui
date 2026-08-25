@@ -10,9 +10,13 @@ import type { Mock } from 'vitest';
 import { wsChatEventsRouter } from './wsChatEventsRouter';
 import { EventName } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
-import { createMockTextMessage } from '../../tests/createMock';
-import type { WsPresenceChangedEvent } from '../../types/network/websocket/wsChatEvents';
+import { createMockMessageFastening, createMockTextMessage } from '../../tests/createMock';
+import type {
+	WsMessagePinnedEvent,
+	WsPresenceChangedEvent
+} from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { FasteningAction, MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
@@ -603,5 +607,275 @@ describe('wsChatEventsRouter - MessageForwarded', () => {
 		expect(useStore.getState().chatsRegistry['room-fd']?.messages[0]).toMatchObject({
 			forwarded: expect.objectContaining({ from: 'user-9' })
 		});
+	});
+});
+
+describe('wsChatEventsRouter - MessagePinned', () => {
+	function pinnedEvent(roomId: string, messageId: string, pinnedBy: string): WsMessagePinnedEvent {
+		return {
+			type: WsEventType.MESSAGE_PINNED,
+			roomId,
+			messageId,
+			pinnedBy,
+			timestamp: AUG_FIRST_LATE_MORNING
+		};
+	}
+
+	it('sets the banner from the loaded target and lands the v1 config row with the v1 effects', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-pin', [
+			createMockTextMessage({
+				id: 'msg-pin-1',
+				stanzaId: 'msg-pin-1',
+				roomId: 'room-pin',
+				text: 'da fissare',
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+		const received: Array<unknown> = [];
+		const listener = (event: Event): void => {
+			received.push((event as CustomEvent).detail);
+		};
+		window.addEventListener(EventName.NEW_MESSAGE, listener);
+
+		wsChatEventsRouter(pinnedEvent('room-pin', 'msg-pin-1', 'user-2'));
+		window.removeEventListener(EventName.NEW_MESSAGE, listener);
+
+		// Banner = the full store copy, not a stub (text comes from the store)
+		expect(useStore.getState().activeConversations['room-pin']?.messagePinned).toMatchObject({
+			id: 'msg-pin-1',
+			text: 'da fissare'
+		});
+		const registry = useStore.getState().chatsRegistry['room-pin'];
+		const row = registry?.messages.find(
+			(message) => message.type === MessageType.CONFIGURATION_MSG
+		);
+		expect(row).toMatchObject({
+			operation: OperationType.MESSAGE_PINNED,
+			value: 'msg-pin-1',
+			from: 'user-2'
+		});
+		expect(registry?.unread).toBe(1);
+		expect(received).toEqual([
+			expect.objectContaining({ operation: OperationType.MESSAGE_PINNED })
+		]);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('lands the own echo without touching the unread counter', () => {
+		const ownPinTarget = 'msg-pown-1';
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-pown', [
+			createMockTextMessage({
+				id: ownPinTarget,
+				stanzaId: ownPinTarget,
+				roomId: 'room-pown',
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter(pinnedEvent('room-pown', ownPinTarget, 'me'));
+
+		expect(useStore.getState().activeConversations['room-pown']?.messagePinned).toBeDefined();
+		expect(useStore.getState().chatsRegistry['room-pown']?.unread ?? 0).toBe(0);
+	});
+
+	it('hydrates an off-window target from GET /pin (the event is content-free)', async () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		mockJsonResponseOnce([
+			{
+				messageId: 'msg-far',
+				roomId: 'room-pfar',
+				pinnedBy: 'user-2',
+				pinnedAt: AUG_FIRST_LATE_MORNING,
+				text: 'testo dal DTO',
+				senderId: 'user-9'
+			}
+		]);
+
+		wsChatEventsRouter(pinnedEvent('room-pfar', 'msg-far', 'user-2'));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-pfar/pin');
+		expect(useStore.getState().activeConversations['room-pfar']?.messagePinned).toMatchObject({
+			id: 'msg-far',
+			text: 'testo dal DTO',
+			from: 'user-9',
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+	});
+
+	it('pins a live-edited message with the edited text in the banner (v1 merged-copy parity)', () => {
+		// The banner renders its copy as-is (no render-time projection like the
+		// bubbles): the resolution must apply the latest EDIT fastening, as the
+		// v1 handleEditedPinnedMessage merge did
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-ped', [
+			createMockTextMessage({
+				id: 'msg-ped-1',
+				stanzaId: 'msg-ped-1',
+				roomId: 'room-ped',
+				text: 'testo prima della correzione',
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+		useStore.getState().addFastening([
+			createMockMessageFastening({
+				id: 'e_msg-ped-1_1754560000000',
+				roomId: 'room-ped',
+				action: FasteningAction.EDIT,
+				originalStanzaId: 'msg-ped-1',
+				value: 'testo corretto live',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter(pinnedEvent('room-ped', 'msg-ped-1', 'user-2'));
+
+		expect(useStore.getState().activeConversations['room-ped']?.messagePinned).toMatchObject({
+			id: 'msg-ped-1',
+			text: 'testo corretto live',
+			edited: true
+		});
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('keeps one config row when the event is delivered twice (deterministic id)', () => {
+		const dupPinTarget = 'msg-pdup-1';
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory('room-pdup', [
+			createMockTextMessage({
+				id: dupPinTarget,
+				stanzaId: dupPinTarget,
+				roomId: 'room-pdup',
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter(pinnedEvent('room-pdup', dupPinTarget, 'user-2'));
+		wsChatEventsRouter(pinnedEvent('room-pdup', dupPinTarget, 'user-2'));
+
+		const rows = useStore
+			.getState()
+			.chatsRegistry[
+				'room-pdup'
+			]?.messages.filter((message) => message.type === MessageType.CONFIGURATION_MSG);
+		expect(rows).toHaveLength(1);
+	});
+});
+
+describe('wsChatEventsRouter - MessageUnpinned', () => {
+	it('clears the banner and the scroll selection, lands the row and bumps unread for others', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const pinned = createMockTextMessage({
+			id: 'msg-up-1',
+			stanzaId: 'msg-up-1',
+			roomId: 'room-up',
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
+		});
+		useStore.getState().newMessage(pinned);
+		useStore.getState().setPinnedMessage('room-up', pinned);
+		useStore.getState().setSelectedPinnedMessage('room-up', 'msg-up-1');
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_UNPINNED,
+			roomId: 'room-up',
+			messageId: 'msg-up-1',
+			unpinnedBy: 'user-2',
+			timestamp: AUG_FIRST_LATE_MORNING
+		});
+
+		const conversation = useStore.getState().activeConversations['room-up'];
+		expect(conversation?.messagePinned).toBeUndefined();
+		expect(conversation?.selectedPinnedMessage).toBeUndefined();
+		const registry = useStore.getState().chatsRegistry['room-up'];
+		const row = registry?.messages.find(
+			(message) => message.type === MessageType.CONFIGURATION_MSG
+		);
+		expect(row).toMatchObject({ operation: OperationType.MESSAGE_UNPINNED, value: 'msg-up-1' });
+		expect(registry?.unread).toBe(1);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+});
+
+describe('wsChatEventsRouter - pinned banner maintenance', () => {
+	it('refreshes the banner text when the pinned message is edited (v1 messagePinUpdated parity)', () => {
+		const pinned = createMockTextMessage({
+			id: 'msg-bm-1',
+			stanzaId: 'msg-bm-1',
+			roomId: 'room-bm',
+			text: 'testo originale',
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
+		});
+		useStore.getState().updateHistory('room-bm', [pinned]);
+		useStore.getState().setPinnedMessage('room-bm', pinned);
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_EDITED,
+			messageId: 'msg-bm-1',
+			roomId: 'room-bm',
+			senderId: 'user-2',
+			text: 'banner ritoccato',
+			editedAt: AUG_FIRST_LATE_MORNING
+		});
+
+		expect(useStore.getState().activeConversations['room-bm']?.messagePinned).toMatchObject({
+			id: 'msg-bm-1',
+			text: 'banner ritoccato'
+		});
+	});
+
+	it('leaves the banner alone when the edit targets another message', () => {
+		const pinned = createMockTextMessage({
+			id: 'msg-bo-1',
+			stanzaId: 'msg-bo-1',
+			roomId: 'room-bo',
+			text: 'testo fissato',
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
+		});
+		useStore.getState().updateHistory('room-bo', [
+			pinned,
+			createMockTextMessage({
+				id: 'msg-bo-2',
+				stanzaId: 'msg-bo-2',
+				roomId: 'room-bo',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+		useStore.getState().setPinnedMessage('room-bo', pinned);
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_EDITED,
+			messageId: 'msg-bo-2',
+			roomId: 'room-bo',
+			senderId: 'user-2',
+			text: 'altro testo',
+			editedAt: AUG_FIRST_LATE_MORNING
+		});
+
+		expect(useStore.getState().activeConversations['room-bo']?.messagePinned).toMatchObject({
+			text: 'testo fissato'
+		});
+	});
+
+	it('drops the banner when the pinned message is deleted (defensive, plan §5.15)', () => {
+		const pinned = createMockTextMessage({
+			id: 'msg-bd-1',
+			stanzaId: 'msg-bd-1',
+			roomId: 'room-bd',
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
+		});
+		useStore.getState().updateHistory('room-bd', [pinned]);
+		useStore.getState().setPinnedMessage('room-bd', pinned);
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_DELETED,
+			messageId: 'msg-bd-1',
+			roomId: 'room-bd',
+			senderId: 'user-2',
+			deletedAt: AUG_FIRST_LATE_MORNING
+		});
+
+		expect(useStore.getState().activeConversations['room-bd']?.messagePinned).toBeUndefined();
 	});
 });

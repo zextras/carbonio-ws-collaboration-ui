@@ -9,11 +9,16 @@ import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collab
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
+import type {
+	WsMessagePinnedEvent,
+	WsMessageUnpinnedEvent
+} from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
 import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
+import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
 import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
@@ -32,6 +37,95 @@ function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: st
 	useStore.getState().incrementUnreadCount(roomId, 1);
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 	displayMessageBrowserNotification(message as TextMessage);
+}
+
+/**
+ * The v1 effects of a pin/unpin configuration row: custom event for every
+ * sender, unread bump only for the others'. No browser notification (the v1
+ * config handler never fired one). The v1 auto-read of the own config row has
+ * no v2 equivalent — the row id is synthesized, the backend's persisted
+ * system-event id is not on the event (plan §5.15).
+ */
+function notifyPinConfigRow(row: StoreMessage, actorId: string, roomId: string): void {
+	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: row as Message });
+	if (!isMyId(actorId)) {
+		useStore.getState().incrementUnreadCount(roomId, 1);
+	}
+}
+
+/**
+ * v1 landed pin changes as real MUC configuration rows; the SDK synthesizes
+ * the row and sets the banner from the store copy when the target is loaded
+ * (same lookup the reply hydration uses — the event is content-free).
+ * Off-window targets fall back to GET /pin, which at least carries text and
+ * sender.
+ */
+function routeMessagePinned(event: WsMessagePinnedEvent): void {
+	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
+		| StoreTextMessage
+		| undefined;
+	const row = wscSdk.handleMessagePinned(
+		{
+			roomId: event.roomId,
+			messageId: event.messageId,
+			pinnedBy: event.pinnedBy,
+			timestamp: event.timestamp
+		},
+		resolved
+	);
+	if (!resolved) {
+		wscSdk
+			.fetchPinnedMessage(
+				event.roomId,
+				(messageId) =>
+					findPinnedMessageContent(event.roomId, messageId) as StoreTextMessage | undefined
+			)
+			.catch((err) => {
+				console.error('wsChatEventsRouter: pinned message hydration failed', err);
+			});
+	}
+	notifyPinConfigRow(row, event.pinnedBy, event.roomId);
+}
+
+/**
+ * Same contract as MessagePinned: the SDK lands the row and clears the banner
+ * (an idempotent no-op over the unpinner's optimistic remove); the
+ * scroll-to-pin selection is cleared like the v1 handler did.
+ */
+function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
+	const row = wscSdk.handleMessageUnpinned({
+		roomId: event.roomId,
+		messageId: event.messageId,
+		unpinnedBy: event.unpinnedBy,
+		timestamp: event.timestamp
+	});
+	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
+	notifyPinConfigRow(row, event.unpinnedBy, event.roomId);
+}
+
+/**
+ * The banner keeps a COPY of the pinned message: v1 refreshed it with a
+ * dedicated messagePinUpdated config (text only), which has no v2 event — the
+ * copy refreshes here when an edit targets the pin.
+ */
+function refreshPinnedBannerOnEdit(roomId: string, messageId: string, text: string): void {
+	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
+	if (pinned && pinned.stanzaId === messageId) {
+		useStore.getState().setPinnedMessage(roomId, { ...pinned, text });
+	}
+}
+
+/**
+ * Defensive: a deleted message must not survive in the pin banner. v1 had no
+ * client-side handling here; if the backend unpins on delete with its own
+ * MessageUnpinned, this is an idempotent no-op (plan §5.15).
+ */
+function dropPinnedBannerOnDelete(roomId: string, messageId: string): void {
+	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
+	if (pinned && pinned.stanzaId === messageId) {
+		useStore.getState().removePinnedMessage(roomId);
+		useStore.getState().setSelectedPinnedMessage(roomId, undefined);
+	}
 }
 
 /**
@@ -122,6 +216,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 				},
 				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
 			);
+			refreshPinnedBannerOnEdit(event.roomId, event.messageId, event.text);
 			return;
 		}
 		case WsEventType.MESSAGE_DELETED: {
@@ -136,6 +231,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 				},
 				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
 			);
+			dropPinnedBannerOnDelete(event.roomId, event.messageId);
 			return;
 		}
 		case WsEventType.REACTION_CHANGED: {
@@ -164,6 +260,14 @@ export function wsChatEventsRouter(event: WsEvent): void {
 					}, 0);
 				}
 			}
+			return;
+		}
+		case WsEventType.MESSAGE_PINNED: {
+			routeMessagePinned(event);
+			return;
+		}
+		case WsEventType.MESSAGE_UNPINNED: {
+			routeMessageUnpinned(event);
 			return;
 		}
 		default:

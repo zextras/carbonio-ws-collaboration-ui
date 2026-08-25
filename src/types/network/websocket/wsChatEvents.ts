@@ -20,7 +20,9 @@ export type WsChatEvent =
 	| WsMessageEditedEvent
 	| WsMessageDeletedEvent
 	| WsReactionChangedEvent
-	| WsMessageForwardedEvent;
+	| WsMessageForwardedEvent
+	| WsMessagePinnedEvent
+	| WsMessageUnpinnedEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
@@ -80,6 +82,27 @@ export type WsMessageDeletedEvent = {
 	roomId: string;
 	senderId: string;
 	deletedAt: string;
+};
+
+/**
+ * Content-free (no text, no sender, no persisted system-event id): the banner
+ * hydrates from the store when the target is loaded, from GET /rooms/{id}/pin
+ * otherwise. Broadcast to the pinner too — the only confirmation path.
+ */
+export type WsMessagePinnedEvent = {
+	type: WsEventType.MESSAGE_PINNED;
+	roomId: string;
+	messageId: string;
+	pinnedBy: string;
+	timestamp: string;
+};
+
+export type WsMessageUnpinnedEvent = {
+	type: WsEventType.MESSAGE_UNPINNED;
+	roomId: string;
+	messageId: string;
+	unpinnedBy: string;
+	timestamp: string;
 };
 
 /** A per-user reaction delta, not the aggregated state. */

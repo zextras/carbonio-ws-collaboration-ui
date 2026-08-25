@@ -8,6 +8,7 @@ import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
@@ -129,6 +130,12 @@ function sendTextViaSdk(
 
 export const chatClient: ChatClient = {
 	get features(): Array<string> {
+		if (isWscPure()) {
+			// The pin endpoints are part of the v2 REST contract, so the disco
+			// feature that gated the v1 pin UI is always on (the only consumer,
+			// usePinMessage, checks this namespace)
+			return ['zextras:iq:pin'];
+		}
 		return xmppClient.features;
 	},
 	connect: (token) => {
@@ -322,21 +329,37 @@ export const chatClient: ChatClient = {
 	},
 	pinMessage: (roomId, stanzaId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('pinMessage');
+			// No optimistic write (v1 parity): the banner and the config row land
+			// with the MessagePinned echo — the only confirmation, the PUT is a 204
+			wscSdk.pinMessage(roomId, stanzaId).catch((err) => {
+				console.error('chatClient.pinMessage: pin failed', err);
+			});
 			return;
 		}
 		xmppClient.pinMessage(roomId, stanzaId);
 	},
 	unpinMessage: (roomId, stanzaId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('unpinMessage');
+			// The optimistic banner removal stays in usePinMessage, like in v1
+			wscSdk.unpinMessage(roomId, stanzaId).catch((err) => {
+				console.error('chatClient.unpinMessage: unpin failed', err);
+			});
 			return;
 		}
 		xmppClient.unpinMessage(roomId, stanzaId);
 	},
 	getMessagePin: (roomId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('getMessagePin');
+			// Store-first with the latest live edit applied (the banner renders
+			// the copy as-is): the full message beats the poor GET /pin stub
+			wscSdk
+				.fetchPinnedMessage(
+					roomId,
+					(messageId) => findPinnedMessageContent(roomId, messageId) as StoreTextMessage | undefined
+				)
+				.catch((err) => {
+					console.error('chatClient.getMessagePin: pinned message hydration failed', err);
+				});
 			return;
 		}
 		xmppClient.getMessagePin(roomId);

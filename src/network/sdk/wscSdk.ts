@@ -9,7 +9,8 @@ import type {
 	StoreBridge,
 	StoreMarker,
 	StoreMessage,
-	StoreMessageFastening
+	StoreMessageFastening,
+	StoreTextMessage
 } from '@zextras/carbonio-ws-collaboration-sdk';
 
 import useStore from '../../store/Store';
@@ -45,7 +46,10 @@ const bridge: StoreBridge = {
 	addFastening: (fastenings: Array<StoreMessageFastening>): void =>
 		useStore.getState().addFastening(fastenings as Array<MessageFastening>),
 	setLastMessage: (roomId, message: StoreMessage): void =>
-		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage)
+		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage),
+	setPinnedMessage: (roomId, message: StoreTextMessage): void =>
+		useStore.getState().setPinnedMessage(roomId, message as TextMessage),
+	removePinnedMessage: (roomId): void => useStore.getState().removePinnedMessage(roomId)
 };
 
 const http = createHttpClient({

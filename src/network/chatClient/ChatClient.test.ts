@@ -26,6 +26,7 @@ import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
+const PIN_FEATURE = 'zextras:iq:pin';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const quotedId = 'msg-quoted';
 const editTargetId = 'msg-target';
@@ -571,11 +572,119 @@ describe('chatClient façade', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('exposes the live XMPP features list', () => {
-		xmppClient.features = ['zextras:iq:pin'];
+	it('exposes the live XMPP features list against a legacy backend', () => {
+		// De-negotiate: earlier tests in this file leave apiVersion at 2.0.0
+		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		xmppClient.features = [PIN_FEATURE];
 
-		expect(chatClient.features).toEqual(['zextras:iq:pin']);
+		expect(chatClient.features).toEqual([PIN_FEATURE]);
 
 		xmppClient.features = [];
+	});
+
+	it('always exposes the pin feature on a WSC-pure backend (the disco gate is REST contract)', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		xmppClient.features = [];
+
+		expect(chatClient.features).toContain(PIN_FEATURE);
+	});
+
+	it('pins through the SDK on a WSC-pure backend: PUT, no optimistic write', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const spy = vi.spyOn(xmppClient, 'pinMessage').mockImplementation(() => undefined);
+		mockJsonResponse(undefined);
+
+		chatClient.pinMessage('room-p', 'msg-p');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-p/messages/msg-p/pin');
+		expect(calls[0]?.[1]).toMatchObject({ method: 'PUT' });
+		// The banner only lands with the MessagePinned echo (v1 parity)
+		expect(useStore.getState().activeConversations['room-p']?.messagePinned).toBeUndefined();
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('unpins through the SDK on a WSC-pure backend: DELETE (the optimistic removal is the hook)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const spy = vi.spyOn(xmppClient, 'unpinMessage').mockImplementation(() => undefined);
+		mockJsonResponse(undefined);
+
+		chatClient.unpinMessage('room-u', 'msg-u');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const { calls } = (global.fetch as Mock).mock;
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-u/messages/msg-u/pin');
+		expect(calls[0]?.[1]).toMatchObject({ method: 'DELETE' });
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('hydrates the pin banner store-first on getMessagePin (the full copy beats the stub)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().updateHistory('room-gp', [
+			createMockTextMessage({
+				id: 'msg-gp',
+				stanzaId: 'msg-gp',
+				roomId: 'room-gp',
+				text: 'dal mio store',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		mockJsonResponse([
+			{
+				messageId: 'msg-gp',
+				roomId: 'room-gp',
+				pinnedBy: 'user-2',
+				pinnedAt: AUG_FIRST_LATE_MORNING,
+				text: 'dal DTO',
+				senderId: 'user-9'
+			}
+		]);
+
+		chatClient.getMessagePin('room-gp');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-gp/pin');
+		expect(useStore.getState().activeConversations['room-gp']?.messagePinned).toMatchObject({
+			id: 'msg-gp',
+			text: 'dal mio store'
+		});
+	});
+
+	it('degrades the banner to the DTO stub when the pin target is off-window', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		mockJsonResponse([
+			{
+				messageId: 'msg-off',
+				roomId: 'room-goff',
+				pinnedBy: 'user-2',
+				pinnedAt: AUG_FIRST_LATE_MORNING,
+				text: 'testo remoto',
+				senderId: 'user-9'
+			}
+		]);
+
+		chatClient.getMessagePin('room-goff');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(useStore.getState().activeConversations['room-goff']?.messagePinned).toMatchObject({
+			id: 'msg-off',
+			text: 'testo remoto',
+			from: 'user-9',
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+	});
+
+	it('clears a stale banner when the backend reports no pin (self-healing over the v1 no-op)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore
+			.getState()
+			.setPinnedMessage('room-gst', createMockTextMessage({ id: 'msg-stale', roomId: 'room-gst' }));
+		mockJsonResponse([]);
+
+		chatClient.getMessagePin('room-gst');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(useStore.getState().activeConversations['room-gst']?.messagePinned).toBeUndefined();
 	});
 });

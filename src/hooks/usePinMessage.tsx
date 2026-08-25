@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useModal } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { chatClient } from '../network/chatClient/ChatClient';
+import { chatClient, isWscPure } from '../network/chatClient/ChatClient';
 import { getPinnedMessage } from '../store/selectors/ActiveConversationsSelectors';
 import { getOwnershipOfTheRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
@@ -31,6 +31,12 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 	const pinnedMessage = useStore((store) => getPinnedMessage(store, message.roomId));
 
 	const stanzaIdToPin = useMemo(() => {
+		if (isWscPure()) {
+			// v2 ids are stable across corrections: the pin always targets the
+			// message's own id — never the synthetic e_… fastening id the edit
+			// projection exposes as editedStanzaId (it is no wire id on v2)
+			return message.stanzaId;
+		}
 		if (message.edited) {
 			return message.editedStanzaId ?? message.stanzaId;
 		}
@@ -38,10 +44,14 @@ export const usePinMessage = (message: TextMessage): UsePinMessageReturnType => 
 		return message.stanzaId;
 	}, [message]);
 
-	const isMessagePinned = useMemo(
-		() => (pinnedMessage?.editedStanzaId ?? pinnedMessage?.stanzaId) === stanzaIdToPin,
-		[pinnedMessage?.editedStanzaId, pinnedMessage?.stanzaId, stanzaIdToPin]
-	);
+	const isMessagePinned = useMemo(() => {
+		if (isWscPure()) {
+			// Plain-id comparison: the banner copy may be a GET /pin stub without
+			// the editedStanzaId the store projection carries
+			return pinnedMessage?.stanzaId === message.stanzaId;
+		}
+		return (pinnedMessage?.editedStanzaId ?? pinnedMessage?.stanzaId) === stanzaIdToPin;
+	}, [pinnedMessage?.editedStanzaId, pinnedMessage?.stanzaId, stanzaIdToPin, message.stanzaId]);
 
 	const canMessageBePinned = useMemo(
 		() =>
