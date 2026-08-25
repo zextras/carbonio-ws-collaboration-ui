@@ -5,7 +5,7 @@
  */
 
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { ConnectionQuality, LinkSample } from '../../network/webRTC/connectionQualityScore';
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -50,7 +50,7 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
-	setConnectionScoreDetail: (detail: LinkSample) => void;
+	setConnectionScoreDetail: (detail: UplinkBreakdown) => void;
 };
 
 export type ActiveMeeting = {
@@ -63,9 +63,9 @@ export type ActiveMeeting = {
 	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
 	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
 	connectionQuality: Record<string, ConnectionQualityInfo>;
-	// My own raw link measurement (RTT + up/down loss), republished by the monitor each tick so the
-	// own-tile indicator can render it live.
-	connectionScoreDetail: LinkSample | undefined;
+	// Per-stream uplink votes (webcam/screen/audio), republished by the monitor each tick so the
+	// own-tile indicator can render the breakdown live. Undefined key = stream inactive.
+	connectionScoreDetail: UplinkBreakdown | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;
@@ -82,6 +82,14 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
+};
+
+// Per-stream uplink votes written to the store by the quality monitor each tick.
+// A key is present only when that stream is actively being published; absent = inactive.
+export type UplinkBreakdown = {
+	webcam?: number;
+	screen?: number;
+	audio?: number;
 };
 
 export enum MeetingAccordionType {

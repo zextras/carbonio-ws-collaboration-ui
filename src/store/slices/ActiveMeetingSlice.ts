@@ -11,7 +11,6 @@ import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
@@ -24,6 +23,7 @@ import {
 	StreamsSubscriptionMap,
 	Subscription,
 	TileData,
+	UplinkBreakdown,
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -74,7 +74,6 @@ export const useActiveMeetingSlice: StateCreator<
 			meetingId,
 			audioConn,
 			videoOutConn,
-			videoScreenIn,
 			screenOutConn
 		);
 		set(
@@ -384,7 +383,7 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_USER_WITH_HAND_RAISED'
 		);
 	},
-	setConnectionScoreDetail: (detail: LinkSample): void => {
+	setConnectionScoreDetail: (detail: UplinkBreakdown): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.activeMeeting) return;

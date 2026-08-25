@@ -7,33 +7,8 @@
 export type ConnectionQuality = 'lost' | 'terrible' | 'poor' | 'medium' | 'high' | 'optimal';
 
 const clamp01 = (x: number): number => Math.max(0, Math.min(1, x));
-const round1 = (x: number): number => Math.round(x * 10) / 10;
 
-// Network-health model: absolute link conditions on OUR OWN legs to Janus. One question — is this
-// participant's own network hurting the call? Two clean, per-leg-isolatable signals:
-//   - RTT: round-trip me<->Janus (candidate-pair). A convex interactivity knee (E-model Id shape).
-//   - loss: worst of uplink (Janus's fractionLost on my sends, always clean me->Janus) and downlink
-//           (the Janus RTCP-SR escape: forwarded-count vs received-count, immune to the publisher's
-//           own uplink loss). Concave decay (IQX / E-model shape): collapses early, then flattens.
-// Green = link clean OR the browser is compensating; red = network damage adaptation cannot hide.
-// Jitter is deliberately excluded (not cleanly per-leg isolatable on downlink). Constants are tunable.
-
-const RTT_GOOD_MS = 200; // at/under this, latency costs nothing
-const RTT_BAD_MS = 700; // at/over this, interactivity is gone
-const K_LOSS = 0.05; // loss decay scale: ~1/e of the range per 5% loss
-const LAMBDA = 0.5; // blend knob: 1 = worst-aware min, 0 = mean, 0.5 = the middle ground
-
-export function rttScore(rttMs: number | undefined): number {
-	if (rttMs === undefined) return 10;
-	const x = clamp01((RTT_BAD_MS - rttMs) / (RTT_BAD_MS - RTT_GOOD_MS));
-	return 10 * x * x;
-}
-
-export function lossScore(loss: number | undefined): number {
-	if (loss === undefined) return 10;
-	return 10 * Math.exp(-loss / K_LOSS);
-}
-
+// Cut-points fill 5 levels across 0–10; everyday calls land in 'high'/'optimal'.
 export function scoreToLevel(s: number): ConnectionQuality {
 	if (s < 2) return 'terrible';
 	if (s < 4.5) return 'poor';
@@ -42,27 +17,122 @@ export function scoreToLevel(s: number): ConnectionQuality {
 	return 'optimal';
 }
 
-// Raw per-leg link sample the monitor measures over its window; the vote normalizes it internally.
-// loss values are fractions (0..1). undefined = not measurable this window (muted / nothing on that leg).
-export type LinkSample = {
-	rttMs?: number;
-	lossUp?: number;
-	lossDown?: number;
-};
+// Shared piecewise-linear loss vote: 10 at/below ok, 0 at/above bad, linear between.
+export function lossVote(loss: number, ok: number, bad: number): number {
+	return 10 * clamp01((bad - loss) / (bad - ok));
+}
 
-// The single vote. loss = max(up, down): the worse direction is the leg's loss. Not ICE-connected ->
-// 'lost'. No signal at all (RTT unknown and no traffic either way) -> 'optimal' (no evidence of harm).
-export function computeConnectionQuality(
-	sample: LinkSample,
+// Webcam artifacts are the most tolerable — forgiving floor before penalty starts.
+export const WEBCAM_LOSS_OK = 0.05;
+// Wide band keeps the webcam vote gentle; collapses only at heavy packet loss.
+export const WEBCAM_LOSS_BAD = 0.35;
+
+// Broken text/code becomes unreadable fast — steep knee starts at 3% loss.
+export const SCREEN_LOSS_OK = 0.03;
+// Narrow band; 13% loss already destroys legibility of code/slides.
+export const SCREEN_LOSS_BAD = 0.13;
+
+// PLC masks early loss — hold until 10% before penalising voice quality.
+export const AUDIO_LOSS_OK = 0.1;
+// PLC fails above ~28% loss; voice becomes unusable — the cliff end.
+export const AUDIO_LOSS_BAD = 0.28;
+
+// Opus useful floor for mono voice; below this fidelity is effectively 0.
+export const AUDIO_FLOOR_KBPS = 6;
+// No perceptual gain beyond 24 kbps for mono speech — the ceiling.
+export const AUDIO_TRANSPARENT_KBPS = 24;
+
+// Importance weights: audio dominates QoE (2×); screen text legibility > webcam motion (1 vs 0.5).
+export const AGG_WEIGHTS = { webcam: 0.5, screen: 1.0, audio: 2.0 } as const;
+
+// 0.6 weighted-mean + 0.4 min — min floor stops a single bad stream hiding behind good others.
+export const BLEND_MEAN = 0.6;
+export const BLEND_MIN = 0.4;
+
+export interface WebcamUplinkSignals {
+	producibleRungs: number;
+	topActiveRung: number;
+	bandwidthLimited: boolean;
+	fractionLost: number;
+}
+
+export interface ScreenUplinkSignals {
+	bandwidthLimited: boolean;
+	captureFps: number | undefined;
+	encodedFps: number;
+	fractionLost: number;
+}
+
+export interface AudioUplinkSignals {
+	speaking: boolean;
+	actualKbps: number;
+	fractionLost: number;
+}
+
+export function webcamUplinkVote(s: WebcamUplinkSignals): number {
+	// Gate first: only the NETWORK counts. Without bandwidth limitation a low/absent rung is CPU,
+	// weak hardware or an easy scene — not our network's fault → full marks even if topActiveRung < 0.
+	let quality: number;
+	if (!s.bandwidthLimited) {
+		quality = 10;
+	} else if (s.topActiveRung < 0) {
+		quality = 0;
+	} else {
+		quality = (10 * (s.topActiveRung + 1)) / s.producibleRungs;
+	}
+	return Math.min(quality, lossVote(s.fractionLost, WEBCAM_LOSS_OK, WEBCAM_LOSS_BAD));
+}
+
+export function screenUplinkVote(s: ScreenUplinkSignals): number {
+	let quality: number;
+	if (s.bandwidthLimited) {
+		quality = s.captureFps ? 10 * clamp01(s.encodedFps / s.captureFps) : 10;
+	} else {
+		quality = 10;
+	}
+	return Math.min(quality, lossVote(s.fractionLost, SCREEN_LOSS_OK, SCREEN_LOSS_BAD));
+}
+
+export function audioUplinkVote(s: AudioUplinkSignals): number {
+	let quality: number;
+	if (s.speaking) {
+		quality =
+			s.actualKbps <= 0
+				? 0
+				: 10 *
+					clamp01(
+						Math.log(s.actualKbps / AUDIO_FLOOR_KBPS) /
+							Math.log(AUDIO_TRANSPARENT_KBPS / AUDIO_FLOOR_KBPS)
+					);
+	} else {
+		quality = 10;
+	}
+	return Math.min(quality, lossVote(s.fractionLost, AUDIO_LOSS_OK, AUDIO_LOSS_BAD));
+}
+
+export interface UplinkVotes {
+	webcam?: number;
+	screen?: number;
+	audio?: number;
+}
+
+export function aggregateUplinkQuality(
+	votes: UplinkVotes,
 	iceConnected: boolean
 ): ConnectionQuality {
 	if (!iceConnected) return 'lost';
-	const hasLoss = sample.lossUp !== undefined || sample.lossDown !== undefined;
-	if (sample.rttMs === undefined && !hasLoss) return 'optimal';
-	const loss = hasLoss ? Math.max(sample.lossUp ?? 0, sample.lossDown ?? 0) : undefined;
-	const rtt = rttScore(sample.rttMs);
-	const los = lossScore(loss);
-	const mean = (rtt + los) / 2;
-	const score = (1 - LAMBDA) * mean + LAMBDA * Math.min(rtt, los);
-	return scoreToLevel(round1(score));
+	const keys = (Object.keys(votes) as (keyof UplinkVotes)[]).filter((k) => votes[k] !== undefined);
+	if (keys.length === 0) return 'optimal';
+	let weightSum = 0;
+	let weightedAcc = 0;
+	let minVote = Infinity;
+	keys.forEach((k) => {
+		const v = votes[k] as number;
+		const w = AGG_WEIGHTS[k];
+		weightedAcc += v * w;
+		weightSum += w;
+		if (v < minVote) minVote = v;
+	});
+	const weightedMean = weightedAcc / weightSum;
+	return scoreToLevel(BLEND_MEAN * weightedMean + BLEND_MIN * minVote);
 }

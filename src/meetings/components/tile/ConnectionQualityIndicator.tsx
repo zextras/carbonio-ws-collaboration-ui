@@ -94,18 +94,16 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		}
 	})();
 
-	// On the current user's own tile, expand the tooltip with the raw link measurement (RTT + up/down
-	// packet loss) the monitor refreshes every tick. A signal not currently measurable shows a dash.
+	// On the current user's own tile, expand the tooltip with the per-stream uplink votes the monitor
+	// refreshes every tick. An absent key means the stream is not being published.
 	const label = ((): string | React.ReactElement => {
 		if (ownDetail == null) return tooltipLabel;
-		const pct = (v: number | undefined): string =>
-			v !== undefined ? `${(v * 100).toFixed(1)}%` : '-';
-		const ms = (v: number | undefined): string => (v !== undefined ? `${v.toFixed(0)} ms` : '-');
+		const vote = (v: number | undefined): string => (v !== undefined ? v.toFixed(1) : '—');
 		const lines = [
 			tooltipLabel,
-			`RTT: ${ms(ownDetail.rttMs)}`,
-			`Loss up: ${pct(ownDetail.lossUp)}`,
-			`Loss down: ${pct(ownDetail.lossDown)}`
+			`Webcam: ${vote(ownDetail.webcam)}`,
+			`Screen: ${vote(ownDetail.screen)}`,
+			`Audio: ${vote(ownDetail.audio)}`
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

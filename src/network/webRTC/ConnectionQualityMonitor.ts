@@ -4,14 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { computeConnectionQuality, ConnectionQuality, LinkSample } from './connectionQualityScore';
+import {
+	aggregateUplinkQuality,
+	audioUplinkVote,
+	ConnectionQuality,
+	screenUplinkVote,
+	UplinkVotes,
+	webcamUplinkVote
+} from './connectionQualityScore';
 import useStore from '../../store/Store';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
-	IVideoOutConnection,
-	IVideoScreenInConnection
+	IVideoOutConnection
 } from '../../types/network/webRTC/webRTC';
+import { UplinkBreakdown } from '../../types/store/ActiveMeetingTypes';
 import { rtcDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
@@ -24,17 +31,12 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 	optimal: 5
 };
 
-const INBOUND_RTP = 'inbound-rtp';
 const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
-const REMOTE_OUTBOUND_RTP = 'remote-outbound-rtp';
 const OUTBOUND_RTP = 'outbound-rtp';
-const CANDIDATE_PAIR = 'candidate-pair';
+const MEDIA_SOURCE = 'media-source';
 
-// 5-second sliding window. Loss is smoothed over it and RTT is a windowed mean; hysteresis (below)
-// only debounces the committed level.
+// 5-second sliding window for cumulative-delta signals.
 const WINDOW_MS = 5000;
-// Minimum forwarded packets in a tick's delta before we trust a downlink-loss ratio (noise floor).
-const MIN_DOWNLINK_SAMPLES = 5;
 
 type Timed<T> = { ts: number; data: T };
 
@@ -42,58 +44,12 @@ function winPrune<T>(ring: Timed<T>[], now: number): void {
 	while (ring.length > 0 && now - ring[0].ts > WINDOW_MS) ring.shift();
 }
 
-// Push a sample then drop anything older than the window (keeps the just-pushed entry).
 function winPush<T>(ring: Timed<T>[], ts: number, data: T): void {
 	ring.push({ ts, data });
 	winPrune(ring, ts);
 }
 
-const ringMean = (ring: Timed<number>[]): number =>
-	ring.reduce((s, e) => s + e.data, 0) / ring.length;
-
-// The Janus RTCP-SR escape for clean per-leg DOWNLINK loss. Janus strips each publisher's SR and
-// generates its OWN per-subscriber SR whose packet count is what it actually forwarded to ME; the
-// browser surfaces that as remote-outbound-rtp.packetsSent. So (forwarded - received)/forwarded is the
-// Janus->me loss, immune to the publisher's own uplink loss (which is neither in packetsSent nor does it
-// reduce packetsReceived). Pooled over every received stream that has a paired SR. NEVER use
-// inbound-rtp.packetsLost: Janus forwards publisher seqnums with a linear offset, so its gaps leak the
-// publisher's uplink loss into ours.
-function poolSrEscape(stats: RTCStatsReport): { sent: number; recv: number } {
-	const forwarded = new Map<string, number>();
-	const received: Array<{ remoteId?: string; recv: number }> = [];
-	stats.forEach(
-		(r: RTCStats & { remoteId?: string; packetsSent?: number; packetsReceived?: number }) => {
-			if (r.type === REMOTE_OUTBOUND_RTP) forwarded.set(r.id, r.packetsSent ?? 0);
-			if (r.type === INBOUND_RTP) {
-				received.push({ remoteId: r.remoteId, recv: r.packetsReceived ?? 0 });
-			}
-		}
-	);
-	let sent = 0;
-	let recv = 0;
-	received.forEach((inb) => {
-		if (inb.remoteId != null && forwarded.has(inb.remoteId)) {
-			sent += forwarded.get(inb.remoteId) ?? 0;
-			recv += inb.recv;
-		}
-	});
-	return { sent, recv };
-}
-
-// Worst uplink fractionLost (0..1) across the remote-inbound reports in a stats set — Janus's view of
-// loss on MY send leg (always clean: me->Janus, no other participant involved). Undefined if I sent
-// nothing (no remote-inbound report).
-function readMaxFractionLost(stats: RTCStatsReport): number | undefined {
-	let worst: number | undefined;
-	stats.forEach((r: RTCStats & { fractionLost?: number }) => {
-		if (r.type === REMOTE_INBOUND_RTP && r.fractionLost != null) {
-			worst = worst === undefined ? r.fractionLost : Math.max(worst, r.fractionLost);
-		}
-	});
-	return worst;
-}
-
-// Number of simulcast rungs the current capture resolution can produce (for the uplink tier log).
+// Number of simulcast rungs the current capture resolution can produce.
 function producibleRungsFor(captureHeight: number, tiers?: Array<{ height: number }>): number {
 	if (tiers && tiers.length > 0) return tiers.filter((t) => captureHeight >= t.height).length;
 	if (captureHeight >= 720) return 3;
@@ -133,6 +89,25 @@ export function stepHysteresis(
 	return { next: committed, streak: 0, changed: false };
 }
 
+// Cumulative outbound-rtp state for the webcam sender (aggregated across simulcast rids).
+type VideoOutCumulative = {
+	framesEncoded: Record<string, number>;
+	qldBandwidth: number;
+	qldCpu: number;
+};
+
+// Cumulative outbound-rtp state for the screen sender.
+type ScreenOutCumulative = {
+	qldBandwidth: number;
+	qldCpu: number;
+};
+
+// Previous tick state for audio byte-rate computation.
+type AudioPrev = {
+	bytesSent: number;
+	ts: number;
+};
+
 export default class ConnectionQualityMonitor {
 	private readonly meetingId: string;
 
@@ -144,8 +119,6 @@ export default class ConnectionQualityMonitor {
 
 	private readonly videoOut: IVideoOutConnection;
 
-	private readonly videoIn: IVideoScreenInConnection;
-
 	private readonly screenOut: IScreenOutConnection;
 
 	private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -156,37 +129,31 @@ export default class ConnectionQualityMonitor {
 
 	private betterStreak = 0;
 
-	// candidate-pair currentRoundTripTime (ms) samples — the me<->Janus round-trip, windowed mean.
-	private rttRing: Timed<number>[] = [];
+	// Sliding-window rings for cumulative-delta signals (qualityLimitationDurations).
+	private videoOutRing: Timed<VideoOutCumulative>[] = [];
 
-	// worst uplink fractionLost across my sent streams (audio/video/screen), per tick, windowed mean.
-	private uplinkLossRing: Timed<number>[] = [];
+	private screenOutRing: Timed<ScreenOutCumulative>[] = [];
 
-	// per-tick downlink loss ratio from the SR escape, windowed mean.
-	private downlinkLossRing: Timed<number>[] = [];
+	// Previous-tick state for per-tick deltas.
+	private videoOutPrevCum: VideoOutCumulative | null = null;
 
-	// previous pooled SR counters, for the per-tick downlink delta.
-	private prevDownPool: { sent: number; recv: number } | null = null;
+	private audioPrev: AudioPrev | null = null;
 
-	// diagnostic-only uplink simulcast tier tracking: framesEncoded per rid + last logged top rung.
-	private videoFramesEncoded: Record<string, number> = {};
+	// Diagnostic: sender change detection for tier log.
+	private lastVideoSender: RTCRtpSender | null = null;
 
 	private lastTopActiveRung = -2;
-
-	private lastVideoSender: RTCRtpSender | null = null;
 
 	constructor(
 		meetingId: string,
 		audioConn: IBidirectionalConnectionAudioInOut,
 		videoOut: IVideoOutConnection,
-		videoIn: IVideoScreenInConnection,
 		screenOut: IScreenOutConnection
 	) {
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session?.id;
 		this.audioConn = audioConn;
 		this.videoOut = videoOut;
-		this.videoIn = videoIn;
 		this.screenOut = screenOut;
 		this.intervalId = setInterval(() => {
 			this.evaluate().catch(() => {});
@@ -258,76 +225,116 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
-	// The whole measurement: RTT + loss on MY legs to Janus only. iceConnected from the always-up audio
-	// PC. loss = max(uplink fractionLost, downlink SR-escape). Nothing app-state driven — muted/idle legs
-	// simply produce no packets and drop out of the loss aggregation.
-	private async computeQuality(): Promise<{ sample: LinkSample; level: ConnectionQuality }> {
+	// Uplink-only quality: one vote per PUBLISHED stream, aggregated by importance weight.
+	// ICE/presence gating: inactive streams are OMITTED from votes — never injected as 10 or 0.
+	private async computeQuality(): Promise<{ sample: UplinkBreakdown; level: ConnectionQuality }> {
 		const audioState = this.audioConn.peerConn?.connectionState;
 		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
 
+		// Presence gates — an inactive stream is entirely omitted from the vote set.
+		const webcamActive = this.videoOut.rtpSender != null;
+		const screenActive = this.screenOut.rtpSender != null;
+		const audioActive = this.audioConn.rtpSender?.track?.enabled === true;
+
 		const now = Date.now();
-		const audioStats = await this.safeStats(this.audioConn.peerConn);
-		const videoUpStats = await this.safeStats(this.videoOut.rtpSender);
-		const screenUpStats = await this.safeStats(this.screenOut.rtpSender);
-		const videoInStats = await this.safeStats(this.videoIn.peerConn);
 
-		// diagnostic side-effect: log uplink simulcast tier changes (downlink is logged in VideoScreenIn)
-		if (videoUpStats != null) this.logUplinkWebcamTier(videoUpStats);
+		const [audioStats, videoUpStats, screenUpStats] = await Promise.all([
+			this.safeStats(this.audioConn.peerConn),
+			webcamActive ? this.safeStats(this.videoOut.rtpSender) : Promise.resolve(null),
+			screenActive ? this.safeStats(this.screenOut.rtpSender) : Promise.resolve(null)
+		]);
 
-		const rttMs = audioStats != null ? this.readRttMs(audioStats) : undefined;
+		const votes: UplinkVotes = {};
 
-		// uplink loss: worst fractionLost across my sent legs (audio/video/screen)
-		const tickUplink = [audioStats, videoUpStats, screenUpStats]
-			.map((s) => (s != null ? readMaxFractionLost(s) : undefined))
-			.filter((v): v is number => v !== undefined);
-		const lossUp = this.windowUplinkLoss(
-			tickUplink.length > 0 ? Math.max(...tickUplink) : undefined,
-			now
-		);
-
-		// downlink loss: pooled SR-escape over the streams I receive (audio mix + video/screen feeds)
-		const pools = [audioStats, videoInStats]
-			.filter((s): s is RTCStatsReport => s != null)
-			.map((s) => poolSrEscape(s));
-		const poolSent = pools.reduce((acc, p) => acc + p.sent, 0);
-		const poolRecv = pools.reduce((acc, p) => acc + p.recv, 0);
-		const lossDown = this.windowDownlinkLoss(poolSent, poolRecv, now);
-
-		const sample: LinkSample = { rttMs, lossUp, lossDown };
-		return { sample, level: computeConnectionQuality(sample, iceConnected) };
-	}
-
-	// Smoothed worst uplink fractionLost; undefined once I have sent nothing within the window.
-	private windowUplinkLoss(tick: number | undefined, now: number): number | undefined {
-		if (tick !== undefined) winPush(this.uplinkLossRing, now, tick);
-		else winPrune(this.uplinkLossRing, now);
-		return this.uplinkLossRing.length > 0 ? ringMean(this.uplinkLossRing) : undefined;
-	}
-
-	// Per-tick SR-escape delta (handles the ~1 Hz SR cadence and stream-set changes), smoothed over the
-	// window; undefined once I have received nothing measurable.
-	private windowDownlinkLoss(poolSent: number, poolRecv: number, now: number): number | undefined {
-		const prev = this.prevDownPool;
-		this.prevDownPool = { sent: poolSent, recv: poolRecv };
-		const dSent = prev != null ? Math.max(0, poolSent - prev.sent) : 0;
-		if (prev != null && dSent >= MIN_DOWNLINK_SAMPLES) {
-			const dRecv = Math.max(0, poolRecv - prev.recv);
-			winPush(this.downlinkLossRing, now, Math.max(0, Math.min(1, (dSent - dRecv) / dSent)));
+		if (webcamActive && videoUpStats != null) {
+			votes.webcam = this.computeWebcamVote(videoUpStats, now);
 		} else {
-			winPrune(this.downlinkLossRing, now);
+			this.videoOutRing = [];
+			this.videoOutPrevCum = null;
 		}
-		return this.downlinkLossRing.length > 0 ? ringMean(this.downlinkLossRing) : undefined;
+
+		if (screenActive && screenUpStats != null) {
+			votes.screen = this.computeScreenVote(screenUpStats, now);
+		} else {
+			this.screenOutRing = [];
+		}
+
+		if (audioActive && audioStats != null) {
+			const audioVote = this.computeAudioVote(audioStats, now);
+			if (audioVote !== undefined) votes.audio = audioVote;
+		} else {
+			this.audioPrev = null;
+		}
+
+		const level = aggregateUplinkQuality(votes, iceConnected);
+		// Only include keys that are present in votes — absent key means the stream is inactive.
+		const sample: UplinkBreakdown = {};
+		if (votes.webcam !== undefined) sample.webcam = votes.webcam;
+		if (votes.screen !== undefined) sample.screen = votes.screen;
+		if (votes.audio !== undefined) sample.audio = votes.audio;
+
+		return { sample, level };
 	}
 
-	// Diagnostic only (not part of the score): log uplink simulcast tier changes — the top layer the
-	// encoder is actually producing (framesEncoded is the reliable signal; RTX/padding keep bytes flowing
-	// on GCC-disabled layers). Mirrors the downlink tier log in VideoScreenInConnection.
-	private logUplinkWebcamTier(stats: RTCStatsReport): void {
+	private computeWebcamVote(stats: RTCStatsReport, now: number): number {
+		// Reset accumulated state when the sender changes (new camera started).
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
-			this.videoFramesEncoded = {};
+			this.videoOutRing = [];
+			this.videoOutPrevCum = null;
 			this.lastTopActiveRung = -2;
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
+
+		const cum: VideoOutCumulative = { framesEncoded: {}, qldBandwidth: 0, qldCpu: 0 };
+		const ridToIndex: Record<string, number> = { l: 0, m: 1, h: 2 };
+
+		stats.forEach(
+			(
+				r: RTCStats & {
+					rid?: string;
+					framesEncoded?: number;
+					qualityLimitationDurations?: Record<string, number>;
+					framesPerSecond?: number;
+					scalabilityMode?: string;
+				}
+			) => {
+				if (r.type !== OUTBOUND_RTP) return;
+				const rid = r.rid ?? '';
+				if (r.framesEncoded != null) cum.framesEncoded[rid] = r.framesEncoded;
+				cum.qldBandwidth += r.qualityLimitationDurations?.bandwidth ?? 0;
+				cum.qldCpu += r.qualityLimitationDurations?.cpu ?? 0;
+			}
+		);
+
+		// topActiveRung: highest rid with Δframing > 0 relative to the previous tick.
+		const prevCum = this.videoOutPrevCum;
+		this.videoOutPrevCum = cum;
+
+		let topActiveRung = -1;
+		Object.entries(cum.framesEncoded).forEach(([rid, currentFrames]) => {
+			const prevFrames = prevCum?.framesEncoded[rid] ?? 0;
+			if (currentFrames > prevFrames) {
+				const idx = ridToIndex[rid] ?? -1;
+				if (idx > topActiveRung) topActiveRung = idx;
+			}
+		});
+
+		// Diagnostic log on tier change (not part of the score).
+		if (topActiveRung !== this.lastTopActiveRung) {
+			const tierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
+			rtcDebug(
+				`UPLINK WEBCAM CHANGE: ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)}`
+			);
+			this.lastTopActiveRung = topActiveRung;
+		}
+
+		// bandwidthLimited: Δbandwidth > Δcpu AND Δbandwidth > 0 over the 5 s window.
+		const oldestCum = this.videoOutRing[0]?.data;
+		winPush(this.videoOutRing, now, cum);
+		const dBandwidth = cum.qldBandwidth - (oldestCum?.qldBandwidth ?? cum.qldBandwidth);
+		const dCpu = cum.qldCpu - (oldestCum?.qldCpu ?? cum.qldCpu);
+		const bandwidthLimited = dBandwidth > dCpu && dBandwidth > 0;
+
 		const track = this.videoOut.rtpSender?.track;
 		const captureHeight =
 			track && typeof track.getSettings === 'function' ? (track.getSettings().height ?? 0) : 0;
@@ -336,71 +343,103 @@ export default class ConnectionQualityMonitor {
 			useStore.getState().session.attributes?.videoSimulcastTiers
 		);
 
-		const ridToIndex: Record<string, 0 | 1 | 2> = { l: 0, m: 1, h: 2 };
-		let topActiveRung = -1;
-		const scal: Record<string, string> = {};
+		const fractionLost = this.readMaxFractionLost(stats);
+
+		return webcamUplinkVote({ producibleRungs, topActiveRung, bandwidthLimited, fractionLost });
+	}
+
+	private computeScreenVote(stats: RTCStatsReport, now: number): number {
+		const cum: ScreenOutCumulative = { qldBandwidth: 0, qldCpu: 0 };
+		let encodedFps = 0;
+
 		stats.forEach(
 			(
 				r: RTCStats & {
-					rid?: string;
-					framesEncoded?: number;
 					framesPerSecond?: number;
-					scalabilityMode?: string;
-					active?: boolean;
+					qualityLimitationDurations?: Record<string, number>;
 				}
 			) => {
 				if (r.type !== OUTBOUND_RTP) return;
-				const rid = r.rid ?? '';
-				const idx = ridToIndex[rid];
-				if (idx == null) return;
-				scal[rid] = `${r.scalabilityMode ?? '?'}@${Math.round(r.framesPerSecond ?? 0)}fps`;
-				const prevFrames = this.videoFramesEncoded[rid] ?? 0;
-				const currentFrames = r.framesEncoded ?? 0;
-				this.videoFramesEncoded[rid] = currentFrames;
-				if (r.active !== false && currentFrames > prevFrames && idx > topActiveRung) {
-					topActiveRung = idx;
-				}
+				encodedFps = r.framesPerSecond ?? encodedFps;
+				cum.qldBandwidth += r.qualityLimitationDurations?.bandwidth ?? 0;
+				cum.qldCpu += r.qualityLimitationDurations?.cpu ?? 0;
 			}
 		);
 
-		if (topActiveRung === this.lastTopActiveRung) return;
-		const tierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
-		const ridName: Record<string, string> = { h: 'high', m: 'medium', l: 'low' };
-		const bestPossible = producibleRungs > 0 ? tierName(producibleRungs - 1) : 'none';
-		const temporal = Object.keys(scal)
-			.map((r) => `${ridName[r] ?? r}:${scal[r]}`)
-			.join(' ');
-		rtcDebug(
-			`UPLINK WEBCAM CHANGE: best tier possible ${bestPossible}, uploaded ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)} | temporal ${temporal}`
-		);
-		this.lastTopActiveRung = topActiveRung;
+		const oldestCum = this.screenOutRing[0]?.data;
+		winPush(this.screenOutRing, now, cum);
+		const dBandwidth = cum.qldBandwidth - (oldestCum?.qldBandwidth ?? cum.qldBandwidth);
+		const dCpu = cum.qldCpu - (oldestCum?.qldCpu ?? cum.qldCpu);
+		const bandwidthLimited = dBandwidth > dCpu && dBandwidth > 0;
+
+		const captureFps =
+			this.screenOut.rtpSender?.track != null &&
+			typeof this.screenOut.rtpSender.track.getSettings === 'function'
+				? this.screenOut.rtpSender.track.getSettings().frameRate
+				: undefined;
+
+		const fractionLost = this.readMaxFractionLost(stats);
+
+		return screenUplinkVote({ bandwidthLimited, captureFps, encodedFps, fractionLost });
 	}
 
-	// RTT (ms) from the selected candidate-pair of the always-up audio PC — the whole me<->Janus
-	// round-trip, averaged over the window. Ours alone: other participants have separate pipes to Janus.
-	private readRttMs(stats: RTCStatsReport): number | undefined {
-		const now = Date.now();
-		let sample: number | undefined;
+	// Returns undefined when no meaningful kbps can be computed yet (first tick, no targetBitrate).
+	private computeAudioVote(stats: RTCStatsReport, now: number): number | undefined {
+		let speaking = false;
+		let targetBitrateKbps: number | undefined;
+		let bytesSent = 0;
+		let fractionLost = 0;
+
 		stats.forEach(
 			(
 				r: RTCStats & {
-					nominated?: boolean;
-					state?: string;
-					currentRoundTripTime?: number;
+					kind?: string;
+					audioLevel?: number;
+					bytesSent?: number;
+					targetBitrate?: number;
+					fractionLost?: number;
 				}
 			) => {
-				if (
-					r.type === CANDIDATE_PAIR &&
-					r.nominated === true &&
-					r.state === 'succeeded' &&
-					r.currentRoundTripTime != null
-				) {
-					sample = r.currentRoundTripTime * 1000;
+				if (r.type === MEDIA_SOURCE && r.kind === 'audio') {
+					speaking = (r.audioLevel ?? 0) > 0.05;
+				}
+				if (r.type === OUTBOUND_RTP && r.kind === 'audio') {
+					bytesSent = r.bytesSent ?? bytesSent;
+					if (r.targetBitrate != null) targetBitrateKbps = r.targetBitrate / 1000;
+				}
+				if (r.type === REMOTE_INBOUND_RTP && r.fractionLost != null) {
+					fractionLost = Math.max(fractionLost, r.fractionLost);
 				}
 			}
 		);
-		if (sample === undefined) return undefined;
-		winPush(this.rttRing, now, sample);
-		return ringMean(this.rttRing);
+
+		let actualKbps: number | undefined;
+		const prev = this.audioPrev;
+		this.audioPrev = { bytesSent, ts: now };
+
+		if (prev != null) {
+			const dtSec = Math.max(0.001, (now - prev.ts) / 1000);
+			const bytesKbps = (Math.max(0, bytesSent - prev.bytesSent) * 8) / 1000 / dtSec;
+			actualKbps =
+				targetBitrateKbps !== undefined ? Math.min(targetBitrateKbps, bytesKbps) : bytesKbps;
+		} else {
+			// First tick: use targetBitrate alone if available; skip the vote otherwise.
+			actualKbps = targetBitrateKbps;
+		}
+
+		if (actualKbps === undefined) return undefined;
+
+		return audioUplinkVote({ speaking, actualKbps, fractionLost });
+	}
+
+	// Worst uplink fractionLost (0..1) across the remote-inbound reports in a stats set.
+	private readMaxFractionLost(stats: RTCStatsReport): number {
+		let worst = 0;
+		stats.forEach((r: RTCStats & { fractionLost?: number }) => {
+			if (r.type === REMOTE_INBOUND_RTP && r.fractionLost != null) {
+				worst = Math.max(worst, r.fractionLost);
+			}
+		});
+		return worst;
 	}
 }
