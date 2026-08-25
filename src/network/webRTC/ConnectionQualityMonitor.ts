@@ -27,6 +27,7 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 const INBOUND_RTP = 'inbound-rtp';
 const REMOTE_INBOUND_RTP = 'remote-inbound-rtp';
 const REMOTE_OUTBOUND_RTP = 'remote-outbound-rtp';
+const OUTBOUND_RTP = 'outbound-rtp';
 const CANDIDATE_PAIR = 'candidate-pair';
 
 // 5-second sliding window. Loss is smoothed over it and RTT is a windowed mean; hysteresis (below)
@@ -90,6 +91,14 @@ function readMaxFractionLost(stats: RTCStatsReport): number | undefined {
 		}
 	});
 	return worst;
+}
+
+// Number of simulcast rungs the current capture resolution can produce (for the uplink tier log).
+function producibleRungsFor(captureHeight: number, tiers?: Array<{ height: number }>): number {
+	if (tiers && tiers.length > 0) return tiers.filter((t) => captureHeight >= t.height).length;
+	if (captureHeight >= 720) return 3;
+	if (captureHeight >= 360) return 2;
+	return 1;
 }
 
 // Exported for testing: next committed level given the raw level and the previous committed level.
@@ -159,6 +168,13 @@ export default class ConnectionQualityMonitor {
 	// previous pooled SR counters, for the per-tick downlink delta.
 	private prevDownPool: { sent: number; recv: number } | null = null;
 
+	// diagnostic-only uplink simulcast tier tracking: framesEncoded per rid + last logged top rung.
+	private videoFramesEncoded: Record<string, number> = {};
+
+	private lastTopActiveRung = -2;
+
+	private lastVideoSender: RTCRtpSender | null = null;
+
 	constructor(
 		meetingId: string,
 		audioConn: IBidirectionalConnectionAudioInOut,
@@ -225,11 +241,6 @@ export default class ConnectionQualityMonitor {
 		if (changed) {
 			this.committed = next;
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-			rtcDebug(
-				`CONNECTION SCORE: ${next} | rtt ${sample.rttMs?.toFixed(0) ?? '-'}ms` +
-					` lossUp ${sample.lossUp != null ? (sample.lossUp * 100).toFixed(1) : '-'}%` +
-					` lossDown ${sample.lossDown != null ? (sample.lossDown * 100).toFixed(1) : '-'}%`
-			);
 			wsClient.sendConnectionScore(this.meetingId, this.committed ?? next, this.changedAt);
 		}
 		this.applyLocalQuality(next);
@@ -259,6 +270,9 @@ export default class ConnectionQualityMonitor {
 		const videoUpStats = await this.safeStats(this.videoOut.rtpSender);
 		const screenUpStats = await this.safeStats(this.screenOut.rtpSender);
 		const videoInStats = await this.safeStats(this.videoIn.peerConn);
+
+		// diagnostic side-effect: log uplink simulcast tier changes (downlink is logged in VideoScreenIn)
+		if (videoUpStats != null) this.logUplinkWebcamTier(videoUpStats);
 
 		const rttMs = audioStats != null ? this.readRttMs(audioStats) : undefined;
 
@@ -303,6 +317,63 @@ export default class ConnectionQualityMonitor {
 			winPrune(this.downlinkLossRing, now);
 		}
 		return this.downlinkLossRing.length > 0 ? ringMean(this.downlinkLossRing) : undefined;
+	}
+
+	// Diagnostic only (not part of the score): log uplink simulcast tier changes — the top layer the
+	// encoder is actually producing (framesEncoded is the reliable signal; RTX/padding keep bytes flowing
+	// on GCC-disabled layers). Mirrors the downlink tier log in VideoScreenInConnection.
+	private logUplinkWebcamTier(stats: RTCStatsReport): void {
+		if (this.videoOut.rtpSender !== this.lastVideoSender) {
+			this.videoFramesEncoded = {};
+			this.lastTopActiveRung = -2;
+			this.lastVideoSender = this.videoOut.rtpSender;
+		}
+		const track = this.videoOut.rtpSender?.track;
+		const captureHeight =
+			track && typeof track.getSettings === 'function' ? (track.getSettings().height ?? 0) : 0;
+		const producibleRungs = producibleRungsFor(
+			captureHeight,
+			useStore.getState().session.attributes?.videoSimulcastTiers
+		);
+
+		const ridToIndex: Record<string, 0 | 1 | 2> = { l: 0, m: 1, h: 2 };
+		let topActiveRung = -1;
+		const scal: Record<string, string> = {};
+		stats.forEach(
+			(
+				r: RTCStats & {
+					rid?: string;
+					framesEncoded?: number;
+					framesPerSecond?: number;
+					scalabilityMode?: string;
+					active?: boolean;
+				}
+			) => {
+				if (r.type !== OUTBOUND_RTP) return;
+				const rid = r.rid ?? '';
+				const idx = ridToIndex[rid];
+				if (idx == null) return;
+				scal[rid] = `${r.scalabilityMode ?? '?'}@${Math.round(r.framesPerSecond ?? 0)}fps`;
+				const prevFrames = this.videoFramesEncoded[rid] ?? 0;
+				const currentFrames = r.framesEncoded ?? 0;
+				this.videoFramesEncoded[rid] = currentFrames;
+				if (r.active !== false && currentFrames > prevFrames && idx > topActiveRung) {
+					topActiveRung = idx;
+				}
+			}
+		);
+
+		if (topActiveRung === this.lastTopActiveRung) return;
+		const tierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
+		const ridName: Record<string, string> = { h: 'high', m: 'medium', l: 'low' };
+		const bestPossible = producibleRungs > 0 ? tierName(producibleRungs - 1) : 'none';
+		const temporal = Object.keys(scal)
+			.map((r) => `${ridName[r] ?? r}:${scal[r]}`)
+			.join(' ');
+		rtcDebug(
+			`UPLINK WEBCAM CHANGE: best tier possible ${bestPossible}, uploaded ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)} | temporal ${temporal}`
+		);
+		this.lastTopActiveRung = topActiveRung;
 	}
 
 	// RTT (ms) from the selected candidate-pair of the always-up audio PC — the whole me<->Janus
