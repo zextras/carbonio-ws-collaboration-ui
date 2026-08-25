@@ -32,7 +32,7 @@ export type WsMeetingEvent =
 	| MeetingRecordingStoppedEvent
 	| MeetingParticipantHandRaisedEvent
 	| MeetingParticipantHandRaisedListEvent
-	| MeetingParticipantConnectionScoreChangedEvent;
+	| MeetingParticipantConnectionStatusChangedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -165,9 +165,10 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	userId: string;
 };
 
-export type MeetingParticipantConnectionScoreChangedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_SCORE_CHANGED;
+export type MeetingParticipantConnectionStatusChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_STATUS_CHANGED;
 	userId: string;
 	score: ConnectionQuality;
 	changedAt: number;
+	maxTier?: number;
 };

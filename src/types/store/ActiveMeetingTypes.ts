@@ -51,6 +51,7 @@ export type ActiveMeetingSlice = {
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: UplinkBreakdown) => void;
+	setDownlinkCompromised: (meetingId: string, compromised: boolean) => void;
 };
 
 export type ActiveMeeting = {
@@ -66,6 +67,9 @@ export type ActiveMeeting = {
 	// Per-stream uplink votes (webcam/screen/audio), republished by the monitor each tick so the
 	// own-tile indicator can render the breakdown live. Undefined key = stream inactive.
 	connectionScoreDetail: UplinkBreakdown | undefined;
+	// true while our downlink is consuming a lower tier than at least one publisher is sending,
+	// written by the per-tick state machine in VideoScreenInConnection.
+	downlinkCompromised: boolean;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;
@@ -82,6 +86,7 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
+	maxTier?: number;
 };
 
 // Per-stream uplink votes written to the store by the quality monitor each tick.

@@ -88,6 +88,7 @@ export const useActiveMeetingSlice: StateCreator<
 					qualityMonitor,
 					connectionQuality: {},
 					connectionScoreDetail: undefined,
+					downlinkCompromised: false,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -391,6 +392,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_CONNECTION_SCORE_DETAIL'
+		);
+	},
+	setDownlinkCompromised: (meetingId: string, compromised: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.downlinkCompromised = compromised;
+			}),
+			false,
+			'AM/SET_DOWNLINK_COMPROMISED'
 		);
 	}
 });

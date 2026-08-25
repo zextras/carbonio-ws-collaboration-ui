@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { meetingParticipantConnectionScoreChangedEventHandler } from './MeetingParticipantConnectionScoreChangedEventHandler';
+import { meetingParticipantConnectionStatusChangedEventHandler } from './MeetingParticipantConnectionStatusChangedEventHandler';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -12,7 +12,7 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
-import { MeetingParticipantConnectionScoreChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingParticipantConnectionStatusChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 
 const room = createMockRoom({ id: 'roomId' });
 const participant = createMockParticipants({ userId: 'participantId' });
@@ -22,8 +22,8 @@ const meeting = createMockMeeting({
 	participants: [participant]
 });
 
-const baseEvent: MeetingParticipantConnectionScoreChangedEvent = {
-	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_SCORE_CHANGED,
+const baseEvent: MeetingParticipantConnectionStatusChangedEvent = {
+	type: WsEventType.MEETING_PARTICIPANT_CONNECTION_STATUS_CHANGED,
 	sentDate: '2026-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: participant.userId,
@@ -35,13 +35,13 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
-	// Connection score lives on the active meeting, so an active meeting must exist to hold it.
+	// Connection status lives on the active meeting, so an active meeting must exist to hold it.
 	store.meetingConnection(meeting.id);
 });
 
-describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
+describe('meetingParticipantConnectionStatusChangedEventHandler tests', () => {
 	test('Score and changedAt are stored for the participant', () => {
-		meetingParticipantConnectionScoreChangedEventHandler(baseEvent);
+		meetingParticipantConnectionStatusChangedEventHandler(baseEvent);
 		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
 		expect(stored?.quality).toBe('optimal');
 		expect(stored?.changedAt).toBe(1000);
@@ -50,7 +50,7 @@ describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
 	test('All 6 score levels are accepted', () => {
 		const levels = ['lost', 'terrible', 'poor', 'medium', 'high', 'optimal'] as const;
 		levels.forEach((score, index) => {
-			meetingParticipantConnectionScoreChangedEventHandler({
+			meetingParticipantConnectionStatusChangedEventHandler({
 				...baseEvent,
 				score,
 				changedAt: baseEvent.changedAt + index + 1
@@ -61,12 +61,12 @@ describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
 	});
 
 	test('A newer changedAt overwrites an existing score', () => {
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			score: 'medium',
 			changedAt: 1000
 		});
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			score: 'high',
 			changedAt: 2000
@@ -77,12 +77,12 @@ describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
 	});
 
 	test('An older changedAt does not overwrite a newer score', () => {
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			score: 'high',
 			changedAt: 2000
 		});
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			score: 'terrible',
 			changedAt: 500
@@ -92,13 +92,40 @@ describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
 		expect(stored?.changedAt).toBe(2000);
 	});
 
-	test('reciprocates our score on first contact with a participant, once (not twice)', () => {
+	test('maxTier is stored when present', () => {
+		meetingParticipantConnectionStatusChangedEventHandler({
+			...baseEvent,
+			maxTier: 2
+		});
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.maxTier).toBe(2);
+	});
+
+	test('maxTier is undefined when absent from event', () => {
+		meetingParticipantConnectionStatusChangedEventHandler(baseEvent);
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.maxTier).toBeUndefined();
+	});
+
+	test('maxTier accepts all valid substream indices (0, 1, 2)', () => {
+		([0, 1, 2] as const).forEach((maxTier, i) => {
+			meetingParticipantConnectionStatusChangedEventHandler({
+				...baseEvent,
+				changedAt: baseEvent.changedAt + i + 1,
+				maxTier
+			});
+			const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+			expect(stored?.maxTier).toBe(maxTier);
+		});
+	});
+
+	test('reciprocates our status on first contact with a participant, once (not twice)', () => {
 		const monitor = useStore.getState().activeMeeting?.qualityMonitor;
 		expect(monitor).toBeDefined();
 		const spy = vi.spyOn(monitor!, 'resyncTo').mockResolvedValue(undefined);
 
 		// first time we learn 'otherUser' -> send ours back so they see us too
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			userId: 'otherUser',
 			changedAt: 1000
@@ -107,7 +134,7 @@ describe('meetingParticipantConnectionScoreChangedEventHandler tests', () => {
 
 		// already known -> no second reciprocation (the exchange has settled)
 		spy.mockClear();
-		meetingParticipantConnectionScoreChangedEventHandler({
+		meetingParticipantConnectionStatusChangedEventHandler({
 			...baseEvent,
 			userId: 'otherUser',
 			changedAt: 2000

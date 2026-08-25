@@ -8,6 +8,13 @@ import { filter, forEach, keyBy } from 'lodash';
 import { gte } from 'semver';
 
 import {
+	computeDegradedSummary,
+	DownlinkSmState,
+	FeedSnapshot,
+	initialDownlinkSmState,
+	tickDownlinkSm
+} from './downlinkStateMachine';
+import {
 	decideQuality,
 	initialQualityState,
 	isReducedFramerate,
@@ -16,6 +23,7 @@ import {
 } from './inboundQualityController';
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
+import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
@@ -123,6 +131,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	private evalTick = 0;
 
 	private qualityIntervalId: ReturnType<typeof setInterval> | null = null;
+
+	private downlinkSmState: DownlinkSmState = initialDownlinkSmState();
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -305,7 +315,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 								const dim = next.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
 								const from = layersOf(prevState.rung);
 								rtcDebug(
-									`DOWNLINK WEBCAM feed=${key} [${dim}]: showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
+									`DOWNLINK WEBCAM ${this.who(userId)} [${dim}]: showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
 								);
 							}
 							if (next.off) {
@@ -323,11 +333,17 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
 					this.suppressedVideo.delete(key);
 					this.qualityStates.set(key, initialQualityState(0));
-					rtcDebug(`DOWNLINK feed=${key} AUTO-ON (re-probe)`);
+					rtcDebug(`DOWNLINK ${this.who(userId)} AUTO-ON (re-probe)`);
 				}
 			});
+			this.evaluateDownlinkSnackbar(Date.now());
 		});
 	};
+
+	// Debug logs identify the feed by display name / email, not the raw user id.
+	private who(userId: string): string {
+		return getUserName(useStore.getState(), userId) || userId;
+	}
 
 	private suppressFeed(key: string, userId: string): void {
 		useStore.getState().setRemoveSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
@@ -339,7 +355,47 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.maskUntilTick.delete(key);
 		this.feedQualityData.delete(key);
 		this.feedCumRing.delete(key);
-		rtcDebug(`DOWNLINK feed=${key} AUTO-OFF (below lowest)`);
+		rtcDebug(`DOWNLINK ${this.who(userId)} AUTO-OFF (below lowest)`);
+	}
+
+	private evaluateDownlinkSnackbar(now: number): void {
+		const store = useStore.getState();
+		if (!store.activeMeeting || store.activeMeeting.meetingId !== this.meetingId) return;
+
+		const feeds: FeedSnapshot[] = [];
+
+		Array.from(this.videoReceivers.entries())
+			.filter(([key]) => !!this.streamsMap[key]?.mid)
+			.forEach(([key, { userId }]) => {
+				const state = this.qualityStates.get(key);
+				feeds.push({
+					userId,
+					suppressed: false,
+					rung: state?.rung,
+					failCount: state?.failCount
+				});
+			});
+
+		Array.from(this.suppressedVideo.entries()).forEach(([, { userId }]) => {
+			feeds.push({ userId, suppressed: true });
+		});
+
+		const { aggregateDegraded, anyFeedSuppressed, maxFailCountAtBoundary } = computeDegradedSummary(
+			feeds,
+			(userId) => store.activeMeeting?.connectionQuality[userId]?.maxTier
+		);
+
+		const { state: nextState, flippedTo } = tickDownlinkSm(this.downlinkSmState, {
+			aggregateDegraded,
+			anyFeedSuppressed,
+			maxFailCountAtBoundary,
+			now
+		});
+		this.downlinkSmState = nextState;
+
+		if (flippedTo !== undefined) {
+			store.setDownlinkCompromised(this.meetingId, flippedTo === 'compromised');
+		}
 	}
 
 	private updateStreams(): void {
@@ -398,6 +454,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.prevStats.clear();
 		this.suppressedVideo.clear();
 		this.maskUntilTick.clear();
+		this.downlinkSmState = initialDownlinkSmState();
 		this.screenReceiver = null;
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();

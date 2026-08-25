@@ -172,7 +172,18 @@ export default class ConnectionQualityMonitor {
 		if (this.myUserId == null) return;
 		useStore
 			.getState()
-			.setParticipantConnectionQuality(this.meetingId, this.myUserId, level, this.changedAt);
+			.setParticipantConnectionQuality(
+				this.meetingId,
+				this.myUserId,
+				level,
+				this.changedAt,
+				this.currentMaxTier()
+			);
+	}
+
+	private currentMaxTier(): number | undefined {
+		const t = this.lastTopActiveRung;
+		return t >= 0 ? t : undefined;
 	}
 
 	async emitInitial(): Promise<void> {
@@ -181,7 +192,12 @@ export default class ConnectionQualityMonitor {
 		this.committed = level;
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 		useStore.getState().setConnectionScoreDetail(sample);
-		wsClient.sendConnectionScore(this.meetingId, level, this.changedAt);
+		wsClient.sendConnectionStatusUpdate(
+			this.meetingId,
+			level,
+			this.changedAt,
+			this.currentMaxTier()
+		);
 		this.applyLocalQuality(level);
 	}
 
@@ -190,25 +206,45 @@ export default class ConnectionQualityMonitor {
 			await this.emitInitial();
 		}
 		if (this.committed != null) {
-			wsClient.sendConnectionScore(this.meetingId, this.committed, this.changedAt, userId);
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				this.currentMaxTier(),
+				userId
+			);
 		}
 	}
 
 	rebroadcast(): void {
 		if (this.committed != null) {
-			wsClient.sendConnectionScore(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				this.currentMaxTier()
+			);
 		}
 	}
 
 	private async evaluate(): Promise<void> {
+		const prevTier = this.lastTopActiveRung;
 		const { sample, level } = await this.computeQuality();
 		const { next, streak, changed } = stepHysteresis(level, this.committed, this.betterStreak);
 		this.betterStreak = streak;
 		useStore.getState().setConnectionScoreDetail(sample);
-		if (changed) {
-			this.committed = next;
-			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-			wsClient.sendConnectionScore(this.meetingId, this.committed ?? next, this.changedAt);
+		const tierChanged = this.lastTopActiveRung !== prevTier;
+		if (changed || tierChanged) {
+			if (changed) {
+				this.committed = next;
+				this.changedAt = Math.max(Date.now(), this.changedAt + 1);
+			}
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed ?? next,
+				this.changedAt,
+				this.currentMaxTier()
+			);
 		}
 		this.applyLocalQuality(next);
 	}

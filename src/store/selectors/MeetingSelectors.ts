@@ -85,6 +85,17 @@ export const getParticipantConnectionQuality = (
 	return activeMeeting.connectionQuality[userId]?.quality;
 };
 
+export const getParticipantMaxTier = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): number | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	return activeMeeting.connectionQuality[userId]?.maxTier;
+};
+
 export const getParticipantVideoStatus = (
 	store: RootStore,
 	meetingId: string | undefined,
@@ -192,3 +203,8 @@ export const getIsMeetingRecording = (store: RootStore, meetingId: string): bool
 
 export const getStartRecordingUserId = (store: RootStore, meetingId: string): string | undefined =>
 	store.meetings[meetingId]?.recUserId;
+
+export const getDownlinkCompromised = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting?.meetingId === meetingId
+		? (store.activeMeeting?.downlinkCompromised ?? false)
+		: false;
