@@ -148,6 +148,9 @@ export default class ConnectionQualityMonitor {
 	// null = no baseline yet; set on first fps reading or on tier-change log.
 	private lastLoggedFpsUplink: number | null = null;
 
+	// Diagnostic: last logged set of actively-published simulcast rids (log once, then only on change).
+	private lastPublishedRungs: string | null = null;
+
 	constructor(
 		meetingId: string,
 		audioConn: IBidirectionalConnectionAudioInOut,
@@ -323,12 +326,15 @@ export default class ConnectionQualityMonitor {
 			this.videoOutPrevCum = null;
 			this.lastTopActiveRung = -2;
 			this.lastLoggedFpsUplink = null;
+			this.lastPublishedRungs = null;
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
 
 		const cum: VideoOutCumulative = { framesEncoded: {}, qldBandwidth: 0, qldCpu: 0 };
 		const ridToIndex: Record<string, number> = { l: 0, m: 1, h: 2 };
 		const ridFps: Record<string, number> = {};
+		const ridW: Record<string, number> = {};
+		const ridH: Record<string, number> = {};
 
 		stats.forEach(
 			(
@@ -337,6 +343,8 @@ export default class ConnectionQualityMonitor {
 					framesEncoded?: number;
 					qualityLimitationDurations?: Record<string, number>;
 					framesPerSecond?: number;
+					frameWidth?: number;
+					frameHeight?: number;
 					scalabilityMode?: string;
 				}
 			) => {
@@ -346,6 +354,8 @@ export default class ConnectionQualityMonitor {
 				cum.qldBandwidth += r.qualityLimitationDurations?.bandwidth ?? 0;
 				cum.qldCpu += r.qualityLimitationDurations?.cpu ?? 0;
 				if (r.framesPerSecond != null) ridFps[rid] = r.framesPerSecond;
+				if (r.frameWidth != null) ridW[rid] = r.frameWidth;
+				if (r.frameHeight != null) ridH[rid] = r.frameHeight;
 			}
 		);
 
@@ -354,9 +364,11 @@ export default class ConnectionQualityMonitor {
 		this.videoOutPrevCum = cum;
 
 		let topActiveRung = -1;
+		const activeRids: string[] = [];
 		Object.entries(cum.framesEncoded).forEach(([rid, currentFrames]) => {
 			const prevFrames = prevCum?.framesEncoded[rid] ?? 0;
 			if (currentFrames > prevFrames) {
+				activeRids.push(rid);
 				const idx = ridToIndex[rid] ?? -1;
 				if (idx > topActiveRung) topActiveRung = idx;
 			}
@@ -365,6 +377,17 @@ export default class ConnectionQualityMonitor {
 		// Published fps of the top active rid (for log context).
 		const indexToRid: Record<number, string> = { 0: 'l', 1: 'm', 2: 'h' };
 		const topFps = topActiveRung >= 0 ? (ridFps[indexToRid[topActiveRung]] ?? 0) : 0;
+
+		// Log the full set of simulcast rungs actually published (once after ramp-up, then only on change).
+		this.logPublishedRungsIfChanged(
+			activeRids,
+			prevCum != null,
+			topActiveRung,
+			Object.keys(cum.framesEncoded),
+			ridFps,
+			ridW,
+			ridH
+		);
 
 		// Diagnostic log on tier change; fps-only log when fps moves >= FPS_LOG_DELTA.
 		if (topActiveRung !== this.lastTopActiveRung) {
@@ -401,6 +424,51 @@ export default class ConnectionQualityMonitor {
 		);
 
 		return webcamUplinkVote({ producibleRungs, topActiveRung, bandwidthLimited });
+	}
+
+	// Diagnostic: log which simulcast rungs the browser is ACTUALLY encoding (Δframes>0), split into
+	// requested (getParameters) / active / idle-in-stats / absent-from-stats, with per-rid res@fps.
+	// Fires once the encoder has ramped (a previous tick exists, ≥1 rung active) and then only when the
+	// published set changes — so a collapse to fewer rungs, or a per-RID getStats gap (e.g. Safari
+	// reporting a single outbound-rtp), is visible without per-tick spam. rtcDebug is a no-op in tests.
+	private logPublishedRungsIfChanged(
+		activeRids: string[],
+		hadPrevTick: boolean,
+		topActiveRung: number,
+		statRids: string[],
+		ridFps: Record<string, number>,
+		ridW: Record<string, number>,
+		ridH: Record<string, number>
+	): void {
+		const rank: Record<string, number> = { l: 0, m: 1, h: 2 };
+		const ladderDesc = (rs: string[]): string =>
+			[...rs].sort((a, b) => (rank[b] ?? -1) - (rank[a] ?? -1)).join(',');
+		const activeSig = ladderDesc(activeRids);
+		if (!hadPrevTick || topActiveRung < 0 || activeSig === this.lastPublishedRungs) return;
+		let requestedRids: string[] = [];
+		try {
+			requestedRids =
+				this.videoOut.rtpSender
+					?.getParameters?.()
+					.encodings?.map((e) => e.rid)
+					.filter((r): r is string => r != null) ?? [];
+		} catch {
+			requestedRids = [];
+		}
+		const idle = statRids.filter((r) => !activeRids.includes(r));
+		const absent = requestedRids.filter((r) => !statRids.includes(r));
+		const detail = ladderDesc(statRids)
+			.split(',')
+			.filter(Boolean)
+			.map((r) => `${r} ${ridW[r] ?? '?'}x${ridH[r] ?? '?'}@${Math.round(ridFps[r] ?? 0)}`)
+			.join(' · ');
+		const idlePart = idle.length ? ` idle=[${ladderDesc(idle)}]` : '';
+		const absentPart = absent.length ? ` absentFromStats=[${ladderDesc(absent)}]` : '';
+		const detailPart = detail ? ` · ${detail}` : '';
+		rtcDebug(
+			`UPLINK WEBCAM RUNGS: requested=[${ladderDesc(requestedRids)}] active=[${activeSig}]${idlePart}${absentPart}${detailPart}`
+		);
+		this.lastPublishedRungs = activeSig;
 	}
 
 	private computeScreenVote(stats: RTCStatsReport, now: number): number {
