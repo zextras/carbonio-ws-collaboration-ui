@@ -165,6 +165,23 @@ describe('chatClient façade', () => {
 		expect(useStore.getState().connections.status.xmpp).toBe(true);
 	});
 
+	it('logs and survives a failing inbox hydration on connect', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'chatClient.connect: inbox hydration failed',
+			expect.any(Error)
+		);
+		// The legacy health flag was parked healthy before the failed round-trip:
+		// the connection banners answer to chats_be/websocket on 2.0.0
+		expect(useStore.getState().connections.status.xmpp).toBe(true);
+	});
+
 	it('loads a history page through the SDK on a WSC-pure backend: GET timeline hydrates the store', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		// The real-world case: ROOM_CREATED shares the room's createdAt (same
@@ -240,6 +257,25 @@ describe('chatClient façade', () => {
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
 			'/services/chats/rooms/room-c/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-old&limit=50'
 		);
+	});
+
+	it('logs and keeps the loader disabled on a failing history page (v1 parity)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-err' })]);
+		// The loader disables itself synchronously before calling the façade
+		useStore.getState().setHistoryLoadDisabled('room-err', true);
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
+
+		chatClient.requestHistory('room-err', Date.parse(AUG_FIRST_MORNING));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'chatClient.requestHistory: timeline hydration failed',
+			expect.any(Error)
+		);
+		// Only the success path re-enables it — the v1 callback did the same
+		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(true);
 	});
 
 	it('bails out on unknown rooms without hitting the network (v1 parity)', () => {

@@ -77,6 +77,21 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 		expect(useStore.getState().users.me).toBeUndefined();
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
+
+	it('logs and survives a failing last-activity refresh on an offline transition', async () => {
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('network down')));
+
+		wsChatEventsRouter(presenceEvent('user-fail', false));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'wsChatEventsRouter: presence hydration failed',
+			expect.any(Error)
+		);
+		// The offline flag from the event landed anyway: only the refresh failed
+		expect(useStore.getState().users['user-fail']).toMatchObject({ online: false });
+	});
 });
 
 describe('wsChatEventsRouter - ReadUpdated', () => {
