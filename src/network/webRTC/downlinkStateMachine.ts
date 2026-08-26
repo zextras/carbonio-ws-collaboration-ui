@@ -28,7 +28,6 @@ export type FeedSnapshot = {
 	userId: string;
 	suppressed: boolean;
 	rung?: number;
-	failCount?: number[];
 };
 
 export type DegradedSummary = {
@@ -39,7 +38,8 @@ export type DegradedSummary = {
 
 export function computeDegradedSummary(
 	feeds: FeedSnapshot[],
-	publishedTier: (userId: string) => number | undefined
+	publishedTier: (userId: string) => number | undefined,
+	sharedFailCount?: number[]
 ): DegradedSummary {
 	let aggregateDegraded = false;
 	let anyFeedSuppressed = false;
@@ -53,8 +53,9 @@ export function computeDegradedSummary(
 			aggregateDegraded = true;
 			if (feed.suppressed) {
 				anyFeedSuppressed = true;
-			} else if (feed.rung != null && feed.failCount != null) {
-				maxFailCountAtBoundary = Math.max(maxFailCountAtBoundary, feed.failCount[feed.rung] ?? 0);
+			} else if (sharedFailCount != null) {
+				// SHARED failCount: any bad boundary in the room fast-paths the snackbar confirm.
+				maxFailCountAtBoundary = Math.max(maxFailCountAtBoundary, ...sharedFailCount);
 			}
 		}
 	});

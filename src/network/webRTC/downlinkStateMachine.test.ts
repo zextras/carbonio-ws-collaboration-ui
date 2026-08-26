@@ -35,27 +35,22 @@ describe('computeDegradedSummary', () => {
 
 	it('consumed==published -> no degradation (no false snackbar)', () => {
 		// rung=4 => substream=2, published=2
-		const s = computeDegradedSummary(
-			[{ userId: 'u1', suppressed: false, rung: 4, failCount: [0, 0, 0, 0, 0] }],
-			tier(2)
-		);
+		const s = computeDegradedSummary([{ userId: 'u1', suppressed: false, rung: 4 }], tier(2));
 		expect(s.aggregateDegraded).toBe(false);
 	});
 
 	it('published=0 consumed=0 (rung=0 substream=0) -> no degradation', () => {
-		const s = computeDegradedSummary(
-			[{ userId: 'u1', suppressed: false, rung: 0, failCount: [0, 0, 0, 0, 0] }],
-			tier(0)
-		);
+		const s = computeDegradedSummary([{ userId: 'u1', suppressed: false, rung: 0 }], tier(0));
 		expect(s.aggregateDegraded).toBe(false);
 	});
 
-	it('consumed(substream=1) < published(2) -> degraded, failCount propagated', () => {
-		const failCount = [0, 0, 2, 0, 0];
-		// rung=2 => substream=1
+	it('consumed(substream=1) < published(2) -> degraded, sharedFailCount propagated', () => {
+		// rung=2 => substream=1; shared failCount has max=2 at boundary 2
+		const sharedFailCount = [0, 0, 2, 0, 0];
 		const s = computeDegradedSummary(
-			[{ userId: 'u1', suppressed: false, rung: 2, failCount }],
-			tier(2)
+			[{ userId: 'u1', suppressed: false, rung: 2 }],
+			tier(2),
+			sharedFailCount
 		);
 		expect(s.aggregateDegraded).toBe(true);
 		expect(s.anyFeedSuppressed).toBe(false);
@@ -78,7 +73,7 @@ describe('computeDegradedSummary', () => {
 		// would degrade correctly, but the caller never passes screen feeds.
 		// Verify: passing only a non-screen (webcam) feed that is not degraded -> no snackbar.
 		const s = computeDegradedSummary(
-			[{ userId: 'u1', suppressed: false, rung: 5, failCount: [0, 0, 0, 0, 0] }],
+			[{ userId: 'u1', suppressed: false, rung: 5 }],
 			tier(2) // rung5 substream=2 == published=2 -> not degraded
 		);
 		expect(s.aggregateDegraded).toBe(false);

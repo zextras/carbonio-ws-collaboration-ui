@@ -34,6 +34,8 @@ const QUALITY_RANK: Record<ConnectionQuality, number> = {
 const OUTBOUND_RTP = 'outbound-rtp';
 const MEDIA_SOURCE = 'media-source';
 
+const FPS_LOG_DELTA = 5; // minimum |fps - lastLoggedFps| to emit a fps-only log (avoids 30↔31 spam)
+
 // 5-second sliding window for cumulative-delta signals.
 const WINDOW_MS = 5000;
 
@@ -142,6 +144,9 @@ export default class ConnectionQualityMonitor {
 	private lastVideoSender: RTCRtpSender | null = null;
 
 	private lastTopActiveRung = -2;
+
+	// null = no baseline yet; set on first fps reading or on tier-change log.
+	private lastLoggedFpsUplink: number | null = null;
 
 	constructor(
 		meetingId: string,
@@ -317,11 +322,13 @@ export default class ConnectionQualityMonitor {
 			this.videoOutRing = [];
 			this.videoOutPrevCum = null;
 			this.lastTopActiveRung = -2;
+			this.lastLoggedFpsUplink = null;
 			this.lastVideoSender = this.videoOut.rtpSender;
 		}
 
 		const cum: VideoOutCumulative = { framesEncoded: {}, qldBandwidth: 0, qldCpu: 0 };
 		const ridToIndex: Record<string, number> = { l: 0, m: 1, h: 2 };
+		const ridFps: Record<string, number> = {};
 
 		stats.forEach(
 			(
@@ -338,6 +345,7 @@ export default class ConnectionQualityMonitor {
 				if (r.framesEncoded != null) cum.framesEncoded[rid] = r.framesEncoded;
 				cum.qldBandwidth += r.qualityLimitationDurations?.bandwidth ?? 0;
 				cum.qldCpu += r.qualityLimitationDurations?.cpu ?? 0;
+				if (r.framesPerSecond != null) ridFps[rid] = r.framesPerSecond;
 			}
 		);
 
@@ -354,13 +362,27 @@ export default class ConnectionQualityMonitor {
 			}
 		});
 
-		// Diagnostic log on tier change (not part of the score).
+		// Published fps of the top active rid (for log context).
+		const indexToRid: Record<number, string> = { 0: 'l', 1: 'm', 2: 'h' };
+		const topFps = topActiveRung >= 0 ? (ridFps[indexToRid[topActiveRung]] ?? 0) : 0;
+
+		// Diagnostic log on tier change; fps-only log when fps moves >= FPS_LOG_DELTA.
 		if (topActiveRung !== this.lastTopActiveRung) {
 			const tierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
 			rtcDebug(
-				`UPLINK WEBCAM CHANGE: ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)}`
+				`UPLINK WEBCAM CHANGE: ${tierName(this.lastTopActiveRung)} -> ${tierName(topActiveRung)} @${Math.round(topFps)}fps`
 			);
 			this.lastTopActiveRung = topActiveRung;
+			this.lastLoggedFpsUplink = topFps;
+		} else if (topFps > 0) {
+			if (this.lastLoggedFpsUplink === null) {
+				this.lastLoggedFpsUplink = topFps; // establish baseline on first reading, no log
+			} else if (Math.abs(topFps - this.lastLoggedFpsUplink) >= FPS_LOG_DELTA) {
+				rtcDebug(
+					`UPLINK WEBCAM FPS: ${Math.round(this.lastLoggedFpsUplink)} -> ${Math.round(topFps)}fps`
+				);
+				this.lastLoggedFpsUplink = topFps;
+			}
 		}
 
 		// bandwidthLimited: Δbandwidth > Δcpu AND Δbandwidth > 0 over the 5 s window.

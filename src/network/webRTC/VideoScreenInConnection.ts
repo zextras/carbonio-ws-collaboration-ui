@@ -15,11 +15,13 @@ import {
 	tickDownlinkSm
 } from './downlinkStateMachine';
 import {
-	decideQuality,
-	initialQualityState,
+	CentralDownlinkState,
+	decideDownlink,
+	FPS_LOG_DELTA,
+	initialCentralState,
 	isReducedFramerate,
 	layersOf,
-	QualityState
+	TOP_RUNG
 } from './inboundQualityController';
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
@@ -31,9 +33,8 @@ import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMee
 import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
-// downlink debug-log helpers: substream index -> tier name, temporal target -> fps label
-const tierName = (substream: number): string => ['low', 'medium', 'high'][substream] ?? '?';
-const fpsLabel = (temporal: number | undefined): string => (temporal === 0 ? 'base' : 'full');
+// height label per substream index (resolution-before-framerate ladder).
+const heightName = (substream: number): string => ['144', '360', '720'][substream] ?? '?';
 
 type InboundVideoStats = {
 	lost: number;
@@ -42,10 +43,10 @@ type InboundVideoStats = {
 	jbEmitted: number;
 	totalFreezesDuration: number;
 	frameHeight: number;
+	framesPerSecond: number;
 };
 
 // Cumulative snapshot for the 5 s sliding-window used to compute per-feed vote inputs.
-// Mirrors the monitor's Timed<T> / winPush pattern; ts is wall-clock Date.now().
 type FeedCumSnap = { ts: number; lost: number; recv: number; totalFreezesDuration: number };
 
 const FEED_WINDOW_MS = 5000;
@@ -64,7 +65,8 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 		jbDelay: 0,
 		jbEmitted: 0,
 		totalFreezesDuration: 0,
-		frameHeight: 0
+		frameHeight: 0,
+		framesPerSecond: 0
 	};
 	report.forEach(
 		(
@@ -75,6 +77,7 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				jitterBufferEmittedCount?: number;
 				totalFreezesDuration?: number;
 				frameHeight?: number;
+				framesPerSecond?: number;
 				kind?: string;
 			}
 		) => {
@@ -85,10 +88,23 @@ const readInboundVideoStats = (report: RTCStatsReport): InboundVideoStats => {
 				s.jbEmitted = r.jitterBufferEmittedCount ?? 0;
 				s.totalFreezesDuration = r.totalFreezesDuration ?? 0;
 				s.frameHeight = r.frameHeight ?? 0;
+				s.framesPerSecond = r.framesPerSecond ?? 0;
 			}
 		}
 	);
 	return s;
+};
+
+// Per-feed result collected from getStats before the centralized decision is run.
+type FeedTickResult = {
+	key: string;
+	userId: string;
+	mid: string;
+	lossRate: number;
+	jbdRising: boolean;
+	fps: number;
+	masked: boolean;
+	enoughPackets: boolean;
 };
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
@@ -104,7 +120,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private screenReceiver: RTCRtpReceiver | null = null;
 
-	private qualityStates = new Map<string, QualityState>();
+	private centralState: CentralDownlinkState = initialCentralState();
 
 	private prevStats = new Map<
 		string,
@@ -127,6 +143,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	private maskUntilTick = new Map<string, number>();
 
 	private suppressedVideo = new Map<string, { userId: string; offAtTick: number }>();
+
+	// last fps logged per feed, for delta-gated fps-only logs
+	private lastFps = new Map<string, number>();
 
 	private evalTick = 0;
 
@@ -197,11 +216,12 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			if (type === STREAM_TYPE.VIDEO) {
 				this.videoReceivers.delete(key);
 				this.prevStats.delete(key);
-				this.qualityStates.delete(key);
+				this.centralState.feeds.delete(key);
 				this.suppressedVideo.delete(key);
 				this.maskUntilTick.delete(key);
 				this.feedQualityData.delete(key);
 				this.feedCumRing.delete(key);
+				this.lastFps.delete(key);
 			}
 			if (type === STREAM_TYPE.SCREEN) {
 				this.screenReceiver = null;
@@ -221,10 +241,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				};
 				if (type === STREAM_TYPE.VIDEO) {
 					this.videoReceivers.set(streamsKey, { receiver: ev.receiver, userId });
-					// a live track means this feed is no longer auto-suppressed (avoid the cooldown filter
-					// skipping a freshly re-subscribed receiver)
+					// Add the feed to the centralized state at the top rung (fresh subscribe).
+					this.centralState.feeds.set(streamsKey, { rung: TOP_RUNG, ticksSinceChange: 0 });
+					// A live track means this feed is no longer auto-suppressed.
 					this.suppressedVideo.delete(streamsKey);
-					// mask decisions while VP8 simulcast layers ramp up (~first ticks after (re)subscribe)
+					// Mask decisions while VP8 simulcast layers ramp up (~first ticks after (re)subscribe).
 					this.maskUntilTick.set(streamsKey, this.evalTick + 4);
 					if (this.qualityIntervalId == null) {
 						this.qualityIntervalId = setInterval(this.evaluateQuality, 2000);
@@ -240,91 +261,144 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	private evaluateQuality = (): Promise<void> => {
 		this.evalTick += 1;
+
+		const activeFeedEntries = Array.from(this.videoReceivers.entries()).filter(
+			([key]) => !!this.streamsMap[key]?.mid && !this.suppressedVideo.has(key)
+		);
+
+		// Step 1: collect stats for all active feeds concurrently.
 		return Promise.all(
-			Array.from(this.videoReceivers.entries())
-				.filter(([key]) => !!this.streamsMap[key]?.mid && !this.suppressedVideo.has(key))
-				.map(([key, { receiver, userId }]) => {
-					const mid = this.streamsMap[key]?.mid as string;
-					return receiver
-						.getStats()
-						.then((report) => {
-							const { lost, recv, jbDelay, jbEmitted, totalFreezesDuration, frameHeight } =
-								readInboundVideoStats(report);
-							const prev = this.prevStats.get(key) ?? {
-								lost: 0,
-								recv: 0,
-								jbDelay: 0,
-								jbEmitted: 0,
-								jbdAvg: 0,
-								totalFreezesDuration: 0
-							};
-							const dLost = Math.max(0, lost - prev.lost);
-							const dRecv = Math.max(0, recv - prev.recv);
-							const dJbDelay = Math.max(0, jbDelay - prev.jbDelay);
-							const dJbEmitted = Math.max(0, jbEmitted - prev.jbEmitted);
-							// per-frame jitter-buffer delay this tick (ms); its DIRECTION confirms congestion
-							// (rejects Wi-Fi/cellular random loss) — no magnitude threshold on purpose.
-							const jbdAvg = dJbEmitted > 0 ? (dJbDelay / dJbEmitted) * 1000 : prev.jbdAvg;
-							const jbdRising = dJbEmitted > 0 && jbdAvg > prev.jbdAvg;
-							// windowed inbound loss rate and freeze fraction for the connection-quality vote.
-							// Uses a 5 s ring (same WINDOW_MS semantics as the monitor) so both signals
-							// smooth over the same horizon. The per-2 s tick lossRate below is kept for
-							// the substream controller — that consumer has its own decision cadence.
-							const now = Date.now();
-							const ring = this.feedCumRing.get(key) ?? [];
-							feedWinPush(ring, { ts: now, lost, recv, totalFreezesDuration });
-							this.feedCumRing.set(key, ring);
-							const base = ring[0];
-							const dLostW = Math.max(0, lost - base.lost);
-							const dRecvW = Math.max(0, recv - base.recv);
-							this.feedQualityData.set(key, {
-								inboundLossRate: dLostW + dRecvW > 0 ? dLostW / (dLostW + dRecvW) : 0,
-								frameHeight
-							});
-							this.prevStats.set(key, {
-								lost,
-								recv,
-								jbDelay,
-								jbEmitted,
-								jbdAvg,
-								totalFreezesDuration
-							});
+			activeFeedEntries.map(([key, { receiver, userId }]) => {
+				const mid = this.streamsMap[key]?.mid as string;
+				return receiver
+					.getStats()
+					.then((report) => {
+						const {
+							lost,
+							recv,
+							jbDelay,
+							jbEmitted,
+							totalFreezesDuration,
+							frameHeight,
+							framesPerSecond
+						} = readInboundVideoStats(report);
+						const prev = this.prevStats.get(key) ?? {
+							lost: 0,
+							recv: 0,
+							jbDelay: 0,
+							jbEmitted: 0,
+							jbdAvg: 0,
+							totalFreezesDuration: 0
+						};
+						const dLost = Math.max(0, lost - prev.lost);
+						const dRecv = Math.max(0, recv - prev.recv);
+						const dJbDelay = Math.max(0, jbDelay - prev.jbDelay);
+						const dJbEmitted = Math.max(0, jbEmitted - prev.jbEmitted);
+						// per-frame jitter-buffer delay this tick (ms); its DIRECTION confirms congestion.
+						const jbdAvg = dJbEmitted > 0 ? (dJbDelay / dJbEmitted) * 1000 : prev.jbdAvg;
+						const jbdRising = dJbEmitted > 0 && jbdAvg > prev.jbdAvg;
 
-							// too few packets this tick => not statistically meaningful; keep baselines, skip
-							if (dLost + dRecv < 20) return;
-							// settle mask right after a layer switch / (re)subscribe (keyframe + VP8 ramp)
-							if ((this.maskUntilTick.get(key) ?? 0) > this.evalTick) return;
+						// windowed inbound loss rate and freeze fraction for the connection-quality vote.
+						const now = Date.now();
+						const ring = this.feedCumRing.get(key) ?? [];
+						feedWinPush(ring, { ts: now, lost, recv, totalFreezesDuration });
+						this.feedCumRing.set(key, ring);
+						const base = ring[0];
+						const dLostW = Math.max(0, lost - base.lost);
+						const dRecvW = Math.max(0, recv - base.recv);
+						this.feedQualityData.set(key, {
+							inboundLossRate: dLostW + dRecvW > 0 ? dLostW / (dLostW + dRecvW) : 0,
+							frameHeight
+						});
+						this.prevStats.set(key, {
+							lost,
+							recv,
+							jbDelay,
+							jbEmitted,
+							jbdAvg,
+							totalFreezesDuration
+						});
 
-							const lossRate = dLost / (dLost + dRecv);
-							const prevState = this.qualityStates.get(key) ?? initialQualityState();
-							const next = decideQuality(prevState, { lossRate, jbdRising });
-							this.qualityStates.set(key, next);
-							if (next.changeSubstream !== undefined && mid) {
-								requestVideoQuality(
-									this.meetingId,
-									userId,
-									mid,
-									next.changeSubstream,
-									next.changeTemporal
-								).catch(() => {});
-								// A RESOLUTION switch changes the SSRC/substream -> needs a keyframe (brief freeze),
-								// and the same-SSRC cumulative jitterBufferDelay spans both layers for one tick; mask
-								// 2 ticks for the keyframe + a clean jbdAvg baseline. A FRAMERATE step (temporal-layer
-								// drop) is freeze-free and same-SSRC, so it needs NO mask — keep evaluating.
-								if (next.substreamChanged) this.maskUntilTick.set(key, this.evalTick + 2);
-								const dim = next.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
-								const from = layersOf(prevState.rung);
-								rtcDebug(
-									`DOWNLINK WEBCAM ${this.who(userId)} [${dim}]: showing ${tierName(from.substream)}@${fpsLabel(from.temporal)} -> ${tierName(next.changeSubstream)}@${fpsLabel(next.changeTemporal)}`
-								);
-							}
-							if (next.off) {
-								this.suppressFeed(key, userId);
-							}
-						})
-						.catch(() => {});
-				})
-		).then(() => {
+						const masked = (this.maskUntilTick.get(key) ?? 0) > this.evalTick;
+						const enoughPackets = dLost + dRecv >= 20;
+						const lossRate = dLost + dRecv > 0 ? dLost / (dLost + dRecv) : 0;
+
+						return {
+							key,
+							userId,
+							mid,
+							lossRate,
+							jbdRising,
+							fps: framesPerSecond,
+							masked,
+							enoughPackets
+						} satisfies FeedTickResult;
+					})
+					.catch((): FeedTickResult | null => null);
+			})
+		).then((rawResults) => {
+			const feedResults = rawResults.filter((r): r is FeedTickResult => r !== null);
+
+			// Step 2: build the samples map from eligible (unmasked + enough packets) feeds.
+			const samplesByFeed = new Map<string, { lossRate: number; jbdRising: boolean }>(
+				feedResults
+					.filter((r) => !r.masked && r.enoughPackets)
+					.map((r): [string, { lossRate: number; jbdRising: boolean }] => [
+						r.key,
+						{ lossRate: r.lossRate, jbdRising: r.jbdRising }
+					])
+			);
+
+			// Step 3: run the centralized decider — AT MOST one change per tick.
+			const { state: nextState, change } = decideDownlink(this.centralState, samplesByFeed);
+			this.centralState = nextState;
+
+			// Step 4: apply the single change (if any).
+			if (change) {
+				if (change.off) {
+					const r = feedResults.find((fr) => fr.key === change.key);
+					if (r) this.suppressFeed(change.key, r.userId);
+				} else if (change.changeSubstream !== undefined) {
+					const r = feedResults.find((fr) => fr.key === change.key);
+					if (r) {
+						requestVideoQuality(
+							this.meetingId,
+							r.userId,
+							r.mid,
+							change.changeSubstream!,
+							change.changeTemporal
+						).catch(() => {});
+						// A RESOLUTION switch changes the SSRC -> needs a keyframe; mask 2 ticks.
+						// A FRAMERATE step (temporal-layer only) is freeze-free: no mask needed.
+						if (change.substreamChanged) this.maskUntilTick.set(change.key, this.evalTick + 2);
+						this.lastFps.set(change.key, r.fps);
+						const dim = change.substreamChanged ? 'RESOLUTION' : 'FRAMERATE';
+						const fromH = heightName(layersOf(change.fromRung).substream);
+						const toH = heightName(change.changeSubstream!);
+						rtcDebug(
+							`DOWNLINK WEBCAM ${this.who(r.userId)} [${dim}]: ${fromH}@${Math.round(r.fps)}fps -> ${toH}@${Math.round(r.fps)}fps`
+						);
+					}
+				}
+			}
+
+			// Step 5: delta-gated fps-only logs for feeds that did NOT have a rung change.
+			const changedKey = change?.key;
+			feedResults
+				.filter((r) => r.key !== changedKey && r.fps > 0)
+				.forEach((r) => {
+					const last = this.lastFps.get(r.key);
+					if (last === undefined) {
+						this.lastFps.set(r.key, r.fps); // first baseline, no log
+					} else if (Math.abs(r.fps - last) >= FPS_LOG_DELTA) {
+						rtcDebug(
+							`DOWNLINK WEBCAM ${this.who(r.userId)} FPS: ${Math.round(last)} -> ${Math.round(r.fps)}fps`
+						);
+						this.lastFps.set(r.key, r.fps);
+					}
+				});
+
+			// Re-probe suppressed feeds after a cooldown.
 			Array.from(this.suppressedVideo.entries()).forEach(([key, { userId, offAtTick }]) => {
 				if (this.evalTick - offAtTick >= 10) {
 					useStore
@@ -332,10 +406,12 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 						.setAddSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
 					useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
 					this.suppressedVideo.delete(key);
-					this.qualityStates.set(key, initialQualityState(0));
+					// Re-probe from the bottom rung (the link failed at rung 0 before).
+					this.centralState.feeds.set(key, { rung: 0, ticksSinceChange: 0 });
 					rtcDebug(`DOWNLINK ${this.who(userId)} AUTO-ON (re-probe)`);
 				}
 			});
+
 			this.evaluateDownlinkSnackbar(Date.now());
 		});
 	};
@@ -350,11 +426,12 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, true);
 		this.suppressedVideo.set(key, { userId, offAtTick: this.evalTick });
 		this.videoReceivers.delete(key);
-		this.qualityStates.delete(key);
+		this.centralState.feeds.delete(key);
 		this.prevStats.delete(key);
 		this.maskUntilTick.delete(key);
 		this.feedQualityData.delete(key);
 		this.feedCumRing.delete(key);
+		this.lastFps.delete(key);
 		rtcDebug(`DOWNLINK ${this.who(userId)} AUTO-OFF (below lowest)`);
 	}
 
@@ -367,12 +444,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		Array.from(this.videoReceivers.entries())
 			.filter(([key]) => !!this.streamsMap[key]?.mid)
 			.forEach(([key, { userId }]) => {
-				const state = this.qualityStates.get(key);
+				const feedState = this.centralState.feeds.get(key);
 				feeds.push({
 					userId,
 					suppressed: false,
-					rung: state?.rung,
-					failCount: state?.failCount
+					rung: feedState?.rung
 				});
 			});
 
@@ -382,7 +458,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		const { aggregateDegraded, anyFeedSuppressed, maxFailCountAtBoundary } = computeDegradedSummary(
 			feeds,
-			(userId) => store.activeMeeting?.connectionQuality[userId]?.maxTier
+			(userId) => store.activeMeeting?.connectionQuality[userId]?.maxTier,
+			this.centralState.failCount
 		);
 
 		const { state: nextState, flippedTo } = tickDownlinkSm(this.downlinkSmState, {
@@ -428,8 +505,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				const qd = this.feedQualityData.get(key) ?? { inboundLossRate: 0, frameHeight: 0 };
 				// framerate (temporal) is not observable from frameHeight, so the vote reads the controller's
 				// current temporal target for this feed: reduced == our controller forced the framerate down.
-				const state = this.qualityStates.get(key);
-				const temporalReduced = state != null ? isReducedFramerate(state.rung) : false;
+				const feedState = this.centralState.feeds.get(key);
+				const temporalReduced = feedState != null ? isReducedFramerate(feedState.rung) : false;
 				feeds.push({ userId: entry.userId, ...qd, temporalReduced });
 			}
 		});
@@ -450,10 +527,11 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			this.qualityIntervalId = null;
 		}
 		this.videoReceivers.clear();
-		this.qualityStates.clear();
+		this.centralState = initialCentralState();
 		this.prevStats.clear();
 		this.suppressedVideo.clear();
 		this.maskUntilTick.clear();
+		this.lastFps.clear();
 		this.downlinkSmState = initialDownlinkSmState();
 		this.screenReceiver = null;
 		delete this.subscriptionManager;
