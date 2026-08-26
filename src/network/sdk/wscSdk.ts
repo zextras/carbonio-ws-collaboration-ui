@@ -51,7 +51,9 @@ const bridge: StoreBridge = {
 		useStore.getState().setPinnedMessage(roomId, message as TextMessage),
 	removePinnedMessage: (roomId): void => useStore.getState().removePinnedMessage(roomId),
 	setIsWriting: (roomId, userId, writing): void =>
-		useStore.getState().setIsWriting(roomId, userId, writing)
+		useStore.getState().setIsWriting(roomId, userId, writing),
+	setSearchResults: (roomId, results: Array<StoreTextMessage>): void =>
+		useStore.getState().setSearchResults(roomId, results as Array<TextMessage>)
 };
 
 const http = createHttpClient({

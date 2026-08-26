@@ -129,6 +129,44 @@ function sendTextViaSdk(
 		});
 }
 
+/**
+ * v2 replacement of the MAM `to-id` form behind the search-result jump:
+ * backward timeline pages from the oldest loaded message until the target
+ * enters the store. Like the v1 backfill the history stays CONTIGUOUS —
+ * the timeline `around` cursor would open a gap the backward pagination
+ * could never heal (plan §5.17). Bounded: fully-loaded ends the walk (target
+ * missing or behind the cleared bound), and a defensive stall guard breaks
+ * it if a page moves nothing.
+ */
+async function loadHistoryToMessageViaSdk(roomId: string, stanzaId: string): Promise<void> {
+	// v2 invariant id === stanzaId: the same by-id lookup the reply hydration
+	// uses matches the panel's "already stored" selector on confirmed messages
+	const isTargetLoaded = (): boolean => !!findRepliedMessage(roomId, stanzaId);
+	const room = useStore.getState().rooms[roomId];
+	if (!room) {
+		return;
+	}
+	const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
+	const notBefore = lowerBound ? dateToTimestamp(lowerBound) : undefined;
+	let previousOldestId: string | undefined;
+	while (!isTargetLoaded()) {
+		if (useStore.getState().activeConversations[roomId]?.isHistoryFullyLoaded) {
+			return;
+		}
+		const oldest = useStore.getState().chatsRegistry[roomId]?.messages[0];
+		if (oldest && oldest.id === previousOldestId) {
+			console.warn('chatClient.requestMessageResultHistoryToId: pagination stalled', roomId);
+			return;
+		}
+		previousOldestId = oldest?.id;
+		// eslint-disable-next-line no-await-in-loop
+		await wscSdk.fetchTimeline(roomId, {
+			...(oldest ? { before: oldest.date, beforeId: oldest.id } : {}),
+			...(notBefore ? { notBefore } : {})
+		});
+	}
+}
+
 export const chatClient: ChatClient = {
 	get features(): Array<string> {
 		if (isWscPure()) {
@@ -288,15 +326,24 @@ export const chatClient: ChatClient = {
 	},
 	fullTextSearch: (roomId, text) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('fullTextSearch');
-			return Promise.resolve();
+			// One shot like v1 (the panel has no load-more: hasMore is dropped,
+			// results beyond the page stay unreachable — plan §5.17). The v1 MAM
+			// `start` bound (clearedAt ?? createdAt) travels as notBefore: the
+			// spec has no server-side lower bound, the SDK filters client-side.
+			// Optional chaining is an improvement: v1 threw on unknown rooms.
+			const room = useStore.getState().rooms[roomId];
+			const lowerBound = room?.userSettings?.clearedAt ?? room?.createdAt;
+			return wscSdk
+				.searchMessages(roomId, text, {
+					...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
+				})
+				.then(() => undefined);
 		}
 		return xmppClient.fullTextSearch(roomId, text);
 	},
 	requestMessageResultHistoryToId: (roomId, stanzaId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('requestMessageResultHistoryToId');
-			return Promise.resolve();
+			return loadHistoryToMessageViaSdk(roomId, stanzaId);
 		}
 		return xmppClient.requestMessageResultHistoryToId(roomId, stanzaId);
 	},
