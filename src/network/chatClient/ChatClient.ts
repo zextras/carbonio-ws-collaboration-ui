@@ -8,9 +8,11 @@ import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
+import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
@@ -319,7 +321,12 @@ export const chatClient: ChatClient = {
 	},
 	requestFullHistory: (...args) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('requestFullHistory');
+			// The export is a server-streamed download (GET …/messages/export,
+			// clearedAt honored server-side): the browser owns progress and
+			// completion, so the ChatExporter MAM loop dies and the `from`
+			// pagination cursor has no v2 meaning.
+			const [roomId] = args;
+			downloadChatExport(roomId, getRoomNameSelector(useStore.getState(), roomId));
 			return;
 		}
 		xmppClient.requestFullHistory(...args);

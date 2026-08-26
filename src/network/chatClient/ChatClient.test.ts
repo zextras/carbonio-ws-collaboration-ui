@@ -19,12 +19,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 import { chatClient, isWscPure } from './ChatClient';
+import { downloadChatExport } from './chatExportDownload';
 import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
 import { xmppClient } from '../xmpp/XMPPClient';
+
+// The DOM download side is unit-tested in chatExportDownload.test.ts
+vi.mock('./chatExportDownload');
 
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const PIN_FEATURE = 'zextras:iq:pin';
@@ -921,5 +925,18 @@ describe('chatClient façade', () => {
 			'chatClient.requestMessageResultHistoryToId: pagination stalled',
 			'room-js'
 		);
+	});
+
+	it('exports the chat as a server-streamed download on a WSC-pure backend', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-exp', name: 'Weekly sync' })]);
+		const xmppSpy = vi.spyOn(xmppClient, 'requestFullHistory').mockImplementation(() => undefined);
+
+		chatClient.requestFullHistory('room-exp');
+
+		// The chat name resolves store-side (the same selector the v1 exporter
+		// used for the blob filename); the MAM accumulation loop never starts
+		expect(downloadChatExport).toHaveBeenCalledWith('room-exp', 'Weekly sync');
+		expect(xmppSpy).not.toHaveBeenCalled();
 	});
 });
