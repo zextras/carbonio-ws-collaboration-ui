@@ -432,6 +432,58 @@ describe('Rooms API', () => {
 		});
 	});
 
+	describe('addRoomAttachment on a WSC-pure backend', () => {
+		afterEach(() => {
+			// The zustand store survives across tests: leave the version un-negotiated
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('sends tempId next to the legacy messageId, both the same client UUID', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption' }, signal);
+
+			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.PUT,
+				testFile,
+				signal,
+				expect.objectContaining({ description: 'a caption' })
+			);
+			const optional = mockSendFileFetchAPI.mock.calls[0][4] as {
+				messageId?: string;
+				tempId?: string;
+			};
+			expect(optional.tempId).toMatch(UUID_REGEX);
+			// The self-echo correlation key and the legacy stanza-id handle are the
+			// same client UUID: the backend accepts both harmlessly (spike parity)
+			expect(optional.messageId).toBe(optional.tempId);
+		});
+
+		test('the optimistic placeholder id IS the tempId, so the self-echo can promote it', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
+			const testFile = new File(['x'], 'photo.png', { type: 'image/png' });
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption', area: '2x2' });
+
+			const optional = mockSendFileFetchAPI.mock.calls[0][4] as { tempId?: string };
+			const messages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
+			const placeholder = messages.find((message) => message.id === optional.tempId);
+			expect(placeholder).toMatchObject({
+				attachment: {
+					id: 'placeholderFileId',
+					name: 'photo.png',
+					mimeType: 'image/png',
+					area: '2x2'
+				}
+			});
+		});
+	});
+
 	describe('addRoomAttachment dispatches quota changed event', () => {
 		test('dispatches event on successful upload (legacy path)', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');

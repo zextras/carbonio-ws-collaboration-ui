@@ -214,7 +214,13 @@ export const addRoomAttachment = (
 				description: optionalFields.description,
 				replyId: optionalFields.replyId,
 				area: optionalFields.area,
-				messageId: uuid
+				// v1 correlation: messageId becomes the id of the stanza the backend
+				// sends. On v2 ids are server-generated and the correlation key is
+				// tempId, carried back by the MessageReceived self-echo — the ONLY
+				// confirmation (the 201 answers with the file id, not the message);
+				// messageId is still sent, the backend accepts both harmlessly
+				messageId: uuid,
+				...(isWscPure() ? { tempId: uuid } : {})
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.0 is officially dropped.

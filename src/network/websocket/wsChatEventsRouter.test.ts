@@ -22,6 +22,9 @@ import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const AUG_FIRST_EARLY_MORNING = '2026-08-01T09:00:00Z';
 const replyText = 'ti rispondo';
+const photoName = 'photo.png';
+const pngMime = 'image/png';
+const cloneFileId = 'file-clone';
 
 function presenceEvent(userId: string, online: boolean): WsPresenceChangedEvent {
 	return { type: WsEventType.PRESENCE_CHANGED, userId, online };
@@ -285,6 +288,136 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 	});
 });
 
+describe('wsChatEventsRouter - MessageReceived attachments', () => {
+	const galleryFilter = { sortBy: 'created_at', order: 'desc' } as const;
+	const wireAttachment = { id: 'file-1', name: photoName, mimeType: pngMime, size: 2048 };
+
+	function initGallery(roomId: string): void {
+		// The v1 prepend only lands on initialized buckets (gallery opened once)
+		useStore.getState().appendMediaGalleryPage(roomId, galleryFilter, [], 0, undefined);
+	}
+
+	function galleryIds(roomId: string): Array<string> {
+		const state = useStore.getState().mediaGallery[roomId];
+		return Object.values(state?.buckets ?? {}).flatMap((bucket) =>
+			bucket.attachments.map((attachment) => attachment.id)
+		);
+	}
+
+	it("lands another sender's attachment message in the store and prepends it to the gallery", () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		initGallery('room-att');
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-att-1',
+			roomId: 'room-att',
+			senderId: 'user-2',
+			text: 'a caption',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			attachments: [wireAttachment]
+		});
+
+		const registry = useStore.getState().chatsRegistry['room-att'];
+		expect(registry?.messages[0]).toMatchObject({ id: 'msg-att-1', attachment: wireAttachment });
+		expect(registry?.unread).toBe(1);
+		// v1 gallery parity: userId/createdAt/messageId come from the parent message
+		const state = useStore.getState().mediaGallery['room-att'];
+		expect(Object.values(state?.buckets ?? {})[0]?.attachments[0]).toMatchObject({
+			id: 'file-1',
+			userId: 'user-2',
+			messageId: 'msg-att-1'
+		});
+	});
+
+	it('accepts the flat fallback shape of the REST Message schema', () => {
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-att-flat',
+			roomId: 'room-att-flat',
+			senderId: 'user-2',
+			text: '',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			attachmentId: 'file-flat',
+			attachmentName: 'doc.pdf',
+			attachmentMime: 'application/pdf',
+			attachmentSize: 99
+		});
+
+		expect(useStore.getState().chatsRegistry['room-att-flat']?.messages[0]).toMatchObject({
+			attachment: { id: 'file-flat', name: 'doc.pdf', mimeType: 'application/pdf', size: 99 }
+		});
+	});
+
+	it('promotes the upload placeholder from the self-echo, gallery included, unread untouched', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		initGallery('room-up');
+		useStore.getState().setPlaceholderMessage({
+			roomId: 'room-up',
+			id: 'tmp-up',
+			text: 'a caption',
+			attachment: { id: 'placeholderFileId', name: photoName, mimeType: pngMime, size: 2048 }
+		});
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-up-1',
+			roomId: 'room-up',
+			senderId: 'me',
+			text: 'a caption',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			tempId: 'tmp-up',
+			attachments: [wireAttachment]
+		});
+
+		const registry = useStore.getState().chatsRegistry['room-up'];
+		// The echo metadata wins: real file id, not the placeholder stub
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-up-1']);
+		expect(registry?.messages[0]).toMatchObject({ attachment: wireAttachment });
+		expect(registry?.unread ?? 0).toBe(0);
+		expect(galleryIds('room-up')).toEqual(['file-1']);
+	});
+
+	it('keeps the placeholder attachment when the self-echo carries no metadata', () => {
+		// The upload 201 answers with the file id, not the message: the echo is
+		// the only confirmation. Without metadata the bubble must keep rendering
+		// the uploaded file (name/mime/size for the icon; the id heals on refetch)
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		initGallery('room-nf');
+		useStore.getState().setPlaceholderMessage({
+			roomId: 'room-nf',
+			id: 'tmp-nf',
+			text: '',
+			attachment: {
+				id: 'placeholderFileId',
+				name: photoName,
+				mimeType: pngMime,
+				size: 2048,
+				area: '640x480'
+			}
+		});
+
+		wsChatEventsRouter({
+			type: WsEventType.MESSAGE_RECEIVED,
+			messageId: 'msg-nf-1',
+			roomId: 'room-nf',
+			senderId: 'me',
+			text: '',
+			timestamp: AUG_FIRST_LATE_MORNING,
+			tempId: 'tmp-nf'
+		});
+
+		const registry = useStore.getState().chatsRegistry['room-nf'];
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-nf-1']);
+		expect(registry?.messages[0]).toMatchObject({
+			attachment: expect.objectContaining({ name: photoName, area: '640x480' })
+		});
+		// The placeholder stub has no real file id: it must stay out of the
+		// gallery (a fake entry would never dedup against the refetched one)
+		expect(galleryIds('room-nf')).toEqual([]);
+	});
+});
+
 describe('wsChatEventsRouter - MessageEdited', () => {
 	const editedText = 'testo corretto';
 	const originalText = 'testo originale';
@@ -397,7 +530,7 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 			text: 'da cancellare',
 			date: Date.parse(AUG_FIRST_LATE_MORNING),
 			replyTo: 'msg-quoted',
-			attachment: { id: 'att-1', name: 'foto.png', mimeType: 'image/png', size: 10 }
+			attachment: { id: 'att-1', name: 'foto.png', mimeType: pngMime, size: 10 }
 		});
 		useStore.getState().updateHistory('room-dl', [target]);
 		useStore.getState().setLastMessage('room-dl', target);
@@ -590,6 +723,34 @@ describe('wsChatEventsRouter - MessageForwarded', () => {
 		const registry = useStore.getState().chatsRegistry['room-fw'];
 		expect(registry?.messages[0]).toMatchObject({ id: 'msg-fw', from: 'me' });
 		expect(registry?.unread ?? 0).toBe(0);
+	});
+
+	it('delivers the server-side attachment clone to the bubble and the gallery', () => {
+		// v1 landed forwards through the plain message handler, gallery included
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore
+			.getState()
+			.appendMediaGalleryPage('room-fw', { sortBy: 'created_at', order: 'desc' }, [], 0, undefined);
+
+		wsChatEventsRouter({
+			...forwardedEvent('user-2'),
+			attachmentId: cloneFileId,
+			attachmentName: photoName,
+			attachmentMime: pngMime,
+			attachmentSize: 2048
+		} as Parameters<typeof wsChatEventsRouter>[0]);
+
+		const registry = useStore.getState().chatsRegistry['room-fw'];
+		expect(registry?.messages[0]).toMatchObject({
+			forwarded: expect.objectContaining({ from: 'user-9' }),
+			attachment: { id: cloneFileId, name: photoName, mimeType: pngMime, size: 2048 }
+		});
+		const galleryState = useStore.getState().mediaGallery['room-fw'];
+		expect(Object.values(galleryState?.buckets ?? {})[0]?.attachments[0]).toMatchObject({
+			id: cloneFileId,
+			userId: 'user-2',
+			messageId: 'msg-fw'
+		});
 	});
 
 	it('keeps the forwarded badge when a forward is delivered as MessageReceived (dual-path)', () => {

@@ -21,6 +21,13 @@ export type AdditionalHeaders = {
 	messageId?: string;
 	replyId?: string;
 	area?: string;
+	/**
+	 * v2 (WSC-pure) only: client-generated correlation key for the optimistic
+	 * placeholder — the MessageReceived self-echo carries it back. Sent both
+	 * as a form field (the spike's contract) and as the X-Temp-Id header
+	 * (the one api.yaml documents, on the binary variant).
+	 */
+	tempId?: string;
 };
 
 export type AttachmentsSortBy = 'created_at' | 'size';

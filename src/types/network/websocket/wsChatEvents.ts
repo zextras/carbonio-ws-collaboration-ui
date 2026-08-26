@@ -38,6 +38,19 @@ export type WsReadUpdatedEvent = {
 	messageId: string;
 };
 
+/**
+ * Attachment metadata as the events carry it — dual-shape: the `attachments`
+ * array (the spike's receive path, first entry wins) with the flat fields of
+ * the REST `Message` schema as fallback. No `area` on the wire (the image
+ * layout hint is upload-only).
+ */
+export type WsEventAttachment = {
+	id: string;
+	name: string;
+	mimeType: string;
+	size: number;
+};
+
 export type WsMessageReceivedEvent = {
 	type: WsEventType.MESSAGE_RECEIVED;
 	messageId: string;
@@ -51,6 +64,11 @@ export type WsMessageReceivedEvent = {
 	/** Defensive dual-path: the original author, when this delivery is actually a forward. */
 	forwardedFrom?: string;
 	forwardedAt?: string;
+	attachments?: Array<WsEventAttachment>;
+	attachmentId?: string;
+	attachmentName?: string;
+	attachmentMime?: string;
+	attachmentSize?: number;
 };
 
 export type WsMessageForwardedEvent = {
@@ -65,6 +83,12 @@ export type WsMessageForwardedEvent = {
 	timestamp?: string;
 	forwardedFrom?: string;
 	forwardedAt?: string;
+	/** A forwarded attachment is cloned server-side: this echo delivers the clone. */
+	attachments?: Array<WsEventAttachment>;
+	attachmentId?: string;
+	attachmentName?: string;
+	attachmentMime?: string;
+	attachmentSize?: number;
 };
 
 export type WsMessageEditedEvent = {

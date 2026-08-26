@@ -4,18 +4,25 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+import type {
+	StoreAttachment,
+	StoreMessage,
+	StoreTextMessage
+} from '@zextras/carbonio-ws-collaboration-sdk';
 
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import type {
+	WsMessageForwardedEvent,
 	WsMessagePinnedEvent,
+	WsMessageReceivedEvent,
 	WsMessageUnpinnedEvent
 } from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
 import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
@@ -37,6 +44,115 @@ function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: st
 	useStore.getState().incrementUnreadCount(roomId, 1);
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 	displayMessageBrowserNotification(message as TextMessage);
+}
+
+/**
+ * The attachment metadata fields shared by MESSAGE_RECEIVED and
+ * MESSAGE_FORWARDED, forwarded to the SDK in their wire dual-shape (the SDK
+ * resolves array-first with the flat fields as fallback).
+ */
+function eventAttachmentFields(
+	event: WsMessageReceivedEvent | WsMessageForwardedEvent
+): Partial<
+	Pick<
+		WsMessageReceivedEvent,
+		'attachments' | 'attachmentId' | 'attachmentName' | 'attachmentMime' | 'attachmentSize'
+	>
+> {
+	return {
+		...(event.attachments ? { attachments: event.attachments } : {}),
+		...(event.attachmentId ? { attachmentId: event.attachmentId } : {}),
+		...(event.attachmentName ? { attachmentName: event.attachmentName } : {}),
+		...(event.attachmentMime ? { attachmentMime: event.attachmentMime } : {}),
+		...(event.attachmentSize !== undefined ? { attachmentSize: event.attachmentSize } : {})
+	};
+}
+
+/**
+ * On the self-echo of an attachment upload the optimistic placeholder (its
+ * id IS the tempId) may still hold the only attachment metadata around: the
+ * SDK renders it when the echo carries none (event metadata wins). Same
+ * by-id lookup the reply hydration uses.
+ */
+function findPlaceholderAttachment(event: WsMessageReceivedEvent): StoreAttachment | undefined {
+	if (!event.tempId) {
+		return undefined;
+	}
+	return findRepliedMessage(event.roomId, event.tempId)?.attachment;
+}
+
+/**
+ * v1 prepended every text message carrying an attachment to the media
+ * gallery buckets — own echo included, the effect sat before the me/others
+ * split. Forwards went through the same v1 handler: a forwarded attachment
+ * is a server-side clone and this is how it reaches the gallery.
+ */
+function prependGalleryAttachment(message: StoreMessage): void {
+	if (message.type !== 'text') {
+		return;
+	}
+	const galleryAttachment = messageToGalleryAttachment(message as TextMessage);
+	if (galleryAttachment) {
+		useStore.getState().prependMediaGalleryAttachment(message.roomId, galleryAttachment);
+	}
+}
+
+/**
+ * The SDK performs the store writes shared by every sender (own echo
+ * included: it promotes the placeholder through the tempId). On a reply, the
+ * quoted message is resolved here — the event carries no preview and the SDK
+ * never reads the store (v1 hydrated from the store too; its not-loaded
+ * fallback, an archive query by id, has no v2 endpoint: the bubble just
+ * renders without the reply section).
+ */
+function routeMessageReceived(event: WsMessageReceivedEvent): void {
+	const wireAttachment = eventAttachmentFields(event);
+	const message = wscSdk.handleMessageReceived(
+		{
+			messageId: event.messageId,
+			roomId: event.roomId,
+			senderId: event.senderId,
+			text: event.text,
+			timestamp: event.timestamp,
+			...(event.replyToId ? { replyToId: event.replyToId } : {}),
+			...(event.tempId ? { tempId: event.tempId } : {}),
+			...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
+			...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {}),
+			...wireAttachment
+		},
+		findRepliedMessage(event.roomId, event.replyToId) as StoreTextMessage | undefined,
+		findPlaceholderAttachment(event)
+	);
+	// Gallery only from wire metadata: the placeholder-stub fallback has no
+	// real file id — a fake entry would never dedup against the refetched one
+	// and its download would be broken (the spike kept it out the same way)
+	if (wireAttachment.attachments?.length || wireAttachment.attachmentId) {
+		prependGalleryAttachment(message);
+	}
+	// Me/others split like the v1 handler
+	notifyOthersMessage(message, event.senderId, event.roomId);
+}
+
+/**
+ * To the receiving room a forward IS a new message (v1 landed it through the
+ * plain message handler): same me/others effects and gallery prepend as
+ * MESSAGE_RECEIVED. The forwarder's own echo is the only confirmation — the
+ * 201 carries no text and nothing was optimistic.
+ */
+function routeMessageForwarded(event: WsMessageForwardedEvent): void {
+	const message = wscSdk.handleMessageForwarded({
+		messageId: event.messageId,
+		roomId: event.roomId,
+		originalRoomId: event.originalRoomId,
+		senderId: event.senderId,
+		text: event.text,
+		...(event.timestamp ? { timestamp: event.timestamp } : {}),
+		...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
+		...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {}),
+		...eventAttachmentFields(event)
+	});
+	prependGalleryAttachment(message);
+	notifyOthersMessage(message, event.senderId, event.roomId);
 }
 
 /**
@@ -158,46 +274,11 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			return;
 		}
 		case WsEventType.MESSAGE_RECEIVED: {
-			// The SDK performs the store writes shared by every sender (own echo
-			// included: it promotes the placeholder through the tempId). On a
-			// reply, the quoted message is resolved here — the event carries no
-			// preview and the SDK never reads the store (v1 hydrated from the
-			// store too; its not-loaded fallback, an archive query by id, has no
-			// v2 endpoint: the bubble just renders without the reply section)
-			const message = wscSdk.handleMessageReceived(
-				{
-					messageId: event.messageId,
-					roomId: event.roomId,
-					senderId: event.senderId,
-					text: event.text,
-					timestamp: event.timestamp,
-					...(event.replyToId ? { replyToId: event.replyToId } : {}),
-					...(event.tempId ? { tempId: event.tempId } : {}),
-					...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
-					...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {})
-				},
-				findRepliedMessage(event.roomId, event.replyToId) as StoreTextMessage | undefined
-			);
-			// Me/others split like the v1 handler
-			notifyOthersMessage(message, event.senderId, event.roomId);
+			routeMessageReceived(event);
 			return;
 		}
 		case WsEventType.MESSAGE_FORWARDED: {
-			// To the receiving room a forward IS a new message (v1 landed it
-			// through the plain message handler): same me/others effects as
-			// MESSAGE_RECEIVED. The forwarder's own echo is the only
-			// confirmation — the 201 carries no text and nothing was optimistic.
-			const message = wscSdk.handleMessageForwarded({
-				messageId: event.messageId,
-				roomId: event.roomId,
-				originalRoomId: event.originalRoomId,
-				senderId: event.senderId,
-				text: event.text,
-				...(event.timestamp ? { timestamp: event.timestamp } : {}),
-				...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
-				...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {})
-			});
-			notifyOthersMessage(message, event.senderId, event.roomId);
+			routeMessageForwarded(event);
 			return;
 		}
 		case WsEventType.MESSAGE_EDITED: {
