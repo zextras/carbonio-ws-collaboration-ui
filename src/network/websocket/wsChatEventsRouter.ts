@@ -270,6 +270,20 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			routeMessageUnpinned(event);
 			return;
 		}
+		case WsEventType.TYPING: {
+			// v1 parity: the own chat states never reached the store (the handler
+			// ignored them). The SDK owns the per-pair 7s auto-expire; a missing
+			// status means started (spike contract).
+			if (isMyId(event.userId)) {
+				return;
+			}
+			wscSdk.handleTyping({
+				roomId: event.roomId,
+				userId: event.userId,
+				...(event.status ? { status: event.status } : {})
+			});
+			return;
+		}
 		default:
 			wsDebug('Chat event (SDK not wired yet):', event);
 	}

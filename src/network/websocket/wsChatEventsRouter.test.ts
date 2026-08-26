@@ -879,3 +879,57 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 		expect(useStore.getState().activeConversations['room-bd']?.messagePinned).toBeUndefined();
 	});
 });
+
+describe('wsChatEventsRouter - Typing', () => {
+	it('turns the indicator on and auto-expires it after 7s without refreshes', async () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter({
+			type: WsEventType.TYPING,
+			roomId: 'room-ty',
+			userId: 'user-2',
+			status: 'started',
+			timestamp: AUG_FIRST_LATE_MORNING
+		});
+		expect(useStore.getState().activeConversations['room-ty']?.isWritingList).toEqual(['user-2']);
+
+		await vi.advanceTimersByTimeAsync(7000);
+		expect(useStore.getState().activeConversations['room-ty']?.isWritingList ?? []).toEqual([]);
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('treats a missing status as started and turns it off on stopped', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter({
+			type: WsEventType.TYPING,
+			roomId: 'room-tm',
+			userId: 'user-2',
+			timestamp: AUG_FIRST_LATE_MORNING
+		});
+		expect(useStore.getState().activeConversations['room-tm']?.isWritingList).toEqual(['user-2']);
+
+		wsChatEventsRouter({
+			type: WsEventType.TYPING,
+			roomId: 'room-tm',
+			userId: 'user-2',
+			status: 'stopped',
+			timestamp: AUG_FIRST_LATE_MORNING
+		});
+		expect(useStore.getState().activeConversations['room-tm']?.isWritingList ?? []).toEqual([]);
+	});
+
+	it('ignores the own echo (v1 parity: own chat states never reached the store)', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter({
+			type: WsEventType.TYPING,
+			roomId: 'room-to',
+			userId: 'me',
+			status: 'started',
+			timestamp: AUG_FIRST_LATE_MORNING
+		});
+
+		expect(useStore.getState().activeConversations['room-to']?.isWritingList ?? []).toEqual([]);
+	});
+});

@@ -16,6 +16,7 @@ import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { wscSdk } from '../sdk/wscSdk';
+import { wsClient } from '../websocket/WebSocketClient';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import { sanitizeXmppMessage } from '../xmpp/utility/sanitizeXmppMessage';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -315,14 +316,23 @@ export const chatClient: ChatClient = {
 	},
 	sendIsWriting: (roomId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendIsWriting');
+			// The only chat traffic sent on the /events socket. Placeholder rooms
+			// are skipped like the v1 stanza path did; the 3s throttle stays in
+			// the composer, unchanged.
+			if (useStore.getState().rooms[roomId]?.placeholder) {
+				return;
+			}
+			wsClient.send({ action: 'Typing', roomId, status: 'started' });
 			return;
 		}
 		xmppClient.sendIsWriting(roomId);
 	},
 	sendPaused: (roomId) => {
 		if (isWscPure()) {
-			sdkNotWiredYet('sendPaused');
+			if (useStore.getState().rooms[roomId]?.placeholder) {
+				return;
+			}
+			wsClient.send({ action: 'Typing', roomId, status: 'stopped' });
 			return;
 		}
 		xmppClient.sendPaused(roomId);

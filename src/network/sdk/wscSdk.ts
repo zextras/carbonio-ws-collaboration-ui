@@ -49,7 +49,9 @@ const bridge: StoreBridge = {
 		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage),
 	setPinnedMessage: (roomId, message: StoreTextMessage): void =>
 		useStore.getState().setPinnedMessage(roomId, message as TextMessage),
-	removePinnedMessage: (roomId): void => useStore.getState().removePinnedMessage(roomId)
+	removePinnedMessage: (roomId): void => useStore.getState().removePinnedMessage(roomId),
+	setIsWriting: (roomId, userId, writing): void =>
+		useStore.getState().setIsWriting(roomId, userId, writing)
 };
 
 const http = createHttpClient({

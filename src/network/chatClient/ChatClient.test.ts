@@ -22,6 +22,7 @@ import { chatClient, isWscPure } from './ChatClient';
 import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
 import { xmppClient } from '../xmpp/XMPPClient';
 
@@ -686,5 +687,40 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect(useStore.getState().activeConversations['room-gst']?.messagePinned).toBeUndefined();
+	});
+
+	it('sends the typing actions on the events socket on a WSC-pure backend', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const sendSpy = vi.spyOn(wsClient, 'send').mockImplementation(() => undefined);
+		const xmppWriting = vi.spyOn(xmppClient, 'sendIsWriting').mockImplementation(() => undefined);
+		const xmppPaused = vi.spyOn(xmppClient, 'sendPaused').mockImplementation(() => undefined);
+
+		chatClient.sendIsWriting('room-w');
+		chatClient.sendPaused('room-w');
+
+		expect(sendSpy).toHaveBeenNthCalledWith(1, {
+			action: 'Typing',
+			roomId: 'room-w',
+			status: 'started'
+		});
+		expect(sendSpy).toHaveBeenNthCalledWith(2, {
+			action: 'Typing',
+			roomId: 'room-w',
+			status: 'stopped'
+		});
+		expect(xmppWriting).not.toHaveBeenCalled();
+		expect(xmppPaused).not.toHaveBeenCalled();
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('skips the typing actions for placeholder rooms (v1 stanza-path parity)', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setPlaceholderRoom('user-w');
+		const sendSpy = vi.spyOn(wsClient, 'send').mockImplementation(() => undefined);
+
+		chatClient.sendIsWriting('placeholder-user-w');
+		chatClient.sendPaused('placeholder-user-w');
+
+		expect(sendSpy).not.toHaveBeenCalled();
 	});
 });

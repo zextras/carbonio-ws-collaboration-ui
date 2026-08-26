@@ -22,7 +22,8 @@ export type WsChatEvent =
 	| WsReactionChangedEvent
 	| WsMessageForwardedEvent
 	| WsMessagePinnedEvent
-	| WsMessageUnpinnedEvent;
+	| WsMessageUnpinnedEvent
+	| WsTypingEvent;
 
 export type WsPresenceChangedEvent = {
 	type: WsEventType.PRESENCE_CHANGED;
@@ -102,6 +103,19 @@ export type WsMessageUnpinnedEvent = {
 	roomId: string;
 	messageId: string;
 	unpinnedBy: string;
+	timestamp: string;
+};
+
+/**
+ * A member's typing state changed. `status` is optional on the wire and a
+ * missing value means `started` (spike contract); the timestamp is unused —
+ * the indicator lifecycle is arrival instant + the SDK's auto-expire.
+ */
+export type WsTypingEvent = {
+	type: WsEventType.TYPING;
+	roomId: string;
+	userId: string;
+	status?: 'started' | 'stopped';
 	timestamp: string;
 };
 
