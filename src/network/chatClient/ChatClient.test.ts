@@ -221,8 +221,10 @@ describe('chatClient façade', () => {
 		chatClient.requestHistory('room-t', Date.parse('2026-08-02T00:00:00Z'));
 		await vi.advanceTimersByTimeAsync(0);
 
+		// Empty store: the caller bound is a synthetic client-clock now() and is
+		// omitted — "the latest N" is decided by the server clock
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
-			'/services/chats/rooms/room-t/timeline?before=2026-08-02T00%3A00%3A00.000Z&limit=50'
+			'/services/chats/rooms/room-t/timeline?limit=50'
 		);
 		const { messages } = useStore.getState().chatsRegistry['room-t'];
 		// The backend ROOM_CREATED event survives the inclusive notBefore bound and
@@ -276,6 +278,39 @@ describe('chatClient façade', () => {
 		);
 		// Only the success path re-enables it — the v1 callback did the same
 		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(true);
+	});
+
+	it('omits the synthetic client-clock bound on the first load, keeps a real anchor', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore
+			.getState()
+			.addRooms([createMockRoom({ id: 'room-skew', createdAt: '2026-07-01T00:00:00Z' })]);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: false }));
+
+		// First load: empty store, the caller passes its own now() — a client
+		// running behind the server must not cut off the newest messages
+		chatClient.requestHistory('room-skew', Date.parse(AUG_FIRST_MORNING));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-skew/timeline?limit=50'
+		);
+
+		// Next page: the anchor is a loaded message, the explicit bound stays
+		const oldestDate = Date.parse(AUG_FIRST_MORNING);
+		useStore
+			.getState()
+			.updateHistory('room-skew', [
+				createMockTextMessage({ id: 'msg-anchor', roomId: 'room-skew', date: oldestDate })
+			]);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true }));
+
+		chatClient.requestHistory('room-skew', oldestDate);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(
+			'/services/chats/rooms/room-skew/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-anchor&limit=50'
+		);
 	});
 
 	it('bails out on unknown rooms without hitting the network (v1 parity)', () => {

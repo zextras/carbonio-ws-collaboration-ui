@@ -305,7 +305,13 @@ export const chatClient: ChatClient = {
 			const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
 			wscSdk
 				.fetchTimeline(roomId, {
-					before: endHistory,
+					// With history in store the bound anchors the page backwards from
+					// the known head (live events may have landed before the first
+					// load). On an empty store the v1 call-site bound is a synthetic
+					// client-clock now(): omitted, so "the latest N" is decided by the
+					// SERVER clock — a client running behind would otherwise cut off
+					// the most recent messages on the first load.
+					...(oldest ? { before: endHistory } : {}),
 					// Composite cursor only when the anchor is a message already in store
 					...(oldest && oldest.date === endHistory ? { beforeId: oldest.id } : {}),
 					...(quantity !== undefined ? { limit: quantity } : {}),
