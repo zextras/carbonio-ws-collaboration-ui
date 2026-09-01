@@ -13,12 +13,13 @@ import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
 import RegisterVirtualRoomCreationButton from './chats/components/RegisterVirtualRoomCreationButton';
 import initChats from './chats/initChats';
+import { SUPPORTED_API_VERSIONS } from './constants/appConstants';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
 import { getCapabilities, getToken, listMeetings, listRooms } from './network';
+import { chatClient } from './network/chatClient/ChatClient';
 import { wsClient } from './network/websocket/WebSocketClient';
-import { xmppClient } from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -34,23 +35,7 @@ export default function MainApp(): React.JSX.Element {
 	const { prefs, attrs } = useUserSettings();
 
 	useEffect(() => {
-		setSupportedVersions([
-			'1.6.14',
-			'1.6.13',
-			'1.6.12',
-			'1.6.11',
-			'1.6.10',
-			'1.6.9',
-			'1.6.8',
-			'1.6.7',
-			'1.6.6',
-			'1.6.5',
-			'1.6.4',
-			'1.6.3',
-			'1.6.2',
-			'1.6.1',
-			'1.6.0'
-		]);
+		setSupportedVersions(SUPPORTED_API_VERSIONS);
 	}, [setSupportedVersions]);
 
 	// STORE: init with user session main infos
@@ -85,8 +70,8 @@ export default function MainApp(): React.JSX.Element {
 							setAttributes(attrs);
 						}
 						setChatsBeStatus(true);
-						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						xmppClient.connect(resp.zmToken);
+						// Init chatClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+						chatClient.connect(resp.zmToken);
 						wsClient.connect();
 					})
 					.catch(() => setChatsBeStatus(false));

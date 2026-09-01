@@ -33,9 +33,10 @@ import {
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
+import { chatClient, isWscPure } from '../chatClient/ChatClient';
+import { wscSdk } from '../sdk/wscSdk';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -185,7 +186,7 @@ export const addRoomAttachment = (
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) chatClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
 	useStore.getState().setPlaceholderMessage({
@@ -213,7 +214,13 @@ export const addRoomAttachment = (
 				description: optionalFields.description,
 				replyId: optionalFields.replyId,
 				area: optionalFields.area,
-				messageId: uuid
+				// v1 correlation: messageId becomes the id of the stanza the backend
+				// sends. On v2 ids are server-generated and the correlation key is
+				// tempId, carried back by the MessageReceived self-echo — the ONLY
+				// confirmation (the 201 answers with the file id, not the message);
+				// messageId is still sent, the backend accepts both harmlessly
+				messageId: uuid,
+				...(isWscPure() ? { tempId: uuid } : {})
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.0 is officially dropped.
@@ -246,11 +253,42 @@ export const forwardMessages = (
 	roomsId: string[],
 	messages: TextMessage[]
 ): Promise<Response[]> => {
+	if (isWscPure()) {
+		// v2 forwards by reference — one bulk POST per destination room, no
+		// content on the wire: the v1 hybrid below (one MAM fetch per message
+		// to rebuild the original stanza XML, body swapped with the projected
+		// text) dissolves. Store updates come from the MessageForwarded echo.
+		const references = messages.map((message) => ({
+			// v2 invariant: id === stanzaId === server UUID
+			sourceRoomId: message.roomId,
+			messageId: message.stanzaId
+		}));
+		const hasAttachments = messages.some((message) => message.attachment);
+		return Promise.allSettled(
+			roomsId.map((roomId) => wscSdk.forwardMessages(roomId, references))
+		).then((results) => {
+			const fulfilled = results.filter((result) => result.status === 'fulfilled');
+			// Forwarding an attachment clones it server-side: same quota effect
+			// as the v1 flow
+			if (hasAttachments && fulfilled.length > 0) {
+				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+			}
+			const rejected = results.find(
+				(result): result is PromiseRejectedResult => result.status === 'rejected'
+			);
+			if (rejected) {
+				throw rejected.reason;
+			}
+			// The caller (ForwardMessageModal) only chains then/catch: the v1
+			// Response values were never consumed
+			return [] as Response[];
+		});
+	}
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {
 		const queryId = HistoryAccumulator.getNextId();
-		return xmppClient
+		return chatClient
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
 				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);

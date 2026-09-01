@@ -5,6 +5,7 @@
  */
 
 import { EventArea, getEventArea } from './eventHandlersUtilities';
+import { wsChatEventsRouter } from './wsChatEventsRouter';
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
 import { wsGeneralEventsHandler } from './wsGeneralEventsHandler';
 import { wsMeetingEventsHandler } from './wsMeetingEventHandlers/wsMeetingEventsHandler';
@@ -23,6 +24,10 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case EventArea.MEETING: {
 			wsMeetingEventsHandler(event);
+			break;
+		}
+		case EventArea.CHAT: {
+			wsChatEventsRouter(event);
 			break;
 		}
 		default:

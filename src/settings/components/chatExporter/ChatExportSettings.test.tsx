@@ -9,9 +9,13 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ChatExportSettings from './ChatExportSettings';
+import { downloadChatExport } from '../../../network/chatClient/chatExportDownload';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
+
+// The DOM download side is unit-tested in chatExportDownload.test.ts
+vi.mock('../../../network/chatClient/chatExportDownload');
 
 const room = createMockRoom({
 	id: 'room',
@@ -93,5 +97,24 @@ describe('ChatExportSettings test', () => {
 		const button = screen.getByRole('button');
 		await user.click(button);
 		expect(useStore.getState().session.chatExporting!.roomId).toBe(room.id);
+	});
+
+	describe('on a WSC-pure backend', () => {
+		afterEach(() => {
+			// The zustand store survives across tests: leave the version un-negotiated
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('Export chat triggers a server-streamed download without a spinner', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().addRooms([room, room1, room2, room3]);
+			const { user } = setup(<ChatExportSettings />);
+			await user.click(screen.getByText(room.name!));
+			await user.click(screen.getByRole('button'));
+
+			expect(downloadChatExport).toHaveBeenCalledWith(room.id, room.name);
+			// No exporting state is set in WSC-pure mode, so the spinner never appears
+			expect(useStore.getState().session.chatExporting).toBeUndefined();
+		});
 	});
 });

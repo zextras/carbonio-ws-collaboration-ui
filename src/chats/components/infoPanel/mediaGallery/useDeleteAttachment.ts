@@ -10,7 +10,7 @@ import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { bulkDeleteRoomAttachments } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Attachment } from '../../../../types/network/models/attachmentTypes';
@@ -76,7 +76,7 @@ const useDeleteAttachment = (
 					if (failedIds.has(attachment.id)) return;
 					removeMediaGalleryAttachment(roomId, attachment.id);
 					if (attachment.stanzaId) {
-						xmppClient.sendChatMessageDeletion(roomId, attachment.stanzaId);
+						chatClient.sendChatMessageDeletion(roomId, attachment.stanzaId);
 					}
 				});
 				showSnackbar(
