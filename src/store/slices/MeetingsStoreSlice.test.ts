@@ -144,6 +144,109 @@ describe('MeetingStoreSlice tests', () => {
 			expect(participants[mockParticipant1.userId]).toBeUndefined();
 		});
 
+		test('Remove a participant clears its connection quality entry', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant1.userId, 'medium', 1000);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant1.userId]
+			).toBeDefined();
+
+			useStore.getState().removeParticipant(mockMeeting0.id, mockParticipant1.userId);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant1.userId]
+			).toBeUndefined();
+		});
+
+		test('setParticipantConnectionQuality applies last-writer-wins based on changedAt', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+
+			// First update at t=1000
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'medium', 1000);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.quality
+			).toBe('medium');
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt
+			).toBe(1000);
+
+			// Newer update at t=2000 wins
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'optimal', 2000);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.quality
+			).toBe('optimal');
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt
+			).toBe(2000);
+
+			// Older update at t=500 is ignored
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 'terrible', 500);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.quality
+			).toBe('optimal');
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt
+			).toBe(2000);
+		});
+
+		test('setParticipantConnectionQuality accepts a maxTier-only change at the same changedAt', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+
+			// Baseline: quality + maxTier at t=1000
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'optimal',
+					1000,
+					1
+				);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.maxTier
+			).toBe(1);
+
+			// A maxTier-only change (sender's camera tier rose while its vote stayed stable) broadcast with
+			// the SAME changedAt must apply — keeping quality/changedAt — so a receiver can follow it back up.
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'optimal',
+					1000,
+					2
+				);
+			const updated = useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId];
+			expect(updated?.maxTier).toBe(2);
+			expect(updated?.quality).toBe('optimal');
+			expect(updated?.changedAt).toBe(1000);
+
+			// An OLDER broadcast (t=500) with a different maxTier is still ignored.
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'optimal',
+					500,
+					0
+				);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.maxTier
+			).toBe(2);
+		});
+
 		test('Update participant stream status', () => {
 			useStore.getState().addMeetings([mockMeeting0]);
 			useStore

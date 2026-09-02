@@ -4,8 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export type WsMessage = WsPingMessage;
+import { ConnectionQuality } from '../../../network/webRTC/connectionQualityScore';
+
+export type WsMessage = WsPingMessage | WsConnectionStatusUpdateMessage;
 
 export type WsPingMessage = {
 	type: 'ping' | 'Ping';
+};
+
+export type WsConnectionStatusUpdateMessage = {
+	type: 'ConnectionStatusUpdate';
+	meetingId: string;
+	score: ConnectionQuality;
+	changedAt: number;
+	to?: string;
+	maxTier?: number;
 };

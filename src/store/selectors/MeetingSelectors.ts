@@ -6,6 +6,7 @@
 
 import { filter, find, reduce, size, some } from 'lodash';
 
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -71,6 +72,17 @@ export const getParticipantAudioStatus = (
 	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.audioStreamOn ?? false;
+};
+
+export const getParticipantConnectionQuality = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): ConnectionQuality | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	return activeMeeting.connectionQuality[userId]?.quality;
 };
 
 export const getParticipantVideoStatus = (
@@ -180,3 +192,8 @@ export const getIsMeetingRecording = (store: RootStore, meetingId: string): bool
 
 export const getStartRecordingUserId = (store: RootStore, meetingId: string): string | undefined =>
 	store.meetings[meetingId]?.recUserId;
+
+export const getDownlinkCompromised = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting?.meetingId === meetingId
+		? (store.activeMeeting?.downlinkCompromised ?? false)
+		: false;

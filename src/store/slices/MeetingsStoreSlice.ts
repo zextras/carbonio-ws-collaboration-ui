@@ -9,6 +9,7 @@ import { produce } from 'immer';
 import { forEach, includes, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import {
@@ -126,6 +127,10 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (meeting) {
 					delete meeting.participants[userId];
 				}
+				const { activeMeeting } = draft;
+				if (activeMeeting?.meetingId === meetingId) {
+					delete activeMeeting.connectionQuality[userId];
+				}
 			}),
 			false,
 			'MEETINGS/REMOVE_PARTICIPANT'
@@ -232,6 +237,41 @@ export const useMeetingsStoreSlice: StateCreator<
 			}),
 			false,
 			'MEETINGS/STOP_RECORDING'
+		);
+	},
+	setParticipantConnectionQuality: (
+		meetingId: string,
+		userId: string,
+		quality: ConnectionQuality,
+		changedAt: number,
+		maxTier?: number
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const { activeMeeting } = draft;
+				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
+				const previous = activeMeeting.connectionQuality[userId];
+				if (previous === undefined || changedAt > previous.changedAt) {
+					activeMeeting.connectionQuality[userId] = {
+						quality,
+						changedAt,
+						...(maxTier !== undefined ? { maxTier } : {})
+					};
+				} else if (
+					changedAt === previous.changedAt &&
+					maxTier !== undefined &&
+					maxTier !== previous.maxTier
+				) {
+					// A sender's maxTier can change while its vote level does NOT (GCC raising the camera tier
+					// back up while the vote stays stable). That broadcast keeps the same changedAt, so the
+					// newer-timestamp guard above drops it — freezing every receiver's downlink at the stale,
+					// lower tier. Accept a maxTier-only update at the same timestamp so a receiver's downlink
+					// controller can follow the sender back up.
+					previous.maxTier = maxTier;
+				}
+			}),
+			false,
+			'MEETINGS/SET_PARTICIPANT_CONNECTION_QUALITY'
 		);
 	}
 });

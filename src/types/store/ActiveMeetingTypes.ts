@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
+import { ConnectionQuality, LinkSample } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -37,6 +39,7 @@ export type ActiveMeetingSlice = {
 	setTalkingUser: (userId: string, isTalking: boolean) => void;
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
+	setLocalVideoSuppressed: (meetingId: string, userId: string, suppressed: boolean) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
 	setDeleteSubscription: (
 		meetingId: string,
@@ -47,6 +50,8 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
+	setConnectionScoreDetail: (detail: LinkSample) => void;
+	setDownlinkCompromised: (meetingId: string, compromised: boolean) => void;
 };
 
 export type ActiveMeeting = {
@@ -55,8 +60,19 @@ export type ActiveMeeting = {
 	videoScreenIn: IVideoScreenInConnection;
 	videoOutConn: IVideoOutConnection;
 	screenOutConn: IScreenOutConnection;
+	qualityMonitor: ConnectionQualityMonitor;
+	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
+	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
+	connectionQuality: Record<string, ConnectionQualityInfo>;
+	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
+	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
+	connectionScoreDetail: LinkSample | undefined;
+	// true while our downlink is consuming a lower tier than at least one publisher is sending,
+	// written by the per-tick state machine in VideoScreenInConnection.
+	downlinkCompromised: boolean;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
+	localVideoSuppressed: Record<string, boolean>;
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
@@ -65,6 +81,12 @@ export type ActiveMeeting = {
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
 	pinnedTile?: PinnedTile;
+};
+
+export type ConnectionQualityInfo = {
+	quality: ConnectionQuality;
+	changedAt: number;
+	maxTier?: number;
 };
 
 export enum MeetingAccordionType {

@@ -27,12 +27,35 @@ vi.mock('@zextras/carbonio-shell-ui');
 vi.mock('@zextras/carbonio-ui-preview');
 vi.mock('darkreader');
 vi.mock('react-router-dom');
+// The connection-quality monitor runs a 2s timer and writes the store from getStats-driven ticks;
+// stub it in component tests (its pure helpers stay real for its own unit test).
+vi.mock('../network/webRTC/ConnectionQualityMonitor', async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import('../network/webRTC/ConnectionQualityMonitor')>();
+	return {
+		...actual,
+		default: class ConnectionQualityMonitorMock {
+			committed = null;
+
+			changedAt = 0;
+
+			emitInitial = vi.fn(() => Promise.resolve());
+
+			resyncTo = vi.fn(() => Promise.resolve());
+
+			rebroadcast = vi.fn();
+
+			stop = vi.fn();
+		}
+	};
+});
 
 Object.defineProperty(window, 'RTCPeerConnection', {
 	configurable: true,
 	value: vi.fn(function RTCPeerConnectionMock() {
 		return {
 			addTrack: vi.fn(),
+			addTransceiver: vi.fn(() => ({ sender: { track: null }, setCodecPreferences: vi.fn() })),
 			createOffer: vi.fn(() => Promise.resolve({ sdp: 'sdp', type: 'offer' })),
 			createAnswer: vi.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
 			setRemoteDescription: vi.fn(() => Promise.resolve()),

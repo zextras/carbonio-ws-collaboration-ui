@@ -14,6 +14,7 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
+import { ConnectionQuality } from '../webRTC/connectionQualityScore';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -68,6 +69,23 @@ export class WebSocketClient {
 		}
 	}
 
+	sendConnectionStatusUpdate(
+		meetingId: string,
+		score: ConnectionQuality,
+		changedAt: number,
+		maxTier?: number,
+		to?: string
+	): void {
+		this.send({
+			type: 'ConnectionStatusUpdate',
+			meetingId,
+			score,
+			changedAt,
+			...(to ? { to } : {}),
+			...(maxTier != null && maxTier >= 0 ? { maxTier } : {})
+		});
+	}
+
 	_onOpen = (): void => {
 		wsDebug('...connected!');
 		this._reconnectionTime = 0;
@@ -83,6 +101,7 @@ export class WebSocketClient {
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
+		useStore.getState().activeMeeting?.qualityMonitor?.rebroadcast();
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
 		}

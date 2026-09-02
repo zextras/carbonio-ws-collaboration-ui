@@ -122,3 +122,13 @@ export const getUserHandRank = (store: RootStore, userId: string): number => {
 
 export const getHandRaisedList = (store: RootStore): string[] | undefined =>
 	store.activeMeeting?.usersWithHandRaised;
+
+export const getLocalVideoSuppressed = (
+	store: RootStore,
+	meetingId?: string,
+	userId?: string
+): boolean => {
+	if (!meetingId || !userId) return false;
+	if (store.activeMeeting?.meetingId !== meetingId) return false;
+	return store.activeMeeting?.localVideoSuppressed?.[userId] ?? false;
+};
