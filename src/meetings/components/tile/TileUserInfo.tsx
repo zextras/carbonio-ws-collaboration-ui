@@ -9,6 +9,7 @@ import styled from '@emotion/styled';
 import { Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import ConnectionQualityIndicator from './ConnectionQualityIndicator';
 import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserHandRank } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -95,6 +96,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 						<Icon icon="ScreenSharingOnOutline" color="gray6" size="medium" />
 					</CustomContainer>
 				)}
+				{!isScreenShare && <ConnectionQualityIndicator meetingId={meetingId} userId={userId} />}
 			</>
 		),
 		[
@@ -104,7 +106,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 			isPinned,
 			isScreenShare,
 			isSessionTile,
+			meetingId,
 			micOffLabel,
+			userId,
 			videoStreamEnabled
 		]
 	);
