@@ -5,6 +5,7 @@
  */
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
+import { QualitySignals } from '../../../network/webRTC/voteWindow';
 import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
@@ -57,4 +58,7 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
+	// One downlink-quality evaluation per 2 s tick, driven by the connection monitor. Receives the three
+	// vote-derived signals (displayBars + the warn/restore N-of-M votes); no store reads for the vote.
+	evaluateQualityTick(signals: QualitySignals): Promise<void>;
 }

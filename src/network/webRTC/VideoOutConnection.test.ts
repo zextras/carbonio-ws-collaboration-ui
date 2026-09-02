@@ -25,6 +25,10 @@ const createPeerConnMock = (
 		track: { stop: vi.fn() },
 		replaceTrack: vi.fn(() => Promise.resolve())
 	})),
+	addTransceiver: vi.fn(() => ({
+		sender: { track: null },
+		setCodecPreferences: vi.fn()
+	})),
 	createOffer: vi.fn(() => Promise.resolve({ sdp: 'sdp', type: 'offer' })),
 	setLocalDescription: vi.fn(() => Promise.resolve()),
 	setRemoteDescription: vi.fn(() => Promise.resolve()),

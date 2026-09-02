@@ -65,9 +65,19 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
+		// Keep the capture at 16:9 (aspectRatio 1.7777) — without it some cameras (notably macOS
+		// Continuity Camera) negotiate a portrait mode. Capture at the top simulcast tier (720p); the
+		// publisher scales this down per tier (scaleResolutionDownBy), so a higher capture is pure waste.
+		// Cap the framerate at 30 so 60fps cameras don't waste bitrate/CPU and the temporal ladder stays a
+		// clean 30/15 (full/mid layer) for the downlink controller.
+		const videoConstraints: MediaTrackConstraints = {
+			...CONSTRAINT_ASPECT_RATIO,
+			height: { ideal: 720 },
+			frameRate: { ideal: 30, max: 30 }
+		};
 		const constraints = deviceId
-			? { video: { deviceId: { exact: deviceId }, ...CONSTRAINT_ASPECT_RATIO } }
-			: { video: CONSTRAINT_ASPECT_RATIO };
+			? { video: { deviceId: { exact: deviceId }, ...videoConstraints } }
+			: { video: videoConstraints };
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
