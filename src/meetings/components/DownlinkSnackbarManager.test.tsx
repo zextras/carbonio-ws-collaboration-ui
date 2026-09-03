@@ -110,4 +110,47 @@ describe('DownlinkSnackbarManager', () => {
 		});
 		expect(await screen.findByText(warningLabel)).toBeInTheDocument();
 	});
+
+	it('hides the quality warning while a connection is down (yields to the connection snackbar)', async () => {
+		setup(<DownlinkSnackbarManager />);
+		act(() => {
+			useStore.getState().setDownlinkCompromised(mockMeeting.id, true);
+		});
+		await screen.findByText(warningLabel);
+
+		// A websocket drop means the connection snackbars own the screen -> quality warning must yield.
+		act(() => {
+			useStore.getState().setWebsocketStatus(false);
+		});
+		await waitFor(() => expect(screen.queryByText(warningLabel)).not.toBeInTheDocument());
+	});
+
+	it('keeps the quality warning suppressed during the reconnect grace, then restores it', () => {
+		vi.useFakeTimers();
+		try {
+			setup(<DownlinkSnackbarManager />);
+			// Connection down first, then a fresh degradation while down -> suppressed (not shown).
+			act(() => {
+				useStore.getState().setWebsocketStatus(false);
+			});
+			act(() => {
+				useStore.getState().setDownlinkCompromised(mockMeeting.id, true);
+			});
+			expect(screen.queryByText(warningLabel)).not.toBeInTheDocument();
+
+			// Websocket reconnects: the blue "re-established" snackbar shows -> quality stays hidden during grace.
+			act(() => {
+				useStore.getState().setWebsocketStatus(true);
+			});
+			expect(screen.queryByText(warningLabel)).not.toBeInTheDocument();
+
+			// Grace elapses -> the still-compromised warning comes back.
+			act(() => {
+				vi.advanceTimersByTime(6000);
+			});
+			expect(screen.getByText(warningLabel)).toBeInTheDocument();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });
