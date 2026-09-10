@@ -29,20 +29,13 @@ export type ChatMessage = {
 	senderId: string;
 	text: string;
 	replyToId?: string;
-	replyTo?: ChatMessageReply;
+	repliedMessage?: ChatMessage;
 	forwardedInfo?: ForwardedInfo;
 	editedInfo?: EditedInfo;
 	deletedInfo?: DeletedInfo;
 	reactions?: ReactionGroup[];
 	attachment?: Attachment;
 	createdAt: string;
-};
-
-export type ChatMessageReply = {
-	id: string;
-	senderId: string;
-	text?: string;
-	deleted: boolean;
 };
 
 export type ReactionGroup = {

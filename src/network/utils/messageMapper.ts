@@ -61,20 +61,8 @@ export function mapChatMessageToTextMessage(
 				}
 			: undefined,
 		replyTo: chatMessage.replyToId,
-		repliedMessage: chatMessage.replyTo
-			? ({
-					id: chatMessage.replyTo.id,
-					stanzaId: chatMessage.replyTo.id,
-					roomId: chatMessage.roomId,
-					type: MessageType.TEXT_MSG,
-					date: 0, // We don't have the original date
-					from: chatMessage.replyTo.senderId ?? '',
-					text: chatMessage.replyTo.deleted ? '' : (chatMessage.replyTo.text ?? ''),
-					read: MarkerStatus.READ,
-					...(chatMessage.replyTo.deleted
-						? { deleted: true, deletedInfo: { deletedBy: '', deletedAt: '' } }
-						: {})
-				} as TextMessage)
+		repliedMessage: chatMessage.repliedMessage
+			? mapChatMessageToTextMessage(chatMessage.repliedMessage, currentUserId)
 			: chatMessage.replyToId
 				? ({
 						id: chatMessage.replyToId,
