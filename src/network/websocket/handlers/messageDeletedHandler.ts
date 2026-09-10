@@ -13,11 +13,11 @@ import useStore from '../../../store/Store';
 export function handleWsMessageDeleted(event: {
 	messageId: string;
 	roomId: string;
-	senderId: string;
+	deletedBy: string;
 	deletedAt: string;
 }): void {
 	const { deleteMessage } = useStore.getState();
-	const { roomId, messageId, senderId, deletedAt } = event;
+	const { roomId, messageId, deletedBy, deletedAt } = event;
 
-	deleteMessage(roomId, messageId, senderId, deletedAt);
+	deleteMessage(roomId, messageId, deletedBy, deletedAt);
 }

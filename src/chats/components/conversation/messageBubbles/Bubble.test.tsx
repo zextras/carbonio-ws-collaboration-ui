@@ -30,6 +30,7 @@ import { dateToTimestamp } from '../../../../utils/dateUtils';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
+const iconForward = 'icon: Forward';
 
 const user1Be: User = createMockUser({
 	id: 'user1',
@@ -342,7 +343,7 @@ describe('Forwarded message label', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		expect(screen.getByTestId('icon: Forward')).toBeInTheDocument();
+		expect(screen.getByTestId(iconForward)).toBeInTheDocument();
 	});
 
 	test('renders ForwardInfo when forwarded is set (MongooseIM legacy path)', () => {
@@ -360,7 +361,7 @@ describe('Forwarded message label', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		expect(screen.getByTestId('icon: Forward')).toBeInTheDocument();
+		expect(screen.getByTestId(iconForward)).toBeInTheDocument();
 	});
 
 	test('does NOT render ForwardInfo when neither field is set', () => {
@@ -378,7 +379,7 @@ describe('Forwarded message label', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		expect(screen.queryByTestId('icon: Forward')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconForward)).not.toBeInTheDocument();
 	});
 });
 

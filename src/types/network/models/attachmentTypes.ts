@@ -14,14 +14,12 @@ export type Attachment = {
 	createdAt: string;
 	messageId?: string;
 	stanzaId?: string;
+	area?: string;
 };
 
 export type AdditionalHeaders = {
 	description?: string;
-	messageId?: string;
-	replyId?: string;
 	area?: string;
-	text?: string;
 	replyToId?: string;
 	tempId?: string;
 };

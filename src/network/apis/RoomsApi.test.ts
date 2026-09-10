@@ -294,84 +294,75 @@ describe('Rooms API', () => {
 	test('bulkDeleteRoomAttachments sends attachmentIds array', async () => {
 		await bulkDeleteRoomAttachments('roomId', ['att1', 'att2']);
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(
-			`rooms/roomId/attachments`,
-			RequestType.DELETE,
-			{ attachmentIds: ['att1', 'att2'] }
-		);
+		expect(mockFetchAPI).toHaveBeenCalledWith(`rooms/roomId/attachments`, RequestType.DELETE, {
+			attachmentIds: ['att1', 'att2']
+		});
 	});
 
 	describe('addRoomAttachments', () => {
 		test('addRoomAttachment is called correctly', async () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			// Send addRoomAttachments request
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve());
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
 			await addRoomAttachment(roomId, testFile, { area }, signal);
 
-			expect(mockUploadFileFetchAPI).toHaveBeenCalledWith(
+			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
 				`rooms/${roomId}/attachments`,
 				RequestType.POST,
 				testFile,
 				signal,
 				{
 					area,
-					messageId: expect.stringMatching(UUID_REGEX),
 					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);
 		});
 
 		test('addRoomAttachment is called correctly with optionalParams', async () => {
-			mockUploadFileFetchAPI.mockImplementation(() => Promise.resolve());
-			// Send addRoomAttachments request
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve());
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
 			await addRoomAttachment(
 				roomId,
 				testFile,
-				{ description: 'description', replyId: 'stanzaId', area },
+				{ description: 'description', replyToId: 'stanzaId', area },
 				signal
 			);
 
-			expect(mockUploadFileFetchAPI).toHaveBeenCalledWith(
+			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
 				`rooms/${roomId}/attachments`,
 				RequestType.POST,
 				testFile,
 				signal,
 				{
 					description: 'description',
-					replyId: 'stanzaId',
+					replyToId: 'stanzaId',
 					area,
-					messageId: expect.stringMatching(UUID_REGEX),
 					tempId: expect.stringMatching(UUID_REGEX)
 				}
 			);
 		});
 
-		test('addRoomAttachment sends messageId equal to tempId (devel legacy correlation parity)', async () => {
+		test('addRoomAttachment does not send messageId', async () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve());
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
 
-			const optional = mockUploadFileFetchAPI.mock.calls[0][4] as {
-				messageId?: string;
-				tempId?: string;
-			};
-			expect(optional.messageId).toMatch(UUID_REGEX);
+			const optional = mockSendFileFetchAPI.mock.calls[0][4] as Record<string, unknown>;
+			expect(optional.messageId).toBeUndefined();
 			expect(optional.tempId).toMatch(UUID_REGEX);
-			expect(optional.messageId).toBe(optional.tempId);
 		});
 
 		test('addRoomAttachment is called correctly with placeholderRoom', async () => {
 			mockFetchAPI.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
 			mockFetchAPI.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
-			// Send addRoomAttachments request
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			const area = '0x0';
@@ -382,81 +373,13 @@ describe('Rooms API', () => {
 				members: [{ userId: 'userId', owner: true }]
 			});
 		});
-
-		test('addRoomAttachment(1.6.1) is called correctly', async () => {
-			const store = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			store.setApiVersion('1.6.1');
-			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve());
-			// Send addRoomAttachments request
-			const testFile = new File([], 'file.pdf', { type: applicationPdf });
-			const { signal } = new AbortController();
-			const area = '0x0';
-			await addRoomAttachment(roomId, testFile, { area }, signal);
-
-			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
-				`rooms/${roomId}/attachments`,
-				RequestType.PUT,
-				testFile,
-				signal,
-				{
-					area,
-					messageId: expect.stringMatching(UUID_REGEX),
-					tempId: expect.stringMatching(UUID_REGEX)
-				}
-			);
-		});
-
-		test('addRoomAttachment(1.6.1) is called correctly with optionalParams', async () => {
-			useStore.getState().setApiVersion('1.6.1');
-			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve());
-			// Send addRoomAttachments request
-			const testFile = new File([], 'file.pdf', { type: applicationPdf });
-			const { signal } = new AbortController();
-			const area = '0x0';
-			await addRoomAttachment(
-				roomId,
-				testFile,
-				{ description: 'description', replyId: 'stanzaId', area },
-				signal
-			);
-
-			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
-				`rooms/${roomId}/attachments`,
-				RequestType.PUT,
-				testFile,
-				signal,
-				{
-					description: 'description',
-					replyId: 'stanzaId',
-					area,
-					messageId: expect.stringMatching(UUID_REGEX),
-					tempId: expect.stringMatching(UUID_REGEX)
-				}
-			);
-		});
 	});
 
 	describe('addRoomAttachment dispatches quota changed event', () => {
-		test('dispatches event on successful upload (legacy path)', async () => {
+		test('dispatches event on successful upload', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			mockUploadFileFetchAPI.mockResolvedValueOnce({ id: 'fileId' });
-			const testFile = new File([], 'file.pdf', { type: applicationPdf });
-			const { signal } = new AbortController();
-			await addRoomAttachment(roomId, testFile, { area: '0x0' }, signal);
-			expect(dispatchSpy).toHaveBeenCalledWith(
-				expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
-			);
-			dispatchSpy.mockRestore();
-		});
-
-		test('dispatches event on successful upload (1.6.1+ path)', async () => {
-			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-			const store = useStore.getState();
-			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			store.setApiVersion('1.6.1');
 			mockSendFileFetchAPI.mockResolvedValueOnce({ id: 'fileId' });
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
@@ -471,7 +394,7 @@ describe('Rooms API', () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));
-			mockUploadFileFetchAPI.mockRejectedValueOnce(new Error('upload failed'));
+			mockSendFileFetchAPI.mockRejectedValueOnce(new Error('upload failed'));
 			const testFile = new File([], 'file.pdf', { type: applicationPdf });
 			const { signal } = new AbortController();
 			await expect(addRoomAttachment(roomId, testFile, { area: '0x0' }, signal)).rejects.toThrow();
@@ -504,7 +427,9 @@ describe('Rooms API', () => {
 
 		// Mock: POST returns real room, then createMeeting returns a meeting
 		mockFetchAPI.mockResolvedValueOnce(realRoom);
-		mockFetchAPI.mockResolvedValueOnce(createMockMeeting({ id: 'meeting-id', roomId: realRoom.id }));
+		mockFetchAPI.mockResolvedValueOnce(
+			createMockMeeting({ id: 'meeting-id', roomId: realRoom.id })
+		);
 
 		// Track store states during the async operation.
 		// After the promise resolves, the placeholder must be gone and the real room present.
@@ -518,4 +443,3 @@ describe('Rooms API', () => {
 		expect(store.rooms[`placeholder-${userId}`]).toBeUndefined();
 	});
 });
-

@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { gte } from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CHATS_ROUTE, QUOTA_CHANGED_EVENT } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
+import { GetRoomAttachmentsParams } from '../../types/network/models/attachmentTypes';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import {
 	AddMemberFields,
@@ -40,10 +40,14 @@ import {
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
-import { GetRoomAttachmentsParams } from '../../types/network/models/attachmentTypes';
 import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
-import { buildQueryString, fetchAPI, sendFileFetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
+import {
+	buildQueryString,
+	fetchAPI,
+	sendFileFetchAPI,
+	uploadFileFetchAPI
+} from '../../utils/FetchUtils';
 import { createMeeting, deleteMeeting } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -169,7 +173,9 @@ export const bulkDeleteRoomAttachments = (
 	roomId: string,
 	attachmentIds: string[]
 ): Promise<BulkDeleteRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, { attachmentIds } as unknown as Record<string, unknown>);
+	fetchAPI(`rooms/${roomId}/attachments`, RequestType.DELETE, {
+		attachmentIds
+	} as unknown as Record<string, unknown>);
 
 /**
  * Replaces a placeholder room with a real one.
@@ -210,14 +216,11 @@ export const addRoomAttachment = (
 	file: File,
 	optionalFields: {
 		description?: string;
-		replyId?: string;
-		area?: string;
-		text?: string;
 		replyToId?: string;
+		area?: string;
 	},
 	signal?: AbortSignal
 ): Promise<AddRoomAttachmentResponse> => {
-	// Check if this is a placeholder room
 	const placeholderRoom = roomId.split('placeholder-');
 	if (placeholderRoom[1]) {
 		return replacePlaceholderRoom(placeholderRoom[1]).then((response) =>
@@ -231,12 +234,13 @@ export const addRoomAttachment = (
 		id: tempId,
 		roomId,
 		text: optionalFields.description ?? file.name,
-		replyTo: optionalFields.replyId,
+		replyTo: optionalFields.replyToId,
 		attachment: {
 			id: tempId,
 			name: file.name,
 			mimeType: file.type || 'application/octet-stream',
-			size: file.size
+			size: file.size,
+			area: optionalFields.area
 		},
 		tempId
 	});
@@ -250,39 +254,19 @@ export const addRoomAttachment = (
 		} else {
 			const optional = {
 				description: optionalFields.description,
-				replyId: optionalFields.replyId,
-				area: optionalFields.area,
-				text: optionalFields.text,
 				replyToId: optionalFields.replyToId,
-				// devel legacy parity: messageId is the sole optimistic-correlation handle on the
-				// MongooseIM backend (it becomes the XMPP stanza id). The new path uses tempId.
-				// The backend accepts both harmlessly, so we send both set to the same client UUID.
-				messageId: tempId,
+				area: optionalFields.area,
 				tempId
 			};
-			// DEPRECATED: This check exists for backward compatibility with previous versions.
-			//  * Remove once support for v1.6.0 is officially dropped.
-			if (session.apiVersion && gte(session.apiVersion, '1.6.1')) {
-				sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.PUT, file, signal, optional)
-					.then((resp: AddRoomAttachmentResponse) => {
-						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
-						resolve(resp);
-					})
-					.catch((error) => {
-						useStore.getState().removePlaceholderMessage(roomId, tempId);
-						reject(new Error(error));
-					});
-			} else {
-				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
-					.then((resp: AddRoomAttachmentResponse) => {
-						window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
-						resolve(resp);
-					})
-					.catch((error) => {
-						useStore.getState().removePlaceholderMessage(roomId, tempId);
-						reject(new Error(error));
-					});
-			}
+			sendFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, optional)
+				.then((resp: AddRoomAttachmentResponse) => {
+					window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+					resolve(resp);
+				})
+				.catch((error) => {
+					useStore.getState().removePlaceholderMessage(roomId, tempId);
+					reject(new Error(error));
+				});
 		}
 	});
 };

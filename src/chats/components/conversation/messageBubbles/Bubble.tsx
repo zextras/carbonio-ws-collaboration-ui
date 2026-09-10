@@ -220,7 +220,9 @@ const Bubble: FC<BubbleProps> = ({
 				height="fit"
 				width="fit"
 				crossAlignment="flex-start"
-				maxWidth={messageAttachment && !(message.forwardedInfo ?? message.forwarded) ? '60%' : '75%'}
+				maxWidth={
+					messageAttachment && !(message.forwardedInfo ?? message.forwarded) ? '60%' : '75%'
+				}
 				padding={{ all: 'medium' }}
 				background={isMyMessage ? 'highlight' : 'gray6'}
 				$isMyMessage={isMyMessage}

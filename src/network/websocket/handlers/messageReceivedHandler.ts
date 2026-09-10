@@ -7,25 +7,21 @@
 import { produce } from 'immer';
 
 import useStore from '../../../store/Store';
+import type { Attachment } from '../../../types/network/models/attachmentTypes';
 import {
 	AttachmentMessageType,
 	MarkerStatus,
 	MessageType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
-import type { Attachment } from '../../../types/network/models/attachmentTypes';
+import type { WsTimelineMessage } from '../types';
 
-/**
- * Maps a resolved WS attachment to the gallery Attachment type.
- * Returns undefined if resolved is missing.
- * Used to prepend the attachment to the MediaGallery slice on every incoming message.
- */
 const toGalleryAttachment = (
-	resolved: { id: string; name: string; mimeType: string; size: number } | undefined,
+	resolved: AttachmentMessageType | undefined,
 	senderId: string,
 	roomId: string,
 	messageId: string,
-	timestamp: string
+	createdAt: string
 ): Attachment | undefined => {
 	if (!resolved) return undefined;
 	return {
@@ -35,34 +31,63 @@ const toGalleryAttachment = (
 		size: Number(resolved.size) || 0,
 		userId: senderId,
 		roomId,
-		createdAt: new Date(timestamp).toISOString(),
+		createdAt: new Date(createdAt).toISOString(),
 		messageId
-		// no stanzaId on common-socket live path (native WS; optional field)
 	};
 };
 
-/**
- * Handles incoming message-received events from the WebSocket.
- *
- * For OTHER users' messages: adds the message to the store and increments unread.
- * For MY OWN messages: promotes the PENDING placeholder to a confirmed message.
- * This is the single source of truth for delivery confirmation — REST is fire-and-forget.
- */
+const resolveAttachment = (
+	att: WsTimelineMessage['attachment']
+): AttachmentMessageType | undefined => {
+	if (!att) return undefined;
+	return {
+		id: att.id,
+		name: att.name,
+		mimeType: att.mimeType,
+		size: att.size,
+		area: att.area
+	};
+};
+
+const resolveRepliedMessage = (
+	rm: WsTimelineMessage | undefined,
+	replyToId: string | undefined,
+	roomId: string
+): TextMessage | undefined => {
+	if (rm) {
+		return {
+			id: rm.id,
+			stanzaId: rm.id,
+			roomId: rm.roomId,
+			type: MessageType.TEXT_MSG,
+			date: new Date(rm.createdAt).getTime(),
+			from: rm.senderId,
+			text: rm.deletedInfo ? '' : rm.text,
+			read: MarkerStatus.READ,
+			deleted: rm.deletedInfo ? true : undefined,
+			deletedInfo: rm.deletedInfo,
+			attachment: resolveAttachment(rm.attachment)
+		} as TextMessage;
+	}
+	if (replyToId) {
+		return {
+			id: replyToId,
+			stanzaId: replyToId,
+			roomId,
+			from: '',
+			text: '',
+			type: MessageType.TEXT_MSG,
+			date: 0,
+			read: MarkerStatus.READ
+		} as TextMessage;
+	}
+	return undefined;
+};
+
 export function handleWsMessageReceived(event: {
-	messageId: string;
-	roomId: string;
-	senderId: string;
-	text: string;
-	timestamp: string;
-	replyToId?: string;
+	type: 'MessageReceived';
+	message: WsTimelineMessage;
 	tempId?: string;
-	attachments?: Array<{ id: string; name: string; mimeType: string; size: number }>;
-	attachmentId?: string;
-	attachmentName?: string;
-	attachmentMime?: string;
-	attachmentSize?: number;
-	forwardedFrom?: string;
-	forwardedAt?: string;
 }): void {
 	const {
 		newMessage,
@@ -72,7 +97,8 @@ export function handleWsMessageReceived(event: {
 		session,
 		chatsRegistry
 	} = useStore.getState();
-	const { roomId, messageId, senderId, text, timestamp } = event;
+
+	const { id: messageId, roomId, senderId, text, createdAt, replyToId } = event.message;
 
 	const room = rooms[roomId];
 	if (!room) {
@@ -80,54 +106,10 @@ export function handleWsMessageReceived(event: {
 		return;
 	}
 
-	// Resolve attachment: prefer the array form, fall back to flat fields
-	let resolvedAttachment: AttachmentMessageType | undefined;
-	if (event.attachments && event.attachments.length > 0) {
-		const first = event.attachments[0];
-		resolvedAttachment = {
-			id: first.id,
-			name: first.name,
-			mimeType: first.mimeType,
-			size: first.size
-		};
-	} else if (event.attachmentId) {
-		resolvedAttachment = {
-			id: event.attachmentId,
-			name: event.attachmentName ?? '',
-			mimeType: event.attachmentMime ?? 'application/octet-stream',
-			size: event.attachmentSize ?? 0
-		};
-	}
+	const resolvedAttachment = resolveAttachment(event.message.attachment);
+	const repliedMessage = resolveRepliedMessage(event.message.repliedMessage, replyToId, roomId);
+	const confirmedDate = new Date(createdAt).getTime();
 
-	// Resolve repliedMessage
-	const existingReplyTarget = event.replyToId
-		? (chatsRegistry[roomId]?.messages ?? []).find(
-				(m) =>
-					m.type === MessageType.TEXT_MSG &&
-					(m.id === event.replyToId || (m as TextMessage).stanzaId === event.replyToId)
-			)
-		: undefined;
-
-	const repliedMessage: TextMessage | undefined = existingReplyTarget
-		? (existingReplyTarget as TextMessage)
-		: event.replyToId
-			? ({
-					id: event.replyToId,
-					stanzaId: event.replyToId,
-					roomId,
-					from: '',
-					text: '',
-					type: MessageType.TEXT_MSG,
-					date: 0,
-					read: MarkerStatus.READ
-				} as TextMessage)
-			: undefined;
-
-	const confirmedDate = new Date(timestamp).getTime();
-
-	// ─── Self-echo: promote pending placeholder to confirmed message ───
-	// The WS echo carries tempId (client-generated) so we can deterministically
-	// match the PENDING placeholder regardless of REST/WS arrival order.
 	if (senderId === session.id) {
 		const messages = chatsRegistry[roomId]?.messages ?? [];
 
@@ -154,14 +136,11 @@ export function handleWsMessageReceived(event: {
 						msg.date = confirmedDate;
 						msg.text = text;
 						msg.read = MarkerStatus.UNREAD;
-						// Only overwrite the attachment when the echo carries attachment metadata.
-						// If the echo arrives without attachment fields (e.g. preview still pending),
-						// we preserve the placeholder attachment so the bubble keeps showing it.
 						if (resolvedAttachment) {
 							msg.attachment = resolvedAttachment;
 						}
 						msg.repliedMessage = repliedMessage;
-						msg.replyTo = event.replyToId;
+						msg.replyTo = replyToId;
 						msg.tempId = undefined;
 					}
 					if (
@@ -181,13 +160,12 @@ export function handleWsMessageReceived(event: {
 				}),
 				false
 			);
-			// Phase E: wire gallery live-update for own attachment uploads (self-echo)
 			const galleryAttachmentSelf = toGalleryAttachment(
 				resolvedAttachment,
 				senderId,
 				roomId,
 				messageId,
-				timestamp
+				createdAt
 			);
 			if (galleryAttachmentSelf) {
 				useStore.getState().prependMediaGalleryAttachment(roomId, galleryAttachmentSelf);
@@ -196,7 +174,6 @@ export function handleWsMessageReceived(event: {
 		return;
 	}
 
-	// ─── Other user's message ───
 	const textMessage: TextMessage = {
 		id: messageId,
 		stanzaId: messageId,
@@ -206,13 +183,13 @@ export function handleWsMessageReceived(event: {
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
-		replyTo: event.replyToId,
+		replyTo: replyToId,
 		repliedMessage,
 		attachment: resolvedAttachment,
-		forwardedInfo: event.forwardedFrom
+		forwardedInfo: event.message.forwardedInfo
 			? {
-					originalSenderId: event.forwardedFrom,
-					originalSentAt: event.forwardedAt ?? new Date().toISOString()
+					originalSenderId: event.message.forwardedInfo.originalSenderId,
+					originalSentAt: event.message.forwardedInfo.originalSentAt
 				}
 			: undefined
 	};
@@ -226,13 +203,12 @@ export function handleWsMessageReceived(event: {
 	}
 	incrementUnreadCount(roomId, 1);
 
-	// Phase E: wire gallery live-update for other-user attachment messages (native WS)
 	const galleryAttachment = toGalleryAttachment(
 		resolvedAttachment,
 		senderId,
 		roomId,
 		messageId,
-		timestamp
+		createdAt
 	);
 	if (galleryAttachment) {
 		useStore.getState().prependMediaGalleryAttachment(roomId, galleryAttachment);

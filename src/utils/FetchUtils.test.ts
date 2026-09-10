@@ -168,9 +168,9 @@ describe('FetchUtils', () => {
 
 		const optField = {
 			description: 'description',
-			messageId: 'messageId',
-			replyId: 'replyId',
-			area: '0x0'
+			area: '0x0',
+			replyToId: 'reply-id',
+			tempId: 'temp-id'
 		};
 		await sendFileFetchAPI('test', RequestType.PUT, testImageFile, undefined, optField);
 
@@ -187,9 +187,11 @@ describe('FetchUtils', () => {
 		expect(headers.get('queue-id')).toBe('idUser1');
 		expect(headers.get(wscApiVersionHeader)).toBe('1.6.1');
 		expect(body.get('description')).toBe(optField.description);
-		expect(body.get('messageId')).toBe(optField.messageId);
-		expect(body.get('replyId')).toBe(optField.replyId);
 		expect(body.get('area')).toBe(optField.area);
+		expect(body.get('replyToId')).toBe(optField.replyToId);
+		expect(body.get('tempId')).toBe(optField.tempId);
+		expect(body.get('messageId')).toBeNull();
+		expect(body.get('replyId')).toBeNull();
 	});
 
 	test('uploadFileFetchAPI is called correctly', async () => {
@@ -202,8 +204,6 @@ describe('FetchUtils', () => {
 
 		const optField = {
 			description: 'description',
-			messageId: 'messageId',
-			replyId: 'replyId',
 			area: '0x0'
 		};
 		const { signal } = new AbortController();

@@ -40,7 +40,10 @@ import {
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
-import { getIsMongooseIM, getMessagingBackend } from '../../../../store/selectors/ConnectionSelector';
+import {
+	getIsMongooseIM,
+	getMessagingBackend
+} from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -209,10 +212,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			file.file,
 			{
 				description: isLastFile ? textMessage.trim() : '',
-				replyId: isLastFile ? capturedReplyToId : undefined,
-				area,
-				text: isLastFile ? textMessage.trim() : '',
-				replyToId: isLastFile ? capturedReplyToId : undefined
+				replyToId: isLastFile ? capturedReplyToId : undefined,
+				area
 			},
 			signal
 		).catch((reason: DOMException) => {

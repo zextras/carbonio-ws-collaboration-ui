@@ -63,9 +63,7 @@ interface IRoomsApi {
 		file: File,
 		optionalFields: {
 			description?: string;
-			replyId?: string;
 			area?: string;
-			text?: string;
 			replyToId?: string;
 		},
 		signal?: AbortSignal

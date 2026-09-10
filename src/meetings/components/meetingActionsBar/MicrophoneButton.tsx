@@ -121,7 +121,14 @@ const MicrophoneButton = ({
 	const tooltipLabel = useMemo(() => {
 		if (!websocketNetworkStatus || !messageBrokerStatus) return disableButtonLabel;
 		return audioStatus ? disableMicLabel : enableMicLabel;
-	}, [websocketNetworkStatus, messageBrokerStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
+	}, [
+		websocketNetworkStatus,
+		messageBrokerStatus,
+		disableButtonLabel,
+		audioStatus,
+		disableMicLabel,
+		enableMicLabel
+	]);
 
 	const disabled = useMemo(
 		() =>

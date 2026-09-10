@@ -6,11 +6,10 @@
 
 import { handleWsMessageReceived } from './messageReceivedHandler';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
+import { createMockRoom } from '../../../tests/createMock';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 const roomId = 'room-test-id';
-const senderId = 'user-sender-id';
 const myUserId = 'my-user-id';
 
 beforeEach(() => {
@@ -30,15 +29,6 @@ describe('handleWsMessageReceived — self-echo attachment guard (Bug 3)', () =>
 			size: 1024
 		};
 
-		// Insert a pending placeholder with an attachment
-		const placeholder = createMockTextMessage({
-			id: tempId,
-			roomId,
-			from: myUserId,
-			read: MarkerStatus.PENDING,
-			tempId,
-			attachment: placeholderAttachment
-		});
 		useStore.getState().setPlaceholderMessage({
 			id: tempId,
 			roomId,
@@ -49,15 +39,16 @@ describe('handleWsMessageReceived — self-echo attachment guard (Bug 3)', () =>
 
 		const confirmedMessageId = 'confirmed-msg-id';
 
-		// Echo arrives WITHOUT attachment fields (attachment still processing on server)
 		handleWsMessageReceived({
-			messageId: confirmedMessageId,
-			roomId,
-			senderId: myUserId,
-			text: 'file.pdf',
-			timestamp: new Date().toISOString(),
+			type: 'MessageReceived',
+			message: {
+				id: confirmedMessageId,
+				roomId,
+				senderId: myUserId,
+				text: 'file.pdf',
+				createdAt: new Date().toISOString()
+			},
 			tempId
-			// no attachments / attachmentId fields
 		});
 
 		const msgs = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
@@ -66,7 +57,6 @@ describe('handleWsMessageReceived — self-echo attachment guard (Bug 3)', () =>
 		) as any;
 
 		expect(confirmed).toBeDefined();
-		// Attachment must NOT have been wiped — the placeholder's attachment should be preserved
 		expect(confirmed.attachment).toBeDefined();
 		expect(confirmed.attachment.id).toBe(tempId);
 		expect(confirmed.attachment.name).toBe('file.pdf');
@@ -92,18 +82,22 @@ describe('handleWsMessageReceived — self-echo attachment guard (Bug 3)', () =>
 
 		const confirmedMessageId = 'confirmed-msg-id-2';
 
-		// Echo arrives WITH attachment fields (server has processed it)
 		handleWsMessageReceived({
-			messageId: confirmedMessageId,
-			roomId,
-			senderId: myUserId,
-			text: 'photo.png',
-			timestamp: new Date().toISOString(),
-			tempId,
-			attachmentId: serverAttachmentId,
-			attachmentName: 'photo.png',
-			attachmentMime: 'image/png',
-			attachmentSize: 2048
+			type: 'MessageReceived',
+			message: {
+				id: confirmedMessageId,
+				roomId,
+				senderId: myUserId,
+				text: 'photo.png',
+				createdAt: new Date().toISOString(),
+				attachment: {
+					id: serverAttachmentId,
+					name: 'photo.png',
+					mimeType: 'image/png',
+					size: 2048
+				}
+			},
+			tempId
 		});
 
 		const msgs = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
@@ -112,8 +106,47 @@ describe('handleWsMessageReceived — self-echo attachment guard (Bug 3)', () =>
 		) as any;
 
 		expect(confirmed).toBeDefined();
-		// Attachment must be updated to the server-provided id
 		expect(confirmed.attachment).toBeDefined();
 		expect(confirmed.attachment.id).toBe(serverAttachmentId);
+	});
+
+	test('passes area through from nested attachment', () => {
+		const tempId = 'temp-id-area';
+
+		useStore.getState().setPlaceholderMessage({
+			id: tempId,
+			roomId,
+			text: 'img.png',
+			tempId,
+			attachment: { id: tempId, name: 'img.png', mimeType: 'image/png', size: 512, area: '100x200' }
+		});
+
+		const confirmedMessageId = 'confirmed-msg-area';
+
+		handleWsMessageReceived({
+			type: 'MessageReceived',
+			message: {
+				id: confirmedMessageId,
+				roomId,
+				senderId: myUserId,
+				text: 'img.png',
+				createdAt: new Date().toISOString(),
+				attachment: {
+					id: 'srv-att-id',
+					name: 'img.png',
+					mimeType: 'image/png',
+					size: 512,
+					area: '100x200'
+				}
+			},
+			tempId
+		});
+
+		const msgs = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
+		const confirmed = msgs.find(
+			(m) => m.type === MessageType.TEXT_MSG && (m as any).id === confirmedMessageId
+		) as any;
+
+		expect(confirmed?.attachment?.area).toBe('100x200');
 	});
 });

@@ -6,28 +6,11 @@
 
 import useStore from '../../../store/Store';
 import { MarkerStatus, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
+import type { WsTimelineMessage } from '../types';
 
-/**
- * Handles message-forwarded events from the WebSocket.
- * Adds the forwarded message to the target room's store.
- *
- * If the user is viewing a historical page (hasMoreAfter === true),
- * the message is NOT added to the chat view to prevent fragmented display.
- * Instead, only the inbox sidebar is updated.
- */
 export function handleWsMessageForwarded(event: {
-	messageId: string;
-	roomId: string;
-	originalRoomId: string;
-	senderId: string;
-	text: string;
-	timestamp?: string;
-	forwardedFrom?: string;
-	forwardedAt?: string;
-	attachmentId?: string;
-	attachmentName?: string;
-	attachmentMime?: string;
-	attachmentSize?: number;
+	type: 'MessageForwarded';
+	message: WsTimelineMessage;
 }): void {
 	const {
 		newMessage,
@@ -37,7 +20,8 @@ export function handleWsMessageForwarded(event: {
 		session,
 		chatsRegistry
 	} = useStore.getState();
-	const { roomId, messageId, senderId, text } = event;
+
+	const { id: messageId, roomId, senderId, text, createdAt } = event.message;
 
 	const room = rooms[roomId];
 	if (!room) {
@@ -45,8 +29,12 @@ export function handleWsMessageForwarded(event: {
 		return;
 	}
 
-	// Use server timestamp when available, fall back to Date.now()
-	const date = event.timestamp ? new Date(event.timestamp).getTime() : Date.now();
+	const date = new Date(createdAt).getTime();
+
+	const att = event.message.attachment;
+	const resolvedAttachment = att
+		? { id: att.id, name: att.name, mimeType: att.mimeType, size: att.size, area: att.area }
+		: undefined;
 
 	const textMessage: TextMessage = {
 		id: messageId,
@@ -57,20 +45,13 @@ export function handleWsMessageForwarded(event: {
 		from: senderId,
 		text,
 		read: MarkerStatus.UNREAD,
-		forwardedInfo: event.forwardedFrom
+		forwardedInfo: event.message.forwardedInfo
 			? {
-					originalSenderId: event.forwardedFrom,
-					originalSentAt: event.forwardedAt ?? new Date().toISOString()
+					originalSenderId: event.message.forwardedInfo.originalSenderId,
+					originalSentAt: event.message.forwardedInfo.originalSentAt
 				}
 			: undefined,
-		attachment: event.attachmentId
-			? {
-					id: event.attachmentId,
-					name: event.attachmentName ?? '',
-					mimeType: event.attachmentMime ?? 'application/octet-stream',
-					size: event.attachmentSize ?? 0
-				}
-			: undefined
+		attachment: resolvedAttachment
 	};
 
 	const hasMoreAfter = chatsRegistry[roomId]?.hasMoreAfter ?? false;
@@ -80,8 +61,6 @@ export function handleWsMessageForwarded(event: {
 	} else {
 		newMessage(textMessage);
 	}
-	// Forward REST is fire-and-forget — WS echo is the only source of truth.
-	// Don't increment unread for messages I forwarded myself.
 	if (senderId !== session.id) {
 		incrementUnreadCount(roomId, 1);
 	}

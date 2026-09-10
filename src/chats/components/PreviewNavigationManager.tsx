@@ -110,10 +110,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 				// (MongooseIM path). getMessagingBackend() routes to the active backend.
 				const targetMessageId = target.messageId ?? target.stanzaId;
 				if (targetMessageId) {
-					getMessagingBackend(useStore.getState()).deleteMessage(
-						target.roomId,
-						targetMessageId
-					);
+					getMessagingBackend(useStore.getState()).deleteMessage(target.roomId, targetMessageId);
 				}
 				showSnackbar('success', successLabel);
 			})

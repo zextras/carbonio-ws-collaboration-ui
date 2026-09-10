@@ -19,33 +19,36 @@ export interface WsAttachment {
 	name: string;
 	mimeType: string;
 	size: number;
+	area?: string;
+}
+
+export interface WsTimelineMessage {
+	id: string;
+	roomId: string;
+	senderId: string;
+	text: string;
+	createdAt: string;
+	replyToId?: string;
+	repliedMessage?: WsTimelineMessage;
+	attachment?: WsAttachment;
+	reactions?: Array<{ reaction: string; userIds: string[] }>;
+	forwardedInfo?: { originalSenderId: string; originalSentAt: string };
+	editedInfo?: { editedAt: string };
+	deletedInfo?: { deletedBy: string; deletedAt: string };
 }
 
 // Outbound events (server -> client)
 export type WsChatEvent =
 	| {
 			type: 'MessageReceived';
-			messageId: string;
-			roomId: string;
-			senderId: string;
-			text: string;
-			timestamp: string;
-			replyToId?: string;
-			attachments?: WsAttachment[];
-			// Flat attachment fields (alternative to the attachments array)
-			attachmentId?: string;
-			attachmentName?: string;
-			attachmentMime?: string;
-			attachmentSize?: number;
-			// Present when this message-received is actually a forwarded message echoed back
-			forwardedFrom?: string; // original sender's userId
-			forwardedAt?: string; // ISO timestamp of original send
+			sentDate: string;
+			message: WsTimelineMessage;
+			tempId?: string;
 	  }
 	| {
 			type: 'MessageEdited';
 			messageId: string;
 			roomId: string;
-			senderId: string;
 			text: string;
 			editedAt: string;
 	  }
@@ -53,23 +56,13 @@ export type WsChatEvent =
 			type: 'MessageDeleted';
 			messageId: string;
 			roomId: string;
-			senderId: string;
+			deletedBy: string;
 			deletedAt: string;
 	  }
 	| {
 			type: 'MessageForwarded';
-			messageId: string;
-			roomId: string;
-			originalRoomId: string;
-			senderId: string;
-			text: string;
-			timestamp?: string;
-			forwardedFrom?: string; // original sender's userId
-			forwardedAt?: string; // ISO timestamp of original send
-			attachmentId?: string;
-			attachmentName?: string;
-			attachmentMime?: string;
-			attachmentSize?: number;
+			sentDate: string;
+			message: WsTimelineMessage;
 	  }
 	| {
 			type: 'ReactionChanged';

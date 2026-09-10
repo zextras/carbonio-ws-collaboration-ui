@@ -80,7 +80,8 @@ export function mapChatMessageToTextMessage(
 					id: chatMessage.attachment.id,
 					name: chatMessage.attachment.name,
 					mimeType: chatMessage.attachment.mimeType,
-					size: chatMessage.attachment.size
+					size: chatMessage.attachment.size,
+					area: chatMessage.attachment.area
 				}
 			: undefined
 	};

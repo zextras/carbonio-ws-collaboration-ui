@@ -13,7 +13,6 @@ import useStore from '../../../store/Store';
 export function handleWsMessageEdited(event: {
 	messageId: string;
 	roomId: string;
-	senderId: string;
 	text: string;
 	editedAt: string;
 }): void {

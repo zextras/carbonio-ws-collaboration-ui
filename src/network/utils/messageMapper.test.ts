@@ -70,6 +70,27 @@ describe('mapChatMessageToTextMessage - repliedMessage', () => {
 		expect(result.repliedMessage?.attachment?.name).toBe('photo.png');
 	});
 
+	test('maps attachment area through to the store message', () => {
+		const msg = baseChatMessage({
+			id: 'msg-area',
+			attachment: {
+				id: 'att-1',
+				name: 'img.png',
+				mimeType: 'image/png',
+				size: 512,
+				userId: 'user-a',
+				roomId: 'room-1',
+				createdAt: originalCreatedAt,
+				area: '640x480'
+			}
+		});
+
+		const result = mapChatMessageToTextMessage(msg, currentUserId);
+
+		expect(result.attachment?.id).toBe('att-1');
+		expect(result.attachment?.area).toBe('640x480');
+	});
+
 	test('falls back to a stub from replyToId when the original is not embedded', () => {
 		const reply = baseChatMessage({
 			id: 'reply-2',
