@@ -13,6 +13,7 @@ import {
 import VideoScreenInConnection from './VideoScreenInConnection';
 import { QualitySignals } from './voteWindow';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { clearStreamCaps, setDownloadCap } from '../../utils/debugStreamCaps';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
 const MEETING_ID = 'test-meeting';
@@ -325,5 +326,110 @@ describe('VideoScreenInConnection — auto-off / re-enable lifecycle', () => {
 
 			// The feed was in exactly one of the two sets at every phase — never in neither.
 		});
+	});
+});
+
+// displayBars = 3 is neither DOWN (<=2) nor UP (===5): the controller HOLDs, isolating the debug cap.
+const holdSignals: QualitySignals = { displayBars: 3, warnVote: false, restoreVote: false };
+
+// Wire an active feed (present in centralState, videoReceivers and streamsMap) at a given rung.
+const setupActiveFeed = (
+	conn: VideoScreenInConnection,
+	key: string,
+	userId: string,
+	rung: number
+): void => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const c = conn as any;
+	c.centralState.feeds.set(key, initialFeedState(rung));
+	const fakeReceiver = {
+		getStats: vi.fn(() => Promise.resolve(new Map()))
+	} as unknown as RTCRtpReceiver;
+	c.videoReceivers.set(key, { receiver: fakeReceiver, userId });
+	c.streamsMap[key] = { userId, type: STREAM_TYPE.VIDEO, mid: 'mid1' };
+};
+
+describe('VideoScreenInConnection — debug download cap', () => {
+	let conn: VideoScreenInConnection;
+	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);
+
+	beforeEach(() => {
+		conn = new VideoScreenInConnection(MEETING_ID);
+	});
+
+	afterEach(() => {
+		clearStreamCaps();
+	});
+
+	it('does NOTHING extra when no cap is set (regression: feed at TOP holds silent)', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+
+		await conn.evaluateQualityTick(holdSignals);
+
+		expect(requestVideoQuality).not.toHaveBeenCalled();
+	});
+
+	it('MEDIUM cap clamps a TOP feed down to rung 3 (360p, full fps)', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		setDownloadCap('MEDIUM');
+
+		await conn.evaluateQualityTick(holdSignals);
+
+		// layersOf(3) = { substream: 1, temporal: 2 }
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 1, 2);
+	});
+
+	it('LOW cap clamps to rung 1 (144p) and does not re-request while unchanged', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		setDownloadCap('LOW');
+
+		await conn.evaluateQualityTick(holdSignals);
+		await conn.evaluateQualityTick(holdSignals);
+
+		// layersOf(1) = { substream: 0, temporal: 2 }; requested exactly once (idempotent).
+		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 0, 2);
+	});
+
+	it('OFF cap suppresses every active feed', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		setDownloadCap('OFF');
+
+		await conn.evaluateQualityTick(holdSignals);
+
+		expect(storeMocks.setRemoveSubscription).toHaveBeenCalledWith(MEETING_ID, {
+			userId: USER_ID,
+			type: STREAM_TYPE.VIDEO
+		});
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
+	});
+
+	it('re-subscribes debug-OFF feeds when the cap is lifted to a tier', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		setDownloadCap('OFF');
+		await conn.evaluateQualityTick(holdSignals);
+		storeMocks.setAddSubscription.mockClear();
+
+		setDownloadCap('MEDIUM');
+		await conn.evaluateQualityTick(holdSignals);
+
+		expect(storeMocks.setAddSubscription).toHaveBeenCalledWith(MEETING_ID, {
+			userId: USER_ID,
+			type: STREAM_TYPE.VIDEO
+		});
+	});
+
+	it('reconciles back to the controller rung when the cap is cleared', async () => {
+		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		setDownloadCap('LOW');
+		await conn.evaluateQualityTick(holdSignals);
+		requestVideoQuality.mockClear();
+
+		setDownloadCap('AUTO'); // clear
+		await conn.evaluateQualityTick(holdSignals);
+
+		// Controller never moved (HOLD), so the feed returns to TOP_RUNG: layersOf(5) = { 2, 2 }.
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 2, 2);
 	});
 });

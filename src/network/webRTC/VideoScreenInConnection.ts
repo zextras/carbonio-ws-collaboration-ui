@@ -26,6 +26,7 @@ import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
 import { rtcDebug } from '../../utils/debug';
+import { DownloadCap, getDownloadCap } from '../../utils/debugStreamCaps';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
 // Why a downlink resolution/framerate change happened: OUR controller shedding quality under our own
@@ -77,6 +78,16 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	private evalTick = 0;
 
 	private downlinkSmState: DownlinkSmState = initialDownlinkSmState();
+
+	// DEBUG-ONLY manual download cap overlay. Inert (and the whole overlay path is skipped) unless the
+	// console hook sets a cap. `debugDownlinkActive` latches so the untouched default path is used
+	// byte-for-byte whenever the cap has never been touched; `lastAppliedRung` de-dupes reconcile
+	// requests; `debugOffFeeds` remembers feeds a debug OFF suppressed so a later tier can re-subscribe them.
+	private debugDownlinkActive = false;
+
+	private lastAppliedRung = new Map<string, number>();
+
+	private debugOffFeeds = new Map<string, string>();
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -142,6 +153,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.videoReceivers.delete(key);
 				this.centralState.feeds.delete(key);
 				this.suppressedVideo.delete(key);
+				this.lastAppliedRung.delete(key);
+				this.debugOffFeeds.delete(key);
 			}
 		});
 	};
@@ -224,57 +237,127 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			);
 			this.centralState = nextState;
 
-			// Apply every change (down/up/auto-off) to each feed in one sweep.
-			changes.forEach((change: DownlinkChange) => {
-				if (change.off) {
-					const r = feeds.find((fr) => fr.key === change.key);
-					if (r) this.suppressFeed(change.key, r.userId);
-				} else if (change.changeSubstream !== undefined) {
-					const { changeSubstream } = change;
-					if (this.suppressedVideo.has(change.key)) {
-						// The UP selected an auto-off feed: re-subscribe it instead of requesting a
-						// quality change (there is no active track yet). The 'suppressed' flag is cleared
-						// only in onTrack when the real track arrives — so a failed re-subscription is
-						// automatically retried on the next UP tick.
-						const { userId } = this.suppressedVideo.get(change.key)!;
-						useStore
-							.getState()
-							.setAddSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
-						useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
-						this.logDownlinkChange(
-							'off',
-							heightName(layersOf(change.rung).substream),
-							'OUR_NETWORK'
-						);
-					} else {
-						const r = feeds.find((fr) => fr.key === change.key);
-						if (r) {
-							requestVideoQuality(
-								this.meetingId,
-								r.userId,
-								r.mid,
-								changeSubstream,
-								change.changeTemporal
-							).catch(() => {});
-							// Temporal-only (framerate) steps never move the effective substream, so log them here;
-							// RESOLUTION changes (ours OR the sender's) are logged by logDownlinkTierChanges.
-							if (!change.substreamChanged) {
-								const height = heightName(changeSubstream);
-								this.logDownlinkChange(
-									`${height}@${Math.round(r.fps)}fps`,
-									`${height}@${framerateOf(r.fps, change.changeTemporal)}fps`,
-									'OUR_NETWORK'
-								);
-							}
-						}
-					}
-				}
-			});
+			// DEBUG download cap: when a manual cap is (or was just) active the overlay clamps every
+			// request; otherwise the default per-change sweep runs, byte-for-byte unchanged.
+			const downloadCap = getDownloadCap();
+			const capActive = downloadCap !== null;
+			if (!capActive && !this.debugDownlinkActive) {
+				changes.forEach((change) => this.applyDownlinkChangeDefault(change, feeds));
+			} else {
+				this.applyDownlinkChangesWithCap(changes, feeds, downloadCap);
+			}
+			this.debugDownlinkActive = capActive;
 
 			this.logDownlinkTierChanges();
 			this.evaluateDownlinkSnackbar(signals);
 		});
 	};
+
+	// The DEFAULT (uncapped) per-change apply — extracted verbatim from the original inline sweep so the
+	// hot path stays flat. Suppress on auto-off; re-subscribe an auto-off feed the UP selected; otherwise
+	// request the new quality and log a temporal-only step.
+	private applyDownlinkChangeDefault(change: DownlinkChange, feeds: FeedTick[]): void {
+		if (change.off) {
+			const r = feeds.find((fr) => fr.key === change.key);
+			if (r) this.suppressFeed(change.key, r.userId);
+			return;
+		}
+		if (change.changeSubstream === undefined) return;
+		const { changeSubstream } = change;
+		if (this.suppressedVideo.has(change.key)) {
+			// The UP selected an auto-off feed: re-subscribe it instead of requesting a quality change
+			// (there is no active track yet). The 'suppressed' flag is cleared only in onTrack when the real
+			// track arrives — so a failed re-subscription is automatically retried on the next UP tick.
+			const { userId } = this.suppressedVideo.get(change.key)!;
+			this.resubscribeFeed(change.key, userId);
+			this.logDownlinkChange('off', heightName(layersOf(change.rung).substream), 'OUR_NETWORK');
+			return;
+		}
+		const r = feeds.find((fr) => fr.key === change.key);
+		if (!r) return;
+		requestVideoQuality(
+			this.meetingId,
+			r.userId,
+			r.mid,
+			changeSubstream,
+			change.changeTemporal
+		).catch(() => {});
+		// Temporal-only (framerate) steps never move the effective substream, so log them here;
+		// RESOLUTION changes (ours OR the sender's) are logged by logDownlinkTierChanges.
+		if (!change.substreamChanged) {
+			const height = heightName(changeSubstream);
+			this.logDownlinkChange(
+				`${height}@${Math.round(r.fps)}fps`,
+				`${height}@${framerateOf(r.fps, change.changeTemporal)}fps`,
+				'OUR_NETWORK'
+			);
+		}
+	}
+
+	// DEBUG overlay apply. The controller (decideDownlink) has already run and evolved centralState on the
+	// real signals; here we only clamp what we REQUEST from Janus. The controller's lifecycle transitions
+	// (auto-off, auto-off -> re-subscribe) are honored; every active feed is reconciled to min(rung, cap).
+	private applyDownlinkChangesWithCap(
+		changes: DownlinkChange[],
+		feeds: FeedTick[],
+		cap: DownloadCap
+	): void {
+		changes.forEach((change) => this.applyCapLifecycle(change, feeds));
+
+		if (cap === 'OFF') {
+			this.debugForceAllOff(feeds);
+			return;
+		}
+		this.restoreDebugOffFeeds();
+		// Fresh activation after being uncapped: drop stale last-applied so the reconcile applies cleanly.
+		if (!this.debugDownlinkActive) this.lastAppliedRung.clear();
+		const capRung = typeof cap === 'number' ? cap : undefined; // null (cleared) -> no clamp
+		feeds.forEach((r) => this.reconcileFeedToCap(r, capRung));
+	}
+
+	// Under a cap, honor only the controller's lifecycle transitions; quality-only changes are owned by
+	// the reconcile so they can be clamped.
+	private applyCapLifecycle(change: DownlinkChange, feeds: FeedTick[]): void {
+		if (change.off) {
+			const r = feeds.find((fr) => fr.key === change.key);
+			if (r) this.suppressFeed(change.key, r.userId);
+		} else if (this.suppressedVideo.has(change.key)) {
+			const entry = this.suppressedVideo.get(change.key);
+			if (entry) this.resubscribeFeed(change.key, entry.userId);
+		}
+	}
+
+	// Debug OFF: force every still-active feed off, remembering it so a later tier can restore it.
+	private debugForceAllOff(feeds: FeedTick[]): void {
+		feeds.forEach((r) => {
+			if (this.suppressedVideo.has(r.key)) return;
+			this.debugOffFeeds.set(r.key, r.userId);
+			this.suppressFeed(r.key, r.userId);
+		});
+	}
+
+	// Re-subscribe every feed a previous debug OFF suppressed (called when the cap leaves OFF).
+	private restoreDebugOffFeeds(): void {
+		if (this.debugOffFeeds.size === 0) return;
+		this.debugOffFeeds.forEach((userId, key) => this.resubscribeFeed(key, userId));
+		this.debugOffFeeds.clear();
+	}
+
+	// Request min(controller rung, cap) for one feed, de-duped against the last value we applied.
+	private reconcileFeedToCap(r: FeedTick, capRung: number | undefined): void {
+		const fs = this.centralState.feeds.get(r.key);
+		if (fs === undefined) return;
+		const desiredRung = capRung !== undefined ? Math.min(fs.rung, capRung) : fs.rung;
+		if (this.lastAppliedRung.get(r.key) === desiredRung) return;
+		this.lastAppliedRung.set(r.key, desiredRung);
+		const { substream, temporal } = layersOf(desiredRung);
+		requestVideoQuality(this.meetingId, r.userId, r.mid, substream, temporal).catch(() => {});
+	}
+
+	private resubscribeFeed(key: string, userId: string): void {
+		useStore.getState().setAddSubscription(this.meetingId, { userId, type: STREAM_TYPE.VIDEO });
+		useStore.getState().setLocalVideoSuppressed(this.meetingId, userId, false);
+	}
 
 	// Debug logs identify the feed by display name / email, not the raw user id.
 	private who(userId: string): string {
@@ -398,6 +481,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.centralState = initialCentralState();
 		this.suppressedVideo.clear();
 		this.downlinkSmState = initialDownlinkSmState();
+		this.lastAppliedRung.clear();
+		this.debugOffFeeds.clear();
+		this.debugDownlinkActive = false;
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();
 	}

@@ -14,6 +14,7 @@ import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import ConnectionSnackbarManager from '../chats/components/ConnectionSnackbarManager';
 import PreviewNavigationManager from '../chats/components/PreviewNavigationManager';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
+import { installStreamDebugHook } from '../utils/debugStreamCaps';
 
 const LazyMeetingMainView = lazy(
 	() => import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
@@ -32,6 +33,8 @@ const MeetingMain = (): React.JSX.Element => (
 
 export default function useMeetingsApp(): void {
 	useEffect(() => {
+		// DEBUG-ONLY: expose window.wscStreamDebug for manual stream-quality hard-caps. Inert until used.
+		installStreamDebugHook();
 		addRoute({
 			route: MEETINGS_ROUTE,
 			visible: false,

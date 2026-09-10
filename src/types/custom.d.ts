@@ -12,3 +12,13 @@ declare module '*.png' {
 declare module '*.mp3';
 
 declare module '*.ogg';
+
+// DEBUG-ONLY console hook for manual meeting stream-quality hard-caps (see utils/debugStreamCaps.ts).
+interface Window {
+	wscStreamDebug?: {
+		setUploadCap: (tier: string | null) => void;
+		setDownloadCap: (tier: string | null) => void;
+		clear: () => void;
+		status: () => void;
+	};
+}

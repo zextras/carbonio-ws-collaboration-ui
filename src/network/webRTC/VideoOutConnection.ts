@@ -10,8 +10,12 @@ import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { getUploadCapSubstream } from '../../utils/debugStreamCaps';
 import { getVideoStream } from '../../utils/UserMediaManager';
 import { videoIceRestart, updateMediaOffer } from '../apis/MeetingsApi';
+
+// Simulcast rid -> ascending tier index (low=0, medium=1, high=2), for the debug upload cap.
+const RID_INDEX: Record<string, number> = { l: 0, m: 1, h: 2 };
 
 export default class VideoOutConnection implements IVideoOutConnection {
 	peerConn: RTCPeerConnection | null;
@@ -134,6 +138,26 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		} catch (e) {
 			// setCodecPreferences unsupported: VP8 still negotiates by default
 		}
+		// Re-assert a manual debug upload cap on the freshly created sender (inert unless one is set).
+		const uploadCap = getUploadCapSubstream();
+		if (uploadCap !== null) this.applyDebugUploadCap(uploadCap);
+	}
+
+	// DEBUG-ONLY: clamp the active simulcast encodings to a rid-index ceiling (0=l,1=m,2=h) so GCC cannot
+	// send above it, or null to re-activate all. No-op with <=1 encoding (nothing to cap) or no sender.
+	public applyDebugUploadCap(capSubstream: 0 | 1 | 2 | null): void {
+		const sender = this.rtpSender;
+		if (!sender || typeof sender.getParameters !== 'function') return;
+		const params = sender.getParameters();
+		const encodings = params.encodings ?? [];
+		if (encodings.length <= 1) return;
+		encodings.forEach((e) => {
+			const idx = e.rid != null ? (RID_INDEX[e.rid] ?? 0) : 0;
+			e.active = capSubstream === null ? true : idx <= capSubstream;
+		});
+		sender
+			.setParameters(params)
+			.catch((reason) => console.warn('applyDebugUploadCap failed', reason));
 	}
 
 	// Stop the old track and add the new one without a new renegotiation

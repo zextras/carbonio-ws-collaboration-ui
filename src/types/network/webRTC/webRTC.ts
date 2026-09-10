@@ -44,6 +44,9 @@ export interface IVideoOutConnection extends IPeerConnection {
 		mediaStreamTrack: MediaStream,
 		isVirtualBackground?: boolean
 	): Promise<MediaStreamTrack | undefined>;
+	// DEBUG-ONLY manual uplink hard-cap: clamp the active simulcast encodings to a rid-index ceiling
+	// (0=l,1=m,2=h) via setParameters, or null to re-activate all. Inert unless the console hook sets it.
+	applyDebugUploadCap(capSubstream: 0 | 1 | 2 | null): void;
 }
 
 export interface IScreenOutConnection extends IPeerConnection {
