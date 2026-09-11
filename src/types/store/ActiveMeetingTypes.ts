@@ -39,7 +39,6 @@ export type ActiveMeetingSlice = {
 	setTalkingUser: (userId: string, isTalking: boolean) => void;
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
-	setLocalVideoSuppressed: (meetingId: string, userId: string, suppressed: boolean) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
 	setDeleteSubscription: (
 		meetingId: string,
@@ -68,7 +67,6 @@ export type ActiveMeeting = {
 	connectionScoreDetail: LinkSample | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
-	localVideoSuppressed: Record<string, boolean>;
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;

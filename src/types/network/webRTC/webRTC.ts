@@ -61,6 +61,7 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
 	// One downlink-quality evaluation per 2 s tick, driven by the connection monitor. Receives the RAW
-	// downlink VIDEO-loss score (0..10); it owns the global-rung controller and feed reconciliation.
-	evaluateQualityTick(dlScore: number): Promise<void>;
+	// downlink VIDEO-loss score (0..10), or undefined on a loss-blind tick; it owns the global-rung
+	// controller and feed reconciliation.
+	evaluateQualityTick(dlScore: number | undefined): Promise<void>;
 }

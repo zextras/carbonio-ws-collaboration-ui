@@ -85,10 +85,15 @@ export type DownlinkDecision = {
 };
 
 /**
- * One tick of the global downlink controller. Reads the RAW downlink-loss score (0..10) and returns the
- * (possibly moved) global targetRung. Priority: DOWN > UP > HOLD. The returned state is a fresh object.
+ * One tick of the global downlink controller. Reads the RAW downlink-loss score (0..10), or `undefined`
+ * when downlink loss was not measurable this window (post-switch mask, thin/low-tier feed below the
+ * packet gate, or the consistency gate rejected the reading). Returns the (possibly moved) global
+ * targetRung. Priority: DOWN > UP > HOLD. The returned state is a fresh object.
  */
-export function decideDownlink(prev: CentralDownlinkState, dlScore: number): DownlinkDecision {
+export function decideDownlink(
+	prev: CentralDownlinkState,
+	dlScore: number | undefined
+): DownlinkDecision {
 	const state: CentralDownlinkState = {
 		targetRung: prev.targetRung,
 		tick: prev.tick + 1,
@@ -98,6 +103,17 @@ export function decideDownlink(prev: CentralDownlinkState, dlScore: number): Dow
 		ticksSinceUp: prev.ticksSinceUp + 1,
 		ticksSinceDown: prev.ticksSinceDown + 1
 	};
+
+	// Loss-blind tick: contribute NO evidence and make NO rung decision, so the N-of-M windows count only
+	// real readings (a static/idle scene never probes UP on the mere absence of loss). The backoff timers
+	// still advance — time passed — and a stability reset can still fire.
+	if (dlScore === undefined) {
+		if (state.ticksSinceDown >= RESET_STABLE && state.cooldownLen > COOLDOWN_BASE) {
+			state.cooldownLen = COOLDOWN_BASE;
+			state.upBlockedFor = 0;
+		}
+		return { state, targetRung: state.targetRung, changed: false, signal: 'HOLD' };
+	}
 
 	// Accumulate the raw score into the resettable evidence buffer (capped).
 	state.evidenceBuf.push(dlScore);

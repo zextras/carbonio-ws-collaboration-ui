@@ -140,7 +140,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// global rung controller, then reconciles EVERY active feed to the global target (one request per feed
 	// whose target actually moved). Stateless per feed: we always request the global target and let Janus
 	// clamp each feed to what its publisher actually publishes.
-	public evaluateQualityTick = (dlScore: number): Promise<void> => {
+	public evaluateQualityTick = (dlScore: number | undefined): Promise<void> => {
 		this.evalTick += 1;
 
 		const { state, targetRung, changed, signal } = decideDownlink(this.centralState, dlScore);

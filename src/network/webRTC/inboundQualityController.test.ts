@@ -315,3 +315,51 @@ test('evidenceBuf resets to [] after DOWN', () => {
 	const { state } = driveDown(s);
 	expect(state.evidenceBuf).toEqual([]);
 });
+
+describe('loss-blind ticks (undefined dlScore) — old-browser / masked / thin-video safety', () => {
+	it('a single undefined tick HOLDs, does not move the rung, and pushes no evidence', () => {
+		const s = initialCentralState();
+		const { state, targetRung, changed, signal } = decideDownlink(s, undefined);
+		expect(signal).toBe('HOLD');
+		expect(changed).toBe(false);
+		expect(targetRung).toBe(TOP_RUNG);
+		expect(state.evidenceBuf).toEqual([]); // no evidence contributed on a blind tick
+		expect(state.tick).toBe(1); // timers still advance
+	});
+
+	it('never moves the webcam when downlink loss is permanently unmeasurable (stays at TOP_RUNG)', () => {
+		let s = initialCentralState();
+		for (let i = 0; i < 100; i += 1) {
+			const r = decideDownlink(s, undefined);
+			s = r.state;
+			expect(r.changed).toBe(false);
+		}
+		expect(s.targetRung).toBe(TOP_RUNG);
+		expect(s.evidenceBuf).toEqual([]);
+	});
+
+	it('undefined ticks still advance the backoff timers (cooldown drains after enough quiet ticks)', () => {
+		let s: CentralDownlinkState = {
+			...initialCentralState(),
+			cooldownLen: COOLDOWN_MAX,
+			upBlockedFor: COOLDOWN_MAX,
+			ticksSinceDown: 0
+		};
+		for (let i = 0; i < RESET_STABLE + 1; i += 1) s = decideDownlink(s, undefined).state;
+		expect(s.cooldownLen).toBe(COOLDOWN_BASE);
+		expect(s.upBlockedFor).toBe(0);
+	});
+
+	it('an undefined tick between real readings neither resets nor pollutes the evidence window', () => {
+		// 3 low readings (not enough for DOWN 4/5), one blind tick (no push), then a 4th low reading:
+		// DOWN still fires on the four REAL readings — the blind tick contributed nothing.
+		let s = initialCentralState();
+		s = decideDownlink(s, 0).state;
+		s = decideDownlink(s, 0).state;
+		s = decideDownlink(s, 0).state;
+		s = decideDownlink(s, undefined).state;
+		const r = decideDownlink(s, 0);
+		expect(r.signal).toBe('DOWN');
+		expect(r.targetRung).toBe(TOP_RUNG - 1);
+	});
+});

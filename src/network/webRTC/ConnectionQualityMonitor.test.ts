@@ -629,13 +629,15 @@ describe('ConnectionQualityMonitor — evaluateQualityTick (video controller fee
 		return { monitor, spy };
 	};
 
-	it('is called with a number on each timer tick; with no stats dlScore equals 10', async () => {
+	it('is called with undefined on a loss-blind tick (no downlink stats) so the controller HOLDs', async () => {
 		const { monitor, spy } = buildWithSpy();
 		// evaluate() is the production timer path; call it directly via private access.
 		await (monitor as any).evaluate();
 		expect(spy).toHaveBeenCalledOnce();
-		expect(typeof spy.mock.calls[0][0]).toBe('number');
-		expect(spy).toHaveBeenCalledWith(10); // undefined loss → curveScore(undefined) = 10
+		// No forwarded-video stats => downlink loss is not measurable => the controller receives undefined
+		// and makes NO rung decision. An old browser lacking the SR-escape stats simply never moves the
+		// webcam; it does not fabricate a "clean" score that would probe up.
+		expect(spy).toHaveBeenCalledWith(undefined);
 	});
 
 	it('receives a low dlScore (< 5) when downlink video loss is high and invariant is satisfied', async () => {
@@ -661,8 +663,8 @@ describe('ConnectionQualityMonitor — evaluateQualityTick (video controller fee
 				])
 			);
 		});
-		// tick 1: SSRC seeded, mask=2→1, lossDownVideoOwn=undefined → dlScore=10
-		// tick 2: mask=1→0, still masked → dlScore=10
+		// tick 1: SSRC seeded, mask=2→1, lossDownVideoOwn=undefined → dlScore=undefined (loss-blind)
+		// tick 2: mask=1→0, still masked → dlScore=undefined (loss-blind)
 		// tick 3: real reading → lossDownVideoOwn≈0.40 → dlScore≈0.025
 		await (monitor as any).evaluate();
 		await (monitor as any).evaluate();

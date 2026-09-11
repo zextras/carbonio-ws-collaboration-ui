@@ -197,7 +197,7 @@ export default class ConnectionQualityMonitor {
 	private async computeQuality(): Promise<{
 		raw: LinkSample;
 		level: ConnectionQuality;
-		dlScore: number;
+		dlScore: number | undefined;
 	}> {
 		const audioState = this.audioConn.peerConn?.connectionState;
 		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
@@ -273,8 +273,11 @@ export default class ConnectionQualityMonitor {
 		if (lossDownVideo !== undefined) raw.lossDownVideo = lossDownVideo;
 		if (lossDownVideoOwn !== undefined) raw.lossDownVideoOwn = lossDownVideoOwn;
 
-		// The video controller reads the RAW downlink-loss score every tick (undefined loss => 10 = off).
-		const dlScore = downlinkVideoLossScore(lossDownVideoOwn);
+		// The video controller reads the RAW downlink-loss score, or undefined when downlink loss was not
+		// measurable this window (masked / thin / gate-rejected) — a loss-blind tick the controller HOLDs on
+		// instead of treating "no loss" as evidence to probe up.
+		const dlScore =
+			lossDownVideoOwn !== undefined ? downlinkVideoLossScore(lossDownVideoOwn) : undefined;
 
 		return { raw, level: this.vote(raw, iceConnected), dlScore };
 	}
