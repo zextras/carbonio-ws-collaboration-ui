@@ -13,8 +13,7 @@ import { getRequiredAttribute } from './decodeStanza';
 export function decodeMarker(markerStanza: Element): Marker {
 	return {
 		from: getId(getRequiredAttribute(markerStanza, 'from')),
-		messageId: getRequiredAttribute(markerStanza, 'id'),
-		markerDate: dateToTimestamp(getRequiredAttribute(markerStanza, 'timestamp')),
+		lastReadAt: dateToTimestamp(getRequiredAttribute(markerStanza, 'timestamp')),
 		type: getRequiredAttribute(markerStanza, 'type') as 'displayed'
 	};
 }

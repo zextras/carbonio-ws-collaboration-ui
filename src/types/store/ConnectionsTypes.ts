@@ -17,7 +17,7 @@ export type ConnectionsStoreSlice = {
 	setMessagingBackend: (backend: IMessagingBackend) => void;
 	resetXmppData: () => void;
 	resetChatData: () => void;
-	updateReadMarker: (roomId: string, userId: string, messageId: string) => void;
+	updateReadMarker: (roomId: string, userId: string, lastReadAt: number) => void;
 	editMessage: (roomId: string, messageId: string, text: string, editedAt: string) => void;
 	deleteMessage: (roomId: string, messageId: string, deletedBy: string, deletedAt: string) => void;
 };

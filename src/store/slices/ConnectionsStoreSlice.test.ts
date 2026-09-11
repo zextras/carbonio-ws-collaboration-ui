@@ -61,8 +61,8 @@ describe('Connections slice', () => {
 		const room2 = createMockRoom({ id: '2' });
 		const message1 = createMockTextMessage({ id: '1', roomId: room1.id });
 		const message2 = createMockTextMessage({ id: '2', roomId: room2.id });
-		const marker1 = createMockMarker({ messageId: message1.id });
-		const marker2 = createMockMarker({ messageId: message2.id });
+		const marker1 = createMockMarker({ lastReadAt: message1.date });
+		const marker2 = createMockMarker({ lastReadAt: message2.date });
 
 		const { result } = renderHook(() => useStore());
 

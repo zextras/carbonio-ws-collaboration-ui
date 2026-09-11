@@ -108,7 +108,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 
 	test('User some messages', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
+		const myLastMarker = createMockMarker({ from: myUserId, lastReadAt: textHistory[3].date });
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(2);
@@ -121,7 +121,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({
 			from: myUserId,
-			messageId: last(textHistory)?.id || ''
+			lastReadAt: last(textHistory)?.date ?? 0
 		});
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
@@ -133,7 +133,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 
 	test('Reading a message after first access', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId2' });
+		const myLastMarker = createMockMarker({ from: myUserId, lastReadAt: textHistory[2].date });
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
@@ -161,7 +161,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 
 	test('User last read is his message and after there is a deleted message', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId1' });
+		const myLastMarker = createMockMarker({ from: myUserId, lastReadAt: complexHistory[1].date });
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
@@ -174,7 +174,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({
 			from: myUserId,
-			messageId: last(complexHistory)?.id || ''
+			lastReadAt: last(complexHistory)?.date ?? 0
 		});
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
@@ -186,7 +186,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 
 	test('Reading a message before a configuration message', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
+		const myLastMarker = createMockMarker({ from: myUserId, lastReadAt: complexHistory[3].date });
 		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(1);

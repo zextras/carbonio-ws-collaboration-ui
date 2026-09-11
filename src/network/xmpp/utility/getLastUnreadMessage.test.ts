@@ -28,7 +28,7 @@ const markedMessage = createMockTextMessage({
 });
 const myMarker = createMockMarker({
 	from: sessionUser.id,
-	messageId: markedMessage.id
+	lastReadAt: markedMessage.date
 });
 
 beforeEach(() => {

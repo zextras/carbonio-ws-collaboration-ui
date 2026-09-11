@@ -357,8 +357,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			});
 			const marker = createMockMarker({
 				from: 'userId1',
-				markerDate: msg.date,
-				messageId: msg.id
+				lastReadAt: msg.date
 			});
 
 			useStore.getState().addRooms([room]);

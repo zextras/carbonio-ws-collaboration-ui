@@ -5,7 +5,7 @@
  */
 
 import useStore from '../../../store/Store';
-import { Marker } from '../../../types/store/ChatsRegistryTypes';
+import { Marker, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
@@ -17,13 +17,19 @@ export function onDisplayedMessageStanza(message: Element): true {
 		if (messageId) {
 			const from = getRequiredAttribute(message, 'from');
 			const roomId = getId(from);
+			const store = useStore.getState();
+			const messages = store.chatsRegistry[roomId]?.messages ?? [];
+			const markedMessage = messages.find(
+				(m) =>
+					m.id === messageId ||
+					(m.type === MessageType.TEXT_MSG && (m as TextMessage).stanzaId === messageId)
+			);
+			const lastReadAt = markedMessage?.date ?? now();
 			const displayedMessage: Marker = {
 				from: getId(getResource(from)),
-				messageId,
-				markerDate: now(),
+				lastReadAt,
 				type: 'displayed'
 			};
-			const store = useStore.getState();
 			store.updateReadStatus(roomId, [displayedMessage]);
 		}
 	}

@@ -33,19 +33,16 @@ const textMessage = createMockTextMessage({
 });
 
 const user1Marker = createMockMarker({
-	messageId: textMessage.id,
 	from: user1.id,
-	markerDate: now - 4000
+	lastReadAt: now - 4000
 });
 const user2Marker = createMockMarker({
-	messageId: textMessage.id,
 	from: user2.id,
-	markerDate: now - 3000
+	lastReadAt: now - 3000
 });
 const sessionUserMarker = createMockMarker({
-	messageId: textMessage.id,
 	from: sessionUser.id,
-	markerDate: now - 2000
+	lastReadAt: now - 2000
 });
 
 const ComplexComponent = (): ReactElement => {

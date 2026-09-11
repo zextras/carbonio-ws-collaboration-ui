@@ -79,14 +79,12 @@ const extractEventActorAndMember = (
 };
 
 const calcReadStatusFromMarkers = (
-	messageId: string,
 	messageDate: number,
 	senderId: string,
 	apiMarkers:
 		| Array<{
 				userId: string;
-				messageId: string;
-				readAt: string;
+				lastReadAt: string;
 		  }>
 		| undefined,
 	members: Array<{ userId: string }> | undefined,
@@ -97,8 +95,7 @@ const calcReadStatusFromMarkers = (
 
 	const readByCount = apiMarkers.filter((marker) => {
 		if (marker.userId === sessionId) return false;
-		const markerDate = dateToTimestamp(marker.readAt);
-		return isBefore(messageDate, markerDate) || marker.messageId === messageId;
+		return isBefore(messageDate, dateToTimestamp(marker.lastReadAt));
 	}).length;
 
 	const otherMembersCount = members.filter((m) => m.userId !== sessionId).length;
@@ -133,8 +130,7 @@ export function hydrateStoreFromInbox(
 			const { updateReadStatus } = useStore.getState();
 			const storeMarkers: Marker[] = conv.markers.map((m) => ({
 				from: m.userId,
-				messageId: m.messageId,
-				markerDate: dateToTimestamp(m.readAt),
+				lastReadAt: dateToTimestamp(m.lastReadAt),
 				type: 'displayed' as const
 			}));
 			updateReadStatus(conv.roomId, storeMarkers);
@@ -146,7 +142,6 @@ export function hydrateStoreFromInbox(
 		if (msgDate >= eventDate && conv.lastMessage) {
 			const msg = conv.lastMessage;
 			const readStatus = calcReadStatusFromMarkers(
-				msg.id,
 				dateToTimestamp(msg.createdAt),
 				msg.senderId,
 				conv.markers,

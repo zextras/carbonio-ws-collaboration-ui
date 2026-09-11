@@ -40,9 +40,7 @@ const ReadByPopoverList = ({ roomId, stanzaId, anchorRef }: ReadByProps): ReactE
 		if (!messageDate) return [];
 		const readBy: string[] = [];
 		forEach(markers, (marker, userId: string) => {
-			const markedMessage = find(messages, (message) => message.id === marker.messageId);
-			const dateToCompare = markedMessage?.date ?? marker.markerDate;
-			if (marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
+			if (marker.from !== sessionId && isBefore(messageDate, marker.lastReadAt)) {
 				readBy.push(userId);
 			}
 		});

@@ -5,6 +5,7 @@
  */
 
 import useStore from '../../../store/Store';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 /**
  * Handles read-updated events from the WebSocket.
@@ -14,16 +15,14 @@ import useStore from '../../../store/Store';
 export function handleWsReadUpdated(event: {
 	roomId: string;
 	userId: string;
-	messageId: string;
+	lastReadAt: string;
 }): void {
 	const { updateReadMarker, setUnreadCount, session } = useStore.getState();
-	const { roomId, userId, messageId } = event;
+	const { roomId, userId, lastReadAt } = event;
 
 	if (userId !== session.id) {
-		// Another user has read messages in this room
-		updateReadMarker(roomId, userId, messageId);
+		updateReadMarker(roomId, userId, dateToTimestamp(lastReadAt));
 	} else {
-		// My own read marker echoed back - clear unread count
 		setUnreadCount(roomId, 0);
 	}
 }

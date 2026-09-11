@@ -76,7 +76,7 @@ export type WsChatEvent =
 			type: 'ReadUpdated';
 			roomId: string;
 			userId: string;
-			messageId: string;
+			lastReadAt: string;
 	  }
 	| {
 			type: 'PresenceChanged';

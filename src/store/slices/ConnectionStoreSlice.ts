@@ -115,29 +115,16 @@ export const useConnectionsStoreSlice: StateCreator<
 			'CONNECTIONS/RESET_CHAT_DATA'
 		);
 	},
-	updateReadMarker: (roomId: string, userId: string, messageId: string): void => {
+	updateReadMarker: (roomId: string, userId: string, lastReadAt: number): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = draft.chatsRegistry[roomId];
 				if (!registry) return;
 				if (!registry.markers) registry.markers = {};
 
-				const markerDate = Date.now();
 				const existing = registry.markers[userId];
-				if (existing && existing.markerDate >= markerDate) return;
-				registry.markers[userId] = { from: userId, messageId, markerDate, type: 'displayed' };
-
-				// Resolve target date — prefer exact message match, fall back to lastMessage, then current time
-				const targetMessage = (registry.messages ?? []).find(
-					(m) => m.type === MessageType.TEXT_MSG && (m.stanzaId === messageId || m.id === messageId)
-				);
-				const targetDate: number =
-					targetMessage?.date ??
-					(registry.lastMessage &&
-					((registry.lastMessage as any).id === messageId ||
-						(registry.lastMessage as any).stanzaId === messageId)
-						? registry.lastMessage.date
-						: markerDate);
+				if (existing && existing.lastReadAt >= lastReadAt) return;
+				registry.markers[userId] = { from: userId, lastReadAt, type: 'displayed' };
 
 				const myId = draft.session.id;
 				if (registry.messages?.length && myId) {
@@ -145,7 +132,7 @@ export const useConnectionsStoreSlice: StateCreator<
 						if (
 							msg.type === MessageType.TEXT_MSG &&
 							msg.from === myId &&
-							msg.date <= targetDate &&
+							msg.date <= lastReadAt &&
 							msg.read === MarkerStatus.UNREAD
 						) {
 							return { ...msg, read: MarkerStatus.READ };
@@ -157,7 +144,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					registry.lastMessage &&
 					registry.lastMessage.type === MessageType.TEXT_MSG &&
 					(registry.lastMessage as any).from === myId &&
-					registry.lastMessage.date <= targetDate &&
+					registry.lastMessage.date <= lastReadAt &&
 					registry.lastMessage.read === MarkerStatus.UNREAD
 				) {
 					registry.lastMessage = { ...registry.lastMessage, read: MarkerStatus.READ };

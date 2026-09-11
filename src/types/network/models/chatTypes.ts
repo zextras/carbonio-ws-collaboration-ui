@@ -117,8 +117,7 @@ export type TimelineResponse = {
 
 export type ReadMarker = {
 	userId: string;
-	messageId: string;
-	readAt: string;
+	lastReadAt: string;
 };
 
 export type RoomReadMarkers = {
@@ -246,8 +245,7 @@ export type ReadMarkerUpdatedEvent = BaseChatEvent & {
 	type: 'read_marker_updated';
 	roomId: string;
 	userId: string;
-	messageId: string;
-	readAt: string;
+	lastReadAt: string;
 };
 
 export type HeartbeatEvent = BaseChatEvent & {

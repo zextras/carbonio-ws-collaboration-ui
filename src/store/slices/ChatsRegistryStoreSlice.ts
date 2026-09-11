@@ -227,7 +227,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					// Update markers
 					forEach(markers, (marker) => {
 						const existing = existingMarkers[marker.from];
-						if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
+						if (!existing || isBefore(existing.lastReadAt, marker.lastReadAt)) {
 							draft.chatsRegistry[roomId].markers[marker.from] = marker;
 						}
 					});
@@ -414,7 +414,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// Set a member marker only when it's a new marker, or it is more recent than other
 				forEach(newMarkers, (marker) => {
 					const existing = markers[marker.from];
-					if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
+					if (!existing || isBefore(existing.lastReadAt, marker.lastReadAt)) {
 						markers[marker.from] = marker;
 					}
 				});
@@ -448,9 +448,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				if (messages.length > 0) {
 					const myId = draft.session.id;
 					const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
-					const lastMarkedDate = myMarker
-						? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
-						: undefined;
+					const lastMarkedDate = myMarker?.lastReadAt;
 
 					const unreadMessages = messages.filter((msg) => {
 						const isConfigOrFromOthers =

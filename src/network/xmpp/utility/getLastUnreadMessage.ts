@@ -3,10 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { find, last } from 'lodash';
+import { last } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { isBefore } from '../../../utils/dateUtils';
 
 export function getLastUnreadMessage(roomId: string): string | undefined {
@@ -19,13 +19,9 @@ export function getLastUnreadMessage(roomId: string): string | undefined {
 		)
 	);
 	if (lastMessage) {
-		const myMarker = chatsRegistry[roomId]?.markers[session.id!]?.messageId;
-		if (myMarker) {
-			const myMarkedMessage = find(
-				chatsRegistry[roomId].messages,
-				(message: Message) => message.id === myMarker
-			);
-			if (myMarkedMessage && !isBefore(lastMessage.date, myMarkedMessage?.date)) {
+		const myMarkerLastReadAt = chatsRegistry[roomId]?.markers[session.id!]?.lastReadAt;
+		if (myMarkerLastReadAt !== undefined) {
+			if (!isBefore(lastMessage.date, myMarkerLastReadAt)) {
 				return lastMessage.id;
 			}
 			return undefined;

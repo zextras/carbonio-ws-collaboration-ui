@@ -107,8 +107,7 @@ export const createMockMember = (fields?: Partial<MemberBe>): MemberBe => ({
 
 export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 	from: 'from',
-	messageId: 'messageId',
-	markerDate: 1662541394393,
+	lastReadAt: 1662541394393,
 	type: 'displayed',
 	...fields
 });

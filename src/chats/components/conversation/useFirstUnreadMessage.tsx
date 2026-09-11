@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 
-import { filter, findIndex, size, slice } from 'lodash';
+import { filter, findLastIndex, size, slice } from 'lodash';
 
 import {
 	getMyLastMarkerOfRoom,
@@ -41,10 +41,9 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 		// Don't calculate if it is already set or if necessary data aren't loaded
 		if (!firstUnreadMessageId && myUserId && size(messages) > 0) {
 			if (unreadCount > 0) {
-				const lastMessageReadByMe = findIndex(
-					messages,
-					(message) => message.id === myLastMarker?.messageId
-				);
+				const lastMessageReadByMe = myLastMarker
+					? findLastIndex(messages, (message) => message.date <= myLastMarker.lastReadAt)
+					: -1;
 				// If last message read by me exist on local store
 				if (lastMessageReadByMe !== -1) {
 					// Take only messages from other that come later (all unread messages)

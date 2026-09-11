@@ -255,8 +255,7 @@ export function mapTimelineItemsToMessages(
 export function mapReadMarkerToMarker(readMarker: ReadMarker): Marker {
 	return {
 		from: readMarker.userId,
-		messageId: readMarker.messageId,
-		markerDate: new Date(readMarker.readAt).getTime(),
+		lastReadAt: new Date(readMarker.lastReadAt).getTime(),
 		type: 'displayed'
 	};
 }

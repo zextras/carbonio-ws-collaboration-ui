@@ -200,7 +200,6 @@ export type PlaceholderFields = {
 
 export type Marker = {
 	from: string;
-	messageId: string;
-	markerDate: number;
+	lastReadAt: number;
 	type: 'displayed';
 };
