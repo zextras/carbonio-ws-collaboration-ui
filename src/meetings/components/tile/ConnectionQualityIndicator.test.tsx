@@ -43,20 +43,28 @@ describe('ConnectionQualityIndicator', () => {
 		expect(screen.getByTestId('icon: WifiOff')).toBeInTheDocument();
 	});
 
-	it('shows the raw rtt/jitter/loss detail on the own tile, with a — fallback for a missing value', async () => {
+	it('always shows the own indicator even at a good (stable) quality', () => {
+		useStore.getState().setLoginInfo({ id: ME_ID });
+		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, ME_ID, 'optimal', 1);
+		const { container } = setup(
+			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} />
+		);
+		expect(container).not.toBeEmptyDOMElement();
+	});
+
+	it('shows the vote-component scores on the own tile, with a — fallback for a missing signal', async () => {
 		useStore.getState().setLoginInfo({ id: ME_ID });
 		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, ME_ID, 'lost', 1);
-		useStore.getState().setConnectionScoreDetail({ rttMs: 100, jitterMs: 20, lossUp: 0.05 });
+		// jitter undefined this window -> em-dash; rttScore(450)=2.5, uplinkLossScore(0.07)=5.6.
+		useStore.getState().setConnectionScoreDetail({ rttMs: 450, lossUp: 0.07 });
 
 		const { user } = setup(
 			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} />
 		);
 		await user.hover(screen.getByTestId('icon: WifiOff'));
 
-		const detail = await screen.findByText(/RTT: 100 ms/);
-		expect(detail).toHaveTextContent('Jitter: 20 ms');
-		expect(detail).toHaveTextContent('Loss ↑: 5.0%');
-		// lossDown was not measured this window -> em-dash fallback.
-		expect(detail).toHaveTextContent('Loss ↓: —');
+		const detail = await screen.findByText(/RTT: 2\.5\/10 \(450 ms\)/);
+		expect(detail).toHaveTextContent('Jitter: —');
+		expect(detail).toHaveTextContent('Uplink loss: 5.6/10 (7.0%)');
 	});
 });
