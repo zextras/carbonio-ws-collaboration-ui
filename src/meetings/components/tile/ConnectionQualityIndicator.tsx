@@ -93,7 +93,7 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 			`RTT: ${ms(ownDetail.rttMs)}`,
 			`Jitter: ${ms(ownDetail.jitterMs)}`,
 			`Loss ↑: ${pct(ownDetail.lossUp)}`,
-			`Loss ↓: ${pct(ownDetail.lossDown)}`
+			`Loss ↓: ${pct(ownDetail.lossDownVideo)}`
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

@@ -51,7 +51,6 @@ export type ActiveMeetingSlice = {
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: LinkSample) => void;
-	setDownlinkCompromised: (meetingId: string, compromised: boolean) => void;
 };
 
 export type ActiveMeeting = {
@@ -67,9 +66,6 @@ export type ActiveMeeting = {
 	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
 	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
 	connectionScoreDetail: LinkSample | undefined;
-	// true while our downlink is consuming a lower tier than at least one publisher is sending,
-	// written by the per-tick state machine in VideoScreenInConnection.
-	downlinkCompromised: boolean;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	localVideoSuppressed: Record<string, boolean>;
@@ -86,7 +82,6 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
-	maxTier?: number;
 };
 
 export enum MeetingAccordionType {

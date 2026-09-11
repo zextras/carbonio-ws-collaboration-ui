@@ -243,8 +243,7 @@ export const useMeetingsStoreSlice: StateCreator<
 		meetingId: string,
 		userId: string,
 		quality: ConnectionQuality,
-		changedAt: number,
-		maxTier?: number
+		changedAt: number
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -252,22 +251,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
-					activeMeeting.connectionQuality[userId] = {
-						quality,
-						changedAt,
-						...(maxTier !== undefined ? { maxTier } : {})
-					};
-				} else if (
-					changedAt === previous.changedAt &&
-					maxTier !== undefined &&
-					maxTier !== previous.maxTier
-				) {
-					// A sender's maxTier can change while its vote level does NOT (GCC raising the camera tier
-					// back up while the vote stays stable). That broadcast keeps the same changedAt, so the
-					// newer-timestamp guard above drops it — freezing every receiver's downlink at the stale,
-					// lower tier. Accept a maxTier-only update at the same timestamp so a receiver's downlink
-					// controller can follow the sender back up.
-					previous.maxTier = maxTier;
+					activeMeeting.connectionQuality[userId] = { quality, changedAt };
 				}
 			}),
 			false,

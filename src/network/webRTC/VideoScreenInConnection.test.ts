@@ -4,36 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	EVIDENCE_DOWN_N,
-	EVIDENCE_UP_N,
-	initialFeedState,
-	TOP_RUNG
-} from './inboundQualityController';
+import { EVIDENCE_DOWN_N, EVIDENCE_UP_N, TOP_RUNG } from './inboundQualityController';
 import VideoScreenInConnection from './VideoScreenInConnection';
-import { QualitySignals } from './voteWindow';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { clearStreamCaps, setDownloadCap } from '../../utils/debugStreamCaps';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
 const MEETING_ID = 'test-meeting';
-const USER_ID = 'user1';
-const FEED_KEY = `${USER_ID}-${STREAM_TYPE.VIDEO}`;
-
-// In the new design, the controller accumulates evidence from displayBars.
-// DOWN fires after EVIDENCE_DOWN_N poor bars (≤2) in the evidenceBuf.
-// UP fires after EVIDENCE_UP_N optimal bars (===5) in the evidenceBuf.
-const upSignals: QualitySignals = {
-	displayBars: 5,
-	warnVote: false,
-	restoreVote: false
-};
-
-const downSignals: QualitySignals = {
-	displayBars: 0,
-	warnVote: false,
-	restoreVote: false
-};
+const USER_1 = 'user1';
+const USER_2 = 'user2';
+const FEED_KEY_1 = `${USER_1}-${STREAM_TYPE.VIDEO}`;
+const FEED_KEY_2 = `${USER_2}-${STREAM_TYPE.VIDEO}`;
 
 // Hoisted so they are accessible inside vi.mock factory closures (which are hoisted too).
 const storeMocks = vi.hoisted(() => ({
@@ -49,7 +30,7 @@ vi.mock('../../store/Store', () => ({
 		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 		getState: () => ({
 			...storeMocks,
-			activeMeeting: undefined,
+			activeMeeting: { meetingId: MEETING_ID },
 			session: { id: 'me', apiVersion: undefined }
 		})
 	}
@@ -66,13 +47,12 @@ vi.mock('../apis/MeetingsApi', () => ({
 	subscribeToMedia: vi.fn(() => Promise.resolve())
 }));
 
-// Helper: fire onTrack on the connection as if a video stream arrived for userId.
+// Fire a simulated onTrack for userId/video on the connection.
 const fireOnTrack = (conn: VideoScreenInConnection, userId: string): void => {
 	const fakeStream = { id: `${userId}/video` } as MediaStream;
 	const fakeReceiver = {
 		getStats: vi.fn(() => Promise.resolve(new Map()))
 	} as unknown as RTCRtpReceiver;
-	// Call the private handler directly — easier than wiring a full RTCTrackEvent.
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	(conn as any).onTrack({
 		streams: [fakeStream],
@@ -80,274 +60,93 @@ const fireOnTrack = (conn: VideoScreenInConnection, userId: string): void => {
 	} as unknown as RTCTrackEvent);
 };
 
-// Drive N ticks of the given signals through the connection.
-const driveN = async (
-	conn: VideoScreenInConnection,
-	signals: QualitySignals,
-	n: number
-): Promise<void> => {
+// Set up two active feeds via handleParticipantsSubscribed + onTrack.
+const setupTwoFeeds = (conn: VideoScreenInConnection): void => {
+	conn.handleParticipantsSubscribed([
+		{ userId: USER_1, type: STREAM_TYPE.VIDEO, mid: 'mid1' },
+		{ userId: USER_2, type: STREAM_TYPE.VIDEO, mid: 'mid2' }
+	]);
+	fireOnTrack(conn, USER_1);
+	fireOnTrack(conn, USER_2);
+};
+
+// Drive N ticks of the given dlScore through the connection.
+const driveN = async (conn: VideoScreenInConnection, dlScore: number, n: number): Promise<void> => {
 	for (let i = 0; i < n; i += 1) {
 		// eslint-disable-next-line no-await-in-loop
-		await conn.evaluateQualityTick(signals);
+		await conn.evaluateQualityTick(dlScore);
 	}
 };
 
-// Accumulate enough poor bars to trigger a DOWN decision.
-const driveDown = (conn: VideoScreenInConnection): Promise<void> =>
-	driveN(conn, downSignals, EVIDENCE_DOWN_N);
-
-// Accumulate enough optimal bars to trigger an UP decision.
-const driveUp = (conn: VideoScreenInConnection): Promise<void> =>
-	driveN(conn, upSignals, EVIDENCE_UP_N);
-
-// Helper: put a feed directly into the AUTO-OFF suppressed state so that
-// the UP-vote recovery path can be tested in isolation.
-// In the new design, allAutoOff=true and targetRung=0 are required so that
-// an UP change actually re-enables the feed.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const suppressFeed = (conn: VideoScreenInConnection, key: string, userId: string): void => {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const c = conn as any;
-	c.centralState.feeds.set(key, initialFeedState(0));
-	c.centralState.allAutoOff = true;
-	c.centralState.targetRung = 0;
-	// Reset evidenceBuf so the 7 UP ticks cleanly fire one UP change.
-	c.centralState.evidenceBuf = [];
-	c.suppressedVideo.set(key, { userId, offAtTick: 0 });
-	// videoReceivers has no entry — the feed is off.
-};
-
-describe('VideoScreenInConnection — auto-off / re-enable lifecycle', () => {
-	let conn: VideoScreenInConnection;
-
-	beforeEach(() => {
-		conn = new VideoScreenInConnection(MEETING_ID);
-	});
-
-	describe('suppressFeed keeps feed in centralState.feeds at rung 0', () => {
-		it('feed remains in centralState.feeds after AUTO-OFF so the UP vote can find it', async () => {
-			// Set up an active feed at rung 0 (floor) with targetRung=0 so DOWN at this point
-			// triggers AUTO-OFF rather than a normal rung step.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).centralState.feeds.set(FEED_KEY, initialFeedState(0));
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).centralState.targetRung = 0;
-			const fakeReceiver = {
-				getStats: vi.fn(() => Promise.resolve(new Map()))
-			} as unknown as RTCRtpReceiver;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).videoReceivers.set(FEED_KEY, { receiver: fakeReceiver, userId: USER_ID });
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).streamsMap[FEED_KEY] = {
-				userId: USER_ID,
-				type: STREAM_TYPE.VIDEO,
-				mid: 'mid1'
-			};
-
-			// DOWN fires after EVIDENCE_DOWN_N poor ticks; at targetRung=0 it triggers AUTO-OFF.
-			await driveDown(conn);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const feeds = (conn as any).centralState.feeds as Map<string, any>;
-			expect(feeds.has(FEED_KEY)).toBe(true);
-			expect(feeds.get(FEED_KEY)?.rung).toBe(0);
-		});
-	});
-
-	describe('UP vote re-enables a suppressed feed', () => {
-		it('calls setAddSubscription with the correct meeting and user', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			await driveUp(conn); // EVIDENCE_UP_N ticks → UP fires → re-enable
-
-			expect(storeMocks.setAddSubscription).toHaveBeenCalledWith(MEETING_ID, {
-				userId: USER_ID,
-				type: STREAM_TYPE.VIDEO
-			});
-		});
-
-		it('calls setLocalVideoSuppressed(false) to unmute the feed', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			await driveUp(conn);
-
-			expect(storeMocks.setLocalVideoSuppressed).toHaveBeenCalledWith(MEETING_ID, USER_ID, false);
-		});
-
-		it('does NOT remove the feed from suppressedVideo before onTrack fires', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			await driveUp(conn);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
-		});
-
-		it('advances the rung by exactly 1 on the first UP decision (rung 0 → 1)', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			await driveUp(conn); // UP fires → targetRung 0→1 (from auto-off recovery)
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const feeds = (conn as any).centralState.feeds as Map<string, any>;
-			expect(feeds.get(FEED_KEY)?.rung).toBe(1);
-		});
-
-		it('retries re-subscription on each UP decision while onTrack has not yet fired', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			// First UP decision at tick EVIDENCE_UP_N: re-subscribe attempt #1.
-			await driveUp(conn);
-			expect(storeMocks.setAddSubscription).toHaveBeenCalledTimes(1);
-			// evidenceBuf was reset after the UP change, so another EVIDENCE_UP_N ticks = attempt #2.
-			await driveUp(conn);
-			expect(storeMocks.setAddSubscription).toHaveBeenCalledTimes(2);
-
-			// The feed stays in suppressedVideo until onTrack fires.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
-		});
-
-		it('does NOT call requestVideoQuality for a suppressed feed on an UP decision', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-
-			await driveUp(conn);
-
-			expect(vi.mocked(MeetingsApi.requestVideoQuality)).not.toHaveBeenCalled();
-		});
-
-		it('climbs rung by rung — never jumps to TOP_RUNG', async () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-			// Capture feeds freshly after each tick (decideDownlink replaces centralState entirely).
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const getRung = (): number => (conn as any).centralState.feeds.get(FEED_KEY)?.rung;
-
-			// First UP decision while suppressed: rung 0→1 (from auto-off recovery).
-			await driveUp(conn);
-			expect(getRung()).toBe(1);
-
-			// onTrack fires: track is back, suppressedVideo cleared, rung stays at 1.
-			fireOnTrack(conn, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(false);
-			expect(getRung()).toBe(1);
-
-			// Second UP decision (feed now active): rung 1→2.
-			await driveUp(conn);
-			expect(getRung()).toBe(2);
-
-			// Third UP decision: rung 2→3.
-			await driveUp(conn);
-			expect(getRung()).toBe(3);
-
-			// After just three UP decisions the feed is still well below TOP_RUNG (5).
-			expect(getRung()).toBeLessThan(TOP_RUNG);
-		});
-	});
-
-	describe('onTrack for a re-enabling feed', () => {
-		it('clears suppressedVideo when the real track arrives', () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).centralState.feeds.set(FEED_KEY, initialFeedState(2));
-
-			fireOnTrack(conn, USER_ID);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(false);
-		});
-
-		it('keeps the current rung (not TOP_RUNG) so the feed climbs gradually', () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-			// Simulate the feed having moved to rung 2 before the track arrived.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).centralState.feeds.set(FEED_KEY, initialFeedState(2));
-
-			fireOnTrack(conn, USER_ID);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const feeds = (conn as any).centralState.feeds as Map<string, any>;
-			expect(feeds.get(FEED_KEY)?.rung).toBe(2);
-			expect(feeds.get(FEED_KEY)?.rung).not.toBe(TOP_RUNG);
-		});
-
-		it('adds the feed back to videoReceivers', () => {
-			suppressFeed(conn, FEED_KEY, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).centralState.feeds.set(FEED_KEY, initialFeedState(1));
-
-			fireOnTrack(conn, USER_ID);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).videoReceivers.has(FEED_KEY)).toBe(true);
-		});
-
-		it('enters TOP_RUNG for a fresh (never-suppressed) subscribe', () => {
-			// No suppressedVideo entry — brand-new subscription.
-			fireOnTrack(conn, USER_ID);
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const feeds = (conn as any).centralState.feeds as Map<string, any>;
-			expect(feeds.get(FEED_KEY)?.rung).toBe(TOP_RUNG);
-		});
-	});
-
-	describe('no-orphan invariant', () => {
-		it('feed is always tracked (suppressedVideo or videoReceivers) through the full lifecycle', async () => {
-			// Phase 1: fresh subscribe → in videoReceivers, NOT suppressed.
-			fireOnTrack(conn, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).videoReceivers.has(FEED_KEY)).toBe(true);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(false);
-
-			// Phase 2: AUTO-OFF → in suppressedVideo, NOT in videoReceivers.
-			suppressFeed(conn, FEED_KEY, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(conn as any).videoReceivers.delete(FEED_KEY); // mirrors what suppressFeed() actually does
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).videoReceivers.has(FEED_KEY)).toBe(false);
-
-			// Phase 3: UP decision triggers re-subscription — still in suppressedVideo (onTrack pending).
-			await driveUp(conn);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).videoReceivers.has(FEED_KEY)).toBe(false);
-
-			// Phase 4: onTrack fires → cleared from suppressedVideo, back in videoReceivers.
-			fireOnTrack(conn, USER_ID);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(false);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect((conn as any).videoReceivers.has(FEED_KEY)).toBe(true);
-
-			// The feed was in exactly one of the two sets at every phase — never in neither.
-		});
-	});
-});
-
-// displayBars = 3 is neither DOWN (<=2) nor UP (===5): the controller HOLDs, isolating the debug cap.
-const holdSignals: QualitySignals = { displayBars: 3, warnVote: false, restoreVote: false };
-
-// Wire an active feed (present in centralState, videoReceivers and streamsMap) at a given rung.
+// Wire an active feed directly (videoReceivers + streamsMap + lastAppliedRung) at a given rung.
+// This avoids the initial-reconcile call, isolating cap-related assertions.
 const setupActiveFeed = (
 	conn: VideoScreenInConnection,
 	key: string,
 	userId: string,
-	rung: number
+	lastApplied: number,
+	mid: string
 ): void => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const c = conn as any;
-	c.centralState.feeds.set(key, initialFeedState(rung));
 	const fakeReceiver = {
 		getStats: vi.fn(() => Promise.resolve(new Map()))
 	} as unknown as RTCRtpReceiver;
 	c.videoReceivers.set(key, { receiver: fakeReceiver, userId });
-	c.streamsMap[key] = { userId, type: STREAM_TYPE.VIDEO, mid: 'mid1' };
+	c.streamsMap[key] = { userId, type: STREAM_TYPE.VIDEO, mid };
+	c.lastAppliedRung.set(key, lastApplied);
 };
+
+describe('VideoScreenInConnection — downlink quality controller', () => {
+	let conn: VideoScreenInConnection;
+	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);
+
+	beforeEach(() => {
+		conn = new VideoScreenInConnection(MEETING_ID);
+		setupTwoFeeds(conn);
+		requestVideoQuality.mockClear();
+	});
+
+	it('(a) drops to rung 1 for every active feed after EVIDENCE_DOWN_N poor dlScore readings', async () => {
+		// EVIDENCE_DOWN_N = 4 ticks with dlScore=0 (< DOWN_SCORE=5):
+		//   tick 1: initial reconcile — calls requestVideoQuality with rung 2 for each feed.
+		//   tick 4: atLeast condition met (4 of last 4 < 5) → DOWN fires, targetRung 2→1.
+		//           requestVideoQuality called with rung 1 for each feed.
+		await driveN(conn, 0, EVIDENCE_DOWN_N);
+
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 1, 2);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_2, 'mid2', 1, 2);
+	});
+
+	it('(b) does not re-issue requestVideoQuality when the global target is unchanged (dedup)', async () => {
+		// Drive DOWN first so targetRung=1 and lastAppliedRung is set to 1 for each feed.
+		await driveN(conn, 0, EVIDENCE_DOWN_N);
+		requestVideoQuality.mockClear();
+
+		// Another tick: dlScore still 0, but evidenceBuf has only 1 element after reset,
+		// so the DOWN condition is not yet met again. targetRung stays at 1 = lastApplied.
+		await conn.evaluateQualityTick(0);
+
+		expect(requestVideoQuality).not.toHaveBeenCalled();
+	});
+
+	it('(c) climbs back to rung 2 for every feed after EVIDENCE_UP_N good dlScore readings', async () => {
+		// Drive DOWN first (evidenceBuf resets on the rung change).
+		await driveN(conn, 0, EVIDENCE_DOWN_N);
+		requestVideoQuality.mockClear();
+
+		// After DOWN, evidenceBuf=[]. EVIDENCE_UP_N=9 ticks with dlScore=10 (>UP_SCORE=9):
+		// atLeast([10x9], 9, 10, s>9) → 9 of last 9 elements pass (≥9 required) → UP fires.
+		// targetRung 1→2; requestVideoQuality called with rung 2 for each feed.
+		await driveN(conn, 10, EVIDENCE_UP_N);
+
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 2, 2);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_2, 'mid2', 2, 2);
+	});
+});
+
+// dlScore in [5..9] satisfies neither DOWN (<5) nor UP (>9): the controller HOLDs, isolating cap logic.
+const HOLD_SCORE = 7;
 
 describe('VideoScreenInConnection — debug download cap', () => {
 	let conn: VideoScreenInConnection;
@@ -355,6 +154,7 @@ describe('VideoScreenInConnection — debug download cap', () => {
 
 	beforeEach(() => {
 		conn = new VideoScreenInConnection(MEETING_ID);
+		requestVideoQuality.mockClear();
 	});
 
 	afterEach(() => {
@@ -362,74 +162,56 @@ describe('VideoScreenInConnection — debug download cap', () => {
 	});
 
 	it('does NOTHING extra when no cap is set (regression: feed at TOP holds silent)', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
+		// lastAppliedRung=TOP_RUNG=2 so dedup fires immediately with no cap.
+		setupActiveFeed(conn, FEED_KEY_1, USER_1, TOP_RUNG, 'mid1');
 
-		await conn.evaluateQualityTick(holdSignals);
+		await conn.evaluateQualityTick(HOLD_SCORE);
 
 		expect(requestVideoQuality).not.toHaveBeenCalled();
 	});
 
-	it('MEDIUM cap clamps a TOP feed down to rung 3 (360p, full fps)', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
-		setDownloadCap('MEDIUM');
+	it('MEDIUM cap clamps a TOP-rung feed down to substream 1 (360p)', async () => {
+		setupActiveFeed(conn, FEED_KEY_1, USER_1, TOP_RUNG, 'mid1');
+		setDownloadCap('MEDIUM'); // cap=1
 
-		await conn.evaluateQualityTick(holdSignals);
+		await conn.evaluateQualityTick(HOLD_SCORE);
 
-		// layersOf(3) = { substream: 1, temporal: 2 }
-		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 1, 2);
+		// desired = min(targetRung=2, cap=1) = 1; lastApplied was 2 → call once.
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 1, 2);
 	});
 
-	it('LOW cap clamps to rung 1 (144p) and does not re-request while unchanged', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
-		setDownloadCap('LOW');
+	it('LOW cap clamps to substream 0 (144p) and does not re-request while unchanged', async () => {
+		setupActiveFeed(conn, FEED_KEY_1, USER_1, TOP_RUNG, 'mid1');
+		setDownloadCap('LOW'); // cap=0
 
-		await conn.evaluateQualityTick(holdSignals);
-		await conn.evaluateQualityTick(holdSignals);
+		await conn.evaluateQualityTick(HOLD_SCORE); // desired=0 ≠ lastApplied=2 → call
+		await conn.evaluateQualityTick(HOLD_SCORE); // desired=0 = lastApplied=0 → skip
 
-		// layersOf(1) = { substream: 0, temporal: 2 }; requested exactly once (idempotent).
 		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
-		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 0, 2);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 0, 2);
 	});
 
-	it('OFF cap suppresses every active feed', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
-		setDownloadCap('OFF');
+	it('reconciles back to the controller rung (TOP_RUNG) when the cap is cleared', async () => {
+		// Pretend LOW cap was previously applied (lastApplied=0).
+		setupActiveFeed(conn, FEED_KEY_1, USER_1, 0, 'mid1');
 
-		await conn.evaluateQualityTick(holdSignals);
+		setDownloadCap('AUTO'); // clears the cap
 
-		expect(storeMocks.setRemoveSubscription).toHaveBeenCalledWith(MEETING_ID, {
-			userId: USER_ID,
-			type: STREAM_TYPE.VIDEO
-		});
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		expect((conn as any).suppressedVideo.has(FEED_KEY)).toBe(true);
+		await conn.evaluateQualityTick(HOLD_SCORE);
+
+		// desired = targetRung = TOP_RUNG = 2; lastApplied was 0 → reconcile.
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 2, 2);
 	});
 
-	it('re-subscribes debug-OFF feeds when the cap is lifted to a tier', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
-		setDownloadCap('OFF');
-		await conn.evaluateQualityTick(holdSignals);
-		storeMocks.setAddSubscription.mockClear();
+	it('cap clamps all active feeds, not just one', async () => {
+		setupActiveFeed(conn, FEED_KEY_1, USER_1, TOP_RUNG, 'mid1');
+		setupActiveFeed(conn, FEED_KEY_2, USER_2, TOP_RUNG, 'mid2');
+		setDownloadCap('LOW'); // cap=0
 
-		setDownloadCap('MEDIUM');
-		await conn.evaluateQualityTick(holdSignals);
+		await conn.evaluateQualityTick(HOLD_SCORE);
 
-		expect(storeMocks.setAddSubscription).toHaveBeenCalledWith(MEETING_ID, {
-			userId: USER_ID,
-			type: STREAM_TYPE.VIDEO
-		});
-	});
-
-	it('reconciles back to the controller rung when the cap is cleared', async () => {
-		setupActiveFeed(conn, FEED_KEY, USER_ID, TOP_RUNG);
-		setDownloadCap('LOW');
-		await conn.evaluateQualityTick(holdSignals);
-		requestVideoQuality.mockClear();
-
-		setDownloadCap('AUTO'); // clear
-		await conn.evaluateQualityTick(holdSignals);
-
-		// Controller never moved (HOLD), so the feed returns to TOP_RUNG: layersOf(5) = { 2, 2 }.
-		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_ID, 'mid1', 2, 2);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 0, 2);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_2, 'mid2', 0, 2);
+		expect(requestVideoQuality).toHaveBeenCalledTimes(2);
 	});
 });

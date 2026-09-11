@@ -78,15 +78,22 @@ describe('debugStreamCaps', () => {
 	});
 
 	describe('download cap parsing', () => {
-		it('maps LOW/MEDIUM/HIGH to rung ceiling 1/3/5 and OFF to OFF', () => {
+		it('maps LOW/MEDIUM/HIGH to substream ceiling 0/1/2 (no OFF)', () => {
 			setDownloadCap('LOW');
-			expect(getDownloadCap()).toBe(1);
+			expect(getDownloadCap()).toBe(0);
 			setDownloadCap('MEDIUM');
-			expect(getDownloadCap()).toBe(3);
+			expect(getDownloadCap()).toBe(1);
 			setDownloadCap('HIGH');
-			expect(getDownloadCap()).toBe(5);
+			expect(getDownloadCap()).toBe(2);
+		});
+
+		it('rejects the removed OFF tier and warns, keeping the previous value', () => {
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			setDownloadCap('MEDIUM');
 			setDownloadCap('OFF');
-			expect(getDownloadCap()).toBe('OFF');
+			expect(getDownloadCap()).toBe(1);
+			expect(warn).toHaveBeenCalled();
+			warn.mockRestore();
 		});
 
 		it('AUTO clears the download cap', () => {
@@ -112,7 +119,7 @@ describe('debugStreamCaps', () => {
 	describe('clearStreamCaps', () => {
 		it('resets both caps to null (upload re-activated on the live connection)', () => {
 			setUploadCap('LOW');
-			setDownloadCap('OFF');
+			setDownloadCap('MEDIUM');
 			applyDebugUploadCap.mockClear();
 			clearStreamCaps();
 			expect(getUploadCapSubstream()).toBeNull();
@@ -145,7 +152,7 @@ describe('debugStreamCaps', () => {
 			(
 				window as unknown as { wscStreamDebug: { setDownloadCap: (t: string) => void } }
 			).wscStreamDebug.setDownloadCap('MEDIUM');
-			expect(getDownloadCap()).toBe(3);
+			expect(getDownloadCap()).toBe(1);
 		});
 	});
 });

@@ -192,8 +192,3 @@ export const getIsMeetingRecording = (store: RootStore, meetingId: string): bool
 
 export const getStartRecordingUserId = (store: RootStore, meetingId: string): string | undefined =>
 	store.meetings[meetingId]?.recUserId;
-
-export const getDownlinkCompromised = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting?.meetingId === meetingId
-		? (store.activeMeeting?.downlinkCompromised ?? false)
-		: false;

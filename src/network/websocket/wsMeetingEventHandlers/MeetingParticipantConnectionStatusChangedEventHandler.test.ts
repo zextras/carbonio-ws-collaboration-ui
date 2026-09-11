@@ -92,33 +92,6 @@ describe('meetingParticipantConnectionStatusChangedEventHandler tests', () => {
 		expect(stored?.changedAt).toBe(2000);
 	});
 
-	test('maxTier is stored when present', () => {
-		meetingParticipantConnectionStatusChangedEventHandler({
-			...baseEvent,
-			maxTier: 2
-		});
-		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.maxTier).toBe(2);
-	});
-
-	test('maxTier is undefined when absent from event', () => {
-		meetingParticipantConnectionStatusChangedEventHandler(baseEvent);
-		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.maxTier).toBeUndefined();
-	});
-
-	test('maxTier accepts all valid substream indices (0, 1, 2)', () => {
-		([0, 1, 2] as const).forEach((maxTier, i) => {
-			meetingParticipantConnectionStatusChangedEventHandler({
-				...baseEvent,
-				changedAt: baseEvent.changedAt + i + 1,
-				maxTier
-			});
-			const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-			expect(stored?.maxTier).toBe(maxTier);
-		});
-	});
-
 	test('reciprocates our status on first contact with a participant, once (not twice)', () => {
 		const monitor = useStore.getState().activeMeeting?.qualityMonitor;
 		expect(monitor).toBeDefined();

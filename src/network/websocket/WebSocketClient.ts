@@ -73,7 +73,6 @@ export class WebSocketClient {
 		meetingId: string,
 		score: ConnectionQuality,
 		changedAt: number,
-		maxTier?: number,
 		to?: string
 	): void {
 		this.send({
@@ -81,8 +80,7 @@ export class WebSocketClient {
 			meetingId,
 			score,
 			changedAt,
-			...(to ? { to } : {}),
-			...(maxTier != null && maxTier >= 0 ? { maxTier } : {})
+			...(to ? { to } : {})
 		});
 	}
 

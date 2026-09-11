@@ -170,5 +170,4 @@ export type MeetingParticipantConnectionStatusChangedEvent = BasicMeetingEvent &
 	userId: string;
 	score: ConnectionQuality;
 	changedAt: number;
-	maxTier?: number;
 };

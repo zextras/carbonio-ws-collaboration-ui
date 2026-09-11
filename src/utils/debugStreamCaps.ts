@@ -7,30 +7,30 @@
 /*
  * Manual DEBUG hard-caps for meeting webcam stream quality, driven from the browser JS console.
  *
- *   wscStreamDebug.setUploadCap('LOW'|'MEDIUM'|'HIGH')          // cap my outbound webcam
- *   wscStreamDebug.setDownloadCap('LOW'|'MEDIUM'|'HIGH'|'OFF')  // cap all inbound webcam feeds
- *   wscStreamDebug.clear()                                      // remove both caps -> fully automatic
- *   wscStreamDebug.status()                                     // log current caps
+ *   wscStreamDebug.setUploadCap('LOW'|'MEDIUM'|'HIGH')     // cap my outbound webcam
+ *   wscStreamDebug.setDownloadCap('LOW'|'MEDIUM'|'HIGH')   // cap all inbound webcam feeds
+ *   wscStreamDebug.clear()                                 // remove both caps -> fully automatic
+ *   wscStreamDebug.status()                                // log current caps
  *
  * These are CEILINGS only, used to SIMULATE quality changes. The real adaptive logic keeps running
  * underneath and may sit below the cap (real congestion) or, when the cap is raised, climb back toward
  * it following the normal rules. When no cap is set (the default), nothing here has any effect.
  *
- * Units differ per consumer:
+ * Units differ per consumer (3-rung substream ladder 0/1/2 = 144/360/720; floor is 144p, no "off"):
  *  - upload cap = rid-index ceiling 0/1/2 (l/m/h) applied via RTCRtpSender.setParameters (GCC exception:
  *    the app must actively tell the sender its max; pushed immediately on set).
- *  - download cap = rung ceiling 1/3/5 (full-fps top of substream 0/1/2) or 'OFF', pulled by
- *    VideoScreenInConnection on its 2 s tick and clamped onto the requested rung.
+ *  - download cap = substream ceiling 0/1/2 (144/360/720), pulled by VideoScreenInConnection on its 2 s
+ *    tick and clamped onto the requested global rung.
  */
 
 import { rtcDebug } from './debug';
 import useStore from '../store/Store';
 
 export type UploadCapSubstream = 0 | 1 | 2 | null;
-export type DownloadCap = 1 | 3 | 5 | 'OFF' | null;
+export type DownloadCap = 0 | 1 | 2 | null;
 
 const UPLOAD_TIERS: Record<string, 0 | 1 | 2> = { LOW: 0, MEDIUM: 1, HIGH: 2 };
-const DOWNLOAD_TIERS: Record<string, 1 | 3 | 5> = { LOW: 1, MEDIUM: 3, HIGH: 5 };
+const DOWNLOAD_TIERS: Record<string, 0 | 1 | 2> = { LOW: 0, MEDIUM: 1, HIGH: 2 };
 
 let uploadCap: UploadCapSubstream = null;
 let downloadCap: DownloadCap = null;
@@ -68,14 +68,12 @@ export const setDownloadCap = (tier: string | null): void => {
 	const key = normalize(tier);
 	if (isClear(key)) {
 		downloadCap = null;
-	} else if (key === 'OFF') {
-		downloadCap = 'OFF';
 	} else if (key in DOWNLOAD_TIERS) {
 		downloadCap = DOWNLOAD_TIERS[key];
 	} else {
 		// eslint-disable-next-line no-console
 		console.warn(
-			`[wscStreamDebug] invalid download tier "${tier}". Use LOW | MEDIUM | HIGH | OFF | AUTO.`
+			`[wscStreamDebug] invalid download tier "${tier}". Use LOW | MEDIUM | HIGH | AUTO.`
 		);
 		return;
 	}
@@ -88,9 +86,8 @@ export const clearStreamCaps = (): void => {
 	setDownloadCap(null);
 };
 
-const nameOf = (value: number | 'OFF' | null, tiers: Record<string, number>): string => {
+const nameOf = (value: number | null, tiers: Record<string, number>): string => {
 	if (value === null) return 'AUTO';
-	if (value === 'OFF') return 'OFF';
 	const entry = Object.entries(tiers).find(([, v]) => v === value);
 	return entry ? entry[0] : String(value);
 };

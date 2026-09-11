@@ -35,8 +35,7 @@ export type MeetingsSlice = {
 		meetingId: string,
 		userId: string,
 		quality: ConnectionQuality,
-		changedAt: number,
-		maxTier?: number
+		changedAt: number
 	) => void;
 };
 

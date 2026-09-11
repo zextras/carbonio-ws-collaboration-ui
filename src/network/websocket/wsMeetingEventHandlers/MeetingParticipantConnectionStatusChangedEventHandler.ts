@@ -21,8 +21,7 @@ export const meetingParticipantConnectionStatusChangedEventHandler = (
 		event.meetingId,
 		event.userId,
 		event.score,
-		event.changedAt,
-		event.maxTier
+		event.changedAt
 	);
 
 	// Reciprocate on first contact (never to ourselves): when we join an ongoing meeting our initial

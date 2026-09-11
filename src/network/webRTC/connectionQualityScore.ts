@@ -6,44 +6,41 @@
 
 export type ConnectionQuality = 'lost' | 'terrible' | 'poor' | 'medium' | 'high' | 'optimal';
 
-// Loss deadband: at/below this the downlink loss is treated as noise (score stays 10). 2% is GCC's
-// "increase" edge (draft-ietf-rmcat-gcc-02 §6). Only the vote uses it now — the downlink controller is
-// vote-driven and reads no loss of its own.
-const LOSS_HEALTHY = 0.02;
-
 const clamp01 = (x: number): number => Math.max(0, Math.min(1, x));
 const round1 = (x: number): number => Math.round(x * 10) / 10;
 
-// Network-carrying estimate: how well is OUR OWN link to Janus bearing the meeting we are ACTUALLY
-// running right now — NOT the perceived quality of that meeting. Every signal is read on our own legs
-// (me<->Janus) and rides the LIVE traffic, so the vote is inherently RELATIVE and self-scaling: push
-// more than the link can carry and RTT/loss/jitter climb -> low vote; once GCC (or our own downlink
-// controller) scale the streams down to what fits, the link drains and the SAME link reads high. A
-// quality drop the link now copes with is therefore a GOOD signal, by design — the opposite of an
-// "how good does it look" vote. Perceived-quality reporting is deliberately NOT here: it lives only in
-// the downlink snackbar. Three clean, per-leg-isolatable axes (all constants tunable):
-//   - RTT    : round-trip me<->Janus. Convex interactivity knee (E-model Id shape).
-//   - jitter : inter-arrival variance on OUR SEND leg only (remote-inbound-rtp.jitter, Janus's view of
-//              our uplink). Clean by construction — it never folds in another participant's send path,
-//              unlike DOWNLINK jitter which is contaminated by the sender's own network and is excluded.
-//   - loss   : worst of uplink (remote-inbound fractionLost, me->Janus) and downlink (the Janus RTCP-SR
-//              escape, immune to a publisher's own uplink loss). Convex knee — audio and video use
-//              different bad-point tolerances so audio loss weighs ~2× video loss.
-// latency = min(rtt, jitter): the worst interactivity signal. The vote blends latency vs loss.
+// TWO INDEPENDENT PIPELINES that share no input and no smoothing mechanism (simplified design):
+//
+//   A · SCORE (the badge / indicator) — how well is OUR OWN link to Janus bearing the meeting right
+//       now. THREE clean own-leg signals only, each me<->Janus so no other participant can contaminate
+//       them: RTT, uplink jitter, uplink loss. Each is turned into a 0..10 curve value, combined
+//       worst-aware into one flat score (no latency/loss grouping), then smoothed by a median of the
+//       last N raw bars in the VoteWindow. NO downlink signal enters the badge.
+//   B · VIDEO controller (the received webcam tier) — driven by ONE signal only: downlink VIDEO loss
+//       (the consistency-gated Janus RTCP-SR escape, immune to the sender's uplink). It has its OWN
+//       curve and is read RAW (the controller's DOWN/UP N-of-M count is its only smoothing).
+//
+// A missing/unreadable signal ⇒ curveScore(undefined) = 10 (off, no harm): it goes blind on that axis
+// instead of dragging the result. This is what lets RTT stay in the badge even on FF-ESR (< 142) that
+// lacks candidate-pair RTT, and what makes a loss-blind controller tick a non-event.
 
+// A · badge curves.
 const RTT_GOOD_MS = 200; // at/under this, latency costs nothing
 const RTT_BAD_MS = 700; // at/over this, interactivity is gone
 const JITTER_GOOD_MS = 30; // at/under this, the jitter buffer hides it for free
 const JITTER_BAD_MS = 120; // at/over this, the buffer can no longer hide it
-// Audio loss: knee hits 0 at 22% — where the old exponential (K=0.05) had already decayed to ~0.2,
-// so the curve is visually similar but reaches a hard 0 (not asymptotic). Video uses ~2× the tolerance
-// (bad 0.42) so audio loss weighs ~2× video loss in the min-scored loss axis.
-const LOSS_BAD_AUDIO = 0.22;
-export const LOSS_BAD_VIDEO = 0.42;
-const LAMBDA = 0.5; // blend knob: 1 = worst-aware min, 0 = mean, 0.5 = the middle ground
+// Uplink loss deadband: at/below this the loss is treated as noise (score stays 10). 2% is GCC's
+// "increase" edge (draft-ietf-rmcat-gcc-02 §6). Knee reaches a hard 0 at 22%.
+const LOSS_HEALTHY = 0.02;
+const LOSS_BAD_UP = 0.22;
+const LAMBDA = 0.5; // worst-aware blend: 1 = pure worst (min), 0 = mean, 0.5 = the middle ground
 
-// Shared convex knee: score = 10 when v is undefined (no evidence of harm); 10*(clamp01((bad-v)/(bad-good)))^2
-// otherwise. Returns 10 at/below `good`, 0 at/above `bad`, quadratic in between.
+// B · downlink video-loss controller curve — SEPARATE from the badge (its own deadband/bad point).
+const DOWNLINK_LOSS_HEALTHY = 0.02;
+const DOWNLINK_LOSS_BAD = 0.42; // video tolerates ~2× the uplink knee before the score reaches 0
+
+// Shared convex knee: score = 10 when v is undefined (no evidence of harm); otherwise
+// 10*(clamp01((bad-v)/(bad-good)))^2. Returns 10 at/below `good`, 0 at/above `bad`, quadratic between.
 export function curveScore(v: number | undefined, good: number, bad: number): number {
 	if (v === undefined) return 10;
 	return 10 * clamp01((bad - v) / (bad - good)) ** 2;
@@ -57,57 +54,54 @@ export function jitterScore(jitterMs: number | undefined): number {
 	return curveScore(jitterMs, JITTER_GOOD_MS, JITTER_BAD_MS);
 }
 
-// Deadband = LOSS_HEALTHY: below it loss is noise (score stays 10). Kills most of the spurious vote flicker
-// (E2E: most fired at lossDown 1–2%) and maps the loss term to the GCC bands — green < 2%, ~medium at ~8%.
-// `bad` defaults to LOSS_BAD_AUDIO; pass LOSS_BAD_VIDEO for video downlink streams.
-export function lossScore(loss: number | undefined, bad: number = LOSS_BAD_AUDIO): number {
-	return curveScore(loss, LOSS_HEALTHY, bad);
+// Uplink loss score (badge). Deadband = LOSS_HEALTHY: below it loss is noise (score stays 10).
+export function uplinkLossScore(loss: number | undefined): number {
+	return curveScore(loss, LOSS_HEALTHY, LOSS_BAD_UP);
 }
 
-// The 0..10 score maps DIRECTLY onto the 5-bar indicator: bars = round(score / 2), half-up (score 9→5 bars,
-// 7→4, 5→3, 3→2, 1→1). No arbitrary per-level cut-points — the level names ARE those bar counts (terrible =
-// the bottom, 0-1 bars; 'lost' is a separate ICE-down state, not a score). Our only job is to make the 0..10
-// score realistic; the display is a plain ÷2.
+// Downlink VIDEO loss score (video controller ONLY — never the badge). Its own curve.
+export function downlinkVideoLossScore(loss: number | undefined): number {
+	return curveScore(loss, DOWNLINK_LOSS_HEALTHY, DOWNLINK_LOSS_BAD);
+}
+
+// The 0..10 score maps DIRECTLY onto the 5-bar indicator: bars = round(score / 2), half-up (score 9→5
+// bars, 7→4, 5→3, 3→2, 1→1).
+export function scoreToBars(s: number): number {
+	return Math.max(0, Math.min(5, Math.round(s / 2)));
+}
+
+// The level names ARE those bar counts (terrible = 0-1 bars; 'lost' is a separate ICE-down state, not a score).
 export function scoreToLevel(s: number): ConnectionQuality {
-	const bars = Math.max(0, Math.min(5, Math.round(s / 2)));
+	const bars = scoreToBars(s);
 	return (['terrible', 'terrible', 'poor', 'medium', 'high', 'optimal'] as const)[bars];
 }
 
-// The connection indicator and the downlink snackbar only surface an UNSTABLE link: quality strictly
-// below 'medium' (poor / terrible / lost — under 3 on the 5-bar scale). At 'medium' and above the link is
-// treated as stable and both stay hidden, so the UI is silent on a healthy or merely-throttled call.
+// The connection indicator only surfaces an UNSTABLE link: quality strictly below 'medium' (poor /
+// terrible / lost — under 3 on the 5-bar scale). At 'medium' and above the badge stays hidden.
 export function isUnstableQuality(q: ConnectionQuality): boolean {
 	return q === 'poor' || q === 'terrible' || q === 'lost';
 }
 
-// Raw per-leg link sample the monitor measures over its window; the vote normalizes it internally.
-// loss values are fractions (0..1); rttMs/jitterMs are milliseconds. undefined = not measurable this
-// window (muted / nothing on that leg). lossDown = max(audio, video) kept for log/hover display;
-// lossDownAudio and lossDownVideo are kept separate for split-tolerance scoring. These same raw numbers
-// are what the own-tile hover shows.
+// Raw per-leg link sample the monitor measures over its window; loss values are fractions (0..1),
+// rttMs/jitterMs are milliseconds. undefined = not measurable this window (muted / nothing on that leg).
+// rttMs/jitterMs/lossUp feed the badge; lossDownVideoOwn (consistency-gated SR-escape) feeds the video
+// controller; lossDownVideo stays for the own-tile hover display only. These same raw numbers are what
+// the own-tile hover shows.
 export type LinkSample = {
 	rttMs?: number;
 	jitterMs?: number;
 	lossUp?: number;
-	lossDown?: number;
-	lossDownAudio?: number;
+	// Raw Janus->me webcam downlink loss (SR-escape), kept for the own-tile hover display only.
 	lossDownVideo?: number;
-	// Consistency-gated our-fault video downlink loss: SR-escape (Janus->me hop) accepted only when it
-	// does not exceed TOTAL loss (packetsLost = our loss + sender loss >= 0). SR-escape > packetsLost
-	// implies a negative sender loss => counters corrupted. This is the ONLY video signal in the vote;
-	// raw lossDownVideo stays for the own-tile hover display only.
+	// Consistency-gated our-fault video downlink loss: SR-escape accepted only when it does not exceed
+	// TOTAL loss (packetsLost = our loss + sender loss >= 0). The ONLY input to the video controller.
 	lossDownVideoOwn?: number;
 };
 
-// Two axes (0..10). latency folds RTT and uplink jitter into the single worst interactivity score; loss
-// is the minimum (worst) of uplink loss, AUDIO downlink loss (both LOSS_BAD_AUDIO), and the
-// consistency-gated our-fault video downlink loss (lossDownVideoOwn, LOSS_BAD_VIDEO). Raw lossDownVideo
-// is excluded: only the invariant-gated lossDownVideoOwn enters the vote.
-export type AxisScores = { latency: number; loss: number };
-
-// Blend the per-axis scores into a single 0..10 value (rounded to 1 decimal). λ balances worst-aware vs mean.
-export function combineScoreValue(scores: AxisScores): number {
-	const mean = (scores.latency + scores.loss) / 2;
-	const score = (1 - LAMBDA) * mean + LAMBDA * Math.min(scores.latency, scores.loss);
+// Combine the three badge signals into one 0..10 value (rounded to 1 decimal). λ balances worst-aware
+// (min) vs mean — a flat 3-signal blend, no latency/loss two-axis grouping.
+export function combineVote(rtt: number, jitter: number, loss: number): number {
+	const mean = (rtt + jitter + loss) / 3;
+	const score = (1 - LAMBDA) * mean + LAMBDA * Math.min(rtt, jitter, loss);
 	return round1(score);
 }

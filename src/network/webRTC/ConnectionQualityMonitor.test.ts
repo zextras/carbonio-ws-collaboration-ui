@@ -93,7 +93,8 @@ const makeMonitor = (
 	} as unknown as IScreenOutConnection;
 
 	const videoIn = {
-		peerConn: { getStats: parts.videoInStats ?? emptyReport }
+		peerConn: { getStats: parts.videoInStats ?? emptyReport },
+		evaluateQualityTick: vi.fn().mockResolvedValue(undefined)
 	} as unknown as IVideoScreenInConnection;
 
 	const monitor = new ConnectionQualityMonitor(
@@ -156,9 +157,9 @@ describe('ConnectionQualityMonitor — ICE state', () => {
 			);
 		const monitor = makeMonitor({ audioConnectionState: () => phase, audioStats: degradedAudio });
 
-		// Degraded while connected → committed 'terrible'.
+		// Degraded while connected → committed 'poor' (50% loss → combineVote ≈ 3.3 → bars=2 → 'poor').
 		await ticks(monitor, 6);
-		expect(monitor.committed).toBe('terrible');
+		expect(monitor.committed).toBe('poor');
 
 		// ICE-loss flap.
 		phase = 'disconnected';
@@ -169,7 +170,7 @@ describe('ConnectionQualityMonitor — ICE state', () => {
 		phase = 'connected';
 		await monitor.emitInitial();
 		expect(monitor.committed).not.toBe('optimal');
-		expect(monitor.committed).toBe('terrible');
+		expect(monitor.committed).toBe('poor');
 	});
 });
 
@@ -245,10 +246,10 @@ describe('ConnectionQualityMonitor — uplink loss', () => {
 				);
 			}
 		});
-		// 6 bad ticks → median-7 at bars=1 (terrible): 20% loss scores ~0.1/10 → bars 1.
+		// 6 bad ticks → median-7 at bars=2: uplinkLossScore(0.2)≈0.1, combineVote≈3.4 → bars=2 → 'poor'.
 		await ticks(monitor, 6);
 		expect(publishedDetail().lossUp).toBeCloseTo(0.2, 5);
-		expect(monitor.committed).toBe('terrible'); // 20% loss (blended score ~2.6 → 1 bar) is terrible
+		expect(monitor.committed).toBe('poor'); // 20% loss (combineVote ≈ 3.4 → bars 2) is 'poor'
 	});
 });
 
@@ -338,20 +339,21 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 		});
 		// tick 1 seeds the SSRC and starts the post-switch mask (VIDEO_LOSS_MASK_TICKS=2).
 		await monitor.emitInitial();
-		expect(publishedDetail().lossDown).toBeUndefined();
+		expect(publishedDetail().lossDownVideo).toBeUndefined();
 		// ticks 2 (mask still active) and 3 (mask expired → first real 10% reading).
 		await ticks(monitor, 2);
-		// SR-escape computation still runs and lossDown is populated for the hover display.
-		expect(publishedDetail().lossDown).toBeCloseTo(0.1, 5);
+		// SR-escape computation still runs and lossDownVideo is populated for the hover display.
+		expect(publishedDetail().lossDownVideo).toBeCloseTo(0.1, 5);
 		// Invariant fails (diagVideoPktLoss=0 because no packetsLost reported) => lossDownVideoOwn=undefined
 		// => raw lossDownVideo has zero vote influence => vote stays 'optimal'.
 		await ticks(monitor, 5); // ticks 4-8: loss computed but lossDownVideoOwn undefined, not fed into vote
 		expect(monitor.committed).toBe('optimal');
 	});
 
-	it('lowers the vote when SR-escape satisfies the invariant (SR-escape <= packetsLost)', async () => {
+	it('populates lossDownVideoOwn when SR-escape satisfies the invariant but does NOT move the badge (downlink is display-only)', async () => {
 		// +1000 forwarded, +900 received, +100 lost per tick after baseline -> SR-escape=10%, diagVideoPktLoss=10%.
-		// Invariant: 0.10 <= 0.10 => lossDownVideoOwn=0.10 => vote is pushed down.
+		// Invariant: 0.10 <= 0.10 => lossDownVideoOwn=0.10 is populated for the video controller.
+		// Badge vote = rttScore + jitterScore + uplinkLossScore ONLY (all undefined here) → stays 'optimal'.
 		let tick = 0;
 		const monitor = makeMonitor({
 			videoInStats: () => {
@@ -374,10 +376,10 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 			}
 		});
 		// ticks 1-2: SSRC seed + mask; ticks 3+: lossDownVideoOwn=0.10.
-		// Need ≥4 consecutive bars=4 ticks to flip the median-7 from 5 to 4 (majority of the 7-slot window).
-		await ticks(monitor, 9); // 2 masked + 7 real readings at bars=4
+		await ticks(monitor, 9);
 		expect(publishedDetail().lossDownVideoOwn).toBeCloseTo(0.1, 5);
-		expect(monitor.committed).toBe('high');
+		// Downlink loss does NOT drive the badge — only rttScore/jitterScore/uplinkLossScore do.
+		expect(monitor.committed).toBe('optimal');
 	});
 
 	it('leaves the vote "optimal" when SR-escape violates the invariant (SR-escape > packetsLost)', async () => {
@@ -435,7 +437,7 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 		});
 		// seed + 2-tick mask + clean 0%-loss readings → steady 0%.
 		await ticks(monitor, 6);
-		expect(publishedDetail().lossDown).toBe(0);
+		expect(publishedDetail().lossDownVideo).toBe(0);
 		expect(monitor.committed).toBe('optimal');
 	});
 
@@ -457,7 +459,7 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 		});
 		await monitor.emitInitial(); // baseline
 		await monitor.emitInitial(); // dSent = 10 < 20 -> undefined
-		expect(publishedDetail().lossDown).toBeUndefined();
+		expect(publishedDetail().lossDownVideo).toBeUndefined();
 	});
 
 	it('reports loss when >= 20 packets are forwarded (gate passes, real loss measured)', async () => {
@@ -479,7 +481,7 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 		// tick 1 seeds SSRC and starts mask (VIDEO_LOSS_MASK_TICKS=2); first real reading at tick 3.
 		// ticks(6) runs ticks 1-6, all of which after tick 3 show 50% loss.
 		await ticks(monitor, 6);
-		expect(publishedDetail().lossDown).toBeCloseTo(0.5, 5);
+		expect(publishedDetail().lossDownVideo).toBeCloseTo(0.5, 5);
 	});
 
 	it('does NOT over-report loss on a stale-SR tick (received advances while packetsSent is frozen)', async () => {
@@ -503,11 +505,11 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 		});
 		// seed + 2-tick mask + clean 0%-loss ticks (VIDEO_LOSS_MASK_TICKS=2: ticks 1-2 masked, 3+ real).
 		await ticks(monitor, 6); // ticks 1-6
-		expect(publishedDetail().lossDown).toBe(0);
+		expect(publishedDetail().lossDownVideo).toBe(0);
 		await monitor.emitInitial(); // tick 7: stale SR (dSent 0) -> skipped, baseline held
-		expect(publishedDetail().lossDown).toBeUndefined();
+		expect(publishedDetail().lossDownVideo).toBeUndefined();
 		await monitor.emitInitial(); // tick 8: SR advances -> dSent 1000, dRecv 1000 -> 0% loss
-		expect(publishedDetail().lossDown).toBe(0);
+		expect(publishedDetail().lossDownVideo).toBe(0);
 		expect(monitor.committed).toBe('optimal');
 	});
 
@@ -542,119 +544,130 @@ describe('ConnectionQualityMonitor — downlink SR-escape loss', () => {
 			}
 		});
 		await monitor.emitInitial(); // tick 1: SSRC A seeded, no reading
-		expect(publishedDetail().lossDown).toBeUndefined();
+		expect(publishedDetail().lossDownVideo).toBeUndefined();
 		await monitor.emitInitial(); // tick 2: SSRC B is new -> fresh baseline, no contribution -> undefined
-		expect(publishedDetail().lossDown).toBeUndefined();
+		expect(publishedDetail().lossDownVideo).toBeUndefined();
+		expect(monitor.committed).toBe('optimal');
+	});
+
+	it('a large downlink video loss does NOT move the badge while rtt/jitter/uplink are clean', async () => {
+		// Severe 40% downlink loss with invariant satisfied (lossDownVideoOwn=0.40). The three badge
+		// signals (rttScore, jitterScore, uplinkLossScore) are all undefined → 10/10 → badge 'optimal'.
+		// Downlink loss feeds the video controller only, not the badge.
+		let tick = 0;
+		const monitor = makeMonitor({
+			videoInStats: () => {
+				tick += 1;
+				const sent = tick * 1000;
+				const recv = tick * 600;
+				const lost = tick === 1 ? 0 : (tick - 1) * 400;
+				return Promise.resolve(
+					report([
+						{ id: 'ro1', type: REMOTE_OUTBOUND_RTP, packetsSent: sent },
+						{
+							id: 'in1',
+							type: INBOUND_RTP,
+							remoteId: 'ro1',
+							packetsReceived: recv,
+							packetsLost: lost
+						}
+					])
+				);
+			}
+		});
+		// 2 masked ticks + several real 40%-loss ticks; badge must remain 'optimal'.
+		await ticks(monitor, 9);
+		expect(publishedDetail().lossDownVideoOwn).toBeGreaterThan(0.3);
 		expect(monitor.committed).toBe('optimal');
 	});
 });
 
-describe('ConnectionQualityMonitor — downlink AUDIO loss (inbound-rtp.packetsLost)', () => {
-	it('reads packetsLost on the Janus-originated audio mix and drives the vote down', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			// audio mix: +1000 received and +150 lost every tick after the baseline -> a sustained ~13% loss.
-			audioStats: () => {
-				tick += 1;
-				const recv = tick * 1000;
-				const lost = tick === 1 ? 0 : (tick - 1) * 150;
-				return Promise.resolve(
-					report([
-						candidatePair(0.05),
-						{ id: 'ina', type: INBOUND_RTP, packetsReceived: recv, packetsLost: lost }
-					])
-				);
+describe('ConnectionQualityMonitor — evaluateQualityTick (video controller feed)', () => {
+	// Build a monitor with an explicit evaluateQualityTick spy, suitable for driving via the
+	// private evaluate() path (the timer is stopped; emitInitial() does not call evaluateQualityTick).
+	const buildWithSpy = (
+		videoInStats?: () => Promise<RTCStatsReport>
+	): { monitor: ConnectionQualityMonitor; spy: ReturnType<typeof vi.fn> } => {
+		useStore.setState({
+			session: { id: 'me' },
+			activeMeeting: {
+				meetingId: 'meetingId',
+				connectionQuality: {},
+				connectionScoreDetail: undefined
 			}
-		});
-		await monitor.emitInitial(); // tick 1: baseline, no reading yet
-		expect(publishedDetail().lossDown).toBeUndefined();
-		await monitor.emitInitial(); // tick 2: 150 / (150 + 1000) ~= 0.13
-		expect(publishedDetail().lossDown).toBeCloseTo(150 / 1150, 2);
-		// Median-7 needs ≥4 bars=2 in the window. tick1=bars5, tick2=bars2; push 5 more bars=2.
-		await ticks(monitor, 5); // ticks 3-7: push bars=2 → total 6×bars2 (≥4 needed) → median-7=2 → 'poor'
-		expect(monitor.committed).toBe('poor');
+		} as unknown as RootStore);
+
+		const audioConn = {
+			peerConn: { connectionState: 'connected', getStats: emptyReport },
+			rtpSender: { track: { enabled: true } }
+		} as unknown as IBidirectionalConnectionAudioInOut;
+
+		const videoOut = {
+			peerConn: { getStats: emptyReport },
+			rtpSender: null
+		} as unknown as IVideoOutConnection;
+
+		const screenOut = {
+			peerConn: { getStats: emptyReport },
+			rtpSender: null
+		} as unknown as IScreenOutConnection;
+
+		const spy = vi.fn().mockResolvedValue(undefined);
+		const videoIn = {
+			peerConn: { getStats: videoInStats ?? emptyReport },
+			evaluateQualityTick: spy
+		} as unknown as IVideoScreenInConnection;
+
+		const monitor = new ConnectionQualityMonitor(
+			'meetingId',
+			audioConn,
+			videoOut,
+			screenOut,
+			videoIn
+		);
+		monitor.stop();
+		return { monitor, spy };
+	};
+
+	it('is called with a number on each timer tick; with no stats dlScore equals 10', async () => {
+		const { monitor, spy } = buildWithSpy();
+		// evaluate() is the production timer path; call it directly via private access.
+		await (monitor as any).evaluate();
+		expect(spy).toHaveBeenCalledOnce();
+		expect(typeof spy.mock.calls[0][0]).toBe('number');
+		expect(spy).toHaveBeenCalledWith(10); // undefined loss → curveScore(undefined) = 10
 	});
 
-	it('gates the reading when fewer than 20 expected packets (volume gate — noisy few-packet window)', async () => {
+	it('receives a low dlScore (< 5) when downlink video loss is high and invariant is satisfied', async () => {
+		// 40% downlink loss: +1000 forwarded, +600 received, +400 lost per tick.
+		// SR-escape = 40%; diagVideoPktLoss = 40%; invariant satisfied → lossDownVideoOwn = 0.40.
+		// downlinkVideoLossScore(0.40) = 10 * ((0.42-0.40)/0.40)^2 ≈ 0.025 — well below 5.
 		let tick = 0;
-		const monitor = makeMonitor({
-			// only 10 expected per tick (8 recv + 2 lost) — below MIN_EXPECTED_PACKETS
-			audioStats: () => {
-				tick += 1;
-				const recv = tick * 8;
-				const lost = tick * 2;
-				return Promise.resolve(
-					report([
-						candidatePair(0.05),
-						{ id: 'ina', type: INBOUND_RTP, packetsReceived: recv, packetsLost: lost }
-					])
-				);
-			}
+		const { monitor, spy } = buildWithSpy(() => {
+			tick += 1;
+			const sent = tick * 1000;
+			const recv = tick * 600;
+			const lost = tick === 1 ? 0 : (tick - 1) * 400;
+			return Promise.resolve(
+				report([
+					{ id: 'ro1', type: REMOTE_OUTBOUND_RTP, packetsSent: sent },
+					{
+						id: 'in1',
+						type: INBOUND_RTP,
+						remoteId: 'ro1',
+						packetsReceived: recv,
+						packetsLost: lost
+					}
+				])
+			);
 		});
-		await monitor.emitInitial(); // baseline
-		await monitor.emitInitial(); // expected = 8 + 2 = 10 < 20 -> undefined
-		expect(publishedDetail().lossDown).toBeUndefined();
-	});
-
-	it('reports loss when >= 20 expected audio packets (gate passes, real loss measured)', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			// exactly 20 expected per tick (15 recv + 5 lost) — 25% loss
-			audioStats: () => {
-				tick += 1;
-				const recv = tick * 15;
-				const lost = tick * 5;
-				return Promise.resolve(
-					report([
-						candidatePair(0.05),
-						{ id: 'ina', type: INBOUND_RTP, packetsReceived: recv, packetsLost: lost }
-					])
-				);
-			}
-		});
-		await monitor.emitInitial(); // baseline
-		await monitor.emitInitial(); // expected = 15 + 5 = 20 >= 20 -> 5/20 = 0.25
-		expect(publishedDetail().lossDown).toBeCloseTo(0.25, 5);
-	});
-
-	it('does NOT suppress genuinely high audio loss when >= 20 expected packets', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			// +1000 expected per tick with 50% loss — gate must not suppress this
-			audioStats: () => {
-				tick += 1;
-				const recv = tick * 500;
-				const lost = tick * 500;
-				return Promise.resolve(
-					report([
-						candidatePair(0.05),
-						{ id: 'ina', type: INBOUND_RTP, packetsReceived: recv, packetsLost: lost }
-					])
-				);
-			}
-		});
-		await monitor.emitInitial(); // baseline
-		await monitor.emitInitial(); // expected = 1000 >= 20, loss = 500/1000 = 50%
-		expect(publishedDetail().lossDown).toBeCloseTo(0.5, 5);
-	});
-
-	it('re-anchors on a counter reset (recv < prev) instead of reporting a false spike', async () => {
-		let tick = 0;
-		const monitor = makeMonitor({
-			audioStats: () => {
-				tick += 1;
-				// tick 1 baseline recv=1000 · tick 2 SSRC reset: recv drops below prev -> skipped + re-anchored.
-				const recv = tick === 1 ? 1000 : 200;
-				return Promise.resolve(
-					report([
-						candidatePair(0.05),
-						{ id: 'ina', type: INBOUND_RTP, packetsReceived: recv, packetsLost: 0 }
-					])
-				);
-			}
-		});
-		await monitor.emitInitial();
-		await monitor.emitInitial();
-		expect(publishedDetail().lossDown).toBeUndefined();
+		// tick 1: SSRC seeded, mask=2→1, lossDownVideoOwn=undefined → dlScore=10
+		// tick 2: mask=1→0, still masked → dlScore=10
+		// tick 3: real reading → lossDownVideoOwn≈0.40 → dlScore≈0.025
+		await (monitor as any).evaluate();
+		await (monitor as any).evaluate();
+		await (monitor as any).evaluate();
+		const lastArg = spy.mock.calls.at(-1)?.[0] as number;
+		expect(lastArg).toBeLessThan(5);
 	});
 });

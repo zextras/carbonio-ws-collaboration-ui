@@ -7,27 +7,35 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+	combineVote,
+	curveScore,
+	downlinkVideoLossScore,
 	isUnstableQuality,
 	jitterScore,
-	LOSS_BAD_VIDEO,
-	lossScore,
 	rttScore,
-	scoreToLevel
+	scoreToBars,
+	scoreToLevel,
+	uplinkLossScore
 } from './connectionQualityScore';
 
-describe('scoreToLevel', () => {
-	it('maps the 0..10 score onto the 5 bars via round(score/2), half-up — no arbitrary cut-points', () => {
-		// bars = round(s/2): optimal 5, high 4, medium 3, poor 2, terrible 0-1. Boundaries at odd scores.
-		expect(scoreToLevel(10)).toBe('optimal'); // 5 bars
-		expect(scoreToLevel(9)).toBe('optimal'); // 4.5 -> 5 (half-up)
-		expect(scoreToLevel(8.9)).toBe('high'); // 4.45 -> 4
-		expect(scoreToLevel(7)).toBe('high'); // 3.5 -> 4
-		expect(scoreToLevel(6.9)).toBe('medium'); // 3.45 -> 3
-		expect(scoreToLevel(5)).toBe('medium'); // 2.5 -> 3
-		expect(scoreToLevel(4.9)).toBe('poor'); // 2.45 -> 2
-		expect(scoreToLevel(3)).toBe('poor'); // 1.5 -> 2
-		expect(scoreToLevel(2.9)).toBe('terrible'); // 1.45 -> 1
-		expect(scoreToLevel(0)).toBe('terrible'); // 0 bars
+describe('curveScore', () => {
+	it('returns 10 when value is undefined (no evidence of harm)', () => {
+		expect(curveScore(undefined, 200, 700)).toBe(10);
+	});
+
+	it('returns 10 at or below the good threshold', () => {
+		expect(curveScore(200, 200, 700)).toBe(10);
+		expect(curveScore(100, 200, 700)).toBe(10);
+	});
+
+	it('returns 0 at or above the bad threshold', () => {
+		expect(curveScore(700, 200, 700)).toBe(0);
+		expect(curveScore(900, 200, 700)).toBe(0);
+	});
+
+	it('follows a convex (quadratic) knee between thresholds', () => {
+		// midpoint v=450: (700-450)/(700-200)=0.5 -> 10*0.25=2.5
+		expect(curveScore(450, 200, 700)).toBeCloseTo(2.5, 5);
 	});
 });
 
@@ -67,29 +75,103 @@ describe('jitterScore', () => {
 	});
 });
 
-describe('lossScore', () => {
+describe('uplinkLossScore', () => {
 	it('is 10 when loss is unknown', () => {
-		expect(lossScore(undefined)).toBe(10);
+		expect(uplinkLossScore(undefined)).toBe(10);
 	});
 
-	it('has a 2% deadband (noise stays 10), then reaches 0 at LOSS_BAD_AUDIO via a convex knee', () => {
-		expect(lossScore(0)).toBe(10);
-		expect(lossScore(0.01)).toBe(10); // below the 2% deadband — treated as noise
-		expect(lossScore(0.02)).toBe(10); // deadband edge (GCC "increase" region)
-		// 5% above deadband: (0.22-0.07)/(0.22-0.02) = 0.75 -> 10*0.5625 = 5.625
-		expect(lossScore(0.07)).toBeCloseTo(5.625, 5);
-		// 10% loss: (0.22-0.1)/(0.22-0.02) = 0.6 -> 10*0.36 = 3.6
-		expect(lossScore(0.1)).toBeCloseTo(3.6, 5);
-		// at/above LOSS_BAD_AUDIO (22%) the score reaches a hard 0
-		expect(lossScore(0.22)).toBe(0);
-		expect(lossScore(0.5)).toBe(0);
+	it('is 10 at 0% loss (below the 2% deadband — treated as noise)', () => {
+		expect(uplinkLossScore(0)).toBe(10);
 	});
 
-	it('accepts an explicit bad threshold — video uses LOSS_BAD_VIDEO (2× audio tolerance)', () => {
-		// At 22% loss: audio->0, video->(0.42-0.22)/(0.42-0.02)=0.5->10*0.25=2.5
-		expect(lossScore(0.22, LOSS_BAD_VIDEO)).toBeCloseTo(2.5, 5);
-		// At 42%: exactly at bad point -> 0
-		expect(lossScore(0.42, LOSS_BAD_VIDEO)).toBe(0);
+	it('is 10 at the deadband edge (2% — GCC increase region)', () => {
+		expect(uplinkLossScore(0.02)).toBe(10);
+	});
+
+	it('reaches 0 at/above LOSS_BAD_UP (22%)', () => {
+		expect(uplinkLossScore(0.22)).toBe(0);
+		expect(uplinkLossScore(0.5)).toBe(0);
+	});
+
+	it('is a convex knee between 2% and 22%', () => {
+		// midpoint v=0.12: (0.22-0.12)/(0.22-0.02)=0.5 -> 10*0.25=2.5
+		expect(uplinkLossScore(0.12)).toBeCloseTo(2.5, 5);
+	});
+});
+
+describe('downlinkVideoLossScore', () => {
+	it('is 10 when loss is unknown', () => {
+		expect(downlinkVideoLossScore(undefined)).toBe(10);
+	});
+
+	it('is 10 at the 2% deadband edge', () => {
+		expect(downlinkVideoLossScore(0.02)).toBe(10);
+	});
+
+	it('reaches 0 at/above DOWNLINK_LOSS_BAD (42%)', () => {
+		expect(downlinkVideoLossScore(0.42)).toBe(0);
+		expect(downlinkVideoLossScore(0.6)).toBe(0);
+	});
+
+	it('is a convex knee between 2% and 42%', () => {
+		// midpoint v=0.22: (0.42-0.22)/(0.42-0.02)=0.5 -> 10*0.25=2.5
+		expect(downlinkVideoLossScore(0.22)).toBeCloseTo(2.5, 5);
+	});
+});
+
+describe('combineVote', () => {
+	it('returns 10 when all signals are perfect', () => {
+		expect(combineVote(10, 10, 10)).toBe(10);
+	});
+
+	it('returns 0 when all signals are worst', () => {
+		expect(combineVote(0, 0, 0)).toBe(0);
+	});
+
+	it('is worst-aware (lambda=0.5): one bad signal drags the result below the mean', () => {
+		// combineVote(10,10,0): mean=20/3, min=0
+		// score = 0.5*(20/3) + 0.5*0 = 10/3 = 3.333... -> round1 = 3.3
+		expect(combineVote(10, 10, 0)).toBe(3.3);
+	});
+
+	it('rounds to 1 decimal', () => {
+		// combineVote(10,5,8): mean=23/3=7.667, min=5
+		// score = 0.5*7.667 + 0.5*5 = 3.833 + 2.5 = 6.333 -> round1 = 6.3
+		expect(combineVote(10, 5, 8)).toBe(6.3);
+	});
+});
+
+describe('scoreToBars', () => {
+	it('maps 0..10 score onto 0..5 bars via round(score/2)', () => {
+		expect(scoreToBars(0)).toBe(0);
+		expect(scoreToBars(1)).toBe(1); // round(0.5) = 1 (half-up)
+		expect(scoreToBars(2)).toBe(1); // round(1) = 1
+		expect(scoreToBars(3)).toBe(2); // round(1.5) = 2
+		expect(scoreToBars(5)).toBe(3); // round(2.5) = 3
+		expect(scoreToBars(7)).toBe(4); // round(3.5) = 4
+		expect(scoreToBars(9)).toBe(5); // round(4.5) = 5
+		expect(scoreToBars(10)).toBe(5); // round(5) = 5
+	});
+
+	it('clamps below 0 and above 5', () => {
+		expect(scoreToBars(-1)).toBe(0);
+		expect(scoreToBars(12)).toBe(5);
+	});
+});
+
+describe('scoreToLevel', () => {
+	it('maps the 0..10 score onto the 5 bars via round(score/2), half-up — no arbitrary cut-points', () => {
+		// bars = round(s/2): optimal 5, high 4, medium 3, poor 2, terrible 0-1. Boundaries at odd scores.
+		expect(scoreToLevel(10)).toBe('optimal'); // 5 bars
+		expect(scoreToLevel(9)).toBe('optimal'); // 4.5 -> 5 (half-up)
+		expect(scoreToLevel(8.9)).toBe('high'); // 4.45 -> 4
+		expect(scoreToLevel(7)).toBe('high'); // 3.5 -> 4
+		expect(scoreToLevel(6.9)).toBe('medium'); // 3.45 -> 3
+		expect(scoreToLevel(5)).toBe('medium'); // 2.5 -> 3
+		expect(scoreToLevel(4.9)).toBe('poor'); // 2.45 -> 2
+		expect(scoreToLevel(3)).toBe('poor'); // 1.5 -> 2
+		expect(scoreToLevel(2.9)).toBe('terrible'); // 1.45 -> 1
+		expect(scoreToLevel(0)).toBe('terrible'); // 0 bars
 	});
 });
 
