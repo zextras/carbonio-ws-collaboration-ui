@@ -105,6 +105,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		this.streamsMap = temporaryStreams;
 		this.updateStreams();
+		// Apply the current global target to freshly-subscribed feeds now that their mids are known, so a
+		// feed subscribed while the target is low never lingers at the publisher's top substream.
+		this.reconcileFeeds();
 	}
 
 	public removeStream = (streamKey: string, streamType: STREAM_TYPE[]): void => {
@@ -134,6 +137,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			}
 		});
 		this.updateStreams();
+		// A (re)subscribed track just arrived — clamp it to the current global target at once.
+		this.reconcileFeeds();
 	};
 
 	// Driven by the connection monitor's single 2 s loop. Reads the RAW downlink-loss score, advances the
@@ -146,23 +151,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		const { state, targetRung, changed, signal } = decideDownlink(this.centralState, dlScore);
 		this.centralState = state;
 
-		// Desired substream for every feed: the global target, clamped by a manual debug download cap.
-		const cap = getDownloadCap();
-		const desired = cap !== null ? Math.min(targetRung, cap) : targetRung;
-
-		const store = useStore.getState();
-		const am = store.activeMeeting;
-		if (am && am.meetingId === this.meetingId) {
-			this.videoReceivers.forEach(({ userId }, key) => {
-				const mid = this.streamsMap[key]?.mid;
-				if (mid == null) return;
-				if (this.lastAppliedRung.get(key) === desired) return;
-				this.lastAppliedRung.set(key, desired);
-				requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
-					() => {}
-				);
-			});
-		}
+		this.reconcileFeeds();
 
 		if (changed && targetRung !== this.lastLoggedTarget) {
 			rtcDebug(
@@ -173,6 +162,34 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		return Promise.resolve();
 	};
+
+	// Current desired substream for every feed: the global target, clamped by a manual debug download cap.
+	private desiredSubstream(): number {
+		const cap = getDownloadCap();
+		return cap !== null
+			? Math.min(this.centralState.targetRung, cap)
+			: this.centralState.targetRung;
+	}
+
+	// Request the current global target for every active feed whose mid is known, de-duped per feed. Run on
+	// every 2 s tick AND whenever the feed set changes (a scroll-driven (re)subscribe), so a feed that
+	// (re)connects while the target is low is clamped to the target immediately instead of sitting at the
+	// publisher's top substream until the next tick. Janus clamps each request to what the publisher offers.
+	private reconcileFeeds(): void {
+		const store = useStore.getState();
+		const am = store.activeMeeting;
+		if (!am || am.meetingId !== this.meetingId) return;
+		const desired = this.desiredSubstream();
+		this.videoReceivers.forEach(({ userId }, key) => {
+			const mid = this.streamsMap[key]?.mid;
+			if (mid == null) return;
+			if (this.lastAppliedRung.get(key) === desired) return;
+			this.lastAppliedRung.set(key, desired);
+			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
+				() => {}
+			);
+		});
+	}
 
 	private updateStreams(): void {
 		const completeStreams = filter(this.streamsMap, (stream) => !!stream.stream && !!stream.userId);
