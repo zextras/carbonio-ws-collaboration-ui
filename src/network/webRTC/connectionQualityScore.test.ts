@@ -7,8 +7,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+	combineDownlinkScore,
 	combineVote,
 	curveScore,
+	downlinkBufferDelayScore,
 	downlinkVideoLossScore,
 	isUnstableQuality,
 	jitterScore,
@@ -108,14 +110,51 @@ describe('downlinkVideoLossScore', () => {
 		expect(downlinkVideoLossScore(0.02)).toBe(10);
 	});
 
-	it('reaches 0 at/above DOWNLINK_LOSS_BAD (42%)', () => {
+	it('reaches 0 at/above DOWNLINK_LOSS_BAD (12%) — recalibrated aggressive', () => {
+		expect(downlinkVideoLossScore(0.12)).toBe(0);
 		expect(downlinkVideoLossScore(0.42)).toBe(0);
-		expect(downlinkVideoLossScore(0.6)).toBe(0);
 	});
 
-	it('is a convex knee between 2% and 42%', () => {
-		// midpoint v=0.22: (0.42-0.22)/(0.42-0.02)=0.5 -> 10*0.25=2.5
-		expect(downlinkVideoLossScore(0.22)).toBeCloseTo(2.5, 5);
+	it('crosses below 5 (DOWN) at ~5% loss and is a convex knee 2%..12%', () => {
+		// midpoint v=0.07: (0.12-0.07)/(0.12-0.02)=0.5 -> 10*0.25=2.5
+		expect(downlinkVideoLossScore(0.07)).toBeCloseTo(2.5, 5);
+		expect(downlinkVideoLossScore(0.05)).toBeLessThan(5);
+	});
+});
+
+describe('downlinkBufferDelayScore', () => {
+	it('is 10 when the delay is unknown or at/under the 60 ms good point', () => {
+		expect(downlinkBufferDelayScore(undefined)).toBe(10);
+		expect(downlinkBufferDelayScore(60)).toBe(10);
+		expect(downlinkBufferDelayScore(30)).toBe(10);
+	});
+
+	it('reaches 0 at/above BUF_BAD (400 ms)', () => {
+		expect(downlinkBufferDelayScore(400)).toBe(0);
+		expect(downlinkBufferDelayScore(800)).toBe(0);
+	});
+
+	it('is a convex knee 60..400 ms (crosses below 5 around 160 ms)', () => {
+		// midpoint v=230: (400-230)/(400-60)=0.5 -> 10*0.25=2.5
+		expect(downlinkBufferDelayScore(230)).toBeCloseTo(2.5, 5);
+		expect(downlinkBufferDelayScore(160)).toBeLessThan(5);
+	});
+});
+
+describe('combineDownlinkScore (worst-aware over defined signals)', () => {
+	it('is undefined when neither signal is measurable (loss-blind → HOLD)', () => {
+		expect(combineDownlinkScore(undefined, undefined)).toBeUndefined();
+	});
+
+	it('uses the single defined signal when the other is undefined', () => {
+		expect(combineDownlinkScore(3, undefined)).toBe(3);
+		expect(combineDownlinkScore(undefined, 2)).toBe(2);
+	});
+
+	it('takes the worse (min) of the two when both are defined (lambda=1)', () => {
+		expect(combineDownlinkScore(10, 0)).toBe(0); // pure delay bad, loss perfect -> DOWN
+		expect(combineDownlinkScore(0, 10)).toBe(0); // pure loss bad, delay perfect -> DOWN
+		expect(combineDownlinkScore(10, 9.5)).toBe(9.5); // both healthy -> stays high
 	});
 });
 

@@ -37,7 +37,13 @@ const LAMBDA = 0.5; // worst-aware blend: 1 = pure worst (min), 0 = mean, 0.5 = 
 
 // B · downlink video-loss controller curve — SEPARATE from the badge (its own deadband/bad point).
 const DOWNLINK_LOSS_HEALTHY = 0.02;
-const DOWNLINK_LOSS_BAD = 0.42; // video tolerates ~2× the uplink knee before the score reaches 0
+// DOWN fires below score 5 → loss > ~5% with this bad-point. Aggressive on purpose: the receiver netshape
+// test showed 0.42 (DOWN only above ~13.7%) far too tolerant — it held at 6-8% loss that already
+// disintegrates VP8. Recalibrated 0.42 → 0.12.
+const DOWNLINK_LOSS_BAD = 0.12;
+// B · downlink receive-buffer delay curve (video controller). Input = avg per-frame de-jitter buffer delay (ms).
+const DOWNLINK_BUFFER_GOOD_MS = 60;
+const DOWNLINK_BUFFER_BAD_MS = 400;
 
 // Shared convex knee: score = 10 when v is undefined (no evidence of harm); otherwise
 // 10*(clamp01((bad-v)/(bad-good)))^2. Returns 10 at/below `good`, 0 at/above `bad`, quadratic between.
@@ -62,6 +68,14 @@ export function uplinkLossScore(loss: number | undefined): number {
 // Downlink VIDEO loss score (video controller ONLY — never the badge). Its own curve.
 export function downlinkVideoLossScore(loss: number | undefined): number {
 	return curveScore(loss, DOWNLINK_LOSS_HEALTHY, DOWNLINK_LOSS_BAD);
+}
+
+// Downlink receive-buffer delay score (video controller ONLY). Input = avg per-frame jitter-buffer delay
+// this window (ms) = Δ jitterBufferDelay / Δ jitterBufferEmittedCount. Rising = our downlink queuing
+// (bufferbloat); receiver-computed so it survives saturation, and a slow/lossy SENDER does not fill our
+// buffer, so it is clean-ish and leads the loss.
+export function downlinkBufferDelayScore(delayMs: number | undefined): number {
+	return curveScore(delayMs, DOWNLINK_BUFFER_GOOD_MS, DOWNLINK_BUFFER_BAD_MS);
 }
 
 // The 0..10 score maps DIRECTLY onto the 5-bar indicator: bars = round(score / 2), half-up (score 9→5
@@ -104,4 +118,23 @@ export function combineVote(rtt: number, jitter: number, loss: number): number {
 	const mean = (rtt + jitter + loss) / 3;
 	const score = (1 - LAMBDA) * mean + LAMBDA * Math.min(rtt, jitter, loss);
 	return round1(score);
+}
+
+// Controller worst-aware blend: 1 = pure min (the worse of loss / buffer-delay drives the shed).
+const DOWNLINK_LAMBDA = 1;
+
+// Combine the video-downlink signals into ONE 0..10 controller score (read RAW). Worst-aware over the
+// DEFINED signals only — a signal not measurable this window (loss when SR-escape's RTCP died, or buffer
+// delay when no frames were emitted) is skipped; if NONE are measurable the tick is loss-blind → undefined
+// and the controller HOLDs. With λ=1 the worse axis drives DOWN (pure delay with zero loss still sheds) and
+// an UP requires BOTH axes healthy.
+export function combineDownlinkScore(
+	lossScore: number | undefined,
+	bufferDelayScore: number | undefined
+): number | undefined {
+	const defined = [lossScore, bufferDelayScore].filter((s): s is number => s !== undefined);
+	if (defined.length === 0) return undefined;
+	const mean = defined.reduce((a, b) => a + b, 0) / defined.length;
+	const worst = Math.min(...defined);
+	return round1((1 - DOWNLINK_LAMBDA) * mean + DOWNLINK_LAMBDA * worst);
 }

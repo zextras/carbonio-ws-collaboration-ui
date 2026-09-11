@@ -643,7 +643,7 @@ describe('ConnectionQualityMonitor — evaluateQualityTick (video controller fee
 	it('receives a low dlScore (< 5) when downlink video loss is high and invariant is satisfied', async () => {
 		// 40% downlink loss: +1000 forwarded, +600 received, +400 lost per tick.
 		// SR-escape = 40%; diagVideoPktLoss = 40%; invariant satisfied → lossDownVideoOwn = 0.40.
-		// downlinkVideoLossScore(0.40) = 10 * ((0.42-0.40)/0.40)^2 ≈ 0.025 — well below 5.
+		// downlinkVideoLossScore(0.40) with the recalibrated 0.12 bad-point → 0 — well below 5.
 		let tick = 0;
 		const { monitor, spy } = buildWithSpy(() => {
 			tick += 1;
@@ -667,6 +667,33 @@ describe('ConnectionQualityMonitor — evaluateQualityTick (video controller fee
 		// tick 2: mask=1→0, still masked → dlScore=undefined (loss-blind)
 		// tick 3: real reading → lossDownVideoOwn≈0.40 → dlScore≈0.025
 		await (monitor as any).evaluate();
+		await (monitor as any).evaluate();
+		await (monitor as any).evaluate();
+		const lastArg = spy.mock.calls.at(-1)?.[0] as number;
+		expect(lastArg).toBeLessThan(5);
+	});
+
+	it('receives a low dlScore (< 5) from BUFFER DELAY alone, with zero loss (bufferbloat)', async () => {
+		// No remote-outbound-rtp → no SR-escape → lossScore undefined. The inbound video jitter buffer grows:
+		// tick1 seeds (delay 0.1s, emitted 25); tick2 avg per-frame = (7.6-0.1)/(50-25)=0.3s=300ms →
+		// downlinkBufferDelayScore(300)≈0.9 → combine(undefined, 0.9)=0.9 < 5, driven purely by delay.
+		let tick = 0;
+		const { monitor, spy } = buildWithSpy(() => {
+			tick += 1;
+			const delay = tick === 1 ? 0.1 : 7.6;
+			const emitted = tick === 1 ? 25 : 50;
+			return Promise.resolve(
+				report([
+					{
+						id: 'in1',
+						type: INBOUND_RTP,
+						kind: 'video',
+						jitterBufferDelay: delay,
+						jitterBufferEmittedCount: emitted
+					}
+				])
+			);
+		});
 		await (monitor as any).evaluate();
 		await (monitor as any).evaluate();
 		const lastArg = spy.mock.calls.at(-1)?.[0] as number;

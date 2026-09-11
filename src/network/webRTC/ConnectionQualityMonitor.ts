@@ -5,8 +5,10 @@
  */
 
 import {
+	combineDownlinkScore,
 	combineVote,
 	ConnectionQuality,
+	downlinkBufferDelayScore,
 	downlinkVideoLossScore,
 	jitterScore,
 	LinkSample,
@@ -40,6 +42,7 @@ import { rtcDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
 const OUTBOUND_RTP = 'outbound-rtp';
+const INBOUND_RTP = 'inbound-rtp';
 
 // Uplink simulcast tier name from topActiveRung (highest rid still encoding): 0=low, 1=medium, 2=high.
 const uplinkTierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
@@ -91,6 +94,10 @@ export default class ConnectionQualityMonitor {
 	// Previous VIDEO SR-escape counters (cumulative) per SSRC — keyed by (remoteId:inboundId) pair.
 	// Per-SSRC isolation avoids baseline-mismatch spikes at SSRC discontinuities.
 	private prevVideoDownSsrc: Map<string, { sent: number; recv: number }> = new Map();
+
+	// Previous VIDEO jitter-buffer counters (cumulative) per inbound SSRC — for the per-frame buffer-delay
+	// signal (Δ jitterBufferDelay / Δ jitterBufferEmittedCount).
+	private prevVideoBufSsrc: Map<string, { delay: number; emitted: number }> = new Map();
 
 	// Countdown of ticks masking the video downlink-loss reading after an SSRC discontinuity.
 	private videoLossMaskTicks = 0;
@@ -273,11 +280,19 @@ export default class ConnectionQualityMonitor {
 		if (lossDownVideo !== undefined) raw.lossDownVideo = lossDownVideo;
 		if (lossDownVideoOwn !== undefined) raw.lossDownVideoOwn = lossDownVideoOwn;
 
-		// The video controller reads the RAW downlink-loss score, or undefined when downlink loss was not
-		// measurable this window (masked / thin / gate-rejected) — a loss-blind tick the controller HOLDs on
-		// instead of treating "no loss" as evidence to probe up.
-		const dlScore =
+		// Downlink receive-buffer delay (avg per-frame jitter-buffer delay, ms) — rises under our own downlink
+		// queuing (bufferbloat), survives saturation (no RTCP), and a slow/lossy sender does not fill our buffer.
+		const bufDelayMs = this.videoBufferDelayTick(videoInStats);
+
+		// The video controller reads ONE raw score = worst-aware(loss, buffer-delay) over the DEFINED signals;
+		// when NEITHER is measurable the tick is loss-blind → undefined and the controller HOLDs. The buffer
+		// signal usually survives even when SR-escape's RTCP reports die under saturation, so it stays responsive
+		// and catches bufferbloat (delay before loss) that the loss signal alone is blind to.
+		const lossScore =
 			lossDownVideoOwn !== undefined ? downlinkVideoLossScore(lossDownVideoOwn) : undefined;
+		const bufferDelayScore =
+			bufDelayMs !== undefined ? downlinkBufferDelayScore(bufDelayMs) : undefined;
+		const dlScore = combineDownlinkScore(lossScore, bufferDelayScore);
 
 		return { raw, level: this.vote(raw, iceConnected), dlScore };
 	}
@@ -345,6 +360,42 @@ export default class ConnectionQualityMonitor {
 		}
 
 		return srEscapeLoss(dSent, Math.max(0, dRecv));
+	}
+
+	// VIDEO per-tick downlink receive-buffer delay: avg time each frame waited in the de-jitter buffer this
+	// window, per inbound SSRC = Δ jitterBufferDelay / Δ jitterBufferEmittedCount (seconds → ms). Returns the
+	// WORST (max) across feeds — our shared downlink queues all feeds together, so the worst-affected feed marks
+	// the pipe. undefined when no feed emitted a frame this tick (loss-blind on this axis). A new/reset SSRC
+	// re-seeds and skips; absent SSRCs are pruned to bound the map.
+	private videoBufferDelayTick(stats: RTCStatsReport | null): number | undefined {
+		if (stats == null) return undefined;
+		const present = new Set<string>();
+		let worstMs: number | undefined;
+		stats.forEach(
+			(
+				r: RTCStats & {
+					kind?: string;
+					jitterBufferDelay?: number;
+					jitterBufferEmittedCount?: number;
+				}
+			) => {
+				if (r.type !== INBOUND_RTP || r.kind !== 'video') return;
+				if (r.jitterBufferDelay == null || r.jitterBufferEmittedCount == null) return;
+				present.add(r.id);
+				const cur = { delay: r.jitterBufferDelay, emitted: r.jitterBufferEmittedCount };
+				const prev = this.prevVideoBufSsrc.get(r.id);
+				this.prevVideoBufSsrc.set(r.id, cur);
+				if (prev === undefined || cur.emitted < prev.emitted || cur.delay < prev.delay) return;
+				const dEmitted = cur.emitted - prev.emitted;
+				if (dEmitted <= 0) return; // no frame emitted this tick → no reading for this feed
+				const perFrameMs = ((cur.delay - prev.delay) / dEmitted) * 1000;
+				worstMs = worstMs === undefined ? perFrameMs : Math.max(worstMs, perFrameMs);
+			}
+		);
+		[...this.prevVideoBufSsrc.keys()].forEach((k) => {
+			if (!present.has(k)) this.prevVideoBufSsrc.delete(k);
+		});
+		return worstMs;
 	}
 
 	// Per-tick inbound-rtp.packetsLost fraction for the forwarded video. Load-bearing: the consistency
