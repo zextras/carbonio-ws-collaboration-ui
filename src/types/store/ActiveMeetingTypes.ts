@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
+import { ConnectionQuality, LinkSample } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -47,6 +49,7 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
+	setConnectionScoreDetail: (detail: LinkSample) => void;
 };
 
 export type ActiveMeeting = {
@@ -55,6 +58,13 @@ export type ActiveMeeting = {
 	videoScreenIn: IVideoScreenInConnection;
 	videoOutConn: IVideoOutConnection;
 	screenOutConn: IScreenOutConnection;
+	qualityMonitor: ConnectionQualityMonitor;
+	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
+	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
+	connectionQuality: Record<string, ConnectionQualityInfo>;
+	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
+	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
+	connectionScoreDetail: LinkSample | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
@@ -65,6 +75,11 @@ export type ActiveMeeting = {
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
 	pinnedTile?: PinnedTile;
+};
+
+export type ConnectionQualityInfo = {
+	quality: ConnectionQuality;
+	changedAt: number;
 };
 
 export enum MeetingAccordionType {

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttributesList, ExportStatus } from '../../types/store/SessionTypes';
+import { AttributesList, ExportStatus, SimulcastTier } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -14,7 +14,8 @@ export const getSelectedConversation = (store: RootStore, roomId: string): boole
 export const getAttribute = (
 	store: RootStore,
 	attributeName: keyof AttributesList
-): boolean | number | string | undefined => store.session.attributes?.[attributeName];
+): boolean | number | string | SimulcastTier[] | undefined =>
+	store.session.attributes?.[attributeName];
 
 export const getUserId = (store: RootStore): string | undefined => store.session?.id;
 

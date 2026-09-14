@@ -10,6 +10,8 @@ import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
+import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
@@ -34,7 +36,7 @@ export const useActiveMeetingSlice: StateCreator<
 	[['zustand/devtools', never]],
 	[],
 	ActiveMeetingSlice
-> = (set) => ({
+> = (set, get) => ({
 	activeMeeting: undefined,
 	meetingConnection: (
 		meetingId: string,
@@ -47,23 +49,46 @@ export const useActiveMeetingSlice: StateCreator<
 			deviceId?: string;
 		}
 	): void => {
+		// stop a previous meeting's quality monitor if we reconnect without an explicit disconnect
+		const prev = get().activeMeeting;
+		if (prev) {
+			prev.qualityMonitor?.stop();
+			prev.bidirectionalAudioConn?.closePeerConnection();
+			prev.videoScreenIn?.closePeerConnection();
+			prev.videoOutConn?.closePeerConnection();
+			prev.screenOutConn?.closePeerConnection();
+		}
+		const audioConn = new BidirectionalConnectionAudioInOut(
+			meetingId,
+			!!audioStream?.enabled,
+			audioStream?.deviceId
+		);
+		const videoScreenIn = new VideoScreenInConnection(meetingId);
+		const videoOutConn = new VideoOutConnection(
+			meetingId,
+			!!videoStream?.enabled,
+			videoStream?.deviceId
+		);
+		const screenOutConn = new ScreenOutConnection(meetingId);
+		const qualityMonitor = new ConnectionQualityMonitor(
+			meetingId,
+			audioConn,
+			videoOutConn,
+			screenOutConn,
+			videoScreenIn
+		);
 		set(
 			produce((draft: RootStore) => {
 				draft.activeMeeting = {
 					meetingId,
 					// Peer connections and streams
-					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
-						meetingId,
-						!!audioStream?.enabled,
-						audioStream?.deviceId
-					),
-					videoScreenIn: new VideoScreenInConnection(meetingId),
-					videoOutConn: new VideoOutConnection(
-						meetingId,
-						!!videoStream?.enabled,
-						videoStream?.deviceId
-					),
-					screenOutConn: new ScreenOutConnection(meetingId),
+					bidirectionalAudioConn: audioConn,
+					videoScreenIn,
+					videoOutConn,
+					screenOutConn,
+					qualityMonitor,
+					connectionQuality: {},
+					connectionScoreDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -91,11 +116,13 @@ export const useActiveMeetingSlice: StateCreator<
 			false,
 			'AM/MEETING_CONNECTION'
 		);
+		qualityMonitor.emitInitial().catch(() => {});
 	},
 	meetingDisconnection: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.qualityMonitor.stop();
 				draft.activeMeeting.bidirectionalAudioConn?.closePeerConnection();
 				draft.activeMeeting.videoScreenIn?.closePeerConnection();
 				draft.activeMeeting.videoOutConn?.closePeerConnection();
@@ -344,6 +371,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_USER_WITH_HAND_RAISED'
+		);
+	},
+	setConnectionScoreDetail: (detail: LinkSample): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.connectionScoreDetail = detail;
+			}),
+			false,
+			'AM/SET_CONNECTION_SCORE_DETAIL'
 		);
 	}
 });

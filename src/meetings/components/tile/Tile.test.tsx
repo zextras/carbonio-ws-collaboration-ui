@@ -244,9 +244,7 @@ describe('Tile actions', () => {
 
 		const { user } = setup(<Tile userId={user2.id} meetingId={meeting.id} />);
 
-		const hoverContainer = screen.getByTestId('hover_container');
-
-		await user.hover(hoverContainer);
+		await user.hover(screen.getByTestId('tile'));
 
 		const muteForAll = await screen.findByTestId(iconMicOffOutline);
 		expect(muteForAll).toBeDefined();
@@ -270,8 +268,7 @@ describe('Tile actions', () => {
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
-		const hoverContainer = screen.getByTestId('hover_container');
-		await user.hover(hoverContainer);
+		await user.hover(screen.getByTestId('tile'));
 
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
@@ -283,8 +280,7 @@ describe('Tile actions', () => {
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
-		const hoverContainer = screen.getByTestId('hover_container');
-		await user.hover(hoverContainer);
+		await user.hover(screen.getByTestId('tile'));
 
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
