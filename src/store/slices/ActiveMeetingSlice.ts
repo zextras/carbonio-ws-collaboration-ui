@@ -88,6 +88,7 @@ export const useActiveMeetingSlice: StateCreator<
 					screenOutConn,
 					qualityMonitor,
 					connectionQuality: {},
+					tileCeilings: {},
 					connectionScoreDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
@@ -381,6 +382,16 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_CONNECTION_SCORE_DETAIL'
+		);
+	},
+	setTileCeiling: (meetingId: string, key: string, rung: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.tileCeilings[key] = rung;
+			}),
+			false,
+			'AM/SET_TILE_CEILING'
 		);
 	}
 });

@@ -38,3 +38,21 @@ export const rtcDebug = (text: string, ...args: unknown[]): void => {
 		);
 	}
 };
+
+// Simulcast rung -> tier name (0 = low/144, 1 = medium/360, 2 = high/720), shared by the uplink and
+// downlink tier logs so both read the same way. Out of range (no active layer / no previous value) = none.
+export const rtcTierName = (rung: number): string => ['low', 'medium', 'high'][rung] ?? 'none';
+
+// One parseable shape for every simulcast tier change (uplink, downlink, ceiling): a common tag plus
+// dir / old / new / user / reason.
+export const rtcTierDebug = (
+	dir: string,
+	oldRung: number,
+	newRung: number,
+	user: string,
+	reason: string
+): void => {
+	rtcDebug(
+		`[TIER] dir=${dir} old=${rtcTierName(oldRung)} new=${rtcTierName(newRung)} user=${user} reason=${reason}`
+	);
+};

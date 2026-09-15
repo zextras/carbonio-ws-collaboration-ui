@@ -14,6 +14,8 @@ import TileHoverContainer, { HoverContainer } from './TileHoverContainer';
 import TileUserInfo from './TileUserInfo';
 import useMuteForAll from '../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../hooks/usePinnedTile';
+import { TOP_RUNG } from '../../../network/webRTC/inboundQualityController';
+import { ceilingRungForHeight } from '../../../network/webRTC/tileCeiling';
 import {
 	getUserIsTalking,
 	getStream,
@@ -23,9 +25,11 @@ import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
+import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { rtcTierDebug } from '../../../utils/debug';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -109,7 +113,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const hoverRef = useRef<HTMLDivElement>(null);
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const { canUsePinFeature } = usePinnedTile(meetingId ?? '', userId ?? '', isScreenShare);
+	const { canUsePinFeature, isPinned } = usePinnedTile(
+		meetingId ?? '',
+		userId ?? '',
+		isScreenShare
+	);
+
+	const videoSimulcastTiers = useStore((store) => store.session.attributes?.videoSimulcastTiers);
+	const setTileCeiling = useStore((store) => store.setTileCeiling);
+	const lastCeilingRung = useRef<number>();
 
 	const { muteForAllHasToAppear } = useMuteForAll(meetingId, userId);
 
@@ -179,6 +191,43 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		},
 		[]
 	);
+
+	// Webcam tiles publish a per-feed downlink ceiling from their rendered size: the inbound controller
+	// never requests a tier bigger than the tile needs. Featured tiles (pinned / fullscreen / cinema
+	// central) are never capped; central tiles are naturally large enough to resolve to the top tier. No
+	// debounce: the controller's own de-dup absorbs redundant publishes. Screen tiles are not measured.
+	const isFeaturedTile = isPinned || !!modalProps;
+	useEffect(() => {
+		if (isScreenShare || !meetingId || !userId) return undefined;
+		const tileEl = hoverRef.current;
+		if (!tileEl) return undefined;
+		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
+		const publishCeiling = (): void => {
+			let rung: number;
+			if (isFeaturedTile) {
+				rung = TOP_RUNG;
+			} else {
+				const renderedHeight = tileEl.getBoundingClientRect().height;
+				if (renderedHeight <= 0) return;
+				rung = ceilingRungForHeight(renderedHeight, window.devicePixelRatio, videoSimulcastTiers);
+			}
+			if (rung === lastCeilingRung.current) return;
+			const previousRung = lastCeilingRung.current ?? -1;
+			lastCeilingRung.current = rung;
+			rtcTierDebug(
+				'ceiling',
+				previousRung,
+				rung,
+				getUserName(useStore.getState(), userId),
+				'tile-resize'
+			);
+			setTileCeiling(meetingId, key, rung);
+		};
+		publishCeiling();
+		const observer = new ResizeObserver(publishCeiling);
+		observer.observe(tileEl);
+		return (): void => observer.disconnect();
+	}, [isFeaturedTile, isScreenShare, meetingId, setTileCeiling, userId, videoSimulcastTiers]);
 
 	return (
 		<CustomTile

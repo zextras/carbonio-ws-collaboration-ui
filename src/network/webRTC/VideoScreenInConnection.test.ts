@@ -27,7 +27,8 @@ const storeMocks = vi.hoisted(() => ({
 	setLocalVideoSuppressed: vi.fn(),
 	setSubscribedTracks: vi.fn(),
 	setDownlinkCompromised: vi.fn(),
-	connectionQuality: {} as Record<string, { quality: string; changedAt: number }>
+	connectionQuality: {} as Record<string, { quality: string; changedAt: number }>,
+	tileCeilings: {} as Record<string, number>
 }));
 
 vi.mock('../../store/Store', () => ({
@@ -37,7 +38,8 @@ vi.mock('../../store/Store', () => ({
 			...storeMocks,
 			activeMeeting: {
 				meetingId: MEETING_ID,
-				connectionQuality: storeMocks.connectionQuality
+				connectionQuality: storeMocks.connectionQuality,
+				tileCeilings: storeMocks.tileCeilings
 			},
 			session: { id: 'me', apiVersion: undefined }
 		})
@@ -130,6 +132,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 
 	beforeEach(() => {
 		storeMocks.connectionQuality = {};
+		storeMocks.tileCeilings = {};
 		conn = new VideoScreenInConnection(MEETING_ID);
 		requestVideoQuality.mockClear();
 	});
@@ -260,5 +263,26 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const { calls } = requestVideoQuality.mock;
 		const feed2Calls = calls.filter(([, uid, , rung]) => uid === USER_2 && (rung as number) === 1);
 		expect(feed2Calls.length).toBe(1);
+	});
+
+	it('(h) clamps the emitted substream to the stored tile ceiling', async () => {
+		// Target would be TOP_RUNG (no feedState, roomFloor=TOP_RUNG), but the tile ceiling caps it at 0.
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 0, 2);
+	});
+
+	it('(i) does not clamp when the stored ceiling is TOP_RUNG (no cap)', async () => {
+		// lastApplied starts at 1; roomFloor with no feedStates is TOP_RUNG, ceiling is TOP_RUNG → target
+		// climbs to TOP_RUNG and reconcile emits it unclamped.
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), 1);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: TOP_RUNG };
+
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', TOP_RUNG, 2);
 	});
 });

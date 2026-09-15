@@ -50,6 +50,7 @@ export type ActiveMeetingSlice = {
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: LinkSample) => void;
+	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
 };
 
 export type ActiveMeeting = {
@@ -62,6 +63,9 @@ export type ActiveMeeting = {
 	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
 	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
 	connectionQuality: Record<string, ConnectionQualityInfo>;
+	// Per-webcam-feed downlink hard ceiling (max substream rung the tile's rendered size needs), keyed by
+	// `${userId}-${type}`. The inbound controller reads it as maxRung; a missing key means no cap (TOP_RUNG).
+	tileCeilings: Record<string, number>;
 	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
 	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
 	connectionScoreDetail: LinkSample | undefined;

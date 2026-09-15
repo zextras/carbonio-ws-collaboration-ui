@@ -9,6 +9,7 @@ import { gte } from 'semver';
 
 import { videoFpsScore, isUnstableQuality } from './connectionQualityScore';
 import {
+	DownlinkSignal,
 	FeedDownlinkState,
 	decideFeedDownlink,
 	initialFeedState,
@@ -16,15 +17,17 @@ import {
 } from './inboundQualityController';
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
+import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { rtcDebug } from '../../utils/debug';
+import { rtcTierDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
-// height label per substream index (0 = 144p, 1 = 360p, 2 = 720p).
-const heightName = (substream: number): string => ['144', '360', '720'][substream] ?? '?';
+// Why a feed's applied rung moved, for the downlink tier log.
+const downlinkReason = (signal: DownlinkSignal): string =>
+	({ DOWN: 'network-down', UP: 'network-up', CAP: 'ceiling-clamp', HOLD: 'hold' })[signal];
 
 // Full temporal target: temporal scaling is removed, so every request asks for all temporal layers.
 const FULL_TEMPORAL = 2;
@@ -209,7 +212,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	public evaluateQualityTick = async (): Promise<void> => {
 		this.evalTick += 1;
 
-		const cq = useStore.getState().activeMeeting?.connectionQuality ?? {};
+		const am = useStore.getState().activeMeeting;
+		const cq = am?.connectionQuality ?? {};
+		const ceilings = am?.tileCeilings ?? {};
 
 		await Promise.all(
 			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
@@ -222,14 +227,19 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				const { state, targetRung, changed, signal } = decideFeedDownlink(
 					prevState,
 					score,
-					senderOK
+					senderOK,
+					ceilings[key] ?? TOP_RUNG
 				);
 				this.feedStates.set(key, state);
 
 				if (changed) {
 					this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
-					rtcDebug(
-						`[DOWNLINK ${userId}] ${heightName(prevState.targetRung)} -> ${heightName(targetRung)} (${signal})`
+					rtcTierDebug(
+						'downlink',
+						prevState.targetRung,
+						targetRung,
+						getUserName(useStore.getState(), userId),
+						downlinkReason(signal)
 					);
 				}
 			})
@@ -250,10 +260,14 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		const store = useStore.getState();
 		const am = store.activeMeeting;
 		if (!am || am.meetingId !== this.meetingId) return;
+		const ceilings = am.tileCeilings ?? {};
 		this.videoReceivers.forEach(({ userId }, key) => {
 			const mid = this.streamsMap[key]?.mid;
 			if (mid == null) return;
-			const desired = this.desiredSubstream(key);
+			// Final clamp: the tile-size ceiling caps the requested substream even for a feed whose state
+			// has not been through a decision tick yet (e.g. a fresh (re)subscribe).
+			const cap = Math.min(ceilings[key] ?? TOP_RUNG, TOP_RUNG);
+			const desired = Math.min(this.desiredSubstream(key), cap);
 			if (this.lastAppliedRung.get(key) === desired) return;
 			this.lastAppliedRung.set(key, desired);
 			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(

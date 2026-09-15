@@ -18,7 +18,8 @@ export const EVIDENCE_DOWN_M = 4;
 export const COOLDOWN_BASE = 12; // clean ticks required before an UP (24 s); doubles on a failed climb
 export const COOLDOWN_MAX = 32; // 64 s; backoff is monotonic per feed — escalates on failed climb, never resets
 
-export type DownlinkSignal = 'DOWN' | 'UP' | 'HOLD';
+// CAP = the per-feed ceiling clamped targetRung down (a tile-size / CPU decision, not a network event).
+export type DownlinkSignal = 'DOWN' | 'UP' | 'HOLD' | 'CAP';
 
 export type FeedDownlinkState = {
 	targetRung: number;
@@ -47,11 +48,16 @@ export type DownlinkDecision = {
 
 const EVIDENCE_CAP = 5; // >= EVIDENCE_DOWN_M
 
+// maxRung is an externally-decided HARD CEILING (from tile size today, CPU later): the controller only
+// moves within [0, maxRung] on network signals and does not know why the ceiling is what it is. It just
+// clamps to it — evaluated before anything else, so a shrunk tile sheds even on a no-data tick.
 export function decideFeedDownlink(
 	prev: FeedDownlinkState,
 	score: number | undefined,
-	senderOK: boolean
+	senderOK: boolean,
+	maxRung: number = TOP_RUNG
 ): DownlinkDecision {
+	const cap = Math.min(maxRung, TOP_RUNG);
 	const state: FeedDownlinkState = {
 		targetRung: prev.targetRung,
 		evidenceBuf: prev.evidenceBuf.slice(),
@@ -59,6 +65,12 @@ export function decideFeedDownlink(
 		cooldownLen: prev.cooldownLen,
 		ticksSinceUp: prev.ticksSinceUp + 1
 	};
+
+	// Ceiling clamp: not a network event, so cooldown/backoff/evidence are left untouched.
+	if (state.targetRung > cap) {
+		state.targetRung = cap;
+		return { state, targetRung: state.targetRung, changed: true, signal: 'CAP' };
+	}
 
 	if (score === undefined) {
 		return { state, targetRung: state.targetRung, changed: false, signal: 'HOLD' };
@@ -87,7 +99,7 @@ export function decideFeedDownlink(
 			state.cooldownLen = Math.min(state.cooldownLen * 2, COOLDOWN_MAX);
 			state.ticksSinceUp = COOLDOWN_MAX + 1;
 		}
-	} else if (upVote && state.targetRung < TOP_RUNG) {
+	} else if (upVote && state.targetRung < cap) {
 		state.targetRung += 1;
 		signal = 'UP';
 		changed = true;

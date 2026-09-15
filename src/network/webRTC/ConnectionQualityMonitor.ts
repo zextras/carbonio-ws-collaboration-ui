@@ -28,13 +28,10 @@ import {
 	IVideoOutConnection,
 	IVideoScreenInConnection
 } from '../../types/network/webRTC/webRTC';
-import { rtcDebug } from '../../utils/debug';
+import { rtcTierDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
 const OUTBOUND_RTP = 'outbound-rtp';
-
-// Uplink simulcast tier name from topActiveRung (highest rid still encoding): 0=low, 1=medium, 2=high.
-const uplinkTierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
 
 function maxDefined(values: Array<number | undefined>): number | undefined {
 	let out: number | undefined;
@@ -283,9 +280,8 @@ export default class ConnectionQualityMonitor {
 			this.lastTopActiveRung !== -2 &&
 			topActiveRung !== this.lastTopActiveRung
 		) {
-			rtcDebug(
-				`[UPLINK CAMERA CHANGED TIER] ${uplinkTierName(this.lastTopActiveRung)} -> ${uplinkTierName(topActiveRung)}`
-			);
+			// Our own uplink (no remote user); GCC drives the encoder's top active layer.
+			rtcTierDebug('uplink', this.lastTopActiveRung, topActiveRung, 'self', 'congestion-control');
 		}
 		this.lastTopActiveRung = topActiveRung;
 	}
