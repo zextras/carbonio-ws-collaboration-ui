@@ -1,3 +1,20 @@
+## [0.18.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.2...v0.18.3) (2026-09-15)
+
+### Other changes
+
+* **deps:** update dependency vitest to v4.1.11 [security] ([#823](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/823)) ([4c4ee94](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4c4ee947ee2659ab947a71a03f250b9ea5a37971))
+
+## [0.18.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.1...v0.18.2) (2026-09-14)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.10 ([#824](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/824)) ([61e21df](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/61e21df4536d40d50ce7fd8b4232d40852ee27cb))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.5 ([#818](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/818)) ([2f0055e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2f0055e7d22707edd23a2b957d9e76202fea0cc0))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.7 ([#819](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/819)) ([d6e410a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d6e410acffdf5a1df13195ce6f9c2ece89dcf8c3))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.9.2 ([#814](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/814)) ([9cab21c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9cab21c411b79bd92bc9b7f9f543c360c76c6003))
+* **deps:** update sonarqube-scanner to 4.4.0 ([#822](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/822)) ([f461de6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f461de6ba15cca502e6dd05dc8e7fac0aadac823))
+* **deps:** update sonarqube-scanner to 5.0.0 ([#825](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/825)) ([8900539](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/89005396bc2adf0875cd23bcb58e51a243e34f61))
+
 ## [0.18.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.0...v0.18.1) (2026-08-25)
 
 ## [0.18.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.17.1...v0.18.0) (2026-08-03)
