@@ -25,6 +25,7 @@ import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
@@ -122,6 +123,10 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const videoSimulcastTiers = useStore((store) => store.session.attributes?.videoSimulcastTiers);
 	const setTileCeiling = useStore((store) => store.setTileCeiling);
 	const removeTileCeiling = useStore((store) => store.removeTileCeiling);
+	const myUserId = useStore(getUserId);
+	// The self tile has no inbound feed (own video is local/outbound), so the controller never reads a
+	// ceiling for it — skip measuring/publishing it entirely.
+	const isLocalUser = userId != null && userId === myUserId;
 	const lastCeilingRung = useRef<number>();
 
 	const { muteForAllHasToAppear } = useMuteForAll(meetingId, userId);
@@ -199,7 +204,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	// debounce: the controller's own de-dup absorbs redundant publishes. Screen tiles are not measured.
 	const isFeaturedTile = isPinned || !!modalProps;
 	useEffect(() => {
-		if (isScreenShare || !meetingId || !userId) return undefined;
+		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
 		const tileEl = hoverRef.current;
 		if (!tileEl) return undefined;
 		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
@@ -224,19 +229,28 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			);
 			setTileCeiling(meetingId, key, rung);
 		};
-		publishCeiling();
+		// No eager call: ResizeObserver fires an initial callback with the settled (post-layout) size, so
+		// we avoid publishing a transient pre-layout measurement on mount.
 		const observer = new ResizeObserver(publishCeiling);
 		observer.observe(tileEl);
 		return (): void => observer.disconnect();
-	}, [isFeaturedTile, isScreenShare, meetingId, setTileCeiling, userId, videoSimulcastTiers]);
+	}, [
+		isFeaturedTile,
+		isLocalUser,
+		isScreenShare,
+		meetingId,
+		setTileCeiling,
+		userId,
+		videoSimulcastTiers
+	]);
 
 	// Prune this feed's ceiling when the tile unmounts (user left / off-page) so the map mirrors the tiles
 	// in the call. A webcam turned off keeps its tile mounted, so its ceiling stays (re-used on video return).
 	useEffect(() => {
-		if (isScreenShare || !meetingId || !userId) return undefined;
+		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
 		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
 		return (): void => removeTileCeiling(meetingId, key);
-	}, [isScreenShare, meetingId, removeTileCeiling, userId]);
+	}, [isLocalUser, isScreenShare, meetingId, removeTileCeiling, userId]);
 
 	return (
 		<CustomTile

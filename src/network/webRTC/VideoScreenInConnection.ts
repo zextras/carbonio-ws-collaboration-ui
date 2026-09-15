@@ -9,7 +9,6 @@ import { gte } from 'semver';
 
 import { videoFpsScore, isUnstableQuality } from './connectionQualityScore';
 import {
-	DownlinkSignal,
 	FeedDownlinkState,
 	decideFeedDownlink,
 	initialFeedState,
@@ -25,9 +24,16 @@ import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMee
 import { rtcTierDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
-// Why a feed's applied rung moved, for the downlink tier log.
-const downlinkReason = (signal: DownlinkSignal): string =>
-	({ DOWN: 'network-down', UP: 'network-up', CAP: 'ceiling-clamp', HOLD: 'hold' })[signal];
+// Attribute a downlink request change to network vs resize (+ direction) for the tier log: only the
+// ceiling moved (network target unchanged) => resize, otherwise the network drove it.
+const reconcileReason = (
+	prev: { net: number; ceil: number } | undefined,
+	net: number,
+	ceil: number,
+	from: number,
+	to: number
+): string =>
+	`${ceil !== prev?.ceil && net === prev?.net ? 'resize' : 'network'}-${to > from ? 'up' : 'down'}`;
 
 // Full temporal target: temporal scaling is removed, so every request asks for all temporal layers.
 const FULL_TEMPORAL = 2;
@@ -57,6 +63,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// Last substream we actually REQUESTED per feed — de-dupes the per-tick reconcile so we only hit the
 	// REST endpoint when a feed's target actually moves (global rung change, a new feed, or a debug cap).
 	private lastAppliedRung = new Map<string, number>();
+
+	// Per feed, the (networkTarget, tileCeiling) seen at the last reconcile — to attribute a request
+	// change to network vs resize in the downlink tier log.
+	private lastReconcile = new Map<string, { net: number; ceil: number }>();
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -124,6 +134,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			if (type === STREAM_TYPE.VIDEO) {
 				this.videoReceivers.delete(key);
 				this.lastAppliedRung.delete(key);
+				this.lastReconcile.delete(key);
 				this.feedStates.delete(key);
 				this.prevStats.delete(key);
 				this.maskTicks.delete(key);
@@ -214,7 +225,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		const am = useStore.getState().activeMeeting;
 		const cq = am?.connectionQuality ?? {};
-		const ceilings = am?.tileCeilings ?? {};
 
 		await Promise.all(
 			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
@@ -224,24 +234,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				const senderOK = q == null ? true : !isUnstableQuality(q);
 
 				const prevState = this.feedStates.get(key) ?? initialFeedState(this.roomFloor());
-				const { state, targetRung, changed, signal } = decideFeedDownlink(
-					prevState,
-					score,
-					senderOK,
-					ceilings[key] ?? TOP_RUNG
-				);
+				// The controller decides only the NETWORK target; the tile-size ceiling is applied as a
+				// min() at request time (reconcileFeeds), so a resize adapts without the network backoff.
+				const { state } = decideFeedDownlink(prevState, score, senderOK);
 				this.feedStates.set(key, state);
-
-				if (changed) {
-					this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
-					rtcTierDebug(
-						'downlink',
-						prevState.targetRung,
-						targetRung,
-						getUserName(useStore.getState(), userId),
-						downlinkReason(signal)
-					);
-				}
 			})
 		);
 
@@ -264,11 +260,20 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.videoReceivers.forEach(({ userId }, key) => {
 			const mid = this.streamsMap[key]?.mid;
 			if (mid == null) return;
-			// Final clamp: the tile-size ceiling caps the requested substream even for a feed whose state
-			// has not been through a decision tick yet (e.g. a fresh (re)subscribe).
-			const cap = Math.min(ceilings[key] ?? TOP_RUNG, TOP_RUNG);
-			const desired = Math.min(this.desiredSubstream(key), cap);
-			if (this.lastAppliedRung.get(key) === desired) return;
+			// Requested tier = the network target capped by the tile-size ceiling. The two change
+			// independently; the ceiling has no backoff, so a resize is applied on the very next tick.
+			const net = this.desiredSubstream(key);
+			const ceil = Math.min(ceilings[key] ?? TOP_RUNG, TOP_RUNG);
+			const desired = Math.min(net, ceil);
+			const prev = this.lastReconcile.get(key);
+			this.lastReconcile.set(key, { net, ceil });
+			const applied = this.lastAppliedRung.get(key);
+			if (applied === desired) return;
+			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
+			if (applied != null) {
+				const reason = reconcileReason(prev, net, ceil, applied, desired);
+				rtcTierDebug('downlink', applied, desired, getUserName(store, userId), reason);
+			}
 			this.lastAppliedRung.set(key, desired);
 			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
 				() => {}
@@ -287,6 +292,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	public closePeerConnection(): void {
 		this.videoReceivers.clear();
+		this.lastReconcile.clear();
 		this.feedStates.clear();
 		this.prevStats.clear();
 		this.maskTicks.clear();
