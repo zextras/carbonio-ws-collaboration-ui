@@ -43,16 +43,21 @@ export const rtcDebug = (text: string, ...args: unknown[]): void => {
 // downlink tier logs so both read the same way. Out of range (no active layer / no previous value) = none.
 export const rtcTierName = (rung: number): string => ['low', 'medium', 'high'][rung] ?? 'none';
 
-// One parseable shape for every simulcast tier change (uplink, downlink, ceiling): a common tag plus
-// dir / old / new / user / reason.
-export const rtcTierDebug = (
-	dir: string,
+// Our own uplink tier change, GCC-driven (no remote user): [UPLINK] old-tier / new-tier.
+export const rtcUplinkDebug = (oldRung: number, newRung: number): void => {
+	rtcDebug(`[UPLINK] old-tier=${rtcTierName(oldRung)} new-tier=${rtcTierName(newRung)}`);
+};
+
+// A per-remote downlink request change: [DOWNLINK] user / old-tier / new-tier / reason. Reason is the
+// cause: our-network (our reception drove it) or tile-resize. There is no sender-network reason — we always
+// request the top rung and Janus forwards a lower one when the sender doesn't publish it, not our change.
+export const rtcDownlinkDebug = (
+	user: string,
 	oldRung: number,
 	newRung: number,
-	user: string,
 	reason: string
 ): void => {
 	rtcDebug(
-		`[TIER] dir=${dir} old=${rtcTierName(oldRung)} new=${rtcTierName(newRung)} user=${user} reason=${reason}`
+		`[DOWNLINK] user=${user} old-tier=${rtcTierName(oldRung)} new-tier=${rtcTierName(newRung)} reason=${reason}`
 	);
 };

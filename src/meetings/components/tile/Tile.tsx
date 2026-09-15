@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Shimmer } from '@zextras/carbonio-design-system';
@@ -26,11 +26,9 @@ import {
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Z_INDEX_RANK } from '../../../types/generics';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { rtcTierDebug } from '../../../utils/debug';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -200,10 +198,12 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	// Webcam tiles publish a per-feed downlink ceiling from their rendered size: the inbound controller
 	// never requests a tier bigger than the tile needs. Featured tiles (pinned / fullscreen / cinema
-	// central) are never capped; central tiles are naturally large enough to resolve to the top tier. No
-	// debounce: the controller's own de-dup absorbs redundant publishes. Screen tiles are not measured.
+	// central) are never capped; central tiles are naturally large enough to resolve to the top tier.
+	// Screen tiles are not measured. The ceiling is published only by the ResizeObserver, which delivers
+	// the settled (post-layout) size; the controller defers a feed's first request until the ceiling
+	// exists, so an eager pre-layout measurement is not needed (it would publish a transient wrong tier).
 	const isFeaturedTile = isPinned || !!modalProps;
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
 		const tileEl = hoverRef.current;
 		if (!tileEl) return undefined;
@@ -218,21 +218,9 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				rung = ceilingRungForHeight(renderedHeight, window.devicePixelRatio, videoSimulcastTiers);
 			}
 			if (rung === lastCeilingRung.current) return;
-			const previousRung = lastCeilingRung.current ?? -1;
 			lastCeilingRung.current = rung;
-			rtcTierDebug(
-				'ceiling',
-				previousRung,
-				rung,
-				getUserName(useStore.getState(), userId),
-				'tile-resize'
-			);
 			setTileCeiling(meetingId, key, rung);
 		};
-		// Measure synchronously in the layout phase so the ceiling is known before paint AND before the
-		// feed's first downlink request — that request is already capped. The observer then tracks genuine
-		// resizes; its redundant post-mount callback (same settled size) is absorbed by the change-guard.
-		publishCeiling();
 		const observer = new ResizeObserver(publishCeiling);
 		observer.observe(tileEl);
 		return (): void => observer.disconnect();

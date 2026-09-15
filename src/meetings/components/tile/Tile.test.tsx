@@ -23,7 +23,6 @@ import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { AttributesList } from '../../../types/store/SessionTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconVideoOffOutline = 'icon: VideoOffOutline';
@@ -233,41 +232,6 @@ describe('Tile test - on meeting', () => {
 
 		const hand = await screen.findByTestId('icon: Hand');
 		expect(hand).toBeInTheDocument();
-	});
-});
-
-describe('Tile ceiling — early measurement', () => {
-	// The test env's ResizeObserver never fires its callback, so a published ceiling can only come from
-	// the synchronous layout-effect measurement on mount.
-	test('a remote webcam tile publishes its size ceiling synchronously on mount (before any resize)', () => {
-		const store = useStore.getState();
-		store.meetingConnection(meeting.id, { enabled: true });
-		act(() => {
-			useStore.setState((s) => ({
-				session: {
-					...s.session,
-					attributes: {
-						...s.session.attributes,
-						videoSimulcastTiers: [
-							{ name: 'low', height: 144 },
-							{ name: 'medium', height: 360 },
-							{ name: 'high', height: 720 }
-						]
-					} as AttributesList
-				}
-			}));
-		});
-		const rectSpy = vi
-			.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-			.mockReturnValue({ height: 200 } as DOMRect);
-
-		// user2 is a remote participant (logged user is user1) → not featured → measured.
-		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
-
-		const key = `${user2.id}-${STREAM_TYPE.VIDEO}`;
-		// 200 CSS px @ dpr 1 → smallest covering tier is 360 (medium) → rung 1.
-		expect(useStore.getState().activeMeeting?.tileCeilings[key]).toBe(1);
-		rectSpy.mockRestore();
 	});
 });
 

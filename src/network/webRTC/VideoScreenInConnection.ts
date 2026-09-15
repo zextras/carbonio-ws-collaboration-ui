@@ -21,19 +21,18 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { rtcTierDebug } from '../../utils/debug';
+import { rtcDownlinkDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
-// Attribute a downlink request change to network vs resize (+ direction) for the tier log: only the
-// ceiling moved (network target unchanged) => resize, otherwise the network drove it.
+// Attribute a downlink request change to its cause for the [DOWNLINK] log: only the ceiling moved
+// (network target unchanged) => tile-resize; otherwise our own downlink controller drove it (our-network).
+// There is no sender-network cause: we always request the top rung and Janus forwards a lower substream when
+// the sender doesn't publish it, so a request change is only ever ours or a resize.
 const reconcileReason = (
 	prev: { net: number; ceil: number } | undefined,
 	net: number,
-	ceil: number,
-	from: number,
-	to: number
-): string =>
-	`${ceil !== prev?.ceil && net === prev?.net ? 'resize' : 'network'}-${to > from ? 'up' : 'down'}`;
+	ceil: number
+): string => (ceil !== prev?.ceil && net === prev?.net ? 'tile-resize' : 'our-network');
 
 // Full temporal target: temporal scaling is removed, so every request asks for all temporal layers.
 const FULL_TEMPORAL = 2;
@@ -298,8 +297,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			if (applied === desired) return;
 			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
 			if (applied != null) {
-				const reason = reconcileReason(prev, net, ceil, applied, desired);
-				rtcTierDebug('downlink', applied, desired, getUserName(store, userId), reason);
+				const reason = reconcileReason(prev, net, ceil);
+				rtcDownlinkDebug(getUserName(store, userId), applied, desired, reason);
 			}
 			this.lastAppliedRung.set(key, desired);
 			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
