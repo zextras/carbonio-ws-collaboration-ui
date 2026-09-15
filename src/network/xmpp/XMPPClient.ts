@@ -73,6 +73,11 @@ class XMPPClient {
 		this.xmppConnection.connect(token);
 	}
 
+	/** Deliberate teardown — only used when the backend flips to WSC-pure at runtime. */
+	public disconnect(): void {
+		this.xmppConnection.disconnect();
+	}
+
 	/**
 	 * PRESENCE:
 	 * I receive presence events only from users who are on my contact list with a bidirectional subscription.

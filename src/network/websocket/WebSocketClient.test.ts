@@ -3,10 +3,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { handleChatReconnection } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 // eslint-disable-next-line import/order
 import { WebSocketClient } from './WebSocketClient';
+
+// The catch-up/flip logic is unit-tested in wsReconnectionHandler.test.ts
+vi.mock('./wsReconnectionHandler');
 
 describe('WebSocketClient', () => {
 	test('Connect WebSocketClient generate a WebSocket', () => {
@@ -91,6 +95,20 @@ describe('WebSocketClient', () => {
 		wsClient._tryReconnection();
 
 		expect(wsClient._reconnectionTime).toBeLessThanOrEqual(1000 * 60 * 5 + 10000);
+	});
+
+	test('A re-connection triggers the chat catch-up, the first connection does not', () => {
+		const wsClient = new WebSocketClient();
+		wsClient.connect();
+
+		wsClient._onOpen();
+		expect(handleChatReconnection).not.toHaveBeenCalled();
+
+		// A drop armed the exponential backoff: the next open is a RE-connection
+		wsClient._reconnectionTime = 4000;
+		wsClient._onOpen();
+		// The gate value predates the sub-protocol realignment (no version here)
+		expect(handleChatReconnection).toHaveBeenCalledWith(false);
 	});
 
 	test('Set apiVersion on store when selected protocol is different from session apiVersion', () => {

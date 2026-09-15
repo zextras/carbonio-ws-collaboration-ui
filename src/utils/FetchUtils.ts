@@ -104,10 +104,16 @@ export const sendFileFetchAPI = (
 	optionalFields?.messageId && formData.append('messageId', optionalFields.messageId);
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
+	optionalFields?.tempId && formData.append('tempId', optionalFields.tempId);
+
+	const headers = buildHeaders();
+	// Dual-path with the form field: api.yaml documents the header (on the
+	// binary variant), the spike sends the form field on this multipart
+	optionalFields?.tempId && headers.append('X-Temp-Id', optionalFields.tempId);
 
 	return fetch(BASE_PATH + endpoint, {
 		method,
-		headers: buildHeaders(),
+		headers,
 		body: formData,
 		signal
 	})

@@ -8,8 +8,8 @@ import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
+import { chatClient } from '../chatClient/ChatClient';
 import { getMeeting, getRoom } from '../index';
-import { xmppClient } from '../xmpp/XMPPClient';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
@@ -18,7 +18,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
 			getRoom(event.roomId).then((response) => state.addRooms([response]));
-			xmppClient.setOnline();
+			chatClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {

@@ -10,6 +10,7 @@ import { produce } from 'immer';
 import { maxSatisfying } from 'semver';
 import { StateCreator } from 'zustand';
 
+import { chatClient, isWscPure } from '../../network/chatClient/ChatClient';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import {
 	AttributesList,
@@ -125,6 +126,14 @@ export const useSessionStoreSlice: StateCreator<
 		);
 	},
 	setChatExporting: (roomId?: string): void => {
+		// WSC-pure: the export is a direct server-streamed download — there is
+		// no client-side history accumulation, so there is no long-running task
+		// to track and no spinner to show. The chatExporting state stays
+		// untouched and the ChatExporter MAM loop is never constructed.
+		if (roomId && isWscPure()) {
+			chatClient.requestFullHistory(roomId);
+			return;
+		}
 		set(
 			produce((draft: RootStore) => {
 				if (roomId) {

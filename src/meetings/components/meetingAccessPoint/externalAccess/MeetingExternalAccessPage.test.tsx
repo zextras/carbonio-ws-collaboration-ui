@@ -8,7 +8,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
+import { SUPPORTED_API_VERSIONS } from '../../../../constants/appConstants';
 import * as api from '../../../../network/apis/MeetingsApi';
+import useStore from '../../../../store/Store';
 import { setup } from '../../../../tests/test-utils';
 
 describe('MeetingExternalAccessPage tests', () => {
@@ -30,6 +32,30 @@ describe('MeetingExternalAccessPage tests', () => {
 		const readyButton = await screen.findByText('Ready to participate');
 		await user.click(readyButton);
 		expect(spyCreateGuest).toHaveBeenCalled();
+	});
+
+	test('The guest flow arms the version negotiation before its first REST call', async () => {
+		vi.spyOn(api, 'getScheduledMeetingName').mockResolvedValue({
+			name: 'Test Meeting'
+		});
+		setup(<MeetingExternalAccessPage />);
+		await screen.findByText('Welcome to "Test Meeting" virtual room');
+
+		const { supportedVersions, apiVersion } = useStore.getState().session;
+		expect(supportedVersions).toEqual(SUPPORTED_API_VERSIONS);
+		// Optimistic default (the highest supported): the guest REST calls now
+		// send the version header, and the 422-dance corrects it against an
+		// older backend before chatClient.connect ever branches
+		expect(apiVersion).toBe('2.0.0');
+
+		// The zustand store survives across tests: leave the version un-negotiated
+		useStore.setState({
+			session: {
+				...useStore.getState().session,
+				apiVersion: undefined,
+				supportedVersions: undefined
+			}
+		});
 	});
 
 	test('Redirect to login page', async () => {

@@ -78,6 +78,7 @@
 		"@zextras/carbonio-shell-ui": "15.1.1",
 		"@zextras/carbonio-ui-preview": "5.0.1",
 		"@zextras/carbonio-ui-soap-lib": "1.3.0",
+		"@zextras/carbonio-ws-collaboration-sdk": "link:../carbonio-ws-collaboration-sdk",
 		"emoji-mart": "5.6.0",
 		"i18next": "22.5.1",
 		"immer": "11.1.15",

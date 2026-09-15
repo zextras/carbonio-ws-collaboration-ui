@@ -9,11 +9,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
+import { MEETINGS_PATH, SUPPORTED_API_VERSIONS } from '../../../../constants/appConstants';
 import useRouting from '../../../../hooks/useRouting';
 import { createGuestAccount, getScheduledMeetingName } from '../../../../network';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import { wsClient } from '../../../../network/websocket/WebSocketClient';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import { UserType } from '../../../../types/store/UserTypes';
 import { setDateDefault } from '../../../../utils/dateUtils';
@@ -33,6 +33,14 @@ const useExternalAccess = (): {
 
 	const { goToInfoPage } = useRouting();
 	const createSnackbar = useSnackbar();
+
+	// The guest session boots outside MainApp, so it must arm the version
+	// negotiation itself before its first REST call: the 422-dance then runs on
+	// getScheduledMeetingName/createGuestAccount, and by the time
+	// chatClient.connect branches, the negotiated version is the real one.
+	useEffect(() => {
+		useStore.getState().setSupportedVersions(SUPPORTED_API_VERSIONS);
+	}, []);
 
 	useEffect(() => {
 		const browserLanguage = navigator.languages?.[0] || navigator.language;
@@ -64,7 +72,7 @@ const useExternalAccess = (): {
 					setLoginInfo({ id: res.id, name: guestName, userType: UserType.GUEST });
 
 					setChatsBeStatus(true);
-					xmppClient.connect(res.zmToken);
+					chatClient.connect(res.zmToken);
 					wsClient.connect();
 
 					setAttributes({

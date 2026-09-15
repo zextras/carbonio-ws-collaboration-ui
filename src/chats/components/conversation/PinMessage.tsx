@@ -23,7 +23,7 @@ import ForwardInfo from './messageBubbles/ForwardInfo';
 import MarkdownMessage from './messageBubbles/MarkdownMessage';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { usePinMessage } from '../../../hooks/usePinMessage';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
@@ -150,7 +150,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		}, 5000);
 
 		if (!isMessageInStore && !isMessageSelected) {
-			xmppClient
+			chatClient
 				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);

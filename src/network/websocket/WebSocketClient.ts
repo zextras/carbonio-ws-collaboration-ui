@@ -9,11 +9,13 @@ import { gte } from 'semver';
 
 import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
+import { handleChatReconnection } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
+import { isWscPure } from '../chatClient/ChatClient';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -70,6 +72,9 @@ export class WebSocketClient {
 
 	_onOpen = (): void => {
 		wsDebug('...connected!');
+		// The backoff only grows after a drop: a non-zero value means this open
+		// is a RE-connection (same discriminator as the strophe handler)
+		const isReconnection = this._reconnectionTime > 0;
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
@@ -81,10 +86,16 @@ export class WebSocketClient {
 		}, this._pingTime);
 
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
+		// Gate value before the sub-protocol realignment below: a difference
+		// after it means the backend changed major under a live session
+		const wasPure = isWscPure();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
+		}
+		if (isReconnection) {
+			handleChatReconnection(wasPure);
 		}
 	};
 

@@ -16,7 +16,7 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import {
 	getHistoryIsFullyLoaded,
 	getIdMessageWhereScrollIsStopped,
@@ -88,7 +88,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					markedMsg.date !== selectedMessage.date &&
 					isBefore(markedMsg.date, selectedMessage.date);
 				if (!myLastMarker || !markedMsg || canMessageBeMarkedAsRead) {
-					xmppClient.readMessage(selectedMessage.roomId, selectedMessage.id);
+					chatClient.readMessage(selectedMessage.roomId, selectedMessage.id);
 				}
 			}
 		},

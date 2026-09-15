@@ -432,6 +432,58 @@ describe('Rooms API', () => {
 		});
 	});
 
+	describe('addRoomAttachment on a WSC-pure backend', () => {
+		afterEach(() => {
+			// The zustand store survives across tests: leave the version un-negotiated
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('sends tempId next to the legacy messageId, both the same client UUID', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			const { signal } = new AbortController();
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption' }, signal);
+
+			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				RequestType.PUT,
+				testFile,
+				signal,
+				expect.objectContaining({ description: 'a caption' })
+			);
+			const optional = mockSendFileFetchAPI.mock.calls[0][4] as {
+				messageId?: string;
+				tempId?: string;
+			};
+			expect(optional.tempId).toMatch(UUID_REGEX);
+			// The self-echo correlation key and the legacy stanza-id handle are the
+			// same client UUID: the backend accepts both harmlessly (spike parity)
+			expect(optional.messageId).toBe(optional.tempId);
+		});
+
+		test('the optimistic placeholder id IS the tempId, so the self-echo can promote it', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
+			const testFile = new File(['x'], 'photo.png', { type: 'image/png' });
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption', area: '2x2' });
+
+			const optional = mockSendFileFetchAPI.mock.calls[0][4] as { tempId?: string };
+			const messages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
+			const placeholder = messages.find((message) => message.id === optional.tempId);
+			expect(placeholder).toMatchObject({
+				attachment: {
+					id: 'placeholderFileId',
+					name: 'photo.png',
+					mimeType: 'image/png',
+					area: '2x2'
+				}
+			});
+		});
+	});
+
 	describe('addRoomAttachment dispatches quota changed event', () => {
 		test('dispatches event on successful upload (legacy path)', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
@@ -602,5 +654,77 @@ describe('Rooms API', () => {
 			type: RoomType.ONE_TO_ONE,
 			members: [{ userId: 'userId', owner: true }]
 		});
+	});
+});
+
+describe('forwardMessages on a WSC-pure backend', () => {
+	afterEach(() => {
+		// The zustand store survives across tests: leave the version un-negotiated
+		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+	});
+
+	test('forwards by reference: one bulk POST per destination room, no MAM hybrid', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const mamSpy = vi.spyOn(xmppClient, 'requestMessageToForward');
+		vi.mocked(global.fetch).mockImplementation(() =>
+			Promise.resolve({
+				ok: true,
+				status: 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src'
+		});
+		await forwardMessages(['room-a', 'room-b'], [message]);
+
+		const urls = vi.mocked(global.fetch).mock.calls.map((call) => call[0]);
+		expect(urls).toEqual([
+			'/services/chats/rooms/room-a/forward',
+			'/services/chats/rooms/room-b/forward'
+		]);
+		expect(vi.mocked(global.fetch).mock.calls[0]?.[1]).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ messages: [{ sourceRoomId: 'room-src', messageId: 'msg-ref' }] })
+		});
+		// The v1 hybrid never runs: no MAM fetch, no legacy endpoint
+		expect(mamSpy).not.toHaveBeenCalled();
+		expect(mockFetchAPI).not.toHaveBeenCalled();
+	});
+
+	test('rethrows the first failed destination and skips the quota event', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+		vi.mocked(global.fetch).mockImplementation((url) =>
+			Promise.resolve({
+				ok: !String(url).includes('room-bad'),
+				status: String(url).includes('room-bad') ? 403 : 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src',
+			attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+		});
+		await expect(forwardMessages(['room-bad'], [message])).rejects.toThrow();
+		// No fulfilled destination: the quota event must not fire
+		expect(dispatchSpy).not.toHaveBeenCalledWith(
+			expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+		);
+		dispatchSpy.mockRestore();
 	});
 });
