@@ -46,9 +46,17 @@ const transportSelectingCp = (): Record<string, unknown> => ({
 	selectedCandidatePairId: 'cp'
 });
 
+const resolveState = (
+	s: RTCPeerConnectionState | (() => RTCPeerConnectionState) | undefined,
+	fallback: RTCPeerConnectionState = 'connected'
+): RTCPeerConnectionState => (typeof s === 'function' ? s() : (s ?? fallback));
+
 const makeMonitor = (
 	parts: {
 		audioConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		videoOutConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		screenOutConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		videoInConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
 		audioStats?: () => Promise<RTCStatsReport>;
 		videoPeerStats?: () => Promise<RTCStatsReport>;
 		screenPeerStats?: () => Promise<RTCStatsReport>;
@@ -70,8 +78,7 @@ const makeMonitor = (
 	const audioConn = {
 		peerConn: {
 			get connectionState(): RTCPeerConnectionState {
-				const s = parts.audioConnectionState;
-				return typeof s === 'function' ? s() : (s ?? 'connected');
+				return resolveState(parts.audioConnectionState);
 			},
 			getStats: parts.audioStats ?? emptyReport
 		},
@@ -80,17 +87,36 @@ const makeMonitor = (
 
 	// null rtpSender = stream off (presence gate); its peerConn.getStats is read only when active.
 	const videoOut = {
-		peerConn: { getStats: parts.videoPeerStats ?? emptyReport },
+		peerConn: {
+			get connectionState(): RTCPeerConnectionState {
+				return resolveState(parts.videoOutConnectionState);
+			},
+			getStats: parts.videoPeerStats ?? emptyReport
+		},
 		rtpSender: parts.webcamActive ? {} : null
 	} as unknown as IVideoOutConnection;
 
 	const screenOut = {
-		peerConn: { getStats: parts.screenPeerStats ?? emptyReport },
+		peerConn: {
+			get connectionState(): RTCPeerConnectionState {
+				return resolveState(parts.screenOutConnectionState);
+			},
+			getStats: parts.screenPeerStats ?? emptyReport
+		},
 		rtpSender: parts.screenActive ? {} : null
 	} as unknown as IScreenOutConnection;
 
+	// Inbound PC — deliberately NOT part of the (outbound-only) LOST decision; a state is wired here
+	// only to prove the monitor ignores it.
 	const videoIn = {
-		peerConn: null,
+		peerConn:
+			parts.videoInConnectionState != null
+				? {
+						get connectionState(): RTCPeerConnectionState {
+							return resolveState(parts.videoInConnectionState);
+						}
+					}
+				: null,
 		evaluateQualityTick: vi.fn().mockResolvedValue(undefined)
 	} as unknown as IVideoScreenInConnection;
 
@@ -159,6 +185,68 @@ describe('ConnectionQualityMonitor — ICE state', () => {
 		await monitor.emitInitial();
 		expect(monitor.committed).not.toBe('optimal');
 		expect(monitor.committed).toBe('poor');
+	});
+});
+
+describe('ConnectionQualityMonitor — LOST aggregates the active OUTBOUND pairs', () => {
+	it('is "lost" when the active webcam-out PC is down while audio is fine', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			webcamActive: true,
+			videoOutConnectionState: 'disconnected'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+	});
+
+	it('is "lost" when the active screen-out PC is down while audio is fine', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			screenActive: true,
+			screenOutConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+	});
+
+	it('ignores a down webcam-out PC while the camera is OFF (inactive pair not counted)', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			webcamActive: false,
+			videoOutConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
+	});
+
+	it('does NOT go "lost" when only the INBOUND PC is down (badge is outbound-only)', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			videoInConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
+	});
+
+	it('stays "lost" until ALL active outbound pairs recover — one recovering is not enough', async () => {
+		let audio: RTCPeerConnectionState = 'disconnected';
+		let webcam: RTCPeerConnectionState = 'disconnected';
+		const monitor = makeMonitor({
+			audioConnectionState: () => audio,
+			webcamActive: true,
+			videoOutConnectionState: () => webcam
+		});
+		// both outbound pairs down → lost
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+		// audio recovers but webcam-out still down → STILL lost
+		audio = 'connected';
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+		// webcam-out recovers too → all outbound up → real vote (not lost)
+		webcam = 'connected';
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
 	});
 });
 

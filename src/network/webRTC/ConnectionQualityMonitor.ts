@@ -170,11 +170,18 @@ export default class ConnectionQualityMonitor {
 	// (per-feed freeze + sender-badge controller) lives in VideoScreenInConnection; the monitor
 	// only ticks it via evaluateQualityTick().
 	private async computeQuality(): Promise<{ raw: LinkSample; level: ConnectionQuality }> {
-		const audioState = this.audioConn.peerConn?.connectionState;
-		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
-
 		const webcamActive = this.videoOut.rtpSender != null;
 		const screenActive = this.screenOut.rtpSender != null;
+
+		// LOST reflects only the OUTBOUND legs (what others receive from us: audio + webcam/screen when
+		// active); inbound is excluded on purpose (our reception trouble is surfaced per-feed, not broadcast).
+		// Soft 'disconnected' counts as down; LOST clears only when every active outbound pair is back up.
+		const outboundDown = [
+			this.audioConn.peerConn?.connectionState,
+			webcamActive ? this.videoOut.peerConn?.connectionState : undefined,
+			screenActive ? this.screenOut.peerConn?.connectionState : undefined
+		].some((s) => s != null && ['failed', 'disconnected', 'closed'].includes(s));
+		const iceConnected = !outboundDown;
 
 		const [audioStats, videoUpStats, screenUpStats] = await Promise.all([
 			this.safeStats(this.audioConn.peerConn),
