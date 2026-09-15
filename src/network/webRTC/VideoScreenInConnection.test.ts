@@ -111,19 +111,20 @@ const makeHealthyReceiver = (framesPerTick = 30, pktPerTick = 60): RTCRtpReceive
 };
 
 // Directly wire a video receiver into the connection (no full onTrack / reconcile ceremony).
+// lastApplied=null models a never-served feed (fresh entry, no request emitted yet).
 const seedReceiver = (
 	conn: VideoScreenInConnection,
 	key: string,
 	userId: string,
 	mid: string,
 	receiver: RTCRtpReceiver,
-	lastApplied = TOP_RUNG
+	lastApplied: number | null = TOP_RUNG
 ): void => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const c = conn as any;
 	c.videoReceivers.set(key, { receiver, userId });
 	c.streamsMap[key] = { userId, type: STREAM_TYPE.VIDEO, mid };
-	c.lastAppliedRung.set(key, lastApplied);
+	if (lastApplied != null) c.lastAppliedRung.set(key, lastApplied);
 };
 
 describe('VideoScreenInConnection — downlink quality controller (fps-liveness + badge)', () => {
@@ -283,6 +284,49 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 
 		await conn.evaluateQualityTick();
 
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', TOP_RUNG, 2);
+	});
+
+	it('(j) defers a never-served feed until its tile ceiling is published, then requests the cap only', async () => {
+		// Fresh feed (never requested), no ceiling yet → first tick must NOT emit a request (no HIGH probe).
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+		storeMocks.tileCeilings = {};
+
+		await conn.evaluateQualityTick(); // ceiling absent → deferred
+		expect(requestVideoQuality).not.toHaveBeenCalled();
+
+		// Tile mounts and publishes its ceiling (rung 0) → next reconcile emits the capped tier, once.
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 0, 2);
+		// Never a HIGH (TOP_RUNG) request that would immediately get clamped down.
+		const highCalls = requestVideoQuality.mock.calls.filter(([, , , rung]) => rung === TOP_RUNG);
+		expect(highCalls).toHaveLength(0);
+	});
+
+	it('(k) the FIRST request is already the capped tier when the ceiling is known upfront (no HIGH-then-drop)', async () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 1 };
+
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 1, 2);
+	});
+
+	it('(l) serves a never-served feed at TOP_RUNG if no ceiling ever arrives (never permanently withheld)', async () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+		storeMocks.tileCeilings = {};
+
+		// Drive past the bounded wait: ticks 1..2 defer, tick 3 falls back to TOP_RUNG.
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+		expect(requestVideoQuality).not.toHaveBeenCalled();
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
 		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', TOP_RUNG, 2);
 	});
 });

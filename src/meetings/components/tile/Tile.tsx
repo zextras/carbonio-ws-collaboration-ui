@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import styled from '@emotion/styled';
 import { Container, Shimmer } from '@zextras/carbonio-design-system';
@@ -203,7 +203,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	// central) are never capped; central tiles are naturally large enough to resolve to the top tier. No
 	// debounce: the controller's own de-dup absorbs redundant publishes. Screen tiles are not measured.
 	const isFeaturedTile = isPinned || !!modalProps;
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
 		const tileEl = hoverRef.current;
 		if (!tileEl) return undefined;
@@ -214,7 +214,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				rung = TOP_RUNG;
 			} else {
 				const renderedHeight = tileEl.getBoundingClientRect().height;
-				if (renderedHeight <= 0) return;
+				if (renderedHeight <= 0) return; // pre-layout / hidden: wait for a real size
 				rung = ceilingRungForHeight(renderedHeight, window.devicePixelRatio, videoSimulcastTiers);
 			}
 			if (rung === lastCeilingRung.current) return;
@@ -229,8 +229,10 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			);
 			setTileCeiling(meetingId, key, rung);
 		};
-		// No eager call: ResizeObserver fires an initial callback with the settled (post-layout) size, so
-		// we avoid publishing a transient pre-layout measurement on mount.
+		// Measure synchronously in the layout phase so the ceiling is known before paint AND before the
+		// feed's first downlink request — that request is already capped. The observer then tracks genuine
+		// resizes; its redundant post-mount callback (same settled size) is absorbed by the change-guard.
+		publishCeiling();
 		const observer = new ResizeObserver(publishCeiling);
 		observer.observe(tileEl);
 		return (): void => observer.disconnect();

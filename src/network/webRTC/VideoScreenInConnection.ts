@@ -40,6 +40,9 @@ const FULL_TEMPORAL = 2;
 
 const MASK_TICKS_AFTER_CHANGE = 1;
 const MIN_PKT = 20; // min packets/tick to trust the reading; below this = HOLD
+// Eval ticks a never-served feed waits for its tile ceiling before falling back to an uncapped request,
+// so the first request is already the capped tier (no HIGH-then-drop) yet a feed is never withheld forever.
+const CEILING_WAIT_TICKS = 2;
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -67,6 +70,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// Per feed, the (networkTarget, tileCeiling) seen at the last reconcile — to attribute a request
 	// change to network vs resize in the downlink tier log.
 	private lastReconcile = new Map<string, { net: number; ceil: number }>();
+
+	// Eval tick at which a never-served feed first started waiting for its tile ceiling (deferral window).
+	private ceilingWaitSince = new Map<string, number>();
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -135,6 +141,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				this.videoReceivers.delete(key);
 				this.lastAppliedRung.delete(key);
 				this.lastReconcile.delete(key);
+				this.ceilingWaitSince.delete(key);
 				this.feedStates.delete(key);
 				this.prevStats.delete(key);
 				this.maskTicks.delete(key);
@@ -248,6 +255,25 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		return this.feedStates.get(key)?.targetRung ?? this.roomFloor();
 	}
 
+	// Defer a feed's FIRST request until its tile publishes a ceiling, so that first request is already the
+	// capped tier (no HIGH probe that the next reconcile clamps down). Bounded: after CEILING_WAIT_TICKS eval
+	// ticks with no ceiling the feed is served uncapped, so video is never permanently withheld.
+	private deferForCeiling(
+		key: string,
+		applied: number | undefined,
+		ceilingKnown: boolean
+	): boolean {
+		if (applied != null || ceilingKnown) {
+			this.ceilingWaitSince.delete(key);
+			return false;
+		}
+		const since = this.ceilingWaitSince.get(key) ?? this.evalTick;
+		this.ceilingWaitSince.set(key, since);
+		if (this.evalTick - since < CEILING_WAIT_TICKS) return true;
+		this.ceilingWaitSince.delete(key);
+		return false;
+	}
+
 	// Request the current per-feed target for every active feed whose mid is known, de-duped per feed.
 	// Run on every 2 s tick AND whenever the feed set changes (a scroll-driven (re)subscribe), so a feed
 	// that (re)connects while the target is low is clamped to the target immediately. Janus clamps each
@@ -260,6 +286,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.videoReceivers.forEach(({ userId }, key) => {
 			const mid = this.streamsMap[key]?.mid;
 			if (mid == null) return;
+			const applied = this.lastAppliedRung.get(key);
+			if (this.deferForCeiling(key, applied, ceilings[key] != null)) return;
 			// Requested tier = the network target capped by the tile-size ceiling. The two change
 			// independently; the ceiling has no backoff, so a resize is applied on the very next tick.
 			const net = this.desiredSubstream(key);
@@ -267,7 +295,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			const desired = Math.min(net, ceil);
 			const prev = this.lastReconcile.get(key);
 			this.lastReconcile.set(key, { net, ceil });
-			const applied = this.lastAppliedRung.get(key);
 			if (applied === desired) return;
 			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
 			if (applied != null) {
@@ -293,6 +320,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	public closePeerConnection(): void {
 		this.videoReceivers.clear();
 		this.lastReconcile.clear();
+		this.ceilingWaitSince.clear();
 		this.feedStates.clear();
 		this.prevStats.clear();
 		this.maskTicks.clear();
