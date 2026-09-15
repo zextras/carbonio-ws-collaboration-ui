@@ -310,5 +310,17 @@ describe('Active Meeting Slice', () => {
 			useStore.getState().setTileCeiling('other-meeting', feedKey, 0);
 			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBeUndefined();
 		});
+
+		test('removeTileCeiling deletes the entry for a key (tile unmounted)', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 2);
+			useStore.getState().removeTileCeiling(meetingId, feedKey);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBeUndefined();
+		});
+
+		test('removeTileCeiling is a no-op for a non-active meeting', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 2);
+			useStore.getState().removeTileCeiling('other-meeting', feedKey);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBe(2);
+		});
 	});
 });

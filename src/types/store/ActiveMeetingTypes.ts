@@ -51,6 +51,7 @@ export type ActiveMeetingSlice = {
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: LinkSample) => void;
 	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
+	removeTileCeiling: (meetingId: string, key: string) => void;
 };
 
 export type ActiveMeeting = {

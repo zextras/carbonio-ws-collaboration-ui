@@ -393,5 +393,15 @@ export const useActiveMeetingSlice: StateCreator<
 			false,
 			'AM/SET_TILE_CEILING'
 		);
+	},
+	removeTileCeiling: (meetingId: string, key: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				delete draft.activeMeeting.tileCeilings[key];
+			}),
+			false,
+			'AM/REMOVE_TILE_CEILING'
+		);
 	}
 });

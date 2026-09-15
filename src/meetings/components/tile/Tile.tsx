@@ -121,6 +121,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	const videoSimulcastTiers = useStore((store) => store.session.attributes?.videoSimulcastTiers);
 	const setTileCeiling = useStore((store) => store.setTileCeiling);
+	const removeTileCeiling = useStore((store) => store.removeTileCeiling);
 	const lastCeilingRung = useRef<number>();
 
 	const { muteForAllHasToAppear } = useMuteForAll(meetingId, userId);
@@ -228,6 +229,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		observer.observe(tileEl);
 		return (): void => observer.disconnect();
 	}, [isFeaturedTile, isScreenShare, meetingId, setTileCeiling, userId, videoSimulcastTiers]);
+
+	// Prune this feed's ceiling when the tile unmounts (user left / off-page) so the map mirrors the tiles
+	// in the call. A webcam turned off keeps its tile mounted, so its ceiling stays (re-used on video return).
+	useEffect(() => {
+		if (isScreenShare || !meetingId || !userId) return undefined;
+		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
+		return (): void => removeTileCeiling(meetingId, key);
+	}, [isScreenShare, meetingId, removeTileCeiling, userId]);
 
 	return (
 		<CustomTile
