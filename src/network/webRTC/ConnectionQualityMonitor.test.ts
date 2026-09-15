@@ -17,6 +17,11 @@ import {
 } from '../../types/network/webRTC/webRTC';
 import { RootStore } from '../../types/store/StoreTypes';
 
+const wsMocks = vi.hoisted(() => ({ sendConnectionStatusUpdate: vi.fn() }));
+vi.mock('../../network/websocket/WebSocketClient', () => ({
+	wsClient: { sendConnectionStatusUpdate: wsMocks.sendConnectionStatusUpdate }
+}));
+
 // setupTests.ts stubs the default export for component tests; exercise the real class here
 vi.unmock('./ConnectionQualityMonitor');
 
@@ -403,5 +408,84 @@ describe('ConnectionQualityMonitor — evaluateQualityTick is called with no arg
 		await (monitor as any).evaluate();
 		expect(spy).toHaveBeenCalledTimes(1);
 		expect(spy).toHaveBeenCalledWith();
+	});
+});
+
+describe('ConnectionQualityMonitor — maxTier broadcast', () => {
+	beforeEach(() => {
+		wsMocks.sendConnectionStatusUpdate.mockClear();
+	});
+
+	it('emitInitial includes maxTier=null when webcam is off', async () => {
+		const monitor = makeMonitor({ webcamActive: false });
+		await monitor.emitInitial();
+		// webcam off → myMaxTier=null → not included in payload (conditional spread)
+		expect(wsMocks.sendConnectionStatusUpdate).toHaveBeenCalled();
+		const [, , , , maxTier] = wsMocks.sendConnectionStatusUpdate.mock.calls[0];
+		expect(maxTier).toBeNull();
+	});
+
+	it('emitInitial includes myMaxTier when webcam is active and GCC has settled', async () => {
+		// trackWebcamUplink sets lastTopActiveRung only when prevCum is already set (tick 1 is transient).
+		// Use a video stats factory with a single OUTBOUND_RTP rid='m' so the second call sees progress.
+		let vTick = 0;
+		const monitor = makeMonitor({
+			webcamActive: true,
+			videoPeerStats: () => {
+				vTick += 1;
+				return Promise.resolve(
+					report([{ id: 'ov', type: OUTBOUND_RTP, rid: 'm', framesEncoded: vTick * 10 }])
+				);
+			}
+		});
+		// Tick 1: prevCum=null → topActiveRung=-1 (transient) → lastTopActiveRung=-1 → myMaxTier stays null.
+		await monitor.emitInitial();
+		wsMocks.sendConnectionStatusUpdate.mockClear();
+		// Tick 2: prevCum has rid 'm' with framesEncoded=10; current=20>10 → topActiveRung=1 (rid='m' index 1)
+		// → lastTopActiveRung=1 ≥ 0 → myMaxTier=1.
+		await monitor.emitInitial();
+		const lastCall = wsMocks.sendConnectionStatusUpdate.mock.calls.at(-1);
+		expect(lastCall?.[4]).toBe(1);
+	});
+
+	it('broadcasts on maxTier-only change (level unchanged)', async () => {
+		// Stub computeQuality so the quality level stays 'optimal' and myMaxTier is not overwritten.
+		// Pre-set committedMaxTier=1, myMaxTier=0 → maxTierChanged fires even though level is unchanged.
+		const monitor = makeMonitor();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const m = monitor as any;
+		const computeStub = vi
+			.spyOn(m, 'computeQuality')
+			.mockResolvedValue({ raw: {}, level: 'optimal' });
+
+		m.committed = 'optimal';
+		m.committedMaxTier = 1;
+		m.myMaxTier = 0; // GCC stepped down
+		m.changedAt = 100;
+
+		wsMocks.sendConnectionStatusUpdate.mockClear();
+		await m.evaluate();
+
+		expect(wsMocks.sendConnectionStatusUpdate).toHaveBeenCalled();
+		const lastCall = wsMocks.sendConnectionStatusUpdate.mock.calls.at(-1);
+		expect(lastCall?.[4]).toBe(0);
+
+		computeStub.mockRestore();
+	});
+
+	it('does NOT broadcast when neither level nor maxTier changed', async () => {
+		const monitor = makeMonitor({ webcamActive: true });
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const m = monitor as any;
+		m.lastTopActiveRung = 2;
+		m.videoOutPrevCum = { framesEncoded: {} };
+		await monitor.emitInitial();
+		wsMocks.sendConnectionStatusUpdate.mockClear();
+
+		// Same rung, same level → no broadcast
+		m.lastTopActiveRung = 2;
+		await m.evaluate();
+
+		expect(wsMocks.sendConnectionStatusUpdate).not.toHaveBeenCalled();
 	});
 });

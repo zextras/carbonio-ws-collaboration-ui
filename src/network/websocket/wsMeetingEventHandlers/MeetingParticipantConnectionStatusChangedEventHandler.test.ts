@@ -60,6 +60,32 @@ describe('meetingParticipantConnectionStatusChangedEventHandler tests', () => {
 		});
 	});
 
+	test('maxTier is stored alongside quality when present', () => {
+		meetingParticipantConnectionStatusChangedEventHandler({
+			...baseEvent,
+			maxTier: 2,
+			changedAt: 2000
+		});
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.maxTier).toBe(2);
+	});
+
+	test('maxTier=0 is stored (falsy value must not be dropped)', () => {
+		meetingParticipantConnectionStatusChangedEventHandler({
+			...baseEvent,
+			maxTier: 0,
+			changedAt: 3000
+		});
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.maxTier).toBe(0);
+	});
+
+	test('maxTier is undefined when the event does not carry it (backward compat)', () => {
+		meetingParticipantConnectionStatusChangedEventHandler({ ...baseEvent, changedAt: 4000 });
+		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
+		expect(stored?.maxTier).toBeUndefined();
+	});
+
 	test('reciprocates our status on first contact with a participant, once (not twice)', () => {
 		const monitor = useStore.getState().activeMeeting?.qualityMonitor;
 		expect(monitor).toBeDefined();

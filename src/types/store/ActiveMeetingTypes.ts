@@ -67,6 +67,9 @@ export type ActiveMeeting = {
 	// Per-webcam-feed downlink hard ceiling (max substream rung the tile's rendered size needs), keyed by
 	// `${userId}-${type}`. The inbound controller reads it as maxRung; a missing key means no cap (TOP_RUNG).
 	tileCeilings: Record<string, number>;
+	// Effective decoded webcam tier per remote user (0/1/2), derived from inbound-rtp frameHeight by the
+	// controller each tick. Local, no wire. Used by the DOWN tier indicator.
+	receivedWebcamTier: Record<string, number>;
 	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
 	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
 	connectionScoreDetail: LinkSample | undefined;
@@ -85,6 +88,7 @@ export type ActiveMeeting = {
 export type ConnectionQualityInfo = {
 	quality: ConnectionQuality;
 	changedAt: number;
+	maxTier?: number | null;
 };
 
 export enum MeetingAccordionType {

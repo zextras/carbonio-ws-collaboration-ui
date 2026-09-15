@@ -18,4 +18,5 @@ export type WsConnectionStatusUpdateMessage = {
 	score: ConnectionQuality;
 	changedAt: number;
 	to?: string;
+	maxTier?: number | null;
 };

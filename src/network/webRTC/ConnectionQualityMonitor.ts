@@ -67,6 +67,10 @@ export default class ConnectionQualityMonitor {
 
 	changedAt = 0;
 
+	private myMaxTier: number | null = null;
+
+	private committedMaxTier: number | null = null;
+
 	// RAW vote buffer (bars 0..5, one per 2 s tick, seeded optimistic). Only the display median reads from
 	// it. Lost ticks push bars=0 with NO reset (see vote()) so recovery is not over-optimistic.
 	private voteWindow = new VoteWindow();
@@ -105,11 +109,17 @@ export default class ConnectionQualityMonitor {
 	}
 
 	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt guard.
-	private applyLocalQuality(level: ConnectionQuality): void {
+	private applyLocalQuality(level: ConnectionQuality, maxTier?: number | null): void {
 		if (this.myUserId == null) return;
 		useStore
 			.getState()
-			.setParticipantConnectionQuality(this.meetingId, this.myUserId, level, this.changedAt);
+			.setParticipantConnectionQuality(
+				this.meetingId,
+				this.myUserId,
+				level,
+				this.changedAt,
+				maxTier
+			);
 	}
 
 	async emitInitial(): Promise<void> {
@@ -118,8 +128,15 @@ export default class ConnectionQualityMonitor {
 		// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 		useStore.getState().setConnectionScoreDetail(raw);
-		wsClient.sendConnectionStatusUpdate(this.meetingId, level, this.changedAt);
-		this.applyLocalQuality(level);
+		wsClient.sendConnectionStatusUpdate(
+			this.meetingId,
+			level,
+			this.changedAt,
+			undefined,
+			this.myMaxTier
+		);
+		this.committedMaxTier = this.myMaxTier;
+		this.applyLocalQuality(level, this.myMaxTier);
 	}
 
 	async resyncTo(userId: string): Promise<void> {
@@ -127,27 +144,46 @@ export default class ConnectionQualityMonitor {
 			await this.emitInitial();
 		}
 		if (this.committed != null) {
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt, userId);
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				userId,
+				this.committedMaxTier
+			);
 		}
 	}
 
 	rebroadcast(): void {
 		if (this.committed != null) {
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				undefined,
+				this.committedMaxTier
+			);
 		}
 	}
 
 	private async evaluate(): Promise<void> {
 		const { raw, level } = await this.computeQuality();
 		useStore.getState().setConnectionScoreDetail(raw);
-		if (this.committed !== level) {
+		const maxTierChanged = this.myMaxTier !== this.committedMaxTier;
+		if (this.committed !== level || maxTierChanged) {
 			this.committed = level;
+			this.committedMaxTier = this.myMaxTier;
 			// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-			// Broadcast only on a vote-level change — the event carries score only (no maxTier).
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendConnectionStatusUpdate(
+				this.meetingId,
+				this.committed,
+				this.changedAt,
+				undefined,
+				this.myMaxTier
+			);
 		}
-		this.applyLocalQuality(this.committed ?? level);
+		this.applyLocalQuality(this.committed ?? level, this.myMaxTier);
 		await this.videoIn.evaluateQualityTick().catch(() => {});
 	}
 
@@ -192,6 +228,13 @@ export default class ConnectionQualityMonitor {
 			this.videoOutPrevCum = null;
 			this.lastVideoSender = null;
 		}
+
+		if (!webcamActive) {
+			this.myMaxTier = null;
+		} else if (this.lastTopActiveRung >= 0) {
+			this.myMaxTier = this.lastTopActiveRung;
+		}
+		// else (-1 transient) keep previous myMaxTier
 
 		// RTT: candidate-pair round-trip ONLY (worst across audio/webcam/screen PCs) — a true two-way STUN
 		// measurement of our own me<->Janus leg, present on every PC regardless of which streams are on.

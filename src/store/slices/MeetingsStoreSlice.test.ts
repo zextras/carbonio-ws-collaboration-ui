@@ -198,6 +198,78 @@ describe('MeetingStoreSlice tests', () => {
 			).toBe(2000);
 		});
 
+		test('setParticipantConnectionQuality stores maxTier under the changedAt guard', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'medium',
+					1000,
+					2
+				);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.maxTier
+			).toBe(2);
+
+			// newer update with maxTier=0 wins
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'medium',
+					2000,
+					0
+				);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.maxTier
+			).toBe(0);
+
+			// older update is ignored — maxTier stays 0
+			useStore
+				.getState()
+				.setParticipantConnectionQuality(
+					mockMeeting0.id,
+					mockParticipant0.userId,
+					'medium',
+					500,
+					2
+				);
+			expect(
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.maxTier
+			).toBe(0);
+		});
+
+		test('setReceivedWebcamTier writes the effective decoded tier per userId', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+
+			useStore.getState().setReceivedWebcamTier(mockMeeting0.id, mockParticipant1.userId, 2);
+			expect(useStore.getState().activeMeeting?.receivedWebcamTier[mockParticipant1.userId]).toBe(
+				2
+			);
+
+			// overwrite with a new value
+			useStore.getState().setReceivedWebcamTier(mockMeeting0.id, mockParticipant1.userId, 1);
+			expect(useStore.getState().activeMeeting?.receivedWebcamTier[mockParticipant1.userId]).toBe(
+				1
+			);
+		});
+
+		test('setReceivedWebcamTier is a no-op when meetingId does not match the active meeting', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().meetingConnection(mockMeeting0.id);
+
+			useStore.getState().setReceivedWebcamTier('other-meeting', mockParticipant0.userId, 2);
+			expect(
+				useStore.getState().activeMeeting?.receivedWebcamTier[mockParticipant0.userId]
+			).toBeUndefined();
+		});
+
 		test('Update participant stream status', () => {
 			useStore.getState().addMeetings([mockMeeting0]);
 			useStore

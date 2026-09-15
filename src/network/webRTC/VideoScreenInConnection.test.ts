@@ -19,6 +19,7 @@ const USER_1 = 'user1';
 const USER_2 = 'user2';
 const FEED_KEY_1 = `${USER_1}-${STREAM_TYPE.VIDEO}`;
 const FEED_KEY_2 = `${USER_2}-${STREAM_TYPE.VIDEO}`;
+const INBOUND_RTP = 'inbound-rtp';
 
 // Hoisted so they are accessible inside vi.mock factory closures (which are hoisted too).
 const storeMocks = vi.hoisted(() => ({
@@ -27,7 +28,11 @@ const storeMocks = vi.hoisted(() => ({
 	setLocalVideoSuppressed: vi.fn(),
 	setSubscribedTracks: vi.fn(),
 	setDownlinkCompromised: vi.fn(),
-	connectionQuality: {} as Record<string, { quality: string; changedAt: number }>,
+	setReceivedWebcamTier: vi.fn(),
+	connectionQuality: {} as Record<
+		string,
+		{ quality: string; changedAt: number; maxTier?: number | null }
+	>,
 	tileCeilings: {} as Record<string, number>
 }));
 
@@ -39,7 +44,8 @@ vi.mock('../../store/Store', () => ({
 			activeMeeting: {
 				meetingId: MEETING_ID,
 				connectionQuality: storeMocks.connectionQuality,
-				tileCeilings: storeMocks.tileCeilings
+				tileCeilings: storeMocks.tileCeilings,
+				receivedWebcamTier: {}
 			},
 			session: { id: 'me', apiVersion: undefined }
 		})
@@ -75,7 +81,7 @@ const makeStalledReceiver = (pktPerTick = 30): RTCRtpReceiver => {
 				[
 					'inb',
 					{
-						type: 'inbound-rtp',
+						type: INBOUND_RTP,
 						kind: 'video',
 						framesDecoded: 0,
 						packetsReceived: totalRecv
@@ -99,7 +105,7 @@ const makeHealthyReceiver = (framesPerTick = 30, pktPerTick = 60): RTCRtpReceive
 				[
 					'inb',
 					{
-						type: 'inbound-rtp',
+						type: INBOUND_RTP,
 						kind: 'video',
 						framesDecoded: totalFrames,
 						packetsReceived: totalRecv
@@ -134,6 +140,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 	beforeEach(() => {
 		storeMocks.connectionQuality = {};
 		storeMocks.tileCeilings = {};
+		storeMocks.setReceivedWebcamTier.mockClear();
 		conn = new VideoScreenInConnection(MEETING_ID);
 		requestVideoQuality.mockClear();
 	});
@@ -156,10 +163,10 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 1, 2);
 	});
 
-	it('(b) holds and does NOT lower rung when sender badge is unstable (their upload is the issue)', async () => {
+	it('(b) holds and does NOT lower rung when sender maxTier is 0 — their uplink is the issue', async () => {
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
-		storeMocks.connectionQuality = { [USER_1]: { quality: 'poor', changedAt: 0 } };
+		storeMocks.connectionQuality = { [USER_1]: { quality: 'poor', changedAt: 0, maxTier: 0 } };
 
 		for (let i = 0; i < EVIDENCE_DOWN_N + EVIDENCE_DOWN_M + 2; i += 1) {
 			// eslint-disable-next-line no-await-in-loop
@@ -328,5 +335,102 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 
 		expect(requestVideoQuality).toHaveBeenCalledTimes(1);
 		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', TOP_RUNG, 2);
+	});
+
+	it('(m) senderOK=true when maxTier is undefined — allows shed on stalled feed', async () => {
+		// No maxTier in connectionQuality → maxTier undefined → senderOK=true → shed fires.
+		const receiver = makeStalledReceiver();
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
+		storeMocks.connectionQuality = { [USER_1]: { quality: 'optimal', changedAt: 0 } };
+
+		await conn.evaluateQualityTick(); // tick 1: no prev → HOLD
+		await conn.evaluateQualityTick(); // tick 2
+		await conn.evaluateQualityTick(); // tick 3
+		requestVideoQuality.mockClear();
+		await conn.evaluateQualityTick(); // tick 4: EVIDENCE_DOWN_N=3 stalls → DOWN fires
+
+		const { calls } = requestVideoQuality.mock;
+		const downgradeCalls = calls.filter(([, , , rung]) => (rung as number) < TOP_RUNG);
+		expect(downgradeCalls.length).toBeGreaterThan(0);
+	});
+
+	it('(n) senderOK=true when maxTier is 1 — allows shed on stalled feed', async () => {
+		const receiver = makeStalledReceiver();
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
+		storeMocks.connectionQuality = { [USER_1]: { quality: 'poor', changedAt: 0, maxTier: 1 } };
+
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+		requestVideoQuality.mockClear();
+		await conn.evaluateQualityTick();
+
+		const { calls } = requestVideoQuality.mock;
+		const downgradeCalls = calls.filter(([, , , rung]) => (rung as number) < TOP_RUNG);
+		expect(downgradeCalls.length).toBeGreaterThan(0);
+	});
+
+	it('(o) senderOK=true when maxTier is 2 — allows shed on stalled feed', async () => {
+		const receiver = makeStalledReceiver();
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
+		storeMocks.connectionQuality = { [USER_1]: { quality: 'poor', changedAt: 0, maxTier: 2 } };
+
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+		requestVideoQuality.mockClear();
+		await conn.evaluateQualityTick();
+
+		const { calls } = requestVideoQuality.mock;
+		const downgradeCalls = calls.filter(([, , , rung]) => (rung as number) < TOP_RUNG);
+		expect(downgradeCalls.length).toBeGreaterThan(0);
+	});
+
+	it('(p) frameHeight maps to receivedWebcamTier: 720p→tier2, 360p→tier1, 144p→tier0', async () => {
+		const makeFrameHeightReceiver = (fh: number): RTCRtpReceiver =>
+			({
+				getStats: vi.fn(
+					async () =>
+						new Map([
+							[
+								'inb',
+								{
+									type: INBOUND_RTP,
+									kind: 'video',
+									framesDecoded: 0,
+									packetsReceived: 0,
+									frameHeight: fh
+								}
+							]
+						]) as unknown as RTCStatsReport
+				)
+			}) as unknown as RTCRtpReceiver;
+
+		storeMocks.setReceivedWebcamTier.mockClear();
+
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeFrameHeightReceiver(720));
+		await conn.evaluateQualityTick();
+		expect(storeMocks.setReceivedWebcamTier).toHaveBeenCalledWith(MEETING_ID, USER_1, 2);
+
+		storeMocks.setReceivedWebcamTier.mockClear();
+		conn = new VideoScreenInConnection(MEETING_ID);
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeFrameHeightReceiver(360));
+		await conn.evaluateQualityTick();
+		expect(storeMocks.setReceivedWebcamTier).toHaveBeenCalledWith(MEETING_ID, USER_1, 1);
+
+		storeMocks.setReceivedWebcamTier.mockClear();
+		conn = new VideoScreenInConnection(MEETING_ID);
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeFrameHeightReceiver(144));
+		await conn.evaluateQualityTick();
+		expect(storeMocks.setReceivedWebcamTier).toHaveBeenCalledWith(MEETING_ID, USER_1, 0);
+	});
+
+	it('(q) no setReceivedWebcamTier call when frameHeight is absent', async () => {
+		storeMocks.setReceivedWebcamTier.mockClear();
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver());
+
+		await conn.evaluateQualityTick();
+
+		expect(storeMocks.setReceivedWebcamTier).not.toHaveBeenCalled();
 	});
 });

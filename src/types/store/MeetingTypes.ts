@@ -35,8 +35,10 @@ export type MeetingsSlice = {
 		meetingId: string,
 		userId: string,
 		quality: ConnectionQuality,
-		changedAt: number
+		changedAt: number,
+		maxTier?: number | null
 	) => void;
+	setReceivedWebcamTier: (meetingId: string, userId: string, tier: number) => void;
 };
 
 export type Meeting = {

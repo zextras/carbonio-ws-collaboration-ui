@@ -89,6 +89,7 @@ export const useActiveMeetingSlice: StateCreator<
 					qualityMonitor,
 					connectionQuality: {},
 					tileCeilings: {},
+					receivedWebcamTier: {},
 					connectionScoreDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,

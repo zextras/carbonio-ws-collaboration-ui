@@ -243,7 +243,8 @@ export const useMeetingsStoreSlice: StateCreator<
 		meetingId: string,
 		userId: string,
 		quality: ConnectionQuality,
-		changedAt: number
+		changedAt: number,
+		maxTier?: number | null
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -251,11 +252,22 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
-					activeMeeting.connectionQuality[userId] = { quality, changedAt };
+					activeMeeting.connectionQuality[userId] = { quality, changedAt, maxTier };
 				}
 			}),
 			false,
 			'MEETINGS/SET_PARTICIPANT_CONNECTION_QUALITY'
+		);
+	},
+	setReceivedWebcamTier: (meetingId: string, userId: string, tier: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				const { activeMeeting } = draft;
+				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
+				activeMeeting.receivedWebcamTier[userId] = tier;
+			}),
+			false,
+			'MEETINGS/SET_RECEIVED_WEBCAM_TIER'
 		);
 	}
 });

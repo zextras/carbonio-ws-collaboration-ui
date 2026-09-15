@@ -85,6 +85,28 @@ export const getParticipantConnectionQuality = (
 	return activeMeeting.connectionQuality[userId]?.quality;
 };
 
+export const getParticipantWebcamMaxTier = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): number | null | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	return activeMeeting.connectionQuality[userId]?.maxTier;
+};
+
+export const getReceivedWebcamTier = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): number | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	return activeMeeting.receivedWebcamTier[userId];
+};
+
 export const getParticipantVideoStatus = (
 	store: RootStore,
 	meetingId: string | undefined,

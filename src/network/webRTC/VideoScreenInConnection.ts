@@ -7,7 +7,7 @@
 import { filter, forEach, keyBy } from 'lodash';
 import { gte } from 'semver';
 
-import { videoFpsScore, isUnstableQuality } from './connectionQualityScore';
+import { videoFpsScore } from './connectionQualityScore';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -42,6 +42,13 @@ const MIN_PKT = 20; // min packets/tick to trust the reading; below this = HOLD
 // Eval ticks a never-served feed waits for its tile ceiling before falling back to an uncapped request,
 // so the first request is already the capped tier (no HIGH-then-drop) yet a feed is never withheld forever.
 const CEILING_WAIT_TICKS = 2;
+
+const heightToTier = (h: number | null | undefined): number | undefined => {
+	if (h == null) return undefined;
+	if (h >= 540) return 2;
+	if (h >= 252) return 1;
+	return 0;
+};
 
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
@@ -194,13 +201,30 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		let decoded: number | undefined;
 		let recv: number | undefined;
+		let frameHeight: number | undefined;
 		stats?.forEach(
-			(r: RTCStats & { kind?: string; framesDecoded?: number; packetsReceived?: number }) => {
+			(
+				r: RTCStats & {
+					kind?: string;
+					framesDecoded?: number;
+					packetsReceived?: number;
+					frameHeight?: number;
+				}
+			) => {
 				if (r.type !== 'inbound-rtp' || r.kind !== 'video') return;
 				if (r.framesDecoded != null) decoded = r.framesDecoded;
 				if (r.packetsReceived != null) recv = r.packetsReceived;
+				if (r.frameHeight != null) frameHeight = r.frameHeight;
 			}
 		);
+
+		const receivedTier = heightToTier(frameHeight);
+		if (receivedTier !== undefined) {
+			const userId = this.videoReceivers.get(key)?.userId;
+			if (userId !== undefined) {
+				useStore.getState().setReceivedWebcamTier(this.meetingId, userId, receivedTier);
+			}
+		}
 
 		const prev = this.prevStats.get(key);
 		if (decoded != null && recv != null) this.prevStats.set(key, { decoded, recv });
@@ -236,8 +260,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
 				const score = await this.computeFeedScore(key, receiver);
 
-				const q = cq[userId]?.quality;
-				const senderOK = q == null ? true : !isUnstableQuality(q);
+				const maxTier = cq[userId]?.maxTier;
+				const senderOK = maxTier == null ? true : maxTier > 0; // sender floored to LOW ⇒ their uplink ⇒ HOLD
 
 				const prevState = this.feedStates.get(key) ?? initialFeedState(this.roomFloor());
 				// The controller decides only the NETWORK target; the tile-size ceiling is applied as a
