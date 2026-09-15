@@ -1,3 +1,9 @@
+## [0.18.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.3...v0.18.4) (2026-09-15)
+
+### Bug Fixes
+
+* **deps:** update dependency react-router-dom to v6.30.6 [security] ([#820](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/820)) ([210b0cf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/210b0cf9f0e0fbd08bbfdda3559d90589cb95fc3))
+
 ## [0.18.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.2...v0.18.3) (2026-09-15)
 
 ### Other changes
