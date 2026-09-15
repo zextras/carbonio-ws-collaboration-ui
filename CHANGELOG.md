@@ -1,3 +1,9 @@
+## [0.18.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.2...v0.18.3) (2026-09-15)
+
+### Other changes
+
+* **deps:** update dependency vitest to v4.1.11 [security] ([#823](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/823)) ([4c4ee94](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4c4ee947ee2659ab947a71a03f250b9ea5a37971))
+
 ## [0.18.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.1...v0.18.2) (2026-09-14)
 
 ### Other changes
