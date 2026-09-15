@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 
 import {
 	ConnectionQuality,
-	isUnstableQuality,
 	jitterScore,
 	rttScore,
 	uplinkLossScore
@@ -64,9 +63,7 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 		isOwn ? store.activeMeeting?.connectionScoreDetail : undefined
 	);
 
-	// Own tile: always visible; remote tiles: hidden unless link is unstable.
 	if (!quality) return null;
-	if (!isOwn && !isUnstableQuality(quality)) return null;
 
 	const { error, warning, success, gray6 } = theme.palette;
 

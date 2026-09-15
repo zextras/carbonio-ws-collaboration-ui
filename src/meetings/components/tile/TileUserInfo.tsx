@@ -10,8 +10,13 @@ import { Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-sy
 import { useTranslation } from 'react-i18next';
 
 import ConnectionQualityIndicator from './ConnectionQualityIndicator';
+import TierIndicator from './TierIndicator';
 import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserHandRank } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getParticipantWebcamMaxTier,
+	getReceivedWebcamTier
+} from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -62,6 +67,16 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	const isSessionTile = useStore(getUserId) === userId;
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
 	const userHandRank = useStore((store) => getUserHandRank(store, userId ?? ''));
+	const myUserId = useStore(getUserId);
+	const myMaxTier = useStore((store) =>
+		isSessionTile ? getParticipantWebcamMaxTier(store, meetingId, myUserId) : undefined
+	);
+	const theirMaxTier = useStore((store) =>
+		!isSessionTile ? getParticipantWebcamMaxTier(store, meetingId, userId) : undefined
+	);
+	const receivedTier = useStore((store) =>
+		!isSessionTile ? getReceivedWebcamTier(store, meetingId, userId) : undefined
+	);
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
 		meetingId ?? '',
@@ -97,6 +112,15 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 					</CustomContainer>
 				)}
 				{!isScreenShare && <ConnectionQualityIndicator meetingId={meetingId} userId={userId} />}
+				{!isScreenShare && videoStreamEnabled && isSessionTile && (
+					<TierIndicator tier={myMaxTier ?? undefined} direction="up" />
+				)}
+				{!isScreenShare && videoStreamEnabled && !isSessionTile && (
+					<>
+						<TierIndicator tier={theirMaxTier ?? undefined} direction="up" />
+						<TierIndicator tier={receivedTier} direction="down" />
+					</>
+				)}
 			</>
 		),
 		[
@@ -108,6 +132,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 			isSessionTile,
 			meetingId,
 			micOffLabel,
+			myMaxTier,
+			receivedTier,
+			theirMaxTier,
 			userId,
 			videoStreamEnabled
 		]

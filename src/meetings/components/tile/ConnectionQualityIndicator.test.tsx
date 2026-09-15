@@ -22,12 +22,12 @@ beforeEach(() => {
 });
 
 describe('ConnectionQualityIndicator', () => {
-	it('renders nothing when the participant quality is stable (medium and above)', () => {
+	it('renders the badge for a remote participant even when quality is stable (medium and above)', () => {
 		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, USER_ID, 'medium', 1);
 		const { container } = setup(
 			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={USER_ID} />
 		);
-		expect(container).toBeEmptyDOMElement();
+		expect(container).not.toBeEmptyDOMElement();
 	});
 
 	it('renders nothing when there is no quality for the participant', () => {
