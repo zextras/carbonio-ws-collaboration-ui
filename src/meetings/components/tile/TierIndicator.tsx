@@ -33,6 +33,13 @@ const BAR_HEIGHTS = ['0.4375rem', '0.6875rem', '1rem'] as const;
 
 const TIER_NAME: Record<number, string> = { 0: 'LOW', 1: 'MEDIUM', 2: 'HIGH' };
 
+// Bar colour by tier, like the score badge: LOW red, MEDIUM yellow, HIGH green.
+const TIER_COLOR: Record<number, 'error' | 'warning' | 'success'> = {
+	0: 'error',
+	1: 'warning',
+	2: 'success'
+};
+
 type TierIndicatorProps = {
 	tier?: number;
 	direction: 'up' | 'down';
@@ -45,8 +52,10 @@ const TierIndicator: FC<TierIndicatorProps> = ({ tier, direction }) => {
 	if (tier == null) return null;
 
 	const filled = tier + 1;
-	const { success, gray6 } = theme.palette;
-	const barColors = BAR_HEIGHTS.map((_, i) => (i < filled ? success.regular : gray6.regular));
+	const barColor = theme.palette[TIER_COLOR[tier] ?? 'success'].regular;
+	const barColors = BAR_HEIGHTS.map((_, i) =>
+		i < filled ? barColor : theme.palette.gray6.regular
+	);
 
 	const tierName = TIER_NAME[tier] ?? String(tier);
 	const label =
