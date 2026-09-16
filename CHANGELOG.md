@@ -1,3 +1,9 @@
+## [0.18.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.6...v0.18.7) (2026-09-16)
+
+### Bug Fixes
+
+* resolve lint errors surfaced by [@typescript-eslint](https://github.com/typescript-eslint) v8 ([#829](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/829)) ([e304077](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e304077862878d489ac37dc4f75542cd95aa5617)), closes [zextras/carbonio-ui-configs#160](https://github.com/zextras/carbonio-ui-configs/issues/160) [#132](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/132) [#648](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/648) [#160](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/160)
+
 ## [0.18.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.5...v0.18.6) (2026-09-15)
 
 ### Other changes
