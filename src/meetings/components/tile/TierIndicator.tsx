@@ -13,23 +13,24 @@ const CustomContainer = styled(Row)`
 	border-radius: 0.25rem;
 `;
 
+// Horizontal, wider-than-tall form factor: 3 flat segments in a row (a level meter laid flat) so the badge
+// reads as a short pill next to the arrow instead of a cramped vertical stack.
 const BarsContainer = styled.div`
 	display: flex;
-	align-items: flex-end;
-	justify-content: center;
-	gap: 0.0625rem;
-	width: 0.75rem;
-	height: 1rem;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.125rem;
 `;
 
-const Bar = styled.div<{ $color: string; $height: string }>`
-	width: 0.125rem;
-	height: ${({ $height }): string => $height};
+const Bar = styled.div<{ $color: string }>`
+	width: 0.5rem;
+	height: 0.25rem;
 	background-color: ${({ $color }): string => $color};
 	border-radius: 0.0625rem;
 `;
 
-const BAR_HEIGHTS = ['0.4rem', '0.7rem', '1rem'] as const;
+// Three equal segments; the number FILLED encodes the tier (1=LOW, 2=MEDIUM, 3=HIGH).
+const SEGMENTS = [0, 1, 2] as const;
 
 const TIER_NAME: Record<number, string> = { 0: 'LOW', 1: 'MEDIUM', 2: 'HIGH' };
 
@@ -46,7 +47,7 @@ const TierIndicator: FC<TierIndicatorProps> = ({ tier, direction }) => {
 
 	const filled = tier + 1;
 	const { success, gray6 } = theme.palette;
-	const barColors = BAR_HEIGHTS.map((_, i) => (i < filled ? success.regular : gray6.regular));
+	const barColors = SEGMENTS.map((i) => (i < filled ? success.regular : gray6.regular));
 
 	const tierName = TIER_NAME[tier] ?? String(tier);
 	const label =
@@ -56,14 +57,14 @@ const TierIndicator: FC<TierIndicatorProps> = ({ tier, direction }) => {
 
 	return (
 		<Tooltip label={label}>
-			<CustomContainer background="gray0" height="fit" width="fit" padding="0.5rem">
-				<Row gap="0.125rem" crossAlignment="center">
+			<CustomContainer background="gray0" height="fit" width="fit" padding="0.25rem">
+				<Row gap="0.1875rem" crossAlignment="center">
+					<Icon icon={direction === 'up' ? 'ArrowUp' : 'ArrowDown'} size="small" color="gray6" />
 					<BarsContainer>
-						{BAR_HEIGHTS.map((height, i) => (
-							<Bar key={height} $color={barColors[i]} $height={height} />
+						{SEGMENTS.map((i) => (
+							<Bar key={i} $color={barColors[i]} />
 						))}
 					</BarsContainer>
-					<Icon icon={direction === 'up' ? 'ArrowUp' : 'ArrowDown'} size="small" color="gray6" />
 				</Row>
 			</CustomContainer>
 		</Tooltip>
