@@ -100,7 +100,7 @@ export const useLocalMediaHandler = ({
 	}, [mediaDeviceList, deviceId, toggleStream, status]);
 
 	useEffect(
-		() => () => {
+		() => (): void => {
 			freeMediaResources(streamTrack);
 		},
 		[streamTrack]

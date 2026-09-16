@@ -72,7 +72,7 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 	}, [videoStatus, videoStream]);
 
 	useEffect(
-		() => () => {
+		() => (): void => {
 			freeMediaResources(currentStreamRef.current);
 		},
 		[]
