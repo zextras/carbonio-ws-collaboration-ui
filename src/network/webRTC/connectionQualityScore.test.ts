@@ -343,14 +343,14 @@ describe('absoluteScore', () => {
 		expect(absoluteScore(6.5, 0, 0)).toBe(6.5);
 	});
 
-	it('clamps to 0 for combined shortfall that would go negative (up=2, down=2 → 10-6-6=-2 → 0)', () => {
-		// clamp(10 - 3*2 - 3*2, 0, 10) = clamp(-2, 0, 10) = 0
-		expect(absoluteScore(10, 2, 2)).toBe(0);
+	it('clamps to 0 for combined shortfall that would go negative (up=2, down=2 → 10-3-6=1)', () => {
+		// clamp(10 - 1.5*2 - 3*2, 0, 10) = clamp(1, 0, 10) = 1
+		expect(absoluteScore(10, 2, 2)).toBe(1);
 	});
 
 	it('applies only uplink penalty when downShortfall is 0', () => {
-		// clamp(10 - 3*2 - 0, 0, 10) = 4.0
-		expect(absoluteScore(10, 2, 0)).toBe(4);
+		// clamp(10 - 1.5*2 - 0, 0, 10) = 7.0
+		expect(absoluteScore(10, 2, 0)).toBe(7);
 	});
 
 	it('applies only downlink penalty when upShortfall is 0', () => {
@@ -359,7 +359,7 @@ describe('absoluteScore', () => {
 	});
 
 	it('rounds the result to 1 decimal', () => {
-		// clamp(7 - 3*1 - 0, 0, 10) = 4.0
-		expect(absoluteScore(7, 1, 0)).toBe(4);
+		// clamp(7 - 1.5*1 - 0, 0, 10) = 5.5
+		expect(absoluteScore(7, 1, 0)).toBe(5.5);
 	});
 });

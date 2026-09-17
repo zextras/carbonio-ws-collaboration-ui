@@ -127,7 +127,7 @@ export function tierPenalty(shortfall: number): number {
 	return TIER_PENALTY_RATIO ** shortfall;
 }
 
-export const K_UP = 3;
+export const K_UP = 1.5;
 export const K_DOWN = 3;
 
 // Absolute score: relative penalised by uplink and downlink tier shortfalls (subtractive counterfactual).
