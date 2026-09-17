@@ -140,23 +140,18 @@ const ConnectionQualityIndicator: FC<{
 		const jitterLine = line('Jitter', ownDetail?.jitterMs, jitterScore, 'ms');
 		const lossLine = line('Uplink loss', ownDetail?.lossUp, uplinkLossScore, '%');
 
-		// Uplink tier line
-		const uplinkTierLine = ((): string => {
-			if (maxUplinkTier == null) return 'Uplink: -';
-			const tierName = TIER_NAMES[maxUplinkTier] ?? String(maxUplinkTier);
-			if (tierWeightedDetail?.uplinkPenalty != null) {
-				const upShortfall = round1(tierWeightedDetail.uplinkPenalty / K_UP);
-				return `Uplink: ${tierName}  (-${upShortfall})`;
-			}
-			return `Uplink: ${tierName}`;
-		})();
+		// Tier difference: how many tiers the network forced below the ceiling, as 0 / -1 / -2 (never -0).
+		const diff = (shortfall: number): string => (shortfall === 0 ? '0' : `-${shortfall}`);
 
-		// Downlink shortfall line
-		const downlinkLine = ((): string => {
-			if (tierWeightedDetail?.downlinkPenalty == null) return 'Downlink: -';
-			const avgShortfall = round1(tierWeightedDetail.downlinkPenalty / K_DOWN);
-			return `Downlink: -${avgShortfall} avg`;
-		})();
+		const uplinkDiffLine =
+			tierWeightedDetail?.uplinkPenalty == null
+				? 'Uplink tier difference: -'
+				: `Uplink tier difference: ${diff(round1(tierWeightedDetail.uplinkPenalty / K_UP))}`;
+
+		const downlinkDiffLine =
+			tierWeightedDetail?.downlinkPenalty == null
+				? 'Downlink avg tier difference: -'
+				: `Downlink avg tier difference: ${diff(round1(tierWeightedDetail.downlinkPenalty / K_DOWN))}`;
 
 		// Score line
 		const scoreLine =
@@ -169,8 +164,8 @@ const ConnectionQualityIndicator: FC<{
 			rttLine,
 			jitterLine,
 			lossLine,
-			uplinkTierLine,
-			downlinkLine,
+			uplinkDiffLine,
+			downlinkDiffLine,
 			scoreLine
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;

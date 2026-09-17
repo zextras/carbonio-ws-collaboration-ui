@@ -88,11 +88,30 @@ describe('ConnectionQualityIndicator', () => {
 		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
 
 		const tooltip = await screen.findByText(/RTT:/);
-		// uplinkPenalty=3.0 / K_UP(1.5) = 2.0 upShortfall → "Uplink: MED (-2)"
-		expect(tooltip).toHaveTextContent('Uplink: MED (-2)');
-		// downlinkPenalty=1.5 / K_DOWN(3) = 0.5 avgShortfall → "Downlink: -0.5 avg"
-		expect(tooltip).toHaveTextContent('Downlink: -0.5 avg');
+		// uplinkPenalty=3.0 / K_UP(1.5) = 2 → "Uplink tier difference: -2"
+		expect(tooltip).toHaveTextContent('Uplink tier difference: -2');
+		// downlinkPenalty=1.5 / K_DOWN(3) = 0.5 → "Downlink avg tier difference: -0.5"
+		expect(tooltip).toHaveTextContent('Downlink avg tier difference: -0.5');
 		expect(tooltip).toHaveTextContent('Score: 5.0/10');
+	});
+
+	it('own-tile tier difference reads 0 (never -0) at the hardware ceiling', async () => {
+		useStore.getState().setLoginInfo({ id: ME_ID });
+		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, ME_ID, null, 1, 2, 2);
+		useStore.getState().setConnectionTierWeightedDetail({
+			networkScore: 10,
+			tierWeightedNetworkScore: 10,
+			uplinkPenalty: 0,
+			downlinkPenalty: 0
+		});
+		const { user } = setup(
+			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} />
+		);
+		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
+		const tooltip = await screen.findByText(/Score:/);
+		expect(tooltip).toHaveTextContent('Uplink tier difference: 0');
+		expect(tooltip).toHaveTextContent('Downlink avg tier difference: 0');
+		expect(tooltip).not.toHaveTextContent('-0');
 	});
 
 	it('own-tile merged tooltip shows — for null coefficients (webcam off / no feeds)', async () => {
@@ -112,8 +131,8 @@ describe('ConnectionQualityIndicator', () => {
 		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
 
 		const tooltip = await screen.findByText(/Score:/);
-		expect(tooltip).toHaveTextContent('Uplink: -');
-		expect(tooltip).toHaveTextContent('Downlink: -');
+		expect(tooltip).toHaveTextContent('Uplink tier difference: -');
+		expect(tooltip).toHaveTextContent('Downlink avg tier difference: -');
 		expect(tooltip).toHaveTextContent('Score: —');
 	});
 
