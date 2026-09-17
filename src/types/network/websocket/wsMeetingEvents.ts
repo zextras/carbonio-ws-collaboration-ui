@@ -167,8 +167,7 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 export type MeetingParticipantUplinkStatusChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_UPLINK_STATUS_CHANGED;
 	userId: string;
-	relativeScore: number | null;
-	absoluteScore?: number | null;
+	networkScore: number | null;
 	changedAt: number;
 	maxUplinkTier?: number | null;
 	maxHardwareTier?: number | null;

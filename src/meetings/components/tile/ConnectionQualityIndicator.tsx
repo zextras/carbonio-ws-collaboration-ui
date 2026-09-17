@@ -13,16 +13,15 @@ import {
 	ConnectionQuality,
 	isUnstableQuality,
 	jitterScore,
+	K_DOWN,
+	K_UP,
+	round1,
 	rttScore,
 	uplinkLossScore
 } from '../../../network/webRTC/connectionQualityScore';
-import {
-	getParticipantAbsoluteQuality,
-	getParticipantConnectionQuality
-} from '../../../store/selectors/MeetingSelectors';
+import { getParticipantNetworkQuality } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { AbsoluteScoreDetail } from '../../../types/store/ActiveMeetingTypes';
 
 const CustomContainer = styled(Row)`
 	border-radius: 0.25rem;
@@ -56,25 +55,28 @@ const LEVEL_BARS: Record<Exclude<ConnectionQuality, 'lost'>, number> = {
 	optimal: 5
 };
 
+const TIER_NAMES = ['LOW', 'MED', 'HIGH'] as const;
+
 const ConnectionQualityIndicator: FC<{
 	meetingId?: string;
 	userId?: string;
-	variant?: 'relative' | 'absolute';
-}> = ({ meetingId, userId, variant = 'relative' }) => {
+}> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
 	const theme = useTheme();
-	const quality = useStore((state) =>
-		variant === 'absolute'
-			? getParticipantAbsoluteQuality(state, meetingId, userId)
-			: getParticipantConnectionQuality(state, meetingId, userId)
-	);
+	const quality = useStore((state) => getParticipantNetworkQuality(state, meetingId, userId));
 	const isOwn = useStore((store) => userId != null && userId === getUserId(store));
 	const ownDetail = useStore((store) =>
 		isOwn ? store.activeMeeting?.connectionScoreDetail : undefined
 	);
-	const absoluteDetail = useStore((store): AbsoluteScoreDetail | undefined =>
-		isOwn ? store.activeMeeting?.connectionAbsoluteDetail : undefined
+	const tierWeightedDetail = useStore((store) =>
+		isOwn ? store.activeMeeting?.connectionTierWeightedDetail : undefined
 	);
+	const maxUplinkTier = useStore((store) => {
+		if (!meetingId || !userId) return undefined;
+		const { activeMeeting } = store;
+		if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+		return activeMeeting.connectionQuality[userId]?.maxUplinkTier;
+	});
 
 	// Own tile: always visible; remote tiles: hidden unless link is unstable.
 	if (!quality) return null;
@@ -115,24 +117,15 @@ const ConnectionQualityIndicator: FC<{
 
 	// An unmeasurable signal (undefined) renders '—' and does not drag the vote.
 	const label = ((): string | React.ReactElement => {
-		if (!isOwn) return tooltipLabel;
-
-		if (variant === 'absolute') {
-			if (absoluteDetail == null) return tooltipLabel;
-			const fmtPenalty = (p: number | null): string => (p != null ? `-${p.toFixed(1)}` : '—');
-			const lines = [
-				tooltipLabel,
-				`Uplink: ${fmtPenalty(absoluteDetail.uplinkPenalty)}`,
-				`Downlink: ${fmtPenalty(absoluteDetail.downlinkPenalty)}`,
-				absoluteDetail.absoluteScore != null
-					? `Score: ${absoluteDetail.absoluteScore.toFixed(1)}/10`
-					: 'Score: —'
-			];
-			return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
+		if (!isOwn) {
+			// Lean tooltip for others: quality label + uplink tier if known
+			const tierLabel =
+				maxUplinkTier != null ? `Uplink: ${TIER_NAMES[maxUplinkTier] ?? maxUplinkTier}` : undefined;
+			if (!tierLabel) return tooltipLabel;
+			return <div style={{ whiteSpace: 'pre-line' }}>{[tooltipLabel, tierLabel].join('\n')}</div>;
 		}
 
-		// variant='relative'
-		if (ownDetail == null) return tooltipLabel;
+		// Self: merged tooltip
 		const fmt = (v: number, unit: 'ms' | '%'): string =>
 			unit === 'ms' ? `${Math.round(v)} ms` : `${(v * 100).toFixed(1)}%`;
 		const line = (
@@ -142,14 +135,43 @@ const ConnectionQualityIndicator: FC<{
 			unit: 'ms' | '%'
 		): string =>
 			raw !== undefined ? `${name}: ${score(raw).toFixed(1)}/10 (${fmt(raw, unit)})` : `${name}: —`;
+
+		const rttLine = line('RTT', ownDetail?.rttMs, rttScore, 'ms');
+		const jitterLine = line('Jitter', ownDetail?.jitterMs, jitterScore, 'ms');
+		const lossLine = line('Uplink loss', ownDetail?.lossUp, uplinkLossScore, '%');
+
+		// Uplink tier line
+		const uplinkTierLine = ((): string => {
+			if (maxUplinkTier == null) return 'Uplink: -';
+			const tierName = TIER_NAMES[maxUplinkTier] ?? String(maxUplinkTier);
+			if (tierWeightedDetail?.uplinkPenalty != null) {
+				const upShortfall = round1(tierWeightedDetail.uplinkPenalty / K_UP);
+				return `Uplink: ${tierName}  (-${upShortfall})`;
+			}
+			return `Uplink: ${tierName}`;
+		})();
+
+		// Downlink shortfall line
+		const downlinkLine = ((): string => {
+			if (tierWeightedDetail?.downlinkPenalty == null) return 'Downlink: -';
+			const avgShortfall = round1(tierWeightedDetail.downlinkPenalty / K_DOWN);
+			return `Downlink: -${avgShortfall} avg`;
+		})();
+
+		// Score line
+		const scoreLine =
+			tierWeightedDetail?.tierWeightedNetworkScore != null
+				? `Score: ${tierWeightedDetail.tierWeightedNetworkScore.toFixed(1)}/10`
+				: 'Score: —';
+
 		const lines = [
 			tooltipLabel,
-			line('RTT', ownDetail.rttMs, rttScore, 'ms'),
-			line('Jitter', ownDetail.jitterMs, jitterScore, 'ms'),
-			line('Uplink loss', ownDetail.lossUp, uplinkLossScore, '%'),
-			absoluteDetail?.relativeScore != null
-				? `Score: ${absoluteDetail.relativeScore.toFixed(1)}/10`
-				: 'Score: —'
+			rttLine,
+			jitterLine,
+			lossLine,
+			uplinkTierLine,
+			downlinkLine,
+			scoreLine
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

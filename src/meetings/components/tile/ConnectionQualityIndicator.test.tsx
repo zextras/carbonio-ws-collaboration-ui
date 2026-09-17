@@ -70,61 +70,63 @@ describe('ConnectionQualityIndicator', () => {
 		expect(detail).toHaveTextContent('Score: —');
 	});
 
-	it('own-tile absolute badge tooltip shows coefficient breakdown when absoluteDetail is set', async () => {
+	it('own-tile merged tooltip shows tier-weighted breakdown when connectionTierWeightedDetail is set', async () => {
 		useStore.getState().setLoginInfo({ id: ME_ID });
-		// absoluteScore=null → lost → WifiOff rendered (easy to hover)
-		useStore
-			.getState()
-			.setParticipantConnectionQuality(mockMeeting.id, ME_ID, 10, 1, undefined, undefined, null);
-		useStore.getState().setConnectionAbsoluteDetail({
-			relativeScore: 10,
-			absoluteScore: null,
+		// networkScore=null → lost → WifiOff rendered (easy to hover), maxUplinkTier=1 (MED)
+		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, ME_ID, null, 1, 1, 2);
+		useStore.getState().setConnectionScoreDetail({ rttMs: 100, jitterMs: 20, lossUp: 0.01 });
+		useStore.getState().setConnectionTierWeightedDetail({
+			networkScore: 8,
+			tierWeightedNetworkScore: 5,
 			uplinkPenalty: 3.0,
 			downlinkPenalty: 1.5
 		});
 
 		const { user } = setup(
-			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} variant="absolute" />
+			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} />
 		);
 		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
 
-		const tooltip = await screen.findByText(/Uplink:/);
-		expect(tooltip).toHaveTextContent('Uplink: -3.0');
-		expect(tooltip).toHaveTextContent('Downlink: -1.5');
-		expect(tooltip).toHaveTextContent('Score: —');
+		const tooltip = await screen.findByText(/RTT:/);
+		// uplinkPenalty=3.0 / K_UP(1.5) = 2.0 upShortfall → "Uplink: MED (-2)"
+		expect(tooltip).toHaveTextContent('Uplink: MED (-2)');
+		// downlinkPenalty=1.5 / K_DOWN(3) = 0.5 avgShortfall → "Downlink: -0.5 avg"
+		expect(tooltip).toHaveTextContent('Downlink: -0.5 avg');
+		expect(tooltip).toHaveTextContent('Score: 5.0/10');
 	});
 
-	it('own-tile absolute badge tooltip shows — for null coefficients (webcam off / no feeds)', async () => {
+	it('own-tile merged tooltip shows — for null coefficients (webcam off / no feeds)', async () => {
 		useStore.getState().setLoginInfo({ id: ME_ID });
-		// absoluteScore=null → lost → WifiOff rendered (easy to hover)
-		useStore
-			.getState()
-			.setParticipantConnectionQuality(mockMeeting.id, ME_ID, 8, 1, undefined, undefined, null);
-		useStore.getState().setConnectionAbsoluteDetail({
-			relativeScore: 8,
-			absoluteScore: null,
+		// networkScore=null → lost → WifiOff rendered
+		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, ME_ID, null, 1);
+		useStore.getState().setConnectionTierWeightedDetail({
+			networkScore: 8,
+			tierWeightedNetworkScore: null,
 			uplinkPenalty: null,
 			downlinkPenalty: null
 		});
 
 		const { user } = setup(
-			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} variant="absolute" />
+			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={ME_ID} />
 		);
 		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
 
-		const tooltip = await screen.findByText(/Uplink:/);
-		expect(tooltip).toHaveTextContent('Uplink: —');
-		expect(tooltip).toHaveTextContent('Downlink: —');
+		const tooltip = await screen.findByText(/Score:/);
+		expect(tooltip).toHaveTextContent('Uplink: -');
+		expect(tooltip).toHaveTextContent('Downlink: -');
 		expect(tooltip).toHaveTextContent('Score: —');
 	});
 
-	it('absolute badge (variant="absolute") renders on a remote webcam tile when connection is unstable', () => {
-		// relativeScore=4 → 'poor' (unstable). No maxUplinkTier/maxHardwareTier → penalty=1 → absolute also 'poor'.
-		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, USER_ID, null, 1);
-		setup(
-			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={USER_ID} variant="absolute" />
+	it('remote tile renders on unstable connection and shows lean tooltip with tier info', async () => {
+		// networkScore=null → lost → WifiOff, maxUplinkTier=2 (HIGH)
+		useStore.getState().setParticipantConnectionQuality(mockMeeting.id, USER_ID, null, 1, 2, 2);
+		const { user } = setup(
+			<ConnectionQualityIndicator meetingId={mockMeeting.id} userId={USER_ID} />
 		);
-		// lost → WifiOff rendered for absolute badge too
 		expect(screen.getByTestId(WIFI_OFF_ICON)).toBeInTheDocument();
+		await user.hover(screen.getByTestId(WIFI_OFF_ICON));
+
+		const tooltip = await screen.findByText(/Connection lost/);
+		expect(tooltip).toHaveTextContent('Uplink: HIGH');
 	});
 });

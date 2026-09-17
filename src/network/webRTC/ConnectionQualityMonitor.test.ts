@@ -413,32 +413,34 @@ describe('ConnectionQualityMonitor — evaluateQualityTick is called with no arg
 	});
 });
 
-describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + maxUplinkTier + maxHardwareTier)', () => {
+describe('ConnectionQualityMonitor — uplink status broadcast (networkScore + maxUplinkTier + maxHardwareTier)', () => {
 	beforeEach(() => {
 		wsMocks.sendUplinkStatusUpdate.mockClear();
 	});
 
-	it('emitInitial broadcasts a numeric relativeScore (not a level string)', async () => {
+	it('emitInitial broadcasts a numeric networkScore (not a level string)', async () => {
 		const monitor = makeMonitor();
 		await monitor.emitInitial();
 		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
-		const [, relativeScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
-		expect(typeof relativeScore).toBe('number');
+		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
+		const [, networkScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(typeof networkScore).toBe('number');
 	});
 
-	it('emitInitial broadcasts null relativeScore when ICE is down (LOST)', async () => {
+	it('emitInitial broadcasts null networkScore when ICE is down (LOST)', async () => {
 		const monitor = makeMonitor({ audioConnectionState: 'disconnected' });
 		await monitor.emitInitial();
 		expect(monitor.committed).toBe('lost');
-		const [, relativeScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
-		expect(relativeScore).toBeNull();
+		const [, networkScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(networkScore).toBeNull();
 	});
 
 	it('emitInitial includes maxUplinkTier=null when webcam is off', async () => {
 		const monitor = makeMonitor({ webcamActive: false });
 		await monitor.emitInitial();
 		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
-		const [, , , maxUplinkTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
+		const [, , maxUplinkTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
 		expect(maxUplinkTier).toBeNull();
 	});
 
@@ -446,7 +448,7 @@ describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + 
 		// rtpSender={} has no .track → captureHeight=undefined → producibleCeiling returns null
 		const monitor = makeMonitor({ webcamActive: true });
 		await monitor.emitInitial();
-		const [, , , , maxHardwareTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		const [, , , maxHardwareTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
 		expect(maxHardwareTier).toBeNull();
 	});
 
@@ -470,7 +472,8 @@ describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + 
 		// → lastTopActiveRung=1 ≥ 0 → myMaxUplinkTier=1.
 		await monitor.emitInitial();
 		const lastCall = wsMocks.sendUplinkStatusUpdate.mock.calls.at(-1);
-		expect(lastCall?.[3]).toBe(1);
+		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
+		expect(lastCall?.[2]).toBe(1);
 	});
 
 	it('broadcasts on maxUplinkTier-only change (level unchanged)', async () => {
@@ -493,7 +496,8 @@ describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + 
 
 		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
 		const lastCall = wsMocks.sendUplinkStatusUpdate.mock.calls.at(-1);
-		expect(lastCall?.[3]).toBe(0);
+		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
+		expect(lastCall?.[2]).toBe(0);
 
 		computeStub.mockRestore();
 	});
@@ -515,31 +519,30 @@ describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + 
 	});
 });
 
-describe('ConnectionQualityMonitor — absoluteScore broadcast and selector', () => {
+describe('ConnectionQualityMonitor — tierWeightedNetworkScore broadcast', () => {
 	beforeEach(() => {
 		wsMocks.sendUplinkStatusUpdate.mockClear();
 	});
 
-	it('emitInitial broadcasts absoluteScore as the third argument (after relativeScore)', async () => {
+	it('emitInitial broadcasts tierWeightedNetworkScore as networkScore (second positional arg)', async () => {
 		const monitor = makeMonitor();
 		await monitor.emitInitial();
 		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
 		const call = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
-		// [meetingId, relativeScore, absoluteScore, maxUplinkTier, maxHardwareTier, changedAt]
-		const [, relativeScore, absoluteScoreArg] = call;
-		expect(typeof relativeScore).toBe('number');
-		// No webcam, no feeds → no shortfalls → absoluteScore == relativeScore (round1)
-		expect(absoluteScoreArg).toBe(relativeScore);
+		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
+		const [, networkScore] = call;
+		expect(typeof networkScore).toBe('number');
+		// No webcam, no feeds → no shortfalls → tierWeightedNetworkScore == networkScore (round1)
 	});
 
-	it('absoluteScore is null when ICE is down (LOST)', async () => {
+	it('networkScore is null when ICE is down (LOST)', async () => {
 		const monitor = makeMonitor({ audioConnectionState: 'disconnected' });
 		await monitor.emitInitial();
-		const [, , absoluteScoreArg] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
-		expect(absoluteScoreArg).toBeNull();
+		const [, networkScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(networkScore).toBeNull();
 	});
 
-	it('broadcasts when absoluteScore changes even if level and tiers are unchanged', async () => {
+	it('broadcasts when tierWeightedNetworkScore changes even if level and tiers are unchanged', async () => {
 		const monitor = makeMonitor();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const m = monitor as any;
@@ -548,15 +551,15 @@ describe('ConnectionQualityMonitor — absoluteScore broadcast and selector', ()
 			.mockResolvedValue({ raw: {}, level: 'optimal' });
 
 		m.committed = 'optimal';
-		m.committedAbsoluteScore = 8;
-		m.myAbsoluteScore = 8;
+		m.committedTierWeightedNetworkScore = 8;
+		m.myTierWeightedNetworkScore = 8;
 		m.committedMaxUplinkTier = null;
 		m.myMaxUplinkTier = null;
 		m.committedMaxHardwareTier = null;
 		m.myMaxHardwareTier = null;
 		m.changedAt = 100;
 
-		// stub downlinkShortfall to now return 1 → absoluteScore drops
+		// stub downlinkShortfall to now return 1 → tierWeightedNetworkScore drops
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(m.videoIn.downlinkShortfall as ReturnType<typeof vi.fn>).mockReturnValue(1);
 

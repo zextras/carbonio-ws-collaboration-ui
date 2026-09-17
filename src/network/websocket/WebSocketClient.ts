@@ -70,8 +70,7 @@ export class WebSocketClient {
 
 	sendUplinkStatusUpdate(
 		meetingId: string,
-		relativeScore: number | null,
-		absoluteScore: number | null | undefined,
+		networkScore: number | null,
 		maxUplinkTier: number | null | undefined,
 		maxHardwareTier: number | null | undefined,
 		changedAt: number,
@@ -80,8 +79,7 @@ export class WebSocketClient {
 		this.send({
 			type: 'UplinkStatusUpdate',
 			meetingId,
-			relativeScore,
-			...(absoluteScore != null ? { absoluteScore } : {}),
+			networkScore,
 			changedAt,
 			...(to ? { to } : {}),
 			...(maxUplinkTier != null ? { maxUplinkTier } : {}),

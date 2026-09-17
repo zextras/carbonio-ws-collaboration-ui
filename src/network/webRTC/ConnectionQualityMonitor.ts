@@ -5,7 +5,7 @@
  */
 
 import {
-	absoluteScore as computeAbsoluteScore,
+	tierWeightedNetworkScore as computeTierWeightedNetworkScore,
 	combineVote,
 	ConnectionQuality,
 	jitterScore,
@@ -73,13 +73,13 @@ export default class ConnectionQualityMonitor {
 
 	changedAt = 0;
 
-	private myRelativeScore: number | null = null;
+	private myNetworkScore: number | null = null;
 
-	private committedRelativeScore: number | null = null;
+	private committedNetworkScore: number | null = null;
 
-	private myAbsoluteScore: number | null = null;
+	private myTierWeightedNetworkScore: number | null = null;
 
-	private committedAbsoluteScore: number | null = null;
+	private committedTierWeightedNetworkScore: number | null = null;
 
 	private myMaxUplinkTier: number | null = null;
 
@@ -127,6 +127,7 @@ export default class ConnectionQualityMonitor {
 	}
 
 	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt guard.
+	// Writes the WEIGHTED score as networkScore so the self badge matches what others receive.
 	private applyLocalQuality(maxUplinkTier?: number | null, maxHardwareTier?: number | null): void {
 		if (this.myUserId == null) return;
 		useStore
@@ -134,30 +135,32 @@ export default class ConnectionQualityMonitor {
 			.setParticipantConnectionQuality(
 				this.meetingId,
 				this.myUserId,
-				this.myRelativeScore,
+				this.myTierWeightedNetworkScore,
 				this.changedAt,
 				maxUplinkTier,
-				maxHardwareTier,
-				this.myAbsoluteScore
+				maxHardwareTier
 			);
 	}
 
 	async emitInitial(): Promise<void> {
 		const { raw, level } = await this.computeQuality();
 		this.committed = level;
-		this.committedRelativeScore = this.myRelativeScore;
+		this.committedNetworkScore = this.myNetworkScore;
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
 		const downSF = this.videoIn.downlinkShortfall();
-		this.myAbsoluteScore = computeAbsoluteScore(this.myRelativeScore, upSF, downSF);
-		this.committedAbsoluteScore = this.myAbsoluteScore;
+		this.myTierWeightedNetworkScore = computeTierWeightedNetworkScore(
+			this.myNetworkScore,
+			upSF,
+			downSF
+		);
+		this.committedTierWeightedNetworkScore = this.myTierWeightedNetworkScore;
 		// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 		useStore.getState().setConnectionScoreDetail(raw);
-		this.storeAbsoluteDetail(upSF, downSF);
+		this.storeTierWeightedDetail(upSF, downSF);
 		wsClient.sendUplinkStatusUpdate(
 			this.meetingId,
-			this.myRelativeScore,
-			this.myAbsoluteScore,
+			this.myTierWeightedNetworkScore,
 			this.myMaxUplinkTier,
 			this.myMaxHardwareTier,
 			this.changedAt
@@ -174,8 +177,7 @@ export default class ConnectionQualityMonitor {
 		if (this.committed != null) {
 			wsClient.sendUplinkStatusUpdate(
 				this.meetingId,
-				this.committedRelativeScore,
-				this.committedAbsoluteScore,
+				this.committedTierWeightedNetworkScore,
 				this.committedMaxUplinkTier,
 				this.committedMaxHardwareTier,
 				this.changedAt,
@@ -188,8 +190,7 @@ export default class ConnectionQualityMonitor {
 		if (this.committed != null) {
 			wsClient.sendUplinkStatusUpdate(
 				this.meetingId,
-				this.committedRelativeScore,
-				this.committedAbsoluteScore,
+				this.committedTierWeightedNetworkScore,
 				this.committedMaxUplinkTier,
 				this.committedMaxHardwareTier,
 				this.changedAt
@@ -201,29 +202,33 @@ export default class ConnectionQualityMonitor {
 		const { raw, level } = await this.computeQuality();
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
 		const downSF = this.videoIn.downlinkShortfall();
-		this.myAbsoluteScore = computeAbsoluteScore(this.myRelativeScore, upSF, downSF);
+		this.myTierWeightedNetworkScore = computeTierWeightedNetworkScore(
+			this.myNetworkScore,
+			upSF,
+			downSF
+		);
 		useStore.getState().setConnectionScoreDetail(raw);
-		this.storeAbsoluteDetail(upSF, downSF);
+		this.storeTierWeightedDetail(upSF, downSF);
 		const maxUplinkTierChanged = this.myMaxUplinkTier !== this.committedMaxUplinkTier;
 		const maxHardwareTierChanged = this.myMaxHardwareTier !== this.committedMaxHardwareTier;
-		const absoluteScoreChanged = this.myAbsoluteScore !== this.committedAbsoluteScore;
+		const tierWeightedNetworkScoreChanged =
+			this.myTierWeightedNetworkScore !== this.committedTierWeightedNetworkScore;
 		if (
 			this.committed !== level ||
 			maxUplinkTierChanged ||
 			maxHardwareTierChanged ||
-			absoluteScoreChanged
+			tierWeightedNetworkScoreChanged
 		) {
 			this.committed = level;
-			this.committedRelativeScore = this.myRelativeScore;
-			this.committedAbsoluteScore = this.myAbsoluteScore;
+			this.committedNetworkScore = this.myNetworkScore;
+			this.committedTierWeightedNetworkScore = this.myTierWeightedNetworkScore;
 			this.committedMaxUplinkTier = this.myMaxUplinkTier;
 			this.committedMaxHardwareTier = this.myMaxHardwareTier;
 			// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 			wsClient.sendUplinkStatusUpdate(
 				this.meetingId,
-				this.committedRelativeScore,
-				this.committedAbsoluteScore,
+				this.committedTierWeightedNetworkScore,
 				this.committedMaxUplinkTier,
 				this.committedMaxHardwareTier,
 				this.changedAt
@@ -233,13 +238,13 @@ export default class ConnectionQualityMonitor {
 		await this.videoIn.evaluateQualityTick().catch(() => {});
 	}
 
-	// Publish the own-tile absolute breakdown for the hover tooltip each tick.
-	private storeAbsoluteDetail(upSF: number, downSF: number): void {
+	// Publish the own-tile tier-weighted breakdown for the hover tooltip each tick.
+	private storeTierWeightedDetail(upSF: number, downSF: number): void {
 		const webcamActive = this.videoOut.rtpSender != null;
 		const hasFeeds = this.videoIn.hasActiveWebcamFeeds();
-		useStore.getState().setConnectionAbsoluteDetail({
-			relativeScore: this.myRelativeScore,
-			absoluteScore: this.myAbsoluteScore,
+		useStore.getState().setConnectionTierWeightedDetail({
+			networkScore: this.myNetworkScore,
+			tierWeightedNetworkScore: this.myTierWeightedNetworkScore,
 			uplinkPenalty:
 				webcamActive && this.myMaxUplinkTier != null && this.myMaxHardwareTier != null
 					? round1(K_UP * upSF)
@@ -347,7 +352,7 @@ export default class ConnectionQualityMonitor {
 	private vote(raw: LinkSample, iceConnected: boolean): ConnectionQuality {
 		if (!iceConnected) {
 			this.voteWindow.push(0);
-			this.myRelativeScore = null;
+			this.myNetworkScore = null;
 			return 'lost';
 		}
 
@@ -358,7 +363,7 @@ export default class ConnectionQualityMonitor {
 		this.voteWindow.push(rawBars);
 
 		const numericScore = this.voteWindow.medianLast(DISPLAY_WINDOW) * 2;
-		this.myRelativeScore = numericScore;
+		this.myNetworkScore = numericScore;
 		return scoreToLevel(numericScore);
 	}
 

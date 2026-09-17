@@ -33,11 +33,10 @@ export type MeetingsSlice = {
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		relativeScore: number | null,
+		networkScore: number | null,
 		changedAt: number,
 		maxUplinkTier?: number | null,
-		maxHardwareTier?: number | null,
-		absoluteScore?: number | null
+		maxHardwareTier?: number | null
 	) => void;
 };
 

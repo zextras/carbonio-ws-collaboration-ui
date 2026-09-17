@@ -241,11 +241,10 @@ export const useMeetingsStoreSlice: StateCreator<
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		relativeScore: number | null,
+		networkScore: number | null,
 		changedAt: number,
 		maxUplinkTier?: number | null,
-		maxHardwareTier?: number | null,
-		absoluteScore?: number | null
+		maxHardwareTier?: number | null
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -254,8 +253,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
 					activeMeeting.connectionQuality[userId] = {
-						relativeScore,
-						absoluteScore,
+						networkScore,
 						changedAt,
 						maxUplinkTier,
 						maxHardwareTier

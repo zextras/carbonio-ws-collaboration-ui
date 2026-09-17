@@ -74,7 +74,7 @@ export const getParticipantAudioStatus = (
 	return participant?.audioStreamOn ?? false;
 };
 
-export const getParticipantConnectionQuality = (
+export const getParticipantNetworkQuality = (
 	store: RootStore,
 	meetingId: string | undefined,
 	userId: string | undefined
@@ -84,28 +84,8 @@ export const getParticipantConnectionQuality = (
 	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
 	const cq = activeMeeting.connectionQuality[userId];
 	if (!cq) return undefined;
-	if (cq.relativeScore == null) return 'lost';
-	return scoreToLevel(cq.relativeScore);
-};
-
-export const getParticipantRelativeQuality = (
-	store: RootStore,
-	meetingId: string | undefined,
-	userId: string | undefined
-): ConnectionQuality | undefined => getParticipantConnectionQuality(store, meetingId, userId);
-
-export const getParticipantAbsoluteQuality = (
-	store: RootStore,
-	meetingId: string | undefined,
-	userId: string | undefined
-): ConnectionQuality | undefined => {
-	if (!meetingId || !userId) return undefined;
-	const { activeMeeting } = store;
-	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
-	const cq = activeMeeting.connectionQuality[userId];
-	if (!cq) return undefined;
-	if (cq.absoluteScore == null) return 'lost';
-	return scoreToLevel(cq.absoluteScore);
+	if (cq.networkScore == null) return 'lost';
+	return scoreToLevel(cq.networkScore);
 };
 
 export const getParticipantVideoStatus = (

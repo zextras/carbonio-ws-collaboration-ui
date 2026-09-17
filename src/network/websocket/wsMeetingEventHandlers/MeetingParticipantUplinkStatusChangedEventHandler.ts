@@ -20,11 +20,10 @@ export const meetingParticipantUplinkStatusChangedEventHandler = (
 	state.setParticipantConnectionQuality(
 		event.meetingId,
 		event.userId,
-		event.relativeScore,
+		event.networkScore,
 		event.changedAt,
 		event.maxUplinkTier,
-		event.maxHardwareTier,
-		event.absoluteScore
+		event.maxHardwareTier
 	);
 
 	// Reciprocate on first contact (never to ourselves): when we join an ongoing meeting our initial

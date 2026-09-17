@@ -164,23 +164,23 @@ describe('MeetingStoreSlice tests', () => {
 			useStore.getState().addMeetings([mockMeeting0]);
 			useStore.getState().meetingConnection(mockMeeting0.id);
 
-			// First update at t=1000 (relativeScore=6 → medium)
+			// First update at t=1000 (networkScore=6 → medium)
 			useStore
 				.getState()
 				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 6, 1000);
 			expect(
-				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.relativeScore
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.networkScore
 			).toBe(6);
 			expect(
 				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt
 			).toBe(1000);
 
-			// Newer update at t=2000 wins (relativeScore=10 → optimal)
+			// Newer update at t=2000 wins (networkScore=10 → optimal)
 			useStore
 				.getState()
 				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 10, 2000);
 			expect(
-				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.relativeScore
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.networkScore
 			).toBe(10);
 			expect(
 				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt
@@ -191,7 +191,7 @@ describe('MeetingStoreSlice tests', () => {
 				.getState()
 				.setParticipantConnectionQuality(mockMeeting0.id, mockParticipant0.userId, 2, 500);
 			expect(
-				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.relativeScore
+				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.networkScore
 			).toBe(10);
 			expect(
 				useStore.getState().activeMeeting?.connectionQuality[mockParticipant0.userId]?.changedAt

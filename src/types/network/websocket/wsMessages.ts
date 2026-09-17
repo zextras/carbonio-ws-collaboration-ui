@@ -13,8 +13,7 @@ export type WsPingMessage = {
 export type WsUplinkStatusUpdateMessage = {
 	type: 'UplinkStatusUpdate';
 	meetingId: string;
-	relativeScore: number | null;
-	absoluteScore?: number | null;
+	networkScore: number | null;
 	changedAt: number;
 	to?: string;
 	maxUplinkTier?: number | null;

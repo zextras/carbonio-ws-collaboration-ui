@@ -130,13 +130,16 @@ export function tierPenalty(shortfall: number): number {
 export const K_UP = 1.5;
 export const K_DOWN = 3;
 
-// Absolute score: relative penalised by uplink and downlink tier shortfalls (subtractive counterfactual).
-// null when relative is null (LOST). Tiers apply instantly (no extra smoothing).
-export function absoluteScore(
-	relative: number | null,
+// Tier-weighted network score: networkScore penalised by uplink and downlink tier shortfalls
+// (subtractive counterfactual). null when networkScore is null (LOST). Tiers apply instantly
+// (no extra smoothing).
+export function tierWeightedNetworkScore(
+	networkScore: number | null,
 	upShortfall: number,
 	downShortfall: number
 ): number | null {
-	if (relative == null) return null;
-	return round1(Math.max(0, Math.min(10, relative - K_UP * upShortfall - K_DOWN * downShortfall)));
+	if (networkScore == null) return null;
+	return round1(
+		Math.max(0, Math.min(10, networkScore - K_UP * upShortfall - K_DOWN * downShortfall))
+	);
 }

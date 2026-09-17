@@ -13,9 +13,9 @@ import {
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
 
-export type AbsoluteScoreDetail = {
-	relativeScore: number | null;
-	absoluteScore: number | null;
+export type TierWeightedScoreDetail = {
+	networkScore: number | null;
+	tierWeightedNetworkScore: number | null;
 	uplinkPenalty: number | null;
 	downlinkPenalty: number | null;
 };
@@ -57,7 +57,7 @@ export type ActiveMeetingSlice = {
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: LinkSample) => void;
-	setConnectionAbsoluteDetail: (detail: AbsoluteScoreDetail | undefined) => void;
+	setConnectionTierWeightedDetail: (detail: TierWeightedScoreDetail | undefined) => void;
 	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
 	removeTileCeiling: (meetingId: string, key: string) => void;
 };
@@ -78,9 +78,9 @@ export type ActiveMeeting = {
 	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
 	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
 	connectionScoreDetail: LinkSample | undefined;
-	// Breakdown for the own-tile absolute badge hover: relativeScore, absoluteScore and the two
-	// penalty coefficients (null = feature off, e.g. webcam inactive → tooltip shows "—").
-	connectionAbsoluteDetail: AbsoluteScoreDetail | undefined;
+	// Breakdown for the own-tile tier-weighted badge hover: networkScore (unweighted), tierWeightedNetworkScore
+	// and the two penalty coefficients (null = feature off, e.g. webcam inactive → tooltip shows "—").
+	connectionTierWeightedDetail: TierWeightedScoreDetail | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
@@ -94,8 +94,7 @@ export type ActiveMeeting = {
 };
 
 export type ConnectionQualityInfo = {
-	relativeScore: number | null;
-	absoluteScore?: number | null;
+	networkScore: number | null;
 	changedAt: number;
 	maxUplinkTier?: number | null;
 	maxHardwareTier?: number | null;

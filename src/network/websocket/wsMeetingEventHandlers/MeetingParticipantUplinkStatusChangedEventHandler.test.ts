@@ -27,7 +27,7 @@ const baseEvent: MeetingParticipantUplinkStatusChangedEvent = {
 	sentDate: '2026-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
 	userId: participant.userId,
-	relativeScore: 10,
+	networkScore: 10,
 	changedAt: 1000
 };
 
@@ -40,36 +40,36 @@ beforeEach(() => {
 });
 
 describe('meetingParticipantUplinkStatusChangedEventHandler tests', () => {
-	test('relativeScore and changedAt are stored for the participant', () => {
+	test('networkScore and changedAt are stored for the participant', () => {
 		meetingParticipantUplinkStatusChangedEventHandler(baseEvent);
 		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.relativeScore).toBe(10);
+		expect(stored?.networkScore).toBe(10);
 		expect(stored?.changedAt).toBe(1000);
 	});
 
-	test('null relativeScore (LOST) is stored correctly', () => {
+	test('null networkScore (LOST) is stored correctly', () => {
 		meetingParticipantUplinkStatusChangedEventHandler({
 			...baseEvent,
-			relativeScore: null,
+			networkScore: null,
 			changedAt: 2000
 		});
 		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.relativeScore).toBeNull();
+		expect(stored?.networkScore).toBeNull();
 	});
 
-	test('numeric relativeScore values in the full 0..10 range are stored', () => {
-		[0, 2, 4, 6, 8, 10].forEach((relativeScore, index) => {
+	test('numeric networkScore values in the full 0..10 range are stored', () => {
+		[0, 2, 4, 6, 8, 10].forEach((networkScore, index) => {
 			meetingParticipantUplinkStatusChangedEventHandler({
 				...baseEvent,
-				relativeScore,
+				networkScore,
 				changedAt: baseEvent.changedAt + index + 1
 			});
 			const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-			expect(stored?.relativeScore).toBe(relativeScore);
+			expect(stored?.networkScore).toBe(networkScore);
 		});
 	});
 
-	test('maxUplinkTier is stored alongside relativeScore when present', () => {
+	test('maxUplinkTier is stored alongside networkScore when present', () => {
 		meetingParticipantUplinkStatusChangedEventHandler({
 			...baseEvent,
 			maxUplinkTier: 2,
@@ -106,33 +106,6 @@ describe('meetingParticipantUplinkStatusChangedEventHandler tests', () => {
 		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
 		expect(stored?.maxUplinkTier).toBeUndefined();
 		expect(stored?.maxHardwareTier).toBeUndefined();
-	});
-
-	test('absoluteScore is stored when the event carries it', () => {
-		meetingParticipantUplinkStatusChangedEventHandler({
-			...baseEvent,
-			absoluteScore: 6.3,
-			changedAt: 6000
-		});
-		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.absoluteScore).toBe(6.3);
-	});
-
-	test('absoluteScore null (LOST) is stored correctly', () => {
-		meetingParticipantUplinkStatusChangedEventHandler({
-			...baseEvent,
-			relativeScore: null,
-			absoluteScore: null,
-			changedAt: 7000
-		});
-		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.absoluteScore).toBeNull();
-	});
-
-	test('absoluteScore is undefined when the event does not carry it', () => {
-		meetingParticipantUplinkStatusChangedEventHandler({ ...baseEvent, changedAt: 8000 });
-		const stored = useStore.getState().activeMeeting?.connectionQuality[participant.userId];
-		expect(stored?.absoluteScore).toBeUndefined();
 	});
 
 	test('reciprocates our status on first contact with a participant, once (not twice)', () => {

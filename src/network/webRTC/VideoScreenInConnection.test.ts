@@ -31,8 +31,7 @@ const storeMocks = vi.hoisted(() => ({
 	connectionQuality: {} as Record<
 		string,
 		{
-			relativeScore: number | null;
-			absoluteScore?: number | null;
+			networkScore: number | null;
 			changedAt: number;
 			maxUplinkTier?: number | null;
 			maxHardwareTier?: number | null;
@@ -176,7 +175,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: null }
+			[USER_1]: { networkScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: null }
 		};
 
 		for (let i = 0; i < EVIDENCE_DOWN_N + EVIDENCE_DOWN_M + 2; i += 1) {
@@ -194,7 +193,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: 0 }
+			[USER_1]: { networkScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: 0 }
 		};
 
 		for (let i = 0; i < EVIDENCE_DOWN_N + EVIDENCE_DOWN_M + 2; i += 1) {
@@ -212,7 +211,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: 2 }
+			[USER_1]: { networkScore: 4, changedAt: 0, maxUplinkTier: 0, maxHardwareTier: 2 }
 		};
 
 		for (let i = 0; i < EVIDENCE_DOWN_N + EVIDENCE_DOWN_M + 2; i += 1) {
@@ -388,7 +387,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		// No maxUplinkTier in connectionQuality → maxUplinkTier undefined → senderOK=true → shed fires.
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
-		storeMocks.connectionQuality = { [USER_1]: { relativeScore: 10, changedAt: 0 } };
+		storeMocks.connectionQuality = { [USER_1]: { networkScore: 10, changedAt: 0 } };
 
 		await conn.evaluateQualityTick(); // tick 1: no prev → HOLD
 		await conn.evaluateQualityTick(); // tick 2
@@ -405,7 +404,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 4, changedAt: 0, maxUplinkTier: 1, maxHardwareTier: null }
+			[USER_1]: { networkScore: 4, changedAt: 0, maxUplinkTier: 1, maxHardwareTier: null }
 		};
 
 		await conn.evaluateQualityTick();
@@ -423,7 +422,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const receiver = makeStalledReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 4, changedAt: 0, maxUplinkTier: 2, maxHardwareTier: null }
+			[USER_1]: { networkScore: 4, changedAt: 0, maxUplinkTier: 2, maxHardwareTier: null }
 		};
 
 		await conn.evaluateQualityTick();
@@ -441,7 +440,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		// Healthy feed → our request stays TOP; sender publishes HIGH then drops to MEDIUM. What we SHOW
 		// = min(request, maxUplinkTier) goes 2→1 with our request unchanged, so the drop is attributed to them.
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 1, maxUplinkTier: 2 }
+			[USER_1]: { networkScore: 10, changedAt: 1, maxUplinkTier: 2 }
 		};
 		const receiver = makeHealthyReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver, TOP_RUNG);
@@ -451,7 +450,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		expect(downlinkDebug).not.toHaveBeenCalled();
 
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 2, maxUplinkTier: 1 }
+			[USER_1]: { networkScore: 10, changedAt: 2, maxUplinkTier: 1 }
 		};
 		await conn.evaluateQualityTick(); // shown = min(TOP, 1) = 1, our request unchanged → their-network
 
@@ -476,7 +475,7 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver());
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(conn as any).feedStates.set(FEED_KEY_1, { targetRung: 2 });
-		storeMocks.connectionQuality = { [USER_1]: { relativeScore: 8, changedAt: 0 } };
+		storeMocks.connectionQuality = { [USER_1]: { networkScore: 8, changedAt: 0 } };
 		expect(conn.downlinkShortfall()).toBe(0);
 	});
 
@@ -485,7 +484,7 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(conn as any).feedStates.set(FEED_KEY_1, { targetRung: 2 });
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 }
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
 		};
 		expect(conn.downlinkShortfall()).toBe(0);
 	});
@@ -495,7 +494,7 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(conn as any).feedStates.set(FEED_KEY_1, { targetRung: 1 });
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 }
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
 		};
 		expect(conn.downlinkShortfall()).toBe(1);
 	});
@@ -505,7 +504,7 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(conn as any).feedStates.set(FEED_KEY_1, { targetRung: 0 });
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 }
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
 		};
 		expect(conn.downlinkShortfall()).toBe(2);
 	});
@@ -524,9 +523,9 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		c.feedStates.set(FEED_KEY_2, { targetRung: 0 });
 		c.feedStates.set(FEED_KEY_3, { targetRung: 1 });
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 },
-			[USER_2]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 },
-			[USER_3]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 1 }
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 },
+			[USER_2]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 },
+			[USER_3]: { networkScore: 10, changedAt: 0, maxUplinkTier: 1 }
 		};
 		expect(conn.downlinkShortfall()).toBeCloseTo(2 / 3, 5);
 	});
@@ -539,7 +538,7 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		(conn as any).feedStates.set(FEED_KEY_1, { targetRung: 2 });
 		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
 		storeMocks.connectionQuality = {
-			[USER_1]: { relativeScore: 10, changedAt: 0, maxUplinkTier: 2 }
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
 		};
 		expect(conn.downlinkShortfall()).toBe(0);
 	});

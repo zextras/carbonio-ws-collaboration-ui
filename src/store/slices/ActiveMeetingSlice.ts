@@ -16,7 +16,7 @@ import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
-	AbsoluteScoreDetail,
+	TierWeightedScoreDetail,
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
 	MeetingAccordionType,
@@ -91,7 +91,7 @@ export const useActiveMeetingSlice: StateCreator<
 					connectionQuality: {},
 					tileCeilings: {},
 					connectionScoreDetail: undefined,
-					connectionAbsoluteDetail: undefined,
+					connectionTierWeightedDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -386,14 +386,14 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_CONNECTION_SCORE_DETAIL'
 		);
 	},
-	setConnectionAbsoluteDetail: (detail: AbsoluteScoreDetail | undefined): void => {
+	setConnectionTierWeightedDetail: (detail: TierWeightedScoreDetail | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.activeMeeting) return;
-				draft.activeMeeting.connectionAbsoluteDetail = detail;
+				draft.activeMeeting.connectionTierWeightedDetail = detail;
 			}),
 			false,
-			'AM/SET_CONNECTION_ABSOLUTE_DETAIL'
+			'AM/SET_CONNECTION_TIER_WEIGHTED_DETAIL'
 		);
 	},
 	setTileCeiling: (meetingId: string, key: string, rung: number): void => {

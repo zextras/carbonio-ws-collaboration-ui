@@ -7,7 +7,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-	absoluteScore,
 	combineVote,
 	curveScore,
 	isUnstableQuality,
@@ -18,6 +17,7 @@ import {
 	scoreToLevel,
 	TIER_PENALTY_RATIO,
 	tierPenalty,
+	tierWeightedNetworkScore,
 	uplinkLossScore,
 	uplinkShortfall,
 	videoFpsScore,
@@ -333,33 +333,33 @@ describe('tierPenalty', () => {
 	});
 });
 
-describe('absoluteScore', () => {
-	it('returns null when relativeScore is null (LOST)', () => {
-		expect(absoluteScore(null, 0, 0)).toBeNull();
+describe('tierWeightedNetworkScore', () => {
+	it('returns null when networkScore is null (LOST)', () => {
+		expect(tierWeightedNetworkScore(null, 0, 0)).toBeNull();
 	});
 
-	it('returns relativeScore unchanged (rounded) when both shortfalls are 0', () => {
-		expect(absoluteScore(10, 0, 0)).toBe(10);
-		expect(absoluteScore(6.5, 0, 0)).toBe(6.5);
+	it('returns networkScore unchanged (rounded) when both shortfalls are 0', () => {
+		expect(tierWeightedNetworkScore(10, 0, 0)).toBe(10);
+		expect(tierWeightedNetworkScore(6.5, 0, 0)).toBe(6.5);
 	});
 
 	it('clamps to 0 for combined shortfall that would go negative (up=2, down=2 → 10-3-6=1)', () => {
 		// clamp(10 - 1.5*2 - 3*2, 0, 10) = clamp(1, 0, 10) = 1
-		expect(absoluteScore(10, 2, 2)).toBe(1);
+		expect(tierWeightedNetworkScore(10, 2, 2)).toBe(1);
 	});
 
 	it('applies only uplink penalty when downShortfall is 0', () => {
 		// clamp(10 - 1.5*2 - 0, 0, 10) = 7.0
-		expect(absoluteScore(10, 2, 0)).toBe(7);
+		expect(tierWeightedNetworkScore(10, 2, 0)).toBe(7);
 	});
 
 	it('applies only downlink penalty when upShortfall is 0', () => {
 		// clamp(10 - 0 - 3*1, 0, 10) = 7.0
-		expect(absoluteScore(10, 0, 1)).toBe(7);
+		expect(tierWeightedNetworkScore(10, 0, 1)).toBe(7);
 	});
 
 	it('rounds the result to 1 decimal', () => {
 		// clamp(7 - 1.5*1 - 0, 0, 10) = 5.5
-		expect(absoluteScore(7, 1, 0)).toBe(5.5);
+		expect(tierWeightedNetworkScore(7, 1, 0)).toBe(5.5);
 	});
 });
