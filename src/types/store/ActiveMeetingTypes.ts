@@ -5,13 +5,20 @@
  */
 
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { ConnectionQuality, LinkSample } from '../../network/webRTC/connectionQualityScore';
+import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
 	IVideoScreenInConnection,
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
+
+export type AbsoluteScoreDetail = {
+	relativeScore: number | null;
+	absoluteScore: number | null;
+	uplinkPenalty: number | null;
+	downlinkPenalty: number | null;
+};
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;
@@ -50,6 +57,9 @@ export type ActiveMeetingSlice = {
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 	setConnectionScoreDetail: (detail: LinkSample) => void;
+	setConnectionAbsoluteDetail: (detail: AbsoluteScoreDetail | undefined) => void;
+	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
+	removeTileCeiling: (meetingId: string, key: string) => void;
 };
 
 export type ActiveMeeting = {
@@ -62,9 +72,15 @@ export type ActiveMeeting = {
 	// Client-computed connection quality per user, kept OUT of the participants map so server-driven
 	// rebuilds of participants (addMeetings/addParticipant/mapParticipants) can never wipe it.
 	connectionQuality: Record<string, ConnectionQualityInfo>;
+	// Per-webcam-feed downlink hard ceiling (max substream rung the tile's rendered size needs), keyed by
+	// `${userId}-${type}`. The inbound controller reads it as maxRung; a missing key means no cap (TOP_RUNG).
+	tileCeilings: Record<string, number>;
 	// Raw link sample (rtt/jitter/loss up+down) republished by the monitor each tick so the own-tile
 	// indicator can render the absolute measures on hover. Undefined key = not measurable this window.
 	connectionScoreDetail: LinkSample | undefined;
+	// Breakdown for the own-tile absolute badge hover: relativeScore, absoluteScore and the two
+	// penalty coefficients (null = feature off, e.g. webcam inactive → tooltip shows "—").
+	connectionAbsoluteDetail: AbsoluteScoreDetail | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
@@ -78,8 +94,11 @@ export type ActiveMeeting = {
 };
 
 export type ConnectionQualityInfo = {
-	quality: ConnectionQuality;
+	relativeScore: number | null;
+	absoluteScore?: number | null;
 	changedAt: number;
+	maxUplinkTier?: number | null;
+	maxHardwareTier?: number | null;
 };
 
 export enum MeetingAccordionType {

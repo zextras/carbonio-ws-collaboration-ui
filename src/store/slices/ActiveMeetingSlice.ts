@@ -16,6 +16,7 @@ import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
+	AbsoluteScoreDetail,
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
 	MeetingAccordionType,
@@ -88,7 +89,9 @@ export const useActiveMeetingSlice: StateCreator<
 					screenOutConn,
 					qualityMonitor,
 					connectionQuality: {},
+					tileCeilings: {},
 					connectionScoreDetail: undefined,
+					connectionAbsoluteDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -381,6 +384,36 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_CONNECTION_SCORE_DETAIL'
+		);
+	},
+	setConnectionAbsoluteDetail: (detail: AbsoluteScoreDetail | undefined): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.connectionAbsoluteDetail = detail;
+			}),
+			false,
+			'AM/SET_CONNECTION_ABSOLUTE_DETAIL'
+		);
+	},
+	setTileCeiling: (meetingId: string, key: string, rung: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.tileCeilings[key] = rung;
+			}),
+			false,
+			'AM/SET_TILE_CEILING'
+		);
+	},
+	removeTileCeiling: (meetingId: string, key: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				delete draft.activeMeeting.tileCeilings[key];
+			}),
+			false,
+			'AM/REMOVE_TILE_CEILING'
 		);
 	}
 });

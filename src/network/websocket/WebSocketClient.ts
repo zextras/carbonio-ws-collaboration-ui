@@ -14,7 +14,6 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
-import { ConnectionQuality } from '../webRTC/connectionQualityScore';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -69,18 +68,24 @@ export class WebSocketClient {
 		}
 	}
 
-	sendConnectionStatusUpdate(
+	sendUplinkStatusUpdate(
 		meetingId: string,
-		score: ConnectionQuality,
+		relativeScore: number | null,
+		absoluteScore: number | null | undefined,
+		maxUplinkTier: number | null | undefined,
+		maxHardwareTier: number | null | undefined,
 		changedAt: number,
 		to?: string
 	): void {
 		this.send({
-			type: 'ConnectionStatusUpdate',
+			type: 'UplinkStatusUpdate',
 			meetingId,
-			score,
+			relativeScore,
+			...(absoluteScore != null ? { absoluteScore } : {}),
 			changedAt,
-			...(to ? { to } : {})
+			...(to ? { to } : {}),
+			...(maxUplinkTier != null ? { maxUplinkTier } : {}),
+			...(maxHardwareTier != null ? { maxHardwareTier } : {})
 		});
 	}
 

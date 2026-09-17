@@ -17,6 +17,11 @@ import {
 } from '../../types/network/webRTC/webRTC';
 import { RootStore } from '../../types/store/StoreTypes';
 
+const wsMocks = vi.hoisted(() => ({ sendUplinkStatusUpdate: vi.fn() }));
+vi.mock('../../network/websocket/WebSocketClient', () => ({
+	wsClient: { sendUplinkStatusUpdate: wsMocks.sendUplinkStatusUpdate }
+}));
+
 // setupTests.ts stubs the default export for component tests; exercise the real class here
 vi.unmock('./ConnectionQualityMonitor');
 
@@ -46,9 +51,17 @@ const transportSelectingCp = (): Record<string, unknown> => ({
 	selectedCandidatePairId: 'cp'
 });
 
+const resolveState = (
+	s: RTCPeerConnectionState | (() => RTCPeerConnectionState) | undefined,
+	fallback: RTCPeerConnectionState = 'connected'
+): RTCPeerConnectionState => (typeof s === 'function' ? s() : (s ?? fallback));
+
 const makeMonitor = (
 	parts: {
 		audioConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		videoOutConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		screenOutConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
+		videoInConnectionState?: RTCPeerConnectionState | (() => RTCPeerConnectionState);
 		audioStats?: () => Promise<RTCStatsReport>;
 		videoPeerStats?: () => Promise<RTCStatsReport>;
 		screenPeerStats?: () => Promise<RTCStatsReport>;
@@ -70,8 +83,7 @@ const makeMonitor = (
 	const audioConn = {
 		peerConn: {
 			get connectionState(): RTCPeerConnectionState {
-				const s = parts.audioConnectionState;
-				return typeof s === 'function' ? s() : (s ?? 'connected');
+				return resolveState(parts.audioConnectionState);
 			},
 			getStats: parts.audioStats ?? emptyReport
 		},
@@ -80,18 +92,39 @@ const makeMonitor = (
 
 	// null rtpSender = stream off (presence gate); its peerConn.getStats is read only when active.
 	const videoOut = {
-		peerConn: { getStats: parts.videoPeerStats ?? emptyReport },
+		peerConn: {
+			get connectionState(): RTCPeerConnectionState {
+				return resolveState(parts.videoOutConnectionState);
+			},
+			getStats: parts.videoPeerStats ?? emptyReport
+		},
 		rtpSender: parts.webcamActive ? {} : null
 	} as unknown as IVideoOutConnection;
 
 	const screenOut = {
-		peerConn: { getStats: parts.screenPeerStats ?? emptyReport },
+		peerConn: {
+			get connectionState(): RTCPeerConnectionState {
+				return resolveState(parts.screenOutConnectionState);
+			},
+			getStats: parts.screenPeerStats ?? emptyReport
+		},
 		rtpSender: parts.screenActive ? {} : null
 	} as unknown as IScreenOutConnection;
 
+	// Inbound PC — deliberately NOT part of the (outbound-only) LOST decision; a state is wired here
+	// only to prove the monitor ignores it.
 	const videoIn = {
-		peerConn: null,
-		evaluateQualityTick: vi.fn().mockResolvedValue(undefined)
+		peerConn:
+			parts.videoInConnectionState != null
+				? {
+						get connectionState(): RTCPeerConnectionState {
+							return resolveState(parts.videoInConnectionState);
+						}
+					}
+				: null,
+		evaluateQualityTick: vi.fn().mockResolvedValue(undefined),
+		downlinkShortfall: vi.fn().mockReturnValue(0),
+		hasActiveWebcamFeeds: vi.fn().mockReturnValue(false)
 	} as unknown as IVideoScreenInConnection;
 
 	const monitor = new ConnectionQualityMonitor(
@@ -145,9 +178,9 @@ describe('ConnectionQualityMonitor — ICE state', () => {
 			);
 		const monitor = makeMonitor({ audioConnectionState: () => phase, audioStats: degradedAudio });
 
-		// Degraded while connected → committed 'poor' (50% loss → combineVote ≈ 3.3 → bars=2 → 'poor').
+		// Degraded while connected → committed 'terrible' (50% loss → loss score 0, combineVote 2.0 → bars=1).
 		await ticks(monitor, 6);
-		expect(monitor.committed).toBe('poor');
+		expect(monitor.committed).toBe('terrible');
 
 		// ICE-loss flap.
 		phase = 'disconnected';
@@ -158,7 +191,69 @@ describe('ConnectionQualityMonitor — ICE state', () => {
 		phase = 'connected';
 		await monitor.emitInitial();
 		expect(monitor.committed).not.toBe('optimal');
-		expect(monitor.committed).toBe('poor');
+		expect(monitor.committed).toBe('terrible');
+	});
+});
+
+describe('ConnectionQualityMonitor — LOST aggregates the active OUTBOUND pairs', () => {
+	it('is "lost" when the active webcam-out PC is down while audio is fine', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			webcamActive: true,
+			videoOutConnectionState: 'disconnected'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+	});
+
+	it('is "lost" when the active screen-out PC is down while audio is fine', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			screenActive: true,
+			screenOutConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+	});
+
+	it('ignores a down webcam-out PC while the camera is OFF (inactive pair not counted)', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			webcamActive: false,
+			videoOutConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
+	});
+
+	it('does NOT go "lost" when only the INBOUND PC is down (badge is outbound-only)', async () => {
+		const monitor = makeMonitor({
+			audioConnectionState: 'connected',
+			videoInConnectionState: 'failed'
+		});
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
+	});
+
+	it('stays "lost" until ALL active outbound pairs recover — one recovering is not enough', async () => {
+		let audio: RTCPeerConnectionState = 'disconnected';
+		let webcam: RTCPeerConnectionState = 'disconnected';
+		const monitor = makeMonitor({
+			audioConnectionState: () => audio,
+			webcamActive: true,
+			videoOutConnectionState: () => webcam
+		});
+		// both outbound pairs down → lost
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+		// audio recovers but webcam-out still down → STILL lost
+		audio = 'connected';
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+		// webcam-out recovers too → all outbound up → real vote (not lost)
+		webcam = 'connected';
+		await monitor.emitInitial();
+		expect(monitor.committed).not.toBe('lost');
 	});
 });
 
@@ -234,10 +329,10 @@ describe('ConnectionQualityMonitor — uplink loss', () => {
 				);
 			}
 		});
-		// 6 bad ticks → median-7 at bars=2: uplinkLossScore(0.2)≈0.1, combineVote≈3.4 → bars=2 → 'poor'.
+		// 6 bad ticks → median-7 at bars=1: uplinkLossScore(0.2)=0 (>16% bad), combineVote 2.0 → bars=1.
 		await ticks(monitor, 6);
 		expect(publishedDetail().lossUp).toBeCloseTo(0.2, 5);
-		expect(monitor.committed).toBe('poor'); // 20% loss (combineVote ≈ 3.4 → bars 2) is 'poor'
+		expect(monitor.committed).toBe('terrible'); // 20% loss → loss score 0 → 'terrible' under the tuned badge
 	});
 });
 
@@ -315,5 +410,160 @@ describe('ConnectionQualityMonitor — evaluateQualityTick is called with no arg
 		await (monitor as any).evaluate();
 		expect(spy).toHaveBeenCalledTimes(1);
 		expect(spy).toHaveBeenCalledWith();
+	});
+});
+
+describe('ConnectionQualityMonitor — uplink status broadcast (relativeScore + maxUplinkTier + maxHardwareTier)', () => {
+	beforeEach(() => {
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+	});
+
+	it('emitInitial broadcasts a numeric relativeScore (not a level string)', async () => {
+		const monitor = makeMonitor();
+		await monitor.emitInitial();
+		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
+		const [, relativeScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(typeof relativeScore).toBe('number');
+	});
+
+	it('emitInitial broadcasts null relativeScore when ICE is down (LOST)', async () => {
+		const monitor = makeMonitor({ audioConnectionState: 'disconnected' });
+		await monitor.emitInitial();
+		expect(monitor.committed).toBe('lost');
+		const [, relativeScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(relativeScore).toBeNull();
+	});
+
+	it('emitInitial includes maxUplinkTier=null when webcam is off', async () => {
+		const monitor = makeMonitor({ webcamActive: false });
+		await monitor.emitInitial();
+		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
+		const [, , , maxUplinkTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(maxUplinkTier).toBeNull();
+	});
+
+	it('emitInitial broadcasts maxHardwareTier=null when captureHeight is unavailable', async () => {
+		// rtpSender={} has no .track → captureHeight=undefined → producibleCeiling returns null
+		const monitor = makeMonitor({ webcamActive: true });
+		await monitor.emitInitial();
+		const [, , , , maxHardwareTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(maxHardwareTier).toBeNull();
+	});
+
+	it('emitInitial includes maxUplinkTier when webcam is active and GCC has settled', async () => {
+		// trackWebcamUplink sets lastTopActiveRung only when prevCum is already set (tick 1 is transient).
+		// Use a video stats factory with a single OUTBOUND_RTP rid='m' so the second call sees progress.
+		let vTick = 0;
+		const monitor = makeMonitor({
+			webcamActive: true,
+			videoPeerStats: () => {
+				vTick += 1;
+				return Promise.resolve(
+					report([{ id: 'ov', type: OUTBOUND_RTP, rid: 'm', framesEncoded: vTick * 10 }])
+				);
+			}
+		});
+		// Tick 1: prevCum=null → topActiveRung=-1 (transient) → lastTopActiveRung=-1 → myMaxUplinkTier stays null.
+		await monitor.emitInitial();
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+		// Tick 2: prevCum has rid 'm' with framesEncoded=10; current=20>10 → topActiveRung=1 (rid='m' index 1)
+		// → lastTopActiveRung=1 ≥ 0 → myMaxUplinkTier=1.
+		await monitor.emitInitial();
+		const lastCall = wsMocks.sendUplinkStatusUpdate.mock.calls.at(-1);
+		expect(lastCall?.[3]).toBe(1);
+	});
+
+	it('broadcasts on maxUplinkTier-only change (level unchanged)', async () => {
+		// Stub computeQuality so the quality level stays 'optimal' and myMaxUplinkTier is not overwritten.
+		// Pre-set committedMaxUplinkTier=1, myMaxUplinkTier=0 → maxUplinkTierChanged fires.
+		const monitor = makeMonitor();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const m = monitor as any;
+		const computeStub = vi
+			.spyOn(m, 'computeQuality')
+			.mockResolvedValue({ raw: {}, level: 'optimal' });
+
+		m.committed = 'optimal';
+		m.committedMaxUplinkTier = 1;
+		m.myMaxUplinkTier = 0; // GCC stepped down
+		m.changedAt = 100;
+
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+		await m.evaluate();
+
+		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
+		const lastCall = wsMocks.sendUplinkStatusUpdate.mock.calls.at(-1);
+		expect(lastCall?.[3]).toBe(0);
+
+		computeStub.mockRestore();
+	});
+
+	it('does NOT broadcast when neither level nor maxUplinkTier nor maxHardwareTier changed', async () => {
+		const monitor = makeMonitor({ webcamActive: true });
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const m = monitor as any;
+		m.lastTopActiveRung = 2;
+		m.videoOutPrevCum = { framesEncoded: {} };
+		await monitor.emitInitial();
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+
+		// Same rung, same level → no broadcast
+		m.lastTopActiveRung = 2;
+		await m.evaluate();
+
+		expect(wsMocks.sendUplinkStatusUpdate).not.toHaveBeenCalled();
+	});
+});
+
+describe('ConnectionQualityMonitor — absoluteScore broadcast and selector', () => {
+	beforeEach(() => {
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+	});
+
+	it('emitInitial broadcasts absoluteScore as the third argument (after relativeScore)', async () => {
+		const monitor = makeMonitor();
+		await monitor.emitInitial();
+		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
+		const call = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		// [meetingId, relativeScore, absoluteScore, maxUplinkTier, maxHardwareTier, changedAt]
+		const [, relativeScore, absoluteScoreArg] = call;
+		expect(typeof relativeScore).toBe('number');
+		// No webcam, no feeds → no shortfalls → absoluteScore == relativeScore (round1)
+		expect(absoluteScoreArg).toBe(relativeScore);
+	});
+
+	it('absoluteScore is null when ICE is down (LOST)', async () => {
+		const monitor = makeMonitor({ audioConnectionState: 'disconnected' });
+		await monitor.emitInitial();
+		const [, , absoluteScoreArg] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(absoluteScoreArg).toBeNull();
+	});
+
+	it('broadcasts when absoluteScore changes even if level and tiers are unchanged', async () => {
+		const monitor = makeMonitor();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const m = monitor as any;
+		const computeStub = vi
+			.spyOn(m, 'computeQuality')
+			.mockResolvedValue({ raw: {}, level: 'optimal' });
+
+		m.committed = 'optimal';
+		m.committedAbsoluteScore = 8;
+		m.myAbsoluteScore = 8;
+		m.committedMaxUplinkTier = null;
+		m.myMaxUplinkTier = null;
+		m.committedMaxHardwareTier = null;
+		m.myMaxHardwareTier = null;
+		m.changedAt = 100;
+
+		// stub downlinkShortfall to now return 1 → absoluteScore drops
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(m.videoIn.downlinkShortfall as ReturnType<typeof vi.fn>).mockReturnValue(1);
+
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+		await m.evaluate();
+
+		expect(wsMocks.sendUplinkStatusUpdate).toHaveBeenCalled();
+		computeStub.mockRestore();
 	});
 });

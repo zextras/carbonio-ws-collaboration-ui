@@ -97,6 +97,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 					</CustomContainer>
 				)}
 				{!isScreenShare && <ConnectionQualityIndicator meetingId={meetingId} userId={userId} />}
+				{!isScreenShare && (
+					<ConnectionQualityIndicator meetingId={meetingId} userId={userId} variant="absolute" />
+				)}
 			</>
 		),
 		[

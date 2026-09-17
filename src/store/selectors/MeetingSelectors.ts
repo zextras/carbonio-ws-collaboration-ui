@@ -6,7 +6,7 @@
 
 import { filter, find, reduce, size, some } from 'lodash';
 
-import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
+import { ConnectionQuality, scoreToLevel } from '../../network/webRTC/connectionQualityScore';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -82,7 +82,30 @@ export const getParticipantConnectionQuality = (
 	if (!meetingId || !userId) return undefined;
 	const { activeMeeting } = store;
 	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
-	return activeMeeting.connectionQuality[userId]?.quality;
+	const cq = activeMeeting.connectionQuality[userId];
+	if (!cq) return undefined;
+	if (cq.relativeScore == null) return 'lost';
+	return scoreToLevel(cq.relativeScore);
+};
+
+export const getParticipantRelativeQuality = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): ConnectionQuality | undefined => getParticipantConnectionQuality(store, meetingId, userId);
+
+export const getParticipantAbsoluteQuality = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): ConnectionQuality | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	const cq = activeMeeting.connectionQuality[userId];
+	if (!cq) return undefined;
+	if (cq.absoluteScore == null) return 'lost';
+	return scoreToLevel(cq.absoluteScore);
 };
 
 export const getParticipantVideoStatus = (

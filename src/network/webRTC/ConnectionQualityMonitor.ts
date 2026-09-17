@@ -5,14 +5,20 @@
  */
 
 import {
+	absoluteScore as computeAbsoluteScore,
 	combineVote,
 	ConnectionQuality,
 	jitterScore,
+	K_DOWN,
+	K_UP,
 	LinkSample,
+	producibleCeiling,
+	round1,
 	rttScore,
 	scoreToBars,
 	scoreToLevel,
-	uplinkLossScore
+	uplinkLossScore,
+	uplinkShortfall as computeUplinkShortfall
 } from './connectionQualityScore';
 import {
 	readCandidatePairRttMs,
@@ -28,13 +34,10 @@ import {
 	IVideoOutConnection,
 	IVideoScreenInConnection
 } from '../../types/network/webRTC/webRTC';
-import { rtcDebug } from '../../utils/debug';
+import { rtcUplinkDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
 const OUTBOUND_RTP = 'outbound-rtp';
-
-// Uplink simulcast tier name from topActiveRung (highest rid still encoding): 0=low, 1=medium, 2=high.
-const uplinkTierName = (r: number): string => ['low', 'medium', 'high'][r] ?? 'none';
 
 function maxDefined(values: Array<number | undefined>): number | undefined {
 	let out: number | undefined;
@@ -69,6 +72,22 @@ export default class ConnectionQualityMonitor {
 	committed: ConnectionQuality | null = null;
 
 	changedAt = 0;
+
+	private myRelativeScore: number | null = null;
+
+	private committedRelativeScore: number | null = null;
+
+	private myAbsoluteScore: number | null = null;
+
+	private committedAbsoluteScore: number | null = null;
+
+	private myMaxUplinkTier: number | null = null;
+
+	private committedMaxUplinkTier: number | null = null;
+
+	private myMaxHardwareTier: number | null = null;
+
+	private committedMaxHardwareTier: number | null = null;
 
 	// RAW vote buffer (bars 0..5, one per 2 s tick, seeded optimistic). Only the display median reads from
 	// it. Lost ticks push bars=0 with NO reset (see vote()) so recovery is not over-optimistic.
@@ -108,21 +127,44 @@ export default class ConnectionQualityMonitor {
 	}
 
 	// Re-assert my own quality straight into the store. Idempotent thanks to the setter's changedAt guard.
-	private applyLocalQuality(level: ConnectionQuality): void {
+	private applyLocalQuality(maxUplinkTier?: number | null, maxHardwareTier?: number | null): void {
 		if (this.myUserId == null) return;
 		useStore
 			.getState()
-			.setParticipantConnectionQuality(this.meetingId, this.myUserId, level, this.changedAt);
+			.setParticipantConnectionQuality(
+				this.meetingId,
+				this.myUserId,
+				this.myRelativeScore,
+				this.changedAt,
+				maxUplinkTier,
+				maxHardwareTier,
+				this.myAbsoluteScore
+			);
 	}
 
 	async emitInitial(): Promise<void> {
 		const { raw, level } = await this.computeQuality();
 		this.committed = level;
+		this.committedRelativeScore = this.myRelativeScore;
+		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
+		const downSF = this.videoIn.downlinkShortfall();
+		this.myAbsoluteScore = computeAbsoluteScore(this.myRelativeScore, upSF, downSF);
+		this.committedAbsoluteScore = this.myAbsoluteScore;
 		// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
 		useStore.getState().setConnectionScoreDetail(raw);
-		wsClient.sendConnectionStatusUpdate(this.meetingId, level, this.changedAt);
-		this.applyLocalQuality(level);
+		this.storeAbsoluteDetail(upSF, downSF);
+		wsClient.sendUplinkStatusUpdate(
+			this.meetingId,
+			this.myRelativeScore,
+			this.myAbsoluteScore,
+			this.myMaxUplinkTier,
+			this.myMaxHardwareTier,
+			this.changedAt
+		);
+		this.committedMaxUplinkTier = this.myMaxUplinkTier;
+		this.committedMaxHardwareTier = this.myMaxHardwareTier;
+		this.applyLocalQuality(this.myMaxUplinkTier, this.myMaxHardwareTier);
 	}
 
 	async resyncTo(userId: string): Promise<void> {
@@ -130,28 +172,80 @@ export default class ConnectionQualityMonitor {
 			await this.emitInitial();
 		}
 		if (this.committed != null) {
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt, userId);
+			wsClient.sendUplinkStatusUpdate(
+				this.meetingId,
+				this.committedRelativeScore,
+				this.committedAbsoluteScore,
+				this.committedMaxUplinkTier,
+				this.committedMaxHardwareTier,
+				this.changedAt,
+				userId
+			);
 		}
 	}
 
 	rebroadcast(): void {
 		if (this.committed != null) {
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendUplinkStatusUpdate(
+				this.meetingId,
+				this.committedRelativeScore,
+				this.committedAbsoluteScore,
+				this.committedMaxUplinkTier,
+				this.committedMaxHardwareTier,
+				this.changedAt
+			);
 		}
 	}
 
 	private async evaluate(): Promise<void> {
 		const { raw, level } = await this.computeQuality();
+		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
+		const downSF = this.videoIn.downlinkShortfall();
+		this.myAbsoluteScore = computeAbsoluteScore(this.myRelativeScore, upSF, downSF);
 		useStore.getState().setConnectionScoreDetail(raw);
-		if (this.committed !== level) {
+		this.storeAbsoluteDetail(upSF, downSF);
+		const maxUplinkTierChanged = this.myMaxUplinkTier !== this.committedMaxUplinkTier;
+		const maxHardwareTierChanged = this.myMaxHardwareTier !== this.committedMaxHardwareTier;
+		const absoluteScoreChanged = this.myAbsoluteScore !== this.committedAbsoluteScore;
+		if (
+			this.committed !== level ||
+			maxUplinkTierChanged ||
+			maxHardwareTierChanged ||
+			absoluteScoreChanged
+		) {
 			this.committed = level;
+			this.committedRelativeScore = this.myRelativeScore;
+			this.committedAbsoluteScore = this.myAbsoluteScore;
+			this.committedMaxUplinkTier = this.myMaxUplinkTier;
+			this.committedMaxHardwareTier = this.myMaxHardwareTier;
 			// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 			this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-			// Broadcast only on a vote-level change — the event carries score only (no maxTier).
-			wsClient.sendConnectionStatusUpdate(this.meetingId, this.committed, this.changedAt);
+			wsClient.sendUplinkStatusUpdate(
+				this.meetingId,
+				this.committedRelativeScore,
+				this.committedAbsoluteScore,
+				this.committedMaxUplinkTier,
+				this.committedMaxHardwareTier,
+				this.changedAt
+			);
 		}
-		this.applyLocalQuality(this.committed ?? level);
+		this.applyLocalQuality(this.myMaxUplinkTier, this.myMaxHardwareTier);
 		await this.videoIn.evaluateQualityTick().catch(() => {});
+	}
+
+	// Publish the own-tile absolute breakdown for the hover tooltip each tick.
+	private storeAbsoluteDetail(upSF: number, downSF: number): void {
+		const webcamActive = this.videoOut.rtpSender != null;
+		const hasFeeds = this.videoIn.hasActiveWebcamFeeds();
+		useStore.getState().setConnectionAbsoluteDetail({
+			relativeScore: this.myRelativeScore,
+			absoluteScore: this.myAbsoluteScore,
+			uplinkPenalty:
+				webcamActive && this.myMaxUplinkTier != null && this.myMaxHardwareTier != null
+					? round1(K_UP * upSF)
+					: null,
+			downlinkPenalty: hasFeeds ? round1(K_DOWN * downSF) : null
+		});
 	}
 
 	// getStats, swallowing the browser's refusal to report on a closing PC.
@@ -170,11 +264,18 @@ export default class ConnectionQualityMonitor {
 	// (per-feed freeze + sender-badge controller) lives in VideoScreenInConnection; the monitor
 	// only ticks it via evaluateQualityTick().
 	private async computeQuality(): Promise<{ raw: LinkSample; level: ConnectionQuality }> {
-		const audioState = this.audioConn.peerConn?.connectionState;
-		const iceConnected = !audioState || !['failed', 'disconnected', 'closed'].includes(audioState);
-
 		const webcamActive = this.videoOut.rtpSender != null;
 		const screenActive = this.screenOut.rtpSender != null;
+
+		// LOST reflects only the OUTBOUND legs (what others receive from us: audio + webcam/screen when
+		// active); inbound is excluded on purpose (our reception trouble is surfaced per-feed, not broadcast).
+		// Soft 'disconnected' counts as down; LOST clears only when every active outbound pair is back up.
+		const outboundDown = [
+			this.audioConn.peerConn?.connectionState,
+			webcamActive ? this.videoOut.peerConn?.connectionState : undefined,
+			screenActive ? this.screenOut.peerConn?.connectionState : undefined
+		].some((s) => s != null && ['failed', 'disconnected', 'closed'].includes(s));
+		const iceConnected = !outboundDown;
 
 		const [audioStats, videoUpStats, screenUpStats] = await Promise.all([
 			this.safeStats(this.audioConn.peerConn),
@@ -187,6 +288,19 @@ export default class ConnectionQualityMonitor {
 		} else {
 			this.videoOutPrevCum = null;
 			this.lastVideoSender = null;
+		}
+
+		if (!webcamActive) {
+			this.myMaxUplinkTier = null;
+			this.myMaxHardwareTier = null;
+		} else {
+			if (this.lastTopActiveRung >= 0) {
+				this.myMaxUplinkTier = this.lastTopActiveRung;
+			}
+			// else (-1 transient) keep previous myMaxUplinkTier
+			const captureHeight = this.videoOut.rtpSender?.track?.getSettings().height;
+			const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+			this.myMaxHardwareTier = producibleCeiling(tiers, captureHeight);
 		}
 
 		// RTT: candidate-pair round-trip ONLY (worst across audio/webcam/screen PCs) — a true two-way STUN
@@ -233,6 +347,7 @@ export default class ConnectionQualityMonitor {
 	private vote(raw: LinkSample, iceConnected: boolean): ConnectionQuality {
 		if (!iceConnected) {
 			this.voteWindow.push(0);
+			this.myRelativeScore = null;
 			return 'lost';
 		}
 
@@ -242,7 +357,9 @@ export default class ConnectionQualityMonitor {
 		const rawBars = scoreToBars(combineVote(rttS, jitterS, lossS));
 		this.voteWindow.push(rawBars);
 
-		return scoreToLevel(this.voteWindow.medianLast(DISPLAY_WINDOW) * 2);
+		const numericScore = this.voteWindow.medianLast(DISPLAY_WINDOW) * 2;
+		this.myRelativeScore = numericScore;
+		return scoreToLevel(numericScore);
 	}
 
 	// Derives topActiveRung (highest rid still encoding) purely to log GCC tier changes; never feeds the vote.
@@ -276,9 +393,8 @@ export default class ConnectionQualityMonitor {
 			this.lastTopActiveRung !== -2 &&
 			topActiveRung !== this.lastTopActiveRung
 		) {
-			rtcDebug(
-				`[UPLINK CAMERA CHANGED TIER] ${uplinkTierName(this.lastTopActiveRung)} -> ${uplinkTierName(topActiveRung)}`
-			);
+			// Our own uplink (no remote user); GCC drives the encoder's top active layer.
+			rtcUplinkDebug(this.lastTopActiveRung, topActiveRung);
 		}
 		this.lastTopActiveRung = topActiveRung;
 	}

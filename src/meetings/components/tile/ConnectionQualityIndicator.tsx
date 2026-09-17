@@ -16,9 +16,13 @@ import {
 	rttScore,
 	uplinkLossScore
 } from '../../../network/webRTC/connectionQualityScore';
-import { getParticipantConnectionQuality } from '../../../store/selectors/MeetingSelectors';
+import {
+	getParticipantAbsoluteQuality,
+	getParticipantConnectionQuality
+} from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { AbsoluteScoreDetail } from '../../../types/store/ActiveMeetingTypes';
 
 const CustomContainer = styled(Row)`
 	border-radius: 0.25rem;
@@ -52,16 +56,24 @@ const LEVEL_BARS: Record<Exclude<ConnectionQuality, 'lost'>, number> = {
 	optimal: 5
 };
 
-const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = ({
-	meetingId,
-	userId
-}) => {
+const ConnectionQualityIndicator: FC<{
+	meetingId?: string;
+	userId?: string;
+	variant?: 'relative' | 'absolute';
+}> = ({ meetingId, userId, variant = 'relative' }) => {
 	const [t] = useTranslation();
 	const theme = useTheme();
-	const quality = useStore((state) => getParticipantConnectionQuality(state, meetingId, userId));
+	const quality = useStore((state) =>
+		variant === 'absolute'
+			? getParticipantAbsoluteQuality(state, meetingId, userId)
+			: getParticipantConnectionQuality(state, meetingId, userId)
+	);
 	const isOwn = useStore((store) => userId != null && userId === getUserId(store));
 	const ownDetail = useStore((store) =>
 		isOwn ? store.activeMeeting?.connectionScoreDetail : undefined
+	);
+	const absoluteDetail = useStore((store): AbsoluteScoreDetail | undefined =>
+		isOwn ? store.activeMeeting?.connectionAbsoluteDetail : undefined
 	);
 
 	// Own tile: always visible; remote tiles: hidden unless link is unstable.
@@ -103,6 +115,23 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 
 	// An unmeasurable signal (undefined) renders '—' and does not drag the vote.
 	const label = ((): string | React.ReactElement => {
+		if (!isOwn) return tooltipLabel;
+
+		if (variant === 'absolute') {
+			if (absoluteDetail == null) return tooltipLabel;
+			const fmtPenalty = (p: number | null): string => (p != null ? `-${p.toFixed(1)}` : '—');
+			const lines = [
+				tooltipLabel,
+				`Uplink: ${fmtPenalty(absoluteDetail.uplinkPenalty)}`,
+				`Downlink: ${fmtPenalty(absoluteDetail.downlinkPenalty)}`,
+				absoluteDetail.absoluteScore != null
+					? `Score: ${absoluteDetail.absoluteScore.toFixed(1)}/10`
+					: 'Score: —'
+			];
+			return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
+		}
+
+		// variant='relative'
 		if (ownDetail == null) return tooltipLabel;
 		const fmt = (v: number, unit: 'ms' | '%'): string =>
 			unit === 'ms' ? `${Math.round(v)} ms` : `${(v * 100).toFixed(1)}%`;
@@ -117,7 +146,10 @@ const ConnectionQualityIndicator: FC<{ meetingId?: string; userId?: string }> = 
 			tooltipLabel,
 			line('RTT', ownDetail.rttMs, rttScore, 'ms'),
 			line('Jitter', ownDetail.jitterMs, jitterScore, 'ms'),
-			line('Uplink loss', ownDetail.lossUp, uplinkLossScore, '%')
+			line('Uplink loss', ownDetail.lossUp, uplinkLossScore, '%'),
+			absoluteDetail?.relativeScore != null
+				? `Score: ${absoluteDetail.relativeScore.toFixed(1)}/10`
+				: 'Score: —'
 		];
 		return <div style={{ whiteSpace: 'pre-line' }}>{lines.join('\n')}</div>;
 	})();

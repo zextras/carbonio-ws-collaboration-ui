@@ -9,7 +9,6 @@ import { produce } from 'immer';
 import { forEach, includes, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import {
@@ -242,8 +241,11 @@ export const useMeetingsStoreSlice: StateCreator<
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		quality: ConnectionQuality,
-		changedAt: number
+		relativeScore: number | null,
+		changedAt: number,
+		maxUplinkTier?: number | null,
+		maxHardwareTier?: number | null,
+		absoluteScore?: number | null
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -251,7 +253,13 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
-					activeMeeting.connectionQuality[userId] = { quality, changedAt };
+					activeMeeting.connectionQuality[userId] = {
+						relativeScore,
+						absoluteScore,
+						changedAt,
+						maxUplinkTier,
+						maxHardwareTier
+					};
 				}
 			}),
 			false,

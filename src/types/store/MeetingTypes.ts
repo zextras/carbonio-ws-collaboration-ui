@@ -5,7 +5,6 @@
  */
 
 import { STREAM_TYPE } from './ActiveMeetingTypes';
-import { ConnectionQuality } from '../../network/webRTC/connectionQualityScore';
 import { MeetingBe, MeetingType } from '../network/models/meetingBeTypes';
 
 export type MeetingsSlice = {
@@ -34,8 +33,11 @@ export type MeetingsSlice = {
 	setParticipantConnectionQuality: (
 		meetingId: string,
 		userId: string,
-		quality: ConnectionQuality,
-		changedAt: number
+		relativeScore: number | null,
+		changedAt: number,
+		maxUplinkTier?: number | null,
+		maxHardwareTier?: number | null,
+		absoluteScore?: number | null
 	) => void;
 };
 

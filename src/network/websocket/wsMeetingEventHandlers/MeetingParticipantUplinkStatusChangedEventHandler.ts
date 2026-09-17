@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import useStore from '../../../store/Store';
-import { MeetingParticipantConnectionStatusChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingParticipantUplinkStatusChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMyId } from '../eventHandlersUtilities';
 
-export const meetingParticipantConnectionStatusChangedEventHandler = (
-	event: MeetingParticipantConnectionStatusChangedEvent
+export const meetingParticipantUplinkStatusChangedEventHandler = (
+	event: MeetingParticipantUplinkStatusChangedEvent
 ): void => {
 	const state = useStore.getState();
 	// First time we learn this participant's status — e.g. someone already in the meeting when we
@@ -20,8 +20,11 @@ export const meetingParticipantConnectionStatusChangedEventHandler = (
 	state.setParticipantConnectionQuality(
 		event.meetingId,
 		event.userId,
-		event.score,
-		event.changedAt
+		event.relativeScore,
+		event.changedAt,
+		event.maxUplinkTier,
+		event.maxHardwareTier,
+		event.absoluteScore
 	);
 
 	// Reciprocate on first contact (never to ourselves): when we join an ongoing meeting our initial

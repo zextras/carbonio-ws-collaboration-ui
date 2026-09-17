@@ -47,6 +47,9 @@ export type DownlinkDecision = {
 
 const EVIDENCE_CAP = 5; // >= EVIDENCE_DOWN_M
 
+// The controller decides the NETWORK target only (what the downlink can sustain), free within
+// [0, TOP_RUNG]. The tile-size ceiling is applied separately as min(targetRung, ceiling) at request
+// time, so a resize adapts instantly without going through this backoff.
 export function decideFeedDownlink(
 	prev: FeedDownlinkState,
 	score: number | undefined,
