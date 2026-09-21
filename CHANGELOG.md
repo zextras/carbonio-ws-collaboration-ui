@@ -1,3 +1,9 @@
+## [0.18.10](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.9...v0.18.10) (2026-09-21)
+
+### Other changes
+
+* **deps:** update pnpm to v10.34.5 ([#831](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/831)) ([afbbfba](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/afbbfbad2d9a9422bcc2bb001df59d2bc2b538eb))
+
 ## [0.18.9](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.8...v0.18.9) (2026-09-21)
 
 ### Other changes
