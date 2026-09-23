@@ -66,5 +66,6 @@ export type StreamMap = {
 		userId: string;
 		type: STREAM_TYPE;
 		stream: MediaStream;
+		mid?: string;
 	};
 };

@@ -22,6 +22,7 @@ export const HoverContainer = styled(Container)`
 	position: absolute;
 	background-color: rgba(255, 255, 255, 0.7);
 	z-index: ${Z_INDEX_RANK.TILE_HOVER};
+	pointer-events: none; /* let hover fall through to the connection indicator below; buttons re-enable it */
 	-webkit-transition: opacity 200ms linear 300ms;
 	-moz-transition: opacity 200ms linear 300ms;
 	-o-transition: opacity 200ms linear 300ms;
@@ -30,6 +31,7 @@ export const HoverContainer = styled(Container)`
 
 const CustomButton = styled(Button)`
 	padding: 0.75rem;
+	pointer-events: auto;
 	& > svg {
 		width: 1.5rem;
 		min-width: 1.5rem;
