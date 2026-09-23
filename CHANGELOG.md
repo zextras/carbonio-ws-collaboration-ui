@@ -1,3 +1,76 @@
+## [0.18.12](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.11...v0.18.12) (2026-09-21)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.11.0 ([#837](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/837)) ([b4e33e7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b4e33e708156e38ec18a9e50d4d65bea8a7bf4a5))
+
+## [0.18.11](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.10...v0.18.11) (2026-09-21)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#836](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/836)) ([49fbe3d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/49fbe3d9ac3b4a37d8a2a04287cef402d8987d05))
+
+## [0.18.10](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.9...v0.18.10) (2026-09-21)
+
+### Other changes
+
+* **deps:** update pnpm to v10.34.5 ([#831](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/831)) ([afbbfba](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/afbbfbad2d9a9422bcc2bb001df59d2bc2b538eb))
+
+## [0.18.9](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.8...v0.18.9) (2026-09-21)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#835](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/835)) ([d8073ff](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d8073ff8c695126e32c02c24e9962a76e27404dc))
+
+## [0.18.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.7...v0.18.8) (2026-09-16)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.11 ([#830](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/830)) ([ac0389b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ac0389bd426b12ffb48c716a7437997507dfe12b))
+
+## [0.18.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.6...v0.18.7) (2026-09-16)
+
+### Bug Fixes
+
+* resolve lint errors surfaced by [@typescript-eslint](https://github.com/typescript-eslint) v8 ([#829](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/829)) ([e304077](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e304077862878d489ac37dc4f75542cd95aa5617)), closes [zextras/carbonio-ui-configs#160](https://github.com/zextras/carbonio-ui-configs/issues/160) [#132](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/132) [#648](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/648) [#160](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/160)
+
+## [0.18.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.5...v0.18.6) (2026-09-15)
+
+### Other changes
+
+* **deps:** weekly update dependencies (2026-09-15) ([#828](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/828)) ([9d7ef56](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9d7ef56c95ac885232b13a2d7736e79500fbe2de))
+
+## [0.18.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.4...v0.18.5) (2026-09-15)
+
+### Other changes
+
+* **deps-dev:** weekly update devDependencies (2026-09-15) ([#827](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/827)) ([278c552](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/278c5522b6cc5a72d3554de21214d90a027e6b05))
+
+## [0.18.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.3...v0.18.4) (2026-09-15)
+
+### Bug Fixes
+
+* **deps:** update dependency react-router-dom to v6.30.6 [security] ([#820](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/820)) ([210b0cf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/210b0cf9f0e0fbd08bbfdda3559d90589cb95fc3))
+
+## [0.18.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.2...v0.18.3) (2026-09-15)
+
+### Other changes
+
+* **deps:** update dependency vitest to v4.1.11 [security] ([#823](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/823)) ([4c4ee94](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4c4ee947ee2659ab947a71a03f250b9ea5a37971))
+
+## [0.18.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.1...v0.18.2) (2026-09-14)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.10 ([#824](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/824)) ([61e21df](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/61e21df4536d40d50ce7fd8b4232d40852ee27cb))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.5 ([#818](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/818)) ([2f0055e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2f0055e7d22707edd23a2b957d9e76202fea0cc0))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.10.7 ([#819](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/819)) ([d6e410a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d6e410acffdf5a1df13195ce6f9c2ece89dcf8c3))
+* **deps:** update dependency zextras/jenkins-lib-common to v4.9.2 ([#814](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/814)) ([9cab21c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9cab21c411b79bd92bc9b7f9f543c360c76c6003))
+* **deps:** update sonarqube-scanner to 4.4.0 ([#822](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/822)) ([f461de6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f461de6ba15cca502e6dd05dc8e7fac0aadac823))
+* **deps:** update sonarqube-scanner to 5.0.0 ([#825](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/825)) ([8900539](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/89005396bc2adf0875cd23bcb58e51a243e34f61))
+
+## [0.18.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.0...v0.18.1) (2026-08-25)
+
 ## [0.18.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.17.1...v0.18.0) (2026-08-03)
 
 ## [0.17.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.17.0...v0.17.1) (2026-07-27)

@@ -396,7 +396,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	useEffect(() => {
 		const ref = messageInputRef.current;
-		return () => {
+		return (): void => {
 			const draft = ref?.value ?? '';
 			setDraftMessage(roomId, draft.trim() || undefined);
 		};
