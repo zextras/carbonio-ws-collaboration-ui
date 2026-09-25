@@ -27,8 +27,8 @@ importers:
         specifier: 12.1.2
         version: 12.1.2(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1))(date-fns@4.4.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@zextras/carbonio-shell-ui':
-        specifier: 15.3.0
-        version: 15.3.0(2104e4122f85e98393d5b7f9698b53e6)
+        specifier: 15.3.8
+        version: 15.3.8(2104e4122f85e98393d5b7f9698b53e6)
       '@zextras/carbonio-ui-preview':
         specifier: 5.0.4
         version: 5.0.4(@types/react@18.3.31)(@zextras/carbonio-design-system@12.1.2(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1))(date-fns@4.4.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2275,8 +2275,8 @@ packages:
       react: ^18.3.1
       react-dom: ^18.3.1
 
-  '@zextras/carbonio-shell-ui@15.3.0':
-    resolution: {integrity: sha512-yhHg5+WPqablgYhf8RlIJmuUnq38AuDLnqIDoNXCK8OPvUKXiWb+RTNI4DGs5eNiHOT0/iKyp7LE8JxmzrJu7Q==}
+  '@zextras/carbonio-shell-ui@15.3.8':
+    resolution: {integrity: sha512-uDCUZbMBTIzp7tNZaLKWVMGZsxn0QNxUe67Bn0GKbiQfHTOr4wO9f913yQOwKaDpOxQdJrjD7gQD7cDbqgj6AA==}
     engines: {node: v22, pnpm: '>=10'}
     peerDependencies:
       '@emotion/react': ^11.14.0
@@ -9129,7 +9129,7 @@ snapshots:
       react-datepicker: 7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
-  '@zextras/carbonio-shell-ui@15.3.0(2104e4122f85e98393d5b7f9698b53e6)':
+  '@zextras/carbonio-shell-ui@15.3.8(2104e4122f85e98393d5b7f9698b53e6)':
     dependencies:
       '@fontsource/roboto': 5.3.0
       '@zextras/carbonio-ui-soap-lib': 1.3.1
