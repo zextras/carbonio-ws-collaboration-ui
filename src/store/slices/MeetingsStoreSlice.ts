@@ -126,6 +126,10 @@ export const useMeetingsStoreSlice: StateCreator<
 				if (meeting) {
 					delete meeting.participants[userId];
 				}
+				const { activeMeeting } = draft;
+				if (activeMeeting?.meetingId === meetingId) {
+					delete activeMeeting.connectionQuality[userId];
+				}
 			}),
 			false,
 			'MEETINGS/REMOVE_PARTICIPANT'
@@ -232,6 +236,32 @@ export const useMeetingsStoreSlice: StateCreator<
 			}),
 			false,
 			'MEETINGS/STOP_RECORDING'
+		);
+	},
+	setParticipantConnectionQuality: (
+		meetingId: string,
+		userId: string,
+		networkScore: number | null,
+		changedAt: number,
+		maxUplinkTier?: number | null,
+		maxHardwareTier?: number | null
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const { activeMeeting } = draft;
+				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
+				const previous = activeMeeting.connectionQuality[userId];
+				if (previous === undefined || changedAt > previous.changedAt) {
+					activeMeeting.connectionQuality[userId] = {
+						networkScore,
+						changedAt,
+						maxUplinkTier,
+						maxHardwareTier
+					};
+				}
+			}),
+			false,
+			'MEETINGS/SET_PARTICIPANT_CONNECTION_QUALITY'
 		);
 	}
 });

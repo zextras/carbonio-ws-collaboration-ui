@@ -25,7 +25,10 @@ import MoreActionsButton from './MoreActionsButton';
 import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
 import { RouterContext } from '../../contexts/routerContext';
+import ConnectionQualityIndicator from '../tile/ConnectionQualityIndicator';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
@@ -55,6 +58,7 @@ type MeetingActionsProps = {
 
 const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	const { meetingId } = useContext(RouterContext);
+	const myUserId = useStore(getUserId);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
@@ -209,6 +213,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<MoreActionsButton />
 				{compactMode && (
 					<>
+						<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 						<MeetingDuration meetingId={meetingId} />
 						<LeaveMeetingButton isHoovering={isHoovering} oneClickLeave />
 					</>
@@ -225,6 +230,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				ref={rightActionsWrapperRef}
 				$compactMode={compactMode}
 			>
+				<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 				<MeetingDuration meetingId={meetingId} />
 				<LeaveMeetingButton isHoovering={isHoovering} />
 			</SecondActionsWrapper>

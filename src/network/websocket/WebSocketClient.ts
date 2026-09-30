@@ -68,6 +68,25 @@ export class WebSocketClient {
 		}
 	}
 
+	sendUplinkStatusUpdate(
+		meetingId: string,
+		networkScore: number | null,
+		maxUplinkTier: number | null | undefined,
+		maxHardwareTier: number | null | undefined,
+		changedAt: number,
+		to?: string
+	): void {
+		this.send({
+			type: 'UplinkStatusUpdate',
+			meetingId,
+			networkScore,
+			changedAt,
+			...(to ? { to } : {}),
+			...(maxUplinkTier != null ? { maxUplinkTier } : {}),
+			...(maxHardwareTier != null ? { maxHardwareTier } : {})
+		});
+	}
+
 	_onOpen = (): void => {
 		wsDebug('...connected!');
 		this._reconnectionTime = 0;
@@ -83,6 +102,7 @@ export class WebSocketClient {
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
+		useStore.getState().activeMeeting?.qualityMonitor?.rebroadcast();
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
 		}

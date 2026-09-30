@@ -6,6 +6,7 @@
 
 import { filter, find, reduce, size, some } from 'lodash';
 
+import { ConnectionQuality, scoreToLevel } from '../../network/webRTC/connectionQualityScore';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -71,6 +72,20 @@ export const getParticipantAudioStatus = (
 	const meeting = store.meetings[meetingId];
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.audioStreamOn ?? false;
+};
+
+export const getParticipantNetworkQuality = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): ConnectionQuality | undefined => {
+	if (!meetingId || !userId) return undefined;
+	const { activeMeeting } = store;
+	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	const cq = activeMeeting.connectionQuality[userId];
+	if (!cq) return undefined;
+	if (cq.networkScore == null) return 'lost';
+	return scoreToLevel(cq.networkScore);
 };
 
 export const getParticipantVideoStatus = (
