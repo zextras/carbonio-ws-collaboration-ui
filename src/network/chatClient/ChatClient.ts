@@ -14,6 +14,7 @@ import { findRepliedMessage } from './findRepliedMessage';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
+import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
@@ -72,12 +73,19 @@ function sdkNotWiredYet(method: string): void {
  * the outgoing-text flows. v1 parity: the XMPP sender also bails out when the
  * message is not in store. Nothing is written locally: the store update comes
  * back through the own ReadUpdated echo, like the v1 MUC displayed echo.
+ *
+ * F3 guard: `PUT /read` 404s on config rows (`MessageType.CONFIGURATION_MSG`)
+ * when one lands as the last item in a room: the pin/unpin rows are
+ * synthesized client-side and have no server id at all, and system-event rows
+ * were rejected by the backend up to common-socket 514b238 (§9). System events
+ * don't count toward the unread badge server-side anyway (§5.15b), so
+ * skipping the marker call for them is a no-op, not a lost read.
  */
 function readMessageViaSdk(roomId: string, messageId: string): void {
 	const message = useStore
 		.getState()
 		.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
-	if (!message) {
+	if (!message || message.type !== MessageType.TEXT_MSG) {
 		return;
 	}
 	wscSdk.markAsRead(roomId, messageId).catch((err) => {
@@ -420,6 +428,13 @@ export const chatClient: ChatClient = {
 	},
 	getMessagePin: (roomId) => {
 		if (isWscPure()) {
+			// F1 guard: a placeholder room (`placeholder-<userId>`, not yet
+			// promoted to a real room by a first sent message) has no backing
+			// room on the backend, so GET /pin 404s on every mount of Chat.tsx.
+			// Same skip as sendIsWriting/sendPaused above.
+			if (useStore.getState().rooms[roomId]?.placeholder) {
+				return;
+			}
 			// Store-first with the latest live edit applied (the banner renders
 			// the copy as-is): the full message beats the poor GET /pin stub
 			wscSdk

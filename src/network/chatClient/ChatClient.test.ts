@@ -21,7 +21,11 @@ import type { Mock } from 'vitest';
 import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import useStore from '../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import {
+	createMockConfigurationMessage,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
@@ -346,6 +350,21 @@ describe('chatClient façade', () => {
 		useStore.getState().setApiVersion('2.0.0');
 
 		chatClient.readMessage('room-m', 'msg-ghost');
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('does not PUT a read marker for a synthetic config row (F3, §9: 404 on the client-only id)', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().updateHistory('room-cfg', [
+			createMockConfigurationMessage({
+				id: 'cfg-1',
+				roomId: 'room-cfg',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+
+		chatClient.readMessage('room-cfg', 'cfg-1');
 
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
@@ -764,6 +783,15 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect(useStore.getState().activeConversations['room-gst']?.messagePinned).toBeUndefined();
+	});
+
+	it('skips getMessagePin for a placeholder room (F1, §9: GET /pin 404s on every mount)', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setPlaceholderRoom('user-gp');
+
+		chatClient.getMessagePin('placeholder-user-gp');
+
+		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
 	it('sends the typing actions on the events socket on a WSC-pure backend', () => {
