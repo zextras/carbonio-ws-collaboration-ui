@@ -5,6 +5,8 @@
  */
 import { t } from '@zextras/carbonio-shell-ui';
 
+import { resolveChatExportName } from '../../utils/resolveChatExportName';
+
 export function getChatExportUrl(roomId: string): string {
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 	const deletedPlaceholder = t('message.deletedMessage', 'Deleted message');
@@ -12,7 +14,11 @@ export function getChatExportUrl(roomId: string): string {
 	return `${window.document.location.origin}/services/chats/rooms/${roomId}/messages/export?${params.toString()}`;
 }
 
-export function downloadChatExport(roomId: string, fileName: string): void {
+export async function downloadChatExport(roomId: string): Promise<void> {
+	// The room name can still be unresolved at click time (store.users hydrates
+	// lazily): resolveChatExportName makes one last direct attempt before
+	// falling back to the roomId, so naming isn't left to a stale snapshot.
+	const fileName = await resolveChatExportName(roomId);
 	const link = document.createElement('a');
 	link.href = getChatExportUrl(roomId);
 	// For a same-origin response the `download` attribute sets the saved filename,

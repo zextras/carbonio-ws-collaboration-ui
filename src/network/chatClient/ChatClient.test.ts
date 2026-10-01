@@ -1027,15 +1027,16 @@ describe('chatClient façade', () => {
 	});
 
 	it('exports the chat as a server-streamed download on a WSC-pure backend', () => {
+		vi.mocked(downloadChatExport).mockResolvedValue(undefined);
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().addRooms([createMockRoom({ id: 'room-exp', name: 'Weekly sync' })]);
 		const xmppSpy = vi.spyOn(xmppClient, 'requestFullHistory').mockImplementation(() => undefined);
 
 		chatClient.requestFullHistory('room-exp');
 
-		// The chat name resolves store-side (the same selector the v1 exporter
-		// used for the blob filename); the MAM accumulation loop never starts
-		expect(downloadChatExport).toHaveBeenCalledWith('room-exp', 'Weekly sync');
+		// Naming is resolved inside downloadChatExport itself (resolveChatExportName,
+		// unit-tested on its own); the MAM accumulation loop never starts
+		expect(downloadChatExport).toHaveBeenCalledWith('room-exp');
 		expect(xmppSpy).not.toHaveBeenCalled();
 	});
 });

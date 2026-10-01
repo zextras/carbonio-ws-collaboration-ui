@@ -100,6 +100,10 @@ describe('ChatExportSettings test', () => {
 	});
 
 	describe('on a WSC-pure backend', () => {
+		beforeEach(() => {
+			vi.mocked(downloadChatExport).mockResolvedValue(undefined);
+		});
+
 		afterEach(() => {
 			// The zustand store survives across tests: leave the version un-negotiated
 			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
@@ -112,7 +116,8 @@ describe('ChatExportSettings test', () => {
 			await user.click(screen.getByText(room.name!));
 			await user.click(screen.getByRole('button'));
 
-			expect(downloadChatExport).toHaveBeenCalledWith(room.id, room.name);
+			// Naming is resolved inside downloadChatExport itself (resolveChatExportName)
+			expect(downloadChatExport).toHaveBeenCalledWith(room.id);
 			// No exporting state is set in WSC-pure mode, so the spinner never appears
 			expect(useStore.getState().session.chatExporting).toBeUndefined();
 		});

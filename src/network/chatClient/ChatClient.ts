@@ -12,7 +12,6 @@ import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
-import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
@@ -340,7 +339,9 @@ export const chatClient: ChatClient = {
 			// completion, so the ChatExporter MAM loop dies and the `from`
 			// pagination cursor has no v2 meaning.
 			const [roomId] = args;
-			downloadChatExport(roomId, getRoomNameSelector(useStore.getState(), roomId));
+			downloadChatExport(roomId).catch((err) => {
+				console.error('chatClient.requestFullHistory: chat export download failed', err);
+			});
 			return;
 		}
 		xmppClient.requestFullHistory(...args);
