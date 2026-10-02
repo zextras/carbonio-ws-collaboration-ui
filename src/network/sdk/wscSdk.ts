@@ -28,6 +28,9 @@ import { BASE_PATH } from '../../utils/FetchUtils';
 // wire values as the store enums); the enums are nominal, hence the single
 // cast at this boundary.
 const bridge: StoreBridge = {
+	// Fastenings never qualify as marker targets: the SDK skips them by type
+	getRoomMessages: (roomId): ReadonlyArray<StoreMessage> =>
+		(useStore.getState().chatsRegistry[roomId]?.messages ?? []) as ReadonlyArray<StoreMessage>,
 	setInboxMessages: (messages: Array<StoreMessage>): void =>
 		useStore.getState().setInboxMessages(messages as Array<Message>),
 	setUnreadCount: (roomId, count): void => useStore.getState().setUnreadCount(roomId, count),

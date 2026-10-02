@@ -107,8 +107,9 @@ function sendTextViaSdk(
 	message: string,
 	replyToId?: string
 ): void {
-	const senderId = useStore.getState().session.id;
-	if (!senderId) {
+	// The placeholder is authored by the session user (the confirmation takes
+	// the sender from the server response)
+	if (!useStore.getState().session.id) {
 		return;
 	}
 	// Read messages before sending a new one (v1 parity)
@@ -125,7 +126,6 @@ function sendTextViaSdk(
 			roomId,
 			text: sanitizeXmppMessage(message),
 			tempId,
-			senderId,
 			...(replyToId
 				? {
 						replyToId,
@@ -239,16 +239,11 @@ export const chatClient: ChatClient = {
 			// message id, unchanged across corrections. No optimistic write, like
 			// v1: the bubble updates on whichever confirmation lands first (REST
 			// response or MessageEdited echo).
-			const senderId = useStore.getState().session.id;
-			if (!senderId) {
-				return;
-			}
 			wscSdk
 				.editMessage({
 					roomId,
 					messageId: messageStanzaId,
-					text: sanitizeXmppMessage(message),
-					senderId
+					text: sanitizeXmppMessage(message)
 				})
 				.catch((err) => {
 					console.error('chatClient.sendChatMessageEdit: message edit failed', err);

@@ -8,6 +8,7 @@ import {
 	buildInboxEntry,
 	buildInboxMember,
 	buildInboxResponse,
+	buildMessage,
 	buildMessageTimelineItem,
 	buildReadMarker,
 	buildSystemEvent,
@@ -142,7 +143,8 @@ describe('chatClient façade', () => {
 				}),
 				unreadCount: 2,
 				markers: [
-					buildReadMarker({ userId: 'user-2', messageId: 'msg-1', readAt: '2026-08-01T10:05:00Z' })
+					// v2 markers carry the createdAt of the marked item
+					buildReadMarker({ userId: 'user-2', lastReadAt: AUG_FIRST_LATE_MORNING })
 				]
 			})
 		]);
@@ -161,6 +163,13 @@ describe('chatClient façade', () => {
 			read: 'unread'
 		});
 		expect(registry?.inboxMessageId).toBe('msg-1');
+		// The timestamp marker resolves on the inbox last message
+		expect(registry?.markers['user-2']).toEqual({
+			from: 'user-2',
+			messageId: 'msg-1',
+			markerDate: Date.parse(AUG_FIRST_LATE_MORNING),
+			type: 'displayed'
+		});
 		expect(registry?.unread).toBe(2);
 		expect(useStore.getState().users['user-2']).toMatchObject({
 			online: false,
@@ -215,9 +224,7 @@ describe('chatClient façade', () => {
 			],
 			{
 				hasMoreBefore: false,
-				markers: [
-					buildReadMarker({ userId: 'user-2', messageId: 'msg-t1', readAt: '2026-08-01T10:05:00Z' })
-				]
+				markers: [buildReadMarker({ userId: 'user-2', lastReadAt: AUG_FIRST_LATE_MORNING })]
 			}
 		);
 		mockJsonResponse(timeline);
@@ -240,6 +247,9 @@ describe('chatClient façade', () => {
 			from: 'user-1'
 		});
 		expect(messages[1]).toMatchObject({ id: 'msg-t1', stanzaId: 'msg-t1', text: 'ciao' });
+		expect(useStore.getState().chatsRegistry['room-t']?.markers['user-2']?.messageId).toBe(
+			'msg-t1'
+		);
 		expect(useStore.getState().activeConversations['room-t']?.isHistoryFullyLoaded).toBe(true);
 		expect(useStore.getState().activeConversations['room-t']?.isHistoryLoadDisabled).toBe(false);
 	});
@@ -373,7 +383,15 @@ describe('chatClient façade', () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		const sentId = 'msg-sent-1';
-		mockJsonResponse({ id: sentId, createdAt: AUG_FIRST_LATE_MORNING });
+		mockJsonResponse(
+			buildMessage({
+				id: sentId,
+				roomId: 'room-s',
+				senderId: 'me',
+				text: 'ciao',
+				createdAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		chatClient.sendChatMessage('room-s', 'ciao');
 
@@ -411,7 +429,15 @@ describe('chatClient façade', () => {
 									name.toLowerCase() === 'content-type' ? 'application/json' : null
 							},
 							json: (): Promise<unknown> =>
-								Promise.resolve({ id: 'msg-dup', createdAt: AUG_FIRST_LATE_MORNING })
+								Promise.resolve(
+									buildMessage({
+										id: 'msg-dup',
+										roomId: 'room-d',
+										senderId: 'me',
+										text: 'doppio',
+										createdAt: AUG_FIRST_LATE_MORNING
+									})
+								)
 						});
 				})
 		);
@@ -454,7 +480,15 @@ describe('chatClient façade', () => {
 			})
 		]);
 		mockJsonResponse(undefined);
-		mockJsonResponse({ id: 'msg-new', createdAt: AUG_FIRST_LATE_MORNING });
+		mockJsonResponse(
+			buildMessage({
+				id: 'msg-new',
+				roomId: 'room-rb',
+				senderId: 'me',
+				text: 'rispondo',
+				createdAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		chatClient.sendChatMessage('room-rb', 'rispondo');
 		await vi.advanceTimersByTimeAsync(0);
@@ -478,7 +512,16 @@ describe('chatClient façade', () => {
 			})
 		]);
 		mockJsonResponse(undefined);
-		mockJsonResponse({ id: 'msg-reply', createdAt: AUG_FIRST_LATE_MORNING });
+		mockJsonResponse(
+			buildMessage({
+				id: 'msg-reply',
+				roomId: 'room-rp',
+				senderId: 'me',
+				text: 'rispondo',
+				createdAt: AUG_FIRST_LATE_MORNING,
+				replyToId: quotedId
+			})
+		);
 
 		chatClient.sendChatMessageReply('room-rp', 'rispondo', 'user-2', quotedId);
 
@@ -522,7 +565,16 @@ describe('chatClient façade', () => {
 		});
 		useStore.getState().updateHistory('room-ed', [target]);
 		useStore.getState().setLastMessage('room-ed', target);
-		mockJsonResponse({ id: editTargetId, text: editedText, updatedAt: AUG_FIRST_LATE_MORNING });
+		mockJsonResponse(
+			buildMessage({
+				id: editTargetId,
+				roomId: 'room-ed',
+				senderId: 'me',
+				text: editedText,
+				createdAt: AUG_FIRST_MORNING,
+				editedInfo: { editedAt: AUG_FIRST_LATE_MORNING }
+			})
+		);
 
 		chatClient.sendChatMessageEdit('room-ed', editedText, editTargetId, editTargetId);
 		await vi.advanceTimersByTimeAsync(0);
