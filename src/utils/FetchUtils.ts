@@ -8,7 +8,7 @@ import { includes } from 'lodash';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
+import { AdditionalHeaders, AttachmentUploadFields } from '../types/network/models/attachmentTypes';
 import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
@@ -104,12 +104,8 @@ export const sendFileFetchAPI = (
 	optionalFields?.messageId && formData.append('messageId', optionalFields.messageId);
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
-	optionalFields?.tempId && formData.append('tempId', optionalFields.tempId);
 
 	const headers = buildHeaders();
-	// Dual-path with the form field: api.yaml documents the header (on the
-	// binary variant), the spike sends the form field on this multipart
-	optionalFields?.tempId && headers.append('X-Temp-Id', optionalFields.tempId);
 
 	return fetch(BASE_PATH + endpoint, {
 		method,
@@ -120,6 +116,35 @@ export const sendFileFetchAPI = (
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error) => Promise.reject(err));
 };
+
+/**
+ * v2 (WSC-pure) attachment upload: one `POST` multipart, answered by the
+ * created `Message`. The file name keeps the unicode escaping, which the
+ * backend decodes (an unescaped name fails with a 500). The description goes
+ * as-is: the backend stores it as the message text without decoding, and v2
+ * clients render the text verbatim (v1 decoded it on receipt).
+ */
+export function sendAttachmentFetchAPI<T>(
+	endpoint: string,
+	file: File,
+	fields: AttachmentUploadFields,
+	signal?: AbortSignal
+): Promise<T> {
+	const formData = new FormData();
+	formData.append('file', file, charToUnicode(file.name));
+	formData.append('contentLength', file.size.toString());
+	formData.append('tempId', fields.tempId);
+	fields.description && formData.append('description', fields.description);
+	fields.replyToId && formData.append('replyToId', fields.replyToId);
+	fields.area && formData.append('area', fields.area);
+
+	return fetch(BASE_PATH + endpoint, {
+		method: RequestType.POST,
+		headers: buildHeaders(),
+		body: formData,
+		signal
+	}).then((resp: Response) => handleResponse(resp));
+}
 
 export const uploadFileFetchAPI = (
 	endpoint: string,

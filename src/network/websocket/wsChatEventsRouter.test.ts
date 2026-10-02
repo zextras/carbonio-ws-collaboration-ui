@@ -4,18 +4,36 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+import { buildWireMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
 import { describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 import { wsChatEventsRouter } from './wsChatEventsRouter';
 import { EventName } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
+import {
+	buildWsErrorEvent,
+	buildWsMessageDeletedEvent,
+	buildWsMessageEditedEvent,
+	buildWsMessageForwardedEvent,
+	buildWsMessagePinnedEvent,
+	buildWsMessageReceivedEvent,
+	buildWsMessageUnpinnedEvent,
+	buildWsPresenceChangedEvent,
+	buildWsReactionChangedEvent,
+	buildWsReadUpdatedEvent,
+	buildWsTypingEvent
+} from '../../tests/buildWsChatEvent';
 import { createMockMessageFastening, createMockTextMessage } from '../../tests/createMock';
 import type {
+	WsMessageDeletedEvent,
+	WsMessageEditedEvent,
+	WsMessageForwardedEvent,
 	WsMessagePinnedEvent,
-	WsPresenceChangedEvent
+	WsPresenceChangedEvent,
+	WsReactionChangedEvent
 } from '../../types/network/websocket/wsChatEvents';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { FasteningAction, MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 
@@ -25,9 +43,10 @@ const replyText = 'ti rispondo';
 const photoName = 'photo.png';
 const pngMime = 'image/png';
 const cloneFileId = 'file-clone';
+const quotedText = 'messaggio citato';
 
 function presenceEvent(userId: string, online: boolean): WsPresenceChangedEvent {
-	return { type: WsEventType.PRESENCE_CHANGED, userId, online };
+	return buildWsPresenceChangedEvent({ userId, online });
 }
 
 function mockJsonResponseOnce(body: unknown): void {
@@ -95,24 +114,28 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 });
 
 describe('wsChatEventsRouter - ReadUpdated', () => {
-	it('stores another member read marker without any round-trip', () => {
+	it('stores another member read marker, resolved on the loaded history, without any round-trip', () => {
 		useStore.getState().updateHistory('room-r', [
 			createMockTextMessage({
 				id: 'msg-r1',
+				roomId: 'room-r',
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			}),
+			createMockTextMessage({
+				id: 'msg-r2',
 				roomId: 'room-r',
 				date: Date.parse(AUG_FIRST_LATE_MORNING)
 			})
 		]);
 
-		wsChatEventsRouter({
-			type: WsEventType.READ_UPDATED,
-			roomId: 'room-r',
-			userId: 'user-2',
-			messageId: 'msg-r1'
-		});
+		// Read up to the first message only: the marker lands on the latest row
+		// at or before lastReadAt, dated lastReadAt (not the arrival instant)
+		const lastReadAt = '2026-08-01T09:30:00.123456Z';
+		wsChatEventsRouter(buildWsReadUpdatedEvent({ roomId: 'room-r', userId: 'user-2', lastReadAt }));
 
 		expect(useStore.getState().chatsRegistry['room-r']?.markers['user-2']).toMatchObject({
 			messageId: 'msg-r1',
+			markerDate: Date.parse('2026-08-01T09:30:00.123Z'),
 			type: 'displayed'
 		});
 		expect(global.fetch).not.toHaveBeenCalled();
@@ -130,12 +153,13 @@ describe('wsChatEventsRouter - ReadUpdated', () => {
 		]);
 		useStore.getState().setUnreadCount('room-u', 1);
 
-		wsChatEventsRouter({
-			type: WsEventType.READ_UPDATED,
-			roomId: 'room-u',
-			userId: 'me',
-			messageId: 'msg-u1'
-		});
+		wsChatEventsRouter(
+			buildWsReadUpdatedEvent({
+				roomId: 'room-u',
+				userId: 'me',
+				lastReadAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		expect(useStore.getState().chatsRegistry['room-u']?.unread).toBe(0);
 	});
@@ -150,14 +174,17 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		};
 		window.addEventListener(EventName.NEW_MESSAGE, listener);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-in-1',
-			roomId: 'room-in',
-			senderId: 'user-2',
-			text: 'ciao a tutti',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-in-1',
+					roomId: 'room-in',
+					senderId: 'user-2',
+					text: 'ciao a tutti',
+					createdAt: AUG_FIRST_LATE_MORNING
+				})
+			)
+		);
 		window.removeEventListener(EventName.NEW_MESSAGE, listener);
 
 		const registry = useStore.getState().chatsRegistry['room-in'];
@@ -171,41 +198,45 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 	it('never bumps the unread counter for an own message from another session', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-other-device',
-			roomId: 'room-md',
-			senderId: 'me',
-			text: 'dal telefono',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-other-device',
+					roomId: 'room-md',
+					senderId: 'me',
+					text: 'dal telefono',
+					createdAt: AUG_FIRST_LATE_MORNING
+				})
+			)
+		);
 
 		const registry = useStore.getState().chatsRegistry['room-md'];
 		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-other-device']);
 		expect(registry?.unread ?? 0).toBe(0);
 	});
 
-	it('hydrates the reply section from the store when a reply lands (v1 hydration parity)', () => {
+	it("renders the reply section from the event's embedded quote, the quoted message not loaded", () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
-		useStore.getState().updateHistory('room-rr', [
-			createMockTextMessage({
-				id: 'msg-orig',
-				roomId: 'room-rr',
-				from: 'user-2',
-				text: 'messaggio originale',
-				date: Date.parse(AUG_FIRST_LATE_MORNING)
-			})
-		]);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-reply-1',
-			roomId: 'room-rr',
-			senderId: 'user-3',
-			text: replyText,
-			timestamp: AUG_FIRST_LATE_MORNING,
-			replyToId: 'msg-orig'
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-reply-1',
+					roomId: 'room-rr',
+					senderId: 'user-3',
+					text: replyText,
+					createdAt: AUG_FIRST_LATE_MORNING,
+					replyToId: 'msg-orig',
+					repliedMessage: buildWireMessage({
+						id: 'msg-orig',
+						roomId: 'room-rr',
+						senderId: 'user-2',
+						text: 'messaggio originale',
+						createdAt: AUG_FIRST_EARLY_MORNING
+					})
+				})
+			)
+		);
 
 		const reply = useStore
 			.getState()
@@ -217,18 +248,22 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('keeps a reply renderable when the quoted message is not loaded', () => {
-		// v1 fired an archive query by id here; v2 has no such endpoint, so the
-		// bubble renders without the reply section (and without any round-trip)
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-reply-2',
-			roomId: 'room-rn',
-			senderId: 'user-3',
-			text: 'reply orfana',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			replyToId: 'msg-ancient'
-		});
+	it('keeps a reply renderable when the backend omits a quote the reader cannot see', () => {
+		// No repliedMessage when the original is cleared, predates the reader's
+		// join or was hard-removed: the bubble renders without the reply
+		// section, and without any round-trip
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-reply-2',
+					roomId: 'room-rn',
+					senderId: 'user-3',
+					text: 'reply orfana',
+					createdAt: AUG_FIRST_LATE_MORNING,
+					replyToId: 'msg-ancient'
+				})
+			)
+		);
 
 		const message = useStore.getState().chatsRegistry['room-rn']?.messages[0];
 		expect(message).toMatchObject({ id: 'msg-reply-2', replyTo: 'msg-ancient' });
@@ -245,8 +280,8 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 				stanzaId: targetId,
 				roomId: 'room-re',
 				from: 'user-2',
-				text: 'messaggio citato',
-				date: Date.parse(AUG_FIRST_LATE_MORNING)
+				text: quotedText,
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
 			})
 		]);
 		useStore.getState().setPlaceholderMessage({
@@ -256,16 +291,26 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 			replyTo: targetId
 		});
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-reply-echo',
-			roomId: 'room-re',
-			senderId: 'me',
-			text: replyText,
-			timestamp: AUG_FIRST_LATE_MORNING,
-			replyToId: targetId,
-			tempId: 'tmp-re'
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-reply-echo',
+					roomId: 'room-re',
+					senderId: 'me',
+					text: replyText,
+					createdAt: AUG_FIRST_LATE_MORNING,
+					replyToId: targetId,
+					repliedMessage: buildWireMessage({
+						id: targetId,
+						roomId: 'room-re',
+						senderId: 'user-2',
+						text: quotedText,
+						createdAt: AUG_FIRST_EARLY_MORNING
+					})
+				}),
+				{ tempId: 'tmp-re' }
+			)
+		);
 
 		const { messages } = useStore.getState().chatsRegistry['room-re'];
 		// The PENDING placeholder is gone: one confirmed reply, quoted message attached
@@ -274,7 +319,7 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 			from: 'me',
 			read: 'unread',
 			replyTo: targetId,
-			repliedMessage: expect.objectContaining({ id: targetId, text: 'messaggio citato' })
+			repliedMessage: expect.objectContaining({ id: targetId, text: quotedText })
 		});
 		expect(useStore.getState().chatsRegistry['room-re']?.unread ?? 0).toBe(0);
 	});
@@ -285,21 +330,52 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 			.getState()
 			.setPlaceholderMessage({ roomId: 'room-echo', id: 'tmp-1', text: 'in volo' });
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-server-1',
-			roomId: 'room-echo',
-			senderId: 'me',
-			text: 'in volo',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			tempId: 'tmp-1'
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-server-1',
+					roomId: 'room-echo',
+					senderId: 'me',
+					text: 'in volo',
+					createdAt: AUG_FIRST_LATE_MORNING
+				}),
+				{ tempId: 'tmp-1' }
+			)
+		);
 
 		const registry = useStore.getState().chatsRegistry['room-echo'];
 		// The PENDING placeholder is gone: one confirmed message with the server id
 		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-server-1']);
 		expect(registry?.messages[0]).toMatchObject({ from: 'me', read: 'unread' });
 		expect(registry?.unread ?? 0).toBe(0);
+	});
+
+	it("leaves another member's room alone when the tempId reaches them too", () => {
+		// The backend sends tempId to every member: only the sender holds a
+		// placeholder under it, for the others the echo is a plain append
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().setPlaceholderMessage({ roomId: 'room-tm', id: 'tmp-mine', text: 'mio' });
+
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-theirs',
+					roomId: 'room-tm',
+					senderId: 'user-2',
+					text: 'loro',
+					createdAt: AUG_FIRST_LATE_MORNING
+				}),
+				{ tempId: 'tmp-theirs' }
+			)
+		);
+
+		const registry = useStore.getState().chatsRegistry['room-tm'];
+		// Both rows survive (sorted: the placeholder is dated by the client clock)
+		expect(registry?.messages.map((message) => message.id).sort()).toEqual([
+			'msg-theirs',
+			'tmp-mine'
+		]);
+		expect(registry?.unread).toBe(1);
 	});
 });
 
@@ -312,6 +388,8 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 		useStore.getState().appendMediaGalleryPage(roomId, galleryFilter, [], 0, undefined);
 	}
 
+	const noAttachmentRoom = 'room-noatt';
+
 	function galleryIds(roomId: string): Array<string> {
 		const state = useStore.getState().mediaGallery[roomId];
 		return Object.values(state?.buckets ?? {}).flatMap((bucket) =>
@@ -323,15 +401,18 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		initGallery('room-att');
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-att-1',
-			roomId: 'room-att',
-			senderId: 'user-2',
-			text: 'a caption',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			attachments: [wireAttachment]
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-att-1',
+					roomId: 'room-att',
+					senderId: 'user-2',
+					text: 'a caption',
+					createdAt: AUG_FIRST_LATE_MORNING,
+					attachment: wireAttachment
+				})
+			)
+		);
 
 		const registry = useStore.getState().chatsRegistry['room-att'];
 		expect(registry?.messages[0]).toMatchObject({ id: 'msg-att-1', attachment: wireAttachment });
@@ -345,23 +426,16 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 		});
 	});
 
-	it('accepts the flat fallback shape of the REST Message schema', () => {
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-att-flat',
-			roomId: 'room-att-flat',
-			senderId: 'user-2',
-			text: '',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			attachmentId: 'file-flat',
-			attachmentName: 'doc.pdf',
-			attachmentMime: 'application/pdf',
-			attachmentSize: 99
-		});
+	it('leaves the gallery alone for a message without attachment', () => {
+		initGallery(noAttachmentRoom);
 
-		expect(useStore.getState().chatsRegistry['room-att-flat']?.messages[0]).toMatchObject({
-			attachment: { id: 'file-flat', name: 'doc.pdf', mimeType: 'application/pdf', size: 99 }
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({ id: 'msg-noatt', roomId: noAttachmentRoom, senderId: 'user-2' })
+			)
+		);
+
+		expect(galleryIds(noAttachmentRoom)).toEqual([]);
 	});
 
 	it('promotes the upload placeholder from the self-echo, gallery included, unread untouched', () => {
@@ -371,38 +445,6 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 			roomId: 'room-up',
 			id: 'tmp-up',
 			text: 'a caption',
-			attachment: { id: 'placeholderFileId', name: photoName, mimeType: pngMime, size: 2048 }
-		});
-
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-up-1',
-			roomId: 'room-up',
-			senderId: 'me',
-			text: 'a caption',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			tempId: 'tmp-up',
-			attachments: [wireAttachment]
-		});
-
-		const registry = useStore.getState().chatsRegistry['room-up'];
-		// The echo metadata wins: real file id, not the placeholder stub
-		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-up-1']);
-		expect(registry?.messages[0]).toMatchObject({ attachment: wireAttachment });
-		expect(registry?.unread ?? 0).toBe(0);
-		expect(galleryIds('room-up')).toEqual(['file-1']);
-	});
-
-	it('keeps the placeholder attachment when the self-echo carries no metadata', () => {
-		// The upload 201 answers with the file id, not the message: the echo is
-		// the only confirmation. Without metadata the bubble must keep rendering
-		// the uploaded file (name/mime/size for the icon; the id heals on refetch)
-		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
-		initGallery('room-nf');
-		useStore.getState().setPlaceholderMessage({
-			roomId: 'room-nf',
-			id: 'tmp-nf',
-			text: '',
 			attachment: {
 				id: 'placeholderFileId',
 				name: photoName,
@@ -412,24 +454,28 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 			}
 		});
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-nf-1',
-			roomId: 'room-nf',
-			senderId: 'me',
-			text: '',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			tempId: 'tmp-nf'
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-up-1',
+					roomId: 'room-up',
+					senderId: 'me',
+					text: 'a caption',
+					createdAt: AUG_FIRST_LATE_MORNING,
+					attachment: { ...wireAttachment, area: '640x480' }
+				}),
+				{ tempId: 'tmp-up' }
+			)
+		);
 
-		const registry = useStore.getState().chatsRegistry['room-nf'];
-		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-nf-1']);
+		const registry = useStore.getState().chatsRegistry['room-up'];
+		// The echo carries the real file id and the layout hint the upload sent
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-up-1']);
 		expect(registry?.messages[0]).toMatchObject({
-			attachment: expect.objectContaining({ name: photoName, area: '640x480' })
+			attachment: { ...wireAttachment, area: '640x480' }
 		});
-		// The placeholder stub has no real file id: it must stay out of the
-		// gallery (a fake entry would never dedup against the refetched one)
-		expect(galleryIds('room-nf')).toEqual([]);
+		expect(registry?.unread ?? 0).toBe(0);
+		expect(galleryIds('room-up')).toEqual(['file-1']);
 	});
 });
 
@@ -437,18 +483,13 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 	const editedText = 'testo corretto';
 	const originalText = 'testo originale';
 
-	function editedEvent(
-		roomId: string,
-		messageId: string
-	): Parameters<typeof wsChatEventsRouter>[0] {
-		return {
-			type: WsEventType.MESSAGE_EDITED,
+	function editedEvent(roomId: string, messageId: string): WsMessageEditedEvent {
+		return buildWsMessageEditedEvent({
 			messageId,
 			roomId,
-			senderId: 'user-2',
 			text: editedText,
 			editedAt: '2026-08-01T11:00:00Z'
-		};
+		});
 	}
 
 	it('files the EDIT fastening and rebuilds the sidebar entry when it targets the last message', () => {
@@ -467,7 +508,8 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 		wsChatEventsRouter(editedEvent('room-ed', 'msg-last'));
 
 		const registry = useStore.getState().chatsRegistry['room-ed'];
-		// The message keeps the original text: the bubble projects the fastening
+		// The message keeps the original text: the bubble projects the fastening.
+		// The event names no editor: the SDK attributes it to the loaded sender
 		expect(registry?.messages[0]).toMatchObject({ text: originalText });
 		expect(registry?.fastenings['msg-last']).toEqual([
 			expect.objectContaining({ action: 'edit', value: editedText, from: 'user-2' })
@@ -523,17 +565,13 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 });
 
 describe('wsChatEventsRouter - MessageDeleted', () => {
-	function deletedEvent(
-		roomId: string,
-		messageId: string
-	): Parameters<typeof wsChatEventsRouter>[0] {
-		return {
-			type: WsEventType.MESSAGE_DELETED,
+	function deletedEvent(roomId: string, messageId: string): WsMessageDeletedEvent {
+		return buildWsMessageDeletedEvent({
 			messageId,
 			roomId,
-			senderId: 'user-2',
+			deletedBy: 'user-2',
 			deletedAt: '2026-08-01T12:00:00Z'
-		};
+		});
 	}
 
 	it('files the DELETE fastening and clears the sidebar entry when it targets the last message', () => {
@@ -602,14 +640,14 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 		});
 		useStore.getState().updateHistory('room-dp', [target]);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_EDITED,
-			messageId: 'msg-ed',
-			roomId: 'room-dp',
-			senderId: 'user-2',
-			text: 'corretto',
-			editedAt: '2026-08-01T11:00:00Z'
-		});
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-ed',
+				roomId: 'room-dp',
+				text: 'corretto',
+				editedAt: '2026-08-01T11:00:00Z'
+			})
+		);
 		wsChatEventsRouter(deletedEvent('room-dp', 'msg-ed'));
 
 		// The slice orders by date and the projection (useMessage) takes the
@@ -622,16 +660,17 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 describe('wsChatEventsRouter - ReactionChanged', () => {
 	function reactionEvent(
 		userId: string,
-		operation: 'added' | 'removed'
-	): Parameters<typeof wsChatEventsRouter>[0] {
-		return {
-			type: WsEventType.REACTION_CHANGED,
+		operation: 'added' | 'removed',
+		sentDate = '2026-08-01T10:05:00.123456Z'
+	): WsReactionChangedEvent {
+		return buildWsReactionChangedEvent({
 			messageId: 'msg-mine',
 			roomId: 'room-rc',
 			userId,
 			reaction: '👍',
-			operation
-		};
+			operation,
+			sentDate
+		});
 	}
 
 	function seedMyMessage(): void {
@@ -677,13 +716,14 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 	it('keeps the whole toggle history with increasing dates (add -> remove -> add)', () => {
 		seedMyMessage();
 
-		wsChatEventsRouter(reactionEvent('user-2', 'added'));
-		wsChatEventsRouter(reactionEvent('user-2', 'removed'));
-		wsChatEventsRouter(reactionEvent('user-2', 'added'));
+		wsChatEventsRouter(reactionEvent('user-2', 'added', '2026-08-01T10:06:00Z'));
+		wsChatEventsRouter(reactionEvent('user-2', 'removed', '2026-08-01T10:07:00Z'));
+		wsChatEventsRouter(reactionEvent('user-2', 'added', '2026-08-01T10:08:00Z'));
 
 		const fastenings = useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine'];
 		// Three distinct fastenings, v1 stanza-history parity: the projection
-		// (latest per user by date) must land on the re-added emoji
+		// (latest per user by date, the SDK dates them with sentDate) must land
+		// on the re-added emoji
 		expect(fastenings?.map((fastening) => fastening.value)).toEqual(['👍', '', '👍']);
 		expect(fastenings?.[2]?.date).toBeGreaterThan(fastenings?.[1]?.date as number);
 		expect(fastenings?.[1]?.date).toBeGreaterThan(fastenings?.[0]?.date as number);
@@ -693,18 +733,21 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 describe('wsChatEventsRouter - MessageForwarded', () => {
 	const forwardedText = 'contenuto inoltrato';
 
-	function forwardedEvent(senderId: string): Parameters<typeof wsChatEventsRouter>[0] {
-		return {
-			type: WsEventType.MESSAGE_FORWARDED,
-			messageId: 'msg-fw',
-			roomId: 'room-fw',
-			originalRoomId: 'room-src',
-			senderId,
-			text: forwardedText,
-			timestamp: AUG_FIRST_LATE_MORNING,
-			forwardedFrom: 'user-9',
-			forwardedAt: AUG_FIRST_EARLY_MORNING
-		};
+	function forwardedEvent(
+		senderId: string,
+		attachment?: WireTimelineMessage['attachment']
+	): WsMessageForwardedEvent {
+		return buildWsMessageForwardedEvent(
+			buildWireMessage({
+				id: 'msg-fw',
+				roomId: 'room-fw',
+				senderId,
+				text: forwardedText,
+				createdAt: AUG_FIRST_LATE_MORNING,
+				forwardedInfo: { originalSenderId: 'user-9', originalSentAt: AUG_FIRST_EARLY_MORNING },
+				...(attachment ? { attachment } : {})
+			})
+		);
 	}
 
 	it("lands another user's forward as a new message with the forwarded badge and the v1 effects", () => {
@@ -747,13 +790,9 @@ describe('wsChatEventsRouter - MessageForwarded', () => {
 			.getState()
 			.appendMediaGalleryPage('room-fw', { sortBy: 'created_at', order: 'desc' }, [], 0, undefined);
 
-		wsChatEventsRouter({
-			...forwardedEvent('user-2'),
-			attachmentId: cloneFileId,
-			attachmentName: photoName,
-			attachmentMime: pngMime,
-			attachmentSize: 2048
-		} as Parameters<typeof wsChatEventsRouter>[0]);
+		wsChatEventsRouter(
+			forwardedEvent('user-2', { id: cloneFileId, name: photoName, mimeType: pngMime, size: 2048 })
+		);
 
 		const registry = useStore.getState().chatsRegistry['room-fw'];
 		expect(registry?.messages[0]).toMatchObject({
@@ -767,34 +806,16 @@ describe('wsChatEventsRouter - MessageForwarded', () => {
 			messageId: 'msg-fw'
 		});
 	});
-
-	it('keeps the forwarded badge when a forward is delivered as MessageReceived (dual-path)', () => {
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-fw-dual',
-			roomId: 'room-fd',
-			senderId: 'user-2',
-			text: forwardedText,
-			timestamp: AUG_FIRST_LATE_MORNING,
-			forwardedFrom: 'user-9',
-			forwardedAt: AUG_FIRST_EARLY_MORNING
-		});
-
-		expect(useStore.getState().chatsRegistry['room-fd']?.messages[0]).toMatchObject({
-			forwarded: expect.objectContaining({ from: 'user-9' })
-		});
-	});
 });
 
 describe('wsChatEventsRouter - MessagePinned', () => {
 	function pinnedEvent(roomId: string, messageId: string, pinnedBy: string): WsMessagePinnedEvent {
-		return {
-			type: WsEventType.MESSAGE_PINNED,
+		return buildWsMessagePinnedEvent({
 			roomId,
 			messageId,
 			pinnedBy,
 			timestamp: AUG_FIRST_LATE_MORNING
-		};
+		});
 	}
 
 	it('sets the banner from the loaded target and lands the v1 config row with the v1 effects', () => {
@@ -953,13 +974,14 @@ describe('wsChatEventsRouter - MessageUnpinned', () => {
 		useStore.getState().setPinnedMessage('room-up', pinned);
 		useStore.getState().setSelectedPinnedMessage('room-up', 'msg-up-1');
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_UNPINNED,
-			roomId: 'room-up',
-			messageId: 'msg-up-1',
-			unpinnedBy: 'user-2',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageUnpinnedEvent({
+				roomId: 'room-up',
+				messageId: 'msg-up-1',
+				unpinnedBy: 'user-2',
+				timestamp: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		const conversation = useStore.getState().activeConversations['room-up'];
 		expect(conversation?.messagePinned).toBeUndefined();
@@ -986,14 +1008,14 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 		useStore.getState().updateHistory('room-bm', [pinned]);
 		useStore.getState().setPinnedMessage('room-bm', pinned);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_EDITED,
-			messageId: 'msg-bm-1',
-			roomId: 'room-bm',
-			senderId: 'user-2',
-			text: 'banner ritoccato',
-			editedAt: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-bm-1',
+				roomId: 'room-bm',
+				text: 'banner ritoccato',
+				editedAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		expect(useStore.getState().activeConversations['room-bm']?.messagePinned).toMatchObject({
 			id: 'msg-bm-1',
@@ -1020,14 +1042,14 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 		]);
 		useStore.getState().setPinnedMessage('room-bo', pinned);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_EDITED,
-			messageId: 'msg-bo-2',
-			roomId: 'room-bo',
-			senderId: 'user-2',
-			text: 'altro testo',
-			editedAt: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-bo-2',
+				roomId: 'room-bo',
+				text: 'altro testo',
+				editedAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		expect(useStore.getState().activeConversations['room-bo']?.messagePinned).toMatchObject({
 			text: 'testo fissato'
@@ -1044,13 +1066,14 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 		useStore.getState().updateHistory('room-bd', [pinned]);
 		useStore.getState().setPinnedMessage('room-bd', pinned);
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_DELETED,
-			messageId: 'msg-bd-1',
-			roomId: 'room-bd',
-			senderId: 'user-2',
-			deletedAt: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageDeletedEvent({
+				messageId: 'msg-bd-1',
+				roomId: 'room-bd',
+				deletedBy: 'user-2',
+				deletedAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 
 		expect(useStore.getState().activeConversations['room-bd']?.messagePinned).toBeUndefined();
 	});
@@ -1060,13 +1083,9 @@ describe('wsChatEventsRouter - Typing', () => {
 	it('turns the indicator on and auto-expires it after 7s without refreshes', async () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 
-		wsChatEventsRouter({
-			type: WsEventType.TYPING,
-			roomId: 'room-ty',
-			userId: 'user-2',
-			status: 'started',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsTypingEvent({ roomId: 'room-ty', userId: 'user-2', status: 'started' })
+		);
 		expect(useStore.getState().activeConversations['room-ty']?.isWritingList).toEqual(['user-2']);
 
 		await vi.advanceTimersByTimeAsync(7000);
@@ -1074,38 +1093,42 @@ describe('wsChatEventsRouter - Typing', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('treats a missing status as started and turns it off on stopped', () => {
+	it('turns the indicator off on stopped, before the expiry', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 
-		wsChatEventsRouter({
-			type: WsEventType.TYPING,
-			roomId: 'room-tm',
-			userId: 'user-2',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsTypingEvent({ roomId: 'room-tm', userId: 'user-2', status: 'started' })
+		);
 		expect(useStore.getState().activeConversations['room-tm']?.isWritingList).toEqual(['user-2']);
 
-		wsChatEventsRouter({
-			type: WsEventType.TYPING,
-			roomId: 'room-tm',
-			userId: 'user-2',
-			status: 'stopped',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsTypingEvent({ roomId: 'room-tm', userId: 'user-2', status: 'stopped' })
+		);
 		expect(useStore.getState().activeConversations['room-tm']?.isWritingList ?? []).toEqual([]);
 	});
 
 	it('ignores the own echo (v1 parity: own chat states never reached the store)', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 
-		wsChatEventsRouter({
-			type: WsEventType.TYPING,
-			roomId: 'room-to',
-			userId: 'me',
-			status: 'started',
-			timestamp: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(buildWsTypingEvent({ roomId: 'room-to', userId: 'me', status: 'started' }));
 
 		expect(useStore.getState().activeConversations['room-to']?.isWritingList ?? []).toEqual([]);
+	});
+});
+
+describe('wsChatEventsRouter - Error', () => {
+	it('logs a refused socket action and leaves the store untouched', () => {
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const stateBefore = useStore.getState();
+
+		const event = buildWsErrorEvent({ requestId: 'req-1' });
+		wsChatEventsRouter(event);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'wsChatEventsRouter: socket action refused by the backend',
+			event
+		);
+		expect(useStore.getState()).toBe(stateBefore);
+		expect(global.fetch).not.toHaveBeenCalled();
 	});
 });

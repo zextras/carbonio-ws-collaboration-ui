@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { buildMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
+
 import {
 	addRoom,
 	addRoomAttachment,
@@ -42,6 +44,7 @@ import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import {
 	mockFetchAPI,
+	mockSendAttachmentFetchAPI,
 	mockSendFileFetchAPI,
 	mockUploadFileFetchAPI
 } from '../../utils/__mocks__/FetchUtils';
@@ -433,46 +436,52 @@ describe('Rooms API', () => {
 	});
 
 	describe('addRoomAttachment on a WSC-pure backend', () => {
+		const photo = (): File => new File(['x'], 'photo.png', { type: 'image/png' });
+
 		afterEach(() => {
 			// The zustand store survives across tests: leave the version un-negotiated
 			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
 		});
 
-		test('sends tempId next to the legacy messageId, both the same client UUID', async () => {
+		test('sends one POST multipart with the v2 fields, the tempId being the placeholder id', async () => {
 			useStore.getState().setApiVersion('2.0.0');
-			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
-			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+			mockSendAttachmentFetchAPI.mockResolvedValueOnce(buildMessage({ attachmentId: 'file-1' }));
+			const testFile = photo();
 			const { signal } = new AbortController();
 
-			await addRoomAttachment(roomId, testFile, { description: 'a caption' }, signal);
-
-			expect(mockSendFileFetchAPI).toHaveBeenCalledWith(
-				`rooms/${roomId}/attachments`,
-				RequestType.PUT,
+			await addRoomAttachment(
+				roomId,
 				testFile,
-				signal,
-				expect.objectContaining({ description: 'a caption' })
+				{ description: 'a caption', replyId: 'msg-quoted', area: '2x2' },
+				signal
 			);
-			const optional = mockSendFileFetchAPI.mock.calls[0][4] as {
-				messageId?: string;
-				tempId?: string;
-			};
-			expect(optional.tempId).toMatch(UUID_REGEX);
-			// The self-echo correlation key and the legacy stanza-id handle are the
-			// same client UUID: the backend accepts both harmlessly (spike parity)
-			expect(optional.messageId).toBe(optional.tempId);
+
+			expect(mockSendAttachmentFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				testFile,
+				{
+					tempId: expect.stringMatching(UUID_REGEX),
+					description: 'a caption',
+					replyToId: 'msg-quoted',
+					area: '2x2'
+				},
+				signal
+			);
+			// No v1 variant: no PUT with messageId, no binary POST with headers
+			expect(mockSendFileFetchAPI).not.toHaveBeenCalled();
+			expect(mockUploadFileFetchAPI).not.toHaveBeenCalled();
 		});
 
 		test('the optimistic placeholder id IS the tempId, so the self-echo can promote it', async () => {
 			useStore.getState().setApiVersion('2.0.0');
-			mockSendFileFetchAPI.mockImplementation(() => Promise.resolve({ id: 'file-1' }));
-			const testFile = new File(['x'], 'photo.png', { type: 'image/png' });
+			// Never settles: the placeholder is still there to inspect
+			mockSendAttachmentFetchAPI.mockReturnValueOnce(new Promise((): void => {}));
 
-			await addRoomAttachment(roomId, testFile, { description: 'a caption', area: '2x2' });
+			addRoomAttachment(roomId, photo(), { description: 'a caption', area: '2x2' });
 
-			const optional = mockSendFileFetchAPI.mock.calls[0][4] as { tempId?: string };
+			const fields = mockSendAttachmentFetchAPI.mock.calls[0][2] as { tempId: string };
 			const messages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
-			const placeholder = messages.find((message) => message.id === optional.tempId);
+			const placeholder = messages.find((message) => message.id === fields.tempId);
 			expect(placeholder).toMatchObject({
 				attachment: {
 					id: 'placeholderFileId',
@@ -481,6 +490,45 @@ describe('Rooms API', () => {
 					area: '2x2'
 				}
 			});
+		});
+
+		test('promotes the placeholder from the 201 with the uploaded file under the server id', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockResolvedValueOnce(
+				buildMessage({
+					id: 'msg-file',
+					roomId,
+					senderId: 'me',
+					text: 'a caption',
+					createdAt: '2026-08-01T10:00:00Z',
+					attachmentId: 'file-1'
+				})
+			);
+			const testFile = photo();
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption', area: '2x2' });
+
+			const { messages, lastMessage } = useStore.getState().chatsRegistry[roomId];
+			const attachment = {
+				id: 'file-1',
+				name: 'photo.png',
+				mimeType: 'image/png',
+				size: testFile.size,
+				area: '2x2'
+			};
+			// The placeholder is gone, the confirmed message renders the uploaded file
+			expect(messages.map((message) => message.id)).toEqual(['msg-file']);
+			expect(messages[0]).toMatchObject({ from: 'me', text: 'a caption', attachment });
+			expect(lastMessage).toMatchObject({ id: 'msg-file', attachment });
+		});
+
+		test('removes the placeholder and rejects when the upload fails', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockRejectedValueOnce(new Error('status ko'));
+
+			await expect(addRoomAttachment(roomId, photo(), {})).rejects.toThrow();
+
+			expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toEqual([]);
 		});
 	});
 

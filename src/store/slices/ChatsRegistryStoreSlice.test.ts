@@ -369,6 +369,28 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(markers[marker.from]).toStrictEqual(marker);
 			expect((messages[0] as TextMessage).read).not.toBe(MarkerStatus.UNREAD);
 		});
+
+		test('Unresolved v2 marker (empty messageId): the unread count falls back to markerDate', () => {
+			// The SDK resolves a marker to '' when no loaded row is dated at or
+			// before lastReadAt; markerDate still carries lastReadAt
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			const roomId = 'room-unresolved';
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id: 'u1', roomId, from: 'other', date: 2000 }),
+					createMockTextMessage({ id: 'u2', roomId, from: 'other', date: 3000 }),
+					createMockTextMessage({ id: 'u3', roomId, from: 'other', date: 4000 })
+				]);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: '', markerDate: 2500 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+		});
 	});
 
 	describe('Unread count', () => {

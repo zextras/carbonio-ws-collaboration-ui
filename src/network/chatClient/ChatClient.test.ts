@@ -23,11 +23,16 @@ import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import useStore from '../../store/Store';
 import {
+	buildWsMessageDeletedEvent,
+	buildWsMessageEditedEvent,
+	buildWsMessageReceivedEvent,
+	buildWsReactionChangedEvent
+} from '../../tests/buildWsChatEvent';
+import {
 	createMockConfigurationMessage,
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -364,19 +369,42 @@ describe('chatClient façade', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('does not PUT a read marker for a synthetic config row (F3, §9: 404 on the client-only id)', () => {
+	it('does not PUT a read marker for a client-synthesized config row (F3: 404 on its id)', () => {
 		useStore.getState().setApiVersion('2.0.0');
+		const livePinRowId = `pin_msg-pinned_${Date.parse(AUG_FIRST_MORNING)}`;
 		useStore.getState().updateHistory('room-cfg', [
 			createMockConfigurationMessage({
-				id: 'cfg-1',
+				id: livePinRowId,
 				roomId: 'room-cfg',
 				date: Date.parse(AUG_FIRST_MORNING)
 			})
 		]);
 
-		chatClient.readMessage('room-cfg', 'cfg-1');
+		chatClient.readMessage('room-cfg', livePinRowId);
 
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('PUTs a read marker on a config row from a timeline system event (server id)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const systemEventId = '6f1c2a4e-8d3b-4f7a-9c21-0b5e7d9a3f10';
+		useStore.getState().updateHistory('room-se', [
+			createMockConfigurationMessage({
+				id: systemEventId,
+				roomId: 'room-se',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		mockJsonResponse(undefined);
+
+		chatClient.readMessage('room-se', systemEventId);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-se/read');
+		expect((global.fetch as Mock).mock.calls[0]?.[1]).toMatchObject({
+			method: 'PUT',
+			body: JSON.stringify({ messageId: systemEventId })
+		});
 	});
 
 	it('sends a message through the SDK: optimistic placeholder, then the REST confirmation promotes it', async () => {
@@ -447,15 +475,18 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		// The WS self-echo arrives while the REST call is still in flight
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_RECEIVED,
-			messageId: 'msg-dup',
-			roomId: 'room-d',
-			senderId: 'me',
-			text: 'doppio',
-			timestamp: AUG_FIRST_LATE_MORNING,
-			tempId
-		});
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-dup',
+					roomId: 'room-d',
+					senderId: 'me',
+					text: 'doppio',
+					createdAt: AUG_FIRST_LATE_MORNING
+				}),
+				{ tempId }
+			)
+		);
 		expect(
 			useStore.getState().chatsRegistry['room-d'].messages.map((message) => message.id)
 		).toEqual(['msg-dup']);
@@ -611,14 +642,14 @@ describe('chatClient façade', () => {
 		// The MessageEdited echo (the backend sends it to the editor too) builds
 		// the same deterministic fastening id — the slice dedup makes it a no-op —
 		// and owns the sidebar rebuild with its fresh router lookup
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_EDITED,
-			messageId: editTargetId,
-			roomId: 'room-ed',
-			senderId: 'me',
-			text: editedText,
-			editedAt: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: editTargetId,
+				roomId: 'room-ed',
+				text: editedText,
+				editedAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 		expect(useStore.getState().chatsRegistry['room-ed'].fastenings[editTargetId]).toHaveLength(1);
 		expect(useStore.getState().chatsRegistry['room-ed'].lastMessage).toMatchObject({
 			edited: true,
@@ -655,13 +686,14 @@ describe('chatClient façade', () => {
 			text: 'da cancellare'
 		});
 
-		wsChatEventsRouter({
-			type: WsEventType.MESSAGE_DELETED,
-			messageId: 'msg-del',
-			roomId: 'room-del',
-			senderId: 'me',
-			deletedAt: AUG_FIRST_LATE_MORNING
-		});
+		wsChatEventsRouter(
+			buildWsMessageDeletedEvent({
+				messageId: 'msg-del',
+				roomId: 'room-del',
+				deletedBy: 'me',
+				deletedAt: AUG_FIRST_LATE_MORNING
+			})
+		);
 		expect(useStore.getState().chatsRegistry['room-del'].fastenings['msg-del']).toEqual([
 			expect.objectContaining({ action: 'delete', originalStanzaId: 'msg-del' })
 		]);
@@ -690,14 +722,15 @@ describe('chatClient façade', () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		// My active reaction lands from its own echo, the only confirmation path
-		wsChatEventsRouter({
-			type: WsEventType.REACTION_CHANGED,
-			messageId: 'msg-rm',
-			roomId: 'room-rm',
-			userId: 'me',
-			reaction: '👍',
-			operation: 'added'
-		});
+		wsChatEventsRouter(
+			buildWsReactionChangedEvent({
+				messageId: 'msg-rm',
+				roomId: 'room-rm',
+				userId: 'me',
+				reaction: '👍',
+				operation: 'added'
+			})
+		);
 		mockJsonResponse(undefined);
 
 		chatClient.sendChatMessageReaction('room-rm', 'msg-rm', '');

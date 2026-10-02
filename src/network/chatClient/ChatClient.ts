@@ -6,7 +6,7 @@
 
 import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { gte } from 'semver';
-import { v4 as uuidGenerator } from 'uuid';
+import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 
 import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
@@ -73,18 +73,22 @@ function sdkNotWiredYet(method: string): void {
  * message is not in store. Nothing is written locally: the store update comes
  * back through the own ReadUpdated echo, like the v1 MUC displayed echo.
  *
- * F3 guard: `PUT /read` 404s on config rows (`MessageType.CONFIGURATION_MSG`)
- * when one lands as the last item in a room: the pin/unpin rows are
- * synthesized client-side and have no server id at all, and system-event rows
- * were rejected by the backend up to common-socket 514b238 (§9). System events
- * don't count toward the unread badge server-side anyway (§5.15b), so
- * skipping the marker call for them is a no-op, not a lost read.
+ * F3 guard: the marker only lands on rows the backend knows. Text messages
+ * always qualify. Config rows (`MessageType.CONFIGURATION_MSG`) qualify when
+ * they map a timeline system event, whose server UUID `PUT /read` accepts
+ * since common-socket 20656f0a (up to 514b238 it 404ed, §9). The live
+ * pin/unpin rows and the room-creation row are synthesized client-side
+ * (`pin_…`, `unpin_…`, `creationMessage-…`): no server id, a 404. Skipping
+ * one leaves the marker on the previous row until the next message.
  */
 function readMessageViaSdk(roomId: string, messageId: string): void {
 	const message = useStore
 		.getState()
 		.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
-	if (!message || message.type !== MessageType.TEXT_MSG) {
+	const isServerRow =
+		message?.type === MessageType.TEXT_MSG ||
+		(message?.type === MessageType.CONFIGURATION_MSG && isServerId(message.id));
+	if (!isServerRow) {
 		return;
 	}
 	wscSdk.markAsRead(roomId, messageId).catch((err) => {

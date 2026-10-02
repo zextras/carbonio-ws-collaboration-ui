@@ -8,6 +8,7 @@ This document tracks internal changes related to API versioning, renamed events,
 
 - **Protocol**: WSC-pure backend (MongooseIM replacement) — REST writes + single push WebSocket. `2.0.0` added to `supportedVersions`; against a 1.6.x backend the whole v2 path stays dormant.
 - **Client architecture**: chat call sites moved from `xmppClient` to the version-gated `chatClient` façade; XMPP connection is skipped when the negotiated version is `>= 2.0.0`. New chat WS events (`MessageReceived`, `MessageEdited`, `MessageDeleted`, `MessageForwarded`, `MessagePinned`, `MessageUnpinned`, `ReactionChanged`, `ReadUpdated`, `PresenceChanged`, `Typing`, `Error`) routed to `wsChatEventsRouter` (SDK wiring lands one API per step, see `wsc-both/PIANO-MIGRAZIONE-SDK.md`).
+- **API**: attachment upload on 2.0.0 is one `POST /rooms/${roomId}/attachments` multipart (`file`, `contentLength`, `tempId`, `description`, `replyToId`, `area`) answered by the created `Message`; the description travels unescaped, the file name keeps its unicode escaping. The 1.6.x variants (`PUT` multipart with `messageId` from 1.6.1, binary `POST` with headers before) are unchanged (`src/utils/FetchUtils.ts` `sendAttachmentFetchAPI`, `src/network/apis/RoomsApi.ts` `addRoomAttachment`).
 
 ### Legacy XMPP boot sequence → 2.0.0
 

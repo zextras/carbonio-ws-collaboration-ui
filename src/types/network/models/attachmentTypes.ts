@@ -21,13 +21,21 @@ export type AdditionalHeaders = {
 	messageId?: string;
 	replyId?: string;
 	area?: string;
+};
+
+/**
+ * v2 (WSC-pure) upload form fields, the `InsertAttachmentRequestMultipart`
+ * of api.yaml besides `file` and `contentLength`.
+ */
+export type AttachmentUploadFields = {
 	/**
-	 * v2 (WSC-pure) only: client-generated correlation key for the optimistic
-	 * placeholder — the MessageReceived self-echo carries it back. Sent both
-	 * as a form field (the spike's contract) and as the X-Temp-Id header
-	 * (the one api.yaml documents, on the binary variant).
+	 * Client-generated correlation key: the optimistic placeholder's id, which
+	 * the MessageReceived self-echo carries back.
 	 */
-	tempId?: string;
+	tempId: string;
+	description?: string;
+	replyToId?: string;
+	area?: string;
 };
 
 export type AttachmentsSortBy = 'created_at' | 'size';

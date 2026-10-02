@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type {
-	StoreAttachment,
-	StoreMessage,
-	StoreTextMessage
-} from '@zextras/carbonio-ws-collaboration-sdk';
+import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -26,7 +22,6 @@ import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
-import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
@@ -47,41 +42,6 @@ function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: st
 }
 
 /**
- * The attachment metadata fields shared by MESSAGE_RECEIVED and
- * MESSAGE_FORWARDED, forwarded to the SDK in their wire dual-shape (the SDK
- * resolves array-first with the flat fields as fallback).
- */
-function eventAttachmentFields(
-	event: WsMessageReceivedEvent | WsMessageForwardedEvent
-): Partial<
-	Pick<
-		WsMessageReceivedEvent,
-		'attachments' | 'attachmentId' | 'attachmentName' | 'attachmentMime' | 'attachmentSize'
-	>
-> {
-	return {
-		...(event.attachments ? { attachments: event.attachments } : {}),
-		...(event.attachmentId ? { attachmentId: event.attachmentId } : {}),
-		...(event.attachmentName ? { attachmentName: event.attachmentName } : {}),
-		...(event.attachmentMime ? { attachmentMime: event.attachmentMime } : {}),
-		...(event.attachmentSize !== undefined ? { attachmentSize: event.attachmentSize } : {})
-	};
-}
-
-/**
- * On the self-echo of an attachment upload the optimistic placeholder (its
- * id IS the tempId) may still hold the only attachment metadata around: the
- * SDK renders it when the echo carries none (event metadata wins). Same
- * by-id lookup the reply hydration uses.
- */
-function findPlaceholderAttachment(event: WsMessageReceivedEvent): StoreAttachment | undefined {
-	if (!event.tempId) {
-		return undefined;
-	}
-	return findRepliedMessage(event.roomId, event.tempId)?.attachment;
-}
-
-/**
  * v1 prepended every text message carrying an attachment to the media
  * gallery buckets — own echo included, the effect sat before the me/others
  * split. Forwards went through the same v1 handler: a forwarded attachment
@@ -99,60 +59,28 @@ function prependGalleryAttachment(message: StoreMessage): void {
 
 /**
  * The SDK performs the store writes shared by every sender (own echo
- * included: it promotes the placeholder through the tempId). On a reply, the
- * quoted message is resolved here — the event carries no preview and the SDK
- * never reads the store (v1 hydrated from the store too; its not-loaded
- * fallback, an archive query by id, has no v2 endpoint: the bubble just
- * renders without the reply section).
+ * included: it promotes the placeholder through the tempId). The event
+ * carries the full `TimelineMessage`, so quote and attachment come from the
+ * wire (v1 hydrated the quote from the store, with an archive query as
+ * fallback): an upload's echo prepends the real file to the gallery.
  */
 function routeMessageReceived(event: WsMessageReceivedEvent): void {
-	const wireAttachment = eventAttachmentFields(event);
-	const message = wscSdk.handleMessageReceived(
-		{
-			messageId: event.messageId,
-			roomId: event.roomId,
-			senderId: event.senderId,
-			text: event.text,
-			timestamp: event.timestamp,
-			...(event.replyToId ? { replyToId: event.replyToId } : {}),
-			...(event.tempId ? { tempId: event.tempId } : {}),
-			...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
-			...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {}),
-			...wireAttachment
-		},
-		findRepliedMessage(event.roomId, event.replyToId) as StoreTextMessage | undefined,
-		findPlaceholderAttachment(event)
-	);
-	// Gallery only from wire metadata: the placeholder-stub fallback has no
-	// real file id — a fake entry would never dedup against the refetched one
-	// and its download would be broken (the spike kept it out the same way)
-	if (wireAttachment.attachments?.length || wireAttachment.attachmentId) {
-		prependGalleryAttachment(message);
-	}
+	const message = wscSdk.handleMessageReceived(event);
+	prependGalleryAttachment(message);
 	// Me/others split like the v1 handler
-	notifyOthersMessage(message, event.senderId, event.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
 }
 
 /**
  * To the receiving room a forward IS a new message (v1 landed it through the
  * plain message handler): same me/others effects and gallery prepend as
- * MESSAGE_RECEIVED. The forwarder's own echo is the only confirmation — the
- * 201 carries no text and nothing was optimistic.
+ * MESSAGE_RECEIVED. The forwarder's own echo is the only store write —
+ * nothing was optimistic.
  */
 function routeMessageForwarded(event: WsMessageForwardedEvent): void {
-	const message = wscSdk.handleMessageForwarded({
-		messageId: event.messageId,
-		roomId: event.roomId,
-		originalRoomId: event.originalRoomId,
-		senderId: event.senderId,
-		text: event.text,
-		...(event.timestamp ? { timestamp: event.timestamp } : {}),
-		...(event.forwardedFrom ? { forwardedFrom: event.forwardedFrom } : {}),
-		...(event.forwardedAt ? { forwardedAt: event.forwardedAt } : {}),
-		...eventAttachmentFields(event)
-	});
+	const message = wscSdk.handleMessageForwarded(event);
 	prependGalleryAttachment(message);
-	notifyOthersMessage(message, event.senderId, event.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
 }
 
 /**
@@ -180,15 +108,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
 		| StoreTextMessage
 		| undefined;
-	const row = wscSdk.handleMessagePinned(
-		{
-			roomId: event.roomId,
-			messageId: event.messageId,
-			pinnedBy: event.pinnedBy,
-			timestamp: event.timestamp
-		},
-		resolved
-	);
+	const row = wscSdk.handleMessagePinned(event, resolved);
 	if (!resolved) {
 		wscSdk
 			.fetchPinnedMessage(
@@ -209,12 +129,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
  * scroll-to-pin selection is cleared like the v1 handler did.
  */
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
-	const row = wscSdk.handleMessageUnpinned({
-		roomId: event.roomId,
-		messageId: event.messageId,
-		unpinnedBy: event.unpinnedBy,
-		timestamp: event.timestamp
-	});
+	const row = wscSdk.handleMessageUnpinned(event);
 	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
 	notifyPinConfigRow(row, event.unpinnedBy, event.roomId);
 }
@@ -253,11 +168,12 @@ export function wsChatEventsRouter(event: WsEvent): void {
 	switch (event.type) {
 		case WsEventType.PRESENCE_CHANGED: {
 			// v1 parity: the logged user's own echo never writes the store (the v1
-			// presence handler only re-announced presence there, a no-op on v2)
+			// presence handler only re-announced presence there, a no-op on v2).
+			// The backend never sends it; the guard stays defensive
 			if (isMyId(event.userId)) {
 				return;
 			}
-			wscSdk.handlePresenceChanged({ userId: event.userId, online: event.online }).catch((err) => {
+			wscSdk.handlePresenceChanged(event).catch((err) => {
 				console.error('wsChatEventsRouter: presence hydration failed', err);
 			});
 			return;
@@ -266,11 +182,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// Own echo included, unlike presence: updateReadStatus recomputes the
 			// unread counter from the own marker and the read statuses from the
 			// others' — the v1 single-path displayed-stanza behavior
-			wscSdk.handleReadUpdated({
-				roomId: event.roomId,
-				userId: event.userId,
-				messageId: event.messageId
-			});
+			wscSdk.handleReadUpdated(event);
 			return;
 		}
 		case WsEventType.MESSAGE_RECEIVED: {
@@ -288,13 +200,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// message that stopped being the last one — and only when the edit
 			// actually targets it.
 			wscSdk.handleMessageEdited(
-				{
-					messageId: event.messageId,
-					roomId: event.roomId,
-					senderId: event.senderId,
-					text: event.text,
-					editedAt: event.editedAt
-				},
+				event,
 				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
 			);
 			refreshPinnedBannerOnEdit(event.roomId, event.messageId, event.text);
@@ -304,12 +210,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// Same contract as MESSAGE_EDITED — and the only confirmation path
 			// for the deleter (the 204 writes nothing).
 			wscSdk.handleMessageDeleted(
-				{
-					messageId: event.messageId,
-					roomId: event.roomId,
-					senderId: event.senderId,
-					deletedAt: event.deletedAt
-				},
+				event,
 				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
 			);
 			dropPinnedBannerOnDelete(event.roomId, event.messageId);
@@ -322,14 +223,9 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// self-guards on my own messages and reads the just-added fastening
 			// for removals — hence the write order), browser notification
 			// (self-guarded against empty values), focus reset. No unread bump:
-			// v1 parity, reactions never counted (plan §5.14).
-			const fastening = wscSdk.handleReactionChanged({
-				messageId: event.messageId,
-				roomId: event.roomId,
-				userId: event.userId,
-				reaction: event.reaction,
-				operation: event.operation
-			});
+			// v1 parity, reactions never counted (plan §5.14). The SDK dates the
+			// fastening with the event's sentDate.
+			const fastening = wscSdk.handleReactionChanged(event);
 			if (!isMyId(event.userId)) {
 				displayReactionBrowserNotification(fastening as MessageFastening);
 				useStore
@@ -353,16 +249,19 @@ export function wsChatEventsRouter(event: WsEvent): void {
 		}
 		case WsEventType.TYPING: {
 			// v1 parity: the own chat states never reached the store (the handler
-			// ignored them). The SDK owns the per-pair 7s auto-expire; a missing
-			// status means started (spike contract).
+			// ignored them). The backend excludes the typist; the guard stays
+			// defensive. The SDK owns the per-pair 7s auto-expire.
 			if (isMyId(event.userId)) {
 				return;
 			}
-			wscSdk.handleTyping({
-				roomId: event.roomId,
-				userId: event.userId,
-				...(event.status ? { status: event.status } : {})
-			});
+			wscSdk.handleTyping(event);
+			return;
+		}
+		case WsEventType.WS_ERROR: {
+			// The backend refused an action this client sent on the socket
+			// (typing outside a room, malformed or unknown action): a client bug,
+			// with no store state to roll back
+			console.error('wsChatEventsRouter: socket action refused by the backend', event);
 			return;
 		}
 		default:

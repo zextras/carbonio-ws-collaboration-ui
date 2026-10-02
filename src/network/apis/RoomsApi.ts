@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import type { StoreTextMessage, WireMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -30,10 +31,12 @@ import {
 	buildQueryString,
 	fetchAPI,
 	RequestType,
+	sendAttachmentFetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
 import { chatClient, isWscPure } from '../chatClient/ChatClient';
+import { findRepliedMessage } from '../chatClient/findRepliedMessage';
 import { wscSdk } from '../sdk/wscSdk';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
@@ -165,6 +168,50 @@ export const replacePlaceholderRoom = (
 	});
 };
 
+/**
+ * v2 (WSC-pure) upload: one POST multipart, answered by the created Message.
+ * Ids are server-generated and the placeholder's is the tempId: the SDK
+ * promotes it from the 201, idempotent with the MessageReceived self-echo
+ * that carries the same tempId back.
+ */
+const uploadWscAttachment = (
+	roomId: string,
+	tempId: string,
+	file: File,
+	optionalFields: { description?: string; replyId?: string; area?: string },
+	signal?: AbortSignal
+): Promise<WireMessage> =>
+	sendAttachmentFetchAPI<WireMessage>(
+		`rooms/${roomId}/attachments`,
+		file,
+		{
+			tempId,
+			description: optionalFields.description,
+			replyToId: optionalFields.replyId,
+			area: optionalFields.area
+		},
+		signal
+	).then((resp) => {
+		wscSdk.confirmAttachmentUpload({
+			roomId,
+			tempId,
+			response: resp,
+			// The 201 names the file only by id. The MIME type is the part's,
+			// which the browser sends as application/octet-stream when the file
+			// has none
+			attachment: {
+				name: file.name,
+				mimeType: file.type || 'application/octet-stream',
+				size: file.size,
+				...(optionalFields.area ? { area: optionalFields.area } : {})
+			},
+			repliedMessage: findRepliedMessage(roomId, optionalFields.replyId) as
+				| StoreTextMessage
+				| undefined
+		});
+		return resp;
+	});
+
 export const addRoomAttachment = (
 	roomId: string,
 	file: File,
@@ -209,18 +256,23 @@ export const addRoomAttachment = (
 		if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 			removePlaceholderMessage(roomId, uuid);
 			reject(new Error('file_too_large'));
+		} else if (isWscPure()) {
+			uploadWscAttachment(roomId, uuid, file, optionalFields, signal)
+				.then((resp) => {
+					window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+					resolve(resp);
+				})
+				.catch((error) => {
+					removePlaceholderMessage(roomId, uuid);
+					reject(new Error(error));
+				});
 		} else {
 			const optional = {
 				description: optionalFields.description,
 				replyId: optionalFields.replyId,
 				area: optionalFields.area,
-				// v1 correlation: messageId becomes the id of the stanza the backend
-				// sends. On v2 ids are server-generated and the correlation key is
-				// tempId, carried back by the MessageReceived self-echo — the ONLY
-				// confirmation (the 201 answers with the file id, not the message);
-				// messageId is still sent, the backend accepts both harmlessly
-				messageId: uuid,
-				...(isWscPure() ? { tempId: uuid } : {})
+				// v1 correlation: messageId becomes the id of the stanza the backend sends
+				messageId: uuid
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
 			//  * Remove once support for v1.6.0 is officially dropped.

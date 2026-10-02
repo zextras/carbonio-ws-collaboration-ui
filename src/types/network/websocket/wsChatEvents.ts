@@ -4,14 +4,28 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type {
+	WireMessageDeletedEvent,
+	WireMessageEditedEvent,
+	WireMessageForwardedEvent,
+	WireMessagePinnedEvent,
+	WireMessageReceivedEvent,
+	WireMessageUnpinnedEvent,
+	WirePresenceChangedEvent,
+	WireReactionChangedEvent,
+	WireReadUpdatedEvent,
+	WireTypingEvent,
+	WireWsErrorEvent
+} from '@zextras/carbonio-ws-collaboration-sdk';
+
 import { WsEventType } from './wsEvents';
 
 /**
  * WSC-pure chat events (backend >= 2.0.0, MongooseIM replacement). The shapes
- * come from the backend implementation via the frontend spike: the chat-event
- * family is not in asyncapi.yaml yet (the SDK tracks the drift in
- * specs/SPEC_SOURCE.md). One member lands per migration step, matching the
- * SDK handler it is routed to.
+ * are the SDK's, generated from asyncapi.yaml (the SDK tracks the spec drift
+ * in specs/SPEC_SOURCE.md): this file only adds the discriminant on the app's
+ * event-type enum, so the router hands the SDK each event as it came off the
+ * wire, `sentDate` included.
  */
 export type WsChatEvent =
 	| WsPresenceChangedEvent
@@ -23,90 +37,33 @@ export type WsChatEvent =
 	| WsMessageForwardedEvent
 	| WsMessagePinnedEvent
 	| WsMessageUnpinnedEvent
-	| WsTypingEvent;
+	| WsTypingEvent
+	| WsErrorEvent;
 
-export type WsPresenceChangedEvent = {
+export type WsPresenceChangedEvent = WirePresenceChangedEvent & {
 	type: WsEventType.PRESENCE_CHANGED;
-	userId: string;
-	online: boolean;
 };
 
-export type WsReadUpdatedEvent = {
-	type: WsEventType.READ_UPDATED;
-	roomId: string;
-	userId: string;
-	messageId: string;
-};
+export type WsReadUpdatedEvent = WireReadUpdatedEvent & { type: WsEventType.READ_UPDATED };
 
 /**
- * Attachment metadata as the events carry it — dual-shape: the `attachments`
- * array (the spike's receive path, first entry wins) with the flat fields of
- * the REST `Message` schema as fallback. No `area` on the wire (the image
- * layout hint is upload-only).
+ * The full `TimelineMessage`, attachment and depth-1 quote included. `tempId`
+ * reaches every member, but only the sender holds a placeholder under it.
  */
-export type WsEventAttachment = {
-	id: string;
-	name: string;
-	mimeType: string;
-	size: number;
-};
-
-export type WsMessageReceivedEvent = {
+export type WsMessageReceivedEvent = WireMessageReceivedEvent & {
 	type: WsEventType.MESSAGE_RECEIVED;
-	messageId: string;
-	roomId: string;
-	senderId: string;
-	text: string;
-	timestamp: string;
-	replyToId?: string;
-	/** Client-generated correlation key: present on the sender's own echo. */
-	tempId?: string;
-	/** Defensive dual-path: the original author, when this delivery is actually a forward. */
-	forwardedFrom?: string;
-	forwardedAt?: string;
-	attachments?: Array<WsEventAttachment>;
-	attachmentId?: string;
-	attachmentName?: string;
-	attachmentMime?: string;
-	attachmentSize?: number;
 };
 
-export type WsMessageForwardedEvent = {
+/** The new message in the destination room, with `forwardedInfo` and the attachment clone. */
+export type WsMessageForwardedEvent = WireMessageForwardedEvent & {
 	type: WsEventType.MESSAGE_FORWARDED;
-	messageId: string;
-	roomId: string;
-	/** The room the message was forwarded from. */
-	originalRoomId: string;
-	senderId: string;
-	text: string;
-	/** Optional in the spike's shape: the SDK falls back to the arrival instant. */
-	timestamp?: string;
-	forwardedFrom?: string;
-	forwardedAt?: string;
-	/** A forwarded attachment is cloned server-side: this echo delivers the clone. */
-	attachments?: Array<WsEventAttachment>;
-	attachmentId?: string;
-	attachmentName?: string;
-	attachmentMime?: string;
-	attachmentSize?: number;
 };
 
-export type WsMessageEditedEvent = {
-	type: WsEventType.MESSAGE_EDITED;
-	messageId: string;
-	roomId: string;
-	senderId: string;
-	/** The full new text, not a delta. */
-	text: string;
-	editedAt: string;
-};
+/** No sender on the wire: only the author can edit. */
+export type WsMessageEditedEvent = WireMessageEditedEvent & { type: WsEventType.MESSAGE_EDITED };
 
-export type WsMessageDeletedEvent = {
+export type WsMessageDeletedEvent = WireMessageDeletedEvent & {
 	type: WsEventType.MESSAGE_DELETED;
-	messageId: string;
-	roomId: string;
-	senderId: string;
-	deletedAt: string;
 };
 
 /**
@@ -114,41 +71,19 @@ export type WsMessageDeletedEvent = {
  * hydrates from the store when the target is loaded, from GET /rooms/{id}/pin
  * otherwise. Broadcast to the pinner too — the only confirmation path.
  */
-export type WsMessagePinnedEvent = {
-	type: WsEventType.MESSAGE_PINNED;
-	roomId: string;
-	messageId: string;
-	pinnedBy: string;
-	timestamp: string;
-};
+export type WsMessagePinnedEvent = WireMessagePinnedEvent & { type: WsEventType.MESSAGE_PINNED };
 
-export type WsMessageUnpinnedEvent = {
+export type WsMessageUnpinnedEvent = WireMessageUnpinnedEvent & {
 	type: WsEventType.MESSAGE_UNPINNED;
-	roomId: string;
-	messageId: string;
-	unpinnedBy: string;
-	timestamp: string;
 };
 
-/**
- * A member's typing state changed. `status` is optional on the wire and a
- * missing value means `started` (spike contract); the timestamp is unused —
- * the indicator lifecycle is arrival instant + the SDK's auto-expire.
- */
-export type WsTypingEvent = {
-	type: WsEventType.TYPING;
-	roomId: string;
-	userId: string;
-	status?: 'started' | 'stopped';
-	timestamp: string;
-};
+/** Relayed to every member but the typist; the backend normalizes `status`. */
+export type WsTypingEvent = WireTypingEvent & { type: WsEventType.TYPING };
 
 /** A per-user reaction delta, not the aggregated state. */
-export type WsReactionChangedEvent = {
+export type WsReactionChangedEvent = WireReactionChangedEvent & {
 	type: WsEventType.REACTION_CHANGED;
-	messageId: string;
-	roomId: string;
-	userId: string;
-	reaction: string;
-	operation: 'added' | 'removed';
 };
+
+/** The backend refused an action this client sent on the socket (typing, unknown action). */
+export type WsErrorEvent = WireWsErrorEvent & { type: WsEventType.WS_ERROR };
