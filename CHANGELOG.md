@@ -1,3 +1,33 @@
+## [0.18.17](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.16...v0.18.17) (2026-10-06)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#857](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/857)) ([d4f34c5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d4f34c5be412baec4a19342c83d8cf32d7fb04a7))
+
+## [0.18.16](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.15...v0.18.16) (2026-09-30)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#856](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/856)) ([a31d787](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a31d787c82c359cc6d56d1360797523f357293c3))
+
+## [0.18.15](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.14...v0.18.15) (2026-09-29)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#855](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/855)) ([1c1dcbc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1c1dcbc8578e887a6d9292e1f835398856934787))
+
+## [0.18.14](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.13...v0.18.14) (2026-09-25)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.13.0 ([#854](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/854)) ([c74c943](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c74c9438b798e086d48f4676b29dcd93aa6a8004))
+
+## [0.18.13](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.12...v0.18.13) (2026-09-25)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.12.3 ([#853](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/853)) ([253b652](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/253b652fef89cfc1a569182ecf6bf63868810a07))
+
 ## [0.18.12](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.11...v0.18.12) (2026-09-21)
 
 ### Other changes
