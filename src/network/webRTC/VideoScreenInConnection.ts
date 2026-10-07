@@ -21,7 +21,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
-import { rtcDownlinkDebug } from '../../utils/debug';
+import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
 // Attribute a change of the SHOWN tier (= min(our request, the publisher's maxTier)) for the [DOWNLINK]
@@ -305,11 +305,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			// Log every change of the SHOWN tier, attributed (our-network / tile-resize / their-network).
 			const prev = this.lastReconcile.get(key);
 			if (prev != null && shown !== prev.shown) {
-				rtcDownlinkDebug(
-					getUserName(store, userId),
-					prev.shown,
-					shown,
-					shownReason(prev, net, ceil)
+				rtcDebug(
+					`[DOWNLINK] ${getUserName(store, userId)} tier ${prev.shown} -> ${shown} (${shownReason(prev, net, ceil)})`
 				);
 			}
 			this.lastReconcile.set(key, { net, ceil, shown });

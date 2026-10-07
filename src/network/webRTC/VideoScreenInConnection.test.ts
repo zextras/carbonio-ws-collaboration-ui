@@ -12,7 +12,7 @@ import {
 } from './inboundQualityController';
 import VideoScreenInConnection from './VideoScreenInConnection';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { rtcDownlinkDebug } from '../../utils/debug';
+import { rtcDebug } from '../../utils/debug';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
 const MEETING_ID = 'test-meeting';
@@ -67,8 +67,7 @@ vi.mock('../apis/MeetingsApi', () => ({
 }));
 
 vi.mock('../../utils/debug', () => ({
-	rtcDownlinkDebug: vi.fn(),
-	rtcUplinkDebug: vi.fn()
+	rtcDebug: vi.fn()
 }));
 
 // Build a receiver whose getStats() returns an inbound-rtp report with NO inbound-rtp entry
@@ -150,7 +149,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		storeMocks.tileCeilings = {};
 		conn = new VideoScreenInConnection(MEETING_ID);
 		requestVideoQuality.mockClear();
-		vi.mocked(rtcDownlinkDebug).mockClear();
+		vi.mocked(rtcDebug).mockClear();
 	});
 
 	it('(a) steps DOWN to rung 1 after EVIDENCE_DOWN_N stalled ticks+1 when sender badge is OK', async () => {
@@ -444,7 +443,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		};
 		const receiver = makeHealthyReceiver();
 		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver, TOP_RUNG);
-		const downlinkDebug = vi.mocked(rtcDownlinkDebug);
+		const downlinkDebug = vi.mocked(rtcDebug);
 
 		await conn.evaluateQualityTick(); // baseline: shown = min(TOP, 2) = 2, first reconcile → no log
 		expect(downlinkDebug).not.toHaveBeenCalled();
@@ -454,7 +453,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		};
 		await conn.evaluateQualityTick(); // shown = min(TOP, 1) = 1, our request unchanged → their-network
 
-		expect(downlinkDebug).toHaveBeenCalledWith('Test User', TOP_RUNG, 1, 'their-network');
+		expect(downlinkDebug).toHaveBeenCalledWith('[DOWNLINK] Test User tier 2 -> 1 (their-network)');
 	});
 });
 

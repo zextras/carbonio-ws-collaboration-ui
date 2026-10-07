@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
-	aspectRatio: 1.7777
-	// video: { aspectRatio: 1.618 }
+export const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+	aspectRatio: 1.7777,
+	height: { ideal: 720 }
 };
 
 /**
@@ -65,19 +65,9 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		// Keep the capture at 16:9 (aspectRatio 1.7777) — without it some cameras (notably macOS
-		// Continuity Camera) negotiate a portrait mode. Capture at the top simulcast tier (720p); the
-		// publisher scales this down per tier (scaleResolutionDownBy), so a higher capture is pure waste.
-		// Cap the framerate at 30 so 60fps cameras don't waste bitrate/CPU and the temporal ladder stays a
-		// clean 30/15 (full/mid layer) for the downlink controller.
-		const videoConstraints: MediaTrackConstraints = {
-			...CONSTRAINT_ASPECT_RATIO,
-			height: { ideal: 720 },
-			frameRate: { ideal: 30, max: 30 }
-		};
 		const constraints = deviceId
-			? { video: { deviceId: { exact: deviceId }, ...videoConstraints } }
-			: { video: videoConstraints };
+			? { video: { deviceId: { exact: deviceId }, ...VIDEO_CONSTRAINTS } }
+			: { video: VIDEO_CONSTRAINTS };
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
@@ -97,8 +87,8 @@ export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getFrontCameraStream = (): Promise<MediaStream> =>
 	navigator.mediaDevices
-		.getUserMedia({ video: { facingMode: 'user', ...CONSTRAINT_ASPECT_RATIO } })
-		.catch(() => navigator.mediaDevices.getUserMedia({ video: CONSTRAINT_ASPECT_RATIO }));
+		.getUserMedia({ video: { facingMode: 'user', ...VIDEO_CONSTRAINTS } })
+		.catch(() => navigator.mediaDevices.getUserMedia({ video: VIDEO_CONSTRAINTS }));
 
 export const getAudioAndVideo = (
 	audio?:

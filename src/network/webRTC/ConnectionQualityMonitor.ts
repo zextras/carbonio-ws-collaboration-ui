@@ -34,7 +34,7 @@ import {
 	IVideoOutConnection,
 	IVideoScreenInConnection
 } from '../../types/network/webRTC/webRTC';
-import { rtcUplinkDebug } from '../../utils/debug';
+import { rtcDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
 const OUTBOUND_RTP = 'outbound-rtp';
@@ -398,8 +398,7 @@ export default class ConnectionQualityMonitor {
 			this.lastTopActiveRung !== -2 &&
 			topActiveRung !== this.lastTopActiveRung
 		) {
-			// Our own uplink (no remote user); GCC drives the encoder's top active layer.
-			rtcUplinkDebug(this.lastTopActiveRung, topActiveRung);
+			rtcDebug(`[UPLINK] tier ${this.lastTopActiveRung} -> ${topActiveRung}`);
 		}
 		this.lastTopActiveRung = topActiveRung;
 	}
