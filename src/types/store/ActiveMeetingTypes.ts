@@ -5,20 +5,12 @@
  */
 
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
 	IVideoScreenInConnection,
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
-
-export type TierWeightedScoreDetail = {
-	networkScore: number | null;
-	tierWeightedNetworkScore: number | null;
-	uplinkPenalty: number | null;
-	downlinkPenalty: number | null;
-};
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;
@@ -56,8 +48,6 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
-	setConnectionScoreDetail: (detail: LinkSample) => void;
-	setConnectionTierWeightedDetail: (detail: TierWeightedScoreDetail | undefined) => void;
 	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
 	removeTileCeiling: (meetingId: string, key: string) => void;
 };
@@ -71,8 +61,6 @@ export type ActiveMeeting = {
 	qualityMonitor: ConnectionQualityMonitor;
 	connectionQuality: Record<string, ConnectionQualityInfo>;
 	tileCeilings: Record<string, number>;
-	connectionScoreDetail: LinkSample | undefined;
-	connectionTierWeightedDetail: TierWeightedScoreDetail | undefined;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;

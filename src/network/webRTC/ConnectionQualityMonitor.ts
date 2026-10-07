@@ -10,11 +10,8 @@ import {
 	ConnectionQuality,
 	isConnectionQualitySupported,
 	jitterScore,
-	K_DOWN,
-	K_UP,
 	LinkSample,
 	producibleCeiling,
-	round1,
 	rttScore,
 	scoreToBars,
 	scoreToLevel,
@@ -148,7 +145,7 @@ export default class ConnectionQualityMonitor {
 
 	async emitInitial(): Promise<void> {
 		if (!isSupportedBySession()) return;
-		const { raw, level } = await this.computeQuality();
+		const { level } = await this.computeQuality();
 		this.committed = level;
 		this.committedNetworkScore = this.myNetworkScore;
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
@@ -161,8 +158,6 @@ export default class ConnectionQualityMonitor {
 		this.committedTierWeightedNetworkScore = this.myTierWeightedNetworkScore;
 		// +1 keeps changedAt strictly increasing so the store monotonicity guard accepts same-ms calls.
 		this.changedAt = Math.max(Date.now(), this.changedAt + 1);
-		useStore.getState().setConnectionScoreDetail(raw);
-		this.storeTierWeightedDetail(upSF, downSF);
 		wsClient.sendUplinkStatusUpdate(
 			this.meetingId,
 			this.myTierWeightedNetworkScore,
@@ -205,7 +200,7 @@ export default class ConnectionQualityMonitor {
 
 	private async evaluate(): Promise<void> {
 		if (!isSupportedBySession()) return;
-		const { raw, level } = await this.computeQuality();
+		const { level } = await this.computeQuality();
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
 		const downSF = this.videoIn.downlinkShortfall();
 		this.myTierWeightedNetworkScore = computeTierWeightedNetworkScore(
@@ -213,8 +208,6 @@ export default class ConnectionQualityMonitor {
 			upSF,
 			downSF
 		);
-		useStore.getState().setConnectionScoreDetail(raw);
-		this.storeTierWeightedDetail(upSF, downSF);
 		const maxUplinkTierChanged = this.myMaxUplinkTier !== this.committedMaxUplinkTier;
 		const maxHardwareTierChanged = this.myMaxHardwareTier !== this.committedMaxHardwareTier;
 		const tierWeightedNetworkScoreChanged =
@@ -242,21 +235,6 @@ export default class ConnectionQualityMonitor {
 		}
 		this.applyLocalQuality(this.myMaxUplinkTier, this.myMaxHardwareTier);
 		await this.videoIn.evaluateQualityTick().catch(() => {});
-	}
-
-	// Publish the own-tile tier-weighted breakdown for the hover tooltip each tick.
-	private storeTierWeightedDetail(upSF: number, downSF: number): void {
-		const webcamActive = this.videoOut.rtpSender != null;
-		const hasFeeds = this.videoIn.hasActiveWebcamFeeds();
-		useStore.getState().setConnectionTierWeightedDetail({
-			networkScore: this.myNetworkScore,
-			tierWeightedNetworkScore: this.myTierWeightedNetworkScore,
-			uplinkPenalty:
-				webcamActive && this.myMaxUplinkTier != null && this.myMaxHardwareTier != null
-					? round1(K_UP * upSF)
-					: null,
-			downlinkPenalty: hasFeeds ? round1(K_DOWN * downSF) : null
-		});
 	}
 
 	// getStats, swallowing the browser's refusal to report on a closing PC.

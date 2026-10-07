@@ -75,8 +75,7 @@ const makeMonitor = (
 		session: { id: 'me', apiVersion: '1.6.15' },
 		activeMeeting: {
 			meetingId: 'meetingId',
-			connectionQuality: {},
-			connectionScoreDetail: undefined
+			connectionQuality: {}
 		}
 	} as unknown as RootStore);
 
@@ -123,8 +122,7 @@ const makeMonitor = (
 					}
 				: null,
 		evaluateQualityTick: vi.fn().mockResolvedValue(undefined),
-		downlinkShortfall: vi.fn().mockReturnValue(0),
-		hasActiveWebcamFeeds: vi.fn().mockReturnValue(false)
+		downlinkShortfall: vi.fn().mockReturnValue(0)
 	} as unknown as IVideoScreenInConnection;
 
 	const monitor = new ConnectionQualityMonitor(
@@ -139,8 +137,10 @@ const makeMonitor = (
 	return monitor;
 };
 
-const publishedDetail = (): LinkSample =>
-	useStore.getState().activeMeeting?.connectionScoreDetail ?? {};
+// Reads the raw sample of one extra tick (computeQuality is private)
+const readSample = async (monitor: ConnectionQualityMonitor): Promise<LinkSample> =>
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	(await (monitor as any).computeQuality()).raw;
 
 // The vote pushes one raw bars value per tick into the VoteWindow (capacity 7, seeded optimistic=5).
 // The committed level is median-7; a full swing needs ~4 consecutive bad ticks to move the majority
@@ -262,7 +262,7 @@ describe('ConnectionQualityMonitor — no evidence', () => {
 		const monitor = makeMonitor();
 		await monitor.emitInitial();
 		expect(monitor.committed).toBe('optimal');
-		expect(publishedDetail()).toEqual({});
+		expect(await readSample(monitor)).toEqual({});
 	});
 });
 
@@ -273,7 +273,7 @@ describe('ConnectionQualityMonitor — RTT', () => {
 		});
 		// 6 bad ticks move ≥4 of the last-7 window to bars=2 → median-7 = 2 → 'poor'.
 		await ticks(monitor, 6);
-		expect(publishedDetail().rttMs).toBeCloseTo(500, 0);
+		expect((await readSample(monitor)).rttMs).toBeCloseTo(500, 0);
 		expect(monitor.committed).toBe('poor');
 	});
 
@@ -289,7 +289,7 @@ describe('ConnectionQualityMonitor — RTT', () => {
 				)
 		});
 		await ticks(monitor, 6);
-		expect(publishedDetail().rttMs).toBeUndefined();
+		expect((await readSample(monitor)).rttMs).toBeUndefined();
 		expect(monitor.committed).toBe('optimal');
 	});
 
@@ -331,7 +331,7 @@ describe('ConnectionQualityMonitor — uplink loss', () => {
 		});
 		// 6 bad ticks → median-7 at bars=1: uplinkLossScore(0.2)=0 (>16% bad), combineVote 2.0 → bars=1.
 		await ticks(monitor, 6);
-		expect(publishedDetail().lossUp).toBeCloseTo(0.2, 5);
+		expect((await readSample(monitor)).lossUp).toBeCloseTo(0.2, 5);
 		expect(monitor.committed).toBe('terrible'); // 20% loss → loss score 0 → 'terrible' under the tuned badge
 	});
 });
@@ -351,7 +351,7 @@ describe('ConnectionQualityMonitor — uplink jitter (clean)', () => {
 		});
 		// tick 1: ssrc 1 first-seen (prev undefined) → treated as active → jitter reads 50 ms.
 		await monitor.emitInitial();
-		expect(publishedDetail().jitterMs).toBeCloseTo(50, 0);
+		expect((await readSample(monitor)).jitterMs).toBeCloseTo(50, 0);
 	});
 });
 
@@ -373,7 +373,7 @@ describe('ConnectionQualityMonitor — parked simulcast layer filter', () => {
 		});
 		// Parked layer (fps 0) is excluded from the first tick → jitterMs ≈ 14 ms, not 71.
 		await monitor.emitInitial();
-		expect(publishedDetail().jitterMs).toBeCloseTo(14, 0);
+		expect((await readSample(monitor)).jitterMs).toBeCloseTo(14, 0);
 		// 7 more ticks of clean 14 ms jitter must NOT drive the vote down (14 ms is fine).
 		await ticks(monitor, 7);
 		expect(monitor.committed).toBe('optimal');
@@ -394,7 +394,7 @@ describe('ConnectionQualityMonitor — parked simulcast layer filter', () => {
 		});
 		// Parked layer (fps 0) excluded from the first tick → lossUp = 0 (only the active layer).
 		await monitor.emitInitial();
-		expect(publishedDetail().lossUp).toBeCloseTo(0, 5);
+		expect((await readSample(monitor)).lossUp).toBeCloseTo(0, 5);
 		// 7 more ticks of zero loss must leave the vote at 'optimal'.
 		await ticks(monitor, 7);
 		expect(monitor.committed).toBe('optimal');

@@ -59,5 +59,4 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
 	evaluateQualityTick(): Promise<void>;
 	downlinkShortfall(): number;
-	hasActiveWebcamFeeds(): boolean;
 }

@@ -11,12 +11,10 @@ import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
-import { LinkSample } from '../../network/webRTC/connectionQualityScore';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
-	TierWeightedScoreDetail,
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
 	MeetingAccordionType,
@@ -90,8 +88,6 @@ export const useActiveMeetingSlice: StateCreator<
 					qualityMonitor,
 					connectionQuality: {},
 					tileCeilings: {},
-					connectionScoreDetail: undefined,
-					connectionTierWeightedDetail: undefined,
 					localStreams: {
 						selectedAudioDeviceId: audioStream?.deviceId,
 						selectedVideoDeviceId: videoStream?.deviceId
@@ -374,26 +370,6 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_USER_WITH_HAND_RAISED'
-		);
-	},
-	setConnectionScoreDetail: (detail: LinkSample): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!draft.activeMeeting) return;
-				draft.activeMeeting.connectionScoreDetail = detail;
-			}),
-			false,
-			'AM/SET_CONNECTION_SCORE_DETAIL'
-		);
-	},
-	setConnectionTierWeightedDetail: (detail: TierWeightedScoreDetail | undefined): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!draft.activeMeeting) return;
-				draft.activeMeeting.connectionTierWeightedDetail = detail;
-			}),
-			false,
-			'AM/SET_CONNECTION_TIER_WEIGHTED_DETAIL'
 		);
 	},
 	setTileCeiling: (meetingId: string, key: string, rung: number): void => {

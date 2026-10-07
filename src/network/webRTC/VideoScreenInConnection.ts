@@ -330,10 +330,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
 	}
 
-	public hasActiveWebcamFeeds(): boolean {
-		return this.videoReceivers.size > 0;
-	}
-
 	// Downlink shortfall: mean per-feed shortfall (theirMaxUplinkTier - myNetTarget).
 	// 0 when there are no active feeds or all tiers unknown.
 	// Read-only — does NOT alter any controller decision.
