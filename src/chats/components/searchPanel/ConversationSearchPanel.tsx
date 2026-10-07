@@ -77,7 +77,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	useEffect(
-		() => () => {
+		() => (): void => {
 			clearSearchResults(roomId);
 		},
 		[clearSearchResults, roomId]
