@@ -72,7 +72,7 @@ const makeMonitor = (
 	// setState MERGES, so the store's real action methods survive; only session/activeMeeting are
 	// replaced with the fixture the monitor reads/writes.
 	useStore.setState({
-		session: { id: 'me' },
+		session: { id: 'me', apiVersion: '1.6.15' },
 		activeMeeting: {
 			meetingId: 'meetingId',
 			connectionQuality: {},
@@ -425,6 +425,15 @@ describe('ConnectionQualityMonitor — uplink status broadcast (networkScore + m
 		// [meetingId, networkScore, maxUplinkTier, maxHardwareTier, changedAt]
 		const [, networkScore] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
 		expect(typeof networkScore).toBe('number');
+	});
+
+	it('does not broadcast when the API version does not support connection quality', async () => {
+		const monitor = makeMonitor();
+		useStore.setState({ session: { id: 'me', apiVersion: '1.6.14' } } as unknown as RootStore);
+		await monitor.emitInitial();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		await (monitor as any).evaluate();
+		expect(wsMocks.sendUplinkStatusUpdate).not.toHaveBeenCalled();
 	});
 
 	it('emitInitial broadcasts null networkScore when ICE is down (LOST)', async () => {

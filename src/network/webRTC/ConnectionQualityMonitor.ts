@@ -8,6 +8,7 @@ import {
 	tierWeightedNetworkScore as computeTierWeightedNetworkScore,
 	combineVote,
 	ConnectionQuality,
+	isConnectionQualitySupported,
 	jitterScore,
 	K_DOWN,
 	K_UP,
@@ -38,6 +39,9 @@ import { rtcDebug } from '../../utils/debug';
 import { wsClient } from '../websocket/WebSocketClient';
 
 const OUTBOUND_RTP = 'outbound-rtp';
+
+const isSupportedBySession = (): boolean =>
+	isConnectionQualitySupported(useStore.getState().session.apiVersion);
 
 function maxDefined(values: Array<number | undefined>): number | undefined {
 	let out: number | undefined;
@@ -143,6 +147,7 @@ export default class ConnectionQualityMonitor {
 	}
 
 	async emitInitial(): Promise<void> {
+		if (!isSupportedBySession()) return;
 		const { raw, level } = await this.computeQuality();
 		this.committed = level;
 		this.committedNetworkScore = this.myNetworkScore;
@@ -199,6 +204,7 @@ export default class ConnectionQualityMonitor {
 	}
 
 	private async evaluate(): Promise<void> {
+		if (!isSupportedBySession()) return;
 		const { raw, level } = await this.computeQuality();
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
 		const downSF = this.videoIn.downlinkShortfall();

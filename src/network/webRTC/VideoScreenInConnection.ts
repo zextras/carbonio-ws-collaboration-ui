@@ -7,7 +7,7 @@
 import { filter, forEach, keyBy } from 'lodash';
 import { gte } from 'semver';
 
-import { videoFpsScore } from './connectionQualityScore';
+import { isConnectionQualitySupported, videoFpsScore } from './connectionQualityScore';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -286,6 +286,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// request to what the publisher offers.
 	private reconcileFeeds(): void {
 		const store = useStore.getState();
+		if (!isConnectionQualitySupported(store.session.apiVersion)) return;
 		const am = store.activeMeeting;
 		if (!am || am.meetingId !== this.meetingId) return;
 		const ceilings = am.tileCeilings ?? {};

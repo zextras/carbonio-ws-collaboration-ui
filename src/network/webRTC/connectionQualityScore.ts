@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { gte } from 'semver';
+
+import { Version } from '../../types/store/SessionTypes';
+
+const CONNECTION_QUALITY_MIN_API_VERSION = '1.6.15';
+
+export const isConnectionQualitySupported = (apiVersion: Version | undefined): boolean =>
+	!!apiVersion && gte(apiVersion, CONNECTION_QUALITY_MIN_API_VERSION);
+
 export type ConnectionQuality = 'lost' | 'terrible' | 'poor' | 'medium' | 'high' | 'optimal';
 
 const clamp01 = (x: number): number => Math.max(0, Math.min(1, x));

@@ -211,9 +211,9 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<RaiseHandButton />
 				<MoreActionsButton />
+				<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 				{compactMode && (
 					<>
-						<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 						<MeetingDuration meetingId={meetingId} />
 						<LeaveMeetingButton isHoovering={isHoovering} oneClickLeave />
 					</>
@@ -230,7 +230,6 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				ref={rightActionsWrapperRef}
 				$compactMode={compactMode}
 			>
-				<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 				<MeetingDuration meetingId={meetingId} />
 				<LeaveMeetingButton isHoovering={isHoovering} />
 			</SecondActionsWrapper>

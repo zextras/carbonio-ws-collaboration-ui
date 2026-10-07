@@ -37,7 +37,8 @@ const storeMocks = vi.hoisted(() => ({
 			maxHardwareTier?: number | null;
 		}
 	>,
-	tileCeilings: {} as Record<string, number>
+	tileCeilings: {} as Record<string, number>,
+	apiVersion: '1.6.15'
 }));
 
 vi.mock('../../store/Store', () => ({
@@ -50,7 +51,7 @@ vi.mock('../../store/Store', () => ({
 				connectionQuality: storeMocks.connectionQuality,
 				tileCeilings: storeMocks.tileCeilings
 			},
-			session: { id: 'me', apiVersion: undefined }
+			session: { id: 'me', apiVersion: storeMocks.apiVersion }
 		})
 	}
 }));
@@ -221,6 +222,26 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		const { calls } = requestVideoQuality.mock;
 		const downgradeCalls = calls.filter(([, , , rung]) => (rung as number) < TOP_RUNG);
 		expect(downgradeCalls).toHaveLength(0);
+	});
+
+	it('requests the first tier of a new feed once its tile ceiling is known', async () => {
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 1 };
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).toHaveBeenCalledWith(MEETING_ID, USER_1, 'mid1', 1, 2);
+	});
+
+	it('does not request any tier when the API version does not support connection quality', async () => {
+		storeMocks.apiVersion = '1.6.14';
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 1 };
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality).not.toHaveBeenCalled();
+		storeMocks.apiVersion = '1.6.15';
 	});
 
 	it('(c) does NOT duplicate requestVideoQuality when the target does not move (dedup)', async () => {
