@@ -122,7 +122,9 @@ export const sendFileFetchAPI = (
  * created `Message`. The file name keeps the unicode escaping, which the
  * backend decodes (an unescaped name fails with a 500). The description goes
  * as-is: the backend stores it as the message text without decoding, and v2
- * clients render the text verbatim (v1 decoded it on receipt).
+ * clients render the text verbatim (v1 decoded it on receipt). It goes as a
+ * part with an explicit UTF-8 charset: a plain string part has no Content-Type,
+ * and the backend reads it as US-ASCII, mangling accents and emoji.
  */
 export function sendAttachmentFetchAPI<T>(
 	endpoint: string,
@@ -134,7 +136,11 @@ export function sendAttachmentFetchAPI<T>(
 	formData.append('file', file, charToUnicode(file.name));
 	formData.append('contentLength', file.size.toString());
 	formData.append('tempId', fields.tempId);
-	fields.description && formData.append('description', fields.description);
+	fields.description &&
+		formData.append(
+			'description',
+			new Blob([fields.description], { type: 'text/plain;charset=UTF-8' })
+		);
 	fields.replyToId && formData.append('replyToId', fields.replyToId);
 	fields.area && formData.append('area', fields.area);
 

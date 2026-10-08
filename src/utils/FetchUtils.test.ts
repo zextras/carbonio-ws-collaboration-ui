@@ -194,7 +194,7 @@ describe('FetchUtils', () => {
 		expect(body.get('area')).toBe(optField.area);
 	});
 
-	test('sendAttachmentFetchAPI sends the v2 multipart: POST, raw description, escaped file name', async () => {
+	test('sendAttachmentFetchAPI sends the v2 multipart: POST, raw UTF-8 description, escaped file name', async () => {
 		act(() => {
 			useStore.getState().setQueueId('idUser1');
 			useStore.getState().setApiVersion('2.0.0');
@@ -207,7 +207,7 @@ describe('FetchUtils', () => {
 			testImageFile,
 			{
 				tempId: 'tmp-1',
-				description: 'una didascalia è qui',
+				description: 'una didascalia — "àèì" 👍',
 				replyToId: 'msg-quoted',
 				area: '640x480'
 			},
@@ -225,7 +225,10 @@ describe('FetchUtils', () => {
 		expect((body.get('file') as File).name).toBe(charToUnicode('città.png'));
 		expect(body.get('contentLength')).toBe('3');
 		expect(body.get('tempId')).toBe('tmp-1');
-		expect(body.get('description')).toBe('una didascalia è qui');
+		// Without an explicit charset the backend would read the part as US-ASCII
+		const description = body.get('description') as File;
+		expect(description.type).toBe('text/plain;charset=utf-8');
+		expect(await description.text()).toBe('una didascalia — "àèì" 👍');
 		expect(body.get('replyToId')).toBe('msg-quoted');
 		expect(body.get('area')).toBe('640x480');
 		// None of the v1 correlation fields
