@@ -29,6 +29,7 @@ import { getVideoStream } from '../../../utils/UserMediaManager';
 import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
+import ConnectionQualityIndicator from '../tile/ConnectionQualityIndicator';
 import Tile from '../tile/Tile';
 
 const PipContainer = styled(Container)`
@@ -178,6 +179,7 @@ const PictureInPictureView = (): ReactElement => {
 						disabled={!websocketNetworkStatus || audioPermission !== 'granted'}
 						size="large"
 					/>
+					<ConnectionQualityIndicator meetingId={meetingId} userId={myUserId} />
 				</CustomActionBar>
 				<CustomActionBar
 					background={'text'}

@@ -9,7 +9,7 @@
 		"build": "sdk build",
 		"deploy": "sdk deploy",
 		"deploy:local": "sdk deploy --container ${CONTAINER:-carbonio-advanced-carbonio-composed-ui-1}",
-		"sdk-install": "sdk install",
+		"sdk-install": "sdk install -d",
 		"start": "sdk watch",
 		"test": "vitest run",
 		"test:watch": "vitest",

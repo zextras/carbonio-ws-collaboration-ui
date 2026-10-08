@@ -9,6 +9,18 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WebSocketClient } from './WebSocketClient';
 
 describe('WebSocketClient', () => {
+	// _tryReconnection schedules a setTimeout(connect, ...) that is never cancelled; under real timers a
+	// pending reconnect can fire after this file's jsdom env is torn down ("window is not defined"),
+	// polluting a later test file. Fake timers here so those pending timers are discarded on teardown.
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
+	});
+
 	test('Connect WebSocketClient generate a WebSocket', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();

@@ -9,7 +9,7 @@
 import { WsEvent } from '../types/network/websocket/wsEvents';
 
 export const wsDebug = (text: string, object?: WsEvent): void => {
-	if (process.env.NODE_ENV !== 'test') {
+	if (process.env.NODE_ENV === 'development') {
 		console.log(
 			`%c CHATS WS [${new Date().toISOString().slice(11, -5)}]: ${text}`,
 			'color: Green',
@@ -20,11 +20,20 @@ export const wsDebug = (text: string, object?: WsEvent): void => {
 
 // Debug XMPP events
 export const xmppDebug = (text: string, object?: Element): void => {
-	if (process.env.NODE_ENV !== 'test') {
+	if (process.env.NODE_ENV === 'development') {
 		console.log(
 			`%c CHATS XMPP [${new Date().toISOString().slice(11, -5)}]: ${text}`,
 			'color: Violet',
 			object || ''
+		);
+	}
+};
+
+export const rtcDebug = (text: string): void => {
+	if (process.env.NODE_ENV === 'development') {
+		console.log(
+			`%c CHATS RTC [${new Date().toISOString().slice(11, -5)}]: ${text}`,
+			'color: Orange'
 		);
 	}
 };

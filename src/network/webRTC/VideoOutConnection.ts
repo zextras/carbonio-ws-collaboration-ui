@@ -6,6 +6,7 @@
 
 import { gte } from 'semver';
 
+import { producibleTiers, TIER_RID } from './connectionQualityScore';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
@@ -91,6 +92,48 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	};
 
+	private addSimulcastTransceiver(
+		videoTrack: MediaStreamTrack,
+		stream: MediaStream,
+		peerConn: RTCPeerConnection
+	): void {
+		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+		const captureHeight =
+			(typeof videoTrack?.getSettings === 'function'
+				? videoTrack.getSettings().height
+				: undefined) ?? 0;
+		// A camera that can't produce a tier drops to the lower ones: a 480p camera has no 720 'high'
+		const producible = producibleTiers(tiers, captureHeight);
+		let sendEncodings: RTCRtpEncodingParameters[];
+		if (!tiers || tiers.length === 0 || producible.length === 0) {
+			sendEncodings = [{ rid: 'h', scaleResolutionDownBy: 1 }];
+		} else {
+			sendEncodings = producible.map((t) => ({
+				rid: TIER_RID[t.name],
+				scaleResolutionDownBy: captureHeight / t.height
+			}));
+		}
+		// No scalabilityMode on purpose: VP8 simulcast already emits temporal layers by default, and setting it is unshipped on Firefox / ignored on Safari.
+		const transceiver = peerConn.addTransceiver(videoTrack, {
+			direction: 'sendonly',
+			streams: [stream],
+			sendEncodings
+		});
+		this.rtpSender = transceiver.sender;
+		try {
+			const caps = RTCRtpSender.getCapabilities('video');
+			const vp8 = caps?.codecs.filter((c) => c.mimeType.toLowerCase() === 'video/vp8') ?? [];
+			if (vp8.length && 'setCodecPreferences' in transceiver) {
+				transceiver.setCodecPreferences([
+					...vp8,
+					...(caps ? caps.codecs.filter((c) => c.mimeType.toLowerCase() !== 'video/vp8') : [])
+				]);
+			}
+		} catch {
+			// setCodecPreferences unsupported: VP8 still negotiates by default
+		}
+	}
+
 	// Stop the old track and add the new one without a new renegotiation
 	public updateLocalStreamTrack(
 		mediaStreamTrack: MediaStream,
@@ -100,9 +143,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
 				if (this.rtpSender == null) {
-					this.rtpSender = this.peerConn?.addTrack(
+					this.addSimulcastTransceiver(
 						videoTrack,
-						mediaStreamTrack ?? new MediaStream()
+						mediaStreamTrack ?? new MediaStream(),
+						this.peerConn
 					);
 				} else if (this.rtpSender?.track) {
 					if (isVirtualBackground) {

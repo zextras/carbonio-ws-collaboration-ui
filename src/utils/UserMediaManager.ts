@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const CONSTRAINT_ASPECT_RATIO: MediaTrackConstraints = {
-	aspectRatio: 1.7777
-	// video: { aspectRatio: 1.618 }
+export const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+	aspectRatio: 1.7777,
+	height: { ideal: 720 }
 };
 
 /**
@@ -66,8 +66,8 @@ export const getAudioStream = (deviceId?: string): Promise<MediaStream> =>
 export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
 		const constraints = deviceId
-			? { video: { deviceId: { exact: deviceId }, ...CONSTRAINT_ASPECT_RATIO } }
-			: { video: CONSTRAINT_ASPECT_RATIO };
+			? { video: { deviceId: { exact: deviceId }, ...VIDEO_CONSTRAINTS } }
+			: { video: VIDEO_CONSTRAINTS };
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {
@@ -87,8 +87,8 @@ export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
  */
 export const getFrontCameraStream = (): Promise<MediaStream> =>
 	navigator.mediaDevices
-		.getUserMedia({ video: { facingMode: 'user', ...CONSTRAINT_ASPECT_RATIO } })
-		.catch(() => navigator.mediaDevices.getUserMedia({ video: CONSTRAINT_ASPECT_RATIO }));
+		.getUserMedia({ video: { facingMode: 'user', ...VIDEO_CONSTRAINTS } })
+		.catch(() => navigator.mediaDevices.getUserMedia({ video: VIDEO_CONSTRAINTS }));
 
 export const getAudioAndVideo = (
 	audio?:
