@@ -19,6 +19,7 @@ export function ceilingRungForHeight(
 	if (!tiers || tiers.length === 0) return TOP_RUNG;
 	const neededPx = renderedHeightPx * (devicePixelRatio || 1);
 	const ascending = [...tiers].sort((a, b) => a.height - b.height);
-	const covering = ascending.find((t) => t.height >= neededPx) ?? ascending[ascending.length - 1];
+	const covering = ascending.find((t) => t.height >= neededPx) ?? ascending.at(-1);
+	if (!covering) return TOP_RUNG;
 	return Math.min(TIER_RUNG[covering.name] ?? TOP_RUNG, TOP_RUNG);
 }

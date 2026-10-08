@@ -249,7 +249,7 @@ export const useMeetingsStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const { activeMeeting } = draft;
-				if (!activeMeeting || activeMeeting.meetingId !== meetingId) return;
+				if (!meetingId || activeMeeting?.meetingId !== meetingId) return;
 				const previous = activeMeeting.connectionQuality[userId];
 				if (previous === undefined || changedAt > previous.changedAt) {
 					activeMeeting.connectionQuality[userId] = {

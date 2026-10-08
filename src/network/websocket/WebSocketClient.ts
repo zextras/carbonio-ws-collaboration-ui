@@ -82,8 +82,8 @@ export class WebSocketClient {
 			networkScore,
 			changedAt,
 			...(to ? { to } : {}),
-			...(maxUplinkTier != null ? { maxUplinkTier } : {}),
-			...(maxHardwareTier != null ? { maxHardwareTier } : {})
+			...(maxUplinkTier == null ? {} : { maxUplinkTier }),
+			...(maxHardwareTier == null ? {} : { maxHardwareTier })
 		});
 	}
 

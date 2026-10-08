@@ -30,7 +30,7 @@ export function readCandidatePairRttMs(stats: RTCStatsReport | null): number | u
 		}
 	});
 
-	const pair = (selectedId != null ? pairsById.get(selectedId) : undefined) ?? firefoxSelected;
+	const pair = (selectedId == null ? undefined : pairsById.get(selectedId)) ?? firefoxSelected;
 	if (pair == null) return undefined;
 	const rtt = pair.currentRoundTripTime;
 	return rtt != null && rtt > 0 ? rtt * 1000 : undefined;

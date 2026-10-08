@@ -21,6 +21,7 @@ import useStore from '../../store/Store';
 import { StreamInfo, StreamMap } from '../../types/network/models/meetingBeTypes';
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { rtcDebug } from '../../utils/debug';
 import { createMediaAnswer, requestVideoQuality, videoIceRestart } from '../apis/MeetingsApi';
 
@@ -42,6 +43,45 @@ const MIN_PKT = 20; // min packets/tick to trust the reading; below this = HOLD
 // so the first request is already the capped tier (no HIGH-then-drop) yet a feed is never withheld forever.
 const CEILING_WAIT_TICKS = 2;
 
+type InboundCounters = { decoded: number; recv: number };
+
+// framesDecoded / packetsReceived of the received webcam, undefined when the counters are missing
+const readInboundVideoCounters = (stats: RTCStatsReport | null): InboundCounters | undefined => {
+	let decoded: number | undefined;
+	let recv: number | undefined;
+	stats?.forEach(
+		(r: RTCStats & { kind?: string; framesDecoded?: number; packetsReceived?: number }) => {
+			if (r.type !== 'inbound-rtp' || r.kind !== 'video') return;
+			if (r.framesDecoded != null) decoded = r.framesDecoded;
+			if (r.packetsReceived != null) recv = r.packetsReceived;
+		}
+	);
+	if (decoded == null || recv == null) return undefined;
+	return { decoded, recv };
+};
+
+// fps-liveness score (0..10) between two samples, undefined (HOLD: no evidence) when it can't be trusted
+const fpsScoreBetween = (
+	prev: InboundCounters | undefined,
+	cur: InboundCounters | undefined
+): number | undefined => {
+	if (cur == null || prev == null) return undefined; // no counters / first tick
+	if (cur.decoded < prev.decoded || cur.recv < prev.recv) return undefined; // counter reset -> reseed, skip
+	if (cur.recv - prev.recv < MIN_PKT) return undefined; // almost no data arriving -> HOLD (blackout / paused / trickle)
+	return videoFpsScore((cur.decoded - prev.decoded) / 2); // 2 s tick
+};
+
+// Shed only when the sender is at/above its HARDWARE ceiling (the freeze is OUR downlink); HOLD when the
+// network shed them BELOW their hardware ceiling (their uplink). Fixes the 144p-camera bug.
+const isSenderOK = (
+	maxUplinkTier: number | null | undefined,
+	maxHardwareTier: number | null | undefined
+): boolean => {
+	if (maxUplinkTier == null) return true;
+	if (maxHardwareTier == null) return maxUplinkTier > 0;
+	return maxUplinkTier >= maxHardwareTier;
+};
+
 export default class VideoScreenInConnection implements IVideoScreenInConnection {
 	peerConn: RTCPeerConnection;
 
@@ -51,26 +91,26 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	streamsMap: StreamMap;
 
-	private videoReceivers = new Map<string, { receiver: RTCRtpReceiver; userId: string }>();
+	private readonly videoReceivers = new Map<string, { receiver: RTCRtpReceiver; userId: string }>();
 
-	private feedStates = new Map<string, FeedDownlinkState>();
+	private readonly feedStates = new Map<string, FeedDownlinkState>();
 
-	private prevStats = new Map<string, { decoded: number; recv: number }>(); // prev inbound-rtp video framesDecoded / packetsReceived per feed
+	private readonly prevStats = new Map<string, { decoded: number; recv: number }>(); // prev inbound-rtp video framesDecoded / packetsReceived per feed
 
-	private maskTicks = new Map<string, number>(); // post-change keyframe mask per feed
+	private readonly maskTicks = new Map<string, number>(); // post-change keyframe mask per feed
 
 	private evalTick = 0;
 
 	// Last substream we actually REQUESTED per feed — de-dupes the per-tick reconcile so we only hit the
 	// REST endpoint when a feed's target actually moves (global rung change, a new feed, or a debug cap).
-	private lastAppliedRung = new Map<string, number>();
+	private readonly lastAppliedRung = new Map<string, number>();
 
 	// Per feed, the (networkTarget, tileCeiling, shownTier) seen at the last reconcile — to log every change
 	// of the SHOWN tier (min(request, publisher maxTier)) and attribute it to our controller / resize / them.
-	private lastReconcile = new Map<string, { net: number; ceil: number; shown: number }>();
+	private readonly lastReconcile = new Map<string, { net: number; ceil: number; shown: number }>();
 
 	// Eval tick at which a never-served feed first started waiting for its tile ceiling (deferral window).
-	private ceilingWaitSince = new Map<string, number>();
+	private readonly ceilingWaitSince = new Map<string, number>();
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -191,37 +231,16 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			stats = null;
 		}
 
-		let decoded: number | undefined;
-		let recv: number | undefined;
-		stats?.forEach(
-			(r: RTCStats & { kind?: string; framesDecoded?: number; packetsReceived?: number }) => {
-				if (r.type !== 'inbound-rtp' || r.kind !== 'video') return;
-				if (r.framesDecoded != null) decoded = r.framesDecoded;
-				if (r.packetsReceived != null) recv = r.packetsReceived;
-			}
-		);
-
+		const cur = readInboundVideoCounters(stats);
 		const prev = this.prevStats.get(key);
-		if (decoded != null && recv != null) this.prevStats.set(key, { decoded, recv });
-
-		let score: number | undefined;
-		if (decoded == null || recv == null || prev == null) {
-			score = undefined; // no counters / first tick
-		} else if (decoded < prev.decoded || recv < prev.recv) {
-			score = undefined; // counter reset -> reseed, skip
-		} else if (recv - prev.recv < MIN_PKT) {
-			score = undefined; // almost no data arriving -> HOLD (blackout / paused / trickle)
-		} else {
-			const fps = (decoded - prev.decoded) / 2; // 2 s tick
-			score = videoFpsScore(fps);
-		}
+		if (cur) this.prevStats.set(key, cur);
 
 		const mask = this.maskTicks.get(key) ?? 0;
 		if (mask > 0) {
 			this.maskTicks.set(key, mask - 1);
-			score = undefined; // skip the keyframe tick right after our own tier change
+			return undefined; // skip the keyframe tick right after our own tier change
 		}
-		return score;
+		return fpsScoreBetween(prev, cur);
 	}
 
 	/** One downlink-quality evaluation per 2 s tick; see decideFeedDownlink for the decision rules. */
@@ -235,16 +254,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
 				const score = await this.computeFeedScore(key, receiver);
 
-				const maxUplinkTier = cq[userId]?.maxUplinkTier;
-				const maxHardwareTier = cq[userId]?.maxHardwareTier;
-				// shed only when sender is at/above its HARDWARE ceiling (freeze is OUR downlink);
-				// HOLD when network shed them BELOW hardware ceiling (their uplink). Fixes 144p-camera bug.
-				const senderOK =
-					maxUplinkTier == null
-						? true
-						: maxHardwareTier == null
-							? maxUplinkTier > 0
-							: maxUplinkTier >= maxHardwareTier;
+				const senderOK = isSenderOK(cq[userId]?.maxUplinkTier, cq[userId]?.maxHardwareTier);
 
 				const prevState = this.feedStates.get(key) ?? initialFeedState(this.roomFloor());
 				// The controller decides only the NETWORK target; the tile-size ceiling is applied as a
@@ -287,7 +297,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		const store = useStore.getState();
 		if (!isConnectionQualitySupported(store.session.apiVersion)) return;
 		const am = store.activeMeeting;
-		if (!am || am.meetingId !== this.meetingId) return;
+		if (am?.meetingId !== this.meetingId) return;
 		const ceilings = am.tileCeilings ?? {};
 		const cq = am.connectionQuality ?? {};
 		this.videoReceivers.forEach(({ userId }, key) => {
@@ -302,14 +312,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			const desired = Math.min(net, ceil);
 			const senderMax = cq[userId]?.maxUplinkTier ?? TOP_RUNG;
 			const shown = Math.min(desired, senderMax);
-			// Log every change of the SHOWN tier, attributed (our-network / tile-resize / their-network).
-			const prev = this.lastReconcile.get(key);
-			if (prev != null && shown !== prev.shown) {
-				rtcDebug(
-					`[DOWNLINK] ${getUserName(store, userId)} tier ${prev.shown} -> ${shown} (${shownReason(prev, net, ceil)})`
-				);
-			}
-			this.lastReconcile.set(key, { net, ceil, shown });
+			this.trackShownTier(store, key, userId, { net, ceil, shown });
 			// Request path unchanged: only hit Janus (and mask the keyframe) when OUR request actually moves.
 			if (applied === desired) return;
 			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
@@ -318,6 +321,22 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				() => {}
 			);
 		});
+	}
+
+	// Log every change of the SHOWN tier, attributed (our-network / tile-resize / their-network).
+	private trackShownTier(
+		store: RootStore,
+		key: string,
+		userId: string,
+		current: { net: number; ceil: number; shown: number }
+	): void {
+		const prev = this.lastReconcile.get(key);
+		if (prev != null && current.shown !== prev.shown) {
+			rtcDebug(
+				`[DOWNLINK] ${getUserName(store, userId)} tier ${prev.shown} -> ${current.shown} (${shownReason(prev, current.net, current.ceil)})`
+			);
+		}
+		this.lastReconcile.set(key, current);
 	}
 
 	private updateStreams(): void {

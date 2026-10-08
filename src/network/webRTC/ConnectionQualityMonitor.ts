@@ -91,7 +91,7 @@ export default class ConnectionQualityMonitor {
 
 	// RAW vote buffer (bars 0..5, one per 2 s tick, seeded optimistic). Only the display median reads from
 	// it. Lost ticks push bars=0 with NO reset (see vote()) so recovery is not over-optimistic.
-	private voteWindow = new VoteWindow();
+	private readonly voteWindow = new VoteWindow();
 
 	private videoOutPrevCum: VideoOutCumulative | null = null;
 
@@ -269,25 +269,7 @@ export default class ConnectionQualityMonitor {
 			screenActive ? this.safeStats(this.screenOut.peerConn) : Promise.resolve(null)
 		]);
 
-		if (webcamActive && videoUpStats != null) {
-			this.trackWebcamUplink(videoUpStats);
-		} else {
-			this.videoOutPrevCum = null;
-			this.lastVideoSender = null;
-		}
-
-		if (!webcamActive) {
-			this.myMaxUplinkTier = null;
-			this.myMaxHardwareTier = null;
-		} else {
-			if (this.lastTopActiveRung >= 0) {
-				this.myMaxUplinkTier = this.lastTopActiveRung;
-			}
-			// else (-1 transient) keep previous myMaxUplinkTier
-			const captureHeight = this.videoOut.rtpSender?.track?.getSettings().height;
-			const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
-			this.myMaxHardwareTier = producibleCeiling(tiers, captureHeight);
-		}
+		this.updateUplinkTiers(webcamActive, videoUpStats);
 
 		// RTT: candidate-pair round-trip ONLY (worst across audio/webcam/screen PCs) — a true two-way STUN
 		// measurement of our own me<->Janus leg, present on every PC regardless of which streams are on.
@@ -323,6 +305,27 @@ export default class ConnectionQualityMonitor {
 		if (lossUp !== undefined) raw.lossUp = lossUp;
 
 		return { raw, level: this.vote(raw, iceConnected) };
+	}
+
+	// The uplink tier we send and the max one the camera can produce, both null with the webcam off
+	private updateUplinkTiers(webcamActive: boolean, videoUpStats: RTCStatsReport | null): void {
+		if (webcamActive && videoUpStats != null) {
+			this.trackWebcamUplink(videoUpStats);
+		} else {
+			this.videoOutPrevCum = null;
+			this.lastVideoSender = null;
+		}
+
+		if (webcamActive) {
+			// -1 (no layer encoded this tick) is transient: keep the previous myMaxUplinkTier
+			if (this.lastTopActiveRung >= 0) this.myMaxUplinkTier = this.lastTopActiveRung;
+			const captureHeight = this.videoOut.rtpSender?.track?.getSettings().height;
+			const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+			this.myMaxHardwareTier = producibleCeiling(tiers, captureHeight);
+		} else {
+			this.myMaxUplinkTier = null;
+			this.myMaxHardwareTier = null;
+		}
 	}
 
 	// Compute the RAW badge vote for THIS tick from the three own-leg signals (RTT, uplink jitter, uplink

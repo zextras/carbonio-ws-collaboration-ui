@@ -81,7 +81,7 @@ export const getParticipantNetworkQuality = (
 ): ConnectionQuality | undefined => {
 	if (!meetingId || !userId) return undefined;
 	const { activeMeeting } = store;
-	if (!activeMeeting || activeMeeting.meetingId !== meetingId) return undefined;
+	if (activeMeeting?.meetingId !== meetingId) return undefined;
 	const cq = activeMeeting.connectionQuality[userId];
 	if (!cq) return undefined;
 	if (cq.networkScore == null) return 'lost';
