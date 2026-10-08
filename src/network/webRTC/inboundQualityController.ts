@@ -18,8 +18,6 @@ export const EVIDENCE_DOWN_M = 4;
 export const COOLDOWN_BASE = 12; // clean ticks required before an UP (24 s); doubles on a failed climb
 export const COOLDOWN_MAX = 32; // 64 s; backoff is monotonic per feed — escalates on failed climb, never resets
 
-export type DownlinkSignal = 'DOWN' | 'UP' | 'HOLD';
-
 export type FeedDownlinkState = {
 	targetRung: number;
 	evidenceBuf: number[]; // recent fps scores, for the DOWN N-of-M
@@ -38,13 +36,6 @@ export function initialFeedState(rung: number = TOP_RUNG): FeedDownlinkState {
 	};
 }
 
-export type DownlinkDecision = {
-	state: FeedDownlinkState;
-	targetRung: number;
-	changed: boolean;
-	signal: DownlinkSignal;
-};
-
 const EVIDENCE_CAP = 5; // >= EVIDENCE_DOWN_M
 
 // The controller decides the NETWORK target only (what the downlink can sustain), free within
@@ -54,7 +45,7 @@ export function decideFeedDownlink(
 	prev: FeedDownlinkState,
 	score: number | undefined,
 	senderOK: boolean
-): DownlinkDecision {
+): FeedDownlinkState {
 	const state: FeedDownlinkState = {
 		targetRung: prev.targetRung,
 		evidenceBuf: prev.evidenceBuf.slice(),
@@ -63,9 +54,7 @@ export function decideFeedDownlink(
 		ticksSinceUp: prev.ticksSinceUp + 1
 	};
 
-	if (score === undefined) {
-		return { state, targetRung: state.targetRung, changed: false, signal: 'HOLD' };
-	}
+	if (score === undefined) return state;
 
 	state.evidenceBuf.push(score);
 	if (state.evidenceBuf.length > EVIDENCE_CAP) state.evidenceBuf.shift();
@@ -77,13 +66,8 @@ export function decideFeedDownlink(
 	const downVote = frozenCount >= EVIDENCE_DOWN_N;
 	const upVote = state.cleanStreak >= state.cooldownLen;
 
-	let signal: DownlinkSignal = 'HOLD';
-	let changed = false;
-
 	if (downVote && state.targetRung > 0 && senderOK) {
 		state.targetRung -= 1;
-		signal = 'DOWN';
-		changed = true;
 		state.evidenceBuf = [];
 		state.cleanStreak = 0;
 		if (state.ticksSinceUp <= state.cooldownLen) {
@@ -92,12 +76,10 @@ export function decideFeedDownlink(
 		}
 	} else if (upVote && state.targetRung < TOP_RUNG) {
 		state.targetRung += 1;
-		signal = 'UP';
-		changed = true;
 		state.evidenceBuf = [];
 		state.cleanStreak = 0;
 		state.ticksSinceUp = 0;
 	}
 
-	return { state, targetRung: state.targetRung, changed, signal };
+	return state;
 }

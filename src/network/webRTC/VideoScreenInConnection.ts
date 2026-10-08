@@ -249,8 +249,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 				const prevState = this.feedStates.get(key) ?? initialFeedState(this.roomFloor());
 				// The controller decides only the NETWORK target; the tile-size ceiling is applied as a
 				// min() at request time (reconcileFeeds), so a resize adapts without the network backoff.
-				const { state } = decideFeedDownlink(prevState, score, senderOK);
-				this.feedStates.set(key, state);
+				this.feedStates.set(key, decideFeedDownlink(prevState, score, senderOK));
 			})
 		);
 

@@ -12,6 +12,7 @@ import {
 	jitterScore,
 	LinkSample,
 	producibleCeiling,
+	RID_RUNG,
 	rttScore,
 	scoreToBars,
 	scoreToLevel,
@@ -75,8 +76,6 @@ export default class ConnectionQualityMonitor {
 	changedAt = 0;
 
 	private myNetworkScore: number | null = null;
-
-	private committedNetworkScore: number | null = null;
 
 	private myTierWeightedNetworkScore: number | null = null;
 
@@ -147,7 +146,6 @@ export default class ConnectionQualityMonitor {
 		if (!isSupportedBySession()) return;
 		const { level } = await this.computeQuality();
 		this.committed = level;
-		this.committedNetworkScore = this.myNetworkScore;
 		const upSF = computeUplinkShortfall(this.myMaxHardwareTier, this.myMaxUplinkTier);
 		const downSF = this.videoIn.downlinkShortfall();
 		this.myTierWeightedNetworkScore = computeTierWeightedNetworkScore(
@@ -219,7 +217,6 @@ export default class ConnectionQualityMonitor {
 			tierWeightedNetworkScoreChanged
 		) {
 			this.committed = level;
-			this.committedNetworkScore = this.myNetworkScore;
 			this.committedTierWeightedNetworkScore = this.myTierWeightedNetworkScore;
 			this.committedMaxUplinkTier = this.myMaxUplinkTier;
 			this.committedMaxHardwareTier = this.myMaxHardwareTier;
@@ -351,7 +348,7 @@ export default class ConnectionQualityMonitor {
 		return scoreToLevel(numericScore);
 	}
 
-	// Derives topActiveRung (highest rid still encoding) purely to log GCC tier changes; never feeds the vote.
+	// Derives the highest rid still encoding (the layer GCC lets through), which becomes myMaxUplinkTier.
 	private trackWebcamUplink(stats: RTCStatsReport): void {
 		if (this.videoOut.rtpSender !== this.lastVideoSender) {
 			this.videoOutPrevCum = null;
@@ -360,7 +357,6 @@ export default class ConnectionQualityMonitor {
 		}
 
 		const framesEncoded: Record<string, number> = {};
-		const ridToIndex: Record<string, number> = { l: 0, m: 1, h: 2 };
 		stats.forEach((r: RTCStats & { rid?: string; framesEncoded?: number }) => {
 			if (r.type !== OUTBOUND_RTP) return;
 			const rid = r.rid ?? '';
@@ -373,7 +369,7 @@ export default class ConnectionQualityMonitor {
 		Object.entries(framesEncoded).forEach(([rid, currentFrames]) => {
 			const prevFrames = prevCum?.framesEncoded[rid] ?? 0;
 			if (currentFrames > prevFrames) {
-				const idx = ridToIndex[rid] ?? -1;
+				const idx = RID_RUNG[rid] ?? -1;
 				if (idx > topActiveRung) topActiveRung = idx;
 			}
 		});

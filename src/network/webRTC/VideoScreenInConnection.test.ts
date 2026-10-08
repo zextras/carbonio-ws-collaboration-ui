@@ -148,6 +148,7 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 	beforeEach(() => {
 		storeMocks.connectionQuality = {};
 		storeMocks.tileCeilings = {};
+		storeMocks.apiVersion = '1.6.15';
 		conn = new VideoScreenInConnection(MEETING_ID);
 		requestVideoQuality.mockClear();
 		vi.mocked(rtcDebug).mockClear();
@@ -241,7 +242,6 @@ describe('VideoScreenInConnection — downlink quality controller (fps-liveness 
 		await conn.evaluateQualityTick();
 
 		expect(requestVideoQuality).not.toHaveBeenCalled();
-		storeMocks.apiVersion = '1.6.15';
 	});
 
 	it('(c) does NOT duplicate requestVideoQuality when the target does not move (dedup)', async () => {

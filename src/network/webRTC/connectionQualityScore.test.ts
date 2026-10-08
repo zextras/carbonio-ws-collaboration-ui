@@ -15,13 +15,10 @@ import {
 	rttScore,
 	scoreToBars,
 	scoreToLevel,
-	TIER_PENALTY_RATIO,
-	tierPenalty,
 	tierWeightedNetworkScore,
 	uplinkLossScore,
 	uplinkShortfall,
-	videoFpsScore,
-	weightByTier
+	videoFpsScore
 } from './connectionQualityScore';
 
 describe('curveScore', () => {
@@ -247,47 +244,6 @@ describe('producibleCeiling', () => {
 	});
 });
 
-describe('weightByTier', () => {
-	it('returns score unchanged (penalty=1) when shortfall is 0 (at hardware ceiling)', () => {
-		expect(weightByTier(10, 2, 2)).toBe(10);
-		expect(weightByTier(10, 0, 0)).toBe(10);
-	});
-
-	it('applies geometric penalty (0.63^1) for shortfall of 1, rounded to 1 decimal', () => {
-		// 10 * 0.63 = 6.3 → round1 = 6.3
-		const expected = Math.round(10 * 0.63 * 10) / 10;
-		expect(weightByTier(10, 2, 1)).toBe(expected);
-	});
-
-	it('applies geometric penalty (0.63^2) for shortfall of 2, rounded to 1 decimal', () => {
-		// 10 * 0.63^2 = 3.969 → round1 = 4.0
-		const expected = Math.round(10 * 0.63 * 0.63 * 10) / 10;
-		expect(weightByTier(10, 2, 0)).toBe(expected);
-	});
-
-	it('returns round1(score) unchanged when both tiers are null', () => {
-		expect(weightByTier(7.5, null, null)).toBe(7.5);
-	});
-
-	it('returns round1(score) unchanged when maxHardwareTier is null', () => {
-		expect(weightByTier(8, null, 1)).toBe(8);
-	});
-
-	it('returns round1(score) unchanged when maxUplinkTier is null', () => {
-		expect(weightByTier(8, 2, null)).toBe(8);
-	});
-
-	it('does not penalise a low-res camera at its ceiling (maxUplink >= maxHardware)', () => {
-		expect(weightByTier(6, 0, 0)).toBe(6);
-	});
-
-	it('rounds result to 1 decimal', () => {
-		const raw = 10 * 0.63;
-		const expected = Math.round(raw * 10) / 10;
-		expect(weightByTier(10, 2, 1)).toBe(expected);
-	});
-});
-
 describe('uplinkShortfall', () => {
 	it('returns 0 when both tiers are null (webcam off or unsettled)', () => {
 		expect(uplinkShortfall(null, null)).toBe(0);
@@ -312,24 +268,6 @@ describe('uplinkShortfall', () => {
 	it('returns the positive shortfall when sending below the ceiling', () => {
 		expect(uplinkShortfall(2, 0)).toBe(2);
 		expect(uplinkShortfall(2, 1)).toBe(1);
-	});
-});
-
-describe('tierPenalty', () => {
-	it('returns 1.0 for shortfall 0 (no penalty)', () => {
-		expect(tierPenalty(0)).toBe(1);
-	});
-
-	it('returns TIER_PENALTY_RATIO^1 for shortfall 1', () => {
-		expect(tierPenalty(1)).toBeCloseTo(TIER_PENALTY_RATIO, 10);
-	});
-
-	it('returns TIER_PENALTY_RATIO^2 for shortfall 2', () => {
-		expect(tierPenalty(2)).toBeCloseTo(TIER_PENALTY_RATIO ** 2, 10);
-	});
-
-	it('returns TIER_PENALTY_RATIO^4 for shortfall 4 (both up=2, down=2 combined)', () => {
-		expect(tierPenalty(4)).toBeCloseTo(TIER_PENALTY_RATIO ** 4, 10);
 	});
 });
 

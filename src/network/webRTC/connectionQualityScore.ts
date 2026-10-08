@@ -6,7 +6,7 @@
 
 import { gte } from 'semver';
 
-import { Version } from '../../types/store/SessionTypes';
+import { SimulcastTier, Version } from '../../types/store/SessionTypes';
 
 const CONNECTION_QUALITY_MIN_API_VERSION = '1.6.15';
 
@@ -94,31 +94,33 @@ export function combineVote(rtt: number, jitter: number, loss: number): number {
 	return round1(score);
 }
 
-// Max rung the CAMERA can produce, from the backend tier list + capture height. NO hardcoded heights.
-// Rung scale: low=0, medium=1, high=2 (matches ridToIndex {l:0,m:1,h:2}).
+// Simulcast tier -> rung (0 = low, 1 = medium, 2 = high) and the rid it is published with
+export const TIER_RUNG: Record<SimulcastTier['name'], number> = { low: 0, medium: 1, high: 2 };
+export const TIER_RID: Record<SimulcastTier['name'], string> = { low: 'l', medium: 'm', high: 'h' };
+export const RID_RUNG: Record<string, number> = Object.fromEntries(
+	(Object.keys(TIER_RID) as SimulcastTier['name'][]).map((name) => [
+		TIER_RID[name],
+		TIER_RUNG[name]
+	])
+);
+
+// Tiers the camera can produce: we only downscale, so the capture must be at least as tall as the tier
+export function producibleTiers(
+	tiers: SimulcastTier[] | undefined,
+	captureHeight: number
+): SimulcastTier[] {
+	return tiers ? tiers.filter((t) => captureHeight >= t.height) : [];
+}
+
+// Max rung the CAMERA can produce, from the backend tier list + capture height
 export function producibleCeiling(
-	tiers: { name: 'high' | 'medium' | 'low'; height: number }[] | undefined,
+	tiers: SimulcastTier[] | undefined,
 	captureHeight: number | undefined
 ): number | null {
 	if (!tiers?.length || captureHeight == null) return null;
-	const rung = { low: 0, medium: 1, high: 2 } as const;
-	const producible = tiers.filter((t) => captureHeight >= t.height);
+	const producible = producibleTiers(tiers, captureHeight);
 	if (!producible.length) return 0;
-	return Math.max(...producible.map((t) => rung[t.name]));
-}
-
-export const TIER_PENALTY_RATIO = 0.63;
-
-// Weight an already-computed vote score (0..10) by how far below the hardware ceiling we send.
-// shortfall 0 (at or above hardware ceiling) -> penalty 1 (not punished). Both tiers null -> 1.
-export function weightByTier(
-	score: number,
-	maxHardwareTier: number | null,
-	maxUplinkTier: number | null
-): number {
-	if (maxHardwareTier == null || maxUplinkTier == null) return round1(score);
-	const shortfall = Math.max(0, maxHardwareTier - maxUplinkTier);
-	return round1(score * TIER_PENALTY_RATIO ** shortfall);
+	return Math.max(...producible.map((t) => TIER_RUNG[t.name]));
 }
 
 // Uplink shortfall: how many tier rungs below the hardware ceiling we are currently sending.
@@ -129,11 +131,6 @@ export function uplinkShortfall(
 ): number {
 	if (maxHardwareTier == null || maxUplinkTier == null) return 0;
 	return Math.max(0, maxHardwareTier - maxUplinkTier);
-}
-
-// Multiplicative penalty coefficient for a given total tier shortfall (uplink + downlink combined).
-export function tierPenalty(shortfall: number): number {
-	return TIER_PENALTY_RATIO ** shortfall;
 }
 
 export const K_UP = 1.5;

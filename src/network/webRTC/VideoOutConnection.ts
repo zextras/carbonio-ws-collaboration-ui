@@ -6,6 +6,7 @@
 
 import { gte } from 'semver';
 
+import { producibleTiers, TIER_RID } from './connectionQualityScore';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
@@ -96,22 +97,19 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		stream: MediaStream,
 		peerConn: RTCPeerConnection
 	): void {
-		const ridMap: Record<'high' | 'medium' | 'low', string> = { high: 'h', medium: 'm', low: 'l' };
 		const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
 		const captureHeight =
 			(typeof videoTrack?.getSettings === 'function'
 				? videoTrack.getSettings().height
 				: undefined) ?? 0;
-		// A tier is producible only if the capture has at least its height (scaleResolutionDownBy must be
-		// >= 1 — we downscale, never upscale). A camera that can't produce a tier simply drops to the
-		// lower tiers, so a 480p camera has no 720 'high' and its top becomes 'medium' (360).
-		const producible = tiers ? tiers.filter((t) => captureHeight >= t.height) : [];
+		// A camera that can't produce a tier drops to the lower ones: a 480p camera has no 720 'high'
+		const producible = producibleTiers(tiers, captureHeight);
 		let sendEncodings: RTCRtpEncodingParameters[];
 		if (!tiers || tiers.length === 0 || producible.length === 0) {
 			sendEncodings = [{ rid: 'h', scaleResolutionDownBy: 1 }];
 		} else {
 			sendEncodings = producible.map((t) => ({
-				rid: ridMap[t.name],
+				rid: TIER_RID[t.name],
 				scaleResolutionDownBy: captureHeight / t.height
 			}));
 		}
