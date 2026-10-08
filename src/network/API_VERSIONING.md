@@ -2,6 +2,44 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.15
+
+### Changes
+
+- **API**: New `PUT /meetings/${meetingId}/media/quality` endpoint to request the simulcast substream received for a participant's video feed
+- **WebSocket**: New `UplinkStatusUpdate` client message to share the own connection quality (`networkScore`, `maxUplinkTier`, `maxHardwareTier`, `changedAt`, optional `to` recipient) and new `MeetingParticipantUplinkStatusChanged` event that relays it to the meeting participants
+- **Attributes**: New `videoSimulcastTiers` session attribute with the simulcast tiers to publish. Without it the webcam is published with a single encoding
+- Connection quality (indicator, status updates and downlink quality requests) is enabled only for api version >= 1.6.15
+
+### Affected Files
+
+- 'src/network/apis/MeetingsApi.ts' on function `requestVideoQuality`
+- 'src/network/websocket/WebSocketClient.ts' on function `sendUplinkStatusUpdate`
+- 'src/network/websocket/wsMeetingEventHandlers/MeetingParticipantUplinkStatusChangedEventHandler.ts'
+- 'src/network/webRTC/connectionQualityScore.ts' on function `isConnectionQualitySupported`
+- 'src/network/webRTC/ConnectionQualityMonitor.ts'
+- 'src/network/webRTC/VideoScreenInConnection.ts'
+- 'src/network/webRTC/VideoOutConnection.ts'
+- 'src/meetings/components/tile/ConnectionQualityIndicator.tsx'
+
+---
+
+## Version 1.6.14
+
+### Changes
+
+- **API**: `GET /rooms/${roomId}/attachments` accepts the new `mimeTypeCategory` param (`IMAGES`, `VIDEOS`, `DOCUMENTS`), alternative to `mimeType`, and returns the `total` number of attachments. The media gallery requires api version >= 1.6.14
+- **API**: New video thumbnail preview `GET /preview/video/${fileId}/${area}/thumbnail`
+
+### Affected Files
+
+- 'src/network/apis/RoomsApi.ts' on function `getRoomAttachments`
+- 'src/network/apis/AttachmentsApi.ts' on function `getVideoThumbnailURL`
+- 'src/hooks/useMediaGalleryAttachments.ts'
+- 'src/chats/components/infoPanel/ConversationInfoPanel.tsx'
+
+---
+
 ## Version 1.6.13
 
 ### Changes
