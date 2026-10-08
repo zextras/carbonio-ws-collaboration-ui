@@ -5,13 +5,13 @@
  */
 
 import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
-import { gte } from 'semver';
 import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 
 import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
+import { getIsWscPure } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
@@ -22,8 +22,6 @@ import { wsClient } from '../websocket/WebSocketClient';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import { sanitizeXmppMessage } from '../xmpp/utility/sanitizeXmppMessage';
 import { xmppClient } from '../xmpp/XMPPClient';
-
-export const WSC_PURE_MIN_VERSION = '2.0.0';
 
 /**
  * Public chat surface consumed outside the XMPP stack (UI components, WS
@@ -53,14 +51,9 @@ export type ChatClient = Pick<
 	| 'getMessagePin'
 >;
 
-/**
- * True when the negotiated backend speaks the WSC-pure protocol (>= 2.0.0):
- * REST writes + single push WebSocket, no MongooseIM. The version gate is the
- * feature flag — against a 1.6.x backend every v2 branch is dormant.
- */
+/** {@link getIsWscPure} on the current session, for the call sites outside the store. */
 export function isWscPure(): boolean {
-	const { apiVersion } = useStore.getState().session;
-	return !!apiVersion && gte(apiVersion, WSC_PURE_MIN_VERSION);
+	return getIsWscPure(useStore.getState());
 }
 
 function sdkNotWiredYet(method: string): void {

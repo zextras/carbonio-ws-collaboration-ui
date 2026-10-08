@@ -391,6 +391,46 @@ describe('ChatsRegistryStoreSlice tests', () => {
 
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
 		});
+
+		const historyWithConfigRows = (roomId: string): Array<TextMessage | ConfigurationMessage> => [
+			createMockTextMessage({ id: 'h1', roomId, from: 'other', date: 1000 }),
+			createMockConfigurationMessage({ id: 'h2', roomId, from: 'other', date: 2000 }),
+			createMockTextMessage({ id: 'h3', roomId, from: 'other', date: 3000 }),
+			createMockConfigurationMessage({ id: 'h4', roomId, from: 'me', date: 4000 }),
+			createMockTextMessage({ id: 'h5', roomId, from: 'me', date: 5000 }),
+			createMockTextMessage({ id: 'h6', roomId, from: 'other', date: 6000 })
+		];
+
+		test('v2: only the others text messages count, the backend leaves the system events out', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('2.0.0');
+			const roomId = 'room-v2-unread';
+			useStore.getState().updateHistory(roomId, historyWithConfigRows(roomId));
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'h1', markerDate: 1000 })
+				]);
+
+			// h3 and h6: neither configuration row, mine included
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+		});
+
+		test('v1: the configuration rows count too, like MongooseIM', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('1.6.14');
+			const roomId = 'room-v1-unread';
+			useStore.getState().updateHistory(roomId, historyWithConfigRows(roomId));
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'h1', markerDate: 1000 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(4);
+		});
 	});
 
 	describe('Unread count', () => {

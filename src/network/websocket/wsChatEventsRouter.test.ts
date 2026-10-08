@@ -818,7 +818,7 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 		});
 	}
 
-	it('sets the banner from the loaded target and lands the v1 config row with the v1 effects', () => {
+	it('sets the banner from the loaded target and lands the v1 config row, no unread bump', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		useStore.getState().updateHistory('room-pin', [
 			createMockTextMessage({
@@ -852,7 +852,8 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 			value: 'msg-pin-1',
 			from: 'user-2'
 		});
-		expect(registry?.unread).toBe(1);
+		// The backend leaves the system events out of its unread counter
+		expect(registry?.unread ?? 0).toBe(0);
 		expect(received).toEqual([
 			expect.objectContaining({ operation: OperationType.MESSAGE_PINNED })
 		]);
@@ -962,7 +963,7 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 });
 
 describe('wsChatEventsRouter - MessageUnpinned', () => {
-	it('clears the banner and the scroll selection, lands the row and bumps unread for others', () => {
+	it('clears the banner and the scroll selection, lands the row without an unread bump', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		const pinned = createMockTextMessage({
 			id: 'msg-up-1',
@@ -991,7 +992,7 @@ describe('wsChatEventsRouter - MessageUnpinned', () => {
 			(message) => message.type === MessageType.CONFIGURATION_MSG
 		);
 		expect(row).toMatchObject({ operation: OperationType.MESSAGE_UNPINNED, value: 'msg-up-1' });
-		expect(registry?.unread).toBe(1);
+		expect(registry?.unread ?? 0).toBe(0);
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 });

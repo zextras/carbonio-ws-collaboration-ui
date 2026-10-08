@@ -84,17 +84,13 @@ function routeMessageForwarded(event: WsMessageForwardedEvent): void {
 }
 
 /**
- * The v1 effects of a pin/unpin configuration row: custom event for every
- * sender, unread bump only for the others'. No browser notification (the v1
- * config handler never fired one). The v1 auto-read of the own config row has
- * no v2 equivalent — the row id is synthesized, the backend's persisted
- * system-event id is not on the event (plan §5.15).
+ * The v1 effects of a pin/unpin configuration row, minus the unread bump: the
+ * WSC backend leaves the system events out of its unread counter (plan
+ * §5.15b), so the badge stays aligned with it. Custom event for every sender;
+ * no browser notification (the v1 config handler never fired one).
  */
-function notifyPinConfigRow(row: StoreMessage, actorId: string, roomId: string): void {
+function notifyPinConfigRow(row: StoreMessage): void {
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: row as Message });
-	if (!isMyId(actorId)) {
-		useStore.getState().incrementUnreadCount(roomId, 1);
-	}
 }
 
 /**
@@ -120,7 +116,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 				console.error('wsChatEventsRouter: pinned message hydration failed', err);
 			});
 	}
-	notifyPinConfigRow(row, event.pinnedBy, event.roomId);
+	notifyPinConfigRow(row);
 }
 
 /**
@@ -131,7 +127,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
 	const row = wscSdk.handleMessageUnpinned(event);
 	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
-	notifyPinConfigRow(row, event.unpinnedBy, event.roomId);
+	notifyPinConfigRow(row);
 }
 
 /**
