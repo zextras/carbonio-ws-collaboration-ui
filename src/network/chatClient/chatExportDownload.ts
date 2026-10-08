@@ -11,7 +11,7 @@ export function getChatExportUrl(roomId: string): string {
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 	const deletedPlaceholder = t('message.deletedMessage', 'Deleted message');
 	const params = new URLSearchParams({ tz, deletedPlaceholder });
-	return `${window.document.location.origin}/services/chats/rooms/${roomId}/messages/export?${params.toString()}`;
+	return `${globalThis.document.location.origin}/services/chats/rooms/${roomId}/messages/export?${params.toString()}`;
 }
 
 export async function downloadChatExport(roomId: string): Promise<void> {
@@ -26,5 +26,5 @@ export async function downloadChatExport(roomId: string): Promise<void> {
 	link.download = `${fileName}.txt`;
 	document.body.appendChild(link);
 	link.click();
-	document.body.removeChild(link);
+	link.remove();
 }

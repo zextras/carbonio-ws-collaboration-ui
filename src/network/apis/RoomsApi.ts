@@ -259,7 +259,7 @@ export const addRoomAttachment = (
 		} else if (isWscPure()) {
 			uploadWscAttachment(roomId, uuid, file, optionalFields, signal)
 				.then((resp) => {
-					window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+					globalThis.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 					resolve(resp);
 				})
 				.catch((error) => {
@@ -323,7 +323,7 @@ export const forwardMessages = (
 			// Forwarding an attachment clones it server-side: same quota effect
 			// as the v1 flow
 			if (hasAttachments && fulfilled.length > 0) {
-				window.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+				globalThis.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 			}
 			const rejected = results.find(
 				(result): result is PromiseRejectedResult => result.status === 'rejected'

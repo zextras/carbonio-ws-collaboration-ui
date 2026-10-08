@@ -312,8 +312,8 @@ export const chatClient: ChatClient = {
 					// the most recent messages on the first load.
 					...(oldest ? { before: endHistory } : {}),
 					// Composite cursor only when the anchor is a message already in store
-					...(oldest && oldest.date === endHistory ? { beforeId: oldest.id } : {}),
-					...(quantity !== undefined ? { limit: quantity } : {}),
+					...(oldest?.date === endHistory ? { beforeId: oldest.id } : {}),
+					...(quantity === undefined ? {} : { limit: quantity }),
 					...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
 				})
 				.then(() => useStore.getState().setHistoryLoadDisabled(roomId, false))

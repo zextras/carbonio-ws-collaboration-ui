@@ -137,7 +137,7 @@ function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
  */
 function refreshPinnedBannerOnEdit(roomId: string, messageId: string, text: string): void {
 	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
-	if (pinned && pinned.stanzaId === messageId) {
+	if (pinned?.stanzaId === messageId) {
 		useStore.getState().setPinnedMessage(roomId, { ...pinned, text });
 	}
 }
@@ -149,7 +149,7 @@ function refreshPinnedBannerOnEdit(roomId: string, messageId: string, text: stri
  */
 function dropPinnedBannerOnDelete(roomId: string, messageId: string): void {
 	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
-	if (pinned && pinned.stanzaId === messageId) {
+	if (pinned?.stanzaId === messageId) {
 		useStore.getState().removePinnedMessage(roomId);
 		useStore.getState().setSelectedPinnedMessage(roomId, undefined);
 	}

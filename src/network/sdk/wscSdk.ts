@@ -60,7 +60,7 @@ const bridge: StoreBridge = {
 };
 
 const http = createHttpClient({
-	fetch: (url, init) => window.fetch(url, init),
+	fetch: (url, init) => globalThis.fetch(url, init),
 	baseUrl: BASE_PATH,
 	versionStore: {
 		getApiVersion: (): string | undefined => useStore.getState().session.apiVersion,
