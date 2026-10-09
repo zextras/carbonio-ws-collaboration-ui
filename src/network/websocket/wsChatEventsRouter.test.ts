@@ -129,9 +129,11 @@ describe('wsChatEventsRouter - ReadUpdated', () => {
 		]);
 
 		// Read up to the first message only: the marker lands on the latest row
-		// at or before lastReadAt, dated lastReadAt (not the arrival instant)
-		const lastReadAt = '2026-08-01T09:30:00.123456Z';
-		wsChatEventsRouter(buildWsReadUpdatedEvent({ roomId: 'room-r', userId: 'user-2', lastReadAt }));
+		// at or before itemCreatedAt, dated itemCreatedAt (not the arrival instant)
+		const itemCreatedAt = '2026-08-01T09:30:00.123456Z';
+		wsChatEventsRouter(
+			buildWsReadUpdatedEvent({ roomId: 'room-r', userId: 'user-2', itemCreatedAt })
+		);
 
 		expect(useStore.getState().chatsRegistry['room-r']?.markers['user-2']).toMatchObject({
 			messageId: 'msg-r1',
@@ -157,7 +159,7 @@ describe('wsChatEventsRouter - ReadUpdated', () => {
 			buildWsReadUpdatedEvent({
 				roomId: 'room-u',
 				userId: 'me',
-				lastReadAt: AUG_FIRST_LATE_MORNING
+				itemCreatedAt: AUG_FIRST_LATE_MORNING
 			})
 		);
 
@@ -809,6 +811,9 @@ describe('wsChatEventsRouter - MessageForwarded', () => {
 });
 
 describe('wsChatEventsRouter - MessagePinned', () => {
+	const systemPinRoomId = 'room-psys';
+	const systemPinTargetId = 'msg-psys-1';
+
 	function pinnedEvent(roomId: string, messageId: string, pinnedBy: string): WsMessagePinnedEvent {
 		return buildWsMessagePinnedEvent({
 			roomId,
@@ -818,7 +823,7 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 		});
 	}
 
-	it('sets the banner from the loaded target and lands the v1 config row, no unread bump', () => {
+	it('sets the banner from the loaded target and lands the v1 config row with the v1 effects', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		useStore.getState().updateHistory('room-pin', [
 			createMockTextMessage({
@@ -852,8 +857,7 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 			value: 'msg-pin-1',
 			from: 'user-2'
 		});
-		// The backend leaves the system events out of its unread counter
-		expect(registry?.unread ?? 0).toBe(0);
+		expect(registry?.unread).toBe(1);
 		expect(received).toEqual([
 			expect.objectContaining({ operation: OperationType.MESSAGE_PINNED })
 		]);
@@ -878,29 +882,48 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 		expect(useStore.getState().chatsRegistry['room-pown']?.unread ?? 0).toBe(0);
 	});
 
-	it('hydrates an off-window target from GET /pin (the event is content-free)', async () => {
+	it('sets the banner from the event message for an off-window target, without a GET /pin', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
-		mockJsonResponseOnce([
-			{
-				messageId: 'msg-far',
+
+		wsChatEventsRouter({
+			...pinnedEvent('room-pfar', 'msg-far', 'user-2'),
+			message: buildWireMessage({
+				id: 'msg-far',
 				roomId: 'room-pfar',
-				pinnedBy: 'user-2',
-				pinnedAt: AUG_FIRST_LATE_MORNING,
-				text: 'testo dal DTO',
-				senderId: 'user-9'
-			}
-		]);
+				senderId: 'user-9',
+				text: 'testo dall evento',
+				createdAt: AUG_FIRST_EARLY_MORNING
+			})
+		});
 
-		wsChatEventsRouter(pinnedEvent('room-pfar', 'msg-far', 'user-2'));
-		await vi.advanceTimersByTimeAsync(0);
-
-		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-pfar/pin');
 		expect(useStore.getState().activeConversations['room-pfar']?.messagePinned).toMatchObject({
 			id: 'msg-far',
-			text: 'testo dal DTO',
+			text: 'testo dall evento',
 			from: 'user-9',
-			date: Date.parse(AUG_FIRST_LATE_MORNING)
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
 		});
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('lands the live row under the systemEventId and counts it once for the others', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateHistory(systemPinRoomId, [
+			createMockTextMessage({
+				id: systemPinTargetId,
+				stanzaId: systemPinTargetId,
+				roomId: systemPinRoomId,
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter({
+			...pinnedEvent(systemPinRoomId, systemPinTargetId, 'user-2'),
+			systemEventId: 'sys-pin-1'
+		});
+
+		const registry = useStore.getState().chatsRegistry[systemPinRoomId];
+		expect(registry?.messages.map((message) => message.id)).toContain('sys-pin-1');
+		expect(registry?.unread).toBe(1);
 	});
 
 	it('pins a live-edited message with the edited text in the banner (v1 merged-copy parity)', () => {
@@ -963,7 +986,7 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 });
 
 describe('wsChatEventsRouter - MessageUnpinned', () => {
-	it('clears the banner and the scroll selection, lands the row without an unread bump', () => {
+	it('clears the banner and the scroll selection, lands the row and bumps unread for others', () => {
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		const pinned = createMockTextMessage({
 			id: 'msg-up-1',
@@ -992,8 +1015,23 @@ describe('wsChatEventsRouter - MessageUnpinned', () => {
 			(message) => message.type === MessageType.CONFIGURATION_MSG
 		);
 		expect(row).toMatchObject({ operation: OperationType.MESSAGE_UNPINNED, value: 'msg-up-1' });
-		expect(registry?.unread ?? 0).toBe(0);
+		expect(registry?.unread).toBe(1);
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('does not bump unread for the own unpin', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter(
+			buildWsMessageUnpinnedEvent({
+				roomId: 'room-upown',
+				messageId: 'msg-up-2',
+				unpinnedBy: 'me',
+				timestamp: AUG_FIRST_LATE_MORNING
+			})
+		);
+
+		expect(useStore.getState().chatsRegistry['room-upown']?.unread ?? 0).toBe(0);
 	});
 });
 

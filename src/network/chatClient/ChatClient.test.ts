@@ -10,6 +10,7 @@ import {
 	buildInboxResponse,
 	buildMessage,
 	buildMessageTimelineItem,
+	buildPinnedMessage,
 	buildReadMarker,
 	buildSystemEvent,
 	buildSystemEventTimelineItem,
@@ -43,6 +44,7 @@ vi.mock('./chatExportDownload');
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const PIN_FEATURE = 'zextras:iq:pin';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
+const inboxRoomId = 'room-se-inbox';
 const quotedId = 'msg-quoted';
 const editTargetId = 'msg-target';
 const editedText = 'testo corretto';
@@ -139,17 +141,19 @@ describe('chatClient façade', () => {
 						})
 					]
 				},
-				lastMessage: buildWireMessage({
-					id: 'msg-1',
-					roomId: 'room-1',
-					senderId: 'user-2',
-					text: 'ciao',
-					createdAt: AUG_FIRST_LATE_MORNING
-				}),
+				lastItem: buildMessageTimelineItem(
+					buildWireMessage({
+						id: 'msg-1',
+						roomId: 'room-1',
+						senderId: 'user-2',
+						text: 'ciao',
+						createdAt: AUG_FIRST_LATE_MORNING
+					})
+				),
 				unreadCount: 2,
 				markers: [
 					// v2 markers carry the createdAt of the marked item
-					buildReadMarker({ userId: 'user-2', lastReadAt: AUG_FIRST_LATE_MORNING })
+					buildReadMarker({ userId: 'user-2', itemCreatedAt: AUG_FIRST_LATE_MORNING })
 				]
 			})
 		]);
@@ -183,6 +187,40 @@ describe('chatClient façade', () => {
 		expect(useStore.getState().connections.status.xmpp).toBe(true);
 	});
 
+	it('hydrates a system_event lastItem of GET /inbox as the room last configuration row', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		vi.spyOn(xmppClient, 'connect').mockImplementation(() => undefined);
+		mockJsonResponse(
+			buildInboxResponse([
+				buildInboxEntry({
+					roomId: inboxRoomId,
+					lastItem: buildSystemEventTimelineItem(
+						buildSystemEvent({
+							id: 'evt-last',
+							roomId: inboxRoomId,
+							type: 'MESSAGE_PINNED',
+							actorId: 'user-3',
+							content: { messageId: 'msg-1' },
+							createdAt: AUG_FIRST_LATE_MORNING
+						})
+					)
+				})
+			])
+		);
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(0);
+
+		const registry = useStore.getState().chatsRegistry[inboxRoomId];
+		expect(registry?.inboxMessageId).toBe('evt-last');
+		expect(registry?.lastMessage).toMatchObject({
+			id: 'evt-last',
+			type: 'configuration',
+			operation: 'messagePinned',
+			from: 'user-3'
+		});
+	});
+
 	it('logs and survives a failing inbox hydration on connect', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -213,7 +251,8 @@ describe('chatClient façade', () => {
 						id: 'evt-created',
 						roomId: 'room-t',
 						type: 'ROOM_CREATED',
-						content: { creatorId: 'user-1' },
+						actorId: 'user-1',
+						content: {},
 						createdAt: roomCreatedAt
 					})
 				),
@@ -229,7 +268,7 @@ describe('chatClient façade', () => {
 			],
 			{
 				hasMoreBefore: false,
-				markers: [buildReadMarker({ userId: 'user-2', lastReadAt: AUG_FIRST_LATE_MORNING })]
+				markers: [buildReadMarker({ userId: 'user-2', itemCreatedAt: AUG_FIRST_LATE_MORNING })]
 			}
 		);
 		mockJsonResponse(timeline);
@@ -357,7 +396,7 @@ describe('chatClient façade', () => {
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-m/read');
 		expect((global.fetch as Mock).mock.calls[0]?.[1]).toMatchObject({
 			method: 'PUT',
-			body: JSON.stringify({ messageId: 'msg-m1' })
+			body: JSON.stringify({ itemId: 'msg-m1' })
 		});
 	});
 
@@ -403,7 +442,7 @@ describe('chatClient façade', () => {
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/rooms/room-se/read');
 		expect((global.fetch as Mock).mock.calls[0]?.[1]).toMatchObject({
 			method: 'PUT',
-			body: JSON.stringify({ messageId: systemEventId })
+			body: JSON.stringify({ itemId: systemEventId })
 		});
 	});
 
@@ -813,14 +852,17 @@ describe('chatClient façade', () => {
 			})
 		]);
 		mockJsonResponse([
-			{
+			buildPinnedMessage({
 				messageId: 'msg-gp',
 				roomId: 'room-gp',
-				pinnedBy: 'user-2',
 				pinnedAt: AUG_FIRST_LATE_MORNING,
-				text: 'dal DTO',
-				senderId: 'user-9'
-			}
+				message: buildWireMessage({
+					id: 'msg-gp',
+					roomId: 'room-gp',
+					senderId: 'user-9',
+					text: 'dal DTO'
+				})
+			})
 		]);
 
 		chatClient.getMessagePin('room-gp');
@@ -833,17 +875,21 @@ describe('chatClient façade', () => {
 		});
 	});
 
-	it('degrades the banner to the DTO stub when the pin target is off-window', async () => {
+	it('falls back to the DTO message, dated with its createdAt, when the pin target is off-window', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		mockJsonResponse([
-			{
+			buildPinnedMessage({
 				messageId: 'msg-off',
 				roomId: 'room-goff',
-				pinnedBy: 'user-2',
 				pinnedAt: AUG_FIRST_LATE_MORNING,
-				text: 'testo remoto',
-				senderId: 'user-9'
-			}
+				message: buildWireMessage({
+					id: 'msg-off',
+					roomId: 'room-goff',
+					senderId: 'user-9',
+					text: 'testo remoto',
+					createdAt: AUG_FIRST_MORNING
+				})
+			})
 		]);
 
 		chatClient.getMessagePin('room-goff');
@@ -853,7 +899,7 @@ describe('chatClient façade', () => {
 			id: 'msg-off',
 			text: 'testo remoto',
 			from: 'user-9',
-			date: Date.parse(AUG_FIRST_LATE_MORNING)
+			date: Date.parse(AUG_FIRST_MORNING)
 		});
 	});
 

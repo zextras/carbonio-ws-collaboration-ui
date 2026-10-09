@@ -120,12 +120,13 @@ const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRe
 
 /**
  * Which messages after the own marker make the unread count: the others' text
- * messages, plus the configuration rows on v1 only, like MongooseIM did. The
- * WSC backend leaves the system events out of its counter (plan §5.15b).
+ * messages, plus the configuration rows: all of them on v1, like MongooseIM
+ * did, only the ones authored by others on v2, like the WSC backend counts the
+ * system lines.
  */
-const countsAsUnread = (msg: Message, countsConfigRows: boolean): boolean => {
+const countsAsUnread = (msg: Message, isWscPure: boolean): boolean => {
 	if (msg.type === MessageType.CONFIGURATION_MSG) {
-		return countsConfigRows;
+		return !isWscPure || !isMyId(msg.from);
 	}
 	return msg.type === MessageType.TEXT_MSG && !isMyId(msg.from);
 };
@@ -366,10 +367,10 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
 					: undefined;
 
-				const countsConfigRows = !getIsWscPure(draft);
+				const isWscPure = getIsWscPure(draft);
 				const unreadMessages = messages.filter((msg) => {
 					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
-					return countsAsUnread(msg, countsConfigRows) && isAfterMarker;
+					return countsAsUnread(msg, isWscPure) && isAfterMarker;
 				});
 
 				draft.chatsRegistry[roomId].unread = unreadMessages.length;

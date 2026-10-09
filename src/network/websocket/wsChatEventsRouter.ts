@@ -84,39 +84,30 @@ function routeMessageForwarded(event: WsMessageForwardedEvent): void {
 }
 
 /**
- * The v1 effects of a pin/unpin configuration row, minus the unread bump: the
- * WSC backend leaves the system events out of its unread counter (plan
- * §5.15b), so the badge stays aligned with it. Custom event for every sender;
- * no browser notification (the v1 config handler never fired one).
+ * The v1 effects of a pin/unpin configuration row: custom event for every
+ * sender, unread bump only for the others'. The WSC backend counts the system
+ * lines whose author is not the user, so the badge stays aligned with it. No
+ * browser notification (the v1 config handler never fired one).
  */
-function notifyPinConfigRow(row: StoreMessage): void {
+function notifyPinConfigRow(row: StoreMessage, actorId: string, roomId: string): void {
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: row as Message });
+	if (!isMyId(actorId)) {
+		useStore.getState().incrementUnreadCount(roomId, 1);
+	}
 }
 
 /**
- * v1 landed pin changes as real MUC configuration rows; the SDK synthesizes
- * the row and sets the banner from the store copy when the target is loaded
- * (same lookup the reply hydration uses — the event is content-free).
- * Off-window targets fall back to GET /pin, which at least carries text and
- * sender.
+ * v1 landed pin changes as real MUC configuration rows; the SDK builds the
+ * row and sets the banner from the store copy when the target is loaded
+ * (same lookup the reply hydration uses), else from the message the event
+ * carries.
  */
 function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
 		| StoreTextMessage
 		| undefined;
 	const row = wscSdk.handleMessagePinned(event, resolved);
-	if (!resolved) {
-		wscSdk
-			.fetchPinnedMessage(
-				event.roomId,
-				(messageId) =>
-					findPinnedMessageContent(event.roomId, messageId) as StoreTextMessage | undefined
-			)
-			.catch((err) => {
-				console.error('wsChatEventsRouter: pinned message hydration failed', err);
-			});
-	}
-	notifyPinConfigRow(row);
+	notifyPinConfigRow(row, event.pinnedBy, event.roomId);
 }
 
 /**
@@ -127,7 +118,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
 	const row = wscSdk.handleMessageUnpinned(event);
 	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
-	notifyPinConfigRow(row);
+	notifyPinConfigRow(row, event.unpinnedBy, event.roomId);
 }
 
 /**

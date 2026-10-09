@@ -401,7 +401,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			createMockTextMessage({ id: 'h6', roomId, from: 'other', date: 6000 })
 		];
 
-		test('v2: only the others text messages count, the backend leaves the system events out', () => {
+		test('v2: the others text messages and the configuration rows by others count, not mine', () => {
 			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-v2-unread';
@@ -413,8 +413,8 @@ describe('ChatsRegistryStoreSlice tests', () => {
 					createMockMarker({ from: 'me', messageId: 'h1', markerDate: 1000 })
 				]);
 
-			// h3 and h6: neither configuration row, mine included
-			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+			// h2, h3 and h6: not the configuration row authored by me (h4)
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(3);
 		});
 
 		test('v1: the configuration rows count too, like MongooseIM', () => {

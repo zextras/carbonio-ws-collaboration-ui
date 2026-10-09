@@ -70,9 +70,10 @@ function sdkNotWiredYet(method: string): void {
  * always qualify. Config rows (`MessageType.CONFIGURATION_MSG`) qualify when
  * they map a timeline system event, whose server UUID `PUT /read` accepts
  * since common-socket 20656f0a (up to 514b238 it 404ed, §9). The live
- * pin/unpin rows and the room-creation row are synthesized client-side
- * (`pin_…`, `unpin_…`, `creationMessage-…`): no server id, a 404. Skipping
- * one leaves the marker on the previous row until the next message.
+ * pin/unpin rows carry the system event id when the event brings it; only the
+ * ones synthesized client-side (`pin_…`, `unpin_…`) and the room-creation row
+ * (`creationMessage-…`) have no server id, a 404. Skipping one leaves the
+ * marker on the previous row until the next message.
  */
 function readMessageViaSdk(roomId: string, messageId: string): void {
 	const message = useStore
