@@ -6,33 +6,18 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import type { Attachment } from '../../../types/network/models/attachmentTypes';
 import {
 	FasteningAction,
 	MessageType,
 	OperationType,
 	TextMessage
 } from '../../../types/store/ChatsRegistryTypes';
+import { messageToGalleryAttachment } from '../../../utils/attachmentUtils';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 import { xmppClient } from '../XMPPClient';
-
-const toGalleryAttachment = (message: TextMessage): Attachment | undefined => {
-	if (!message.attachment) return undefined;
-	return {
-		id: message.attachment.id,
-		name: message.attachment.name,
-		mimeType: message.attachment.mimeType,
-		size: Number(message.attachment.size) || 0,
-		userId: message.from,
-		roomId: message.roomId,
-		createdAt: new Date(message.date).toISOString(),
-		messageId: message.id,
-		stanzaId: message.stanzaId
-	};
-};
 
 export function onNewMessageStanza(message: Element): true {
 	if (getTagElement(message, 'result') != null) return true;
@@ -48,7 +33,7 @@ export function onNewMessageStanza(message: Element): true {
 		case MessageType.TEXT_MSG: {
 			store.newMessage(newMessage);
 
-			const galleryAttachment = toGalleryAttachment(newMessage);
+			const galleryAttachment = messageToGalleryAttachment(newMessage);
 			if (galleryAttachment) {
 				store.prependMediaGalleryAttachment(newMessage.roomId, galleryAttachment);
 			}

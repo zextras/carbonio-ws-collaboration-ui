@@ -15,7 +15,7 @@ import { gte } from 'semver';
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
 import { declineMeeting } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { chatClient } from '../../network/chatClient/ChatClient';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -91,7 +91,7 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			xmppClient.sendChatMessage(meeting.roomId, message);
+			chatClient.sendChatMessage(meeting.roomId, message);
 			setMessage('');
 			stopMeetingSound();
 		}

@@ -369,6 +369,68 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(markers[marker.from]).toStrictEqual(marker);
 			expect((messages[0] as TextMessage).read).not.toBe(MarkerStatus.UNREAD);
 		});
+
+		test('Unresolved v2 marker (empty messageId): the unread count falls back to markerDate', () => {
+			// The SDK resolves a marker to '' when no loaded row is dated at or
+			// before lastReadAt; markerDate still carries lastReadAt
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			const roomId = 'room-unresolved';
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id: 'u1', roomId, from: 'other', date: 2000 }),
+					createMockTextMessage({ id: 'u2', roomId, from: 'other', date: 3000 }),
+					createMockTextMessage({ id: 'u3', roomId, from: 'other', date: 4000 })
+				]);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: '', markerDate: 2500 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+		});
+
+		const historyWithConfigRows = (roomId: string): Array<TextMessage | ConfigurationMessage> => [
+			createMockTextMessage({ id: 'h1', roomId, from: 'other', date: 1000 }),
+			createMockConfigurationMessage({ id: 'h2', roomId, from: 'other', date: 2000 }),
+			createMockTextMessage({ id: 'h3', roomId, from: 'other', date: 3000 }),
+			createMockConfigurationMessage({ id: 'h4', roomId, from: 'me', date: 4000 }),
+			createMockTextMessage({ id: 'h5', roomId, from: 'me', date: 5000 }),
+			createMockTextMessage({ id: 'h6', roomId, from: 'other', date: 6000 })
+		];
+
+		test('v2: the others text messages and the configuration rows by others count, not mine', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('2.0.0');
+			const roomId = 'room-v2-unread';
+			useStore.getState().updateHistory(roomId, historyWithConfigRows(roomId));
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'h1', markerDate: 1000 })
+				]);
+
+			// h2, h3 and h6: not the configuration row authored by me (h4)
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(3);
+		});
+
+		test('v1: the configuration rows count too, like MongooseIM', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('1.6.14');
+			const roomId = 'room-v1-unread';
+			useStore.getState().updateHistory(roomId, historyWithConfigRows(roomId));
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'h1', markerDate: 1000 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(4);
+		});
 	});
 
 	describe('Unread count', () => {

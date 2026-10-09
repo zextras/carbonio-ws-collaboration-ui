@@ -11,7 +11,7 @@ import {
 	getURLAttachment
 } from '../network';
 import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
-import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
+import { AttachmentMessageType, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { MediaGalleryFilter } from '../types/store/MediaGalleryTypes';
 
 const PDF_MIME_TYPE = 'application/pdf';
@@ -382,3 +382,22 @@ export const attachmentMatchesFilter = (
 	(!filter.createdBefore || attachment.createdAt <= filter.createdBefore) &&
 	(filter.minSize === undefined || attachment.size >= filter.minSize) &&
 	(filter.maxSize === undefined || attachment.size <= filter.maxSize);
+
+// Maps a freshly received text message carrying an attachment into the Attachment
+// shape used by the media gallery buckets, filling the fields that live on the
+// parent message (userId, roomId, createdAt, messageId, stanzaId) rather than on
+// the message attachment itself.
+export const messageToGalleryAttachment = (message: TextMessage): Attachment | undefined => {
+	if (!message.attachment) return undefined;
+	return {
+		id: message.attachment.id,
+		name: message.attachment.name,
+		mimeType: message.attachment.mimeType,
+		size: Number(message.attachment.size) || 0,
+		userId: message.from,
+		roomId: message.roomId,
+		createdAt: new Date(message.date).toISOString(),
+		messageId: message.id,
+		stanzaId: message.stanzaId
+	};
+};

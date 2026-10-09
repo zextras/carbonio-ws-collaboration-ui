@@ -33,6 +33,8 @@ export type XMPPRequest = {
 class XMPPConnection {
 	private token: string | undefined;
 
+	private deliberateTeardown = false;
+
 	private connection: StropheConnection;
 
 	private connectionStatus: StropheConnectionStatus | undefined;
@@ -91,6 +93,10 @@ class XMPPConnection {
 				break;
 			}
 			case Strophe.Status.DISCONNECTED: {
+				if (this.deliberateTeardown) {
+					xmppDebug('Disconnected (deliberate teardown)');
+					break;
+				}
 				xmppDebug('Disconnected!');
 				setXmppStatus(false);
 				this.tryReconnection();
@@ -153,10 +159,23 @@ class XMPPConnection {
 	}, 200);
 
 	public connect(token: string): void {
+		this.deliberateTeardown = false;
 		this.token = token;
 		const userId = useStore.getState().session.id;
 		const jid = `${userId}@carbonio`;
 		this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
+	}
+
+	/**
+	 * Deliberate teardown (runtime version flip to WSC-pure): clearing the token
+	 * stops the reconnection loop (`tryReconnection` only re-arms while a token
+	 * is set) and the flag keeps the async DISCONNECTED from driving the
+	 * connection-health banners — on 2.0.0 this stack is dead by design.
+	 */
+	public disconnect(): void {
+		this.deliberateTeardown = true;
+		this.token = undefined;
+		this.connection.disconnect('Session closed');
 	}
 
 	public send(request: XMPPRequest): void {

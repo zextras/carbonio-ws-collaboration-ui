@@ -16,7 +16,7 @@ import { DeleteAttachmentModal } from './infoPanel/mediaGallery/DeleteAttachment
 import { buildAttachmentForwardMessages } from './infoPanel/mediaGallery/useAttachmentForward';
 import { PREVIEW_NAVIGATION_PAGE_SIZE } from '../../hooks/usePreviewNavigation';
 import { bulkDeleteRoomAttachments, getRoomAttachments } from '../../network';
-import { xmppClient } from '../../network/xmpp/XMPPClient';
+import { chatClient } from '../../network/chatClient/ChatClient';
 import {
 	getPreviewNavigationActive,
 	getPreviewNavigationOpenTargetId
@@ -123,7 +123,7 @@ const PreviewNavigationManager = (): React.JSX.Element | null => {
 				removePreviewNavigationAttachment(target.id);
 				removeMediaGalleryAttachment(target.roomId, target.id);
 				if (target.stanzaId) {
-					xmppClient.sendChatMessageDeletion(target.roomId, target.stanzaId);
+					chatClient.sendChatMessageDeletion(target.roomId, target.stanzaId);
 				}
 				showSnackbar('success', successLabel);
 			})

@@ -8,7 +8,7 @@ import { includes } from 'lodash';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
+import { AdditionalHeaders, AttachmentUploadFields } from '../types/network/models/attachmentTypes';
 import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
@@ -105,15 +105,52 @@ export const sendFileFetchAPI = (
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
 
+	const headers = buildHeaders();
+
 	return fetch(BASE_PATH + endpoint, {
 		method,
-		headers: buildHeaders(),
+		headers,
 		body: formData,
 		signal
 	})
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error) => Promise.reject(err));
 };
+
+/**
+ * v2 (WSC-pure) attachment upload: one `POST` multipart, answered by the
+ * created `Message`. The file name keeps the unicode escaping, which the
+ * backend decodes (an unescaped name fails with a 500). The description goes
+ * as-is: the backend stores it as the message text without decoding, and v2
+ * clients render the text verbatim (v1 decoded it on receipt). It goes as a
+ * part with an explicit UTF-8 charset: a plain string part has no Content-Type,
+ * and the backend reads it as US-ASCII, mangling accents and emoji.
+ */
+export function sendAttachmentFetchAPI<T>(
+	endpoint: string,
+	file: File,
+	fields: AttachmentUploadFields,
+	signal?: AbortSignal
+): Promise<T> {
+	const formData = new FormData();
+	formData.append('file', file, charToUnicode(file.name));
+	formData.append('contentLength', file.size.toString());
+	formData.append('tempId', fields.tempId);
+	fields.description &&
+		formData.append(
+			'description',
+			new Blob([fields.description], { type: 'text/plain;charset=UTF-8' })
+		);
+	fields.replyToId && formData.append('replyToId', fields.replyToId);
+	fields.area && formData.append('area', fields.area);
+
+	return fetch(BASE_PATH + endpoint, {
+		method: RequestType.POST,
+		headers: buildHeaders(),
+		body: formData,
+		signal
+	}).then((resp: Response) => handleResponse(resp));
+}
 
 export const uploadFileFetchAPI = (
 	endpoint: string,

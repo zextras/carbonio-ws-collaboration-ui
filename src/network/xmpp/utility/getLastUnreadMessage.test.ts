@@ -132,5 +132,21 @@ describe('getLastUnreadMessage', () => {
 
 			expect(getLastUnreadMessage(room.id)).toBe(message2.id);
 		});
+
+		test('My v2 marker falls before the loaded history (empty messageId)', () => {
+			// The SDK resolves a marker to '' when no loaded row is dated at or
+			// before lastReadAt: every loaded message is unread
+			const store = useStore.getState();
+			store.updateHistory(room.id, [markedMessage]);
+			store.updateReadStatus(room.id, [
+				createMockMarker({
+					from: sessionUser.id,
+					messageId: '',
+					markerDate: dateToTimestamp(new Date('2024-02-19T15:00:00.000+02:00'))
+				})
+			]);
+
+			expect(getLastUnreadMessage(room.id)).toBe(markedMessage.id);
+		});
 	});
 });

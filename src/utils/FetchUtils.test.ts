@@ -10,6 +10,7 @@ import { Mock } from 'vitest';
 import {
 	fetchAPI,
 	RequestType,
+	sendAttachmentFetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI,
 	wscApiVersionHeader
@@ -191,6 +192,59 @@ describe('FetchUtils', () => {
 		expect(body.get('messageId')).toBe(optField.messageId);
 		expect(body.get('replyId')).toBe(optField.replyId);
 		expect(body.get('area')).toBe(optField.area);
+	});
+
+	test('sendAttachmentFetchAPI sends the v2 multipart: POST, raw UTF-8 description, escaped file name', async () => {
+		act(() => {
+			useStore.getState().setQueueId('idUser1');
+			useStore.getState().setApiVersion('2.0.0');
+		});
+		const testImageFile = new File(['abc'], 'città.png', { type: 'image/png' });
+		const { signal } = new AbortController();
+
+		await sendAttachmentFetchAPI(
+			'test',
+			testImageFile,
+			{
+				tempId: 'tmp-1',
+				description: 'una didascalia — "àèì" 👍',
+				replyToId: 'msg-quoted',
+				area: '640x480'
+			},
+			signal
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			defPath,
+			expect.objectContaining({ method: RequestType.POST, body: expect.any(FormData), signal })
+		);
+		const [_, { headers, body }] = (global.fetch as Mock).mock.calls[0];
+		expect(headers.get('queue-id')).toBe('idUser1');
+		expect(headers.get(wscApiVersionHeader)).toBe('2.0.0');
+		// The backend decodes the file name, and stores the description as-is
+		expect((body.get('file') as File).name).toBe(charToUnicode('città.png'));
+		expect(body.get('contentLength')).toBe('3');
+		expect(body.get('tempId')).toBe('tmp-1');
+		// Without an explicit charset the backend would read the part as US-ASCII
+		const description = body.get('description') as File;
+		expect(description.type).toBe('text/plain;charset=utf-8');
+		expect(await description.text()).toBe('una didascalia — "àèì" 👍');
+		expect(body.get('replyToId')).toBe('msg-quoted');
+		expect(body.get('area')).toBe('640x480');
+		// None of the v1 correlation fields
+		expect(body.get('messageId')).toBeNull();
+		expect(body.get('replyId')).toBeNull();
+		expect(headers.get('X-Temp-Id')).toBeNull();
+	});
+
+	test('sendAttachmentFetchAPI omits the optional fields it is not given', async () => {
+		await sendAttachmentFetchAPI('test', new File([], 'a.pdf'), { tempId: 'tmp-2' });
+
+		const [, { body }] = (global.fetch as Mock).mock.calls[0];
+		expect(body.get('tempId')).toBe('tmp-2');
+		expect(body.get('description')).toBeNull();
+		expect(body.get('replyToId')).toBeNull();
+		expect(body.get('area')).toBeNull();
 	});
 
 	test('uploadFileFetchAPI is called correctly', async () => {

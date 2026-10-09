@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { buildMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
+
 import {
 	addRoom,
 	addRoomAttachment,
@@ -42,6 +44,7 @@ import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import {
 	mockFetchAPI,
+	mockSendAttachmentFetchAPI,
 	mockSendFileFetchAPI,
 	mockUploadFileFetchAPI
 } from '../../utils/__mocks__/FetchUtils';
@@ -432,6 +435,103 @@ describe('Rooms API', () => {
 		});
 	});
 
+	describe('addRoomAttachment on a WSC-pure backend', () => {
+		const photo = (): File => new File(['x'], 'photo.png', { type: 'image/png' });
+
+		afterEach(() => {
+			// The zustand store survives across tests: leave the version un-negotiated
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('sends one POST multipart with the v2 fields, the tempId being the placeholder id', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockResolvedValueOnce(buildMessage({ attachmentId: 'file-1' }));
+			const testFile = photo();
+			const { signal } = new AbortController();
+
+			await addRoomAttachment(
+				roomId,
+				testFile,
+				{ description: 'a caption', replyId: 'msg-quoted', area: '2x2' },
+				signal
+			);
+
+			expect(mockSendAttachmentFetchAPI).toHaveBeenCalledWith(
+				`rooms/${roomId}/attachments`,
+				testFile,
+				{
+					tempId: expect.stringMatching(UUID_REGEX),
+					description: 'a caption',
+					replyToId: 'msg-quoted',
+					area: '2x2'
+				},
+				signal
+			);
+			// No v1 variant: no PUT with messageId, no binary POST with headers
+			expect(mockSendFileFetchAPI).not.toHaveBeenCalled();
+			expect(mockUploadFileFetchAPI).not.toHaveBeenCalled();
+		});
+
+		test('the optimistic placeholder id IS the tempId, so the self-echo can promote it', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			// Never settles: the placeholder is still there to inspect
+			mockSendAttachmentFetchAPI.mockReturnValueOnce(new Promise((): void => {}));
+
+			addRoomAttachment(roomId, photo(), { description: 'a caption', area: '2x2' });
+
+			const fields = mockSendAttachmentFetchAPI.mock.calls[0][2] as { tempId: string };
+			const messages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
+			const placeholder = messages.find((message) => message.id === fields.tempId);
+			expect(placeholder).toMatchObject({
+				attachment: {
+					id: 'placeholderFileId',
+					name: 'photo.png',
+					mimeType: 'image/png',
+					area: '2x2'
+				}
+			});
+		});
+
+		test('promotes the placeholder from the 201 with the uploaded file under the server id', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockResolvedValueOnce(
+				buildMessage({
+					id: 'msg-file',
+					roomId,
+					senderId: 'me',
+					text: 'a caption',
+					createdAt: '2026-08-01T10:00:00Z',
+					attachmentId: 'file-1'
+				})
+			);
+			const testFile = photo();
+
+			await addRoomAttachment(roomId, testFile, { description: 'a caption', area: '2x2' });
+
+			const { messages, lastMessage } = useStore.getState().chatsRegistry[roomId];
+			const attachment = {
+				id: 'file-1',
+				name: 'photo.png',
+				mimeType: 'image/png',
+				size: testFile.size,
+				area: '2x2'
+			};
+			// The placeholder is gone, the confirmed message renders the uploaded file
+			expect(messages.map((message) => message.id)).toEqual(['msg-file']);
+			expect(messages[0]).toMatchObject({ from: 'me', text: 'a caption', attachment });
+			expect(lastMessage).toMatchObject({ id: 'msg-file', attachment });
+		});
+
+		test('removes the placeholder and rejects when the upload fails', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockRejectedValueOnce(new Error('status ko'));
+
+			await expect(addRoomAttachment(roomId, photo(), {})).rejects.toThrow();
+
+			expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toEqual([]);
+		});
+	});
+
 	describe('addRoomAttachment dispatches quota changed event', () => {
 		test('dispatches event on successful upload (legacy path)', async () => {
 			const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
@@ -602,5 +702,77 @@ describe('Rooms API', () => {
 			type: RoomType.ONE_TO_ONE,
 			members: [{ userId: 'userId', owner: true }]
 		});
+	});
+});
+
+describe('forwardMessages on a WSC-pure backend', () => {
+	afterEach(() => {
+		// The zustand store survives across tests: leave the version un-negotiated
+		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+	});
+
+	test('forwards by reference: one bulk POST per destination room, no MAM hybrid', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const mamSpy = vi.spyOn(xmppClient, 'requestMessageToForward');
+		vi.mocked(global.fetch).mockImplementation(() =>
+			Promise.resolve({
+				ok: true,
+				status: 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src'
+		});
+		await forwardMessages(['room-a', 'room-b'], [message]);
+
+		const urls = vi.mocked(global.fetch).mock.calls.map((call) => call[0]);
+		expect(urls).toEqual([
+			'/services/chats/rooms/room-a/forward',
+			'/services/chats/rooms/room-b/forward'
+		]);
+		expect(vi.mocked(global.fetch).mock.calls[0]?.[1]).toMatchObject({
+			method: 'POST',
+			body: JSON.stringify({ messages: [{ sourceRoomId: 'room-src', messageId: 'msg-ref' }] })
+		});
+		// The v1 hybrid never runs: no MAM fetch, no legacy endpoint
+		expect(mamSpy).not.toHaveBeenCalled();
+		expect(mockFetchAPI).not.toHaveBeenCalled();
+	});
+
+	test('rethrows the first failed destination and skips the quota event', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+		vi.mocked(global.fetch).mockImplementation((url) =>
+			Promise.resolve({
+				ok: !String(url).includes('room-bad'),
+				status: String(url).includes('room-bad') ? 403 : 201,
+				headers: {
+					get: (name: string): string | null =>
+						name.toLowerCase() === 'content-type' ? 'application/json' : null
+				},
+				json: (): Promise<unknown> => Promise.resolve([])
+			} as unknown as Response)
+		);
+
+		const message = createMockTextMessage({
+			id: 'msg-ref',
+			stanzaId: 'msg-ref',
+			roomId: 'room-src',
+			attachment: { id: 'att1', name: 'file.pdf', mimeType: applicationPdf, size: 1024 }
+		});
+		await expect(forwardMessages(['room-bad'], [message])).rejects.toThrow();
+		// No fulfilled destination: the quota event must not fire
+		expect(dispatchSpy).not.toHaveBeenCalledWith(
+			expect.objectContaining({ type: QUOTA_CHANGED_EVENT })
+		);
+		dispatchSpy.mockRestore();
 	});
 });
