@@ -15,8 +15,14 @@ describe('chatExportDownload', () => {
 	});
 
 	test('getChatExportUrl builds the same-origin URL with tz and deletedPlaceholder', () => {
-		// TZ=Europe/Rome is enforced by the vitest environment; the label rides
-		// the same i18n key the v1 client-side formatter used (message.deletedMessage)
+		// Pin the zone so the URL does not depend on the host running the tests (CI is in UTC).
+		// The fake timers replace Intl.DateTimeFormat, so spying on its prototype has no effect
+		const formatter = Intl.DateTimeFormat();
+		const options = formatter.resolvedOptions();
+		vi.spyOn(formatter, 'resolvedOptions').mockReturnValue({ ...options, timeZone: 'Europe/Rome' });
+		vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue(formatter);
+		// The label rides the same i18n key the v1 client-side formatter used
+		// (message.deletedMessage)
 		const url = getChatExportUrl('room-1');
 		expect(url).toBe(
 			`${window.document.location.origin}/services/chats/rooms/room-1/messages/export?tz=Europe%2FRome&deletedPlaceholder=Deleted+message`
