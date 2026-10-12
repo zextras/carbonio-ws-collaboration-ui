@@ -1,3 +1,9 @@
+## [0.18.18](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.17...v0.18.18) (2026-10-12)
+
+### Bug Fixes
+
+* **CO-4465:** reuse the registered em-emoji-picker to avoid "Illegal constructor" ([#858](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/858)) ([1ed1374](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1ed1374f9200d9a5b6696e12df81ea34c76f5d82))
+
 ## [0.18.17](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.16...v0.18.17) (2026-10-06)
 
 ### Other changes
