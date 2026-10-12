@@ -67,9 +67,9 @@ export type WsMessageDeletedEvent = WireMessageDeletedEvent & {
 };
 
 /**
- * Content-free (no text, no sender, no persisted system-event id): the banner
- * hydrates from the store when the target is loaded, from GET /rooms/{id}/pin
- * otherwise. Broadcast to the pinner too — the only confirmation path.
+ * Carries the pinned `message` (the banner falls back to it when the target is
+ * not loaded), the pinner and the id of the persisted system line
+ * (`systemEventId`). Broadcast to the pinner too — the only confirmation path.
  */
 export type WsMessagePinnedEvent = WireMessagePinnedEvent & { type: WsEventType.MESSAGE_PINNED };
 

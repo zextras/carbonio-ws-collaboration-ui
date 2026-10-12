@@ -430,7 +430,7 @@ export const chatClient: ChatClient = {
 				return;
 			}
 			// Store-first with the latest live edit applied (the banner renders
-			// the copy as-is): the full message beats the poor GET /pin stub
+			// the copy as-is), else the message GET /pin carries
 			wscSdk
 				.fetchPinnedMessage(
 					roomId,
