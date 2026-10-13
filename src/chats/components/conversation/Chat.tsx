@@ -136,6 +136,17 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 
 	useEffect(() => {
 		chatClient.getMessagePin(roomId);
+		// A reconnection (resetXmppData) wipes the conversation state but keeps the room:
+		// messages reload on their own, the pinned message has to be asked again
+		return useStore.subscribe((state, prevState) => {
+			if (
+				prevState.activeConversations[roomId] &&
+				!state.activeConversations[roomId] &&
+				state.rooms[roomId]
+			) {
+				chatClient.getMessagePin(roomId);
+			}
+		});
 	}, [roomId]);
 
 	return (
