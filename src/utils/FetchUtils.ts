@@ -58,7 +58,7 @@ const handleResponse = async (response: Response): Promise<any> => {
 				return Promise.reject(new Error('version_mismatch'));
 			}
 		}
-		return Promise.reject(new Error('status ko'));
+		return Promise.reject(Object.assign(new Error('status ko'), { status: response.status }));
 	}
 
 	const contentType = response.headers.get(contentTypeHeader);

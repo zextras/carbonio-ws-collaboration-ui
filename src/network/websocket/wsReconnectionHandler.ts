@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { refreshPresenceOfStoredRooms } from './presenceRefresh';
 import useStore from '../../store/Store';
 import { getToken } from '../apis/InfoApi';
 import { isWscPure } from '../chatClient/ChatClient';
@@ -29,14 +30,31 @@ export function catchUpChatState(): void {
 	});
 }
 
+let catchUpPending = false;
+
+// WebsocketConnected arrives once the socket is subscribed: an earlier reload could miss events
+export function handleWebsocketConnected(): void {
+	if (!isWscPure()) {
+		catchUpPending = false;
+		return;
+	}
+	if (catchUpPending) {
+		catchUpPending = false;
+		catchUpChatState();
+		return;
+	}
+	refreshPresenceOfStoredRooms();
+}
+
 /**
  * Chat lifecycle on an events-socket RE-connection. `wasPure` is the gate
  * value before `_onOpen` realigned the version from the negotiated
  * sub-protocol: when they differ, the backend changed major under a live
  * session (deploy/rollback) and the chat stack must be swapped at runtime.
  *
- * - still WSC-pure → plain catch-up (reset + inbox refresh);
- * - flip to WSC-pure → same, plus the strophe stack is deliberately torn down
+ * - still WSC-pure → plain catch-up (reset + inbox refresh), deferred to the
+ *   `WebsocketConnected` event;
+ * - flip to WSC-pure → same (deferred), plus the strophe stack is deliberately torn down
  *   (MongooseIM is gone: its reconnection loop would spin forever) and the
  *   legacy health flag is parked healthy like `chatClient.connect` does;
  * - flip back to 1.6.x → reset the v2-shaped data and boot the XMPP stack,
@@ -50,9 +68,10 @@ export function handleChatReconnection(wasPure: boolean): void {
 			xmppClient.disconnect();
 			useStore.getState().setXmppStatus(true);
 		}
-		catchUpChatState();
+		catchUpPending = true;
 		return;
 	}
+	catchUpPending = false;
 	if (wasPure) {
 		useStore.getState().resetXmppData();
 		getToken()

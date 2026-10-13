@@ -3,12 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { refreshPresence } from './presenceRefresh';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
-import { chatClient } from '../chatClient/ChatClient';
+import { chatClient, isWscPure } from '../chatClient/ChatClient';
 import { getMeeting, getRoom } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
@@ -17,7 +18,12 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			getRoom(event.roomId).then((response) => state.addRooms([response]));
+			getRoom(event.roomId).then((response) => {
+				state.addRooms([response]);
+				if (isWscPure()) {
+					refreshPresence((response.members ?? []).map((member) => member.userId));
+				}
+			});
 			chatClient.setOnline();
 			break;
 		}
@@ -61,6 +67,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			if (isMyId(event.userId)) {
 				getRoom(event.roomId).then((response) => {
 					state.addRooms([response]);
+					if (isWscPure()) {
+						refreshPresence((response.members ?? []).map((member) => member.userId));
+					}
 					if (response.meetingId) {
 						getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
 					}
@@ -70,6 +79,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 					userId: event.userId,
 					owner: event.isOwner
 				});
+				if (isWscPure()) {
+					refreshPresence([event.userId]);
+				}
 			}
 			break;
 		}
