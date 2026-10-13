@@ -67,7 +67,19 @@ const pagesToCheckGuest = [
 		'PLEASE, TRY TO JOIN AGAIN',
 		'Something went wrong.'
 	],
-	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', 'Call ended', 'declined the call']
+	[PAGE_INFO_TYPE.MEETING_DECLINED, 'Call Declined', 'Call ended', 'declined the call'],
+	[
+		PAGE_INFO_TYPE.KICKED,
+		'You were removed from the meeting',
+		'You can close this tab',
+		'A moderator removed you from this meeting. You can keep in touch with your colleagues in Chats.'
+	],
+	[
+		PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM,
+		'You were removed from the virtual room',
+		'You can close this tab',
+		'A moderator removed you from this virtual room.'
+	]
 ];
 
 describe('Info page', () => {
@@ -91,4 +103,11 @@ describe('Info page', () => {
 
 		expect(document.cookie).toBe('');
 	});
+	test.each([PAGE_INFO_TYPE.KICKED, PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM])(
+		'Feedback is not displayed in %s info page',
+		async (type) => {
+			routerContextSetup(<InfoPage />, { infoType: type });
+			expect(screen.queryByText(/Your opinion is important to us!/i)).not.toBeInTheDocument();
+		}
+	);
 });
