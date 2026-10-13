@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import * as presenceRefresh from './presenceRefresh';
 import { wsGeneralEventsHandler } from './wsGeneralEventsHandler';
 import { catchUpChatState, handleChatReconnection } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
@@ -56,6 +57,9 @@ describe('wsReconnectionHandler', () => {
 
 		handleChatReconnection(true);
 
+		expect(inboxSpy).not.toHaveBeenCalled();
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+
 		expect(inboxSpy).toHaveBeenCalledTimes(1);
 		expect(teardownSpy).not.toHaveBeenCalled();
 	});
@@ -70,6 +74,7 @@ describe('wsReconnectionHandler', () => {
 
 		expect(teardownSpy).toHaveBeenCalledTimes(1);
 		expect(useStore.getState().connections.status.xmpp).toBe(true);
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
 		expect(inboxSpy).toHaveBeenCalledTimes(1);
 	});
 
@@ -109,5 +114,46 @@ describe('wsReconnectionHandler', () => {
 		// socket: the flag flips back healthy and the state is re-requested
 		expect(useStore.getState().connections.status.messageBroker).toBe(true);
 		expect(inboxSpy).toHaveBeenCalledTimes(1);
+	});
+
+	test('WebsocketConnected on the first connection refreshes presence only, once', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		const refreshSpy = vi
+			.spyOn(presenceRefresh, 'refreshPresenceOfStoredRooms')
+			.mockImplementation(() => undefined);
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+
+		expect(refreshSpy).toHaveBeenCalledTimes(1);
+		expect(inboxSpy).not.toHaveBeenCalled();
+	});
+
+	test('WebsocketConnected after a reconnection runs the catch-up once, then only presence', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		const refreshSpy = vi
+			.spyOn(presenceRefresh, 'refreshPresenceOfStoredRooms')
+			.mockImplementation(() => undefined);
+
+		handleChatReconnection(true);
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+		expect(refreshSpy).not.toHaveBeenCalled();
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+		expect(refreshSpy).toHaveBeenCalledTimes(1);
+	});
+
+	test('WebsocketConnected on 1.6.x does not touch the chat state', () => {
+		useStore.getState().setApiVersion('1.6.14');
+		const refreshSpy = vi.spyOn(presenceRefresh, 'refreshPresenceOfStoredRooms');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox');
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+
+		expect(refreshSpy).not.toHaveBeenCalled();
+		expect(inboxSpy).not.toHaveBeenCalled();
 	});
 });

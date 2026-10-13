@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { catchUpChatState } from './wsReconnectionHandler';
+import { catchUpChatState, handleWebsocketConnected } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 
@@ -13,6 +13,7 @@ export const wsGeneralEventsHandler = (event: WsEvent): void => {
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
 			state.setQueueId(event.queueId);
+			handleWebsocketConnected();
 			break;
 		}
 		case WsEventType.MESSAGE_BROKER_DISCONNECTED: {

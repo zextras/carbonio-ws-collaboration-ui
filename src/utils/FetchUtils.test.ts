@@ -70,6 +70,15 @@ describe('FetchUtils', () => {
 		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
 	});
 
+	test('fetchApi rejection carries the HTTP status', async () => {
+		(global.fetch as Mock).mockResolvedValue({ ok: false, status: 424 });
+
+		await expect(fetchAPI('test', RequestType.GET)).rejects.toMatchObject({
+			message: 'status ko',
+			status: 424
+		});
+	});
+
 	test('Set correct version after version mismatch error', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const mockErrResp = {
