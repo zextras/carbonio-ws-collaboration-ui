@@ -11,6 +11,7 @@ import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { SimulcastTier } from '../../types/store/SessionTypes';
 import { getVideoStream } from '../../utils/UserMediaManager';
 import { videoIceRestart, updateMediaOffer } from '../apis/MeetingsApi';
 
@@ -22,6 +23,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	rtpSender: RTCRtpSender | null;
 
 	selectedVideoDeviceId: string | undefined;
+
+	// Simulcast layers negotiated with the transceiver: a later track can only rescale or pause them
+	sendTiers: SimulcastTier[] | undefined;
 
 	private readonly videoStreamEnabled: boolean;
 
@@ -106,8 +110,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		const producible = producibleTiers(tiers, captureHeight);
 		let sendEncodings: RTCRtpEncodingParameters[];
 		if (!tiers || tiers.length === 0 || producible.length === 0) {
+			this.sendTiers = undefined;
 			sendEncodings = [{ rid: 'h', scaleResolutionDownBy: 1 }];
 		} else {
+			this.sendTiers = producible;
 			sendEncodings = producible.map((t) => ({
 				rid: TIER_RID[t.name],
 				scaleResolutionDownBy: captureHeight / t.height
@@ -154,11 +160,32 @@ export default class VideoOutConnection implements IVideoOutConnection {
 					} else {
 						this.rtpSender.track.stop();
 						this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
+						this.fitLayersTo(videoTrack);
 					}
 				}
 			}
 			resolve(videoTrack);
 		});
+	}
+
+	// Another camera can deliver another height: keep every layer at its tier height and pause the ones it
+	// can't produce (we only downscale; a layer missing from the negotiation needs a new one)
+	private fitLayersTo(videoTrack: MediaStreamTrack): void {
+		const height =
+			typeof videoTrack?.getSettings === 'function' ? videoTrack.getSettings().height : undefined;
+		const { rtpSender, sendTiers } = this;
+		if (!rtpSender || !height || !sendTiers) return;
+		const params = rtpSender.getParameters();
+		params.encodings = params.encodings.map((encoding) => {
+			const tier = sendTiers.find((t) => TIER_RID[t.name] === encoding.rid);
+			if (!tier) return encoding;
+			return {
+				...encoding,
+				active: height >= tier.height,
+				scaleResolutionDownBy: Math.max(1, height / tier.height)
+			};
+		});
+		rtpSender.setParameters(params).catch((reason) => console.warn(reason));
 	}
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
@@ -173,6 +200,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.rtpSender = null;
+		this.sendTiers = undefined;
 		this.peerConn = null;
 	}
 }

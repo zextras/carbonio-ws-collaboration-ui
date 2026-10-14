@@ -8,6 +8,7 @@ import {
 	COOLDOWN_BASE,
 	EVIDENCE_DOWN_M,
 	EVIDENCE_DOWN_N,
+	initialFeedState,
 	TOP_RUNG
 } from './inboundQualityController';
 import VideoScreenInConnection from './VideoScreenInConnection';
@@ -20,6 +21,7 @@ const USER_1 = 'user1';
 const USER_2 = 'user2';
 const FEED_KEY_1 = `${USER_1}-${STREAM_TYPE.VIDEO}`;
 const FEED_KEY_2 = `${USER_2}-${STREAM_TYPE.VIDEO}`;
+const INBOUND_RTP = 'inbound-rtp';
 
 // Hoisted so they are accessible inside vi.mock factory closures (which are hoisted too).
 const storeMocks = vi.hoisted(() => ({
@@ -89,7 +91,7 @@ const makeStalledReceiver = (pktPerTick = 30): RTCRtpReceiver => {
 				[
 					'inb',
 					{
-						type: 'inbound-rtp',
+						type: INBOUND_RTP,
 						kind: 'video',
 						framesDecoded: 0,
 						packetsReceived: totalRecv
@@ -113,7 +115,7 @@ const makeHealthyReceiver = (framesPerTick = 30, pktPerTick = 60): RTCRtpReceive
 				[
 					'inb',
 					{
-						type: 'inbound-rtp',
+						type: INBOUND_RTP,
 						kind: 'video',
 						framesDecoded: totalFrames,
 						packetsReceived: totalRecv
@@ -561,5 +563,104 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
 		};
 		expect(conn.downlinkShortfall()).toBe(0);
+	});
+});
+
+describe('VideoScreenInConnection — tick robustness', () => {
+	let conn: VideoScreenInConnection;
+	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const internals = (): any => conn;
+
+	const inboundVideo = (
+		framesDecoded: number,
+		packetsReceived: number,
+		timestamp?: number
+	): RTCStatsReport =>
+		new Map([
+			['inb', { type: INBOUND_RTP, kind: 'video', framesDecoded, packetsReceived, timestamp }]
+		]) as unknown as RTCStatsReport;
+
+	beforeEach(() => {
+		storeMocks.connectionQuality = {};
+		storeMocks.tileCeilings = {};
+		storeMocks.apiVersion = '1.6.15';
+		conn = new VideoScreenInConnection(MEETING_ID);
+		requestVideoQuality.mockReset();
+		requestVideoQuality.mockResolvedValue(new Response());
+	});
+
+	it('does not resurrect the state of a feed removed while its stats were being read', async () => {
+		let releaseStats: () => void = () => undefined;
+		const pendingReceiver = {
+			getStats: vi.fn(
+				() =>
+					new Promise<RTCStatsReport>((resolve) => {
+						releaseStats = (): void => resolve(inboundVideo(100, 1000));
+					})
+			)
+		} as unknown as RTCRtpReceiver;
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', pendingReceiver);
+		seedReceiver(conn, FEED_KEY_2, USER_2, 'mid2', makeHealthyReceiver(), 0);
+		internals().feedStates.set(FEED_KEY_2, initialFeedState(0));
+
+		const tick = conn.evaluateQualityTick();
+		conn.removeStream(USER_1, [STREAM_TYPE.VIDEO]);
+		releaseStats();
+		await tick;
+
+		expect(internals().feedStates.has(FEED_KEY_1)).toBe(false);
+		expect(internals().prevStats.has(FEED_KEY_1)).toBe(false);
+	});
+
+	it('retries a tier request that failed instead of considering it applied', async () => {
+		storeMocks.tileCeilings = { [FEED_KEY_1]: TOP_RUNG };
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		requestVideoQuality.mockRejectedValueOnce(new Error('status ko'));
+
+		await conn.evaluateQualityTick();
+		await Promise.resolve();
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality.mock.calls.map(([, , , rung]) => rung)).toEqual([0, 0]);
+	});
+
+	it('does not drop a newer request when an older one fails late', async () => {
+		let rejectFirst: ((e: Error) => void) | undefined;
+		requestVideoQuality.mockImplementationOnce(
+			() =>
+				new Promise<Response>((_, reject) => {
+					rejectFirst = reject;
+				})
+		);
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 1 };
+		await conn.evaluateQualityTick();
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		await conn.evaluateQualityTick();
+		rejectFirst?.(new Error('status ko'));
+		await Promise.resolve();
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality.mock.calls.map(([, , , rung]) => rung)).toEqual([1, 0]);
+	});
+
+	it.each([
+		['a stretched 4 s tick', 4000, 3 * 4],
+		['a bunched 0.5 s tick', 500, 15 * 0.5]
+	])('measures fps over the real stats interval on %s', async (_, intervalMs, frames) => {
+		const realFps = frames / (intervalMs / 1000);
+		const snapshots = [inboundVideo(0, 0, 10_000), inboundVideo(frames, 200, 10_000 + intervalMs)];
+		const receiver = {
+			getStats: vi.fn(async () => snapshots.shift())
+		} as unknown as RTCRtpReceiver;
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', receiver);
+
+		await conn.evaluateQualityTick();
+		await conn.evaluateQualityTick();
+
+		const [score] = internals().feedStates.get(FEED_KEY_1).evidenceBuf;
+		expect(score).toBeCloseTo(Math.min(10, (10 * realFps) / 15), 5);
 	});
 });

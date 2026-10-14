@@ -453,6 +453,35 @@ describe('ConnectionQualityMonitor — uplink status broadcast (networkScore + m
 		expect(maxUplinkTier).toBeNull();
 	});
 
+	it('caps maxHardwareTier to the simulcast layers negotiated for the current camera', async () => {
+		const monitor = makeMonitor({ webcamActive: true });
+		useStore.setState({
+			session: {
+				id: 'me',
+				apiVersion: '1.6.15',
+				attributes: {
+					videoSimulcastTiers: [
+						{ name: 'low', height: 144 },
+						{ name: 'medium', height: 360 },
+						{ name: 'high', height: 720 }
+					]
+				}
+			}
+		} as unknown as RootStore);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { videoOut } = monitor as any;
+		videoOut.rtpSender = { track: { getSettings: (): { height: number } => ({ height: 720 }) } };
+		videoOut.sendTiers = [
+			{ name: 'low', height: 144 },
+			{ name: 'medium', height: 360 }
+		];
+
+		await monitor.emitInitial();
+
+		const [, , , maxHardwareTier] = wsMocks.sendUplinkStatusUpdate.mock.calls[0];
+		expect(maxHardwareTier).toBe(1);
+	});
+
 	it('emitInitial broadcasts maxHardwareTier=null when captureHeight is unavailable', async () => {
 		// rtpSender={} has no .track → captureHeight=undefined → producibleCeiling returns null
 		const monitor = makeMonitor({ webcamActive: true });
