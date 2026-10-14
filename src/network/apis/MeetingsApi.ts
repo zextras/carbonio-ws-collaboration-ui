@@ -170,9 +170,8 @@ export const updateAudioStreamStatus = (
 ): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, { enabled, userToModerate });
 
-// TODO: endpoint aligned with wsc-mobile-2 but not yet confirmed by the backend, update it once agreed
 export const kickParticipant = (meetingId: string, userId: string): Promise<Response> =>
-	fetchAPI(`meetings/${meetingId}/participants/${userId}`, RequestType.DELETE);
+	fetchAPI(`meetings/${meetingId}/participants/${userId}/kick`, RequestType.POST);
 
 export const updateMediaOffer = (
 	meetingId: string,

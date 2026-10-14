@@ -485,8 +485,8 @@ describe('Meetings API', () => {
 		await kickParticipant(meetingMock.id, 'userId');
 
 		expect(mockFetchAPI).toHaveBeenCalledWith(
-			`meetings/${meetingMock.id}/participants/userId`,
-			RequestType.DELETE
+			`meetings/${meetingMock.id}/participants/userId/kick`,
+			RequestType.POST
 		);
 	});
 

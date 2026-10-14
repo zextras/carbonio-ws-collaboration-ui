@@ -50,19 +50,23 @@ const storeSetup = (sessionUserId: string, participantsNumber = 3): MeetingBe =>
 	return meeting;
 };
 
-const getMoreActionsButton = (userName: string): HTMLElement => {
-	const row = find(screen.getAllByTestId('participant_element'), (element) =>
+const getParticipantRow = (userName: string): HTMLElement =>
+	find(screen.getAllByTestId('participant_element'), (element) =>
 		within(element).queryByText(userName)
-	);
-	return within(row as HTMLElement).getByTestId('participant_more_actions');
-};
+	) as HTMLElement;
+
+const getMoreActionsButton = (userName: string): HTMLElement =>
+	within(getParticipantRow(userName)).getByTestId('participant_more_actions');
+
+const queryMoreActionsButton = (userName: string): HTMLElement | null =>
+	within(getParticipantRow(userName)).queryByTestId('participant_more_actions');
 
 describe('Meeting participant more actions', () => {
-	test('More actions button is disabled on the own row', () => {
+	test('More actions button is hidden on the own row', () => {
 		const meeting = storeSetup(moderator.id);
 		setup(<MeetingParticipantsList meetingId={meeting.id} />);
-		expect(getMoreActionsButton(moderator.name)).toBeDisabled();
-		expect(getMoreActionsButton(participant.name)).toBeEnabled();
+		expect(queryMoreActionsButton(moderator.name)).not.toBeInTheDocument();
+		expect(getMoreActionsButton(participant.name)).toBeVisible();
 	});
 
 	test('Moderator sees promote, pin and remove actions', async () => {
@@ -91,10 +95,10 @@ describe('Meeting participant more actions', () => {
 		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
 	});
 
-	test('More actions button is disabled when a participant has no available actions', () => {
+	test('More actions button is hidden when a participant has no available actions', () => {
 		const meeting = storeSetup(participant.id, 2);
 		setup(<MeetingParticipantsList meetingId={meeting.id} />);
-		expect(getMoreActionsButton(moderator.name)).toBeDisabled();
+		expect(queryMoreActionsButton(moderator.name)).not.toBeInTheDocument();
 	});
 });
 

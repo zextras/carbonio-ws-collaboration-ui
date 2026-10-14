@@ -16,7 +16,9 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import MuteForAllModal from './MuteForAllModal';
 import RemoveParticipantModal from './RemoveParticipantModal';
+import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
 import { demotesRoomMember, promoteRoomMember } from '../../../../network';
 
@@ -45,11 +47,17 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 	const demoteModeratorLabel = t('tooltip.demoteModerator', 'Demote moderator');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
+	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const removeFromMeetingLabel = t('meeting.kick.action', 'Remove from meeting');
 
+	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
 	const [removeModalIsOpen, setRemoveModalIsOpen] = useState(false);
 
 	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId, memberId);
+	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, memberId);
+
+	const openMuteForAllModal = useCallback(() => setMuteForAllModalIsOpen(true), []);
+	const closeMuteForAllModal = useCallback(() => setMuteForAllModalIsOpen(false), []);
 
 	const openRemoveModal = useCallback(() => setRemoveModalIsOpen(true), []);
 	const closeRemoveModal = useCallback(() => setRemoveModalIsOpen(false), []);
@@ -62,6 +70,14 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 
 	const items: DropdownItem[] = useMemo(() => {
 		const list: DropdownItem[] = [];
+		if (canUsePinFeature) {
+			list.push({
+				id: 'switchPin',
+				icon: isPinned ? 'Unpin3Outline' : 'Pin3Outline',
+				label: isPinned ? unpinVideoLabel : pinVideoLabel,
+				onClick: switchPinnedTile
+			});
+		}
 		if (iAmOwner && !isUserGuest) {
 			list.push({
 				id: 'switchOwnership',
@@ -70,12 +86,12 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: switchOwnership
 			});
 		}
-		if (canUsePinFeature) {
+		if (muteForAllHasToAppear) {
 			list.push({
-				id: 'switchPin',
-				icon: isPinned ? 'Unpin3Outline' : 'Pin3Outline',
-				label: isPinned ? unpinVideoLabel : pinVideoLabel,
-				onClick: switchPinnedTile
+				id: 'muteForAll',
+				icon: 'MicOffOutline',
+				label: muteForAllLabel,
+				onClick: openMuteForAllModal
 			});
 		}
 		if (iAmOwner) {
@@ -98,6 +114,9 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		isMemberOwner,
 		isPinned,
 		isUserGuest,
+		muteForAllHasToAppear,
+		muteForAllLabel,
+		openMuteForAllModal,
 		openRemoveModal,
 		pinVideoLabel,
 		promoteModeratorLabel,
@@ -107,23 +126,31 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		unpinVideoLabel
 	]);
 
-	const isDisabled = isSessionParticipant || items.length === 0;
+	const hasActions = !isSessionParticipant && items.length > 0;
 
 	return (
 		<>
-			<Tooltip label={moreActionsLabel} disabled={isDisabled}>
-				<Dropdown items={items} placement="bottom-end" disabled={isDisabled}>
-					<Button
-						labelColor="gray0"
-						backgroundColor="text"
-						icon="MoreVertical"
-						size="medium"
-						onClick={(): null => null}
-						disabled={isDisabled}
-						data-testid="participant_more_actions"
-					/>
-				</Dropdown>
-			</Tooltip>
+			{hasActions && (
+				<Tooltip label={moreActionsLabel}>
+					<Dropdown items={items} placement="bottom-end">
+						<Button
+							labelColor="gray0"
+							backgroundColor="text"
+							icon="MoreVertical"
+							size="medium"
+							onClick={(): null => null}
+							data-testid="participant_more_actions"
+						/>
+					</Dropdown>
+				</Tooltip>
+			)}
+			{muteForAllModalIsOpen && (
+				<MuteForAllModal
+					isOpen={muteForAllModalIsOpen}
+					closeModal={closeMuteForAllModal}
+					muteForAll={muteForAll}
+				/>
+			)}
 			{removeModalIsOpen && (
 				<RemoveParticipantModal
 					meetingId={meetingId}
