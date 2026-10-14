@@ -320,7 +320,8 @@ export default class ConnectionQualityMonitor {
 			// -1 (no layer encoded this tick) is transient: keep the previous myMaxUplinkTier
 			if (this.lastTopActiveRung >= 0) this.myMaxUplinkTier = this.lastTopActiveRung;
 			const captureHeight = this.videoOut.rtpSender?.track?.getSettings().height;
-			const tiers = useStore.getState().session.attributes?.videoSimulcastTiers;
+			const tiers =
+				this.videoOut.sendTiers ?? useStore.getState().session.attributes?.videoSimulcastTiers;
 			this.myMaxHardwareTier = producibleCeiling(tiers, captureHeight);
 		} else {
 			this.myMaxUplinkTier = null;
