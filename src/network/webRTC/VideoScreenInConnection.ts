@@ -39,25 +39,28 @@ const FULL_TEMPORAL = 2;
 
 const MASK_TICKS_AFTER_CHANGE = 1;
 const MIN_PKT = 20; // min packets/tick to trust the reading; below this = HOLD
+const TICK_SEC = 2;
 // Eval ticks a never-served feed waits for its tile ceiling before falling back to an uncapped request,
 // so the first request is already the capped tier (no HIGH-then-drop) yet a feed is never withheld forever.
 const CEILING_WAIT_TICKS = 2;
 
-type InboundCounters = { decoded: number; recv: number };
+type InboundCounters = { decoded: number; recv: number; timestamp?: number };
 
 // framesDecoded / packetsReceived of the received webcam, undefined when the counters are missing
 const readInboundVideoCounters = (stats: RTCStatsReport | null): InboundCounters | undefined => {
 	let decoded: number | undefined;
 	let recv: number | undefined;
+	let timestamp: number | undefined;
 	stats?.forEach(
 		(r: RTCStats & { kind?: string; framesDecoded?: number; packetsReceived?: number }) => {
 			if (r.type !== 'inbound-rtp' || r.kind !== 'video') return;
 			if (r.framesDecoded != null) decoded = r.framesDecoded;
 			if (r.packetsReceived != null) recv = r.packetsReceived;
+			if (r.timestamp != null) timestamp = r.timestamp;
 		}
 	);
 	if (decoded == null || recv == null) return undefined;
-	return { decoded, recv };
+	return { decoded, recv, timestamp };
 };
 
 // fps-liveness score (0..10) between two samples, undefined (HOLD: no evidence) when it can't be trusted
@@ -68,7 +71,21 @@ const fpsScoreBetween = (
 	if (cur == null || prev == null) return undefined; // no counters / first tick
 	if (cur.decoded < prev.decoded || cur.recv < prev.recv) return undefined; // counter reset -> reseed, skip
 	if (cur.recv - prev.recv < MIN_PKT) return undefined; // almost no data arriving -> HOLD (blackout / paused / trickle)
-	return videoFpsScore((cur.decoded - prev.decoded) / 2); // 2 s tick
+	// Real interval between the two readings: timers drift (background throttling, overlapping ticks)
+	const elapsedSec =
+		cur.timestamp != null && prev.timestamp != null
+			? (cur.timestamp - prev.timestamp) / 1000
+			: TICK_SEC;
+	if (elapsedSec <= 0) return undefined;
+	return videoFpsScore((cur.decoded - prev.decoded) / elapsedSec);
+};
+
+const readReceiverStats = async (receiver: RTCRtpReceiver): Promise<RTCStatsReport | null> => {
+	try {
+		return await receiver.getStats();
+	} catch {
+		return null;
+	}
 };
 
 // Shed only when the sender is at/above its HARDWARE ceiling (the freeze is OUR downlink); HOLD when the
@@ -217,20 +234,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		return m;
 	}
 
-	// Read the receiver's inbound-rtp video stats and derive the fps-liveness score (0..10), or undefined
+	// Derive the fps-liveness score (0..10) from the receiver's inbound-rtp video stats, or undefined
 	// (HOLD: no evidence) on the first tick, a counter reset, or when almost no data arrives. Also consumes
 	// the post-change keyframe mask so the tick right after our own tier change is skipped.
-	private async computeFeedScore(
-		key: string,
-		receiver: RTCRtpReceiver
-	): Promise<number | undefined> {
-		let stats: RTCStatsReport | null = null;
-		try {
-			stats = await receiver.getStats();
-		} catch {
-			stats = null;
-		}
-
+	private computeFeedScore(key: string, stats: RTCStatsReport | null): number | undefined {
 		const cur = readInboundVideoCounters(stats);
 		const prev = this.prevStats.get(key);
 		if (cur) this.prevStats.set(key, cur);
@@ -252,7 +259,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 		await Promise.all(
 			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
-				const score = await this.computeFeedScore(key, receiver);
+				const stats = await readReceiverStats(receiver);
+				// removed (or re-subscribed) while the stats were being read: its state must stay deleted
+				if (this.videoReceivers.get(key)?.receiver !== receiver) return;
+				const score = this.computeFeedScore(key, stats);
 
 				const senderOK = isSenderOK(cq[userId]?.maxUplinkTier, cq[userId]?.maxHardwareTier);
 
@@ -318,7 +328,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
 			this.lastAppliedRung.set(key, desired);
 			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
-				() => {}
+				() => {
+					// not applied: forget it so the next reconcile asks again (unless a newer request superseded it)
+					if (this.lastAppliedRung.get(key) === desired) this.lastAppliedRung.delete(key);
+				}
 			);
 		});
 	}
