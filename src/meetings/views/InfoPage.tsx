@@ -39,10 +39,10 @@ const StarIcon = styled(Icon)`
 	cursor: pointer;
 `;
 
-const infoTypesWithoutFeedback = [
-	PAGE_INFO_TYPE.MEETING_DECLINED,
-	PAGE_INFO_TYPE.KICKED,
-	PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM
+const infoTypesWithFeedback = [
+	PAGE_INFO_TYPE.MEETING_ENDED,
+	PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION,
+	PAGE_INFO_TYPE.GENERAL_ERROR
 ];
 
 const InfoPage = (): ReactElement => {
@@ -283,7 +283,7 @@ const InfoPage = (): ReactElement => {
 					</Container>
 					<Divider />
 				</Container>
-				{infoType && !infoTypesWithoutFeedback.includes(infoType) && (
+				{infoType && infoTypesWithFeedback.includes(infoType) && (
 					<Container gap="0.7rem" width="fit" height="fit">
 						<Text color="gray6" overflow="break-word" textAlign="center">
 							{meetingExperienceLabel}

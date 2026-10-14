@@ -103,11 +103,28 @@ describe('Info page', () => {
 
 		expect(document.cookie).toBe('');
 	});
-	test.each([PAGE_INFO_TYPE.KICKED, PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM])(
-		'Feedback is not displayed in %s info page',
-		async (type) => {
-			routerContextSetup(<InfoPage />, { infoType: type });
-			expect(screen.queryByText(/Your opinion is important to us!/i)).not.toBeInTheDocument();
-		}
-	);
+	test.each([
+		PAGE_INFO_TYPE.MEETING_ENDED,
+		PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION,
+		PAGE_INFO_TYPE.GENERAL_ERROR
+	])('Feedback is displayed in %s info page', async (type) => {
+		routerContextSetup(<InfoPage />, { infoType: type });
+		expect(screen.getByText(/Your opinion is important to us!/i)).toBeVisible();
+		expect(screen.getAllByTestId('icon: StarOutline')).toHaveLength(5);
+	});
+	test.each([
+		PAGE_INFO_TYPE.MEETING_NOT_FOUND,
+		PAGE_INFO_TYPE.HANG_UP_PAGE,
+		PAGE_INFO_TYPE.NEXT_TIME_PAGE,
+		PAGE_INFO_TYPE.ROOM_EMPTY,
+		PAGE_INFO_TYPE.UNAUTHENTICATED,
+		PAGE_INFO_TYPE.INVALID_WAITING_ROOM,
+		PAGE_INFO_TYPE.MEETING_DECLINED,
+		PAGE_INFO_TYPE.KICKED,
+		PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM
+	])('Feedback is not displayed in %s info page', async (type) => {
+		routerContextSetup(<InfoPage />, { infoType: type });
+		expect(screen.queryByText(/Your opinion is important to us!/i)).not.toBeInTheDocument();
+		expect(screen.queryByTestId('icon: StarOutline')).not.toBeInTheDocument();
+	});
 });
