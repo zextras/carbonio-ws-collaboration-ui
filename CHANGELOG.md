@@ -1,3 +1,9 @@
+## [0.18.21](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.20...v0.18.21) (2026-10-14)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#860](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/860)) ([4186346](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4186346afb765ebdcb70e16b6441e622222d0f76))
+
 ## [0.18.20](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.19...v0.18.20) (2026-10-13)
 
 ### Other changes
