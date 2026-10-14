@@ -285,3 +285,96 @@ describe('Tile actions', () => {
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 });
+
+describe('Tile — downlink tile ceiling', () => {
+	const M = 'ceilingMeetingId';
+	const tiers = [
+		{ name: 'low', height: 144 },
+		{ name: 'medium', height: 360 },
+		{ name: 'high', height: 720 }
+	];
+	const resizeCallbacks: Array<{ cb: ResizeObserverCallback; live: boolean }> = [];
+	const fireResize = (): void =>
+		act(() => resizeCallbacks.filter((o) => o.live).forEach((o) => o.cb([], {} as ResizeObserver)));
+	const ceilings = (): Record<string, number> => ({
+		...useStore.getState().activeMeeting?.tileCeilings
+	});
+
+	beforeEach(() => {
+		resizeCallbacks.length = 0;
+		vi.mocked(window.ResizeObserver).mockImplementation(function ResizeObserverMock(
+			cb: ResizeObserverCallback
+		) {
+			const entry = { cb, live: true };
+			resizeCallbacks.push(entry);
+			return {
+				observe: vi.fn(),
+				unobserve: vi.fn(),
+				disconnect: (): void => {
+					entry.live = false;
+				}
+			} as unknown as ResizeObserver;
+		});
+		vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function rect(
+			this: Element
+		) {
+			const height = Number(this.closest('[data-height]')?.getAttribute('data-height') ?? 0);
+			return { height } as DOMRect;
+		});
+		useStore.setState({
+			session: { id: 'me', attributes: { videoSimulcastTiers: tiers } },
+			activeMeeting: {
+				meetingId: M,
+				tileCeilings: {},
+				connectionQuality: {},
+				subscription: {},
+				localStreams: {},
+				talkingUsers: [],
+				usersWithHandRaised: [],
+				virtualBackground: {}
+			}
+		} as unknown as RootStore);
+	});
+
+	const GridWithPip = ({ pipUserId }: { pipUserId?: string }): React.JSX.Element => (
+		<>
+			<div data-height="500">
+				<Tile userId="userA" meetingId={M} />
+			</div>
+			{pipUserId && (
+				<div data-height="162">
+					<Tile userId={pipUserId} meetingId={M} isPip />
+				</div>
+			)}
+		</>
+	);
+
+	test('a picture-in-picture tile neither caps nor removes the ceiling of the main tile', () => {
+		const { rerender } = setup(<GridWithPip />);
+		fireResize();
+		expect(ceilings()).toEqual({ 'userA-video': 2 });
+
+		rerender(<GridWithPip pipUserId="userA" />);
+		fireResize();
+		expect(ceilings()).toEqual({ 'userA-video': 2 });
+
+		rerender(<GridWithPip />);
+		fireResize();
+		expect(ceilings()).toEqual({ 'userA-video': 2 });
+	});
+
+	test('a tile switching to another user publishes the new user ceiling even at the same size', () => {
+		const SingleTile = ({ userId }: { userId: string }): React.JSX.Element => (
+			<div data-height="300">
+				<Tile userId={userId} meetingId={M} />
+			</div>
+		);
+		const { rerender } = setup(<SingleTile userId="userA" />);
+		fireResize();
+		expect(ceilings()).toEqual({ 'userA-video': 1 });
+
+		rerender(<SingleTile userId="userB" />);
+		fireResize();
+		expect(ceilings()).toEqual({ 'userB-video': 1 });
+	});
+});

@@ -125,6 +125,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	// The self tile has no inbound feed (own video is local/outbound), so the controller never reads a
 	// ceiling for it — skip measuring/publishing it entirely.
 	const isLocalUser = userId != null && userId === myUserId;
+	// The PiP tile duplicates a main-view tile of the same user, which owns the per-feed ceiling key.
+	const publishesCeiling = !isScreenShare && !isLocalUser && !isPip;
 	const lastCeilingRung = useRef<number>();
 
 	const { muteForAllHasToAppear } = useMuteForAll(meetingId, userId);
@@ -204,10 +206,11 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	// exists, so an eager pre-layout measurement is not needed (it would publish a transient wrong tier).
 	const isFeaturedTile = isPinned || !!modalProps;
 	useEffect(() => {
-		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
+		if (!publishesCeiling || !meetingId || !userId) return undefined;
 		const tileEl = hoverRef.current;
 		if (!tileEl) return undefined;
 		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
+		lastCeilingRung.current = undefined;
 		const publishCeiling = (): void => {
 			let rung: number;
 			if (isFeaturedTile) {
@@ -224,23 +227,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		const observer = new ResizeObserver(publishCeiling);
 		observer.observe(tileEl);
 		return (): void => observer.disconnect();
-	}, [
-		isFeaturedTile,
-		isLocalUser,
-		isScreenShare,
-		meetingId,
-		setTileCeiling,
-		userId,
-		videoSimulcastTiers
-	]);
+	}, [isFeaturedTile, meetingId, publishesCeiling, setTileCeiling, userId, videoSimulcastTiers]);
 
 	// Prune this feed's ceiling when the tile unmounts (user left / off-page) so the map mirrors the tiles
 	// in the call. A webcam turned off keeps its tile mounted, so its ceiling stays (re-used on video return).
 	useEffect(() => {
-		if (isScreenShare || isLocalUser || !meetingId || !userId) return undefined;
+		if (!publishesCeiling || !meetingId || !userId) return undefined;
 		const key = `${userId}-${STREAM_TYPE.VIDEO}`;
 		return (): void => removeTileCeiling(meetingId, key);
-	}, [isLocalUser, isScreenShare, meetingId, removeTileCeiling, userId]);
+	}, [meetingId, publishesCeiling, removeTileCeiling, userId]);
 
 	return (
 		<CustomTile
