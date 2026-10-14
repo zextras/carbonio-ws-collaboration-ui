@@ -1,3 +1,27 @@
+## [0.18.21](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.20...v0.18.21) (2026-10-14)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#860](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/860)) ([4186346](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4186346afb765ebdcb70e16b6441e622222d0f76))
+
+## [0.18.20](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.19...v0.18.20) (2026-10-13)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.15.0 ([#861](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/861)) ([1cd5998](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1cd599899a3e8b3f4b4385657a1976313604727a))
+
+## [0.18.19](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.18...v0.18.19) (2026-10-13)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#859](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/859)) ([f081419](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f0814192eb92ee539a4bcc997f931c386bdd0e61))
+
+## [0.18.18](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.17...v0.18.18) (2026-10-12)
+
+### Bug Fixes
+
+* **CO-4465:** reuse the registered em-emoji-picker to avoid "Illegal constructor" ([#858](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/858)) ([1ed1374](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1ed1374f9200d9a5b6696e12df81ea34c76f5d82))
+
 ## [0.18.17](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.16...v0.18.17) (2026-10-06)
 
 ### Other changes
