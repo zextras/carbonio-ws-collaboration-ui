@@ -38,7 +38,6 @@ export enum WsEventType {
 	MEETING_PARTICIPANT_SUBSCRIBED = 'MeetingParticipantSubscribed',
 	MEETING_PARTICIPANT_TALKING = 'MeetingParticipantTalking',
 	MEETING_PARTICIPANT_CLASHED = 'MeetingParticipantClashed',
-	// TODO: event aligned with wsc-mobile-2 but not yet confirmed by the backend, update name and payload once agreed
 	MEETING_PARTICIPANT_KICKED = 'MeetingParticipantKicked',
 	MEETING_WAITING_PARTICIPANT_JOINED = 'MeetingWaitingParticipantJoined',
 	MEETING_WAITING_PARTICIPANT_ACCEPTED = 'MeetingWaitingParticipantAccepted',
