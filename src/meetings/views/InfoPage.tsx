@@ -39,6 +39,12 @@ const StarIcon = styled(Icon)`
 	cursor: pointer;
 `;
 
+const infoTypesWithFeedback = [
+	PAGE_INFO_TYPE.MEETING_ENDED,
+	PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION,
+	PAGE_INFO_TYPE.GENERAL_ERROR
+];
+
 const InfoPage = (): ReactElement => {
 	const { infoType, meetingId } = useContext(RouterContext);
 
@@ -163,6 +169,27 @@ const InfoPage = (): ReactElement => {
 					sloganLabel: t('meeting.infoPage.slogan.generalError', 'PLEASE, TRY TO JOIN AGAIN'),
 					descriptionLabel: t('meeting.infoPage.description.generalError', 'Something went wrong.')
 				};
+			case PAGE_INFO_TYPE.KICKED:
+				return {
+					titleLabel: t('meeting.infoPage.title.kicked', 'You were removed from the meeting'),
+					sloganLabel: t('meeting.infoPage.slogan.kicked', 'You can close this tab'),
+					descriptionLabel: t(
+						'meeting.infoPage.description.kicked',
+						'A moderator removed you from this meeting. You can keep in touch with your colleagues in Chats.'
+					)
+				};
+			case PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM:
+				return {
+					titleLabel: t(
+						'meeting.infoPage.title.kickedFromVirtualRoom',
+						'You were removed from the virtual room'
+					),
+					sloganLabel: t('meeting.infoPage.slogan.kickedFromVirtualRoom', 'You can close this tab'),
+					descriptionLabel: t(
+						'meeting.infoPage.description.kickedFromVirtualRoom',
+						'A moderator removed you from this virtual room.'
+					)
+				};
 			case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 			default: {
 				return {
@@ -256,7 +283,7 @@ const InfoPage = (): ReactElement => {
 					</Container>
 					<Divider />
 				</Container>
-				{infoType && ![PAGE_INFO_TYPE.MEETING_DECLINED].includes(infoType) && (
+				{infoType && infoTypesWithFeedback.includes(infoType) && (
 					<Container gap="0.7rem" width="fit" height="fit">
 						<Text color="gray6" overflow="break-word" textAlign="center">
 							{meetingExperienceLabel}

@@ -170,6 +170,9 @@ export const updateAudioStreamStatus = (
 ): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, { enabled, userToModerate });
 
+export const kickParticipant = (meetingId: string, userId: string): Promise<Response> =>
+	fetchAPI(`meetings/${meetingId}/participants/${userId}/kick`, RequestType.POST);
+
 export const updateMediaOffer = (
 	meetingId: string,
 	type: STREAM_TYPE,
