@@ -1,3 +1,9 @@
+## [0.18.23](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.22...v0.18.23) (2026-10-15)
+
+### Bug Fixes
+
+* keep the dev server port in chat websocket and XMPP URLs [CO-4497] ([#864](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/864)) ([b40542a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b40542ae804b0a9e5dddb9df9a44e8186a59837d))
+
 ## [0.18.22](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.21...v0.18.22) (2026-10-15)
 
 ### Other changes
