@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { WsChatEvent } from './wsChatEvents';
 import { WsConversationEvent } from './wsConversationEvents';
 import { WsMeetingEvent } from './wsMeetingEvents';
 
@@ -24,6 +25,19 @@ export enum WsEventType {
 	ROOM_MUTED = 'RoomMuted',
 	ROOM_UNMUTED = 'RoomUnmuted',
 	ROOM_HISTORY_CLEARED = 'RoomHistoryCleared',
+	// WSC-pure chat events (backend >= 2.0.0, MongooseIM replacement) — routed to the SDK
+	MESSAGE_RECEIVED = 'MessageReceived',
+	MESSAGE_SENT = 'MessageSent',
+	MESSAGE_EDITED = 'MessageEdited',
+	MESSAGE_DELETED = 'MessageDeleted',
+	MESSAGE_FORWARDED = 'MessageForwarded',
+	MESSAGE_PINNED = 'MessagePinned',
+	MESSAGE_UNPINNED = 'MessageUnpinned',
+	REACTION_CHANGED = 'ReactionChanged',
+	READ_UPDATED = 'ReadUpdated',
+	PRESENCE_CHANGED = 'PresenceChanged',
+	TYPING = 'Typing',
+	WS_ERROR = 'Error',
 	MEETING_CREATED = 'MeetingCreated',
 	MEETING_STARTED = 'MeetingStarted',
 	MEETING_PARTICIPANT_JOINED = 'MeetingParticipantJoined',
@@ -49,7 +63,7 @@ export enum WsEventType {
 	MEETING_DECLINED = 'MeetingDeclined'
 }
 
-export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent;
+export type WsEvent = WsGeneralEvent | WsConversationEvent | WsMeetingEvent | WsChatEvent;
 
 type WsGeneralEvent =
 	| InitializationEvent

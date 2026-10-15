@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import { getReferenceMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -35,7 +35,7 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 
 	const deleteMessage = useCallback(() => {
 		if (referenceMessage) {
-			xmppClient.sendChatMessageDeletion(roomId, referenceMessage.stanzaId);
+			chatClient.sendChatMessageDeletion(roomId, referenceMessage.stanzaId);
 		}
 		onClose();
 	}, [onClose, referenceMessage, roomId]);

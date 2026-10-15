@@ -34,7 +34,7 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { addRoomAttachment } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import {
 	getFilesToUploadArray,
 	getReferenceMessage
@@ -217,22 +217,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	// Send isWriting every 3 seconds
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendThrottleIsWriting = useCallback(
-		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
-		[xmppClient, roomId]
+		throttle(() => chatClient.sendIsWriting(roomId), 3000),
+		[chatClient, roomId]
 	);
 
 	// Send paused after 3,5 seconds user stops typing
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendDebouncedPause = useCallback(
-		debounce(() => xmppClient.sendPaused(roomId), 3500),
-		[xmppClient, roomId]
+		debounce(() => chatClient.sendPaused(roomId), 3500),
+		[chatClient, roomId]
 	);
 
 	// Send paused and avoid to send pending isWriting
 	const sendStopWriting = useCallback(() => {
 		sendThrottleIsWriting.cancel();
 		sendDebouncedPause.cancel();
-		xmppClient.sendPaused(roomId);
+		chatClient.sendPaused(roomId);
 	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
@@ -243,7 +243,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					xmppClient.sendChatMessageReply(
+					chatClient.sendChatMessageReply(
 						roomId,
 						message,
 						referenceMessage.senderId,
@@ -258,7 +258,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						xmppClient.sendChatMessageEdit(
+						chatClient.sendChatMessageEdit(
 							roomId,
 							message,
 							referenceMessage.stanzaId,
@@ -314,7 +314,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			xmppClient.sendChatMessage(roomId, message);
+			chatClient.sendChatMessage(roomId, message);
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
