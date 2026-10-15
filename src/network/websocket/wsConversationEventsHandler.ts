@@ -44,6 +44,34 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
 	}
 }
 
+/** WSC 2.0.0 reloads the presence of new members over REST; v1 receives it from XMPP. */
+function refreshMembersPresence(userIds: Array<string>): void {
+	if (!isWscPure()) {
+		return;
+	}
+	refreshPresence(userIds);
+}
+
+function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
+	const state = useStore.getState();
+	landMemberAddedLine(event);
+	if (event.userId === state.session.id) {
+		getRoom(event.roomId).then((response) => {
+			state.addRooms([response]);
+			refreshMembersPresence((response.members ?? []).map((member) => member.userId));
+			if (response.meetingId) {
+				getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
+			}
+		});
+	} else {
+		state.addRoomMember(event.roomId, {
+			userId: event.userId,
+			owner: event.isOwner
+		});
+		refreshMembersPresence([event.userId]);
+	}
+}
+
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
 	const isMyId = (userId: string): boolean => userId === state.session.id;
@@ -52,9 +80,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		case WsEventType.ROOM_CREATED: {
 			getRoom(event.roomId).then((response) => {
 				state.addRooms([response]);
-				if (isWscPure()) {
-					refreshPresence((response.members ?? []).map((member) => member.userId));
-				}
+				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
 			});
 			chatClient.setOnline();
 			break;
@@ -96,26 +122,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
-			landMemberAddedLine(event);
-			if (isMyId(event.userId)) {
-				getRoom(event.roomId).then((response) => {
-					state.addRooms([response]);
-					if (isWscPure()) {
-						refreshPresence((response.members ?? []).map((member) => member.userId));
-					}
-					if (response.meetingId) {
-						getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
-					}
-				});
-			} else {
-				state.addRoomMember(event.roomId, {
-					userId: event.userId,
-					owner: event.isOwner
-				});
-				if (isWscPure()) {
-					refreshPresence([event.userId]);
-				}
-			}
+			onRoomMemberAdded(event);
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
