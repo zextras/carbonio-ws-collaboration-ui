@@ -36,8 +36,8 @@ importers:
         specifier: 1.3.1
         version: 1.3.1
       '@zextras/carbonio-ws-collaboration-sdk':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.3.0
+        version: 0.3.0
       emoji-mart:
         specifier: 5.6.0
         version: 5.6.0
@@ -2327,8 +2327,8 @@ packages:
   '@zextras/carbonio-ui-soap-lib@1.3.1':
     resolution: {integrity: sha512-H628eJJT3TGL5BsAoKgYoBrP9w8tT6HBhrH19gxAyc+Y9g97v4gUT6G+TGjIn1mDXVrZN17KR9Fnz9v2F25UrA==}
 
-  '@zextras/carbonio-ws-collaboration-sdk@0.2.0':
-    resolution: {integrity: sha512-pSmtebP0ySrdjwBT9FhlMEFr9FwIqxnbbpKYlpMG5b4jVbYNp7TjQQQxuu2vgSS4VPSQXrmhrgyH7gfZz0DDLQ==}
+  '@zextras/carbonio-ws-collaboration-sdk@0.3.0':
+    resolution: {integrity: sha512-UdK9xSD7+J0+LvpKzJfVbgCcntwg5vR112VR/G3Ck3wokVQwmwpoXeF+eGtGMGf6fD7p/sWwbVCvAuMp1V6Tdg==}
     engines: {node: '>=22'}
 
   abab@2.0.6:
@@ -9241,7 +9241,7 @@ snapshots:
       '@types/ua-parser-js': 0.7.39
       ua-parser-js: 1.0.41
 
-  '@zextras/carbonio-ws-collaboration-sdk@0.2.0': {}
+  '@zextras/carbonio-ws-collaboration-sdk@0.3.0': {}
 
   abab@2.0.6: {}
 

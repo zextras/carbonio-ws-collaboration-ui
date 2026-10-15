@@ -10,6 +10,7 @@ import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MessageType, OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const room = createMockRoom({ type: RoomType.ONE_TO_ONE });
@@ -50,5 +51,24 @@ describe('MeetingDeclinedEventHandler tests', () => {
 		meetingDeclinedEventHandler({ ...event, userId: 'myUserId' });
 		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
 		expect(call.type).toBe(EventName.REMOVED_MEETING_NOTIFICATION);
+	});
+});
+
+describe('MeetingDeclinedEventHandler system line on a v2 backend', () => {
+	beforeEach(() => {
+		useStore.getState().setApiVersion('2.0.0');
+	});
+
+	test("the callee's decline lands the meetingDeclined line and counts it", () => {
+		meetingDeclinedEventHandler({ ...event, systemEventId: 'sys-declined' });
+
+		const registry = useStore.getState().chatsRegistry[room.id];
+		expect(registry?.lastMessage).toMatchObject({
+			id: 'sys-declined',
+			type: MessageType.CONFIGURATION_MSG,
+			operation: OperationType.MEETING_DECLINED,
+			from: event.userId
+		});
+		expect(registry?.unread).toBe(1);
 	});
 });

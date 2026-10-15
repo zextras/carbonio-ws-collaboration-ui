@@ -46,6 +46,8 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_STARTED;
 	starterUser: string;
 	startedAt: string;
+	// WSC 2.0.0: id of the system line, one-to-one rooms only
+	systemEventId?: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
@@ -60,6 +62,9 @@ export type MeetingLeftEvent = BasicMeetingEvent & {
 
 export type MeetingStoppedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_STOPPED;
+	// WSC 2.0.0: author and id of the system line, one-to-one rooms only
+	endedBy?: string;
+	systemEventId?: string;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {
@@ -161,4 +166,6 @@ export type MeetingParticipantHandRaisedListEvent = BasicMeetingEvent & {
 export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_DECLINED;
 	userId: string;
+	// WSC 2.0.0: id of the system line, one-to-one rooms only
+	systemEventId?: string;
 };

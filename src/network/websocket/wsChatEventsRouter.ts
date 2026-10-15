@@ -6,6 +6,7 @@
 
 import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 
+import { notifyConfigRow } from './configRowEffects';
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -84,19 +85,6 @@ function routeMessageForwarded(event: WsMessageForwardedEvent): void {
 }
 
 /**
- * The v1 effects of a pin/unpin configuration row: custom event for every
- * sender, unread bump only for the others'. The WSC backend counts the system
- * lines whose author is not the user, so the badge stays aligned with it. No
- * browser notification (the v1 config handler never fired one).
- */
-function notifyPinConfigRow(row: StoreMessage, actorId: string, roomId: string): void {
-	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: row as Message });
-	if (!isMyId(actorId)) {
-		useStore.getState().incrementUnreadCount(roomId, 1);
-	}
-}
-
-/**
  * v1 landed pin changes as real MUC configuration rows; the SDK builds the
  * row and sets the banner from the store copy when the target is loaded
  * (same lookup the reply hydration uses), else from the message the event
@@ -107,7 +95,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 		| StoreTextMessage
 		| undefined;
 	const row = wscSdk.handleMessagePinned(event, resolved);
-	notifyPinConfigRow(row, event.pinnedBy, event.roomId);
+	notifyConfigRow(row);
 }
 
 /**
@@ -118,7 +106,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
 	const row = wscSdk.handleMessageUnpinned(event);
 	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
-	notifyPinConfigRow(row, event.unpinnedBy, event.roomId);
+	notifyConfigRow(row);
 }
 
 /**

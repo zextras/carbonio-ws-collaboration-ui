@@ -70,12 +70,18 @@ export type RoomMemberAddedEvent = BasicConversationEvent & {
 	roomId: string;
 	userId: string;
 	isOwner: boolean;
+	// WSC 2.0.0: author and id of the system line
+	addedBy?: string;
+	systemEventId?: string;
 };
 
 export type RoomMemberRemovedEvent = BasicConversationEvent & {
 	type: WsEventType.ROOM_MEMBER_REMOVED;
 	roomId: string;
 	userId: string;
+	// WSC 2.0.0: author and id of the system line, absent on an automatic removal
+	removedBy?: string;
+	systemEventId?: string;
 };
 
 export type RoomMutedEvent = BasicConversationEvent & {

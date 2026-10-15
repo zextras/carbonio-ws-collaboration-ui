@@ -19,6 +19,7 @@ import {
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import * as api from '../index';
 
 const SENT_DATE = '2023-01-01T00:00:00.000Z';
@@ -139,6 +140,115 @@ describe('wsConversationEventHandler tests', () => {
 			} as RoomMemberAddedEvent);
 
 			expect(refreshSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('system lines on a v2 backend', () => {
+		const otherUser = 'other';
+		const newMember = 'new-member';
+
+		beforeEach(() => {
+			useStore.getState().setApiVersion('2.0.0');
+			vi.spyOn(presenceRefresh, 'refreshPresence').mockImplementation(() => {});
+		});
+		afterEach(() => {
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		function memberAdded(
+			roomId: string,
+			userId: string,
+			addedBy: string,
+			systemEventId?: string
+		): RoomMemberAddedEvent {
+			return {
+				type: WsEventType.ROOM_MEMBER_ADDED,
+				roomId,
+				userId,
+				isOwner: false,
+				addedBy,
+				systemEventId,
+				sentDate: SENT_DATE
+			} as RoomMemberAddedEvent;
+		}
+
+		function memberRemoved(
+			roomId: string,
+			userId: string,
+			removedBy?: string,
+			systemEventId?: string
+		): RoomMemberRemovedEvent {
+			return {
+				type: WsEventType.ROOM_MEMBER_REMOVED,
+				roomId,
+				userId,
+				removedBy,
+				systemEventId,
+				sentDate: SENT_DATE
+			} as RoomMemberRemovedEvent;
+		}
+
+		test("ROOM_MEMBER_ADDED by another user lands the line as the room's last message and counts it", () => {
+			wsConversationEventsHandler(memberAdded('room-add', newMember, otherUser, 'sys-add'));
+
+			const registry = useStore.getState().chatsRegistry['room-add'];
+			expect(registry?.messages).toEqual([
+				expect.objectContaining({
+					id: 'sys-add',
+					type: MessageType.CONFIGURATION_MSG,
+					operation: OperationType.MEMBER_ADDED,
+					value: newMember,
+					from: otherUser
+				})
+			]);
+			expect(registry?.lastMessage?.id).toBe('sys-add');
+			expect(registry?.unread).toBe(1);
+		});
+
+		test('ROOM_MEMBER_ADDED by the session user lands the line without counting it', () => {
+			wsConversationEventsHandler(
+				memberAdded('room-add-own', newMember, sessionUser.id, 'sys-add-own')
+			);
+
+			const registry = useStore.getState().chatsRegistry['room-add-own'];
+			expect(registry?.lastMessage?.id).toBe('sys-add-own');
+			expect(registry?.unread ?? 0).toBe(0);
+		});
+
+		test('a bulk add lands and counts its single line once', () => {
+			wsConversationEventsHandler(memberAdded('room-bulk', 'first', otherUser, 'sys-bulk'));
+			wsConversationEventsHandler(memberAdded('room-bulk', 'second', otherUser, 'sys-bulk'));
+
+			const registry = useStore.getState().chatsRegistry['room-bulk'];
+			expect(registry?.messages).toEqual([expect.objectContaining({ value: 'first' })]);
+			expect(registry?.unread).toBe(1);
+		});
+
+		test('ROOM_MEMBER_REMOVED by another user lands the line and counts it', () => {
+			wsConversationEventsHandler(memberRemoved('room-rem', 'gone', otherUser, 'sys-rem'));
+
+			const registry = useStore.getState().chatsRegistry['room-rem'];
+			expect(registry?.lastMessage).toMatchObject({
+				id: 'sys-rem',
+				operation: OperationType.MEMBER_REMOVED,
+				value: 'gone',
+				from: otherUser
+			});
+			expect(registry?.unread).toBe(1);
+		});
+
+		test('an automatic removal lands no line', () => {
+			wsConversationEventsHandler(memberRemoved('room-auto', 'gone'));
+
+			expect(useStore.getState().chatsRegistry['room-auto']).toBeUndefined();
+		});
+
+		test('no line is landed on 1.6.x, where XMPP brings it', () => {
+			useStore.getState().setApiVersion('1.6.14');
+
+			wsConversationEventsHandler(memberAdded('room-v1', newMember, otherUser, 'sys-v1'));
+
+			expect(useStore.getState().chatsRegistry['room-v1']).toBeUndefined();
 		});
 	});
 });

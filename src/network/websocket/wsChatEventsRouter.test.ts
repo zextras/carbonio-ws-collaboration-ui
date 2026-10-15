@@ -898,6 +898,20 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 		expect(registry?.unread).toBe(1);
 	});
 
+	it("makes the pin row the room's last message in the chat list", () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+
+		wsChatEventsRouter({
+			...pinnedEvent('room-plast', 'msg-plast', 'user-2'),
+			systemEventId: 'sys-pin-last'
+		});
+
+		expect(useStore.getState().chatsRegistry['room-plast']?.lastMessage).toMatchObject({
+			id: 'sys-pin-last',
+			operation: OperationType.MESSAGE_PINNED
+		});
+	});
+
 	it('pins a live-edited message with the edited text in the banner (v1 merged-copy parity)', () => {
 		// The banner renders its copy as-is (no render-time projection like the
 		// bubbles): the resolution must apply the latest EDIT fastening, as the
