@@ -218,6 +218,15 @@ describe('Tile test - on meeting', () => {
 		expect(screen.getByTestId('icon: ScreenSharingOnOutline')).toBeInTheDocument();
 	});
 
+	test('User screen share tile shows the connection indicator when the connection is unstable', () => {
+		const store = useStore.getState();
+		store.setApiVersion('1.6.15');
+		store.meetingConnection(meeting.id, { enabled: true });
+		store.setParticipantConnectionQuality(meeting.id, user2.id, 4, 1);
+		setup(<Tile userId={user2.id} meetingId={meeting.id} isScreenShare />);
+		expect(screen.getByTestId('connection_quality_indicator')).toBeInTheDocument();
+	});
+
 	test('Hand raised', async () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, { enabled: true });
