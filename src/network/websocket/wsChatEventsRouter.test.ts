@@ -7,7 +7,6 @@
 import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-sdk';
 import { buildWireMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
 import { describe, expect, it, vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import { wsChatEventsRouter } from './wsChatEventsRouter';
 import { EventName } from '../../hooks/useEventListener';
@@ -49,20 +48,6 @@ function presenceEvent(userId: string, online: boolean): WsPresenceChangedEvent 
 	return buildWsPresenceChangedEvent({ userId, online });
 }
 
-function mockJsonResponseOnce(body: unknown): void {
-	(global.fetch as Mock).mockImplementationOnce(() =>
-		Promise.resolve({
-			ok: true,
-			status: 200,
-			headers: {
-				get: (name: string): string | null =>
-					name.toLowerCase() === 'content-type' ? 'application/json' : null
-			},
-			json: (): Promise<unknown> => Promise.resolve(body)
-		})
-	);
-}
-
 describe('wsChatEventsRouter - PresenceChanged', () => {
 	it('lands an online transition in the store without any round-trip', async () => {
 		wsChatEventsRouter(presenceEvent('user-online', true));
@@ -72,19 +57,21 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('refreshes the last activity through the presence batch on an offline transition', async () => {
-		mockJsonResponseOnce([
-			{ userId: 'user-off', online: false, lastActivity: AUG_FIRST_EARLY_MORNING }
-		]);
-
-		wsChatEventsRouter(presenceEvent('user-off', false));
+	it('lands the last activity carried by an offline transition without any round-trip', async () => {
+		wsChatEventsRouter(
+			buildWsPresenceChangedEvent({
+				userId: 'user-off',
+				online: false,
+				lastActivity: AUG_FIRST_EARLY_MORNING
+			})
+		);
 		await vi.advanceTimersByTimeAsync(0);
 
-		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/presence/batch');
 		expect(useStore.getState().users['user-off']).toMatchObject({
 			online: false,
 			lastActivity: Date.parse(AUG_FIRST_EARLY_MORNING)
 		});
+		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
 	it('ignores the logged user own echo (v1 parity: it never reached the store)', async () => {
@@ -95,21 +82,6 @@ describe('wsChatEventsRouter - PresenceChanged', () => {
 
 		expect(useStore.getState().users.me).toBeUndefined();
 		expect(global.fetch).not.toHaveBeenCalled();
-	});
-
-	it('logs and survives a failing last-activity refresh on an offline transition', async () => {
-		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('network down')));
-
-		wsChatEventsRouter(presenceEvent('user-fail', false));
-		await vi.advanceTimersByTimeAsync(0);
-
-		expect(errorSpy).toHaveBeenCalledWith(
-			'wsChatEventsRouter: presence hydration failed',
-			expect.any(Error)
-		);
-		// The offline flag from the event landed anyway: only the refresh failed
-		expect(useStore.getState().users['user-fail']).toMatchObject({ online: false });
 	});
 });
 
