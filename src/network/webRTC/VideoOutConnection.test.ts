@@ -5,7 +5,9 @@
  */
 
 import VideoOutConnection from './VideoOutConnection';
+import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
@@ -24,6 +26,10 @@ const createPeerConnMock = (
 	addTrack: vi.fn(() => ({
 		track: { stop: vi.fn() },
 		replaceTrack: vi.fn(() => Promise.resolve())
+	})),
+	addTransceiver: vi.fn(() => ({
+		sender: { track: null },
+		setCodecPreferences: vi.fn()
 	})),
 	createOffer: vi.fn(() => Promise.resolve({ sdp: 'sdp', type: 'offer' })),
 	setLocalDescription: vi.fn(() => Promise.resolve()),
@@ -104,5 +110,110 @@ describe('VideoOutConnection', () => {
 
 		conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
 		expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+	});
+});
+
+describe('VideoOutConnection — simulcast layers after a track change', () => {
+	type FakeSender = {
+		track: MediaStreamTrack | null;
+		encodings: RTCRtpEncodingParameters[];
+		replaceTrack: ReturnType<typeof vi.fn>;
+		getParameters: ReturnType<typeof vi.fn>;
+		setParameters: ReturnType<typeof vi.fn>;
+	};
+
+	const cameraStream = (height: number): MediaStream => {
+		const track = { getSettings: () => ({ height }), stop: vi.fn() };
+		return { getVideoTracks: () => [track] } as unknown as MediaStream;
+	};
+
+	const layers = (sender: FakeSender): Record<string, { scale?: number; active?: boolean }> =>
+		Object.fromEntries(
+			sender.encodings.map((e) => [
+				e.rid,
+				{ scale: e.scaleResolutionDownBy, active: e.active ?? true }
+			])
+		);
+
+	const startCamera = async (
+		height: number
+	): Promise<{ conn: VideoOutConnection; sender: FakeSender }> => {
+		const sender: FakeSender = {
+			track: null,
+			encodings: [],
+			replaceTrack: vi.fn(async (track: MediaStreamTrack) => {
+				sender.track = track;
+			}),
+			getParameters: vi.fn(() => ({ encodings: sender.encodings.map((e) => ({ ...e })) })),
+			setParameters: vi.fn(async (params: RTCRtpSendParameters) => {
+				sender.encodings = params.encodings;
+			})
+		};
+		peerConnMock = createPeerConnMock({
+			addTransceiver: vi.fn((track: MediaStreamTrack, init: RTCRtpTransceiverInit) => {
+				sender.track = track;
+				sender.encodings = (init.sendEncodings ?? []).map((e) => ({ ...e }));
+				return { sender, setCodecPreferences: vi.fn() };
+			})
+		});
+		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(cameraStream(height));
+		vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+		const conn = new VideoOutConnection(meetingId, false);
+		await conn.startVideo();
+		return { conn, sender };
+	};
+
+	beforeEach(() => {
+		useStore.setState({
+			session: {
+				id: 'me',
+				attributes: {
+					videoSimulcastTiers: [
+						{ name: 'low', height: 144 },
+						{ name: 'medium', height: 360 },
+						{ name: 'high', height: 720 }
+					]
+				}
+			}
+		} as unknown as RootStore);
+	});
+
+	test('a lower-resolution camera keeps the layers at their tier height and switches off the top one', async () => {
+		const { conn, sender } = await startCamera(720);
+		expect(layers(sender)).toEqual({
+			l: { scale: 5, active: true },
+			m: { scale: 2, active: true },
+			h: { scale: 1, active: true }
+		});
+
+		await conn.updateLocalStreamTrack(cameraStream(360));
+		await flushPromises();
+
+		expect(layers(sender)).toEqual({
+			l: { scale: 2.5, active: true },
+			m: { scale: 1, active: true },
+			h: { scale: 1, active: false }
+		});
+	});
+
+	test('a higher-resolution camera keeps the negotiated layers at their tier height', async () => {
+		const { conn, sender } = await startCamera(360);
+
+		await conn.updateLocalStreamTrack(cameraStream(720));
+		await flushPromises();
+
+		expect(layers(sender)).toEqual({
+			l: { scale: 5, active: true },
+			m: { scale: 2, active: true }
+		});
+	});
+
+	test('the virtual background track does not rescale the layers', async () => {
+		const { conn, sender } = await startCamera(720);
+
+		await conn.updateLocalStreamTrack(cameraStream(150), true);
+		await flushPromises();
+
+		expect(sender.setParameters).not.toHaveBeenCalled();
 	});
 });
