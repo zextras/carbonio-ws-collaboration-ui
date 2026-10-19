@@ -102,7 +102,11 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	);
 
 	useEffect(() => {
-		pickerRef.current = new Picker({
+		// em-emoji-picker can be registered only once per page: if another module (e.g. Mails) bundling its
+		// own emoji-mart registered it first, constructing our Picker class throws "Illegal constructor"
+		const PickerClass =
+			(customElements.get('em-emoji-picker') as typeof Picker | undefined) ?? Picker;
+		pickerRef.current = new PickerClass({
 			previewPosition: 'none',
 			onEmojiSelect,
 			data,
