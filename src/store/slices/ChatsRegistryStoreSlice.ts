@@ -360,14 +360,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					return msg;
 				});
 
-				// Recalculate unread count
+				// Recalculate unread count. On v2 only a marker of mine changes it: the count comes from the server,
+				// and the rows in store can be fewer than the unread ones because the history is not preloaded
 				const myId = draft.session.id;
+				const isWscPure = getIsWscPure(draft);
+				if (isWscPure && !some(newMarkers, { from: myId })) {
+					return;
+				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
 				const lastMarkedDate = myMarker
 					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
 					: undefined;
 
-				const isWscPure = getIsWscPure(draft);
 				const unreadMessages = messages.filter((msg) => {
 					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
 					return countsAsUnread(msg, isWscPure) && isAfterMarker;

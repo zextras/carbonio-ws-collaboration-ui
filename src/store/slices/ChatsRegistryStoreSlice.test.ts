@@ -431,6 +431,63 @@ describe('ChatsRegistryStoreSlice tests', () => {
 
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(4);
 		});
+
+		test('A marker of another member keeps the unread count of a room whose history is not loaded', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('2.0.0');
+			const roomId = 'room-not-opened';
+			useStore.getState().setUnreadCount(roomId, 5);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'other', messageId: 'last', markerDate: 5000 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(5);
+		});
+
+		test('A marker of another member keeps the unread count when only the live rows are loaded', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('2.0.0');
+			const roomId = 'room-live-rows';
+			useStore.getState().setUnreadCount(roomId, 4);
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id: 'l1', roomId, from: 'other', date: 2000 }),
+					createMockTextMessage({ id: 'l2', roomId, from: 'other', date: 3000 }),
+					createMockTextMessage({ id: 'l3', roomId, from: 'other', date: 4000 })
+				]);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'other', messageId: 'l3', markerDate: 4000 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(4);
+		});
+
+		test('v1: a marker of another member recounts the unread rows, which the inbox preloads', () => {
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().setApiVersion('1.6.14');
+			const roomId = 'room-v1-preloaded';
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id: 'p1', roomId, from: 'other', date: 2000 }),
+					createMockTextMessage({ id: 'p2', roomId, from: 'other', date: 3000 })
+				]);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'other', messageId: 'p2', markerDate: 3000 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+		});
 	});
 
 	describe('Unread count', () => {
