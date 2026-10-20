@@ -11,6 +11,7 @@ import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import type {
+	RoomCreatedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
@@ -42,6 +43,19 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
 	if (row) {
 		notifyConfigRow(row);
 	}
+}
+
+/**
+ * WSC 2.0.0 reads the new room's last message over REST, as the event does not
+ * announce the creation lines; v1 receives them from XMPP.
+ */
+function landRoomCreatedLastItem(event: RoomCreatedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	wscSdk.handleRoomCreated(event).catch((err) => {
+		console.error('RoomCreated: last item hydration failed', err);
+	});
 }
 
 /** WSC 2.0.0 reloads the presence of new members over REST; v1 receives it from XMPP. */
@@ -82,6 +96,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				state.addRooms([response]);
 				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
 			});
+			landRoomCreatedLastItem(event);
 			chatClient.setOnline();
 			break;
 		}

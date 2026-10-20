@@ -15,12 +15,14 @@ import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/c
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
+	RoomCreatedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import * as api from '../index';
+import { wscSdk } from '../sdk/wscSdk';
 
 const SENT_DATE = '2023-01-01T00:00:00.000Z';
 
@@ -172,6 +174,10 @@ describe('wsConversationEventHandler tests', () => {
 			} as RoomMemberAddedEvent;
 		}
 
+		function roomCreated(roomId: string): RoomCreatedEvent {
+			return { type: WsEventType.ROOM_CREATED, roomId, sentDate: SENT_DATE } as RoomCreatedEvent;
+		}
+
 		function memberRemoved(
 			roomId: string,
 			userId: string,
@@ -249,6 +255,28 @@ describe('wsConversationEventHandler tests', () => {
 			wsConversationEventsHandler(memberAdded('room-v1', newMember, otherUser, 'sys-v1'));
 
 			expect(useStore.getState().chatsRegistry['room-v1']).toBeUndefined();
+		});
+
+		test('ROOM_CREATED asks the SDK for the last message of the new room', () => {
+			vi.spyOn(api, 'getRoom').mockResolvedValue(createMockRoom({ id: 'room-new' }));
+			const handleRoomCreatedSpy = vi
+				.spyOn(wscSdk, 'handleRoomCreated')
+				.mockResolvedValue(undefined);
+			const event = roomCreated('room-new');
+
+			wsConversationEventsHandler(event);
+
+			expect(handleRoomCreatedSpy).toHaveBeenCalledWith(event);
+		});
+
+		test('no last message is requested for a new room on 1.6.x, where XMPP brings the creation lines', () => {
+			useStore.getState().setApiVersion('1.6.14');
+			vi.spyOn(api, 'getRoom').mockResolvedValue(createMockRoom({ id: 'room-v1-new' }));
+			const handleRoomCreatedSpy = vi.spyOn(wscSdk, 'handleRoomCreated');
+
+			wsConversationEventsHandler(roomCreated('room-v1-new'));
+
+			expect(handleRoomCreatedSpy).not.toHaveBeenCalled();
 		});
 	});
 });
