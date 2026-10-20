@@ -538,6 +538,18 @@ describe('chatClient façade', () => {
 		expect(messages.map((message) => message.id)).toEqual(['msg-dup']);
 	});
 
+	it('resolves false when the message cannot be sent, so the composer gives it back', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+
+		const sent = chatClient.sendChatMessage('room-f', 'not sent');
+		await vi.advanceTimersByTimeAsync(0);
+
+		await expect(sent).resolves.toBe(false);
+	});
+
 	it('reads the last unread message before sending (v1 parity)', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });

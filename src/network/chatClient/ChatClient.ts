@@ -33,8 +33,6 @@ export type ChatClient = Pick<
 	| 'connect'
 	| 'setOnline'
 	| 'features'
-	| 'sendChatMessage'
-	| 'sendChatMessageReply'
 	| 'sendChatMessageEdit'
 	| 'sendChatMessageDeletion'
 	| 'sendChatMessageReaction'
@@ -49,7 +47,16 @@ export type ChatClient = Pick<
 	| 'pinMessage'
 	| 'unpinMessage'
 	| 'getMessagePin'
->;
+> & {
+	/**
+	 * Resolves false when the message could not be sent, so the composer can
+	 * give the text back; v1 resolves true, the XMPP connection queues it.
+	 */
+	sendChatMessage: (...args: Parameters<typeof xmppClient.sendChatMessage>) => Promise<boolean>;
+	sendChatMessageReply: (
+		...args: Parameters<typeof xmppClient.sendChatMessageReply>
+	) => Promise<boolean>;
+};
 
 /** {@link getIsWscPure} on the current session, for the call sites outside the store. */
 export function isWscPure(): boolean {
@@ -104,11 +111,11 @@ function sendTextViaSdk(
 	roomId: string,
 	message: string,
 	replyToId?: string
-): void {
+): Promise<boolean> {
 	// The placeholder is authored by the session user (the confirmation takes
 	// the sender from the server response)
 	if (!useStore.getState().session.id) {
-		return;
+		return Promise.resolve(false);
 	}
 	// Read messages before sending a new one (v1 parity)
 	const lastMessageId = getLastUnreadMessage(roomId);
@@ -119,7 +126,7 @@ function sendTextViaSdk(
 	useStore
 		.getState()
 		.setPlaceholderMessage({ roomId, id: tempId, text: message, replyTo: replyToId });
-	wscSdk
+	return wscSdk
 		.sendMessage({
 			roomId,
 			text: sanitizeXmppMessage(message),
@@ -131,8 +138,10 @@ function sendTextViaSdk(
 					}
 				: {})
 		})
+		.then(() => true)
 		.catch((err) => {
 			console.error(`chatClient.${caller}: message send failed`, err);
+			return false;
 		});
 }
 
@@ -210,25 +219,27 @@ export const chatClient: ChatClient = {
 			// v1 parity: a placeholder room becomes a real 1:1 on the first message
 			const placeholderRoom = roomId.split('placeholder-');
 			if (placeholderRoom[1]) {
-				replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
-					chatClient.sendChatMessage(response.id, message);
-				});
-				return;
+				return replacePlaceholderRoom(placeholderRoom[1], message)
+					.then((response) => chatClient.sendChatMessage(response.id, message))
+					.catch((err) => {
+						console.error('chatClient.sendChatMessage: room creation failed', err);
+						return false;
+					});
 			}
-			sendTextViaSdk('sendChatMessage', roomId, message);
-			return;
+			return sendTextViaSdk('sendChatMessage', roomId, message);
 		}
 		xmppClient.sendChatMessage(roomId, message);
+		return Promise.resolve(true);
 	},
 	sendChatMessageReply: (roomId, message, replyTo, replyMessageId) => {
 		if (isWscPure()) {
 			// The 3rd v1 arg (the quoted author, only needed for the XMPP `to`
 			// address) has no v2 counterpart: the server resolves the quoted
 			// message from replyToId.
-			sendTextViaSdk('sendChatMessageReply', roomId, message, replyMessageId);
-			return;
+			return sendTextViaSdk('sendChatMessageReply', roomId, message, replyMessageId);
 		}
 		xmppClient.sendChatMessageReply(roomId, message, replyTo, replyMessageId);
+		return Promise.resolve(true);
 	},
 	sendChatMessageEdit: (roomId, message, messageStanzaId, parentStanzaId) => {
 		if (isWscPure()) {

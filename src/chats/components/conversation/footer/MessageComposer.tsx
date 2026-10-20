@@ -36,6 +36,7 @@ import useMessage from '../../../../hooks/useMessage';
 import { addRoomAttachment } from '../../../../network';
 import { chatClient } from '../../../../network/chatClient/ChatClient';
 import {
+	getDraftMessage,
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
@@ -90,6 +91,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 	const actionLabel = t('action.understood', 'Understood');
+	const messageNotSentLabel = t('feedback.messageNotSent', 'Message not sent. Please try again');
 
 	const myUserId = useStore(getUserId);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
@@ -121,6 +123,34 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
+
+	// Like a failed upload, an unsent message goes back to the composer, with the quote of a
+	// reply, unless something else has been written in the meantime
+	const restoreIfUnsent = useCallback(
+		(sending: Promise<boolean>, message: string, reference?: ReferenceMessage): void => {
+			sending.then((sent) => {
+				if (sent) return;
+				const state = useStore.getState();
+				// Once the user has moved to another room, what was written there is its draft
+				const hasNewText = messageInputRef.current
+					? messageInputRef.current.value.trim() !== ''
+					: !!getDraftMessage(state, roomId);
+				if (!hasNewText) {
+					setDraftMessage(roomId, message);
+					if (reference && !getReferenceMessage(state, roomId)) {
+						setReferenceMessage(roomId, reference);
+					}
+				}
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: messageNotSentLabel,
+					hideButton: true
+				});
+			});
+		},
+		[createSnackbar, messageNotSentLabel, roomId, setDraftMessage, setReferenceMessage]
+	);
 
 	const loadFiles = useLoadFiles(roomId);
 
@@ -243,11 +273,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					chatClient.sendChatMessageReply(
-						roomId,
+					restoreIfUnsent(
+						chatClient.sendChatMessageReply(
+							roomId,
+							message,
+							referenceMessage.senderId,
+							referenceMessage.stanzaId
+						),
 						message,
-						referenceMessage.senderId,
-						referenceMessage.stanzaId
+						referenceMessage
 					);
 					unsetReferenceMessage(roomId);
 					break;
@@ -275,7 +309,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage]
+		[restoreIfUnsent, roomId, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
@@ -314,7 +348,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			chatClient.sendChatMessage(roomId, message);
+			restoreIfUnsent(chatClient.sendChatMessage(roomId, message), message);
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
@@ -325,7 +359,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
-		filesToUploadArray
+		filesToUploadArray,
+		restoreIfUnsent
 	]);
 
 	// Set focus on input after closing DeleteMessageModal
