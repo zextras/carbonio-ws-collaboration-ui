@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-sdk';
-import { buildWireMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
+import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+import { buildWireMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import { wsChatEventsRouter } from './wsChatEventsRouter';

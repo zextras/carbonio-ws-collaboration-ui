@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { buildMessage } from '@zextras/carbonio-ws-collaboration-sdk/testing';
+import { buildMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk/testing';
 
 import {
 	addRoom,

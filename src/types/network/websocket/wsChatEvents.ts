@@ -16,7 +16,7 @@ import type {
 	WireReadUpdatedEvent,
 	WireTypingEvent,
 	WireWsErrorEvent
-} from '@zextras/carbonio-ws-collaboration-sdk';
+} from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import { WsEventType } from './wsEvents';
 

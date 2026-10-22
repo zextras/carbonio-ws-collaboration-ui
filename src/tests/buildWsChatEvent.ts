@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import {
 	buildMessageDeletedEvent,
 	buildMessageEditedEvent,
@@ -16,7 +16,7 @@ import {
 	buildReactionChangedEvent,
 	buildReadUpdatedEvent,
 	buildTypingEvent
-} from '@zextras/carbonio-ws-collaboration-sdk/testing';
+} from '@zextras/carbonio-ws-collaboration-ui-sdk/testing';
 
 import type {
 	WsErrorEvent,

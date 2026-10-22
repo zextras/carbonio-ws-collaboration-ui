@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import type { WireMeetingStoppedEvent } from '@zextras/carbonio-ws-collaboration-sdk';
+import type { WireMeetingStoppedEvent } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';

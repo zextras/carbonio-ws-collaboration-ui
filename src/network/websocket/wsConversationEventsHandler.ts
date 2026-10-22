@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import type { WireRoomMemberAddedEvent } from '@zextras/carbonio-ws-collaboration-sdk';
+import type { WireRoomMemberAddedEvent } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import { notifyConfigRow } from './configRowEffects';
 import { refreshPresence } from './presenceRefresh';

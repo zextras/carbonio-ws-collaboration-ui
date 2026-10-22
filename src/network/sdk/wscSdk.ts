@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { createHttpClient, createWscClient } from '@zextras/carbonio-ws-collaboration-sdk';
+import { createHttpClient, createWscClient } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import type {
 	StoreBridge,
 	StoreMarker,
 	StoreMessage,
 	StoreMessageFastening,
 	StoreTextMessage
-} from '@zextras/carbonio-ws-collaboration-sdk';
+} from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import useStore from '../../store/Store';
 import type {

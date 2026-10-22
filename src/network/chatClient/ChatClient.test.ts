@@ -16,7 +16,7 @@ import {
 	buildSystemEventTimelineItem,
 	buildTimelineResponse,
 	buildWireMessage
-} from '@zextras/carbonio-ws-collaboration-sdk/testing';
+} from '@zextras/carbonio-ws-collaboration-ui-sdk/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 

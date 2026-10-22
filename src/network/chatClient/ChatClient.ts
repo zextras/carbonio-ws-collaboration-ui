@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-sdk';
+import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 
 import { downloadChatExport } from './chatExportDownload';
