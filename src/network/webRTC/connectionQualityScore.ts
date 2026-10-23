@@ -21,8 +21,8 @@ export const round1 = (x: number): number => Math.round(x * 10) / 10;
 // Missing/unreadable signal => curveScore(undefined)=10: go blind on that axis instead of dragging the
 // score to 0 (e.g. RTT stays in the badge on FF-ESR <142 which lacks candidate-pair RTT).
 
-// 150 (was 200): start reacting to rising delay/bufferbloat earlier — GCC's delay-based arm acts on a
-// ~12.5ms queue gradient (RTT often 100-150ms), well before an absolute 200ms would move the badge.
+// RTT starts lowering the score at 150ms, to react to rising delay/bufferbloat early: GCC's delay-based
+// arm acts on a ~12.5ms queue gradient (RTT often 100-150ms), well before an absolute 200ms.
 const RTT_GOOD_MS = 150;
 const RTT_BAD_MS = 700;
 const JITTER_GOOD_MS = 30;
@@ -30,8 +30,8 @@ const JITTER_BAD_MS = 120;
 // Uplink loss deadband: at/below this the loss is treated as noise (score stays 10). 2% is GCC's
 // "increase" edge (draft-ietf-rmcat-gcc-02 §6). Knee reaches a hard 0 at 16% (>16% loss is unusable).
 const LOSS_HEALTHY = 0.02;
-const LOSS_BAD_UP = 0.16; // was 0.22 — a bit less gentle so the badge reddens inside GCC's 2-10% hold zone
-// 0.7 (was 0.5): worst-aware blend, 1 = pure worst (min), 0 = mean. Higher lets the WORST axis dominate,
+const LOSS_BAD_UP = 0.16; // steep enough that the badge reddens inside GCC's 2-10% hold zone
+// Worst-aware blend, 1 = pure worst (min), 0 = mean. Leaning on the worst lets the WORST axis dominate,
 // so a single genuinely-bad signal (loss climbing / delay rising) is not diluted by two healthy axes.
 const LAMBDA = 0.7;
 

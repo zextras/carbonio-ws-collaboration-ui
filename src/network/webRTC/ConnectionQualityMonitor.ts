@@ -246,9 +246,8 @@ export default class ConnectionQualityMonitor {
 		}
 	}
 
-	// Raw per-tick RTT / jitter / uplink loss on OUR OWN legs to Janus (the badge). Pipeline B
-	// (per-feed freeze + sender-badge controller) lives in VideoScreenInConnection; the monitor
-	// only ticks it via evaluateQualityTick().
+	// Raw per-tick RTT / jitter / uplink loss on OUR OWN legs to Janus (the badge). The per-feed downlink
+	// controller lives in VideoScreenInConnection; the monitor only ticks it via evaluateQualityTick().
 	private async computeQuality(): Promise<{ raw: LinkSample; level: ConnectionQuality }> {
 		const webcamActive = this.videoOut.rtpSender != null;
 		const screenActive = this.screenOut.rtpSender != null;

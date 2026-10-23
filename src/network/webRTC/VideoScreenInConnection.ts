@@ -34,7 +34,7 @@ const shownReason = (prev: { net: number; ceil: number }, net: number, ceil: num
 	return 'their-network';
 };
 
-// Full temporal target: temporal scaling is removed, so every request asks for all temporal layers.
+// Every request asks for all the temporal layers: only the spatial substream is adapted.
 const FULL_TEMPORAL = 2;
 
 const MASK_TICKS_AFTER_CHANGE = 1;
@@ -89,7 +89,8 @@ const readReceiverStats = async (receiver: RTCRtpReceiver): Promise<RTCStatsRepo
 };
 
 // Shed only when the sender is at/above its HARDWARE ceiling (the freeze is OUR downlink); HOLD when the
-// network shed them BELOW their hardware ceiling (their uplink). Fixes the 144p-camera bug.
+// network shed them BELOW their hardware ceiling (their uplink), so a low-resolution camera is not
+// mistaken for a congested sender.
 const isSenderOK = (
 	maxUplinkTier: number | null | undefined,
 	maxHardwareTier: number | null | undefined
@@ -397,7 +398,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			perFeed.push(Math.max(0, theirMaxUplinkTier - netTarget));
 		});
 		if (perFeed.length === 0) return 0;
-		// MEAN over webcam-ON peers (MAX variant: replace next line with Math.max(...perFeed))
+		// Mean over the received webcams
 		return perFeed.reduce((sum, v) => sum + v, 0) / perFeed.length;
 	}
 
