@@ -39,11 +39,11 @@ const StarIcon = styled(Icon)`
 	cursor: pointer;
 `;
 
-const infoTypesWithFeedback = [
+const infoTypesWithFeedback = new Set([
 	PAGE_INFO_TYPE.MEETING_ENDED,
 	PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION,
 	PAGE_INFO_TYPE.GENERAL_ERROR
-];
+]);
 
 const InfoPage = (): ReactElement => {
 	const { infoType, meetingId } = useContext(RouterContext);
@@ -283,7 +283,7 @@ const InfoPage = (): ReactElement => {
 					</Container>
 					<Divider />
 				</Container>
-				{infoType && infoTypesWithFeedback.includes(infoType) && (
+				{infoType && infoTypesWithFeedback.has(infoType) && (
 					<Container gap="0.7rem" width="fit" height="fit">
 						<Text color="gray6" overflow="break-word" textAlign="center">
 							{meetingExperienceLabel}
