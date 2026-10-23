@@ -588,6 +588,10 @@ describe('VideoScreenInConnection — tick robustness', () => {
 	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const internals = (): any => conn;
+	const flushRequests = (): Promise<void> =>
+		new Promise((resolve) => {
+			setTimeout(resolve, 0);
+		});
 
 	const inboundVideo = (
 		framesDecoded: number,
@@ -661,6 +665,50 @@ describe('VideoScreenInConnection — tick robustness', () => {
 		await conn.evaluateQualityTick();
 
 		expect(requestVideoQuality.mock.calls.map(([, , , rung]) => rung)).toEqual([1, 0]);
+	});
+
+	it('waits longer after each consecutive failure before asking again', async () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		requestVideoQuality.mockRejectedValue(new Error('status ko'));
+
+		const requestTicks: number[] = [];
+		for (let tick = 1; tick <= 12; tick += 1) {
+			const before = requestVideoQuality.mock.calls.length;
+			// eslint-disable-next-line no-await-in-loop
+			await conn.evaluateQualityTick();
+			// eslint-disable-next-line no-await-in-loop
+			await flushRequests();
+			if (requestVideoQuality.mock.calls.length > before) requestTicks.push(tick);
+		}
+
+		expect(requestTicks).toEqual([1, 2, 4, 8]);
+	});
+
+	it('does not mask the next reading after a request that failed', async () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		requestVideoQuality.mockRejectedValueOnce(new Error('status ko'));
+
+		await conn.evaluateQualityTick();
+		await flushRequests();
+
+		expect(internals().maskTicks.has(FEED_KEY_1)).toBe(false);
+	});
+
+	it('asks again right away after a success that follows a failure', async () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), TOP_RUNG);
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 1 };
+		requestVideoQuality.mockRejectedValueOnce(new Error('status ko'));
+
+		await conn.evaluateQualityTick();
+		await flushRequests();
+		await conn.evaluateQualityTick();
+		await flushRequests();
+		storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+		await conn.evaluateQualityTick();
+
+		expect(requestVideoQuality.mock.calls.map(([, , , rung]) => rung)).toEqual([1, 1, 0]);
 	});
 
 	describe('resubscription', () => {

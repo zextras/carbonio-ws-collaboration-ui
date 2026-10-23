@@ -166,19 +166,21 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	// Another camera can deliver another height: keep every layer at its tier height and pause the ones it
-	// can't produce (we only downscale; a layer missing from the negotiation needs a new one)
+	// can't produce (we only downscale; a layer missing from the negotiation needs a new one). A camera
+	// shorter than every layer keeps the lowest one active at its own size, so video is never switched off.
 	private fitLayersTo(videoTrack: MediaStreamTrack): void {
 		const height =
 			typeof videoTrack?.getSettings === 'function' ? videoTrack.getSettings().height : undefined;
 		const { rtpSender, sendTiers } = this;
-		if (!rtpSender || !height || !sendTiers) return;
+		if (!rtpSender || !height || !sendTiers?.length) return;
+		const lowest = sendTiers.reduce((low, t) => (t.height < low.height ? t : low));
 		const params = rtpSender.getParameters();
 		params.encodings = params.encodings.map((encoding) => {
 			const tier = sendTiers.find((t) => TIER_RID[t.name] === encoding.rid);
 			if (!tier) return encoding;
 			return {
 				...encoding,
-				active: height >= tier.height,
+				active: height >= tier.height || tier === lowest,
 				scaleResolutionDownBy: Math.max(1, height / tier.height)
 			};
 		});

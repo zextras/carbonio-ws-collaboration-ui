@@ -43,6 +43,8 @@ const TICK_SEC = 2;
 // Eval ticks a never-served feed waits for its tile ceiling before falling back to an uncapped request,
 // so the first request is already the capped tier (no HIGH-then-drop) yet a feed is never withheld forever.
 const CEILING_WAIT_TICKS = 2;
+// Upper bound of the doubling wait (in eval ticks) before a failed quality request is sent again
+const REQUEST_RETRY_MAX_TICKS = 16;
 
 type InboundCounters = { decoded: number; recv: number; timestamp?: number };
 
@@ -130,6 +132,10 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// Eval tick at which a never-served feed first started waiting for its tile ceiling (deferral window).
 	private readonly ceilingWaitSince = new Map<string, number>();
 
+	// Per feed whose last quality request failed: the eval tick before which it is not sent again, and the
+	// current wait, doubled on every consecutive failure so a failing endpoint is not hit on every reconcile.
+	private readonly requestBackoff = new Map<string, { retryTick: number; delay: number }>();
+
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
@@ -215,6 +221,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.ceilingWaitSince.delete(key);
 		this.prevStats.delete(key);
 		this.maskTicks.delete(key);
+		this.requestBackoff.delete(key);
 	}
 
 	private onTrack = (ev: RTCTrackEvent): void => {
@@ -347,15 +354,24 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			this.trackShownTier(store, key, userId, { net, ceil, shown });
 			// Request path unchanged: only hit Janus (and mask the keyframe) when OUR request actually moves.
 			if (applied === desired) return;
+			if ((this.requestBackoff.get(key)?.retryTick ?? 0) > this.evalTick) return;
 			this.maskTicks.set(key, MASK_TICKS_AFTER_CHANGE);
 			this.lastAppliedRung.set(key, desired);
-			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL).catch(
-				() => {
-					// not applied: forget it so the next reconcile asks again (unless a newer request superseded it)
-					if (this.lastAppliedRung.get(key) === desired) this.lastAppliedRung.delete(key);
-				}
-			);
+			requestVideoQuality(this.meetingId, userId, mid, desired as 0 | 1 | 2, FULL_TEMPORAL)
+				.then(() => this.requestBackoff.delete(key))
+				.catch(() => this.onRequestFailed(key, desired));
 		});
+	}
+
+	// The tier did not change, so there is no keyframe to mask; ask again (unless a newer request
+	// superseded this one) only after a wait that doubles on every consecutive failure
+	private onRequestFailed(key: string, rung: number): void {
+		if (this.lastAppliedRung.get(key) !== rung) return;
+		this.lastAppliedRung.delete(key);
+		this.maskTicks.delete(key);
+		const previousDelay = this.requestBackoff.get(key)?.delay;
+		const delay = previousDelay ? Math.min(previousDelay * 2, REQUEST_RETRY_MAX_TICKS) : 1;
+		this.requestBackoff.set(key, { retryTick: this.evalTick + delay, delay });
 	}
 
 	// Log every change of the SHOWN tier, attributed (our-network / tile-resize / their-network).
@@ -410,6 +426,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.prevStats.clear();
 		this.maskTicks.clear();
 		this.lastAppliedRung.clear();
+		this.requestBackoff.clear();
 		delete this.subscriptionManager;
 		this.peerConn?.close?.();
 	}

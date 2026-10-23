@@ -208,6 +208,19 @@ describe('VideoOutConnection — simulcast layers after a track change', () => {
 		});
 	});
 
+	test('a camera shorter than every layer keeps the lowest one active at its own size', async () => {
+		const { conn, sender } = await startCamera(720);
+
+		await conn.updateLocalStreamTrack(cameraStream(120));
+		await flushPromises();
+
+		expect(layers(sender)).toEqual({
+			l: { scale: 1, active: true },
+			m: { scale: 1, active: false },
+			h: { scale: 1, active: false }
+		});
+	});
+
 	test('the virtual background track does not rescale the layers', async () => {
 		const { conn, sender } = await startCamera(720);
 
