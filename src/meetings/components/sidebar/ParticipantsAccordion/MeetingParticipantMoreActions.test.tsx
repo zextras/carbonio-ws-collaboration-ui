@@ -62,11 +62,19 @@ const queryMoreActionsButton = (userName: string): HTMLElement | null =>
 	within(getParticipantRow(userName)).queryByTestId('participant_more_actions');
 
 describe('Meeting participant more actions', () => {
-	test('More actions button is hidden on the own row', () => {
+	test('Moderator sees only the pin action on the own row', async () => {
 		const meeting = storeSetup(moderator.id);
+		const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
+		await user.click(getMoreActionsButton(moderator.name));
+		expect(await screen.findByText(/Pin video/i)).toBeVisible();
+		expect(screen.queryByText(/Demote moderator/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
+	});
+
+	test('More actions button is hidden on the own row when pin is not available', () => {
+		const meeting = storeSetup(moderator.id, 2);
 		setup(<MeetingParticipantsList meetingId={meeting.id} />);
 		expect(queryMoreActionsButton(moderator.name)).not.toBeInTheDocument();
-		expect(getMoreActionsButton(participant.name)).toBeVisible();
 	});
 
 	test('Moderator sees promote, pin and remove actions', async () => {

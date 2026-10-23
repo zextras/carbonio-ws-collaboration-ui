@@ -78,7 +78,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: switchPinnedTile
 			});
 		}
-		if (iAmOwner && !isUserGuest) {
+		if (iAmOwner && !isSessionParticipant && !isUserGuest) {
 			list.push({
 				id: 'switchOwnership',
 				icon: isMemberOwner ? 'Crown' : 'CrownOutline',
@@ -94,7 +94,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: openMuteForAllModal
 			});
 		}
-		if (iAmOwner) {
+		if (iAmOwner && !isSessionParticipant) {
 			list.push({
 				id: 'removeFromMeeting',
 				onClick: openRemoveModal,
@@ -113,6 +113,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		iAmOwner,
 		isMemberOwner,
 		isPinned,
+		isSessionParticipant,
 		isUserGuest,
 		muteForAllHasToAppear,
 		muteForAllLabel,
@@ -126,7 +127,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		unpinVideoLabel
 	]);
 
-	const hasActions = !isSessionParticipant && items.length > 0;
+	const hasActions = items.length > 0;
 
 	return (
 		<>
