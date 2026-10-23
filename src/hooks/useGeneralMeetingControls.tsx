@@ -132,10 +132,11 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipantKickedHandler = useCallback(() => {
 		const state = useStore.getState();
 		const roomId = getRoomIdByMeetingId(state, meetingId);
-		const isVirtualRoom = getRoomTypeSelector(state, roomId ?? '') === RoomType.TEMPORARY;
+		const roomType = getRoomTypeSelector(state, roomId ?? '');
+		const isChatRoom = !!roomType && roomType !== RoomType.TEMPORARY;
 		meetingDisconnection(meetingId);
 		closePipWindow();
-		goToInfoPage(isVirtualRoom ? PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM : PAGE_INFO_TYPE.KICKED);
+		goToInfoPage(isChatRoom ? PAGE_INFO_TYPE.KICKED : PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM);
 	}, [closePipWindow, goToInfoPage, meetingDisconnection, meetingId]);
 	useEventListener(EventName.MEETING_PARTICIPANT_KICKED, meetingParticipantKickedHandler);
 
