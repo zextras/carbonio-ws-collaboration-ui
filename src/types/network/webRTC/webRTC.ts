@@ -6,6 +6,7 @@
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
 import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+import { SimulcastTier } from '../../store/SessionTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
@@ -36,6 +37,7 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
 	selectedVideoDeviceId: string | undefined;
+	sendTiers?: SimulcastTier[];
 	startVideo(selectedVideoDeviceId?: string): Promise<void>;
 	stopVideo(): Promise<Response>;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
@@ -57,4 +59,6 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
+	evaluateQualityTick(): Promise<void>;
+	downlinkShortfall(): number;
 }

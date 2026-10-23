@@ -284,6 +284,21 @@ export const getLoginConfig = (): Promise<LoginV3ConfigResponse> =>
 		.then((resp) => resp.json())
 		.catch((err: Error) => console.error(err));
 
+export const requestVideoQuality = (
+	meetingId: string,
+	userId: string,
+	mid: string,
+	substream: 0 | 1 | 2,
+	temporal?: 0 | 1 | 2
+): Promise<Response> =>
+	fetchAPI(`meetings/${meetingId}/media/quality`, RequestType.PUT, {
+		userId,
+		type: STREAM_TYPE.VIDEO,
+		mid,
+		substream,
+		temporal
+	});
+
 export const audioIceRestart = (meetingId: string, sdp: string): Promise<Response> =>
 	fetchAPI(`meetings/${meetingId}/audio/iceRestart`, RequestType.PUT, { sdp });
 
