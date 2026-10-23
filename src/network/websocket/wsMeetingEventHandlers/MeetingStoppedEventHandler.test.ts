@@ -10,6 +10,7 @@ import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MessageType, OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const oneToOneRoom = createMockRoom({
@@ -72,5 +73,36 @@ describe('MeetingStoppedEventHandler tests', () => {
 		meetingStoppedEventHandler(groupEvent);
 		const call = dispatchEvent.mock.calls[0][0] as CustomEvent;
 		expect(call.type).toBe(EventName.MEETING_STOPPED);
+	});
+});
+
+describe('MeetingStoppedEventHandler system line on a v2 backend', () => {
+	beforeEach(() => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().startMeeting(oneToOneMeeting.id, '2022-12-31T23:55:00.000Z');
+	});
+
+	test('the meetingEnded line carries the call duration measured from the known start', () => {
+		meetingStoppedEventHandler({
+			...oneToOneEvent,
+			endedBy: 'otherUserId',
+			systemEventId: 'sys-end'
+		});
+
+		expect(useStore.getState().chatsRegistry[oneToOneRoom.id]?.lastMessage).toMatchObject({
+			id: 'sys-end',
+			type: MessageType.CONFIGURATION_MSG,
+			operation: OperationType.MEETING_ENDED,
+			value: '300',
+			from: 'otherUserId'
+		});
+	});
+
+	test('the own stop lands the line without counting it', () => {
+		meetingStoppedEventHandler({ ...oneToOneEvent, endedBy: 'myUserId', systemEventId: 'sys-end' });
+
+		const registry = useStore.getState().chatsRegistry[oneToOneRoom.id];
+		expect(registry?.lastMessage?.id).toBe('sys-end');
+		expect(registry?.unread ?? 0).toBe(0);
 	});
 });

@@ -30,6 +30,7 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
 import { isBefore } from '../../utils/dateUtils';
+import { getIsWscPure } from '../selectors/SessionSelectors';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
 	const result: T[] = [];
@@ -115,6 +116,19 @@ const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRe
 		return;
 	}
 	queue.push(request);
+};
+
+/**
+ * Which messages after the own marker make the unread count: the others' text
+ * messages, plus the configuration rows: all of them on v1, like MongooseIM
+ * did, only the ones authored by others on v2, like the WSC backend counts the
+ * system lines.
+ */
+const countsAsUnread = (msg: Message, isWscPure: boolean): boolean => {
+	if (msg.type === MessageType.CONFIGURATION_MSG) {
+		return !isWscPure || !isMyId(msg.from);
+	}
+	return msg.type === MessageType.TEXT_MSG && !isMyId(msg.from);
 };
 
 export const useChatsRegistryStoreSlice: StateCreator<
@@ -346,19 +360,21 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					return msg;
 				});
 
-				// Recalculate unread count
+				// Recalculate unread count. On v2 only a marker of mine changes it: the count comes from the server,
+				// and the rows in store can be fewer than the unread ones because the history is not preloaded
 				const myId = draft.session.id;
+				const isWscPure = getIsWscPure(draft);
+				if (isWscPure && !some(newMarkers, { from: myId })) {
+					return;
+				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
 				const lastMarkedDate = myMarker
 					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
 					: undefined;
 
 				const unreadMessages = messages.filter((msg) => {
-					const isConfigOrFromOthers =
-						msg.type === MessageType.CONFIGURATION_MSG ||
-						(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
 					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
-					return isConfigOrFromOthers && isAfterMarker;
+					return countsAsUnread(msg, isWscPure) && isAfterMarker;
 				});
 
 				draft.chatsRegistry[roomId].unread = unreadMessages.length;

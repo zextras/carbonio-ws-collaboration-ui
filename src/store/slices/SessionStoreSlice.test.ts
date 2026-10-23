@@ -6,6 +6,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 
+import { chatClient } from '../../network/chatClient/ChatClient';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -204,6 +205,33 @@ describe('SessionStoreSlice tests', () => {
 				roomId,
 				exporter: new ChatExporter(roomId),
 				status: ExportStatus.DOWNLOADING
+			});
+		});
+
+		describe('on a WSC-pure backend', () => {
+			afterEach(() => {
+				// The zustand store survives across tests: leave the version un-negotiated
+				useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+			});
+
+			test('Export delegates to the façade download without touching the state', () => {
+				useStore.getState().setApiVersion('2.0.0');
+				const spy = vi.spyOn(chatClient, 'requestFullHistory').mockImplementation(() => undefined);
+
+				useStore.getState().setChatExporting(roomId);
+
+				// Server-streamed download: no ChatExporter, no spinner state
+				expect(spy).toHaveBeenCalledWith(roomId);
+				expect(useStore.getState().session.chatExporting).toBeUndefined();
+			});
+
+			test('Clearing the export state still works after a version renegotiation', () => {
+				useStore.getState().setChatExporting(roomId);
+				useStore.getState().setApiVersion('2.0.0');
+
+				useStore.getState().setChatExporting();
+
+				expect(useStore.getState().session.chatExporting).toBeUndefined();
 			});
 		});
 	});

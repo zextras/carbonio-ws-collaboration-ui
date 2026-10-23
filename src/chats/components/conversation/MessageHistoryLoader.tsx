@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
 
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { now } from '../../../utils/dateUtils';
@@ -86,7 +86,7 @@ const MessageHistoryLoader = ({
 			const roomMessages = store.chatsRegistry[roomId]?.messages;
 			const date = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date);
+				chatClient.requestHistory(roomId, date);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),

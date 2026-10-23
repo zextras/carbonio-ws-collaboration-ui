@@ -6,17 +6,17 @@
 import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
-import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
+import { resolveChatExportName } from '../../../utils/resolveChatExportName';
 
 export interface IChatExporter {
 	addMessagesToFullHistory(messages: Message[]): void;
 	continueExporting(): void;
-	exportHistory(): void;
+	exportHistory(): Promise<void>;
 }
 
 class ChatExporter implements IChatExporter {
@@ -26,7 +26,7 @@ class ChatExporter implements IChatExporter {
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
-		xmppClient.requestFullHistory(this.roomId);
+		chatClient.requestFullHistory(this.roomId);
 	}
 
 	public addMessagesToFullHistory(messages: Message[]): void {
@@ -35,10 +35,10 @@ class ChatExporter implements IChatExporter {
 
 	public continueExporting(): void {
 		const from = last(this.fullHistory)?.date ?? 0;
-		xmppClient.requestFullHistory(this.roomId, from);
+		chatClient.requestFullHistory(this.roomId, from);
 	}
 
-	public exportHistory(): void {
+	public async exportHistory(): Promise<void> {
 		let content = '';
 		forEach(this.fullHistory, (message) => {
 			if (message.type === MessageType.TEXT_MSG) {
@@ -51,7 +51,11 @@ class ChatExporter implements IChatExporter {
 		const blob = new Blob([content], { type: 'text/plain' });
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(blob);
-		const chatName = getRoomNameSelector(useStore.getState(), this.roomId);
+		// The room name can still be unresolved at this point (store.users
+		// hydrates lazily): resolveChatExportName makes one last direct attempt
+		// before falling back to the roomId, so naming isn't left to a stale
+		// snapshot of the store.
+		const chatName = await resolveChatExportName(this.roomId);
 		link.download = `${chatName}.txt`;
 		document.body.appendChild(link);
 		link.click();
