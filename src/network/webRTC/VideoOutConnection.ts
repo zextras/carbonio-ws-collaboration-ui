@@ -96,7 +96,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	};
 
-	private addSimulcastTransceiver(
+	private addVideoSender(
 		videoTrack: MediaStreamTrack,
 		stream: MediaStream,
 		peerConn: RTCPeerConnection
@@ -108,17 +108,18 @@ export default class VideoOutConnection implements IVideoOutConnection {
 				: undefined) ?? 0;
 		// A camera that can't produce a tier drops to the lower ones: a 480p camera has no 720 'high'
 		const producible = producibleTiers(tiers, captureHeight);
-		let sendEncodings: RTCRtpEncodingParameters[];
-		if (!tiers || tiers.length === 0 || producible.length === 0) {
+		// Nothing to simulcast: publish a plain track, so the offer carries no rid/simulcast lines (as
+		// before simulcast, which is what a backend without videoSimulcastTiers expects)
+		if (producible.length === 0) {
 			this.sendTiers = undefined;
-			sendEncodings = [{ rid: 'h', scaleResolutionDownBy: 1 }];
-		} else {
-			this.sendTiers = producible;
-			sendEncodings = producible.map((t) => ({
-				rid: TIER_RID[t.name],
-				scaleResolutionDownBy: captureHeight / t.height
-			}));
+			this.rtpSender = peerConn.addTrack(videoTrack, stream);
+			return;
 		}
+		this.sendTiers = producible;
+		const sendEncodings: RTCRtpEncodingParameters[] = producible.map((t) => ({
+			rid: TIER_RID[t.name],
+			scaleResolutionDownBy: captureHeight / t.height
+		}));
 		// No scalabilityMode on purpose: VP8 simulcast already emits temporal layers by default, and setting it is unshipped on Firefox / ignored on Safari.
 		const transceiver = peerConn.addTransceiver(videoTrack, {
 			direction: 'sendonly',
@@ -149,11 +150,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
 				if (this.rtpSender == null) {
-					this.addSimulcastTransceiver(
-						videoTrack,
-						mediaStreamTrack ?? new MediaStream(),
-						this.peerConn
-					);
+					this.addVideoSender(videoTrack, mediaStreamTrack ?? new MediaStream(), this.peerConn);
 				} else if (this.rtpSender?.track) {
 					if (isVirtualBackground) {
 						this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));

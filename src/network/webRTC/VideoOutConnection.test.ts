@@ -216,4 +216,27 @@ describe('VideoOutConnection — simulcast layers after a track change', () => {
 
 		expect(sender.setParameters).not.toHaveBeenCalled();
 	});
+
+	test('publishes the simulcast layers through a transceiver when tiers are configured', async () => {
+		await startCamera(720);
+
+		expect(peerConnMock.addTransceiver).toHaveBeenCalled();
+		expect(peerConnMock.addTrack).not.toHaveBeenCalled();
+	});
+
+	test.each([
+		['no tiers are configured', undefined, 720],
+		['the tier list is empty', [], 720],
+		['the camera is shorter than every tier', [{ name: 'low', height: 144 }], 120]
+	])('publishes a plain track without rid when %s', async (_, tiers, height) => {
+		useStore.setState({
+			session: { id: 'me', attributes: { videoSimulcastTiers: tiers } }
+		} as unknown as RootStore);
+		const { conn } = await startCamera(height);
+
+		expect(peerConnMock.addTrack).toHaveBeenCalledTimes(1);
+		expect(peerConnMock.addTransceiver).not.toHaveBeenCalled();
+		expect(conn.sendTiers).toBeUndefined();
+		expect(conn.rtpSender).not.toBeNull();
+	});
 });
