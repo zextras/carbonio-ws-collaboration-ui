@@ -564,6 +564,23 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 		};
 		expect(conn.downlinkShortfall()).toBe(0);
 	});
+
+	it('ignores a feed that left the subscription', () => {
+		seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver());
+		seedReceiver(conn, FEED_KEY_2, USER_2, 'mid2', makeNoStatReceiver());
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const c = conn as any;
+		c.feedStates.set(FEED_KEY_1, { targetRung: 2 });
+		c.feedStates.set(FEED_KEY_2, { targetRung: 0 });
+		storeMocks.connectionQuality = {
+			[USER_1]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 },
+			[USER_2]: { networkScore: 10, changedAt: 0, maxUplinkTier: 2 }
+		};
+
+		conn.handleParticipantsSubscribed([{ userId: USER_1, type: STREAM_TYPE.VIDEO, mid: 'mid1' }]);
+
+		expect(conn.downlinkShortfall()).toBe(0);
+	});
 });
 
 describe('VideoScreenInConnection — tick robustness', () => {
@@ -644,6 +661,95 @@ describe('VideoScreenInConnection — tick robustness', () => {
 		await conn.evaluateQualityTick();
 
 		expect(requestVideoQuality.mock.calls.map(([, , , rung]) => rung)).toEqual([1, 0]);
+	});
+
+	describe('resubscription', () => {
+		const subscribed = (mid?: string): Parameters<typeof conn.handleParticipantsSubscribed>[0] =>
+			mid ? [{ userId: USER_1, type: STREAM_TYPE.VIDEO, mid }] : [];
+		const requestedMidsAndRungs = (): Array<[string, number]> =>
+			requestVideoQuality.mock.calls.map(([, , mid, rung]) => [mid, rung]);
+
+		beforeEach(() => {
+			storeMocks.tileCeilings = { [FEED_KEY_1]: 0 };
+			seedReceiver(conn, FEED_KEY_1, USER_1, 'mid1', makeNoStatReceiver(), null);
+		});
+
+		it('requests the tier again when a feed is resubscribed after leaving the subscription', () => {
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+			conn.handleParticipantsSubscribed(subscribed());
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+
+			expect(requestedMidsAndRungs()).toEqual([
+				['mid1', 0],
+				['mid1', 0]
+			]);
+		});
+
+		it('requests the tier on the new mid when a subscribed feed moves to another mid', () => {
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+			conn.handleParticipantsSubscribed(subscribed('mid3'));
+
+			expect(requestedMidsAndRungs()).toEqual([
+				['mid1', 0],
+				['mid3', 0]
+			]);
+		});
+
+		it('does not request again when a subscription update keeps the feed on the same mid', () => {
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+
+			expect(requestedMidsAndRungs()).toEqual([['mid1', 0]]);
+		});
+
+		it('keeps the learned network target of a feed that left the subscription', () => {
+			internals().feedStates.set(FEED_KEY_1, initialFeedState(1));
+			conn.handleParticipantsSubscribed(subscribed('mid1'));
+			conn.handleParticipantsSubscribed(subscribed());
+
+			expect(internals().feedStates.get(FEED_KEY_1).targetRung).toBe(1);
+		});
+
+		it('does not read the stats of a feed that left the subscription', async () => {
+			const receiver = makeHealthyReceiver();
+			internals().videoReceivers.set(FEED_KEY_1, { receiver, userId: USER_1 });
+			conn.handleParticipantsSubscribed(subscribed());
+
+			await conn.evaluateQualityTick();
+
+			expect(receiver.getStats).not.toHaveBeenCalled();
+		});
+
+		it('does not keep the reading of a feed unsubscribed while its stats were being read', async () => {
+			let releaseStats: () => void = () => undefined;
+			const pendingReceiver = {
+				getStats: vi.fn(
+					() =>
+						new Promise<RTCStatsReport>((resolve) => {
+							releaseStats = (): void => resolve(inboundVideo(100, 1000));
+						})
+				)
+			} as unknown as RTCRtpReceiver;
+			internals().videoReceivers.set(FEED_KEY_1, { receiver: pendingReceiver, userId: USER_1 });
+
+			const tick = conn.evaluateQualityTick();
+			conn.handleParticipantsSubscribed(subscribed());
+			releaseStats();
+			await tick;
+
+			expect(internals().prevStats.has(FEED_KEY_1)).toBe(false);
+			expect(internals().feedStates.has(FEED_KEY_1)).toBe(false);
+		});
+
+		it('does not seed a new feed from the target of a feed that left the subscription', async () => {
+			internals().feedStates.set(FEED_KEY_1, initialFeedState(0));
+			conn.handleParticipantsSubscribed(subscribed());
+			seedReceiver(conn, FEED_KEY_2, USER_2, 'mid2', makeNoStatReceiver(), null);
+
+			await conn.evaluateQualityTick();
+
+			expect(internals().feedStates.get(FEED_KEY_2).targetRung).toBe(TOP_RUNG);
+		});
 	});
 
 	it.each([

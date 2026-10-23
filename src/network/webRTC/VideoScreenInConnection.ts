@@ -181,6 +181,13 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			};
 		});
 
+		// A feed that left the subscription (or came back on another mid) starts again from Janus' default
+		// substream, so what we requested for it before no longer holds and must be requested again
+		forEach(this.streamsMap, (previous, key) => {
+			if (previous.type !== STREAM_TYPE.VIDEO || previous.mid == null) return;
+			if (temporaryStreams[key]?.mid !== previous.mid) this.resetFeedRequest(key);
+		});
+
 		this.streamsMap = temporaryStreams;
 		this.updateStreams();
 		// Apply the current target to freshly-subscribed feeds now that their mids are known, so a
@@ -194,15 +201,20 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			delete this.streamsMap[key];
 			if (type === STREAM_TYPE.VIDEO) {
 				this.videoReceivers.delete(key);
-				this.lastAppliedRung.delete(key);
-				this.lastReconcile.delete(key);
-				this.ceilingWaitSince.delete(key);
 				this.feedStates.delete(key);
-				this.prevStats.delete(key);
-				this.maskTicks.delete(key);
+				this.resetFeedRequest(key);
 			}
 		});
 	};
+
+	// Forget what was requested and measured for a feed, keeping its learned network target (feedStates)
+	private resetFeedRequest(key: string): void {
+		this.lastAppliedRung.delete(key);
+		this.lastReconcile.delete(key);
+		this.ceilingWaitSince.delete(key);
+		this.prevStats.delete(key);
+		this.maskTicks.delete(key);
+	}
 
 	private onTrack = (ev: RTCTrackEvent): void => {
 		forEach(ev.streams, (stream) => {
@@ -224,12 +236,18 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.reconcileFeeds();
 	};
 
-	// Returns the lowest targetRung across all tracked feeds (used to seed a newly subscribed feed
+	// A receiver and its learned state outlive a scroll-driven unsubscribe (Janus may reuse the transceiver),
+	// but only the feeds in the current subscription carry a mid
+	private isSubscribed(key: string): boolean {
+		return this.streamsMap[key]?.mid != null;
+	}
+
+	// Returns the lowest targetRung across the subscribed feeds (used to seed a newly subscribed feed
 	// so it inherits the room's current lowest tier instead of jumping straight to 720p).
 	private roomFloor(): number {
 		let m = TOP_RUNG;
-		this.feedStates.forEach((s) => {
-			if (s.targetRung < m) m = s.targetRung;
+		this.feedStates.forEach((s, key) => {
+			if (this.isSubscribed(key) && s.targetRung < m) m = s.targetRung;
 		});
 		return m;
 	}
@@ -257,11 +275,14 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		const am = useStore.getState().activeMeeting;
 		const cq = am?.connectionQuality ?? {};
 
+		const subscribedReceivers = [...this.videoReceivers.entries()].filter(([key]) =>
+			this.isSubscribed(key)
+		);
 		await Promise.all(
-			[...this.videoReceivers.entries()].map(async ([key, { receiver, userId }]) => {
+			subscribedReceivers.map(async ([key, { receiver, userId }]) => {
 				const stats = await readReceiverStats(receiver);
-				// removed (or re-subscribed) while the stats were being read: its state must stay deleted
-				if (this.videoReceivers.get(key)?.receiver !== receiver) return;
+				// removed, re-subscribed or unsubscribed while the stats were being read: its state must stay deleted
+				if (this.videoReceivers.get(key)?.receiver !== receiver || !this.isSubscribed(key)) return;
 				const score = this.computeFeedScore(key, stats);
 
 				const senderOK = isSenderOK(cq[userId]?.maxUplinkTier, cq[userId]?.maxHardwareTier);
@@ -368,6 +389,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		const cq = useStore.getState().activeMeeting?.connectionQuality ?? {};
 		const perFeed: number[] = [];
 		this.videoReceivers.forEach(({ userId }, key) => {
+			if (!this.isSubscribed(key)) return;
 			const theirMaxUplinkTier = cq[userId]?.maxUplinkTier;
 			if (theirMaxUplinkTier == null) return;
 			const netTarget = this.feedStates.get(key)?.targetRung;
