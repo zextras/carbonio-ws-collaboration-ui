@@ -24,9 +24,7 @@ describe('WebSocketClient', () => {
 	test('Connect WebSocketClient generate a WebSocket', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
-		expect(wsClient._webSocket?.url).toEqual(
-			`wss://${window.location.hostname}/services/chats/events`
-		);
+		expect(wsClient._webSocket?.url).toEqual(`wss://${window.location.host}/services/chats/events`);
 		expect(wsClient._webSocket).toBeDefined();
 		expect(wsClient._webSocket?.onopen).toBeDefined();
 		expect(wsClient._webSocket?.onclose).toBeDefined();
