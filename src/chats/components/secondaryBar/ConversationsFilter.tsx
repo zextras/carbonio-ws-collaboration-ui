@@ -17,6 +17,7 @@ import React, {
 
 import styled from '@emotion/styled';
 import { Container, Input, Tooltip, Button } from '@zextras/carbonio-design-system';
+import { openSecondaryBar } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 const FilterContainer = styled(Container)`
@@ -46,6 +47,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	const closeTooltip = t('conversationFilter.closeTooltip', 'Close filter');
 
 	const [filterHasFocus, setFilterHasFocus] = useState(false);
+	const shouldFocusRef = useRef(false);
 
 	const [searchInput, setSearchInput] = useState('');
 
@@ -68,13 +70,20 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 		setFilterHasFocus(true);
 	}, [setFilterHasFocus]);
 
+	const handleFunnelClick = useCallback(() => {
+		shouldFocusRef.current = true;
+		openSecondaryBar();
+	}, []);
+
 	const handleInputBlur = useCallback(() => {
 		setFilterHasFocus(false);
 	}, [setFilterHasFocus]);
 
 	useEffect(() => {
-		if (filterHasFocus) {
+		if (expanded && (filterHasFocus || shouldFocusRef.current)) {
 			filterInputRef.current?.focus();
+			shouldFocusRef.current = false;
+			setFilterHasFocus(true);
 		}
 		if (!expanded) {
 			handleInputBlur();
@@ -122,7 +131,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 							type="ghost"
 							icon="FunnelOutline"
 							size="large"
-							onClick={handleInputFocus}
+							onClick={handleFunnelClick}
 							color="text"
 						/>
 					</Tooltip>
