@@ -47,7 +47,7 @@ export class WebSocketClient {
 		const wsUrl = '/services/chats/events';
 		const versions = useStore.getState().session.supportedVersions;
 		// Creating WebSocket
-		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`, versions);
+		this._webSocket = new WebSocket(`wss://${window.location.host}${wsUrl}`, versions);
 		wsDebug('WebSocket connection...');
 
 		// Attach handler

@@ -1,3 +1,57 @@
+## [0.18.27](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.26...v0.18.27) (2026-10-21)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v5 ([#869](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/869)) ([ce27220](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ce2722068ab93c07a627308e5c545ef11bd1cf95))
+
+## [0.18.26](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.25...v0.18.26) (2026-10-20)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#868](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/868)) ([5531086](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5531086c9f1e0310b3d57707fa970ef7b1e53a96))
+
+## [0.18.25](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.24...v0.18.25) (2026-10-19)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#867](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/867)) ([fabb8f6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fabb8f62dfe20299150f783ca3d5d232ef9a39e9))
+
+## [0.18.24](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.23...v0.18.24) (2026-10-16)
+
+### Other changes
+
+* **deps:** weekly update dependencies (2026-10-15) ([#866](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/866)) ([3984a81](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3984a81acdf17a21aa806496e7a3ce79507dff27))
+
+## [0.18.23](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.22...v0.18.23) (2026-10-15)
+
+### Bug Fixes
+
+* keep the dev server port in chat websocket and XMPP URLs [CO-4497] ([#864](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/864)) ([b40542a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b40542ae804b0a9e5dddb9df9a44e8186a59837d))
+
+## [0.18.22](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.21...v0.18.22) (2026-10-15)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.15.2 ([#865](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/865)) ([9e602ed](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9e602ed49d83290f30345815dcbc4840ca7d38ec))
+
+## [0.18.21](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.20...v0.18.21) (2026-10-14)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#860](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/860)) ([4186346](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4186346afb765ebdcb70e16b6441e622222d0f76))
+
+## [0.18.20](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.19...v0.18.20) (2026-10-13)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v4.15.0 ([#861](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/861)) ([1cd5998](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1cd599899a3e8b3f4b4385657a1976313604727a))
+
+## [0.18.19](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.18...v0.18.19) (2026-10-13)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#859](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/859)) ([f081419](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f0814192eb92ee539a4bcc997f931c386bdd0e61))
+
 ## [0.18.18](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.17...v0.18.18) (2026-10-12)
 
 ### Bug Fixes
