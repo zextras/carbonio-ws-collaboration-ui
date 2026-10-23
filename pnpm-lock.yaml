@@ -27,8 +27,8 @@ importers:
         specifier: 12.2.1
         version: 12.2.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1))(date-fns@4.4.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@zextras/carbonio-shell-ui':
-        specifier: 15.3.15
-        version: 15.3.15(1067848b219f23b0f8dea35aaece0f58)
+        specifier: 15.3.22
+        version: 15.3.22(1067848b219f23b0f8dea35aaece0f58)
       '@zextras/carbonio-ui-preview':
         specifier: 5.0.19
         version: 5.0.19(@types/react@18.3.31)(@zextras/carbonio-design-system@12.2.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1))(date-fns@4.4.0)(lodash@4.18.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1468,11 +1468,14 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/browser-common@0.8.3':
-    resolution: {integrity: sha512-4Hlbwyn+Hioc2+pjqSGWMTDrA5XsDshssPnGfv34khPKoJaeBe2YvPvsEPoH78jezOS6Wo3LJvCPhqyolg3S8w==}
+  '@posthog/browser-common@0.9.11':
+    resolution: {integrity: sha512-ZCwJIgiDBRoEAlrlYxaIIIAUfITmBDpWDQJp+IZmAcTyvJka5/ebEKu8uV+jSSA/RhpvDKKte1WmhLUbkIWQjA==}
 
   '@posthog/core@1.59.1':
     resolution: {integrity: sha512-P39YgzQVDh6oz6wAzQXEnoHgTYpM7gifonmVKq1scAJco79h31XmmNVurRq9tTmmyIrr1uX8FHT0riCsyfV9AQ==}
+
+  '@posthog/core@1.60.1':
+    resolution: {integrity: sha512-UpswaG2957O6Ywfx1aCeI8BbXcfoKduKwq1ytBml80AQuAmgK672OmhDcldA7wg4vGP49LpDTgxcNbLvZwQOqw==}
 
   '@posthog/types@1.416.0':
     resolution: {integrity: sha512-0/9+02s/0uDyrH4G/qUg1yyl6gXUg8Uuxw/PlDad3KLzo9FFS9zS/kAQaEshx/saVGupj1aAy/4EUBxWisBogw==}
@@ -1583,14 +1586,14 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@rollup/rollup-linux-x64-gnu@4.62.4':
-    resolution: {integrity: sha512-W69hukhZ3KKNRCaMIEzKvcFye42hh0FE1+YoYaf5+Ikacuftoco6yO/xouz0hc5d5W/s3yBro5jRiuEE/Q5vUw==}
+  '@rollup/rollup-linux-x64-gnu@4.63.1':
+    resolution: {integrity: sha512-gfI5T24WLLuFfSKw7Go/zDXjAAV0fny0swTaDv+WjK7vqcw4cRhFfdsyKL1n+ukI+ooBxn3bVQnyrn06WpI50w==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@rollup/rollup-win32-x64-msvc@4.62.4':
-    resolution: {integrity: sha512-zD6NdeWEByGE9QF9vCrlJ5YQB4oq9q91kPZS37Jwj5hOkvR1lTBSpsKhKDw4IJtbQ35LsTS1HD9DZYGKIshU1Q==}
+  '@rollup/rollup-win32-x64-msvc@4.63.1':
+    resolution: {integrity: sha512-at8QVep6S3h5Y6gSbdGU06bRY5WJkf6WUduM9YtvYMbYhB1MOFfUgc6kehitQXzOtMSaT70q7f9ydPhpqu821w==}
     cpu: [x64]
     os: [win32]
 
@@ -2258,8 +2261,8 @@ packages:
       react: ^18.3.1
       react-dom: ^18.3.1
 
-  '@zextras/carbonio-shell-ui@15.3.15':
-    resolution: {integrity: sha512-Hr6BHEZBNB5HkVsIV6OaI0qQsLobnrXFEa5/pX+KBtKG/ZQJfJ2FvsGwb99SeW1jIDvS0d1xFgck6nhhPYUVBw==}
+  '@zextras/carbonio-shell-ui@15.3.22':
+    resolution: {integrity: sha512-gygswGhXhmW/Ow9cn+issDTa5el4sQvF73E3hA2YEYN4HXeBEkj9tH1hmKVMJnOjBwAE0Ec1b2vH/y4i01NfbQ==}
     engines: {node: v22, pnpm: '>=10'}
     peerDependencies:
       '@emotion/react': ^11.14.0
@@ -2309,9 +2312,6 @@ packages:
     resolution: {integrity: sha512-I73jlmzGrzo9lvKsQkqCFqkXiwj7QuF0ZAllxWr+0q2dsTky11nGUMpu7hkL0coIAT8O0M2MvFDIuGG0MDI7Ug==}
     engines: {node: v22, pnpm: '>=9'}
     hasBin: true
-
-  '@zextras/carbonio-ui-soap-lib@1.3.1':
-    resolution: {integrity: sha512-H628eJJT3TGL5BsAoKgYoBrP9w8tT6HBhrH19gxAyc+Y9g97v4gUT6G+TGjIn1mDXVrZN17KR9Fnz9v2F25UrA==}
 
   '@zextras/carbonio-ui-soap-lib@1.3.2':
     resolution: {integrity: sha512-hI+uAl0ewU7eSlHxn992dwuWAdvyruV3G7rCJTD6gGcVQqOQx9/U6sNt+yBm5zd3kXv7mdwd+LJfAJ0yh6oWSw==}
@@ -3029,8 +3029,8 @@ packages:
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
 
-  darkreader@4.9.130:
-    resolution: {integrity: sha512-hLYjyUszzRc7n+EGbK+LYJV9uCp0JwwvRNgXgKyMkqCoetwkheefWUIxbxKiqQaSWLrCQuQuv55f2cHQMopJ2w==}
+  darkreader@4.9.133:
+    resolution: {integrity: sha512-d3dRGpVgoBnMXl9qfnTuRvrdtO/9e6puFbsDwxfycTwbRNFI+sNX+093h6qnNo4VosyHHUaIXyunDWvbEudTRQ==}
 
   data-urls@7.0.0:
     resolution: {integrity: sha512-23XHcCF+coGYevirZceTVD7NdJOqVn+49IHyxgszm+JIiHLoB2TkmPtsYkNWT1pvRSGkc35L6NHs0yHkN2SumA==}
@@ -4030,9 +4030,6 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  immer@11.1.18:
-    resolution: {integrity: sha512-EQyQtLiYW029lyoczMl/Hh4Xu7cDecSc58JRYpHyL4tIAu3eqd1yJzQX04d2BZHDkzFFvm6qJEJWOtfDSWAXbQ==}
-
   immer@11.1.21:
     resolution: {integrity: sha512-bZSadeCPGdaY5/qRLgr6mDSH1ra21rD3rqpiWk7+QTr4ayYPTE9qZYdLh/NdPhMe0wSrTvHD/Lk8q5EwhUs0aw==}
 
@@ -4592,8 +4589,8 @@ packages:
   make-event-props@2.0.0:
     resolution: {integrity: sha512-G/hncXrl4Qt7mauJEXSg3AcdYzmpkIITTNl5I+rH9sog5Yw0kK6vseJjCaPfOXqOqQuPUP89Rkhfz5kPS8ijtw==}
 
-  malevic@0.20.2:
-    resolution: {integrity: sha512-s44yEUyfDaONt7nPT7NDQ+Z2oAswErG70ok2Q95bJFh1Bdcn4dZQVMrLE02ZIjTtYfQ/LFOVxF+yB3bdGw/GtQ==}
+  malevic@0.20.3:
+    resolution: {integrity: sha512-DzUDSf5MkW0Bjrk7l5j6hIN4uxMRGLKmblKvZ84Nu3V5bwAu4tzYX7Mds5HM5Vk1oZaTIeEPFbHaUU1YSWwOnw==}
 
   marked-terminal@7.3.0:
     resolution: {integrity: sha512-t4rBvPsHc57uE/2nJOLmMbZCQ4tgAccAED3ngXQqW6g+TxA488JzJ+FK3lQkzBQOI1mRV/r/Kq+1ZlJ4D0owQw==}
@@ -5269,8 +5266,8 @@ packages:
     resolution: {integrity: sha512-YUbWYCgErwnMAVkjUnYa+KlMBzGpHwiIt/DE7f0G33AuX2LH9UcTk6KgWxd3zRU+pN3u/C+Xl3EnMLM4Hea7Sg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.430.3:
-    resolution: {integrity: sha512-+j/0wa36fXdXsiKhN7ghHOA4z9/ik893ZpMOLeqCluqXZSt/oe+iClIavWqLRcYhvvmJvl2D3EfKpt8Kg8GbUQ==}
+  posthog-js@1.438.11:
+    resolution: {integrity: sha512-jMrd5aLUg9D0ewei9q3Vk0ZQqftp87KJPrCn4Cr89aGmYGLlFNc+aIboI49xoUGl1+lMb/991rGffpiJnpfwhA==}
     peerDependencies:
       '@types/react': '>=16.8.0'
       react: '>=16.8.0'
@@ -8232,12 +8229,19 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/browser-common@0.8.3':
+  '@posthog/browser-common@0.9.11':
     dependencies:
-      '@posthog/core': 1.59.1
+      '@posthog/core': 1.60.1
       '@posthog/types': 1.416.0
+      preact: 10.29.8
+    transitivePeerDependencies:
+      - preact-render-to-string
 
   '@posthog/core@1.59.1':
+    dependencies:
+      '@posthog/types': 1.416.0
+
+  '@posthog/core@1.60.1':
     dependencies:
       '@posthog/types': 1.416.0
 
@@ -8294,10 +8298,10 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@rollup/rollup-linux-x64-gnu@4.62.4':
+  '@rollup/rollup-linux-x64-gnu@4.63.1':
     optional: true
 
-  '@rollup/rollup-win32-x64-msvc@4.62.4':
+  '@rollup/rollup-win32-x64-msvc@4.63.1':
     optional: true
 
   '@rtsao/scc@1.1.0': {}
@@ -9098,19 +9102,19 @@ snapshots:
       react-datepicker: 7.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
-  '@zextras/carbonio-shell-ui@15.3.15(1067848b219f23b0f8dea35aaece0f58)':
+  '@zextras/carbonio-shell-ui@15.3.22(1067848b219f23b0f8dea35aaece0f58)':
     dependencies:
       '@fontsource/roboto': 5.3.0
-      '@zextras/carbonio-ui-soap-lib': 1.3.1
+      '@zextras/carbonio-ui-soap-lib': 1.3.2
       core-js: 3.51.0
-      darkreader: 4.9.130
+      darkreader: 4.9.133
       date-fns: 4.4.0
       i18next: 22.5.1
       i18next-chained-backend: 4.6.3
       i18next-http-backend: 3.0.6
-      immer: 11.1.18
-      posthog-js: 1.430.3(@types/react@18.3.31)(react@18.3.1)
-      zustand: 5.0.15(@types/react@18.3.31)(immer@11.1.18)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      immer: 11.1.21
+      posthog-js: 1.438.11(@types/react@18.3.31)(react@18.3.1)
+      zustand: 5.0.15(@types/react@18.3.31)(immer@11.1.21)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
     optionalDependencies:
       '@emotion/react': 11.14.0(@types/react@18.3.31)(react@18.3.1)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1)
@@ -9213,11 +9217,6 @@ snapshots:
       - uglify-js
       - utf-8-validate
       - webpack-cli
-
-  '@zextras/carbonio-ui-soap-lib@1.3.1':
-    dependencies:
-      '@types/ua-parser-js': 0.7.39
-      ua-parser-js: 1.0.41
 
   '@zextras/carbonio-ui-soap-lib@1.3.2':
     dependencies:
@@ -9968,12 +9967,12 @@ snapshots:
 
   damerau-levenshtein@1.0.8: {}
 
-  darkreader@4.9.130:
+  darkreader@4.9.133:
     dependencies:
-      malevic: 0.20.2
+      malevic: 0.20.3
     optionalDependencies:
-      '@rollup/rollup-linux-x64-gnu': 4.62.4
-      '@rollup/rollup-win32-x64-msvc': 4.62.4
+      '@rollup/rollup-linux-x64-gnu': 4.63.1
+      '@rollup/rollup-win32-x64-msvc': 4.63.1
 
   data-urls@7.0.0(@noble/hashes@1.8.0):
     dependencies:
@@ -11158,8 +11157,6 @@ snapshots:
   image-size@0.5.5:
     optional: true
 
-  immer@11.1.18: {}
-
   immer@11.1.21: {}
 
   import-fresh@3.3.1:
@@ -11679,7 +11676,7 @@ snapshots:
 
   make-event-props@2.0.0: {}
 
-  malevic@0.20.2: {}
+  malevic@0.20.3: {}
 
   marked-terminal@7.3.0(marked@15.0.12):
     dependencies:
@@ -12210,9 +12207,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
-  posthog-js@1.430.3(@types/react@18.3.31)(react@18.3.1):
+  posthog-js@1.438.11(@types/react@18.3.31)(react@18.3.1):
     dependencies:
-      '@posthog/browser-common': 0.8.3
+      '@posthog/browser-common': 0.9.11
       '@posthog/core': 1.59.1
       '@posthog/types': 1.416.0
       core-js: 3.51.0
@@ -13779,13 +13776,6 @@ snapshots:
   yocto-queue@1.2.2: {}
 
   yoctocolors@2.2.0: {}
-
-  zustand@5.0.15(@types/react@18.3.31)(immer@11.1.18)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)):
-    optionalDependencies:
-      '@types/react': 18.3.31
-      immer: 11.1.18
-      react: 18.3.1
-      use-sync-external-store: 1.7.0(react@18.3.1)
 
   zustand@5.0.15(@types/react@18.3.31)(immer@11.1.21)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)):
     optionalDependencies:
