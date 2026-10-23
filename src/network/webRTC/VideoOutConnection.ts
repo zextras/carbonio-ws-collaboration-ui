@@ -173,7 +173,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			typeof videoTrack?.getSettings === 'function' ? videoTrack.getSettings().height : undefined;
 		const { rtpSender, sendTiers } = this;
 		if (!rtpSender || !height || !sendTiers?.length) return;
-		const lowest = sendTiers.reduce((low, t) => (t.height < low.height ? t : low));
+		const lowest = sendTiers.reduce((low, t) => (t.height < low.height ? t : low), sendTiers[0]);
 		const params = rtpSender.getParameters();
 		params.encodings = params.encodings.map((encoding) => {
 			const tier = sendTiers.find((t) => TIER_RID[t.name] === encoding.rid);
