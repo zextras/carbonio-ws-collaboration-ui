@@ -23,6 +23,7 @@ export type WsMeetingEvent =
 	| MeetingParticipantSubscribedEvent
 	| MeetingParticipantTalkingEvent
 	| MeetingParticipantClashedEvent
+	| MeetingParticipantKickedEvent
 	| MeetingWaitingParticipantJoinedEvent
 	| MeetingUserAcceptedEvent
 	| MeetingUserRejectedEvent
@@ -114,6 +115,11 @@ export type MeetingParticipantTalkingEvent = BasicMeetingEvent & {
 
 export type MeetingParticipantClashedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_CLASHED;
+};
+
+export type MeetingParticipantKickedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_KICKED;
+	userId: string;
 };
 
 export type MeetingWaitingParticipantJoinedEvent = BasicMeetingEvent & {

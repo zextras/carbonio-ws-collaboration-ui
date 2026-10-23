@@ -2,6 +2,22 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 1.6.16
+
+### Changes
+
+- **API**: New `POST /meetings/${meetingId}/participants/${userId}/kick` endpoint to let moderators remove a participant from the meeting. Used as feature flag to show/hide the "Remove from meeting" action in the participant list.
+- **WebSocket**: New `MeetingParticipantKicked` event, received by the removed participant to leave the meeting
+
+### Affected Files
+
+- 'src/network/apis/MeetingsApi.ts' on function `kickParticipant`
+- 'src/network/websocket/wsMeetingEventHandlers/MeetingParticipantKickedEventHandler.ts'
+- 'src/meetings/components/sidebar/ParticipantsAccordion/MeetingParticipantMoreActions.tsx'
+- 'src/MainApp.tsx'
+
+---
+
 ## Version 1.6.13
 
 ### Changes
