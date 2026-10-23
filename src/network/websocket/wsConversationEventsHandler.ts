@@ -3,7 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import type { WireRoomMemberAddedEvent } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+import type {
+	WireRoomMemberAddedEvent,
+	WireRoomPictureChangedEvent,
+	WireRoomPictureDeletedEvent,
+	WireRoomUpdatedEvent
+} from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import { notifyConfigRow } from './configRowEffects';
 import { refreshPresence } from './presenceRefresh';
@@ -12,8 +17,12 @@ import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import type {
 	RoomCreatedEvent,
+	RoomHistoryClearedEvent,
 	RoomMemberAddedEvent,
-	RoomMemberRemovedEvent
+	RoomMemberRemovedEvent,
+	RoomPictureChangedEvent,
+	RoomPictureDeletedEvent,
+	RoomUpdatedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -40,6 +49,48 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
 		return;
 	}
 	const row = wscSdk.handleRoomMemberRemoved(event);
+	if (row) {
+		notifyConfigRow(row);
+	}
+}
+
+/**
+ * WSC 2.0.0 lands the room change lines from the push events, which carry the
+ * line's author (`updatedBy`, `deletedBy`, `clearedBy`); v1 lands them from XMPP.
+ */
+function landRoomUpdatedLines(event: RoomUpdatedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	wscSdk.handleRoomUpdated(event as WireRoomUpdatedEvent).forEach(notifyConfigRow);
+}
+
+function landRoomPictureChangedLine(event: RoomPictureChangedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	const row = wscSdk.handleRoomPictureChanged(event as WireRoomPictureChangedEvent);
+	if (row) {
+		notifyConfigRow(row);
+	}
+}
+
+function landRoomPictureDeletedLine(event: RoomPictureDeletedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	const row = wscSdk.handleRoomPictureDeleted(event as WireRoomPictureDeletedEvent);
+	if (row) {
+		notifyConfigRow(row);
+	}
+}
+
+/** Landed after the clear, which zeroes the temporary room's unread, so another member's line counts. */
+function landHistoryClearedLine(event: RoomHistoryClearedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	const row = wscSdk.handleRoomHistoryCleared(event);
 	if (row) {
 		notifyConfigRow(row);
 	}
@@ -102,6 +153,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_UPDATED: {
 			state.editRoom(event.roomId, { name: event.name, description: event.description });
+			landRoomUpdatedLines(event);
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
@@ -130,10 +182,12 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
 			state.editRoom(event.roomId, { pictureUpdatedAt: event.updatedAt });
+			landRoomPictureChangedLine(event);
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_DELETED: {
 			state.editRoom(event.roomId, { pictureUpdatedAt: undefined });
+			landRoomPictureDeletedLine(event);
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
@@ -166,6 +220,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
 				state.removePinnedMessage(event.roomId);
 			}
+			landHistoryClearedLine(event);
 			break;
 		}
 		default: {
