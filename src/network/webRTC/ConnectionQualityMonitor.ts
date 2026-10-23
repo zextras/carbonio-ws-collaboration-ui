@@ -71,6 +71,10 @@ export default class ConnectionQualityMonitor {
 
 	private intervalId: ReturnType<typeof setInterval> | null = null;
 
+	// The evaluation in progress: a tick can outlast the 2 s period (slow getStats, throttled tab), and
+	// two interleaved passes would push two votes for one interval and race the per-tick counters
+	private inFlight: Promise<void> | null = null;
+
 	committed: ConnectionQuality | null = null;
 
 	changedAt = 0;
@@ -115,8 +119,18 @@ export default class ConnectionQualityMonitor {
 		// The SINGLE 2 s loop: computes the badge vote (uplink+RTT), applies the display level to the
 		// store, then ticks the per-feed freeze+badge controller (evaluateQualityTick).
 		this.intervalId = setInterval(() => {
-			this.evaluate().catch(() => {});
+			this.runExclusive(() => this.evaluate()).catch(() => {});
 		}, 2000);
+	}
+
+	// Run one evaluation at a time: a caller arriving while one is in progress shares its outcome
+	private runExclusive(task: () => Promise<void>): Promise<void> {
+		if (this.inFlight) return this.inFlight;
+		const run = task().finally(() => {
+			this.inFlight = null;
+		});
+		this.inFlight = run;
+		return run;
 	}
 
 	stop(): void {
@@ -142,7 +156,11 @@ export default class ConnectionQualityMonitor {
 			);
 	}
 
-	async emitInitial(): Promise<void> {
+	emitInitial(): Promise<void> {
+		return this.runExclusive(() => this.computeAndEmitInitial());
+	}
+
+	private async computeAndEmitInitial(): Promise<void> {
 		if (!isSupportedBySession()) return;
 		const { level } = await this.computeQuality();
 		this.committed = level;

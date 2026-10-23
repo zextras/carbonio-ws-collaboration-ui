@@ -67,6 +67,7 @@ const makeMonitor = (
 		screenPeerStats?: () => Promise<RTCStatsReport>;
 		webcamActive?: boolean;
 		screenActive?: boolean;
+		keepTimer?: boolean;
 	} = {}
 ): ConnectionQualityMonitor => {
 	// setState MERGES, so the store's real action methods survive; only session/activeMeeting are
@@ -133,7 +134,7 @@ const makeMonitor = (
 		videoIn
 	);
 	// stop the 2 s timer; evaluations are driven manually via emitInitial()
-	monitor.stop();
+	if (!parts.keepTimer) monitor.stop();
 	return monitor;
 };
 
@@ -398,6 +399,72 @@ describe('ConnectionQualityMonitor — parked simulcast layer filter', () => {
 		// 7 more ticks of zero loss must leave the vote at 'optimal'.
 		await ticks(monitor, 7);
 		expect(monitor.committed).toBe('optimal');
+	});
+});
+
+describe('ConnectionQualityMonitor — one evaluation at a time', () => {
+	// Audio getStats that stays pending until released, to keep an evaluation in progress
+	const pendingAudioStats = (): {
+		audioStats: () => Promise<RTCStatsReport>;
+		release: () => void;
+	} => {
+		const waiting: Array<() => void> = [];
+		return {
+			audioStats: vi.fn(
+				() =>
+					new Promise<RTCStatsReport>((resolve) => {
+						waiting.push(() => resolve(report([])));
+					})
+			),
+			release: (): void => waiting.splice(0).forEach((resolve) => resolve())
+		};
+	};
+
+	beforeEach(() => {
+		wsMocks.sendUplinkStatusUpdate.mockClear();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it('skips a timer tick while the previous evaluation is still running', async () => {
+		vi.useFakeTimers();
+		const { audioStats, release } = pendingAudioStats();
+		const monitor = makeMonitor({ audioStats, keepTimer: true });
+
+		await vi.advanceTimersByTimeAsync(2000);
+		await vi.advanceTimersByTimeAsync(2000);
+		expect(audioStats).toHaveBeenCalledTimes(1);
+
+		release();
+		await vi.advanceTimersByTimeAsync(2000);
+		expect(audioStats).toHaveBeenCalledTimes(2);
+		monitor.stop();
+	});
+
+	it('resyncs to a participant without a second initial evaluation while the first is running', async () => {
+		const { audioStats, release } = pendingAudioStats();
+		const monitor = makeMonitor({ audioStats });
+
+		const initial = monitor.emitInitial();
+		const resync = monitor.resyncTo('other');
+		release();
+		await Promise.all([initial, resync]);
+
+		expect(audioStats).toHaveBeenCalledTimes(1);
+		const recipients = wsMocks.sendUplinkStatusUpdate.mock.calls.map((call) => call[5]);
+		expect(recipients).toEqual([undefined, 'other']);
+	});
+
+	it('evaluates again once the previous evaluation is over', async () => {
+		const audioStats = vi.fn(emptyReport);
+		const monitor = makeMonitor({ audioStats });
+
+		await monitor.emitInitial();
+		await monitor.emitInitial();
+
+		expect(audioStats).toHaveBeenCalledTimes(2);
 	});
 });
 
