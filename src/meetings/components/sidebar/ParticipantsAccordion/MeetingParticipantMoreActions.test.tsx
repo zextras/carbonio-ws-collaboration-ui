@@ -21,13 +21,18 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { Version } from '../../../../types/store/SessionTypes';
 import { UserType } from '../../../../types/store/UserTypes';
 
 const moderator = createMockUser({ id: 'moderatorId', name: 'Moderator' });
 const participant = createMockUser({ id: 'participantId', name: 'Camillo Fuffolo' });
 const guest = createMockUser({ id: 'guestId', name: 'External Person', type: UserType.GUEST });
 
-const storeSetup = (sessionUserId: string, participantsNumber = 3): MeetingBe => {
+const storeSetup = (
+	sessionUserId: string,
+	participantsNumber = 3,
+	apiVersion: Version = '1.6.16'
+): MeetingBe => {
 	const store = useStore.getState();
 	const users = [moderator, participant, guest].slice(0, participantsNumber);
 	const room = createMockRoom({
@@ -44,6 +49,7 @@ const storeSetup = (sessionUserId: string, participantsNumber = 3): MeetingBe =>
 	});
 	store.setUserInfo(users);
 	store.setLoginInfo({ id: sessionUserId, name: 'Session user' });
+	useStore.setState((state) => ({ session: { ...state.session, apiVersion } }));
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
@@ -100,6 +106,23 @@ describe('Meeting participant more actions', () => {
 		await user.click(getMoreActionsButton(moderator.name));
 		expect(await screen.findByText(/Pin video/i)).toBeVisible();
 		expect(screen.queryByText(/Promote to moderator/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
+	});
+
+	test('Remove action is hidden when the API version does not support it', async () => {
+		const meeting = storeSetup(moderator.id, 3, '1.6.15');
+		const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
+		await user.click(getMoreActionsButton(participant.name));
+		expect(await screen.findByText(/Promote to moderator/i)).toBeVisible();
+		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
+	});
+
+	test('Remove action is hidden when the API version is unknown', async () => {
+		const meeting = storeSetup(moderator.id);
+		useStore.setState((state) => ({ session: { ...state.session, apiVersion: undefined } }));
+		const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
+		await user.click(getMoreActionsButton(participant.name));
+		expect(await screen.findByText(/Promote to moderator/i)).toBeVisible();
 		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
 	});
 

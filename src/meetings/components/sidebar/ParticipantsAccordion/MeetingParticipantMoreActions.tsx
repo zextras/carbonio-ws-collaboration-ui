@@ -15,12 +15,16 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import { gte } from 'semver';
 
 import MuteForAllModal from './MuteForAllModal';
 import RemoveParticipantModal from './RemoveParticipantModal';
 import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
 import { demotesRoomMember, promoteRoomMember } from '../../../../network';
+import useStore from '../../../../store/Store';
+
+const KICK_PARTICIPANT_MIN_API_VERSION = '1.6.16';
 
 type MeetingParticipantMoreActionsProps = {
 	meetingId: string;
@@ -49,6 +53,9 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const removeFromMeetingLabel = t('meeting.kick.action', 'Remove from meeting');
+
+	const apiVersion = useStore((state) => state.session.apiVersion);
+	const isKickSupported = !!apiVersion && gte(apiVersion, KICK_PARTICIPANT_MIN_API_VERSION);
 
 	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
 	const [removeModalIsOpen, setRemoveModalIsOpen] = useState(false);
@@ -94,7 +101,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: openMuteForAllModal
 			});
 		}
-		if (iAmOwner && !isSessionParticipant) {
+		if (isKickSupported && iAmOwner && !isSessionParticipant) {
 			list.push({
 				id: 'removeFromMeeting',
 				onClick: openRemoveModal,
@@ -111,6 +118,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		canUsePinFeature,
 		demoteModeratorLabel,
 		iAmOwner,
+		isKickSupported,
 		isMemberOwner,
 		isPinned,
 		isSessionParticipant,
