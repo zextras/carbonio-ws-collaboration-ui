@@ -1,3 +1,13 @@
+## [0.18.28](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.27...v0.18.28) (2026-10-26)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-shell-ui to v15.3.22 ([#872](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/872)) ([128e19d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/128e19df3a2bf57fe72048ab2f50fb3573923208))
+
+### Other changes
+
+* **deps:** update dependency @types/lodash to v4.17.27 ([#875](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/875)) ([6b2f4cf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6b2f4cf0c369e7d56663eadfb5472d89de359071))
+
 ## [0.18.27](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.26...v0.18.27) (2026-10-21)
 
 ### Other changes
