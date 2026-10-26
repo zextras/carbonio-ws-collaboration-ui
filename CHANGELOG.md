@@ -1,3 +1,13 @@
+## [0.19.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.28...v0.19.0) (2026-10-26)
+
+### Features
+
+* **meeting:** dynamic-quality streams + connection-quality indicator [CO-3533] ([#852](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/852)) ([e03b8dc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e03b8dca587fdeb14f9bc7b300cab29d902413c6)), closes [#863](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/863)
+
+### Bug Fixes
+
+* treat a 0 upload size limit as a real limit ([#877](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/877)) ([5faeec3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5faeec335cf6379969bbb3a8746fa817b56928fa))
+
 ## [0.18.28](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.27...v0.18.28) (2026-10-26)
 
 ### Bug Fixes
