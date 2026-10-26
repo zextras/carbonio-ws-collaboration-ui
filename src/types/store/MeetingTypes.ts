@@ -30,6 +30,14 @@ export type MeetingsSlice = {
 		startRecordingUserId: string
 	) => void;
 	stopRecording: (meetingId: string) => void;
+	setParticipantConnectionQuality: (
+		meetingId: string,
+		userId: string,
+		networkScore: number | null,
+		changedAt: number,
+		maxUplinkTier?: number | null,
+		maxHardwareTier?: number | null
+	) => void;
 };
 
 export type Meeting = {
