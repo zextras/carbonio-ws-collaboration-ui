@@ -30,7 +30,8 @@ export type WsMeetingEvent =
 	| MeetingRecordingStartedEvent
 	| MeetingRecordingStoppedEvent
 	| MeetingParticipantHandRaisedEvent
-	| MeetingParticipantHandRaisedListEvent;
+	| MeetingParticipantHandRaisedListEvent
+	| MeetingParticipantUplinkStatusChangedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -168,4 +169,13 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	userId: string;
 	// WSC 2.0.0: id of the system line, one-to-one rooms only
 	systemEventId?: string;
+};
+
+export type MeetingParticipantUplinkStatusChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_UPLINK_STATUS_CHANGED;
+	userId: string;
+	networkScore: number | null;
+	changedAt: number;
+	maxUplinkTier?: number | null;
+	maxHardwareTier?: number | null;
 };

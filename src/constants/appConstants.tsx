@@ -33,6 +33,7 @@ export const QUOTA_CHANGED_EVENT = 'carbonio-ws-collaboration-ui:quota-changed';
  */
 export const SUPPORTED_API_VERSIONS: Array<Version> = [
 	'2.0.0',
+	'1.6.15',
 	'1.6.14',
 	'1.6.13',
 	'1.6.12',

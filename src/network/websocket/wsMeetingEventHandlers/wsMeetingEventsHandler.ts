@@ -14,6 +14,7 @@ import { meetingParticipantClashedEventHandler } from './MeetingParticipantClash
 import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
 import { meetingParticipantSubscribedEventHandler } from './MeetingParticipantSubscribedEventHandler';
 import { meetingParticipantTalkingEventHandler } from './MeetingParticipantTalkingHandler';
+import { meetingParticipantUplinkStatusChangedEventHandler } from './MeetingParticipantUplinkStatusChangedEventHandler';
 import { meetingRecordingStartedEventHandler } from './MeetingRecordingStartedEventHandler';
 import { meetingRecordingStoppedEventHandler } from './MeetingRecordingStoppedEventHandler';
 import { meetingSDPAnsweredEventHandler } from './MeetingSDPAnsweredEventHandler';
@@ -132,6 +133,10 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MEETING_DECLINED: {
 			meetingDeclinedEventHandler(event);
+			break;
+		}
+		case WsEventType.MEETING_PARTICIPANT_UPLINK_STATUS_CHANGED: {
+			meetingParticipantUplinkStatusChangedEventHandler(event);
 			break;
 		}
 		default: {
