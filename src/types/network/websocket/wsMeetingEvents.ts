@@ -61,7 +61,7 @@ export enum MeetingLeftReason {
 export type MeetingLeftEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_LEFT;
 	userId: string;
-	reason: MeetingLeftReason;
+	reason?: MeetingLeftReason;
 };
 
 export type MeetingStoppedEvent = BasicMeetingEvent & {
