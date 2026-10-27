@@ -55,38 +55,41 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 		setListVisibility((prevState: boolean) => !prevState);
 	}, []);
 
-	return expanded ? (
+	return (
 		<>
-			<Container padding="0.5rem" height="fit" background={'gray5'}>
-				<Button
-					label={virtualRoomsLabel}
-					color="primary"
-					type={areThereActiveMeeting ? 'default' : 'outlined'}
-					width="fill"
-					onClick={handleOnClick}
-					ref={parentRef}
-					icon={areThereActiveMeeting ? 'Video' : undefined}
-					iconPlacement="left"
-				/>
-				{areThereActiveMeeting && <ActiveMeetingDot />}
-			</Container>
+			{expanded ? (
+				<Container padding="0.5rem" height="fit" background={'gray5'}>
+					<Button
+						label={virtualRoomsLabel}
+						color="primary"
+						type={areThereActiveMeeting ? 'default' : 'outlined'}
+						width="fill"
+						onClick={handleOnClick}
+						ref={parentRef}
+						icon={areThereActiveMeeting ? 'Video' : undefined}
+						iconPlacement="left"
+					/>
+					{areThereActiveMeeting && <ActiveMeetingDot />}
+				</Container>
+			) : (
+				<Container padding="0.5rem" height="fit" background={'gray5'}>
+					<Tooltip label={virtualRoomsLabel} triggerRef={parentRef}>
+						<Button
+							icon="VideoOutline"
+							size="large"
+							onClick={handleOnClick}
+							type="outlined"
+							labelColor="primary"
+							backgroundColor="gray6"
+							ref={parentRef}
+						/>
+					</Tooltip>
+				</Container>
+			)}
 			{listVisibility && (
 				<VirtualRoomsList setListVisibility={setListVisibility} parentRef={parentRef} />
 			)}
 		</>
-	) : (
-		<Container padding="0.5rem" height="fit" background={'gray5'}>
-			<Tooltip label={virtualRoomsLabel}>
-				<Button
-					icon="VideoOutline"
-					size="large"
-					onClick={handleOnClick}
-					type="outlined"
-					labelColor="primary"
-					backgroundColor="gray6"
-				/>
-			</Tooltip>
-		</Container>
 	);
 };
 
