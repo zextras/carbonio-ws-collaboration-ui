@@ -38,7 +38,6 @@ export enum WsEventType {
 	MEETING_PARTICIPANT_SUBSCRIBED = 'MeetingParticipantSubscribed',
 	MEETING_PARTICIPANT_TALKING = 'MeetingParticipantTalking',
 	MEETING_PARTICIPANT_CLASHED = 'MeetingParticipantClashed',
-	MEETING_PARTICIPANT_KICKED = 'MeetingParticipantKicked',
 	MEETING_WAITING_PARTICIPANT_JOINED = 'MeetingWaitingParticipantJoined',
 	MEETING_WAITING_PARTICIPANT_ACCEPTED = 'MeetingWaitingParticipantAccepted',
 	MEETING_WAITING_PARTICIPANT_REJECTED = 'MeetingWaitingParticipantRejected',

@@ -4,8 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import {
+	MeetingLeftEvent,
+	MeetingLeftReason
+} from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
@@ -17,6 +21,9 @@ export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 	}
 
 	if (isMeetingActive(event.meetingId)) {
+		if (event.reason === MeetingLeftReason.KICKED && isMyId(event.userId)) {
+			sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_KICKED, data: event });
+		}
 		// Update subscription manager
 		state.setDeleteSubscription(event.meetingId, event.userId, [
 			STREAM_TYPE.VIDEO,

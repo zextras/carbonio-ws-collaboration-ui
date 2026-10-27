@@ -12,7 +12,6 @@ import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
 import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChangedEventHandler';
 import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
 import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
-import { meetingParticipantKickedEventHandler } from './MeetingParticipantKickedEventHandler';
 import { meetingParticipantSubscribedEventHandler } from './MeetingParticipantSubscribedEventHandler';
 import { meetingParticipantTalkingEventHandler } from './MeetingParticipantTalkingHandler';
 import { meetingRecordingStartedEventHandler } from './MeetingRecordingStartedEventHandler';
@@ -97,10 +96,6 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
 			meetingParticipantClashedEventHandler(event);
-			break;
-		}
-		case WsEventType.MEETING_PARTICIPANT_KICKED: {
-			meetingParticipantKickedEventHandler(event);
 			break;
 		}
 		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED: {

@@ -484,10 +484,9 @@ describe('Meetings API', () => {
 	test('kickParticipant is called correctly', async () => {
 		await kickParticipant(meetingMock.id, 'userId');
 
-		expect(mockFetchAPI).toHaveBeenCalledWith(
-			`meetings/${meetingMock.id}/participants/userId/kick`,
-			RequestType.POST
-		);
+		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/kick`, RequestType.POST, {
+			userToModerate: 'userId'
+		});
 	});
 
 	test('startRecording is called correctly', async () => {

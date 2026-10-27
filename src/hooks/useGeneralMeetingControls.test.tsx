@@ -15,6 +15,7 @@ import { ProvidersWrapper } from '../tests/test-utils';
 import { mockGoToInfoPage } from './__mocks__/useRouting';
 import * as api from '../network/apis/MeetingsApi';
 import { WsEventType } from '../types/network/websocket/wsEvents';
+import { MeetingLeftReason } from '../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../types/store/RoomTypes';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
@@ -85,10 +86,11 @@ describe('useGeneralMeetingControl hook', () => {
 				sendCustomEvent({
 					name: EventName.MEETING_PARTICIPANT_KICKED,
 					data: {
-						type: WsEventType.MEETING_PARTICIPANT_KICKED,
+						type: WsEventType.MEETING_PARTICIPANT_LEFT,
 						sentDate: '2022-01-01T00:00:00.000Z',
 						meetingId: meeting.id,
-						userId: 'userId'
+						userId: 'userId',
+						reason: MeetingLeftReason.KICKED
 					}
 				});
 			});

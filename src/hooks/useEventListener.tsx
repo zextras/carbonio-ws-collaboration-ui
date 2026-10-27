@@ -14,9 +14,9 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingDeclinedEvent,
 	MeetingJoinedEvent,
+	MeetingLeftEvent,
 	MeetingParticipantClashedEvent,
 	MeetingParticipantHandRaisedEvent,
-	MeetingParticipantKickedEvent,
 	MeetingRecordingStartedEvent,
 	MeetingRecordingStoppedEvent,
 	MeetingStartedEvent,
@@ -136,7 +136,7 @@ export type MeetingDeclinedUseEvent = {
 
 export type ParticipantKickedEvent = {
 	name: EventName.MEETING_PARTICIPANT_KICKED;
-	data: MeetingParticipantKickedEvent;
+	data: MeetingLeftEvent;
 };
 
 type AppCustomEvent =
