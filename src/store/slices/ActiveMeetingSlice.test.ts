@@ -287,4 +287,40 @@ describe('Active Meeting Slice', () => {
 			expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
 		});
 	});
+
+	describe('Tile ceilings', () => {
+		const feedKey = 'user1-video';
+
+		test('tileCeilings is initialized empty on connection', () => {
+			expect(useStore.getState().activeMeeting?.tileCeilings).toStrictEqual({});
+		});
+
+		test('setTileCeiling stores the rung keyed by feed key', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 1);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBe(1);
+		});
+
+		test('setTileCeiling overwrites the previous rung for the same key', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 2);
+			useStore.getState().setTileCeiling(meetingId, feedKey, 0);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBe(0);
+		});
+
+		test('setTileCeiling is a no-op for a non-active meeting', () => {
+			useStore.getState().setTileCeiling('other-meeting', feedKey, 0);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBeUndefined();
+		});
+
+		test('removeTileCeiling deletes the entry for a key (tile unmounted)', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 2);
+			useStore.getState().removeTileCeiling(meetingId, feedKey);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBeUndefined();
+		});
+
+		test('removeTileCeiling is a no-op for a non-active meeting', () => {
+			useStore.getState().setTileCeiling(meetingId, feedKey, 2);
+			useStore.getState().removeTileCeiling('other-meeting', feedKey);
+			expect(useStore.getState().activeMeeting?.tileCeilings[feedKey]).toBe(2);
+		});
+	});
 });

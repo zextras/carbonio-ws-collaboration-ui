@@ -1,3 +1,29 @@
+## [0.19.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.0...v0.19.1) (2026-10-27)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#876](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/876)) ([c3df2b9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c3df2b9b43b23cedbb41adb46e556a1a73605cd6))
+
+## [0.19.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.28...v0.19.0) (2026-10-26)
+
+### Features
+
+* **meeting:** dynamic-quality streams + connection-quality indicator [CO-3533] ([#852](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/852)) ([e03b8dc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e03b8dca587fdeb14f9bc7b300cab29d902413c6)), closes [#863](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/863)
+
+### Bug Fixes
+
+* treat a 0 upload size limit as a real limit ([#877](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/877)) ([5faeec3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5faeec335cf6379969bbb3a8746fa817b56928fa))
+
+## [0.18.28](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.27...v0.18.28) (2026-10-26)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-shell-ui to v15.3.22 ([#872](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/872)) ([128e19d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/128e19df3a2bf57fe72048ab2f50fb3573923208))
+
+### Other changes
+
+* **deps:** update dependency @types/lodash to v4.17.27 ([#875](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/875)) ([6b2f4cf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6b2f4cf0c369e7d56663eadfb5472d89de359071))
+
 ## [0.18.27](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.18.26...v0.18.27) (2026-10-21)
 
 ### Other changes
