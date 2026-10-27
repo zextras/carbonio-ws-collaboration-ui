@@ -54,9 +54,15 @@ export type MeetingJoinedEvent = BasicMeetingEvent & {
 	userId: string;
 };
 
+export enum MeetingLeftReason {
+	LEFT = 'LEFT',
+	KICKED = 'KICKED'
+}
+
 export type MeetingLeftEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_LEFT;
 	userId: string;
+	reason?: MeetingLeftReason;
 };
 
 export type MeetingStoppedEvent = BasicMeetingEvent & {

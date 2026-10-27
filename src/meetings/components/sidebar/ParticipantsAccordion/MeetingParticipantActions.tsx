@@ -3,15 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 
-import { Container, Tooltip, Icon, Padding, Button } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Icon, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import MuteForAllModal from './MuteForAllModal';
-import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
-import useMuteForAll from '../../../../hooks/useMuteForAll';
-import usePinnedTile from '../../../../hooks/usePinnedTile';
+import MeetingParticipantMoreActions from './MeetingParticipantMoreActions';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -35,9 +32,6 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 	const participantMutedLabel = t('tooltip.participantMuted', 'This participant is muted');
 	const youAreMutedLabel = t('tooltip.youAreAlreadyMuted', "You're muted");
-	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
-	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
-	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const roomId: string | undefined = useStore((store) =>
@@ -52,39 +46,16 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 
-	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
-
-	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId ?? '', memberId);
-
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
-
-	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, memberId);
-
-	const openMuteForAllModal = useCallback(() => {
-		setMuteForAllModalIsOpen(true);
-	}, []);
-
-	const closeMuteForAllModal = useCallback(() => {
-		setMuteForAllModalIsOpen(false);
-	}, []);
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
-			{iAmOwner && !isSessionParticipant && !isUserGuest ? (
-				<PromoteDemoteMemberAction
-					memberId={memberId}
-					roomId={roomId ?? ''}
-					owner={isMemberOwner}
-					isInsideMeeting
-				/>
-			) : (
-				isMemberOwner && (
-					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
-						<Padding all="0.5rem">
-							<Icon icon="Crown" size="medium" color="gray1" />
-						</Padding>
-					</Tooltip>
-				)
+			{isMemberOwner && (
+				<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
+					<Padding all="0.5rem">
+						<Icon icon="Crown" size="medium" color="gray1" />
+					</Padding>
+				</Tooltip>
 			)}
 			{!participantAudioStatus && (
 				<Tooltip label={isSessionParticipant ? youAreMutedLabel : participantMutedLabel}>
@@ -93,35 +64,15 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 					</Padding>
 				</Tooltip>
 			)}
-			{muteForAllHasToAppear && (
-				<Tooltip label={muteForAllLabel}>
-					<Button
-						labelColor="gray0"
-						backgroundColor="text"
-						icon="MicOffOutline"
-						onClick={openMuteForAllModal}
-						size="medium"
-					/>
-				</Tooltip>
-			)}
-			{canUsePinFeature && (
-				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
-					<Button
-						labelColor="gray0"
-						backgroundColor="text"
-						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
-						onClick={switchPinnedTile}
-						size="medium"
-					/>
-				</Tooltip>
-			)}
-			{muteForAllModalIsOpen && (
-				<MuteForAllModal
-					isOpen={muteForAllModalIsOpen}
-					closeModal={closeMuteForAllModal}
-					muteForAll={muteForAll}
-				/>
-			)}
+			<MeetingParticipantMoreActions
+				meetingId={meetingId ?? ''}
+				roomId={roomId ?? ''}
+				memberId={memberId}
+				isSessionParticipant={isSessionParticipant}
+				isMemberOwner={isMemberOwner}
+				isUserGuest={!!isUserGuest}
+				iAmOwner={iAmOwner}
+			/>
 		</Container>
 	);
 };
