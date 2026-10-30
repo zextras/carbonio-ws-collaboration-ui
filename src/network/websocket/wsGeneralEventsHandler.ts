@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { catchUpChatState, handleWebsocketConnected } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 
@@ -12,6 +13,7 @@ export const wsGeneralEventsHandler = (event: WsEvent): void => {
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
 			state.setQueueId(event.queueId);
+			handleWebsocketConnected();
 			break;
 		}
 		case WsEventType.MESSAGE_BROKER_DISCONNECTED: {
@@ -20,6 +22,10 @@ export const wsGeneralEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.MESSAGE_BROKER_RESTORED: {
 			state.setMessageBrokerStatus(true);
+			// Chat events published while the broker was down are gone even though
+			// the socket stayed up: same refresh as a socket reconnection
+			// (WSC-pure only — on 1.6.x the chat data rode MongooseIM, v1 parity)
+			catchUpChatState();
 			break;
 		}
 		default: {

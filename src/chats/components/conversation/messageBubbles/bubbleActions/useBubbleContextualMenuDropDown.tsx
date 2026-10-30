@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { usePinMessage } from '../../../../../hooks/usePinMessage';
 import usePreviewNavigation from '../../../../../hooks/usePreviewNavigation';
 import { deleteAttachment } from '../../../../../network';
-import { xmppClient } from '../../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../../network/chatClient/ChatClient';
 import {
 	getFilesToUploadArray,
 	getForwardList,
@@ -116,10 +116,10 @@ const useBubbleContextualMenuDropDown = (
 	const deleteMessageAction = useCallback(() => {
 		if (message.attachment) {
 			deleteAttachment(message.attachment.id).then(() =>
-				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
+				chatClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
 			);
 		} else {
-			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
+			chatClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
 	}, [message.stanzaId, message.attachment, message.roomId]);
 

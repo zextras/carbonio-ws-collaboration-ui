@@ -12,6 +12,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
 import * as api from '../../../../network/apis/RoomsApi';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import { xmppClient } from '../../../../network/xmpp/XMPPClient';
 import useStore from '../../../../store/Store';
 import {
@@ -35,6 +36,7 @@ import { now } from '../../../../utils/dateUtils';
 const iconNavigator2 = 'icon: Navigation2';
 const initText = 'we are gonna se';
 const iconAttach = 'icon: Attach';
+const messageNotSentLabel = 'Message not sent. Please try again';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
@@ -339,6 +341,58 @@ describe('ConversationFooter', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 		await waitFor(() => expect(spySendChatMessageReply).toHaveBeenCalled());
+	});
+
+	test('A message that cannot be sent goes back to the composer and a snackbar says so', async () => {
+		vi.spyOn(chatClient, 'sendChatMessage').mockResolvedValue(false);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, 'not sent');
+		await user.click(screen.getByTestId(iconNavigator2));
+
+		expect(await screen.findByText(messageNotSentLabel)).toBeVisible();
+		expect(textArea).toHaveValue('not sent');
+	});
+
+	test('A reply that cannot be sent goes back to the composer with its quote', async () => {
+		const store = useStore.getState();
+		vi.spyOn(chatClient, 'sendChatMessageReply').mockResolvedValue(false);
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, 'reply not sent');
+		await user.click(screen.getByTestId(iconNavigator2));
+
+		expect(await screen.findByText(messageNotSentLabel)).toBeVisible();
+		expect(textArea).toHaveValue('reply not sent');
+		expect(screen.getByText('Reply to yourself')).toBeVisible();
+	});
+
+	test('A message that cannot be sent leaves the text written in the meantime', async () => {
+		let resolveSend: ((sent: boolean) => void) | undefined;
+		vi.spyOn(chatClient, 'sendChatMessage').mockReturnValue(
+			new Promise((resolve) => {
+				resolveSend = resolve;
+			})
+		);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, 'not sent');
+		await user.click(screen.getByTestId(iconNavigator2));
+		await user.type(textArea, 'written meanwhile');
+		act(() => resolveSend?.(false));
+
+		expect(await screen.findByText(messageNotSentLabel)).toBeVisible();
+		expect(textArea).toHaveValue('written meanwhile');
 	});
 
 	test('User can edit a message and send it', async () => {

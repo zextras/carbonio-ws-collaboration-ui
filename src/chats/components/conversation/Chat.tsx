@@ -31,7 +31,7 @@ import useEventListener, {
 } from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
@@ -135,7 +135,18 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
 	useEffect(() => {
-		xmppClient.getMessagePin(roomId);
+		chatClient.getMessagePin(roomId);
+		// A reconnection (resetXmppData) wipes the conversation state but keeps the room:
+		// messages reload on their own, the pinned message has to be asked again
+		return useStore.subscribe((state, prevState) => {
+			if (
+				prevState.activeConversations[roomId] &&
+				!state.activeConversations[roomId] &&
+				state.rooms[roomId]
+			) {
+				chatClient.getMessagePin(roomId);
+			}
+		});
 	}, [roomId]);
 
 	return (
