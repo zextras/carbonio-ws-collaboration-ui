@@ -317,6 +317,34 @@ describe('Rooms API', () => {
 		);
 	});
 
+	describe('getRoomAttachments stanzaId alignment', () => {
+		const restItem = { id: 'att-1', messageId: 'msg-1' };
+		const restItemWithStanza = { id: 'att-2', messageId: 'msg-2', stanzaId: 'stanza-2' };
+
+		afterEach(() => {
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('on 2.0.0 every item gets stanzaId from messageId when missing', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockFetchAPI.mockResolvedValueOnce({ attachments: [restItem, restItemWithStanza] });
+
+			const response = await getRoomAttachments('roomId', { limit: 20 });
+
+			expect(response.attachments[0].stanzaId).toBe('msg-1');
+			expect(response.attachments[1].stanzaId).toBe('stanza-2');
+		});
+
+		test('on 1.x the REST items are returned untouched', async () => {
+			useStore.getState().setApiVersion('1.6.15');
+			mockFetchAPI.mockResolvedValueOnce({ attachments: [restItem] });
+
+			const response = await getRoomAttachments('roomId', { limit: 20 });
+
+			expect(response.attachments[0].stanzaId).toBeUndefined();
+		});
+	});
+
 	test('bulkDeleteRoomAttachments is called with the attachmentIds body', async () => {
 		await bulkDeleteRoomAttachments('roomId', ['file-1', 'file-2']);
 

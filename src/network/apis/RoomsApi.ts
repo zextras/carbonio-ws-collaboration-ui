@@ -132,7 +132,19 @@ export const getRoomAttachments = (
 	roomId: string,
 	params: GetRoomAttachmentsParams
 ): Promise<GetRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+	fetchAPI<GetRoomAttachmentsResponse>(
+		`rooms/${roomId}/attachments${buildQueryString({ ...params })}`,
+		RequestType.GET
+	).then((response) => {
+		if (!isWscPure() || !response?.attachments) return response;
+		return {
+			...response,
+			attachments: response.attachments.map((attachment) => ({
+				...attachment,
+				stanzaId: attachment.stanzaId ?? attachment.messageId
+			}))
+		};
+	});
 
 export const bulkDeleteRoomAttachments = (
 	roomId: string,
