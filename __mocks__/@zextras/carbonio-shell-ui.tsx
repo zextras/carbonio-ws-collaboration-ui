@@ -59,6 +59,8 @@ export const addSettingsView: typeof Shell.addSettingsView = () => '';
 
 export const registerComponents: typeof Shell.registerComponents = () => undefined;
 
+export const registerActions: typeof Shell.registerActions = () => undefined;
+
 export const removeActions: typeof Shell.removeActions = () => undefined;
 
 export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings header</div>;

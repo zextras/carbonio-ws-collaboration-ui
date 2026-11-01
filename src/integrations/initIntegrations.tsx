@@ -5,16 +5,29 @@
  */
 import { useEffect } from 'react';
 
-import { getIntegratedFunction, registerComponents } from '@zextras/carbonio-shell-ui';
+import {
+	getIntegratedFunction,
+	registerActions,
+	registerComponents,
+	removeActions
+} from '@zextras/carbonio-shell-ui';
 import { debounce } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import CopyRoomWidget from './copyRoomIntegration/CopyRoomWidget';
+import {
+	toWidgetAction,
+	WIDGET_ACTION_TYPE,
+	type DashboardWidgetAction
+} from './dashboardWidgets/dashboardWidgetTypes';
+import { unreadChatsWidget } from './dashboardWidgets/unreadChatsDefinition';
 import SelectVirtualRoomWidgetComponent from './virtualRoomIntegration/SelectVirtualRoomWidget';
 import { QUOTA_CHANGED_EVENT } from '../constants/appConstants';
 import { getAttribute } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
 
 export default function useIntegrationsApp(): void {
+	const [t] = useTranslation();
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 
 	useEffect(() => {
@@ -32,6 +45,20 @@ export default function useIntegrationsApp(): void {
 			component: CopyRoomWidget
 		});
 	}, []);
+
+	// Widgets exposed to carbonio-dashboard-ui
+	useEffect(() => {
+		registerActions<DashboardWidgetAction>({
+			id: unreadChatsWidget.id,
+			type: WIDGET_ACTION_TYPE,
+			action: () =>
+				toWidgetAction({
+					...unreadChatsWidget,
+					label: t('dashboard.unreadChats.title', 'Unread messages')
+				})
+		});
+		return (): void => removeActions(unreadChatsWidget.id);
+	}, [t]);
 
 	useEffect(() => {
 		const debouncedRefreshQuota = debounce(() => {
