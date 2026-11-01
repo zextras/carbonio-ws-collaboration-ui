@@ -74,6 +74,7 @@ function mockJsonResponse(body: unknown): void {
 
 describe('chatClient façade', () => {
 	afterEach(() => {
+		wscSdk.reset();
 		vi.restoreAllMocks();
 	});
 
@@ -570,16 +571,37 @@ describe('chatClient façade', () => {
 		expect(messages.map((message) => message.id)).toEqual(['msg-dup']);
 	});
 
-	it('resolves false when the message cannot be sent, so the composer gives it back', async () => {
+	it('resolves false on a certain rejection, so the composer gives the text back', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+		(global.fetch as Mock).mockImplementationOnce(() =>
+			Promise.resolve({
+				ok: false,
+				status: 403,
+				headers: { get: (): string | null => null },
+				json: (): Promise<unknown> => Promise.resolve(undefined)
+			})
+		);
 
 		const sent = chatClient.sendChatMessage('room-f', 'not sent');
 		await vi.advanceTimersByTimeAsync(0);
 
 		await expect(sent).resolves.toBe(false);
+		expect(useStore.getState().chatsRegistry['room-f']?.messages ?? []).toHaveLength(0);
+	});
+
+	it('keeps an unreachable send pending, retried by the SDK, instead of giving it back', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+		const settled = vi.fn();
+
+		chatClient.sendChatMessage('room-f', 'queued').then(settled);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(settled).not.toHaveBeenCalled();
+		expect(useStore.getState().chatsRegistry['room-f'].messages).toHaveLength(1);
 	});
 
 	it('reads the last unread message before sending (v1 parity)', async () => {
