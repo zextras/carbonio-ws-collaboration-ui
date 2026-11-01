@@ -6,11 +6,17 @@
 
 import * as presenceRefresh from './presenceRefresh';
 import { wsGeneralEventsHandler } from './wsGeneralEventsHandler';
-import { catchUpChatState, handleChatReconnection } from './wsReconnectionHandler';
+import {
+	catchUpChatState,
+	handleChatReconnection,
+	handleWebsocketConnected
+} from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import * as InfoApi from '../apis/InfoApi';
+import { chatClient } from '../chatClient/ChatClient';
+import { BOOT_INBOX_TIMEOUT_MS } from '../chatClient/inboxRefresh';
 import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
 
@@ -155,5 +161,21 @@ describe('wsReconnectionHandler', () => {
 
 		expect(refreshSpy).not.toHaveBeenCalled();
 		expect(inboxSpy).not.toHaveBeenCalled();
+	});
+
+	test('A reconnection while the boot inbox is waiting cancels its timer: one inbox, one reset', async () => {
+		vi.useFakeTimers();
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		const resetSpy = vi.spyOn(useStore.getState(), 'resetXmppData');
+
+		chatClient.connect('token');
+		handleChatReconnection(true);
+		handleWebsocketConnected();
+		await vi.advanceTimersByTimeAsync(2 * BOOT_INBOX_TIMEOUT_MS);
+
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+		expect(resetSpy).toHaveBeenCalledTimes(1);
+		vi.useRealTimers();
 	});
 });

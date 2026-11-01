@@ -10,6 +10,7 @@ import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
+import { scheduleBootInbox } from './inboxRefresh';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
@@ -199,9 +200,7 @@ export const chatClient: ChatClient = {
 			// REST has no persistent chat connection: the legacy xmpp status flag
 			// feeds the connection-health banners, so mark it healthy.
 			useStore.getState().setXmppStatus(true);
-			wscSdk.fetchInbox().catch((err) => {
-				console.error('chatClient.connect: inbox hydration failed', err);
-			});
+			scheduleBootInbox();
 			return;
 		}
 		xmppClient.connect(token);

@@ -8,7 +8,11 @@ import { refreshPresenceOfStoredRooms } from './presenceRefresh';
 import useStore from '../../store/Store';
 import { getToken } from '../apis/InfoApi';
 import { isWscPure } from '../chatClient/ChatClient';
-import { wscSdk } from '../sdk/wscSdk';
+import {
+	cancelBootInbox,
+	onFirstWebsocketConnected,
+	refreshInboxSerialized
+} from '../chatClient/inboxRefresh';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 /**
@@ -24,10 +28,9 @@ export function catchUpChatState(): void {
 	if (!isWscPure()) {
 		return;
 	}
+	cancelBootInbox();
 	useStore.getState().resetXmppData();
-	wscSdk.fetchInbox().catch((err) => {
-		console.error('catchUpChatState: inbox refresh failed', err);
-	});
+	refreshInboxSerialized('catchUpChatState: inbox refresh failed');
 }
 
 let catchUpPending = false;
@@ -41,6 +44,9 @@ export function handleWebsocketConnected(): void {
 	if (catchUpPending) {
 		catchUpPending = false;
 		catchUpChatState();
+		return;
+	}
+	if (onFirstWebsocketConnected()) {
 		return;
 	}
 	refreshPresenceOfStoredRooms();

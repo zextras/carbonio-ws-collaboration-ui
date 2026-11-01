@@ -22,6 +22,7 @@ import type { Mock } from 'vitest';
 
 import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
+import { BOOT_INBOX_TIMEOUT_MS } from './inboxRefresh';
 import useStore from '../../store/Store';
 import {
 	buildWsMessageDeletedEvent,
@@ -34,8 +35,11 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { wscSdk } from '../sdk/wscSdk';
 import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
+import { wsGeneralEventsHandler } from '../websocket/wsGeneralEventsHandler';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 // The DOM download side is unit-tested in chatExportDownload.test.ts
@@ -160,7 +164,7 @@ describe('chatClient façade', () => {
 		mockJsonResponse(inbox);
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		expect(connectSpy).not.toHaveBeenCalled();
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/inbox');
@@ -209,7 +213,7 @@ describe('chatClient façade', () => {
 		);
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		const registry = useStore.getState().chatsRegistry[inboxRoomId];
 		expect(registry?.inboxMessageId).toBe('evt-last');
@@ -221,13 +225,41 @@ describe('chatClient façade', () => {
 		});
 	});
 
+	it('waits for the first WebsocketConnected before loading the boot inbox, once', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS - 1);
+		expect(inboxSpy).not.toHaveBeenCalled();
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS * 2);
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('falls back to the boot inbox on timeout and reloads it when the socket finally connects', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		await vi.advanceTimersByTimeAsync(0);
+		expect(inboxSpy).toHaveBeenCalledTimes(2);
+	});
+
 	it('logs and survives a failing inbox hydration on connect', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		expect(errorSpy).toHaveBeenCalledWith(
 			'chatClient.connect: inbox hydration failed',
