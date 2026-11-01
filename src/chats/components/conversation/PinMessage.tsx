@@ -28,7 +28,7 @@ import {
 	getIsMessageSelectedAlreadyStored,
 	getIsPinnedMessageSelected
 } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getIsWscPure, getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
@@ -78,12 +78,14 @@ const ExpandedMessageWithThumbnail = ({
 	attachment,
 	messageText,
 	roomId,
-	messageDate
+	messageDate,
+	belowVisibilityFloor
 }: {
 	attachment: AttachmentMessageType;
 	messageText: string;
 	roomId: string;
 	messageDate: number;
+	belowVisibilityFloor: boolean;
 }): React.JSX.Element => (
 	<Container gap={'0.5rem'} crossAlignment="flex-start">
 		<RoundedRow
@@ -93,7 +95,12 @@ const ExpandedMessageWithThumbnail = ({
 			width={'fill'}
 			mainAlignment="flex-start"
 		>
-			<AttachmentSmallView attachment={attachment} roomId={roomId} messageDate={messageDate} />
+			<AttachmentSmallView
+				attachment={attachment}
+				roomId={roomId}
+				messageDate={messageDate}
+				belowVisibilityFloor={belowVisibilityFloor}
+			/>
 			<Text overflow="break-word" color={'gray1'} size="small">
 				{attachment.name}
 			</Text>
@@ -113,6 +120,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 	const { avatarColor } = useAvatarUtilities(pinnedMessage.from);
 	const { pinAction, canMessageBePinned } = usePinMessage(pinnedMessage);
 	const loggedUserId = useStore(getUserId);
+	const isWscPure = useStore(getIsWscPure);
 	const clearedAt = useStore((store) => store.rooms[pinnedMessage.roomId].userSettings?.clearedAt);
 
 	const isMessageSelected = useStore((state) =>
@@ -184,6 +192,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 					messageText={pinnedMessage.text}
 					roomId={pinnedMessage.roomId}
 					messageDate={pinnedMessage.date}
+					belowVisibilityFloor={isWscPure && !isClickable}
 				/>
 			);
 		}
@@ -196,7 +205,7 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				</TextExpanded>
 			</Container>
 		);
-	}, [pinnedMessage]);
+	}, [pinnedMessage, isWscPure, isClickable]);
 
 	if (isExpanded) {
 		return (
