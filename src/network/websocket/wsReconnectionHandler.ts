@@ -13,6 +13,7 @@ import {
 	onFirstWebsocketConnected,
 	refreshInboxSerialized
 } from '../chatClient/inboxRefresh';
+import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 /**
@@ -30,6 +31,7 @@ export function catchUpChatState(): void {
 	}
 	cancelBootInbox();
 	useStore.getState().resetXmppData();
+	wscSdk.retryPendingSends();
 	refreshInboxSerialized('catchUpChatState: inbox refresh failed');
 }
 
@@ -46,10 +48,10 @@ export function handleWebsocketConnected(): void {
 		catchUpChatState();
 		return;
 	}
-	if (onFirstWebsocketConnected()) {
-		return;
+	if (!onFirstWebsocketConnected()) {
+		refreshPresenceOfStoredRooms();
 	}
-	refreshPresenceOfStoredRooms();
+	wscSdk.retryPendingSends();
 }
 
 /**
@@ -79,6 +81,7 @@ export function handleChatReconnection(wasPure: boolean): void {
 	}
 	catchUpPending = false;
 	if (wasPure) {
+		wscSdk.reset();
 		useStore.getState().resetXmppData();
 		getToken()
 			.then((resp) => xmppClient.connect(resp.zmToken))

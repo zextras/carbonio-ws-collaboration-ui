@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import type { Mock } from 'vitest';
+
 import * as presenceRefresh from './presenceRefresh';
 import { wsGeneralEventsHandler } from './wsGeneralEventsHandler';
 import {
@@ -22,6 +24,8 @@ import { xmppClient } from '../xmpp/XMPPClient';
 
 describe('wsReconnectionHandler', () => {
 	afterEach(() => {
+		wscSdk.reset();
+		vi.useRealTimers();
 		// The zustand store survives across tests: leave the version un-negotiated
 		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
 	});
@@ -92,11 +96,13 @@ describe('wsReconnectionHandler', () => {
 			.updateHistory('room-b', [createMockTextMessage({ id: 'm2', roomId: 'room-b' })]);
 		const tokenSpy = vi.spyOn(InfoApi, 'getToken').mockResolvedValue({ zmToken: 'fresh-token' });
 		const connectSpy = vi.spyOn(xmppClient, 'connect').mockImplementation(() => undefined);
+		const resetSdkSpy = vi.spyOn(wscSdk, 'reset').mockImplementation(() => undefined);
 
 		handleChatReconnection(true); // the gate said 2.0.0 before the realignment
 
 		await vi.waitFor(() => expect(connectSpy).toHaveBeenCalledWith('fresh-token'));
 		expect(tokenSpy).toHaveBeenCalledTimes(1);
+		expect(resetSdkSpy).toHaveBeenCalledTimes(1);
 		expect(useStore.getState().chatsRegistry).toEqual({});
 	});
 
@@ -177,5 +183,74 @@ describe('wsReconnectionHandler', () => {
 		expect(inboxSpy).toHaveBeenCalledTimes(1);
 		expect(resetSpy).toHaveBeenCalledTimes(1);
 		vi.useRealTimers();
+	});
+
+	test('WebsocketConnected retries the pending sends on the first connection and on every reconnection', () => {
+		vi.useFakeTimers();
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		vi.spyOn(presenceRefresh, 'refreshPresenceOfStoredRooms').mockImplementation(() => undefined);
+		const retrySpy = vi.spyOn(wscSdk, 'retryPendingSends').mockImplementation(() => undefined);
+
+		chatClient.connect('token');
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+		expect(retrySpy).toHaveBeenCalledTimes(1);
+
+		handleChatReconnection(true);
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(retrySpy).toHaveBeenCalledTimes(2);
+	});
+
+	test('A reconnection retries the pending sends once, not twice', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		const retrySpy = vi.spyOn(wscSdk, 'retryPendingSends').mockImplementation(() => undefined);
+
+		handleChatReconnection(true);
+		handleWebsocketConnected();
+
+		expect(retrySpy).toHaveBeenCalledTimes(1);
+	});
+
+	test('MessageBrokerRestored keeps the pending send in store after the reset', async () => {
+		vi.useFakeTimers();
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+		chatClient.sendChatMessage('room-bb', 'pending text');
+		await vi.advanceTimersByTimeAsync(0);
+		expect(useStore.getState().chatsRegistry['room-bb'].messages).toHaveLength(1);
+
+		wsGeneralEventsHandler({ type: WsEventType.MESSAGE_BROKER_RESTORED });
+
+		expect(useStore.getState().chatsRegistry['room-bb'].messages).toHaveLength(1);
+	});
+
+	test('The pending sends are retried after the reconnection reset, never before it', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+		const order: Array<string> = [];
+		vi.spyOn(useStore.getState(), 'resetXmppData').mockImplementation(() => {
+			order.push('reset');
+		});
+		vi.spyOn(wscSdk, 'retryPendingSends').mockImplementation(() => {
+			order.push('retry');
+		});
+
+		handleChatReconnection(true);
+		handleWebsocketConnected();
+
+		expect(order).toEqual(['reset', 'retry']);
+	});
+
+	test('WebsocketConnected on 1.6.x does not retry any send', () => {
+		useStore.getState().setApiVersion('1.6.14');
+		const retrySpy = vi.spyOn(wscSdk, 'retryPendingSends');
+
+		handleWebsocketConnected();
+
+		expect(retrySpy).not.toHaveBeenCalled();
 	});
 });
