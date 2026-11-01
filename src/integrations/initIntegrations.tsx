@@ -54,7 +54,7 @@ export default function useIntegrationsApp(): void {
 			action: () =>
 				toWidgetAction({
 					...unreadChatsWidget,
-					label: t('dashboard.unreadChats.title', 'Unread messages')
+					label: t('dashboard.unreadChats.title', 'Unread chats messages')
 				})
 		});
 		return (): void => removeActions(unreadChatsWidget.id);

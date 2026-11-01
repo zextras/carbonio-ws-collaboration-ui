@@ -38,7 +38,7 @@ export const deserializeUnreadChatsConfig = (
 
 export const unreadChatsWidget: DashboardWidgetAction<UnreadChatsConfig> = {
 	id: UNREAD_CHATS_WIDGET_ID,
-	label: 'Unread messages',
+	label: 'Unread chats messages',
 	icon: 'MessageCircleOutline',
 	execute: () => undefined,
 	contractVersion: WIDGET_CONTRACT_VERSION,
