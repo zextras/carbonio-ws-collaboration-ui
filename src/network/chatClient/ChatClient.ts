@@ -17,6 +17,7 @@ import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
+import { getOldestConfirmedMessage } from '../../utils/historyAnchorUtils';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { wscSdk } from '../sdk/wscSdk';
 import { wsClient } from '../websocket/WebSocketClient';
@@ -170,7 +171,9 @@ async function loadHistoryToMessageViaSdk(roomId: string, stanzaId: string): Pro
 		if (useStore.getState().activeConversations[roomId]?.isHistoryFullyLoaded) {
 			return;
 		}
-		const oldest = useStore.getState().chatsRegistry[roomId]?.messages[0];
+		const oldest = getOldestConfirmedMessage(
+			useStore.getState().chatsRegistry[roomId]?.messages ?? []
+		);
 		if (oldest && oldest.id === previousOldestId) {
 			console.warn('chatClient.requestMessageResultHistoryToId: pagination stalled', roomId);
 			return;
@@ -311,7 +314,7 @@ export const chatClient: ChatClient = {
 			if (!room) {
 				return;
 			}
-			const oldest = store.chatsRegistry[roomId]?.messages[0];
+			const oldest = getOldestConfirmedMessage(store.chatsRegistry[roomId]?.messages ?? []);
 			const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
 			wscSdk
 				.fetchTimeline(roomId, {

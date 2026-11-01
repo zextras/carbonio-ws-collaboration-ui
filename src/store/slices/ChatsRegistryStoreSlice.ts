@@ -9,6 +9,7 @@ import { produce } from 'immer';
 import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
@@ -270,7 +271,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 
 				const placeholderMessage: TextMessage = {
 					id,
-					stanzaId: `placeholder_${id}`,
+					stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${id}`,
 					roomId,
 					date: Date.now(),
 					type: MessageType.TEXT_MSG,
