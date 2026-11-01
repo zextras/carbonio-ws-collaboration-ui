@@ -10,6 +10,7 @@ import * as shell from '@zextras/carbonio-shell-ui';
 
 import MainApp from './MainApp';
 import * as api from './network';
+import { wscSdk } from './network/sdk/wscSdk';
 import useStore from './store/Store';
 import { setup } from './tests/test-utils';
 
@@ -100,5 +101,49 @@ describe('Entry point', () => {
 		await waitFor(() => expect(useStore.getState().connections.status.chats_be).toBe(true));
 		expect(getCapabilitiesSpy).not.toHaveBeenCalled();
 		expect(useStore.getState().session.attributes).toBeDefined();
+	});
+
+	test('The SDK session state is dropped when the session is torn down', () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		const resetSpy = vi.spyOn(wscSdk, 'reset').mockImplementation(() => undefined);
+		const { unmount } = setup(<MainApp />);
+		expect(resetSpy).not.toHaveBeenCalled();
+
+		unmount();
+
+		expect(resetSpy).toHaveBeenCalledTimes(1);
+	});
+
+	test('The SDK session state is dropped when the user logs out', () => {
+		const authSpy = vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		const resetSpy = vi.spyOn(wscSdk, 'reset').mockImplementation(() => undefined);
+		const { rerender } = setup(<MainApp />);
+
+		authSpy.mockReturnValue(false);
+		rerender(<MainApp />);
+
+		expect(resetSpy).toHaveBeenCalledTimes(1);
+	});
+
+	test('A change of the user settings does not drop the SDK session state', () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(true);
+		const settingsSpy = vi.spyOn(shell, 'useUserSettings');
+		const resetSpy = vi.spyOn(wscSdk, 'reset').mockImplementation(() => undefined);
+		const { rerender } = setup(<MainApp />);
+
+		settingsSpy.mockReturnValue({ prefs: { zimbraPrefLocale: 'it' }, attrs: {}, props: [] });
+		rerender(<MainApp />);
+
+		expect(resetSpy).not.toHaveBeenCalled();
+	});
+
+	test('An unauthenticated session has nothing to drop', () => {
+		vi.spyOn(shell, 'useAuthenticated').mockReturnValue(false);
+		const resetSpy = vi.spyOn(wscSdk, 'reset').mockImplementation(() => undefined);
+		const { unmount } = setup(<MainApp />);
+
+		unmount();
+
+		expect(resetSpy).not.toHaveBeenCalled();
 	});
 });
