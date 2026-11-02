@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import type {
+	WireRoomDescriptionChangedEvent,
 	WireRoomMemberAddedEvent,
+	WireRoomNameChangedEvent,
 	WireRoomPictureChangedEvent,
-	WireRoomPictureDeletedEvent,
-	WireRoomUpdatedEvent
+	WireRoomPictureDeletedEvent
 } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import { notifyConfigRow } from './configRowEffects';
@@ -17,12 +18,13 @@ import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import type {
 	RoomCreatedEvent,
+	RoomDescriptionChangedEvent,
 	RoomHistoryClearedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent,
+	RoomNameChangedEvent,
 	RoomPictureChangedEvent,
-	RoomPictureDeletedEvent,
-	RoomUpdatedEvent
+	RoomPictureDeletedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -58,11 +60,18 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
  * WSC 2.0.0 lands the room change lines from the push events, which carry the
  * line's author (`updatedBy`, `deletedBy`, `clearedBy`); v1 lands them from XMPP.
  */
-function landRoomUpdatedLines(event: RoomUpdatedEvent): void {
+function landRoomNameChangedLine(event: RoomNameChangedEvent): void {
 	if (!isWscPure()) {
 		return;
 	}
-	wscSdk.handleRoomUpdated(event as WireRoomUpdatedEvent).forEach(notifyConfigRow);
+	notifyConfigRow(wscSdk.handleRoomNameChanged(event as WireRoomNameChangedEvent));
+}
+
+function landRoomDescriptionChangedLine(event: RoomDescriptionChangedEvent): void {
+	if (!isWscPure()) {
+		return;
+	}
+	notifyConfigRow(wscSdk.handleRoomDescriptionChanged(event as WireRoomDescriptionChangedEvent));
 }
 
 function landRoomPictureChangedLine(event: RoomPictureChangedEvent): void {
@@ -153,7 +162,16 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_UPDATED: {
 			state.editRoom(event.roomId, { name: event.name, description: event.description });
-			landRoomUpdatedLines(event);
+			break;
+		}
+		case WsEventType.ROOM_NAME_CHANGED: {
+			state.editRoom(event.roomId, { name: event.name });
+			landRoomNameChangedLine(event);
+			break;
+		}
+		case WsEventType.ROOM_DESCRIPTION_CHANGED: {
+			state.editRoom(event.roomId, { description: event.description });
+			landRoomDescriptionChangedLine(event);
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {

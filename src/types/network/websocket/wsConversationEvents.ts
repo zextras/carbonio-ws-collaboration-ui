@@ -9,6 +9,8 @@ import { WsEventType } from './wsEvents';
 export type WsConversationEvent =
 	| RoomCreatedEvent
 	| RoomUpdatedEvent
+	| RoomNameChangedEvent
+	| RoomDescriptionChangedEvent
 	| RoomDeletedEvent
 	| RoomOwnerPromotedEvent
 	| RoomOwnerDemotedEvent
@@ -35,10 +37,24 @@ export type RoomUpdatedEvent = BasicConversationEvent & {
 	roomId: string;
 	name: string;
 	description: string;
-	// WSC 2.0.0: author and ids of the system lines, one per changed field
-	updatedBy?: string;
-	nameSystemEventId?: string;
-	descriptionSystemEventId?: string;
+};
+
+export type RoomNameChangedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_NAME_CHANGED;
+	roomId: string;
+	name: string;
+	updatedBy: string;
+	systemEventId: string;
+	systemEventCreatedAt: string;
+};
+
+export type RoomDescriptionChangedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_DESCRIPTION_CHANGED;
+	roomId: string;
+	description: string;
+	updatedBy: string;
+	systemEventId: string;
+	systemEventCreatedAt: string;
 };
 
 export type RoomDeletedEvent = BasicConversationEvent & {
