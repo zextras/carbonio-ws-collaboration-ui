@@ -22,6 +22,8 @@ import type { Mock } from 'vitest';
 
 import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
+import { BOOT_INBOX_TIMEOUT_MS } from './inboxRefresh';
+import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import useStore from '../../store/Store';
 import {
 	buildWsMessageDeletedEvent,
@@ -34,13 +36,19 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { MarkerStatus } from '../../types/store/ChatsRegistryTypes';
+import { wscSdk } from '../sdk/wscSdk';
 import { wsClient } from '../websocket/WebSocketClient';
 import { wsChatEventsRouter } from '../websocket/wsChatEventsRouter';
+import { wsGeneralEventsHandler } from '../websocket/wsGeneralEventsHandler';
 import { xmppClient } from '../xmpp/XMPPClient';
 
 // The DOM download side is unit-tested in chatExportDownload.test.ts
 vi.mock('./chatExportDownload');
 
+const pendingId = 'msg-pending';
+const JULY_FIRST = '2026-07-01T00:00:00Z';
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const PIN_FEATURE = 'zextras:iq:pin';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
@@ -70,6 +78,7 @@ function mockJsonResponse(body: unknown): void {
 
 describe('chatClient façade', () => {
 	afterEach(() => {
+		wscSdk.reset();
 		vi.restoreAllMocks();
 	});
 
@@ -160,7 +169,7 @@ describe('chatClient façade', () => {
 		mockJsonResponse(inbox);
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		expect(connectSpy).not.toHaveBeenCalled();
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe('/services/chats/inbox');
@@ -209,7 +218,7 @@ describe('chatClient façade', () => {
 		);
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		const registry = useStore.getState().chatsRegistry[inboxRoomId];
 		expect(registry?.inboxMessageId).toBe('evt-last');
@@ -221,13 +230,41 @@ describe('chatClient façade', () => {
 		});
 	});
 
+	it('waits for the first WebsocketConnected before loading the boot inbox, once', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS - 1);
+		expect(inboxSpy).not.toHaveBeenCalled();
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS * 2);
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('falls back to the boot inbox on timeout and reloads it when the socket finally connects', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+
+		chatClient.connect('token');
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
+		expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
+		await vi.advanceTimersByTimeAsync(0);
+		expect(inboxSpy).toHaveBeenCalledTimes(2);
+	});
+
 	it('logs and survives a failing inbox hydration on connect', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
 
 		chatClient.connect('token');
-		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
 
 		expect(errorSpy).toHaveBeenCalledWith(
 			'chatClient.connect: inbox hydration failed',
@@ -300,9 +337,7 @@ describe('chatClient façade', () => {
 
 	it('anchors the next page with the composite cursor of the oldest loaded message', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		useStore
-			.getState()
-			.addRooms([createMockRoom({ id: 'room-c', createdAt: '2026-07-01T00:00:00Z' })]);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-c', createdAt: JULY_FIRST })]);
 		const oldestDate = Date.parse(AUG_FIRST_MORNING);
 		useStore
 			.getState()
@@ -316,6 +351,53 @@ describe('chatClient façade', () => {
 
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
 			'/services/chats/rooms/room-c/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-old&limit=50'
+		);
+	});
+
+	it('never anchors a history page on a pending placeholder written back after a reconnection', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-pp', createdAt: JULY_FIRST })]);
+		const oldestDate = Date.parse(AUG_FIRST_MORNING);
+		useStore.getState().updateHistory('room-pp', [
+			createMockTextMessage({
+				id: pendingId,
+				stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${pendingId}`,
+				roomId: 'room-pp',
+				date: oldestDate - 60_000,
+				read: MarkerStatus.PENDING
+			}),
+			createMockTextMessage({ id: 'msg-real', roomId: 'room-pp', date: oldestDate })
+		]);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true }));
+
+		chatClient.requestHistory('room-pp', oldestDate);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-pp/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-real&limit=50'
+		);
+	});
+
+	it('loads the first page by the server clock when only pending placeholders are in store', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-po', createdAt: JULY_FIRST })]);
+		const pendingDate = Date.parse(AUG_FIRST_MORNING);
+		useStore.getState().updateHistory('room-po', [
+			createMockTextMessage({
+				id: pendingId,
+				stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${pendingId}`,
+				roomId: 'room-po',
+				date: pendingDate,
+				read: MarkerStatus.PENDING
+			})
+		]);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true }));
+
+		chatClient.requestHistory('room-po', Date.parse('2026-08-02T00:00:00Z'));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-po/timeline?limit=50'
 		);
 	});
 
@@ -340,9 +422,7 @@ describe('chatClient façade', () => {
 
 	it('omits the synthetic client-clock bound on the first load, keeps a real anchor', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		useStore
-			.getState()
-			.addRooms([createMockRoom({ id: 'room-skew', createdAt: '2026-07-01T00:00:00Z' })]);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-skew', createdAt: JULY_FIRST })]);
 		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: false }));
 
 		// First load: empty store, the caller passes its own now() — a client
@@ -538,16 +618,37 @@ describe('chatClient façade', () => {
 		expect(messages.map((message) => message.id)).toEqual(['msg-dup']);
 	});
 
-	it('resolves false when the message cannot be sent, so the composer gives it back', async () => {
+	it('resolves false on a certain rejection, so the composer gives the text back', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+		(global.fetch as Mock).mockImplementationOnce(() =>
+			Promise.resolve({
+				ok: false,
+				status: 403,
+				headers: { get: (): string | null => null },
+				json: (): Promise<unknown> => Promise.resolve(undefined)
+			})
+		);
 
 		const sent = chatClient.sendChatMessage('room-f', 'not sent');
 		await vi.advanceTimersByTimeAsync(0);
 
 		await expect(sent).resolves.toBe(false);
+		expect(useStore.getState().chatsRegistry['room-f']?.messages ?? []).toHaveLength(0);
+	});
+
+	it('keeps an unreachable send pending, retried by the SDK, instead of giving it back', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('offline')));
+		const settled = vi.fn();
+
+		chatClient.sendChatMessage('room-f', 'queued').then(settled);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(settled).not.toHaveBeenCalled();
+		expect(useStore.getState().chatsRegistry['room-f'].messages).toHaveLength(1);
 	});
 
 	it('reads the last unread message before sending (v1 parity)', async () => {
@@ -1082,6 +1183,46 @@ describe('chatClient façade', () => {
 		expect(
 			useStore.getState().chatsRegistry[jumpRoomId]?.messages.map((message) => message.id)
 		).toEqual([jumpTargetId, 'msg-middle', jumpRecentId]);
+	});
+
+	it('never anchors the jump walk on a pending placeholder', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-jp', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-jp', [
+			createMockTextMessage({
+				id: pendingId,
+				stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${pendingId}`,
+				roomId: 'room-jp',
+				date: Date.parse(AUG_FIRST_MORNING),
+				read: MarkerStatus.PENDING
+			}),
+			createMockTextMessage({
+				id: 'msg-real',
+				stanzaId: 'msg-real',
+				roomId: 'room-jp',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({
+							id: jumpTargetId,
+							roomId: 'room-jp',
+							createdAt: '2026-08-01T08:00:00Z'
+						})
+					)
+				],
+				{ hasMoreBefore: true }
+			)
+		);
+
+		await chatClient.requestMessageResultHistoryToId('room-jp', jumpTargetId);
+
+		const [firstCall] = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
+		expect(firstCall).toContain('beforeId=msg-real');
+		expect(firstCall).not.toContain('beforeId=msg-pending');
 	});
 
 	it('skips every round-trip when the jump target is already loaded', async () => {

@@ -5,6 +5,8 @@
  */
 import React from 'react';
 
+import { act } from '@testing-library/react';
+
 import { PinMessage } from './PinMessage';
 import useStore from '../../../store/Store';
 import {
@@ -16,6 +18,7 @@ import {
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import * as attachmentUtils from '../../../utils/attachmentUtils';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
@@ -33,6 +36,10 @@ beforeEach(() => {
 });
 
 const iconClose = 'icon: Unpin3';
+const FLOOR_AFTER_PIN = '2026-06-01T00:00:00.000Z';
+const FLOOR_BEFORE_PIN = '2025-06-01T00:00:00.000Z';
+const ATTACHMENT_NAME = 'file_name';
+const EYE_ICON = 'icon: EyeOutline';
 
 describe('PinMessage', () => {
 	describe('One to one', () => {
@@ -183,7 +190,7 @@ describe('PinMessage', () => {
 				from: 'user1',
 				attachment: {
 					id: 'attachmentId',
-					name: 'file_name',
+					name: ATTACHMENT_NAME,
 					mimeType,
 					size: 1661441294393
 				},
@@ -202,7 +209,7 @@ describe('PinMessage', () => {
 				from: 'user1',
 				attachment: {
 					id: 'attachmentId',
-					name: 'file_name',
+					name: ATTACHMENT_NAME,
 					mimeType,
 					size: 1661441294393
 				},
@@ -222,7 +229,7 @@ describe('PinMessage', () => {
 				from: 'user1',
 				attachment: {
 					id: 'attachmentId',
-					name: 'file_name',
+					name: ATTACHMENT_NAME,
 					mimeType,
 					size: 1661441294393
 				},
@@ -236,6 +243,66 @@ describe('PinMessage', () => {
 			expect(screen.getByText(mockedTextMessage.attachment!.name)).toBeVisible();
 			expect(screen.getByText(mockedTextMessage.text)).toBeVisible();
 			expect(screen.queryByTestId(`icon: ${expectedIcon}`)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('Pinned attachment older than the visibility floor', () => {
+		const attachment = {
+			id: 'attachmentId',
+			name: ATTACHMENT_NAME,
+			mimeType: 'image/png',
+			size: 1024
+		};
+		const buildPinned = (): ReturnType<typeof createMockTextMessage> =>
+			createMockTextMessage({
+				id: 'idSimpleTextMessage',
+				roomId: oneToOneRoom.id,
+				from: 'user1',
+				date: Date.UTC(2026, 0, 1),
+				attachment,
+				text: 'content'
+			});
+		const clearAfterPin = (): void =>
+			useStore.getState().clearConversation(oneToOneRoom.id, FLOOR_AFTER_PIN);
+
+		afterEach(() => {
+			act(() => {
+				useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+			});
+		});
+
+		it('on 2.0.0 shows the name and the icon only, without thumbnail, preview or download', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			clearAfterPin();
+			const spyThumbnail = vi.spyOn(attachmentUtils, 'getAttachmentThumbnailURL');
+			const { user } = setup(<PinMessage pinnedMessage={buildPinned()} />);
+
+			await user.click(screen.getByText(/show more/i));
+
+			expect(screen.getByText(attachment.name)).toBeVisible();
+			expect(screen.queryByTestId(EYE_ICON)).not.toBeInTheDocument();
+			expect(screen.queryByTestId('icon: DownloadOutline')).not.toBeInTheDocument();
+			expect(spyThumbnail).not.toHaveBeenCalled();
+		});
+
+		it('on 2.0.0 keeps the thumbnail and the actions when the pin is newer than the floor', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().clearConversation(oneToOneRoom.id, FLOOR_BEFORE_PIN);
+			const { user } = setup(<PinMessage pinnedMessage={buildPinned()} />);
+
+			await user.click(screen.getByText(/show more/i));
+
+			expect(screen.getByTestId(EYE_ICON)).toBeInTheDocument();
+		});
+
+		it('on 1.x the expanded attachment is unchanged', async () => {
+			useStore.getState().setApiVersion('1.6.14');
+			clearAfterPin();
+			const { user } = setup(<PinMessage pinnedMessage={buildPinned()} />);
+
+			await user.click(screen.getByText(/show more/i));
+
+			expect(screen.getByTestId(EYE_ICON)).toBeInTheDocument();
 		});
 	});
 });

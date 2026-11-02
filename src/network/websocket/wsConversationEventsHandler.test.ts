@@ -21,9 +21,11 @@ import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
 	RoomCreatedEvent,
+	RoomDescriptionChangedEvent,
 	RoomHistoryClearedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent,
+	RoomNameChangedEvent,
 	RoomPictureChangedEvent,
 	RoomPictureDeletedEvent,
 	RoomUpdatedEvent
@@ -159,6 +161,7 @@ describe('wsConversationEventHandler tests', () => {
 		const otherUser = 'other';
 		const newMember = 'new-member';
 		const newName = 'New name';
+		const newDescription = 'New description';
 
 		beforeEach(() => {
 			useStore.getState().setApiVersion('2.0.0');
@@ -268,16 +271,16 @@ describe('wsConversationEventHandler tests', () => {
 			expect(useStore.getState().chatsRegistry['room-v1']).toBeUndefined();
 		});
 
-		test('ROOM_UPDATED by another user lands the name line with the new name and counts it', () => {
+		test('ROOM_NAME_CHANGED by another user lands the name line with the new name and counts it', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: room.id,
 				name: newName,
-				description: room.description,
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-name',
+				systemEventId: 'sys-name',
+				systemEventCreatedAt: SENT_DATE,
 				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry[room.id];
 			expect(registry?.lastMessage).toMatchObject({
@@ -289,48 +292,84 @@ describe('wsConversationEventHandler tests', () => {
 			});
 			expect(registry?.unread).toBe(1);
 			expect(useStore.getState().rooms[room.id]?.name).toBe(newName);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(room.description);
 		});
 
-		test('ROOM_UPDATED of name and description lands both lines, the description last', () => {
-			const descriptionLineId = 'sys-description';
+		test('ROOM_DESCRIPTION_CHANGED lands the description line and edits only the description', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
-				roomId: 'room-both',
-				name: newName,
-				description: 'New description',
+				type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+				roomId: room.id,
+				description: newDescription,
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-name',
-				descriptionSystemEventId: descriptionLineId,
+				systemEventId: 'sys-description',
+				systemEventCreatedAt: SENT_DATE,
 				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+			} as RoomDescriptionChangedEvent);
 
-			const registry = useStore.getState().chatsRegistry['room-both'];
-			expect(registry?.messages).toEqual([
-				expect.objectContaining({ id: 'sys-name', operation: OperationType.ROOM_NAME_CHANGED }),
-				expect.objectContaining({
-					id: descriptionLineId,
-					operation: OperationType.ROOM_DESCRIPTION_CHANGED,
-					value: 'New description'
-				})
-			]);
-			expect(registry?.lastMessage?.id).toBe(descriptionLineId);
-			expect(registry?.unread).toBe(2);
+			const registry = useStore.getState().chatsRegistry[room.id];
+			expect(registry?.lastMessage).toMatchObject({
+				id: 'sys-description',
+				operation: OperationType.ROOM_DESCRIPTION_CHANGED,
+				value: newDescription,
+				from: otherUser
+			});
+			expect(registry?.unread).toBe(1);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(newDescription);
+			expect(useStore.getState().rooms[room.id]?.name).toBe(room.name);
 		});
 
-		test('ROOM_UPDATED by the session user lands the line without counting it', () => {
+		test('ROOM_DESCRIPTION_CHANGED with an empty description clears it and lands the line', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+				roomId: room.id,
+				description: '',
+				updatedBy: otherUser,
+				systemEventId: 'sys-description-cleared',
+				systemEventCreatedAt: SENT_DATE,
+				sentDate: SENT_DATE
+			} as RoomDescriptionChangedEvent);
+
+			const registry = useStore.getState().chatsRegistry[room.id];
+			expect(registry?.lastMessage).toMatchObject({
+				id: 'sys-description-cleared',
+				operation: OperationType.ROOM_DESCRIPTION_CHANGED
+			});
+			expect(useStore.getState().rooms[room.id]?.description).toBe('');
+		});
+
+		test('ROOM_NAME_CHANGED by the session user lands the line without counting it', () => {
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: 'room-own-name',
 				name: newName,
-				description: '',
 				updatedBy: sessionUser.id,
-				nameSystemEventId: 'sys-own-name',
+				systemEventId: 'sys-own-name',
+				systemEventCreatedAt: SENT_DATE,
 				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-own-name'];
 			expect(registry?.lastMessage?.id).toBe('sys-own-name');
 			expect(registry?.unread ?? 0).toBe(0);
+		});
+
+		test('ROOM_UPDATED edits name and description and does not ask the SDK for lines', () => {
+			const nameSpy = vi.spyOn(wscSdk, 'handleRoomNameChanged');
+			const descriptionSpy = vi.spyOn(wscSdk, 'handleRoomDescriptionChanged');
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_UPDATED,
+				roomId: room.id,
+				name: newName,
+				description: newDescription,
+				sentDate: SENT_DATE
+			} as RoomUpdatedEvent);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe(newName);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(newDescription);
+			expect(nameSpy).not.toHaveBeenCalled();
+			expect(descriptionSpy).not.toHaveBeenCalled();
+			expect(useStore.getState().chatsRegistry[room.id]).toBeUndefined();
 		});
 
 		test('ROOM_PICTURE_CHANGED by another user lands the picture line and counts it', () => {
@@ -415,14 +454,14 @@ describe('wsConversationEventHandler tests', () => {
 			useStore.getState().setApiVersion('1.6.14');
 
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: 'room-v1-name',
 				name: newName,
-				description: '',
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-v1-name',
+				systemEventId: 'sys-v1-name',
+				systemEventCreatedAt: SENT_DATE,
 				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+			} as RoomNameChangedEvent);
 
 			expect(useStore.getState().chatsRegistry['room-v1-name']).toBeUndefined();
 		});

@@ -17,6 +17,7 @@ import {
 } from './FetchUtils';
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
+import { Version } from '../types/store/SessionTypes';
 
 const defPath = '/services/chats/test';
 
@@ -153,6 +154,56 @@ describe('FetchUtils', () => {
 		});
 		await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('version_mismatch');
 		expect(global.fetch).toHaveBeenCalledTimes(4);
+	});
+
+	describe('version fallback when the server version is not in the supported list', () => {
+		const supported: Array<Version> = ['2.0.0', '1.6.15', '1.6.14', '1.6.13'];
+		const mismatch = (serverVersion: string): Record<string, unknown> => ({
+			ok: false,
+			status: 422,
+			headers: {
+				get: (header: string): string | undefined =>
+					header === wscApiVersionHeader ? serverVersion : undefined
+			}
+		});
+		const okResp = {
+			ok: true,
+			status: 200,
+			headers: { get: (): string => 'text/plain' }
+		};
+
+		test.each([
+			['1.6.16', '1.6.15'],
+			['1.6.99', '1.6.15'],
+			['1.6.14', '1.6.14'],
+			['2.1.0', '2.0.0'],
+			['3.0.0', '2.0.0']
+		])('server %s -> client retries with %s', async (serverVersion, expected) => {
+			useStore.getState().setSupportedVersions(supported);
+			useStore.getState().setApiVersion('1.6.13');
+			(global.fetch as Mock)
+				.mockResolvedValueOnce(mismatch(serverVersion))
+				.mockResolvedValueOnce(okResp);
+			await fetchAPI('test', RequestType.GET);
+			expect(useStore.getState().session.apiVersion).toBe(expected);
+			expect(global.fetch).toHaveBeenCalledTimes(2);
+		});
+
+		test('server older than every supported version -> error', async () => {
+			useStore.getState().setSupportedVersions(supported);
+			useStore.getState().setApiVersion('2.0.0');
+			(global.fetch as Mock).mockResolvedValueOnce(mismatch('1.6.2'));
+			await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
+			expect(global.fetch).toHaveBeenCalledTimes(1);
+		});
+
+		test('fallback equal to the version already sent -> error, no retry', async () => {
+			useStore.getState().setSupportedVersions(supported);
+			useStore.getState().setApiVersion('1.6.15');
+			(global.fetch as Mock).mockResolvedValueOnce(mismatch('1.6.16'));
+			await expect(fetchAPI('test', RequestType.GET)).rejects.toThrow('status ko');
+			expect(global.fetch).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	test('Return error if version choose by the server is not supported by the client', async () => {

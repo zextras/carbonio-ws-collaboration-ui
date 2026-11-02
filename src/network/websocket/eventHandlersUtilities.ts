@@ -26,6 +26,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		}
 		case WsEventType.ROOM_CREATED:
 		case WsEventType.ROOM_UPDATED:
+		case WsEventType.ROOM_NAME_CHANGED:
+		case WsEventType.ROOM_DESCRIPTION_CHANGED:
 		case WsEventType.ROOM_DELETED:
 		case WsEventType.ROOM_OWNER_PROMOTED:
 		case WsEventType.ROOM_OWNER_DEMOTED:

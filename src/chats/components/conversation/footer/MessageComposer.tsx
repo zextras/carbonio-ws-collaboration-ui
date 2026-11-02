@@ -213,14 +213,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
 		controller: AbortController
-	): Promise<{ id: string }> => {
+	): Promise<void> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
 		const lastFileId = filesToUploadArray?.at(-1)?.fileId;
 		const isLastFile = filesToUploadArray && file.fileId === lastFileId;
 
-		let area;
+		let area: string | undefined;
 		if (isAttachmentImage(file.file.type)) {
 			try {
 				const imageSize = await getImageSize(file.localUrl);
@@ -229,18 +229,27 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return Promise.reject(err);
 			}
 		}
-		return addRoomAttachment(
-			roomId,
-			file.file,
-			{
-				description: isLastFile ? textMessage.trim() : '',
-				replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
-				area
-			},
-			signal
-		).catch((reason: DOMException) => {
-			errorHandler(reason, fileName);
-			return Promise.reject(reason);
+		// Released on the first attempt: background retries must not hold the next file
+		return new Promise<void>((resolve, reject) => {
+			addRoomAttachment(
+				roomId,
+				file.file,
+				{
+					description: isLastFile ? textMessage.trim() : '',
+					replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
+					area
+				},
+				signal,
+				(outcome) => {
+					if (outcome !== 'rejected') resolve();
+				}
+			).then(
+				() => resolve(),
+				(reason: DOMException) => {
+					errorHandler(reason, fileName);
+					reject(reason);
+				}
+			);
 		});
 	};
 
@@ -323,7 +332,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = filesToUploadArray.reduce(
-				(acc: Promise<{ id: string } | void>, file, i) =>
+				(acc: Promise<void>, file, i) =>
 					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);

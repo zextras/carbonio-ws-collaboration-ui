@@ -50,6 +50,7 @@ import {
 } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
 import { RequestType } from '../../utils/FetchUtils';
+import { wscSdk } from '../sdk/wscSdk';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
 
@@ -317,6 +318,34 @@ describe('Rooms API', () => {
 		);
 	});
 
+	describe('getRoomAttachments stanzaId alignment', () => {
+		const restItem = { id: 'att-1', messageId: 'msg-1' };
+		const restItemWithStanza = { id: 'att-2', messageId: 'msg-2', stanzaId: 'stanza-2' };
+
+		afterEach(() => {
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		test('on 2.0.0 every item gets stanzaId from messageId when missing', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			mockFetchAPI.mockResolvedValueOnce({ attachments: [restItem, restItemWithStanza] });
+
+			const response = await getRoomAttachments('roomId', { limit: 20 });
+
+			expect(response.attachments[0].stanzaId).toBe('msg-1');
+			expect(response.attachments[1].stanzaId).toBe('stanza-2');
+		});
+
+		test('on 1.x the REST items are returned untouched', async () => {
+			useStore.getState().setApiVersion('1.6.15');
+			mockFetchAPI.mockResolvedValueOnce({ attachments: [restItem] });
+
+			const response = await getRoomAttachments('roomId', { limit: 20 });
+
+			expect(response.attachments[0].stanzaId).toBeUndefined();
+		});
+	});
+
 	test('bulkDeleteRoomAttachments is called with the attachmentIds body', async () => {
 		await bulkDeleteRoomAttachments('roomId', ['file-1', 'file-2']);
 
@@ -439,6 +468,9 @@ describe('Rooms API', () => {
 		const photo = (): File => new File(['x'], 'photo.png', { type: 'image/png' });
 
 		afterEach(() => {
+			wscSdk.reset();
+			vi.useRealTimers();
+			mockSendAttachmentFetchAPI.mockReset().mockImplementation(() => Promise.resolve({}));
 			// The zustand store survives across tests: leave the version un-negotiated
 			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
 		});
@@ -465,7 +497,7 @@ describe('Rooms API', () => {
 					replyToId: 'msg-quoted',
 					area: '2x2'
 				},
-				signal
+				expect.any(AbortSignal)
 			);
 			// No v1 variant: no PUT with messageId, no binary POST with headers
 			expect(mockSendFileFetchAPI).not.toHaveBeenCalled();
@@ -524,11 +556,122 @@ describe('Rooms API', () => {
 
 		test('removes the placeholder and rejects when the upload fails', async () => {
 			useStore.getState().setApiVersion('2.0.0');
-			mockSendAttachmentFetchAPI.mockRejectedValueOnce(new Error('status ko'));
+			mockSendAttachmentFetchAPI.mockRejectedValueOnce(
+				Object.assign(new Error('status ko'), { status: 403 })
+			);
 
 			await expect(addRoomAttachment(roomId, photo(), {})).rejects.toThrow();
 
 			expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toEqual([]);
+		});
+
+		test('an uncertain attempt keeps the placeholder pending and retries the same tempId', async () => {
+			vi.useFakeTimers();
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI
+				.mockRejectedValueOnce(new Error('offline'))
+				.mockResolvedValueOnce(buildMessage({ id: 'msg-file', roomId, attachmentId: 'file-1' }));
+			const settled = vi.fn();
+
+			addRoomAttachment(roomId, photo(), {}).then(settled);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(settled).not.toHaveBeenCalled();
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(1);
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(2);
+			const [first, second] = mockSendAttachmentFetchAPI.mock.calls.map(
+				(call) => (call[2] as { tempId: string }).tempId
+			);
+			expect(second).toBe(first);
+			expect(settled).toHaveBeenCalledWith({ id: 'msg-file' });
+		});
+
+		test('reports the outcome of the first attempt once, even when the SDK keeps retrying', async () => {
+			vi.useFakeTimers();
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI.mockRejectedValue(new Error('offline'));
+			const firstAttemptSettled = vi.fn();
+			const settled = vi.fn();
+
+			addRoomAttachment(roomId, photo(), {}, undefined, firstAttemptSettled).then(settled);
+			await vi.advanceTimersByTimeAsync(0);
+			expect(firstAttemptSettled).toHaveBeenCalledWith('pending');
+
+			await vi.advanceTimersByTimeAsync(120_000);
+
+			expect(mockSendAttachmentFetchAPI.mock.calls.length).toBeGreaterThan(1);
+			expect(firstAttemptSettled).toHaveBeenCalledTimes(1);
+			expect(settled).not.toHaveBeenCalled();
+		});
+
+		test('reports a certain rejection and a confirmation as such', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			const rejected = vi.fn();
+			const confirmed = vi.fn();
+			mockSendAttachmentFetchAPI.mockRejectedValueOnce(
+				Object.assign(new Error('status ko'), { status: 403 })
+			);
+			mockSendAttachmentFetchAPI.mockResolvedValueOnce(
+				buildMessage({ id: 'msg-ok', roomId, attachmentId: 'file-1' })
+			);
+
+			await expect(addRoomAttachment(roomId, photo(), {}, undefined, rejected)).rejects.toThrow();
+			await addRoomAttachment(roomId, photo(), {}, undefined, confirmed);
+
+			expect(rejected).toHaveBeenCalledWith('rejected');
+			expect(confirmed).toHaveBeenCalledWith('confirmed');
+		});
+
+		describe('cancel from the composer', () => {
+			const abortError = (): DOMException => new DOMException('aborted', 'AbortError');
+
+			test('aborting during an attempt aborts its fetch, removes the placeholder and rejects', async () => {
+				useStore.getState().setApiVersion('2.0.0');
+				const controller = new AbortController();
+				let attemptSignal: AbortSignal | undefined;
+				mockSendAttachmentFetchAPI.mockImplementation(
+					(endpoint: string, file: File, fields: unknown, signal: AbortSignal) => {
+						attemptSignal = signal;
+						return new Promise((resolve, reject) => {
+							signal.addEventListener('abort', () => reject(abortError()));
+						});
+					}
+				);
+
+				const upload = addRoomAttachment(roomId, photo(), {}, controller.signal);
+				const rejection = expect(upload).rejects.toMatchObject({ name: 'AbortError' });
+				await Promise.resolve();
+				expect(attemptSignal?.aborted).toBe(false);
+
+				controller.abort();
+
+				await rejection;
+				expect(attemptSignal?.aborted).toBe(true);
+				expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toEqual([]);
+				expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(1);
+			});
+
+			test('aborting during the backoff stops the retries', async () => {
+				vi.useFakeTimers();
+				useStore.getState().setApiVersion('2.0.0');
+				const controller = new AbortController();
+				mockSendAttachmentFetchAPI.mockRejectedValue(new Error('offline'));
+
+				const upload = addRoomAttachment(roomId, photo(), {}, controller.signal);
+				const rejection = expect(upload).rejects.toBeDefined();
+				await vi.advanceTimersByTimeAsync(1000);
+				expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(1);
+
+				controller.abort();
+				await vi.advanceTimersByTimeAsync(10 * 60_000);
+
+				await rejection;
+				expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(1);
+				expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toEqual([]);
+			});
 		});
 	});
 

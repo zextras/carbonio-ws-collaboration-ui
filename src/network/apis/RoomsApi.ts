@@ -3,7 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import type { StoreTextMessage, WireMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+import type {
+	FirstAttemptOutcome,
+	StoreTextMessage,
+	WireMessage
+} from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -132,7 +136,19 @@ export const getRoomAttachments = (
 	roomId: string,
 	params: GetRoomAttachmentsParams
 ): Promise<GetRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+	fetchAPI<GetRoomAttachmentsResponse>(
+		`rooms/${roomId}/attachments${buildQueryString({ ...params })}`,
+		RequestType.GET
+	).then((response) => {
+		if (!isWscPure() || !response?.attachments) return response;
+		return {
+			...response,
+			attachments: response.attachments.map((attachment) => ({
+				...attachment,
+				stanzaId: attachment.stanzaId ?? attachment.messageId
+			}))
+		};
+	});
 
 export const bulkDeleteRoomAttachments = (
 	roomId: string,
@@ -169,36 +185,35 @@ export const replacePlaceholderRoom = (
 };
 
 /**
- * v2 (WSC-pure) upload: one POST multipart, answered by the created Message.
- * Ids are server-generated and the placeholder's is the tempId: the SDK
- * promotes it from the 201, idempotent with the MessageReceived self-echo
- * that carries the same tempId back.
+ * v2 (WSC-pure) upload through the SDK: every attempt is one multipart POST
+ * with the same tempId, the placeholder's id, which the SDK promotes from the
+ * 201 (idempotent with the self-echo). Retries of an uncertain outcome are the
+ * SDK's (see `sendAttachment`); `onFirstAttemptSettled` reports the first one.
  */
 const uploadWscAttachment = (
 	roomId: string,
 	tempId: string,
 	file: File,
 	optionalFields: { description?: string; replyId?: string; area?: string },
-	signal?: AbortSignal
-): Promise<WireMessage> =>
-	sendAttachmentFetchAPI<WireMessage>(
-		`rooms/${roomId}/attachments`,
-		file,
-		{
-			tempId,
-			description: optionalFields.description,
-			replyToId: optionalFields.replyId,
-			area: optionalFields.area
-		},
-		signal
-	).then((resp) => {
-		wscSdk.confirmAttachmentUpload({
+	signal?: AbortSignal,
+	onFirstAttemptSettled?: (outcome: FirstAttemptOutcome) => void
+): Promise<{ id: string }> =>
+	wscSdk
+		.sendAttachment({
 			roomId,
 			tempId,
-			response: resp,
-			// The 201 names the file only by id. The MIME type is the part's,
-			// which the browser sends as application/octet-stream when the file
-			// has none
+			upload: (attemptSignal) =>
+				sendAttachmentFetchAPI<WireMessage>(
+					`rooms/${roomId}/attachments`,
+					file,
+					{
+						tempId,
+						description: optionalFields.description,
+						replyToId: optionalFields.replyId,
+						area: optionalFields.area
+					},
+					attemptSignal as AbortSignal
+				),
 			attachment: {
 				name: file.name,
 				mimeType: file.type || 'application/octet-stream',
@@ -207,10 +222,11 @@ const uploadWscAttachment = (
 			},
 			repliedMessage: findRepliedMessage(roomId, optionalFields.replyId) as
 				| StoreTextMessage
-				| undefined
-		});
-		return resp;
-	});
+				| undefined,
+			signal,
+			onFirstAttemptSettled
+		})
+		.then((message) => ({ id: message?.id ?? tempId }));
 
 export const addRoomAttachment = (
 	roomId: string,
@@ -220,13 +236,14 @@ export const addRoomAttachment = (
 		replyId?: string;
 		area?: string;
 	},
-	signal?: AbortSignal
+	signal?: AbortSignal,
+	onFirstAttemptSettled?: (outcome: FirstAttemptOutcome) => void
 ): Promise<{ id: string }> => {
 	const placeholderRoom = roomId.split('placeholder-');
 	if (placeholderRoom[1]) {
 		return replacePlaceholderRoom(placeholderRoom[1], optionalFields.description ?? '', file).then(
 			(response) => {
-				addRoomAttachment(response.id, file, optionalFields, signal);
+				addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled);
 				return response;
 			}
 		);
@@ -257,14 +274,14 @@ export const addRoomAttachment = (
 			removePlaceholderMessage(roomId, uuid);
 			reject(new Error('file_too_large'));
 		} else if (isWscPure()) {
-			uploadWscAttachment(roomId, uuid, file, optionalFields, signal)
+			uploadWscAttachment(roomId, uuid, file, optionalFields, signal, onFirstAttemptSettled)
 				.then((resp) => {
 					globalThis.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
 					resolve(resp);
 				})
 				.catch((error) => {
 					removePlaceholderMessage(roomId, uuid);
-					reject(new Error(error));
+					reject(error instanceof Error ? error : new Error(String(error)));
 				});
 		} else {
 			const optional = {

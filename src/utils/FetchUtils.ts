@@ -5,6 +5,7 @@
  */
 
 import { includes } from 'lodash';
+import { maxSatisfying } from 'semver';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
@@ -49,12 +50,14 @@ const handleResponse = async (response: Response): Promise<any> => {
 			const { session, setApiVersion } = useStore.getState();
 			const serverApiVersion = response.headers.get(wscApiVersionHeader) as Version;
 			const clientApiVersion = session.apiVersion;
-			if (
-				!!serverApiVersion &&
-				serverApiVersion !== clientApiVersion &&
-				session.supportedVersions?.includes(serverApiVersion)
-			) {
-				setApiVersion(serverApiVersion as Version);
+			const negotiatedVersion = serverApiVersion
+				? (maxSatisfying(
+						session.supportedVersions ?? [],
+						`<=${serverApiVersion}`
+					) as Version | null)
+				: null;
+			if (negotiatedVersion && negotiatedVersion !== clientApiVersion) {
+				setApiVersion(negotiatedVersion);
 				return Promise.reject(new Error('version_mismatch'));
 			}
 		}

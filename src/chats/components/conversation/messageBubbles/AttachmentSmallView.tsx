@@ -61,8 +61,14 @@ type AttachmentSmallViewProps = {
 	attachment: AttachmentMessageType;
 	roomId: string;
 	messageDate: number;
+	belowVisibilityFloor?: boolean;
 };
-const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment, roomId, messageDate }) => {
+const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({
+	attachment,
+	roomId,
+	messageDate,
+	belowVisibilityFloor = false
+}) => {
 	const [t] = useTranslation();
 	const previewActionLabel = t('action.preview', 'Preview');
 	const downloadActionLabel = t('action.download', 'Download');
@@ -73,8 +79,11 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment, roomId,
 	}, [attachment, messageDate, openFromChat, roomId]);
 
 	const previewURL = useMemo(
-		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
-		[attachment]
+		() =>
+			belowVisibilityFloor
+				? undefined
+				: getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
+		[attachment, belowVisibilityFloor]
 	);
 
 	const previewSupported = useMemo(() => isPreviewSupported(attachment.mimeType), [attachment]);
@@ -86,21 +95,23 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment, roomId,
 
 	return (
 		<CustomPadding right="small" data-testid="hover-container">
-			<HoverContainer
-				height="3rem"
-				width="3rem"
-				mainAlignment="center"
-				crossAlignment="center"
-				$isGenericFile={!previewSupported}
-			>
-				<Tooltip label={previewSupported ? previewActionLabel : downloadActionLabel}>
-					{previewSupported ? (
-						<CustomButton type="ghost" icon="EyeOutline" color="gray6" onClick={onPreviewClick} />
-					) : (
-						<CustomButton type="ghost" color="gray6" icon="DownloadOutline" onClick={download} />
-					)}
-				</Tooltip>
-			</HoverContainer>
+			{!belowVisibilityFloor && (
+				<HoverContainer
+					height="3rem"
+					width="3rem"
+					mainAlignment="center"
+					crossAlignment="center"
+					$isGenericFile={!previewSupported}
+				>
+					<Tooltip label={previewSupported ? previewActionLabel : downloadActionLabel}>
+						{previewSupported ? (
+							<CustomButton type="ghost" icon="EyeOutline" color="gray6" onClick={onPreviewClick} />
+						) : (
+							<CustomButton type="ghost" color="gray6" icon="DownloadOutline" onClick={download} />
+						)}
+					</Tooltip>
+				</HoverContainer>
+			)}
 			<CustomAvatar
 				size="large"
 				icon={`${getPinAttachmentIcon(attachment.mimeType)}Outline`}

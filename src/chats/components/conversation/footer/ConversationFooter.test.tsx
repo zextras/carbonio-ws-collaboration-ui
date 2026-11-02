@@ -9,6 +9,7 @@ import React from 'react';
 
 import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import type { FirstAttemptOutcome } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import ConversationFooter from './ConversationFooter';
 import * as api from '../../../../network/apis/RoomsApi';
@@ -525,6 +526,87 @@ describe('Send message', () => {
 		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();
+	});
+
+	describe('Files uploaded one after another', () => {
+		const sendTwoFiles = async (): Promise<void> => {
+			vi.spyOn(attachmentUtils, 'getImageSize').mockResolvedValue({ width: 10, height: 10 });
+			const { user } = storeSetupAdvanced();
+			const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+			await user.upload(input, [
+				new File(['a'], 'first.png', { type: 'image/png' }),
+				new File(['b'], 'second.png', { type: 'image/png' })
+			]);
+			await user.click(screen.getByTestId(iconNavigator2));
+		};
+
+		test('A first file whose first attempt is uncertain does not hold the next one', async () => {
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					if (file.name === 'first.png') {
+						onFirstAttemptSettled?.('pending');
+						return new Promise<{ id: string }>(() => {
+							// never settles: a background retry
+						});
+					}
+					return Promise.resolve({ id: 'second' });
+				});
+
+			await sendTwoFiles();
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
+			expect(spy.mock.calls.map((call) => call[1].name)).toEqual(['first.png', 'second.png']);
+		});
+
+		test('The next file never starts before the first attempt of the previous one is over', async () => {
+			let endFirstAttempt = vi.fn<(outcome: FirstAttemptOutcome) => void>();
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					if (file.name === 'first.png') {
+						if (onFirstAttemptSettled) endFirstAttempt = vi.fn(onFirstAttemptSettled);
+						return new Promise<{ id: string }>(() => {
+							// never settles: a background retry
+						});
+					}
+					return Promise.resolve({ id: 'second' });
+				});
+
+			await sendTwoFiles();
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+			await act(
+				() =>
+					new Promise<void>((resolve) => {
+						setTimeout(resolve, 50);
+					})
+			);
+			expect(spy).toHaveBeenCalledTimes(1);
+
+			endFirstAttempt('pending');
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
+		});
+
+		test('A certain rejection of the first file stops the following ones', async () => {
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					onFirstAttemptSettled?.('rejected');
+					return Promise.reject(new Error('status ko'));
+				});
+
+			await sendTwoFiles();
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+			await act(
+				() =>
+					new Promise<void>((resolve) => {
+						setTimeout(resolve, 50);
+					})
+			);
+			expect(spy).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	test('File description is preserved in input when upload failed', async () => {
