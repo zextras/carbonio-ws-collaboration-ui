@@ -15,7 +15,6 @@ import LivingRoom from '../meetings/assets/virtualBackgrounds/LivingRoom.png';
 import Mountains from '../meetings/assets/virtualBackgrounds/Mountains.png';
 import Office from '../meetings/assets/virtualBackgrounds/Office.png';
 import { VirtualBackgroundType } from '../types/store/ActiveMeetingTypes';
-import { BrowserUtils } from '../utils/BrowserUtils';
 
 const useVirtualBackground = (
 	backgroundSelected?: VirtualBackgroundType,
@@ -54,13 +53,10 @@ const useVirtualBackground = (
 			if (canvas) {
 				const context = canvas.getContext('2d');
 				if (context) {
-					// setup canvas width and height to be the same as the results one
-					context.canvas.width = 640;
-					if (BrowserUtils.isFirefox()) {
-						context.canvas.height = 480;
-					} else {
-						context.canvas.height = 360;
-					}
+					// Size the canvas to the ACTUAL frame so the output aspect matches the camera on every
+					// browser (Firefox tends to deliver 4:3, Chrome 16:9, others any resolution).
+					context.canvas.width = results.image.width;
+					context.canvas.height = results.image.height;
 
 					// Clear the canvas
 					context.clearRect(0, 0, canvas.width, canvas.height);
@@ -72,10 +68,10 @@ const useVirtualBackground = (
 					// Apply blur effect
 					context.globalCompositeOperation = 'source-out';
 					context.filter = 'blur(10px)';
-					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
+					context.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 					context.filter = 'none';
 					context.globalCompositeOperation = 'destination-atop';
-					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
+					context.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 					context.restore();
 				}
 			}
@@ -91,13 +87,10 @@ const useVirtualBackground = (
 					preserveDrawingBuffer: true
 				}) as CanvasRenderingContext2D | null;
 				if (context) {
-					// setup canvas width and height to be the same as the results one
-					context.canvas.width = 640;
-					if (BrowserUtils.isFirefox()) {
-						context.canvas.height = 480;
-					} else {
-						context.canvas.height = 360;
-					}
+					// Size the canvas to the ACTUAL frame so the output aspect matches the camera on every
+					// browser (Firefox tends to deliver 4:3, Chrome 16:9, others any resolution).
+					context.canvas.width = results.image.width;
+					context.canvas.height = results.image.height;
 
 					// Clear the canvas
 					context.clearRect(0, 0, canvas.width, canvas.height);
@@ -106,16 +99,10 @@ const useVirtualBackground = (
 					context.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
 
 					context.globalCompositeOperation = 'source-out';
-					context.drawImage(
-						backgroundImageSelected,
-						0,
-						0,
-						results.image.width,
-						results.image.height
-					);
+					context.drawImage(backgroundImageSelected, 0, 0, canvas.width, canvas.height);
 
 					context.globalCompositeOperation = 'destination-atop';
-					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
+					context.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
 					context.restore();
 				}

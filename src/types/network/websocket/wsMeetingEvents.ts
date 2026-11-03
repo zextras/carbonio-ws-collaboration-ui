@@ -30,7 +30,8 @@ export type WsMeetingEvent =
 	| MeetingRecordingStartedEvent
 	| MeetingRecordingStoppedEvent
 	| MeetingParticipantHandRaisedEvent
-	| MeetingParticipantHandRaisedListEvent;
+	| MeetingParticipantHandRaisedListEvent
+	| MeetingParticipantUplinkStatusChangedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -161,4 +162,13 @@ export type MeetingParticipantHandRaisedListEvent = BasicMeetingEvent & {
 export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_DECLINED;
 	userId: string;
+};
+
+export type MeetingParticipantUplinkStatusChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_UPLINK_STATUS_CHANGED;
+	userId: string;
+	networkScore: number | null;
+	changedAt: number;
+	maxUplinkTier?: number | null;
+	maxHardwareTier?: number | null;
 };

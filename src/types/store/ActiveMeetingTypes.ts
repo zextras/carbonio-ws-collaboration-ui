@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import ConnectionQualityMonitor from '../../network/webRTC/ConnectionQualityMonitor';
 import {
 	IBidirectionalConnectionAudioInOut,
 	IScreenOutConnection,
@@ -47,6 +48,8 @@ export type ActiveMeetingSlice = {
 	removeBackgroundStream: () => void;
 	setBackgroundImage: (image: VirtualBackgroundType) => void;
 	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
+	setTileCeiling: (meetingId: string, key: string, rung: number) => void;
+	removeTileCeiling: (meetingId: string, key: string) => void;
 };
 
 export type ActiveMeeting = {
@@ -55,6 +58,9 @@ export type ActiveMeeting = {
 	videoScreenIn: IVideoScreenInConnection;
 	videoOutConn: IVideoOutConnection;
 	screenOutConn: IScreenOutConnection;
+	qualityMonitor: ConnectionQualityMonitor;
+	connectionQuality: Record<string, ConnectionQualityInfo>;
+	tileCeilings: Record<string, number>;
 	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
@@ -65,6 +71,13 @@ export type ActiveMeeting = {
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
 	pinnedTile?: PinnedTile;
+};
+
+export type ConnectionQualityInfo = {
+	networkScore: number | null;
+	changedAt: number;
+	maxUplinkTier?: number | null;
+	maxHardwareTier?: number | null;
 };
 
 export enum MeetingAccordionType {
