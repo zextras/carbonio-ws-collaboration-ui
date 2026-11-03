@@ -9,7 +9,10 @@ import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collab
 import { notifyConfigRow } from './configRowEffects';
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
-import { getMyLastMarkerOfRoom } from '../../store/selectors/ChatsRegistrySelectors';
+import {
+	getEditAndDeleteFasteningSelector,
+	getMyLastMarkerOfRoom
+} from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
 import type {
 	WsMessageForwardedEvent,
@@ -19,13 +22,13 @@ import type {
 } from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
+import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
 import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
-import { parseIsoMicros } from '../../utils/isoMicros';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
-import { wscSdk, withoutPinnedBannerWrites } from '../sdk/wscSdk';
+import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
 
@@ -53,6 +56,9 @@ function notifyOthersMessage(
 	const ownMarker = getMyLastMarkerOfRoom(useStore.getState(), roomId);
 	if (!alreadyInStore && (!ownMarker || message.date > ownMarker.markerDate)) {
 		useStore.getState().incrementUnreadCount(roomId, 1);
+	}
+	if (alreadyInStore) {
+		return;
 	}
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 	displayMessageBrowserNotification(message as TextMessage);
@@ -103,21 +109,6 @@ function routeMessageForwarded(event: WsMessageForwardedEvent): void {
 }
 
 /**
- * The banner follows the stored pin time: a pin/unpin older than (or equal to)
- * the last one applied to the room's banner is a stale or duplicate state and
- * leaves the banner alone; the system line still lands.
- */
-function claimPinTime(roomId: string, time: string): boolean {
-	const eventTime = parseIsoMicros(time);
-	const { activeConversations, setPinTime } = useStore.getState();
-	if (eventTime <= (activeConversations[roomId]?.pinTime ?? 0)) {
-		return false;
-	}
-	setPinTime(roomId, eventTime);
-	return true;
-}
-
-/**
  * v1 landed pin changes as real MUC configuration rows; the SDK builds the
  * row and sets the banner from the store copy when the target is loaded
  * (same lookup the reply hydration uses), else from the message the event
@@ -127,11 +118,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
 		| StoreTextMessage
 		| undefined;
-	const applyToBanner = claimPinTime(event.roomId, event.systemEventCreatedAt ?? event.timestamp);
-	const row = applyToBanner
-		? wscSdk.handleMessagePinned(event, resolved)
-		: withoutPinnedBannerWrites(() => wscSdk.handleMessagePinned(event, resolved));
-	notifyConfigRow(row);
+	notifyConfigRow(wscSdk.handleMessagePinned(event, resolved).row);
 }
 
 /**
@@ -140,11 +127,8 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
  * scroll-to-pin selection is cleared like the v1 handler did.
  */
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
-	const applyToBanner = claimPinTime(event.roomId, event.systemEventCreatedAt ?? event.timestamp);
-	const row = applyToBanner
-		? wscSdk.handleMessageUnpinned(event)
-		: withoutPinnedBannerWrites(() => wscSdk.handleMessageUnpinned(event));
-	if (applyToBanner) {
+	const { row, bannerApplied } = wscSdk.handleMessageUnpinned(event);
+	if (bannerApplied) {
 		useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
 	}
 	notifyConfigRow(row);
@@ -155,10 +139,15 @@ function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
  * dedicated messagePinUpdated config (text only), which has no v2 event — the
  * copy refreshes here when an edit targets the pin.
  */
-function refreshPinnedBannerOnEdit(roomId: string, messageId: string, text: string): void {
-	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
-	if (pinned?.stanzaId === messageId) {
-		useStore.getState().setPinnedMessage(roomId, { ...pinned, text });
+function refreshPinnedBannerOnEdit(roomId: string, messageId: string): void {
+	const state = useStore.getState();
+	const pinned = state.activeConversations[roomId]?.messagePinned;
+	if (pinned?.stanzaId !== messageId) {
+		return;
+	}
+	const latest = getEditAndDeleteFasteningSelector(state, roomId, messageId);
+	if (latest?.action === FasteningAction.EDIT) {
+		state.setPinnedMessage(roomId, { ...pinned, text: latest.value ?? '' });
 	}
 }
 
@@ -221,7 +210,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 					| StoreTextMessage
 					| undefined
 			);
-			refreshPinnedBannerOnEdit(event.roomId, event.messageId, event.text);
+			refreshPinnedBannerOnEdit(event.roomId, event.messageId);
 			return;
 		}
 		case WsEventType.MESSAGE_DELETED: {

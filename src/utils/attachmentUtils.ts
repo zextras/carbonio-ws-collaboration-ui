@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { toIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+
 import {
 	getImagePreviewURL,
 	getImageThumbnailURL,
@@ -10,7 +12,6 @@ import {
 	getPdfThumbnailURL,
 	getURLAttachment
 } from '../network';
-import { toIsoMicros } from './isoMicros';
 import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { MediaGalleryFilter } from '../types/store/MediaGalleryTypes';

@@ -204,6 +204,7 @@ describe('Media gallery slice', () => {
 		});
 
 		test('inserts at the position of its creation date, microseconds included, ties broken by id', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			useStore
 				.getState()
 				.appendMediaGalleryPage(
@@ -238,7 +239,56 @@ describe('Media gallery slice', () => {
 			]);
 		});
 
+		test('on 1.6.x a new attachment is always prepended, whatever its date', () => {
+			useStore.getState().setApiVersion('1.6.14');
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1', createdAt: '2024-01-01T10:00:05Z' })],
+					1,
+					'cur-1'
+				);
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(
+					roomId,
+					buildAttachment({ id: 'old', createdAt: '2024-01-01T10:00:01Z' })
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'old',
+				'a1'
+			]);
+		});
+
+		test('appending a page skips the attachments already loaded', () => {
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' })],
+					2,
+					'c'
+				);
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' }), buildAttachment({ id: 'a2' })],
+					2,
+					undefined
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'a1',
+				'a2'
+			]);
+		});
+
 		test('leaves out an attachment older than the loaded ones while older pages remain', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			useStore
 				.getState()
 				.appendMediaGalleryPage(

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { parseIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { findLast } from 'lodash';
 
 import useStore from '../../store/Store';
 import { FasteningAction, MessageType } from '../../types/store/ChatsRegistryTypes';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
-import { parseIsoMicros } from '../../utils/isoMicros';
 
 /**
  * Resolves the room's sidebar last message when it is the target of an

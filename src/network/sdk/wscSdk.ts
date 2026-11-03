@@ -6,7 +6,6 @@
 
 import { createHttpClient, createWscClient } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import type {
-	HttpClient,
 	StoreBridge,
 	StoreMarker,
 	StoreMessage,
@@ -24,22 +23,10 @@ import type {
 } from '../../types/store/ChatsRegistryTypes';
 import type { Version } from '../../types/store/SessionTypes';
 import { BASE_PATH } from '../../utils/FetchUtils';
-import { parseIsoMicros } from '../../utils/isoMicros';
 
 // The SDK emits structural store types (string-literal unions with the same
 // wire values as the store enums); the enums are nominal, hence the single
 // cast at this boundary.
-let bannerWritesSuppressed = false;
-
-export function withoutPinnedBannerWrites<T>(run: () => T): T {
-	bannerWritesSuppressed = true;
-	try {
-		return run();
-	} finally {
-		bannerWritesSuppressed = false;
-	}
-}
-
 const bridge: StoreBridge = {
 	// Fastenings never qualify as marker targets: the SDK skips them by type
 	getRoomMessages: (roomId): ReadonlyArray<StoreMessage> =>
@@ -63,25 +50,16 @@ const bridge: StoreBridge = {
 		useStore.getState().addFastening(fastenings as Array<MessageFastening>),
 	setLastMessage: (roomId, message: StoreMessage): void =>
 		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage),
-	setPinnedMessage: (roomId, message: StoreTextMessage): void => {
-		if (!bannerWritesSuppressed) {
-			useStore.getState().setPinnedMessage(roomId, message as TextMessage);
-		}
-	},
-	removePinnedMessage: (roomId): void => {
-		if (!bannerWritesSuppressed) {
-			useStore.getState().removePinnedMessage(roomId);
-		}
-	},
+	setPinnedMessage: (roomId, message: StoreTextMessage): void =>
+		useStore.getState().setPinnedMessage(roomId, message as TextMessage),
+	removePinnedMessage: (roomId): void => useStore.getState().removePinnedMessage(roomId),
 	setIsWriting: (roomId, userId, writing): void =>
 		useStore.getState().setIsWriting(roomId, userId, writing),
 	setSearchResults: (roomId, results: Array<StoreTextMessage>): void =>
 		useStore.getState().setSearchResults(roomId, results as Array<TextMessage>)
 };
 
-const PIN_ENDPOINT = /^\/?rooms\/([^/]+)\/pin$/;
-
-const baseHttp = createHttpClient({
+const http = createHttpClient({
 	fetch: (url, init) => globalThis.fetch(url, init),
 	baseUrl: BASE_PATH,
 	versionStore: {
@@ -97,21 +75,5 @@ const baseHttp = createHttpClient({
 	// Surfaces protocol diagnostics (e.g. the 422 version renegotiation)
 	logger: { warn: console.warn, error: console.error }
 });
-
-// GET /rooms/{id}/pin carries the pin time (`pinnedAt`, the one MessagePinned events carry): it versions the banner
-const http: HttpClient = {
-	request: async <T>(...args: Parameters<HttpClient['request']>): Promise<T> => {
-		const response = await baseHttp.request<T>(...args);
-		const [endpoint, method] = args;
-		const match = PIN_ENDPOINT.exec(endpoint);
-		if (match && method === 'GET' && Array.isArray(response)) {
-			const roomId = decodeURIComponent(match[1]);
-			response.forEach((pin: { pinnedAt?: string }) =>
-				useStore.getState().setPinTime(roomId, parseIsoMicros(pin.pinnedAt))
-			);
-		}
-		return response;
-	}
-};
 
 export const wscSdk = createWscClient({ http, bridge });

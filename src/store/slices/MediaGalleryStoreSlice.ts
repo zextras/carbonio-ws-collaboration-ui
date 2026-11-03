@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { parseIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { produce } from 'immer';
 import { StateCreator } from 'zustand';
 
@@ -19,7 +20,7 @@ import {
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { attachmentMatchesFilter, getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
-import { parseIsoMicros } from '../../utils/isoMicros';
+import { getIsWscPure } from '../selectors/SessionSelectors';
 
 const emptyBucket = (filter: MediaGalleryFilter): MediaGalleryBucket => ({
 	filter,
@@ -68,11 +69,20 @@ const isNewerInGallery = (candidate: Attachment, other: Attachment): boolean => 
 	return candidate.id > other.id;
 };
 
-const prependToBucket = (bucket: MediaGalleryBucket, attachment: Attachment): void => {
+const prependToBucket = (
+	bucket: MediaGalleryBucket,
+	attachment: Attachment,
+	isWscPure: boolean
+): void => {
 	if (!bucket.isInitialized) return;
 	if (bucket.filter.sortBy !== 'created_at' || bucket.filter.order !== 'desc') return;
 	if (!attachmentMatchesFilter(attachment, bucket.filter)) return;
 	if (bucket.attachments.some((a) => a.id === attachment.id)) return;
+	if (!isWscPure) {
+		bucket.attachments.unshift(attachment);
+		if (bucket.total !== undefined) bucket.total += 1;
+		return;
+	}
 	const index = bucket.attachments.findIndex((a) => isNewerInGallery(attachment, a));
 	// Older than everything loaded while pages remain: the next page brings it
 	if (index !== -1 || !bucket.hasMore) {
@@ -113,7 +123,8 @@ export const useMediaGalleryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const bucket = ensureBucket(draft, roomId, filter);
-				bucket.attachments.push(...attachments);
+				const known = new Set(bucket.attachments.map((a) => a.id));
+				bucket.attachments.push(...attachments.filter((a) => !known.has(a.id)));
 				if (total !== undefined) bucket.total = total;
 				bucket.nextCursor = nextCursor;
 				bucket.hasMore = nextCursor !== undefined;
@@ -152,7 +163,10 @@ export const useMediaGalleryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const state = draft.mediaGallery[roomId];
 				if (!state) return;
-				Object.values(state.buckets).forEach((bucket) => prependToBucket(bucket, attachment));
+				const isWscPure = getIsWscPure(draft);
+				Object.values(state.buckets).forEach((bucket) =>
+					prependToBucket(bucket, attachment, isWscPure)
+				);
 			}),
 			false,
 			'MG/PREPEND_ATTACHMENT'

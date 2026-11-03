@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { parseIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+
 import {
 	isPreviewSupported,
 	getPreviewType,
@@ -23,7 +25,6 @@ import {
 	messageToGalleryAttachment,
 	AttachmentType
 } from './attachmentUtils';
-import { parseIsoMicros } from './isoMicros';
 import { createMockTextMessage } from '../tests/createMock';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';

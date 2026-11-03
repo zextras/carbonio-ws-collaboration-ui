@@ -69,6 +69,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 
 		test('A message dated before the last ones lands at its sorted position', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, newTextMessage]);
 			useStore.getState().newMessage(textMessage1);
 
@@ -77,6 +78,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 
 		test('Messages with the same date are ordered by id', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-ties';
 			const mk = (id: string): TextMessage => createMockTextMessage({ id, roomId, date: date1 });
 			useStore.getState().newMessage(mk('b'));
@@ -88,6 +90,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 
 		test('A promoted placeholder moves to the position of its stored date', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-promote';
 			const placeholder = createMockTextMessage({
 				id: 'temp',
@@ -95,17 +98,20 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				date: date3,
 				read: MarkerStatus.PENDING
 			});
-			useStore.getState().updateHistory(roomId, [textMessage0, placeholder]);
+			const between = createMockTextMessage({ id: 'between', roomId, date: date2 + 1 });
+			useStore.getState().updateHistory(roomId, [textMessage0, between, placeholder]);
 			useStore.getState().newMessage({ ...textMessage1, id: 'temp', roomId });
 
 			const { messages } = useStore.getState().chatsRegistry[roomId];
 			expect(messages.map((message) => [message.id, message.date])).toEqual([
 				['message0', date1],
-				['temp', date2]
+				['temp', date2],
+				['between', date2 + 1]
 			]);
 		});
 
 		test('A new own message gets its read status from the current markers', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-own-read';
 			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 			useStore.getState().addRooms([
@@ -133,6 +139,51 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect((messages[1] as TextMessage).read).toBe(MarkerStatus.UNREAD);
 		});
 
+		test('A pending own placeholder keeps its pending status and stays last', () => {
+			const roomId = 'room-pending';
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().updateHistory(roomId, [textMessage0]);
+			useStore.getState().newMessage(
+				createMockTextMessage({
+					id: 'pending',
+					roomId,
+					from: 'me',
+					date: date1 - 1000,
+					read: MarkerStatus.PENDING
+				})
+			);
+
+			const { messages } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['message0', 'pending']);
+			expect((messages[1] as TextMessage).read).toBe(MarkerStatus.PENDING);
+		});
+
+		test('A new real message lands before a trailing pending placeholder', () => {
+			const roomId = 'room-pending-tail';
+			useStore.getState().setApiVersion('2.0.0');
+			useStore
+				.getState()
+				.newMessage(
+					createMockTextMessage({ id: 'pending', roomId, date: date3, read: MarkerStatus.PENDING })
+				);
+			useStore.getState().newMessage(createMockTextMessage({ id: 'real', roomId, date: date1 }));
+
+			const { messages } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['real', 'pending']);
+		});
+
+		test('On 1.6.x a live message is appended in arrival order whatever its date', () => {
+			const roomId = 'room-legacy-order';
+			useStore.getState().setApiVersion('1.6.14');
+			useStore.getState().updateHistory(roomId, [textMessage0, textMessage1]);
+			const skewed = createMockTextMessage({ id: 'skewed', roomId, date: date1 - 1000 });
+			useStore.getState().newMessage(skewed);
+
+			const { messages } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['message0', 'message1', 'skewed']);
+		});
+
 		test('Arrive an configuration message as first', () => {
 			const newMessage = createMockConfigurationMessage({ operation: OperationType.MEMBER_ADDED });
 			useStore.getState().newMessage(newMessage);
@@ -153,6 +204,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 
 		test('An older inbox row never replaces a newer last message, the same id always does', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-inbox-order';
 			const newer = createMockTextMessage({ id: 'b', roomId, date: date2 });
 			useStore.getState().setInboxMessages([newer]);
@@ -170,6 +222,33 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				.getState()
 				.setInboxMessages([createMockTextMessage({ id: 'c', roomId, date: date2 })]);
 			expect(useStore.getState().chatsRegistry[roomId].lastMessage?.id).toBe('c');
+		});
+
+		test('On 1.6.x the inbox row always replaces the last message and sets the inbox id', () => {
+			const roomId = 'room-legacy-inbox';
+			useStore.getState().setApiVersion('1.6.14');
+			useStore
+				.getState()
+				.setInboxMessages([createMockTextMessage({ id: 'b', roomId, date: date2 })]);
+			const older = createMockTextMessage({ id: 'a', roomId, date: date1 });
+			useStore.getState().setInboxMessages([older]);
+
+			const registry = useStore.getState().chatsRegistry[roomId];
+			expect(registry.lastMessage).toBe(older);
+			expect(registry.inboxMessageId).toBe('a');
+		});
+
+		test('On 2.0 the inbox id follows the last message it replaced', () => {
+			const roomId = 'room-inbox-id';
+			useStore.getState().setApiVersion('2.0.0');
+			useStore
+				.getState()
+				.setInboxMessages([createMockTextMessage({ id: 'b', roomId, date: date2 })]);
+			useStore
+				.getState()
+				.setInboxMessages([createMockTextMessage({ id: 'a', roomId, date: date1 })]);
+
+			expect(useStore.getState().chatsRegistry[roomId].inboxMessageId).toBe('b');
 		});
 
 		test('Arrive an inbox text message after a history request', () => {
@@ -220,6 +299,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 
 		test('A page merges with the loaded rows by (date, id)', () => {
+			useStore.getState().setApiVersion('2.0.0');
 			const roomId = 'room-merge';
 			const mk = (id: string, date: number): TextMessage =>
 				createMockTextMessage({ id, roomId, date });

@@ -338,18 +338,6 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/REMOVE_PINNED_MESSAGE'
 		);
 	},
-	setPinTime: (roomId: string, time: number): void => {
-		set(
-			produce((draft: RootStore) => {
-				const conversation = initActiveConversation(draft, roomId);
-				if (time > (conversation.pinTime ?? 0)) {
-					conversation.pinTime = time;
-				}
-			}),
-			false,
-			'AC/SET_PIN_TIME'
-		);
-	},
 	setSelectedPinnedMessage: (roomId: string, stanzaId: string | undefined): void => {
 		set(
 			produce((draft: RootStore) => {

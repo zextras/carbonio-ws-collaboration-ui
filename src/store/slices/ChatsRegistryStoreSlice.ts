@@ -61,9 +61,16 @@ const compareMessageKeys = (
 	return a.id < b.id ? -1 : 1;
 };
 
+const isPendingRow = (message: Message): boolean =>
+	message.type === MessageType.TEXT_MSG && message.read === MarkerStatus.PENDING;
+
 const sortedInsertIndex = (messages: Message[], message: Message): number => {
 	let index = messages.length;
-	while (index > 0 && compareMessageKeys(messages[index - 1], message) > 0) {
+	if (isPendingRow(message)) return index;
+	while (
+		index > 0 &&
+		(isPendingRow(messages[index - 1]) || compareMessageKeys(messages[index - 1], message) > 0)
+	) {
 		index -= 1;
 	}
 	return index;
@@ -160,8 +167,20 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const { messages, markers } = initRoomChatsRegistry(draft, message.roomId);
+				if (!getIsWscPure(draft)) {
+					const alreadyExists = find(messages, { id: message.id });
+					// Replace message if it already exists (placeholder message)
+					if (alreadyExists) {
+						Object.assign(alreadyExists, message);
+					} else {
+						messages.push(message);
+					}
+					return;
+				}
 				const row: Message =
-					message.type === MessageType.TEXT_MSG && isMyId(message.from)
+					message.type === MessageType.TEXT_MSG &&
+					message.read !== MarkerStatus.PENDING &&
+					isMyId(message.from)
 						? { ...message, read: calcReads(message.date, message.roomId, markers) }
 						: message;
 				const existingIndex = findIndex(messages, { id: message.id });
@@ -181,21 +200,25 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
+				const isWscPure = getIsWscPure(draft);
 				inbox.forEach((message) => {
 					const registry = initRoomChatsRegistry(draft, message.roomId);
-					registry.inboxMessageId = message.id;
 					if (
-						message.type === MessageType.TEXT_MSG ||
-						message.type === MessageType.CONFIGURATION_MSG
+						message.type !== MessageType.TEXT_MSG &&
+						message.type !== MessageType.CONFIGURATION_MSG
 					) {
-						const { lastMessage } = registry;
-						if (
-							!lastMessage ||
-							lastMessage.id === message.id ||
-							compareMessageKeys(message, lastMessage) > 0
-						) {
-							registry.lastMessage = message;
-						}
+						registry.inboxMessageId = message.id;
+						return;
+					}
+					const { lastMessage } = registry;
+					if (
+						!isWscPure ||
+						!lastMessage ||
+						lastMessage.id === message.id ||
+						compareMessageKeys(message, lastMessage) > 0
+					) {
+						registry.inboxMessageId = message.id;
+						registry.lastMessage = message;
 					}
 				});
 			}),
