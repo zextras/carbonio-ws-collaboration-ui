@@ -33,6 +33,13 @@ beforeEach(() => {
 	store.addMeetings([meeting]);
 });
 describe('MeetingRecordingStartedEventHandler tests', () => {
+	test('The stored startedAt of the event is the recording start', () => {
+		meetingRecordingStartedEventHandler({ ...event, startedAt: '2022-03-03T10:00:00.123456Z' });
+		expect(useStore.getState().meetings[meeting.id].recStartedAt).toBe(
+			'2022-03-03T10:00:00.123456Z'
+		);
+	});
+
 	test('Meeting starting information are saved into store', () => {
 		meetingRecordingStartedEventHandler(event);
 		const state = useStore.getState();

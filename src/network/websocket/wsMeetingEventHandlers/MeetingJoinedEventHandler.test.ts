@@ -63,6 +63,18 @@ beforeEach(() => {
 	store.addMeetings([meeting, groupMeeting, meetingWith10Participants]);
 });
 describe('meetingJoinedEventHandler tests', () => {
+	test('The stored joinedAt of the event is the participant join time', () => {
+		meetingJoinedEventHandler({ ...event, joinedAt: '2022-02-02T10:00:00.123456Z' });
+		const participant = useStore.getState().meetings[meeting.id].participants[event.userId];
+		expect(participant.joinedAt).toBe('2022-02-02T10:00:00.123456Z');
+	});
+
+	test('A 1.6.x event without joinedAt falls back to its sentDate', () => {
+		meetingJoinedEventHandler({ ...event, joinedAt: undefined });
+		const participant = useStore.getState().meetings[meeting.id].participants[event.userId];
+		expect(participant.joinedAt).toBe(event.sentDate);
+	});
+
 	test('Joined participant information are added into store', () => {
 		meetingJoinedEventHandler(event);
 		const meet = useStore.getState().meetings[meeting.id];

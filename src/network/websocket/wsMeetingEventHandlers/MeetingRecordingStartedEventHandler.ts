@@ -10,7 +10,7 @@ import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingRecordingStartedEventHandler = (event: MeetingRecordingStartedEvent): void => {
 	const state = useStore.getState();
-	state.startRecording(event.meetingId, event.sentDate, event.userId);
+	state.startRecording(event.meetingId, event.startedAt ?? event.sentDate ?? '', event.userId);
 	if (isMeetingActive(event.meetingId)) {
 		sendCustomEvent({ name: EventName.MEETING_RECORDING_STARTED, data: event });
 	}
