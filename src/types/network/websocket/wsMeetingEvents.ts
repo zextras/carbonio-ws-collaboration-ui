@@ -49,6 +49,7 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 	startedAt: string;
 	// WSC 2.0.0: id of the system line, one-to-one rooms only
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
@@ -66,6 +67,8 @@ export type MeetingStoppedEvent = BasicMeetingEvent & {
 	// WSC 2.0.0: author and id of the system line, one-to-one rooms only
 	endedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
+	durationSec?: number;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {
@@ -169,6 +172,7 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	userId: string;
 	// WSC 2.0.0: id of the system line, one-to-one rooms only
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type MeetingParticipantUplinkStatusChangedEvent = BasicMeetingEvent & {

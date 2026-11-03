@@ -23,14 +23,9 @@ export const meetingStoppedEventHandler = (event: MeetingStoppedEvent): void => 
 		sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 	}
 
-	// `startedAt` is read before stopMeeting clears it; the v2 event carries the
-	// line's author (`endedBy`), v1 lands the line from XMPP
+	// The v2 event carries the line's author (`endedBy`) and the call duration; v1 lands the line from XMPP
 	if (meeting && isWscPure()) {
-		const row = wscSdk.handleMeetingStopped(
-			event as WireMeetingStoppedEvent,
-			meeting.roomId,
-			meeting.startedAt
-		);
+		const row = wscSdk.handleMeetingStopped(event as WireMeetingStoppedEvent, meeting.roomId);
 		if (row) {
 			notifyConfigRow(row);
 		}

@@ -184,7 +184,7 @@ describe('wsConversationEventHandler tests', () => {
 				isOwner: false,
 				addedBy,
 				systemEventId,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomMemberAddedEvent;
 		}
 
@@ -204,7 +204,7 @@ describe('wsConversationEventHandler tests', () => {
 				userId,
 				removedBy,
 				systemEventId,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomMemberRemovedEvent;
 		}
 
@@ -278,8 +278,7 @@ describe('wsConversationEventHandler tests', () => {
 				name: newName,
 				updatedBy: otherUser,
 				systemEventId: 'sys-name',
-				systemEventCreatedAt: SENT_DATE,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry[room.id];
@@ -302,8 +301,7 @@ describe('wsConversationEventHandler tests', () => {
 				description: newDescription,
 				updatedBy: otherUser,
 				systemEventId: 'sys-description',
-				systemEventCreatedAt: SENT_DATE,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomDescriptionChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry[room.id];
@@ -325,8 +323,7 @@ describe('wsConversationEventHandler tests', () => {
 				description: '',
 				updatedBy: otherUser,
 				systemEventId: 'sys-description-cleared',
-				systemEventCreatedAt: SENT_DATE,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomDescriptionChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry[room.id];
@@ -344,8 +341,7 @@ describe('wsConversationEventHandler tests', () => {
 				name: newName,
 				updatedBy: sessionUser.id,
 				systemEventId: 'sys-own-name',
-				systemEventCreatedAt: SENT_DATE,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-own-name'];
@@ -379,7 +375,7 @@ describe('wsConversationEventHandler tests', () => {
 				updatedAt: SENT_DATE,
 				updatedBy: otherUser,
 				systemEventId: 'sys-picture',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomPictureChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-picture'];
@@ -397,7 +393,7 @@ describe('wsConversationEventHandler tests', () => {
 				roomId: 'room-no-picture',
 				deletedBy: otherUser,
 				systemEventId: 'sys-no-picture',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomPictureDeletedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-no-picture'];
@@ -426,7 +422,7 @@ describe('wsConversationEventHandler tests', () => {
 				clearedAt: SENT_DATE,
 				clearedBy: otherUser,
 				systemEventId: 'sys-clear',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomHistoryClearedEvent);
 
 			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
@@ -459,8 +455,7 @@ describe('wsConversationEventHandler tests', () => {
 				name: newName,
 				updatedBy: otherUser,
 				systemEventId: 'sys-v1-name',
-				systemEventCreatedAt: SENT_DATE,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomNameChangedEvent);
 
 			expect(useStore.getState().chatsRegistry['room-v1-name']).toBeUndefined();

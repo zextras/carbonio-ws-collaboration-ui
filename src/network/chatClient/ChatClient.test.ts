@@ -350,7 +350,7 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
-			'/services/chats/rooms/room-c/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-old&limit=50'
+			'/services/chats/rooms/room-c/timeline?before=2026-08-01T09%3A00%3A00.000000Z&beforeId=msg-old&limit=50'
 		);
 	});
 
@@ -374,7 +374,7 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
-			'/services/chats/rooms/room-pp/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-real&limit=50'
+			'/services/chats/rooms/room-pp/timeline?before=2026-08-01T09%3A00%3A00.000000Z&beforeId=msg-real&limit=50'
 		);
 	});
 
@@ -447,7 +447,7 @@ describe('chatClient façade', () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(
-			'/services/chats/rooms/room-skew/timeline?before=2026-08-01T09%3A00%3A00.000Z&beforeId=msg-anchor&limit=50'
+			'/services/chats/rooms/room-skew/timeline?before=2026-08-01T09%3A00%3A00.000000Z&beforeId=msg-anchor&limit=50'
 		);
 	});
 
@@ -855,7 +855,7 @@ describe('chatClient façade', () => {
 		});
 	});
 
-	it('reacts to a message through the SDK: POST with the percent-encoded emoji', async () => {
+	it('reacts to a message through the SDK: PUT with the emoji in the body', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		mockJsonResponse(undefined);
 
@@ -864,13 +864,14 @@ describe('chatClient façade', () => {
 
 		const { calls } = (global.fetch as Mock).mock;
 		expect(calls).toHaveLength(1);
-		expect(calls[0]?.[0]).toBe(
-			`/services/chats/rooms/room-rx/messages/msg-rx/reactions/${encodeURIComponent('👨‍👩‍👧')}`
-		);
-		expect(calls[0]?.[1]).toMatchObject({ method: 'POST' });
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-rx/messages/msg-rx/reaction');
+		expect(calls[0]?.[1]).toMatchObject({
+			method: 'PUT',
+			body: JSON.stringify({ reaction: '👨‍👩‍👧' })
+		});
 	});
 
-	it('removes a reaction by resolving my current emoji from the store (v1 empty-value contract)', async () => {
+	it('removes my single reaction without naming the emoji (v1 empty-value contract)', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		// My active reaction lands from its own echo, the only confirmation path
@@ -890,9 +891,7 @@ describe('chatClient façade', () => {
 
 		const { calls } = (global.fetch as Mock).mock;
 		expect(calls).toHaveLength(1);
-		expect(calls[0]?.[0]).toBe(
-			`/services/chats/rooms/room-rm/messages/msg-rm/reactions/${encodeURIComponent('👍')}`
-		);
+		expect(calls[0]?.[0]).toBe('/services/chats/rooms/room-rm/messages/msg-rm/reaction');
 		expect(calls[0]?.[1]).toMatchObject({ method: 'DELETE' });
 	});
 

@@ -199,13 +199,20 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// for removals — hence the write order), browser notification
 			// (self-guarded against empty values), focus reset. No unread bump:
 			// v1 parity, reactions never counted (plan §5.14). The SDK dates the
-			// fastening with the event's sentDate.
+			// fastening with the stored time of the event and returns undefined for
+			// a duplicate or stale one: no effect at all then.
 			const fastening = wscSdk.handleReactionChanged(event);
-			if (!isMyId(event.userId)) {
+			if (fastening && !isMyId(event.userId)) {
 				displayReactionBrowserNotification(fastening as MessageFastening);
 				useStore
 					.getState()
-					.setNewReaction(event.roomId, event.messageId, fastening.value ?? '', event.userId);
+					.setNewReaction(
+						event.roomId,
+						event.messageId,
+						fastening.value ?? '',
+						event.userId,
+						event.operation === 'updated' ? event.previousReaction : undefined
+					);
 				if (useStore.getState().activeConversations[event.roomId]?.inputHasFocus) {
 					setTimeout(() => {
 						useStore.getState().unsetNewReactions(event.roomId);
