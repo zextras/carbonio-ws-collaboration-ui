@@ -19,6 +19,7 @@ import {
 } from '../../types/store/MediaGalleryTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { attachmentMatchesFilter, getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
+import { parseIsoMicros } from '../../utils/isoMicros';
 
 const emptyBucket = (filter: MediaGalleryFilter): MediaGalleryBucket => ({
 	filter,
@@ -60,12 +61,23 @@ const removeFromBucket = (bucket: MediaGalleryBucket, attachmentId: string): voi
 	if (bucket.total !== undefined && bucket.total > 0) bucket.total -= 1;
 };
 
+const isNewerInGallery = (candidate: Attachment, other: Attachment): boolean => {
+	const candidateTime = parseIsoMicros(candidate.createdAt);
+	const otherTime = parseIsoMicros(other.createdAt);
+	if (candidateTime !== otherTime) return candidateTime > otherTime;
+	return candidate.id > other.id;
+};
+
 const prependToBucket = (bucket: MediaGalleryBucket, attachment: Attachment): void => {
 	if (!bucket.isInitialized) return;
 	if (bucket.filter.sortBy !== 'created_at' || bucket.filter.order !== 'desc') return;
 	if (!attachmentMatchesFilter(attachment, bucket.filter)) return;
 	if (bucket.attachments.some((a) => a.id === attachment.id)) return;
-	bucket.attachments.unshift(attachment);
+	const index = bucket.attachments.findIndex((a) => isNewerInGallery(attachment, a));
+	// Older than everything loaded while pages remain: the next page brings it
+	if (index !== -1 || !bucket.hasMore) {
+		bucket.attachments.splice(index === -1 ? bucket.attachments.length : index, 0, attachment);
+	}
 	if (bucket.total !== undefined) bucket.total += 1;
 };
 

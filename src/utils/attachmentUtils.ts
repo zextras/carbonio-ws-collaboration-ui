@@ -10,6 +10,7 @@ import {
 	getPdfThumbnailURL,
 	getURLAttachment
 } from '../network';
+import { toIsoMicros } from './isoMicros';
 import { Attachment, MimeTypeCategory } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { MediaGalleryFilter } from '../types/store/MediaGalleryTypes';
@@ -396,7 +397,7 @@ export const messageToGalleryAttachment = (message: TextMessage): Attachment | u
 		size: Number(message.attachment.size) || 0,
 		userId: message.from,
 		roomId: message.roomId,
-		createdAt: new Date(message.date).toISOString(),
+		createdAt: toIsoMicros(message.date),
 		messageId: message.id,
 		stanzaId: message.stanzaId
 	};

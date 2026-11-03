@@ -39,6 +39,8 @@ import { wscSdk } from '../sdk/wscSdk';
 
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const AUG_FIRST_EARLY_MORNING = '2026-08-01T09:00:00Z';
+const KNOWN_ROOM = 'room-known';
+const MARKER_ROOM = 'room-marker';
 const EDIT_TIME = '2026-08-01T11:00:00Z';
 const REACTION_TIME_1 = '2026-08-01T10:06:00Z';
 const REACTION_TIME_2 = '2026-08-01T10:07:00Z';
@@ -171,6 +173,63 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		expect(registry?.unread).toBe(1);
 		expect(received).toEqual([expect.objectContaining({ id: 'msg-in-1' })]);
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('does not count a message a timeline page already loaded', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const wire = buildWireMessage({
+			id: 'msg-known',
+			roomId: KNOWN_ROOM,
+			senderId: 'user-2',
+			createdAt: AUG_FIRST_LATE_MORNING
+		});
+		useStore.getState().updateHistory(KNOWN_ROOM, [
+			createMockTextMessage({
+				id: 'msg-known',
+				roomId: KNOWN_ROOM,
+				from: 'user-2',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter(buildWsMessageReceivedEvent(wire));
+
+		expect(useStore.getState().chatsRegistry[KNOWN_ROOM]?.unread ?? 0).toBe(0);
+	});
+
+	it('does not count a message older than the own read marker', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateReadStatus(MARKER_ROOM, [
+			{
+				from: 'me',
+				messageId: 'unknown',
+				markerDate: Date.parse(AUG_FIRST_LATE_MORNING),
+				type: 'displayed'
+			}
+		]);
+
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-before',
+					roomId: MARKER_ROOM,
+					senderId: 'user-2',
+					createdAt: AUG_FIRST_EARLY_MORNING
+				})
+			)
+		);
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-after',
+					roomId: MARKER_ROOM,
+					senderId: 'user-2',
+					createdAt: '2026-08-01T10:00:01Z'
+				})
+			)
+		);
+
+		expect(useStore.getState().chatsRegistry[MARKER_ROOM]?.unread).toBe(1);
 	});
 
 	it('never bumps the unread counter for an own message from another session', () => {
@@ -496,6 +555,70 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 		expect(registry?.lastMessage).toMatchObject({ edited: true, text: editedText });
 		expect(registry?.unread ?? 0).toBe(0);
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('an older edit never overwrites the sidebar preview of a newer one', () => {
+		const target = createMockTextMessage({
+			id: 'msg-two',
+			stanzaId: 'msg-two',
+			roomId: 'room-e2',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-e2', [target]);
+		useStore.getState().setLastMessage('room-e2', target);
+
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-two',
+				roomId: 'room-e2',
+				text: 'second',
+				editedAt: '2026-08-01T11:00:02Z'
+			})
+		);
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-two',
+				roomId: 'room-e2',
+				text: 'first',
+				editedAt: '2026-08-01T11:00:01Z'
+			})
+		);
+
+		expect(useStore.getState().chatsRegistry['room-e2']?.lastMessage).toMatchObject({
+			text: 'second'
+		});
+	});
+
+	it('a delete is terminal for the sidebar preview: a later-arriving edit does not revive it', () => {
+		const target = createMockTextMessage({
+			id: 'msg-del',
+			stanzaId: 'msg-del',
+			roomId: 'room-e3',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-e3', [target]);
+		useStore.getState().setLastMessage('room-e3', target);
+
+		wsChatEventsRouter(
+			buildWsMessageDeletedEvent({
+				messageId: 'msg-del',
+				roomId: 'room-e3',
+				deletedAt: '2026-08-01T11:00:01Z'
+			})
+		);
+		const afterDelete = useStore.getState().chatsRegistry['room-e3']?.lastMessage;
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-del',
+				roomId: 'room-e3',
+				text: 'late edit',
+				editedAt: EDIT_TIME
+			})
+		);
+
+		expect(useStore.getState().chatsRegistry['room-e3']?.lastMessage).toBe(afterDelete);
 	});
 
 	it('leaves the sidebar untouched when the edit targets an older message', () => {
@@ -1059,6 +1182,69 @@ describe('wsChatEventsRouter - MessageUnpinned', () => {
 		);
 
 		expect(useStore.getState().chatsRegistry['room-upown']?.unread ?? 0).toBe(0);
+	});
+});
+
+describe('wsChatEventsRouter - pin banner versioning', () => {
+	const roomId = 'room-pv';
+
+	function seedTarget(id: string): void {
+		useStore.getState().updateHistory(roomId, [
+			createMockTextMessage({
+				id,
+				stanzaId: id,
+				roomId,
+				date: Date.parse(AUG_FIRST_EARLY_MORNING)
+			})
+		]);
+	}
+
+	it('applies a pin newer than the last one and ignores an older pin or unpin for the banner', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		seedTarget('msg-a');
+		seedTarget('msg-b');
+		const pin = (messageId: string, systemEventCreatedAt: string): void =>
+			wsChatEventsRouter(
+				buildWsMessagePinnedEvent({
+					roomId,
+					messageId,
+					pinnedBy: 'user-2',
+					timestamp: systemEventCreatedAt,
+					systemEventCreatedAt
+				})
+			);
+
+		pin('msg-b', '2026-08-01T10:00:02.000000Z');
+		pin('msg-a', '2026-08-01T10:00:01.000000Z');
+		expect(useStore.getState().activeConversations[roomId]?.messagePinned?.id).toBe('msg-b');
+
+		wsChatEventsRouter(
+			buildWsMessageUnpinnedEvent({
+				roomId,
+				messageId: 'msg-a',
+				unpinnedBy: 'user-2',
+				timestamp: '2026-08-01T10:00:01.500000Z',
+				systemEventCreatedAt: '2026-08-01T10:00:01.500000Z'
+			})
+		);
+		expect(useStore.getState().activeConversations[roomId]?.messagePinned?.id).toBe('msg-b');
+		const lines = useStore
+			.getState()
+			.chatsRegistry[
+				roomId
+			]?.messages.filter((message) => message.type === MessageType.CONFIGURATION_MSG);
+		expect(lines).toHaveLength(3);
+
+		wsChatEventsRouter(
+			buildWsMessageUnpinnedEvent({
+				roomId,
+				messageId: 'msg-b',
+				unpinnedBy: 'user-2',
+				timestamp: '2026-08-01T10:00:03.000000Z',
+				systemEventCreatedAt: '2026-08-01T10:00:03.000000Z'
+			})
+		);
+		expect(useStore.getState().activeConversations[roomId]?.messagePinned).toBeUndefined();
 	});
 });
 

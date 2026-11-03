@@ -9,6 +9,7 @@ import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collab
 import { notifyConfigRow } from './configRowEffects';
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { getMyLastMarkerOfRoom } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
 import type {
 	WsMessageForwardedEvent,
@@ -21,11 +22,16 @@ import type { WsEvent } from '../../types/network/websocket/wsEvents';
 import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
+import { parseIsoMicros } from '../../utils/isoMicros';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
-import { wscSdk } from '../sdk/wscSdk';
+import { wscSdk, withoutPinnedBannerWrites } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
+
+function isMessageInStore(roomId: string, messageId: string): boolean {
+	return !!useStore.getState().chatsRegistry[roomId]?.messages.some((row) => row.id === messageId);
+}
 
 /**
  * The v1 receiving effects for another sender's message: unread counter,
@@ -33,11 +39,21 @@ import displayReactionBrowserNotification from '../xmpp/utility/displayReactionB
  * and MESSAGE_FORWARDED — v1 landed forwards through the same plain message
  * handler, effects included.
  */
-function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: string): void {
+function notifyOthersMessage(
+	message: StoreMessage,
+	senderId: string,
+	roomId: string,
+	alreadyInStore: boolean
+): void {
 	if (isMyId(senderId)) {
 		return;
 	}
-	useStore.getState().incrementUnreadCount(roomId, 1);
+	// A message a timeline page already brought, or one older than the own read
+	// marker, is part of the unread count the inbox/markers established
+	const ownMarker = getMyLastMarkerOfRoom(useStore.getState(), roomId);
+	if (!alreadyInStore && (!ownMarker || message.date > ownMarker.markerDate)) {
+		useStore.getState().incrementUnreadCount(roomId, 1);
+	}
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 	displayMessageBrowserNotification(message as TextMessage);
 }
@@ -66,10 +82,11 @@ function prependGalleryAttachment(message: StoreMessage): void {
  * fallback): an upload's echo prepends the real file to the gallery.
  */
 function routeMessageReceived(event: WsMessageReceivedEvent): void {
+	const alreadyInStore = isMessageInStore(event.message.roomId, event.message.id);
 	const message = wscSdk.handleMessageReceived(event);
 	prependGalleryAttachment(message);
 	// Me/others split like the v1 handler
-	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId, alreadyInStore);
 }
 
 /**
@@ -79,9 +96,25 @@ function routeMessageReceived(event: WsMessageReceivedEvent): void {
  * nothing was optimistic.
  */
 function routeMessageForwarded(event: WsMessageForwardedEvent): void {
+	const alreadyInStore = isMessageInStore(event.message.roomId, event.message.id);
 	const message = wscSdk.handleMessageForwarded(event);
 	prependGalleryAttachment(message);
-	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId, alreadyInStore);
+}
+
+/**
+ * The banner follows the stored pin time: a pin/unpin older than (or equal to)
+ * the last one applied to the room's banner is a stale or duplicate state and
+ * leaves the banner alone; the system line still lands.
+ */
+function claimPinTime(roomId: string, time: string): boolean {
+	const eventTime = parseIsoMicros(time);
+	const { activeConversations, setPinTime } = useStore.getState();
+	if (eventTime <= (activeConversations[roomId]?.pinTime ?? 0)) {
+		return false;
+	}
+	setPinTime(roomId, eventTime);
+	return true;
 }
 
 /**
@@ -94,7 +127,10 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
 		| StoreTextMessage
 		| undefined;
-	const row = wscSdk.handleMessagePinned(event, resolved);
+	const applyToBanner = claimPinTime(event.roomId, event.systemEventCreatedAt ?? event.timestamp);
+	const row = applyToBanner
+		? wscSdk.handleMessagePinned(event, resolved)
+		: withoutPinnedBannerWrites(() => wscSdk.handleMessagePinned(event, resolved));
 	notifyConfigRow(row);
 }
 
@@ -104,8 +140,13 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
  * scroll-to-pin selection is cleared like the v1 handler did.
  */
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
-	const row = wscSdk.handleMessageUnpinned(event);
-	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
+	const applyToBanner = claimPinTime(event.roomId, event.systemEventCreatedAt ?? event.timestamp);
+	const row = applyToBanner
+		? wscSdk.handleMessageUnpinned(event)
+		: withoutPinnedBannerWrites(() => wscSdk.handleMessageUnpinned(event));
+	if (applyToBanner) {
+		useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
+	}
 	notifyConfigRow(row);
 }
 
@@ -176,7 +217,9 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// actually targets it.
 			wscSdk.handleMessageEdited(
 				event,
-				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
+				findFastenedLastMessage(event.roomId, event.messageId, event.editedAt) as
+					| StoreTextMessage
+					| undefined
 			);
 			refreshPinnedBannerOnEdit(event.roomId, event.messageId, event.text);
 			return;

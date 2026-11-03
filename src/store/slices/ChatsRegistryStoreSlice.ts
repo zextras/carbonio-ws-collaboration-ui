@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
+import { find, findIndex, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
@@ -51,6 +51,23 @@ function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => n
 
 	return result;
 }
+
+const compareMessageKeys = (
+	a: Pick<Message, 'date' | 'id'>,
+	b: Pick<Message, 'date' | 'id'>
+): number => {
+	if (a.date !== b.date) return a.date - b.date;
+	if (a.id === b.id) return 0;
+	return a.id < b.id ? -1 : 1;
+};
+
+const sortedInsertIndex = (messages: Message[], message: Message): number => {
+	let index = messages.length;
+	while (index > 0 && compareMessageKeys(messages[index - 1], message) > 0) {
+		index -= 1;
+	}
+	return index;
+};
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
@@ -142,13 +159,19 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = initRoomChatsRegistry(draft, message.roomId);
-				const alreadyExists = find(messages, { id: message.id });
+				const { messages, markers } = initRoomChatsRegistry(draft, message.roomId);
+				const row: Message =
+					message.type === MessageType.TEXT_MSG && isMyId(message.from)
+						? { ...message, read: calcReads(message.date, message.roomId, markers) }
+						: message;
+				const existingIndex = findIndex(messages, { id: message.id });
 				// Replace message if it already exists (placeholder message)
-				if (alreadyExists) {
-					Object.assign(alreadyExists, message);
+				if (existingIndex !== -1) {
+					const [existing] = messages.splice(existingIndex, 1);
+					Object.assign(existing, row);
+					messages.splice(sortedInsertIndex(messages, existing), 0, existing);
 				} else {
-					messages.push(message);
+					messages.splice(sortedInsertIndex(messages, row), 0, row);
 				}
 			}),
 			false,
@@ -165,7 +188,14 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						message.type === MessageType.TEXT_MSG ||
 						message.type === MessageType.CONFIGURATION_MSG
 					) {
-						registry.lastMessage = message;
+						const { lastMessage } = registry;
+						if (
+							!lastMessage ||
+							lastMessage.id === message.id ||
+							compareMessageKeys(message, lastMessage) > 0
+						) {
+							registry.lastMessage = message;
+						}
 					}
 				});
 			}),
@@ -187,8 +217,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const newMessages = orderBy(messageArray, ['date'], ['asc']);
-					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
+					const newMessages = [...messageArray].sort(compareMessageKeys);
+					const merged = mergeSortedArrays(newMessages, messages, compareMessageKeys);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}
