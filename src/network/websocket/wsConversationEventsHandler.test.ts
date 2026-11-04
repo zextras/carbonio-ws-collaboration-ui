@@ -439,6 +439,32 @@ describe('wsConversationEventHandler tests', () => {
 			expect(registry?.unread).toBe(1);
 		});
 
+		test('ROOM_HISTORY_CLEARED of a temporary room removes the pin through the SDK, versioned by clearedAt', () => {
+			const temporaryRoom = createMockRoom({ id: 'room-temporary-pin', type: RoomType.TEMPORARY });
+			useStore.getState().addRooms([temporaryRoom]);
+			useStore
+				.getState()
+				.setPinnedMessage(
+					temporaryRoom.id,
+					createMockTextMessage({ id: 'pinned', roomId: temporaryRoom.id })
+				);
+			const clearSpy = vi.spyOn(wscSdk, 'clearPinnedBanner');
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_HISTORY_CLEARED,
+				roomId: temporaryRoom.id,
+				clearedAt: NEWER_AT,
+				clearedBy: otherUser,
+				systemEventId: 'sys-clear-pin',
+				systemEventCreatedAt: NEWER_AT
+			} as RoomHistoryClearedEvent);
+
+			expect(clearSpy).toHaveBeenCalledWith(temporaryRoom.id, NEWER_AT);
+			expect(
+				useStore.getState().activeConversations[temporaryRoom.id]?.messagePinned
+			).toBeUndefined();
+		});
+
 		test('the per-user ROOM_HISTORY_CLEARED lands no line', () => {
 			wsConversationEventsHandler({
 				type: WsEventType.ROOM_HISTORY_CLEARED,

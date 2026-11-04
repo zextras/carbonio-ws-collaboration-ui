@@ -158,6 +158,19 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 	}
 }
 
+function onRoomHistoryCleared(event: RoomHistoryClearedEvent): void {
+	const state = useStore.getState();
+	state.clearConversation(event.roomId, event.clearedAt);
+	if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
+		if (isWscPure()) {
+			wscSdk.clearPinnedBanner(event.roomId, event.clearedAt);
+		} else {
+			state.removePinnedMessage(event.roomId);
+		}
+	}
+	landHistoryClearedLine(event);
+}
+
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
 	const isMyId = (userId: string): boolean => userId === state.session.id;
@@ -244,11 +257,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
-			state.clearConversation(event.roomId, event.clearedAt);
-			if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
-				state.removePinnedMessage(event.roomId);
-			}
-			landHistoryClearedLine(event);
+			onRoomHistoryCleared(event);
 			break;
 		}
 		default: {
