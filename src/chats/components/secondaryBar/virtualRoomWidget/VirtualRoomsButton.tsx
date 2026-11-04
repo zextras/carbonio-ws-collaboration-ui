@@ -86,7 +86,11 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 				</Container>
 			)}
 			{listVisibility && (
-				<VirtualRoomsList setListVisibility={setListVisibility} parentRef={parentRef} />
+				<VirtualRoomsList
+					setListVisibility={setListVisibility}
+					parentRef={parentRef}
+					expanded={expanded}
+				/>
 			)}
 		</>
 	);
