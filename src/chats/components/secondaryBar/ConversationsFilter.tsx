@@ -83,7 +83,6 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 		if (expanded && (filterHasFocus || shouldFocusRef.current)) {
 			filterInputRef.current?.focus();
 			shouldFocusRef.current = false;
-			setFilterHasFocus(true);
 		}
 		if (!expanded) {
 			handleInputBlur();

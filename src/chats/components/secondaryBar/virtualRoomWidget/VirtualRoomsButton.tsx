@@ -81,7 +81,6 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 							type="outlined"
 							labelColor="primary"
 							backgroundColor="gray6"
-							ref={parentRef}
 						/>
 					</Tooltip>
 				</Container>

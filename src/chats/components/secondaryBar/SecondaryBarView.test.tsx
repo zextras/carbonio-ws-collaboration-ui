@@ -160,6 +160,14 @@ describe('SecondaryBar tests', () => {
 		expect(shell.openSecondaryBar).toHaveBeenCalledTimes(1);
 	});
 
+	test('Filter input is focused once the secondary bar expands after clicking funnel button', async () => {
+		const { user, rerender } = setup(<SecondaryBarView expanded={false} />);
+		await user.click(screen.getByTestId(iconFunnelOutline));
+		rerender(<SecondaryBarView expanded />);
+		const filterInput = await screen.findByRole('textbox', { name: /type to filter list/i });
+		await waitFor(() => expect(filterInput).toHaveFocus());
+	});
+
 	describe('FilteredGal inside SecondaryBarView tests', () => {
 		test('User filter gal and expect only one user to be visible', async () => {
 			mockSearchUsersByFeatureRequest.mockReturnValueOnce({ contacts: [contactUser1] });
