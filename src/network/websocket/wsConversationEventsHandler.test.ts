@@ -12,6 +12,7 @@ import { wsEventsHandler } from './wsEventsHandler';
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import {
+	createMockMarker,
 	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage,
@@ -37,6 +38,8 @@ import * as api from '../index';
 import { wscSdk } from '../sdk/wscSdk';
 
 const SENT_DATE = '2023-01-01T00:00:00.000Z';
+const OLDER_AT = '2026-11-04T12:00:00.000000Z';
+const NEWER_AT = '2026-11-04T12:00:00.600000Z';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 
@@ -166,6 +169,7 @@ describe('wsConversationEventHandler tests', () => {
 		beforeEach(() => {
 			useStore.getState().setApiVersion('2.0.0');
 			vi.spyOn(presenceRefresh, 'refreshPresence').mockImplementation(() => {});
+			wscSdk.reset();
 		});
 		afterEach(() => {
 			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
@@ -444,6 +448,72 @@ describe('wsConversationEventHandler tests', () => {
 			} as RoomHistoryClearedEvent);
 
 			expect(useStore.getState().chatsRegistry[room.id]).toBeUndefined();
+		});
+
+		function nameChanged(name: string, id: string, at: string): RoomNameChangedEvent {
+			return {
+				type: WsEventType.ROOM_NAME_CHANGED,
+				roomId: room.id,
+				name,
+				updatedBy: otherUser,
+				systemEventId: id,
+				systemEventCreatedAt: at
+			} as RoomNameChangedEvent;
+		}
+
+		test('an older ROOM_NAME_CHANGED delivered late lands its line but keeps the newer name', () => {
+			wsConversationEventsHandler(nameChanged('Second', 'sys-2', NEWER_AT));
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Second');
+			expect(
+				useStore.getState().chatsRegistry[room.id]?.messages.map((message) => message.id)
+			).toEqual(expect.arrayContaining(['sys-1', 'sys-2']));
+		});
+
+		test('an older ROOM_DESCRIPTION_CHANGED delivered late keeps the newer description', () => {
+			const event = (description: string, id: string, at: string): RoomDescriptionChangedEvent =>
+				({
+					type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+					roomId: room.id,
+					description,
+					updatedBy: otherUser,
+					systemEventId: id,
+					systemEventCreatedAt: at
+				}) as RoomDescriptionChangedEvent;
+
+			wsConversationEventsHandler(event('Second', 'sys-2', NEWER_AT));
+			wsConversationEventsHandler(event('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.description).toBe('Second');
+		});
+
+		test('a line older than the own read marker does not count as unread', () => {
+			useStore.getState().updateReadStatus(room.id, [
+				createMockMarker({
+					from: sessionUser.id,
+					messageId: 'sys-2',
+					markerDate: Date.parse('2026-11-04T12:00:01.000Z')
+				})
+			]);
+
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().chatsRegistry[room.id]?.unread ?? 0).toBe(0);
+		});
+
+		test('a line newer than the own read marker counts as unread', () => {
+			useStore.getState().updateReadStatus(room.id, [
+				createMockMarker({
+					from: sessionUser.id,
+					messageId: 'sys-0',
+					markerDate: Date.parse('2026-11-04T11:00:00.000Z')
+				})
+			]);
+
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().chatsRegistry[room.id]?.unread).toBe(1);
 		});
 
 		test('no room change line is landed on 1.6.x, where XMPP brings it', () => {

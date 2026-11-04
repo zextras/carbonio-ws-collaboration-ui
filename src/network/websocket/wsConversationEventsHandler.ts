@@ -60,18 +60,30 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
  * WSC 2.0.0 lands the room change lines from the push events, which carry the
  * line's author (`updatedBy`, `deletedBy`, `clearedBy`); v1 lands them from XMPP.
  */
-function landRoomNameChangedLine(event: RoomNameChangedEvent): void {
+function onRoomNameChanged(event: RoomNameChangedEvent): void {
 	if (!isWscPure()) {
+		useStore.getState().editRoom(event.roomId, { name: event.name });
 		return;
 	}
-	notifyConfigRow(wscSdk.handleRoomNameChanged(event as WireRoomNameChangedEvent));
+	const { row, applied } = wscSdk.handleRoomNameChanged(event as WireRoomNameChangedEvent);
+	if (applied) {
+		useStore.getState().editRoom(event.roomId, { name: event.name });
+	}
+	notifyConfigRow(row);
 }
 
-function landRoomDescriptionChangedLine(event: RoomDescriptionChangedEvent): void {
+function onRoomDescriptionChanged(event: RoomDescriptionChangedEvent): void {
 	if (!isWscPure()) {
+		useStore.getState().editRoom(event.roomId, { description: event.description });
 		return;
 	}
-	notifyConfigRow(wscSdk.handleRoomDescriptionChanged(event as WireRoomDescriptionChangedEvent));
+	const { row, applied } = wscSdk.handleRoomDescriptionChanged(
+		event as WireRoomDescriptionChangedEvent
+	);
+	if (applied) {
+		useStore.getState().editRoom(event.roomId, { description: event.description });
+	}
+	notifyConfigRow(row);
 }
 
 function landRoomPictureChangedLine(event: RoomPictureChangedEvent): void {
@@ -165,13 +177,11 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_NAME_CHANGED: {
-			state.editRoom(event.roomId, { name: event.name });
-			landRoomNameChangedLine(event);
+			onRoomNameChanged(event);
 			break;
 		}
 		case WsEventType.ROOM_DESCRIPTION_CHANGED: {
-			state.editRoom(event.roomId, { description: event.description });
-			landRoomDescriptionChangedLine(event);
+			onRoomDescriptionChanged(event);
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
