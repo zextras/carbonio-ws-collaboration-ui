@@ -240,8 +240,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const newMessages = [...messageArray].sort(compareMessageKeys);
-					const merged = mergeSortedArrays(newMessages, messages, compareMessageKeys);
+					const compare = getIsWscPure(draft)
+						? compareMessageKeys
+						: (a: Message, b: Message): number => a.date - b.date;
+					const newMessages = [...messageArray].sort(compare);
+					const merged = mergeSortedArrays(newMessages, messages, compare);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}

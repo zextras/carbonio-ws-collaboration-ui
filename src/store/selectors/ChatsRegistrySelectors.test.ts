@@ -38,6 +38,13 @@ describe('getMyLastReaction', () => {
 		}));
 	};
 
+	beforeEach(() => {
+		useStore.getState().setApiVersion('2.0.0');
+	});
+	afterEach(() => {
+		useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+	});
+
 	test('picks the latest reaction by date, not by array position', () => {
 		seed(reaction('r2', 2000, '❤️'), reaction('r1', 1000, '👍'));
 		expect(getMyLastReaction(useStore.getState(), roomId, stanzaId)).toBe('❤️');
@@ -50,6 +57,17 @@ describe('getMyLastReaction', () => {
 
 	test('ignores the reactions of other users', () => {
 		seed(reaction('r1', 1000, '👍'), reaction('r2', 2000, '😂', 'other'));
+		expect(getMyLastReaction(useStore.getState(), roomId, stanzaId)).toBe('👍');
+	});
+
+	test('on equal dates the later fastening wins', () => {
+		seed(reaction('r1', 1000, '👍'), reaction('r2', 1000, '❤️'));
+		expect(getMyLastReaction(useStore.getState(), roomId, stanzaId)).toBe('❤️');
+	});
+
+	test('on 1.6.x the last fastening of the array wins, as before', () => {
+		useStore.getState().setApiVersion('1.6.14');
+		seed(reaction('r2', 2000, '❤️'), reaction('r1', 1000, '👍'));
 		expect(getMyLastReaction(useStore.getState(), roomId, stanzaId)).toBe('👍');
 	});
 });

@@ -310,6 +310,17 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(messages.map((message) => message.id)).toEqual(['a', 'b', 'c', 'd']);
 		});
 
+		test('On 1.6.x equal dates keep the order the rows arrived in', () => {
+			useStore.getState().setApiVersion('1.6.14');
+			const roomId = 'room-merge-v1';
+			const mk = (id: string, date: number): TextMessage =>
+				createMockTextMessage({ id, roomId, date });
+			useStore.getState().updateHistory(roomId, [mk('c', date1), mk('a', date1), mk('d', date2)]);
+
+			const { messages } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['c', 'a', 'd']);
+		});
+
 		test('Load a history after another history', () => {
 			useStore.getState().updateHistory(textMessage0.roomId, [textMessage0, textMessage1]);
 
