@@ -45,6 +45,27 @@ import { wscSdk } from '../sdk/wscSdk';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
+/**
+ * Stores rooms read from REST. On WSC 2.0.0 a name or description older than the last change
+ * already applied (the snapshot `updatedAt` against the change line times) keeps the stored value.
+ */
+export const addRoomSnapshots = (roomsBe: RoomBe[], fullSync = false): void => {
+	const state = useStore.getState();
+	const rooms = isWscPure()
+		? roomsBe.map((roomBe) => {
+				const newer = wscSdk.claimRoomSnapshot(roomBe.id, roomBe.updatedAt);
+				const stored = state.rooms[roomBe.id];
+				if (!stored) return roomBe;
+				return {
+					...roomBe,
+					name: newer.name ? roomBe.name : stored.name,
+					description: newer.description ? roomBe.description : stored.description
+				};
+			})
+		: roomsBe;
+	state.addRooms(rooms, fullSync);
+};
+
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
 	if (members || settings) {
@@ -54,7 +75,7 @@ export const listRooms = (members = false, settings = false): Promise<RoomBe[]> 
 		paramsStr = `?${array.join('&')}`;
 	}
 	return fetchAPI<RoomBe[]>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
-		useStore.getState().addRooms(resp, true);
+		addRoomSnapshots(resp, true);
 		return resp;
 	});
 };

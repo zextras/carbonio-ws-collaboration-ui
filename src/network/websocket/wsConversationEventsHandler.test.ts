@@ -514,6 +514,30 @@ describe('wsConversationEventHandler tests', () => {
 			expect(useStore.getState().rooms[room.id]?.description).toBe('Second');
 		});
 
+		test('a room snapshot older than an applied rename keeps the newer name', () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', NEWER_AT));
+
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: OLDER_AT })]);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Live');
+		});
+
+		test('a room snapshot newer than the applied rename replaces the name', () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', OLDER_AT));
+
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: NEWER_AT })]);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Snapshot');
+		});
+
+		test('a rename older than the room snapshot is not applied', () => {
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: NEWER_AT })]);
+
+			wsConversationEventsHandler(nameChanged('Late', 'sys-late', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Snapshot');
+		});
+
 		test('a line older than the own read marker does not count as unread', () => {
 			useStore.getState().updateReadStatus(room.id, [
 				createMockMarker({

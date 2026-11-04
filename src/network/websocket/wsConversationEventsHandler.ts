@@ -29,7 +29,7 @@ import type {
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { chatClient, isWscPure } from '../chatClient/ChatClient';
-import { getMeeting, getRoom } from '../index';
+import { addRoomSnapshots, getMeeting, getRoom } from '../index';
 import { wscSdk } from '../sdk/wscSdk';
 
 /**
@@ -143,7 +143,7 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 	landMemberAddedLine(event);
 	if (event.userId === state.session.id) {
 		getRoom(event.roomId).then((response) => {
-			state.addRooms([response]);
+			addRoomSnapshots([response]);
 			refreshMembersPresence((response.members ?? []).map((member) => member.userId));
 			if (response.meetingId) {
 				getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
@@ -178,7 +178,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
 			getRoom(event.roomId).then((response) => {
-				state.addRooms([response]);
+				addRoomSnapshots([response]);
 				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
 			});
 			landRoomCreatedLastItem(event);
