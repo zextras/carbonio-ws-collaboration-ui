@@ -522,6 +522,22 @@ describe('wsConversationEventHandler tests', () => {
 			expect(useStore.getState().rooms[room.id]?.name).toBe('Live');
 		});
 
+		test('a rename seen before the room is stored wins over an older snapshot of that room', () => {
+			const fresh = createMockRoom({ id: 'room-fresh', name: 'Created', updatedAt: OLDER_AT });
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_NAME_CHANGED,
+				roomId: fresh.id,
+				name: 'Live',
+				updatedBy: otherUser,
+				systemEventId: 'sys-fresh',
+				systemEventCreatedAt: NEWER_AT
+			} as RoomNameChangedEvent);
+
+			api.addRoomSnapshots([fresh]);
+
+			expect(useStore.getState().rooms[fresh.id]?.name).toBe('Live');
+		});
+
 		test('a room snapshot newer than the applied rename replaces the name', () => {
 			wsConversationEventsHandler(nameChanged('Live', 'sys-live', OLDER_AT));
 
