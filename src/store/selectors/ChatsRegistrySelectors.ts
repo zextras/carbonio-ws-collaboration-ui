@@ -5,6 +5,7 @@
  */
 import { filter, find, forEach, includes, last, map, reduce, size } from 'lodash';
 
+import { getIsWscPure } from './SessionSelectors';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
@@ -136,7 +137,14 @@ export const getMyLastReaction = (
 			(fastening) =>
 				fastening.action === FasteningAction.REACTION && fastening.from === state.session?.id
 		);
-		return last(myReactions)?.value;
+		if (!getIsWscPure(state)) {
+			return last(myReactions)?.value;
+		}
+		const latest = myReactions.reduce<MessageFastening | undefined>(
+			(acc, current) => (!acc || acc.date <= current.date ? current : acc),
+			undefined
+		);
+		return latest?.value;
 	}
 	return undefined;
 };

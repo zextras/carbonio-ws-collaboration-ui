@@ -25,7 +25,7 @@ import { WsEventType } from './wsEvents';
  * are the SDK's, generated from asyncapi.yaml (the SDK tracks the spec drift
  * in specs/SPEC_SOURCE.md): this file only adds the discriminant on the app's
  * event-type enum, so the router hands the SDK each event as it came off the
- * wire, `sentDate` included.
+ * wire. No event carries `sentDate`: every time is the stored value.
  */
 export type WsChatEvent =
 	| WsPresenceChangedEvent

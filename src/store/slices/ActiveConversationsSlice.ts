@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { concat, find, findIndex, includes, orderBy, remove, reverse, size } from 'lodash';
+import { concat, find, findIndex, findLast, includes, orderBy, remove, size } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import {
@@ -14,7 +14,8 @@ import {
 	ActiveConversationsSlice,
 	FileToUpload,
 	InfoPanelTab,
-	messageActionType
+	messageActionType,
+	NewReaction
 } from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
@@ -34,6 +35,18 @@ const initActiveConversation = (draft: RootStore, roomId: string): ActiveConvers
 		};
 	}
 	return draft.activeConversations[roomId];
+};
+
+const dropNewReaction = (
+	reactions: NewReaction[],
+	stanzaId: string,
+	reaction: string | undefined
+): void => {
+	if (!reaction) return;
+	const index = findIndex(reactions, (r) => r.reaction === reaction && r.stanzaId === stanzaId);
+	if (index !== -1) {
+		reactions.splice(index, 1);
+	}
 };
 
 export const useActiveConversationsSlice: StateCreator<
@@ -239,7 +252,13 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/UNSET_FORWARD_MESSAGE_LIST'
 		);
 	},
-	setNewReaction(roomId: string, stanzaId: string, reaction: string, from: string): void {
+	setNewReaction(
+		roomId: string,
+		stanzaId: string,
+		reaction: string,
+		from: string,
+		previousReaction?: string
+	): void {
 		set(
 			produce((draft: RootStore) => {
 				// Ignore reactions to messages that are not mine
@@ -258,23 +277,15 @@ export const useActiveConversationsSlice: StateCreator<
 				const reactions = conversation.newReactions || [];
 
 				if (reaction === '') {
-					const reactionToRemove = find(
-						reverse(draft.chatsRegistry[roomId]?.fastenings?.[stanzaId]),
+					const reactionToRemove = findLast(
+						draft.chatsRegistry[roomId]?.fastenings?.[stanzaId],
 						(fastening) =>
 							fastening.action === 'reaction' && fastening.from === from && fastening.value !== ''
 					);
-					const index = findIndex(
-						reactions,
-						(r) => r.reaction === reactionToRemove?.value && r.stanzaId === stanzaId
-					);
-					if (index !== -1) {
-						reactions.splice(index, 1);
-					}
+					dropNewReaction(reactions, stanzaId, reactionToRemove?.value);
 				} else {
-					reactions.push({
-						stanzaId,
-						reaction
-					});
+					dropNewReaction(reactions, stanzaId, previousReaction);
+					reactions.push({ stanzaId, reaction });
 				}
 				conversation.newReactions = reactions;
 			}),

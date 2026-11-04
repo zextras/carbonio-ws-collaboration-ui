@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
+import { find, findIndex, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
@@ -51,6 +51,30 @@ function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => n
 
 	return result;
 }
+
+const compareMessageKeys = (
+	a: Pick<Message, 'date' | 'id'>,
+	b: Pick<Message, 'date' | 'id'>
+): number => {
+	if (a.date !== b.date) return a.date - b.date;
+	if (a.id === b.id) return 0;
+	return a.id < b.id ? -1 : 1;
+};
+
+const isPendingRow = (message: Message): boolean =>
+	message.type === MessageType.TEXT_MSG && message.read === MarkerStatus.PENDING;
+
+const sortedInsertIndex = (messages: Message[], message: Message): number => {
+	let index = messages.length;
+	if (isPendingRow(message)) return index;
+	while (
+		index > 0 &&
+		(isPendingRow(messages[index - 1]) || compareMessageKeys(messages[index - 1], message) > 0)
+	) {
+		index -= 1;
+	}
+	return index;
+};
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
@@ -142,13 +166,31 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = initRoomChatsRegistry(draft, message.roomId);
-				const alreadyExists = find(messages, { id: message.id });
+				const { messages, markers } = initRoomChatsRegistry(draft, message.roomId);
+				if (!getIsWscPure(draft)) {
+					const alreadyExists = find(messages, { id: message.id });
+					// Replace message if it already exists (placeholder message)
+					if (alreadyExists) {
+						Object.assign(alreadyExists, message);
+					} else {
+						messages.push(message);
+					}
+					return;
+				}
+				const row: Message =
+					message.type === MessageType.TEXT_MSG &&
+					message.read !== MarkerStatus.PENDING &&
+					isMyId(message.from)
+						? { ...message, read: calcReads(message.date, message.roomId, markers) }
+						: message;
+				const existingIndex = findIndex(messages, { id: message.id });
 				// Replace message if it already exists (placeholder message)
-				if (alreadyExists) {
-					Object.assign(alreadyExists, message);
+				if (existingIndex !== -1) {
+					const [existing] = messages.splice(existingIndex, 1);
+					Object.assign(existing, row);
+					messages.splice(sortedInsertIndex(messages, existing), 0, existing);
 				} else {
-					messages.push(message);
+					messages.splice(sortedInsertIndex(messages, row), 0, row);
 				}
 			}),
 			false,
@@ -158,13 +200,24 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
+				const isWscPure = getIsWscPure(draft);
 				inbox.forEach((message) => {
 					const registry = initRoomChatsRegistry(draft, message.roomId);
-					registry.inboxMessageId = message.id;
 					if (
-						message.type === MessageType.TEXT_MSG ||
-						message.type === MessageType.CONFIGURATION_MSG
+						message.type !== MessageType.TEXT_MSG &&
+						message.type !== MessageType.CONFIGURATION_MSG
 					) {
+						registry.inboxMessageId = message.id;
+						return;
+					}
+					const { lastMessage } = registry;
+					if (
+						!isWscPure ||
+						!lastMessage ||
+						lastMessage.id === message.id ||
+						compareMessageKeys(message, lastMessage) > 0
+					) {
+						registry.inboxMessageId = message.id;
 						registry.lastMessage = message;
 					}
 				});
@@ -187,8 +240,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const newMessages = orderBy(messageArray, ['date'], ['asc']);
-					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
+					const compare = getIsWscPure(draft)
+						? compareMessageKeys
+						: (a: Message, b: Message): number => a.date - b.date;
+					const newMessages = [...messageArray].sort(compare);
+					const merged = mergeSortedArrays(newMessages, messages, compare);
 					// Check for duplicates and remove them
 					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
 				}

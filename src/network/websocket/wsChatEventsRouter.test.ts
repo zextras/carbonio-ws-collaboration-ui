@@ -6,7 +6,7 @@
 
 import type { WireTimelineMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { buildWireMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk/testing';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { wsChatEventsRouter } from './wsChatEventsRouter';
 import { EventName } from '../../hooks/useEventListener';
@@ -35,9 +35,17 @@ import type {
 } from '../../types/network/websocket/wsChatEvents';
 import { FasteningAction, MessageType, OperationType } from '../../types/store/ChatsRegistryTypes';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
+import { wscSdk } from '../sdk/wscSdk';
 
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const AUG_FIRST_EARLY_MORNING = '2026-08-01T09:00:00Z';
+const KNOWN_ROOM = 'room-known';
+const MARKER_ROOM = 'room-marker';
+const EDIT_TIME_1 = '2026-08-01T11:00:01Z';
+const EDIT_TIME = '2026-08-01T11:00:00Z';
+const REACTION_TIME_1 = '2026-08-01T10:06:00Z';
+const REACTION_TIME_2 = '2026-08-01T10:07:00Z';
+const originalText = 'testo originale';
 const replyText = 'ti rispondo';
 const photoName = 'photo.png';
 const pngMime = 'image/png';
@@ -109,7 +117,7 @@ describe('wsChatEventsRouter - ReadUpdated', () => {
 
 		expect(useStore.getState().chatsRegistry['room-r']?.markers['user-2']).toMatchObject({
 			messageId: 'msg-r1',
-			markerDate: Date.parse('2026-08-01T09:30:00.123Z'),
+			markerDate: expect.closeTo(Date.parse('2026-08-01T09:30:00.123Z') + 0.456, 3),
 			type: 'displayed'
 		});
 		expect(global.fetch).not.toHaveBeenCalled();
@@ -167,6 +175,87 @@ describe('wsChatEventsRouter - MessageReceived', () => {
 		expect(registry?.unread).toBe(1);
 		expect(received).toEqual([expect.objectContaining({ id: 'msg-in-1' })]);
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('fires no NEW_MESSAGE event for a message already in the store', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const event = buildWsMessageReceivedEvent(
+			buildWireMessage({
+				id: 'msg-dup',
+				roomId: 'room-dup',
+				senderId: 'user-2',
+				createdAt: AUG_FIRST_LATE_MORNING
+			})
+		);
+		wsChatEventsRouter(event);
+		const received: Array<unknown> = [];
+		const listener = (e: Event): void => {
+			received.push((e as CustomEvent).detail);
+		};
+		window.addEventListener(EventName.NEW_MESSAGE, listener);
+
+		wsChatEventsRouter(event);
+		window.removeEventListener(EventName.NEW_MESSAGE, listener);
+
+		expect(received).toEqual([]);
+		expect(useStore.getState().chatsRegistry['room-dup']?.unread).toBe(1);
+	});
+
+	it('does not count a message a timeline page already loaded', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		const wire = buildWireMessage({
+			id: 'msg-known',
+			roomId: KNOWN_ROOM,
+			senderId: 'user-2',
+			createdAt: AUG_FIRST_LATE_MORNING
+		});
+		useStore.getState().updateHistory(KNOWN_ROOM, [
+			createMockTextMessage({
+				id: 'msg-known',
+				roomId: KNOWN_ROOM,
+				from: 'user-2',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+
+		wsChatEventsRouter(buildWsMessageReceivedEvent(wire));
+
+		expect(useStore.getState().chatsRegistry[KNOWN_ROOM]?.unread ?? 0).toBe(0);
+	});
+
+	it('does not count a message older than the own read marker', () => {
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().updateReadStatus(MARKER_ROOM, [
+			{
+				from: 'me',
+				messageId: 'unknown',
+				markerDate: Date.parse(AUG_FIRST_LATE_MORNING),
+				type: 'displayed'
+			}
+		]);
+
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-before',
+					roomId: MARKER_ROOM,
+					senderId: 'user-2',
+					createdAt: AUG_FIRST_EARLY_MORNING
+				})
+			)
+		);
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-after',
+					roomId: MARKER_ROOM,
+					senderId: 'user-2',
+					createdAt: '2026-08-01T10:00:01Z'
+				})
+			)
+		);
+
+		expect(useStore.getState().chatsRegistry[MARKER_ROOM]?.unread).toBe(1);
 	});
 
 	it('never bumps the unread counter for an own message from another session', () => {
@@ -455,14 +544,13 @@ describe('wsChatEventsRouter - MessageReceived attachments', () => {
 
 describe('wsChatEventsRouter - MessageEdited', () => {
 	const editedText = 'testo corretto';
-	const originalText = 'testo originale';
 
 	function editedEvent(roomId: string, messageId: string): WsMessageEditedEvent {
 		return buildWsMessageEditedEvent({
 			messageId,
 			roomId,
 			text: editedText,
-			editedAt: '2026-08-01T11:00:00Z'
+			editedAt: EDIT_TIME
 		});
 	}
 
@@ -492,6 +580,70 @@ describe('wsChatEventsRouter - MessageEdited', () => {
 		expect(registry?.lastMessage).toMatchObject({ edited: true, text: editedText });
 		expect(registry?.unread ?? 0).toBe(0);
 		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('an older edit never overwrites the sidebar preview of a newer one', () => {
+		const target = createMockTextMessage({
+			id: 'msg-two',
+			stanzaId: 'msg-two',
+			roomId: 'room-e2',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-e2', [target]);
+		useStore.getState().setLastMessage('room-e2', target);
+
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-two',
+				roomId: 'room-e2',
+				text: 'second',
+				editedAt: '2026-08-01T11:00:02Z'
+			})
+		);
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-two',
+				roomId: 'room-e2',
+				text: 'first',
+				editedAt: EDIT_TIME_1
+			})
+		);
+
+		expect(useStore.getState().chatsRegistry['room-e2']?.lastMessage).toMatchObject({
+			text: 'second'
+		});
+	});
+
+	it('a delete is terminal for the sidebar preview: a later-arriving edit does not revive it', () => {
+		const target = createMockTextMessage({
+			id: 'msg-del',
+			stanzaId: 'msg-del',
+			roomId: 'room-e3',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_LATE_MORNING)
+		});
+		useStore.getState().updateHistory('room-e3', [target]);
+		useStore.getState().setLastMessage('room-e3', target);
+
+		wsChatEventsRouter(
+			buildWsMessageDeletedEvent({
+				messageId: 'msg-del',
+				roomId: 'room-e3',
+				deletedAt: EDIT_TIME_1
+			})
+		);
+		const afterDelete = useStore.getState().chatsRegistry['room-e3']?.lastMessage;
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-del',
+				roomId: 'room-e3',
+				text: 'late edit',
+				editedAt: EDIT_TIME
+			})
+		);
+
+		expect(useStore.getState().chatsRegistry['room-e3']?.lastMessage).toBe(afterDelete);
 	});
 
 	it('leaves the sidebar untouched when the edit targets an older message', () => {
@@ -619,7 +771,7 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 				messageId: 'msg-ed',
 				roomId: 'room-dp',
 				text: 'corretto',
-				editedAt: '2026-08-01T11:00:00Z'
+				editedAt: EDIT_TIME
 			})
 		);
 		wsChatEventsRouter(deletedEvent('room-dp', 'msg-ed'));
@@ -632,10 +784,14 @@ describe('wsChatEventsRouter - MessageDeleted', () => {
 });
 
 describe('wsChatEventsRouter - ReactionChanged', () => {
+	beforeEach(() => {
+		wscSdk.reset();
+	});
+
 	function reactionEvent(
 		userId: string,
 		operation: 'added' | 'removed',
-		sentDate = '2026-08-01T10:05:00.123456Z'
+		time = '2026-08-01T10:05:00.123456Z'
 	): WsReactionChangedEvent {
 		return buildWsReactionChangedEvent({
 			messageId: 'msg-mine',
@@ -643,7 +799,7 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 			userId,
 			reaction: '👍',
 			operation,
-			sentDate
+			...(operation === 'removed' ? { deletedAt: time } : { updatedAt: time })
 		});
 	}
 
@@ -678,6 +834,57 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
+	it('an update drops the previous reaction from the animation state and adds the new one', () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('user-2', 'added', REACTION_TIME_1));
+		wsChatEventsRouter(
+			buildWsReactionChangedEvent({
+				messageId: 'msg-mine',
+				roomId: 'room-rc',
+				userId: 'user-2',
+				reaction: '❤️',
+				previousReaction: '👍',
+				operation: 'updated',
+				updatedAt: REACTION_TIME_2
+			})
+		);
+
+		expect(useStore.getState().activeConversations['room-rc']?.newReactions).toEqual([
+			{ stanzaId: 'msg-mine', reaction: '❤️' }
+		]);
+	});
+
+	it('skips the animation state for a duplicate or stale event', () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('user-2', 'added', REACTION_TIME_2));
+		useStore.getState().unsetNewReactions('room-rc');
+		wsChatEventsRouter(reactionEvent('user-2', 'added', REACTION_TIME_2));
+		wsChatEventsRouter(reactionEvent('user-2', 'added', REACTION_TIME_1));
+
+		expect(useStore.getState().activeConversations['room-rc']?.newReactions).toBeUndefined();
+		expect(useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine']).toHaveLength(1);
+	});
+
+	it('keeps the stored reaction order when another user removes a reaction on my message', () => {
+		seedMyMessage();
+
+		wsChatEventsRouter(reactionEvent('user-2', 'added', '2026-08-01T10:06:00Z'));
+		wsChatEventsRouter(reactionEvent('user-3', 'added', '2026-08-01T10:07:00Z'));
+		wsChatEventsRouter(reactionEvent('user-2', 'removed', '2026-08-01T10:08:00Z'));
+
+		const fastenings = useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine'];
+		expect(fastenings?.map((fastening) => [fastening.from, fastening.date])).toEqual(
+			[...(fastenings ?? [])]
+				.sort((a, b) => a.date - b.date)
+				.map((fastening) => [fastening.from, fastening.date])
+		);
+		expect(useStore.getState().activeConversations['room-rc']?.newReactions).toEqual([
+			{ stanzaId: 'msg-mine', reaction: '👍' }
+		]);
+	});
+
 	it('files my own echo without touching the animation state', () => {
 		seedMyMessage();
 
@@ -690,13 +897,13 @@ describe('wsChatEventsRouter - ReactionChanged', () => {
 	it('keeps the whole toggle history with increasing dates (add -> remove -> add)', () => {
 		seedMyMessage();
 
-		wsChatEventsRouter(reactionEvent('user-2', 'added', '2026-08-01T10:06:00Z'));
-		wsChatEventsRouter(reactionEvent('user-2', 'removed', '2026-08-01T10:07:00Z'));
+		wsChatEventsRouter(reactionEvent('user-2', 'added', REACTION_TIME_1));
+		wsChatEventsRouter(reactionEvent('user-2', 'removed', REACTION_TIME_2));
 		wsChatEventsRouter(reactionEvent('user-2', 'added', '2026-08-01T10:08:00Z'));
 
 		const fastenings = useStore.getState().chatsRegistry['room-rc']?.fastenings['msg-mine'];
 		// Three distinct fastenings, v1 stanza-history parity: the projection
-		// (latest per user by date, the SDK dates them with sentDate) must land
+		// (latest per user by date, the SDK dates them with the stored time) must land
 		// on the re-added emoji
 		expect(fastenings?.map((fastening) => fastening.value)).toEqual(['👍', '', '👍']);
 		expect(fastenings?.[2]?.date).toBeGreaterThan(fastenings?.[1]?.date as number);
@@ -1027,7 +1234,7 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 			id: 'msg-bm-1',
 			stanzaId: 'msg-bm-1',
 			roomId: 'room-bm',
-			text: 'testo originale',
+			text: originalText,
 			date: Date.parse(AUG_FIRST_EARLY_MORNING)
 		});
 		useStore.getState().updateHistory('room-bm', [pinned]);
@@ -1046,6 +1253,37 @@ describe('wsChatEventsRouter - pinned banner maintenance', () => {
 			id: 'msg-bm-1',
 			text: 'banner ritoccato'
 		});
+	});
+
+	it('keeps the banner on the latest edit by date when an older edit arrives late', () => {
+		const pinned = createMockTextMessage({
+			id: 'msg-bl-1',
+			stanzaId: 'msg-bl-1',
+			roomId: 'room-bl',
+			text: originalText,
+			date: Date.parse(AUG_FIRST_EARLY_MORNING)
+		});
+		useStore.getState().updateHistory('room-bl', [pinned]);
+		useStore.getState().setPinnedMessage('room-bl', pinned);
+
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-bl-1',
+				roomId: 'room-bl',
+				text: 'seconda',
+				editedAt: '2026-08-01T11:00:02Z'
+			})
+		);
+		wsChatEventsRouter(
+			buildWsMessageEditedEvent({
+				messageId: 'msg-bl-1',
+				roomId: 'room-bl',
+				text: 'prima',
+				editedAt: EDIT_TIME_1
+			})
+		);
+
+		expect(useStore.getState().activeConversations['room-bl']?.messagePinned?.text).toBe('seconda');
 	});
 
 	it('leaves the banner alone when the edit targets another message', () => {

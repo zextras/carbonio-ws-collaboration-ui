@@ -14,6 +14,7 @@ import { getMediaGalleryBucketKey } from '../../utils/attachmentUtils';
 import useStore from '../Store';
 
 const roomId = 'room-1';
+const SECOND_TWO = '2024-01-01T10:00:02.000000Z';
 const UNKNOWN_ROOM_ID = 'unknown-room';
 
 const IMAGES_FILTER: MediaGalleryFilter = {
@@ -200,6 +201,110 @@ describe('Media gallery slice', () => {
 			expect(getBucket(IMAGES_FILTER)?.attachments.map((a) => a.id)).toEqual([NEW_ID]);
 			expect(getBucket(IMAGES_FILTER)?.total).toBe(1);
 			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.nextCursor).toBe('cur-1');
+		});
+
+		test('inserts at the position of its creation date, microseconds included, ties broken by id', () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[
+						buildAttachment({ id: 'a3', createdAt: '2024-01-01T10:00:03.000100Z' }),
+						buildAttachment({ id: 'a2', createdAt: SECOND_TWO }),
+						buildAttachment({ id: 'a1', createdAt: '2024-01-01T10:00:01.000000Z' })
+					],
+					3,
+					undefined
+				);
+			const prepend = (id: string, createdAt: string): void =>
+				useStore
+					.getState()
+					.prependMediaGalleryAttachment(roomId, buildAttachment({ id, createdAt }));
+			prepend('late', '2024-01-01T10:00:03.000101Z');
+			prepend('middle', '2024-01-01T10:00:02.500000Z');
+			prepend('tie-low', SECOND_TWO);
+			prepend('tie-high', SECOND_TWO);
+			prepend('oldest', '2024-01-01T10:00:00.999999Z');
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'late',
+				'a3',
+				'middle',
+				'tie-low',
+				'tie-high',
+				'a2',
+				'a1',
+				'oldest'
+			]);
+		});
+
+		test('on 1.6.x a new attachment is always prepended, whatever its date', () => {
+			useStore.getState().setApiVersion('1.6.14');
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1', createdAt: '2024-01-01T10:00:05Z' })],
+					1,
+					'cur-1'
+				);
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(
+					roomId,
+					buildAttachment({ id: 'old', createdAt: '2024-01-01T10:00:01Z' })
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'old',
+				'a1'
+			]);
+		});
+
+		test('appending a page skips the attachments already loaded', () => {
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' })],
+					2,
+					'c'
+				);
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1' }), buildAttachment({ id: 'a2' })],
+					2,
+					undefined
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'a1',
+				'a2'
+			]);
+		});
+
+		test('leaves out an attachment older than the loaded ones while older pages remain', () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1', createdAt: '2024-01-01T10:00:05Z' })],
+					1,
+					'cur-1'
+				);
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(
+					roomId,
+					buildAttachment({ id: 'old', createdAt: '2024-01-01T10:00:01Z' })
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
 		});
 
 		test('skips the buckets whose filter does not match the attachment', () => {

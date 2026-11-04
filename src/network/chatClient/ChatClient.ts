@@ -280,15 +280,14 @@ export const chatClient: ChatClient = {
 			// No optimistic write, v1 parity: the bubble updates on the
 			// ReactionChanged echo (both endpoints answer a bodyless 204).
 			if (reaction === '') {
-				// The v1 removal was an empty-valued stanza; v2 DELETEs the specific
-				// emoji, so resolve my current one from the store — the same
-				// selector the reaction pickers read. Nothing active, nothing to
+				// The v1 removal was an empty-valued stanza; v2 DELETEs the single
+				// reaction of the user. Nothing active in the store, nothing to
 				// remove: the empty v1 stanza was a no-op there too.
 				const myReaction = getMyLastReaction(useStore.getState(), roomId, messageStanzaId);
 				if (!myReaction) {
 					return;
 				}
-				wscSdk.removeReaction(roomId, messageStanzaId, myReaction).catch((err) => {
+				wscSdk.removeReaction(roomId, messageStanzaId).catch((err) => {
 					console.error('chatClient.sendChatMessageReaction: reaction removal failed', err);
 				});
 				return;

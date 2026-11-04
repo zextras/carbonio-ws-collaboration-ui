@@ -41,7 +41,7 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 					roomId: event.roomId,
 					active: false,
 					participants: [],
-					createdAt: event.sentDate,
+					createdAt: event.createdAt ?? event.sentDate ?? '',
 					meetingType: MeetingType.PERMANENT
 				}
 			]);
