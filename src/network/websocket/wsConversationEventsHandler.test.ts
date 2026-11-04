@@ -5,6 +5,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
+import type { Mock } from 'vitest';
 
 import * as presenceRefresh from './presenceRefresh';
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
@@ -552,6 +553,46 @@ describe('wsConversationEventHandler tests', () => {
 			wsConversationEventsHandler(nameChanged('Late', 'sys-late', OLDER_AT));
 
 			expect(useStore.getState().rooms[room.id]?.name).toBe('Snapshot');
+		});
+
+		const inboxWith = (name: string, updatedAt: string): Response =>
+			new Response(
+				JSON.stringify({
+					conversations: [
+						{
+							roomId: room.id,
+							room: {
+								id: room.id,
+								type: 'group',
+								members: [],
+								name,
+								description: 'Desc',
+								updatedAt
+							},
+							unreadCount: 0,
+							markers: []
+						}
+					]
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } }
+			);
+
+		test('the inbox refresh applies a rename whose event was missed', async () => {
+			(global.fetch as Mock).mockResolvedValueOnce(inboxWith('Missed', NEWER_AT));
+
+			await wscSdk.fetchInbox();
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Missed');
+			expect(useStore.getState().rooms[room.id]?.description).toBe('Desc');
+		});
+
+		test('the inbox refresh keeps a rename newer than its snapshot', async () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', NEWER_AT));
+			(global.fetch as Mock).mockResolvedValueOnce(inboxWith('Older', OLDER_AT));
+
+			await wscSdk.fetchInbox();
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Live');
 		});
 
 		test('a line older than the own read marker does not count as unread', () => {
