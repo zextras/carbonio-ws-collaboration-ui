@@ -1,3 +1,9 @@
+## [0.19.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.2...v0.19.3) (2026-11-03)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-ui-soap-lib to v1.3.3 ([#880](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/880)) ([13997c6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/13997c699954f9ff69b7a2c483efa579efd89fab))
+
 ## [0.19.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.1...v0.19.2) (2026-11-03)
 
 ### Other changes
