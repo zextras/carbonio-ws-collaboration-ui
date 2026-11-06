@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen, waitFor, within } from '@testing-library/react';
+import * as shell from '@zextras/carbonio-shell-ui';
 
 import SecondaryBarView from './SecondaryBarView';
 import { mockSearchUsersByFeatureRequest } from '../../../network/soap/__mocks__/SearchUsersByFeatureRequest';
@@ -150,6 +151,21 @@ describe('SecondaryBar tests', () => {
 		setup(<SecondaryBarView expanded={false} />);
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
+	});
+
+	test('Collapsed sidebar view opens secondary bar when clicking funnel button', async () => {
+		const { user } = setup(<SecondaryBarView expanded={false} />);
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
+		await user.click(funnelButton);
+		expect(shell.openSecondaryBar).toHaveBeenCalledTimes(1);
+	});
+
+	test('Filter input is focused once the secondary bar expands after clicking funnel button', async () => {
+		const { user, rerender } = setup(<SecondaryBarView expanded={false} />);
+		await user.click(screen.getByTestId(iconFunnelOutline));
+		rerender(<SecondaryBarView expanded />);
+		const filterInput = await screen.findByRole('textbox', { name: /type to filter list/i });
+		await waitFor(() => expect(filterInput).toHaveFocus());
 	});
 
 	describe('FilteredGal inside SecondaryBarView tests', () => {

@@ -1,3 +1,21 @@
+## [0.19.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.3...v0.19.4) (2026-11-06)
+
+### Bug Fixes
+
+* allow opening virtual rooms list when secondary bar is collapsed ([22e9b04](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/22e9b04544afe4ec5d4ed77055046b127b58af77)), closes [#874](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/874)
+
+## [0.19.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.2...v0.19.3) (2026-11-03)
+
+### Bug Fixes
+
+* **deps:** update dependency @zextras/carbonio-ui-soap-lib to v1.3.3 ([#880](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/880)) ([13997c6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/13997c699954f9ff69b7a2c483efa579efd89fab))
+
+## [0.19.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.1...v0.19.2) (2026-11-03)
+
+### Other changes
+
+* **deps:** lock file maintenance ([#879](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/879)) ([6e7349a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6e7349ad3ac77514be9d5b7287e6d71bbf8d2a9e))
+
 ## [0.19.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.0...v0.19.1) (2026-10-27)
 
 ### Other changes
