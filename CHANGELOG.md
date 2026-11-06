@@ -1,3 +1,9 @@
+## [0.19.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.3...v0.19.4) (2026-11-06)
+
+### Bug Fixes
+
+* allow opening virtual rooms list when secondary bar is collapsed ([22e9b04](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/22e9b04544afe4ec5d4ed77055046b127b58af77)), closes [#874](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/874)
+
 ## [0.19.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.2...v0.19.3) (2026-11-03)
 
 ### Bug Fixes
