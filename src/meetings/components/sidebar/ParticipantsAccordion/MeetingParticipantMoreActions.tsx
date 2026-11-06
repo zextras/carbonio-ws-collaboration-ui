@@ -22,6 +22,8 @@ import RemoveParticipantModal from './RemoveParticipantModal';
 import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
 import { demotesRoomMember, promoteRoomMember } from '../../../../network';
+import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
+import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 
 const KICK_PARTICIPANT_MIN_API_VERSION = '1.6.16';
@@ -32,8 +34,6 @@ type MeetingParticipantMoreActionsProps = {
 	memberId: string;
 	isSessionParticipant: boolean;
 	isMemberOwner: boolean;
-	isUserGuest: boolean;
-	iAmOwner: boolean;
 };
 
 const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
@@ -41,9 +41,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 	roomId,
 	memberId,
 	isSessionParticipant,
-	isMemberOwner,
-	isUserGuest,
-	iAmOwner
+	isMemberOwner
 }) => {
 	const [t] = useTranslation();
 	const moreActionsLabel = t('tooltip.moreActions', 'More actions');
@@ -54,6 +52,8 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const removeFromMeetingLabel = t('meeting.kick.action', 'Remove from meeting');
 
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
+	const iAmOwner = useStore((store) => getOwnershipOfTheRoom(store, roomId));
 	const apiVersion = useStore((state) => state.session.apiVersion);
 	const isKickSupported = !!apiVersion && gte(apiVersion, KICK_PARTICIPANT_MIN_API_VERSION);
 

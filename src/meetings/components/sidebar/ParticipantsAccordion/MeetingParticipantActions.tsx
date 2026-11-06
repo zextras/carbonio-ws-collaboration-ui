@@ -15,7 +15,6 @@ import {
 } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 
 type ParticipantActionsProps = {
@@ -43,8 +42,6 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const isMemberOwner: boolean = useStore((store) =>
 		getOwnershipOfTheRoom(store, roomId ?? '', memberId)
 	);
-	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
-	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
@@ -70,8 +67,6 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 				memberId={memberId}
 				isSessionParticipant={isSessionParticipant}
 				isMemberOwner={isMemberOwner}
-				isUserGuest={!!isUserGuest}
-				iAmOwner={iAmOwner}
 			/>
 		</Container>
 	);
