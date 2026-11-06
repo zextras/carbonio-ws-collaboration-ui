@@ -31,12 +31,13 @@ const guest = createMockUser({ id: 'guestId', name: 'External Person', type: Use
 const storeSetup = (
 	sessionUserId: string,
 	participantsNumber = 3,
-	apiVersion: Version = '1.6.16'
+	apiVersion: Version = '1.6.16',
+	roomType: RoomType = RoomType.GROUP
 ): MeetingBe => {
 	const store = useStore.getState();
 	const users = [moderator, participant, guest].slice(0, participantsNumber);
 	const room = createMockRoom({
-		type: RoomType.GROUP,
+		type: roomType,
 		members: [
 			createMockMember({ userId: moderator.id, owner: true }),
 			createMockMember({ userId: participant.id }),
@@ -124,6 +125,12 @@ describe('Meeting participant more actions', () => {
 		await user.click(getMoreActionsButton(participant.name));
 		expect(await screen.findByText(/Promote to moderator/i)).toBeVisible();
 		expect(screen.queryByText(/Remove from meeting/i)).not.toBeInTheDocument();
+	});
+
+	test('Moderator has no ownership or remove actions in a one to one meeting', () => {
+		const meeting = storeSetup(moderator.id, 2, '1.6.16', RoomType.ONE_TO_ONE);
+		setup(<MeetingParticipantsList meetingId={meeting.id} />);
+		expect(queryMoreActionsButton(participant.name)).not.toBeInTheDocument();
 	});
 
 	test('More actions button is hidden when a participant has no available actions', () => {

@@ -22,9 +22,13 @@ import RemoveParticipantModal from './RemoveParticipantModal';
 import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
 import { demotesRoomMember, promoteRoomMember } from '../../../../network';
-import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
+import {
+	getOwnershipOfTheRoom,
+	getRoomTypeSelector
+} from '../../../../store/selectors/RoomsSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 const KICK_PARTICIPANT_MIN_API_VERSION = '1.6.16';
 
@@ -54,6 +58,9 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const iAmOwner = useStore((store) => getOwnershipOfTheRoom(store, roomId));
+	const isOneToOne = useStore(
+		(store) => getRoomTypeSelector(store, roomId) === RoomType.ONE_TO_ONE
+	);
 	const apiVersion = useStore((state) => state.session.apiVersion);
 	const isKickSupported = !!apiVersion && gte(apiVersion, KICK_PARTICIPANT_MIN_API_VERSION);
 
@@ -85,7 +92,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: switchPinnedTile
 			});
 		}
-		if (iAmOwner && !isSessionParticipant && !isUserGuest) {
+		if (iAmOwner && !isOneToOne && !isSessionParticipant && !isUserGuest) {
 			list.push({
 				id: 'switchOwnership',
 				icon: isMemberOwner ? 'Crown' : 'CrownOutline',
@@ -101,7 +108,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 				onClick: openMuteForAllModal
 			});
 		}
-		if (isKickSupported && iAmOwner && !isSessionParticipant) {
+		if (isKickSupported && iAmOwner && !isOneToOne && !isSessionParticipant) {
 			list.push({
 				id: 'removeFromMeeting',
 				onClick: openRemoveModal,
@@ -120,6 +127,7 @@ const MeetingParticipantMoreActions: FC<MeetingParticipantMoreActionsProps> = ({
 		iAmOwner,
 		isKickSupported,
 		isMemberOwner,
+		isOneToOne,
 		isPinned,
 		isSessionParticipant,
 		isUserGuest,
