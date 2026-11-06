@@ -84,4 +84,4 @@ export const useTracker: typeof Shell.useTracker = () => ({
 	reset: vi.fn()
 });
 
-export const openSecondaryBar = vi.fn();
+export const openSecondaryBar: typeof Shell.openSecondaryBar = vi.fn();

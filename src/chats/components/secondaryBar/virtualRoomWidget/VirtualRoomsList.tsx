@@ -29,13 +29,13 @@ type virtualRoomsListProps = {
 	expanded?: boolean;
 };
 
-const CustomContainer = styled(Container)<{ expanded?: boolean }>`
+const CustomContainer = styled(Container)<{ $expanded?: boolean }>`
 	position: fixed;
 	width: 21.875rem;
 	height: auto;
 	max-height: 31.25rem;
 	bottom: 3rem;
-	left: ${({ expanded = true }): string => (expanded ? '3.6rem' : '6.75rem')};
+	left: ${({ $expanded = true }): string => ($expanded ? '3.6rem' : '6.75rem')};
 	border-radius: 0.5rem;
 	box-shadow: 0 0 4px 0 rgba(166, 166, 166, 0.5);
 	z-index: 3;
@@ -125,7 +125,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 			padding="0.5rem"
 			gap="0.5rem"
 			ref={popupRef}
-			expanded={expanded}
+			$expanded={expanded}
 		>
 			<Button label={createVirtualRoom} color="primary" width="fill" onClick={toggleModal} />
 			<CreateVirtualRoomModal
