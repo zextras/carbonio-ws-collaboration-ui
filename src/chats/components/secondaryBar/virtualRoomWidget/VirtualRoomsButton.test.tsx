@@ -25,6 +25,8 @@ const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 
 const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 
+const CREATE_NEW_VIRTUAL_ROOM = 'Create new virtual room';
+
 vi.mock('../../../../network/soap/Requests/SearchUsersByFeatureRequest');
 
 beforeEach(() => {
@@ -44,7 +46,7 @@ describe('VirtualRoomsButton', () => {
 		const button = screen.getByRole('button');
 		await user.click(button);
 
-		const createButton = await screen.findByText('Create new virtual room');
+		const createButton = await screen.findByText(CREATE_NEW_VIRTUAL_ROOM);
 		expect(createButton).toBeVisible();
 
 		await user.click(createButton);
@@ -69,5 +71,43 @@ describe('VirtualRoomsButton', () => {
 		// check if there's a video icon inside the button
 		const button = screen.getByTestId('icon: Video');
 		expect(button).toBeInTheDocument();
+	});
+
+	test('open popover when clicked while collapsed', async () => {
+		const { user } = setup(<VirtualRoomsButton expanded={false} />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByText(CREATE_NEW_VIRTUAL_ROOM);
+		expect(createButton).toBeVisible();
+
+		await user.click(button);
+		expect(screen.queryByText(CREATE_NEW_VIRTUAL_ROOM)).not.toBeInTheDocument();
+	});
+
+	test('close popover when clicking outside while collapsed', async () => {
+		const { user } = setup(<VirtualRoomsButton expanded={false} />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByText(CREATE_NEW_VIRTUAL_ROOM);
+		expect(createButton).toBeVisible();
+
+		await user.click(document.body);
+		expect(screen.queryByText(CREATE_NEW_VIRTUAL_ROOM)).not.toBeInTheDocument();
+	});
+
+	test('test toggle in expanded mode', async () => {
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		expect(await screen.findByText(CREATE_NEW_VIRTUAL_ROOM)).toBeVisible();
+
+		await user.click(button);
+		expect(screen.queryByText(CREATE_NEW_VIRTUAL_ROOM)).not.toBeInTheDocument();
 	});
 });
