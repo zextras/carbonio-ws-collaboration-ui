@@ -5,6 +5,7 @@
  */
 
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
+import { EventName } from '../../../hooks/useEventListener';
 import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import {
@@ -13,7 +14,10 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
-import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import {
+	MeetingLeftEvent,
+	MeetingLeftReason
+} from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 import SubscriptionsManager from '../../webRTC/SubscriptionsManager';
 
@@ -43,7 +47,8 @@ const event: MeetingLeftEvent = {
 	type: WsEventType.MEETING_PARTICIPANT_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
 	meetingId: meeting.id,
-	userId: 'userId'
+	userId: 'userId',
+	reason: MeetingLeftReason.LEFT
 };
 
 beforeEach(() => {
@@ -74,5 +79,40 @@ describe('meetingLeftEventHandler tests', () => {
 		store.setTalkingUser(event.userId, true);
 		meetingLeftEventHandler(event);
 		expect(store.activeMeeting?.talkingUsers).not.toContain(event.userId);
+	});
+});
+
+describe('meetingLeftEventHandler kick tests', () => {
+	const kickedEvent: MeetingLeftEvent = {
+		...event,
+		userId: 'myUserId',
+		reason: MeetingLeftReason.KICKED
+	};
+
+	test('A custom event is sent if I am removed from the active meeting', () => {
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingLeftEventHandler(kickedEvent);
+		expect(dispatchEvent).toHaveBeenCalledWith(
+			new CustomEvent(EventName.MEETING_PARTICIPANT_KICKED, { detail: kickedEvent })
+		);
+	});
+
+	test('A custom event is not sent if I am not inside the meeting', () => {
+		useStore.getState().meetingDisconnection(meeting.id);
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingLeftEventHandler(kickedEvent);
+		expect(dispatchEvent).not.toHaveBeenCalled();
+	});
+
+	test('A custom event is not sent if another participant is removed', () => {
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingLeftEventHandler({ ...kickedEvent, userId: 'otherUserId' });
+		expect(dispatchEvent).not.toHaveBeenCalled();
+	});
+
+	test('A custom event is not sent if I leave on my own', () => {
+		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
+		meetingLeftEventHandler({ ...kickedEvent, reason: MeetingLeftReason.LEFT });
+		expect(dispatchEvent).not.toHaveBeenCalled();
 	});
 });

@@ -14,6 +14,7 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingDeclinedEvent,
 	MeetingJoinedEvent,
+	MeetingLeftEvent,
 	MeetingParticipantClashedEvent,
 	MeetingParticipantHandRaisedEvent,
 	MeetingRecordingStartedEvent,
@@ -44,7 +45,8 @@ export enum EventName {
 	MEMBER_DEMOTED = 'memberDemoted',
 	ROUTE_REDIRECT = 'routeRedirect',
 	MEETING_PARTICIPANT_RAISE_HAND = 'meetingParticipantRaiseHand',
-	MEETING_DECLINED = 'meetingDeclined'
+	MEETING_DECLINED = 'meetingDeclined',
+	MEETING_PARTICIPANT_KICKED = 'meetingParticipantKicked'
 }
 
 export type NewMessageEvent = {
@@ -132,6 +134,11 @@ export type MeetingDeclinedUseEvent = {
 	data: MeetingDeclinedEvent;
 };
 
+export type ParticipantKickedEvent = {
+	name: EventName.MEETING_PARTICIPANT_KICKED;
+	data: MeetingLeftEvent;
+};
+
 type AppCustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -149,7 +156,8 @@ type AppCustomEvent =
 	| MemberDemotedEvent
 	| RouteRedirectEvent
 	| MeetingParticipantRaiseHandEvent
-	| MeetingDeclinedUseEvent;
+	| MeetingDeclinedUseEvent
+	| ParticipantKickedEvent;
 
 export const sendCustomEvent = (event: AppCustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

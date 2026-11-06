@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -15,15 +15,9 @@ type PromoteDemoteMemberProps = {
 	owner: boolean;
 	memberId: string;
 	roomId: string;
-	isInsideMeeting?: boolean;
 };
 
-const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
-	owner,
-	memberId,
-	roomId,
-	isInsideMeeting
-}) => {
+const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({ owner, memberId, roomId }) => {
 	const [t] = useTranslation();
 	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
@@ -34,17 +28,12 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 
 	const demoteMember = useCallback(() => demotesRoomMember(roomId, memberId), [memberId, roomId]);
 
-	const iconColor = useMemo(() => {
-		if (isInsideMeeting) return 'gray0';
-		return owner ? 'primary' : 'secondary';
-	}, [isInsideMeeting, owner]);
-
 	return (
 		<Tooltip label={tooltipLabel}>
 			<Button
 				type="ghost"
-				color={iconColor}
-				size={isInsideMeeting ? 'medium' : 'extralarge'}
+				color={owner ? 'primary' : 'secondary'}
+				size="extralarge"
 				icon={owner ? 'Crown' : 'CrownOutline'}
 				onClick={owner ? demoteMember : promoteMember}
 			/>
