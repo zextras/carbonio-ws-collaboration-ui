@@ -23,7 +23,9 @@ export enum PAGE_INFO_TYPE {
 	UNAUTHENTICATED = 'unauthenticated',
 	INVALID_WAITING_ROOM = 'invalid_waiting_room',
 	GENERAL_ERROR = 'general_error',
-	MEETING_DECLINED = 'meeting_declined'
+	MEETING_DECLINED = 'meeting_declined',
+	KICKED = 'kicked',
+	KICKED_FROM_VIRTUAL_ROOM = 'kicked_from_virtual_room'
 }
 
 export type RouterContextType = {

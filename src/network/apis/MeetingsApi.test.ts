@@ -22,6 +22,7 @@ import {
 	leaveMeeting,
 	leaveWaitingRoom,
 	listMeetings,
+	kickParticipant,
 	startMeeting,
 	startRecording,
 	stopMeeting,
@@ -478,6 +479,14 @@ describe('Meetings API', () => {
 				status: 'ACCEPTED'
 			}
 		);
+	});
+
+	test('kickParticipant is called correctly', async () => {
+		await kickParticipant(meetingMock.id, 'userId');
+
+		expect(mockFetchAPI).toHaveBeenCalledWith(`meetings/${meetingMock.id}/kick`, RequestType.POST, {
+			userToModerate: 'userId'
+		});
 	});
 
 	test('startRecording is called correctly', async () => {

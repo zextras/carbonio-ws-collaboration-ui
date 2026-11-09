@@ -21,11 +21,14 @@ import { getMeetingByMeetingId, leaveMeeting } from '../network';
 import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipants
+	getMeetingParticipants,
+	getRoomIdByMeetingId
 } from '../store/selectors/MeetingSelectors';
+import { getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
+import { RoomType } from '../types/store/RoomTypes';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();
@@ -124,6 +127,18 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
+
+	// Redirect to info page when a moderator removes the user from the meeting
+	const meetingParticipantKickedHandler = useCallback(() => {
+		const state = useStore.getState();
+		const roomId = getRoomIdByMeetingId(state, meetingId);
+		const roomType = getRoomTypeSelector(state, roomId ?? '');
+		const isChatRoom = !!roomType && roomType !== RoomType.TEMPORARY;
+		meetingDisconnection(meetingId);
+		closePipWindow();
+		goToInfoPage(isChatRoom ? PAGE_INFO_TYPE.KICKED : PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM);
+	}, [closePipWindow, goToInfoPage, meetingDisconnection, meetingId]);
+	useEventListener(EventName.MEETING_PARTICIPANT_KICKED, meetingParticipantKickedHandler);
 
 	// Redirect to info page when callee declines the call
 	const meetingDeclinedHandler = useCallback(() => {

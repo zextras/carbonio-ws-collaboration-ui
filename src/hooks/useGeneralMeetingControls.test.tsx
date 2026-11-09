@@ -6,13 +6,17 @@
 
 import { act, renderHook, waitFor, screen } from '@testing-library/react';
 
+import { EventName, sendCustomEvent } from './useEventListener';
 import useGeneralMeetingControls from './useGeneralMeetingControls';
 import { PAGE_INFO_TYPE } from '../meetings/contexts/routerContext';
 import useStore from '../store/Store';
-import { createMockMeeting, createMockParticipants } from '../tests/createMock';
+import { createMockMeeting, createMockParticipants, createMockRoom } from '../tests/createMock';
 import { ProvidersWrapper } from '../tests/test-utils';
 import { mockGoToInfoPage } from './__mocks__/useRouting';
 import * as api from '../network/apis/MeetingsApi';
+import { WsEventType } from '../types/network/websocket/wsEvents';
+import { MeetingLeftReason } from '../types/network/websocket/wsMeetingEvents';
+import { RoomType } from '../types/store/RoomTypes';
 
 const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
 
@@ -67,4 +71,32 @@ describe('useGeneralMeetingControl hook', () => {
 			expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.GENERAL_ERROR);
 		});
 	});
+
+	test.each([
+		[RoomType.GROUP, PAGE_INFO_TYPE.KICKED],
+		[RoomType.TEMPORARY, PAGE_INFO_TYPE.KICKED_FROM_VIRTUAL_ROOM]
+	])(
+		'Redirect to the removed info page when the user is removed from a %s meeting',
+		async (roomType, infoType) => {
+			useStore.getState().addRooms([createMockRoom({ id: meeting.roomId, type: roomType })]);
+			renderHook(() => useGeneralMeetingControls(meeting.id), {
+				wrapper: ProvidersWrapper
+			});
+			act(() => {
+				sendCustomEvent({
+					name: EventName.MEETING_PARTICIPANT_KICKED,
+					data: {
+						type: WsEventType.MEETING_PARTICIPANT_LEFT,
+						sentDate: '2022-01-01T00:00:00.000Z',
+						meetingId: meeting.id,
+						userId: 'userId',
+						reason: MeetingLeftReason.KICKED
+					}
+				});
+			});
+			await waitFor(() => {
+				expect(mockGoToInfoPage).toHaveBeenCalledWith(infoType);
+			});
+		}
+	);
 });
