@@ -1,3 +1,9 @@
+## [0.20.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.4...v0.20.0) (2026-11-09)
+
+### Features
+
+* let moderators remove a participant from the meeting [CO-4284] ([#862](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/862)) ([9bf5e96](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9bf5e96a8bd5149b145f67336d3a680830ed40af))
+
 ## [0.19.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.19.3...v0.19.4) (2026-11-06)
 
 ### Bug Fixes
