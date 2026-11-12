@@ -1,3 +1,9 @@
+## [0.20.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.2...v0.20.3) (2026-11-12)
+
+### Other changes
+
+* **deps:** update dependency @zextras/carbonio-design-system to v12.3.1 ([#871](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/871)) ([291ae94](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/291ae94f184c90c0defb14cde6623fdab188f80d))
+
 ## [0.20.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.1...v0.20.2) (2026-11-11)
 
 ### Other changes
