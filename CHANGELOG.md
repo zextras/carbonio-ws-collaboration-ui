@@ -1,3 +1,9 @@
+## [0.20.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.3...v0.20.4) (2026-11-17)
+
+### Other changes
+
+* **deps:** update devdependencies (weekly) ([#885](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/885)) ([fc285e1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fc285e16da36d0a8dd9904c28b218918664969a2))
+
 ## [0.20.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.2...v0.20.3) (2026-11-12)
 
 ### Other changes
