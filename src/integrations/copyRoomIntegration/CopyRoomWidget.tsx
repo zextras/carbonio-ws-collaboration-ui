@@ -154,7 +154,7 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 		'Something went wrong, please try again or reload the page'
 	);
 	const twoMembersTooltip = t(
-		'readonly.room.toBeMigrate.tooltip',
+		'readOnly.room.toBeMigrate.tooltip',
 		'There must be at least two members besides you.'
 	);
 
