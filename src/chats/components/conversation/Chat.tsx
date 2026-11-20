@@ -100,8 +100,8 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 				key: new Date().toLocaleString(),
 				severity: 'info',
 				label: t(
-					'feedback.member.demotion',
-					`Congratulations! You are now a moderator of ${roomName} group.`,
+					'feedback.member.promotion',
+					'Congratulations! You are now a moderator of {{roomName}} group.',
 					{ roomName }
 				),
 				hideButton: true,
@@ -120,8 +120,8 @@ const Chat = ({ roomId, conversationView, setConversationView }: ChatsProps): Re
 				key: new Date().toLocaleString(),
 				severity: 'info',
 				label: t(
-					'feedback.member.promotion',
-					`You are no longer a moderator of ${roomName} group.`,
+					'feedback.member.demotion',
+					'You are no longer a moderator of {{roomName}} group.',
 					{ roomName }
 				),
 				hideButton: true,

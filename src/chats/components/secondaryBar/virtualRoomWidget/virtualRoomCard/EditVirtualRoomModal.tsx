@@ -47,7 +47,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const meetingParticipants = useStore((state) => getMeetingParticipantsByRoomId(state, roomId));
 
 	const [t] = useTranslation();
-	const modalTitle = t('meeting.virtual.modal.edit.title ', `Edit "${roomName}" Virtual Room`, {
+	const modalTitle = t('meeting.virtual.modal.edit.title', 'Edit "{{roomName}}" Virtual Room', {
 		roomName
 	});
 	const namePlaceholder = t('meeting.virtual.creationInput', 'Virtual Room’s name');
