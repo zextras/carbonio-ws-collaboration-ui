@@ -1,3 +1,13 @@
+## [0.20.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.5...v0.20.6) (2026-11-23)
+
+### Bug Fixes
+
+* use translation keys that match the i18n repository ([#887](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/887)) ([1c75ae1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1c75ae116754ed805e44430b840413c4c55830f0))
+
+### Other changes
+
+* **deps:** update deps 2026-11-20 ([#888](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/888)) ([02f2b18](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/02f2b187876d3f2bac307fbf7b9e31e9bcf72b41))
+
 ## [0.20.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.4...v0.20.5) (2026-11-19)
 
 ### Other changes
