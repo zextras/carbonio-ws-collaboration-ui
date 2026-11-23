@@ -101,10 +101,10 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		if (this.peerConn.signalingState !== 'have-remote-offer') {
-			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn.setRemoteDescription(remoteDescription);
-		}
+		if (this.peerConn.signalingState !== 'have-local-offer') return;
+		this.peerConn
+			.setRemoteDescription(new RTCSessionDescription(remoteAnswer))
+			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
 	/**

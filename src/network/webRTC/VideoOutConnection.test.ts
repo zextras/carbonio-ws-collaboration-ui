@@ -101,15 +101,53 @@ describe('VideoOutConnection', () => {
 		expect(updateMediaOfferSpy).toHaveBeenCalledWith(meetingId, STREAM_TYPE.VIDEO, false);
 	});
 
-	test('handleRemoteAnswer sets the remote description', async () => {
-		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
-		vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+	describe('handleRemoteAnswer', () => {
+		const startVideo = async (): Promise<VideoOutConnection> => {
+			vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
+			vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+			const conn = new VideoOutConnection(meetingId, true);
+			await flushPromises();
+			return conn;
+		};
 
-		const conn = new VideoOutConnection(meetingId, true);
-		await flushPromises();
+		test('applies the answer to the pending offer', async () => {
+			const conn = await startVideo();
+			peerConnMock.signalingState = 'have-local-offer';
 
-		conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
-		expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		});
+
+		test('ignores an answer when no offer is pending', async () => {
+			const conn = await startVideo();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('ignores an answer once the video is stopped', async () => {
+			const conn = await startVideo();
+			conn.closePeerConnection();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('logs an answer that cannot be applied', async () => {
+			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			const conn = await startVideo();
+			peerConnMock.signalingState = 'have-local-offer';
+			const error = new Error('InvalidStateError');
+			(peerConnMock.setRemoteDescription as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+			await flushPromises();
+
+			expect(consoleWarn).toHaveBeenCalledWith('setRemoteDescription failed', error);
+		});
 	});
 });
 

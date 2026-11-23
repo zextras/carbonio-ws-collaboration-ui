@@ -153,15 +153,48 @@ describe('BidirectionalConnectionAudioInOut', () => {
 		expect(createAudioOfferSpy).not.toHaveBeenCalled();
 	});
 
-	test('handleRemoteAnswer sets the remote description when not in have-remote-offer state', async () => {
-		vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
-		vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+	describe('handleRemoteAnswer', () => {
+		const createConnection = async (): Promise<BidirectionalConnectionAudioInOut> => {
+			vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
+			vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+			const conn = new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+			return conn;
+		};
 
-		const conn = new BidirectionalConnectionAudioInOut(meetingId, false);
-		await flushPromises();
+		const withPendingOffer = (): void => {
+			peerConnMock.signalingState = 'have-local-offer';
+		};
 
-		conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
-		expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		test('applies the answer to the pending offer', async () => {
+			const conn = await createConnection();
+			withPendingOffer();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		});
+
+		test('ignores an answer when no offer is pending', async () => {
+			const conn = await createConnection();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('logs an answer that cannot be applied', async () => {
+			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			const conn = await createConnection();
+			withPendingOffer();
+			const error = new Error('InvalidStateError');
+			(peerConnMock.setRemoteDescription as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+			await flushPromises();
+
+			expect(consoleWarn).toHaveBeenCalledWith('setRemoteDescription failed', error);
+		});
 	});
 
 	test('Acquires the audio stream but keeps the track disabled when joining muted', async () => {

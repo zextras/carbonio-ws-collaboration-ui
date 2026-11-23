@@ -176,8 +176,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-		this.peerConn?.setRemoteDescription(remoteDescription);
+		if (this.peerConn?.signalingState !== 'have-local-offer') return;
+		this.peerConn
+			.setRemoteDescription(new RTCSessionDescription(remoteAnswer))
+			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
 	public closePeerConnection(): void {
