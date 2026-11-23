@@ -367,6 +367,7 @@ describe('BidirectionalConnectionAudioInOut', () => {
 			failConnection();
 			await vi.advanceTimersByTimeAsync(6_000);
 
+			expect(peerConnMock.createOffer).not.toHaveBeenCalledWith({ iceRestart: true });
 			expect(audioIceRestartSpy).not.toHaveBeenCalled();
 		});
 	});

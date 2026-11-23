@@ -7,6 +7,7 @@
 import VideoOutConnection from './VideoOutConnection';
 import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { Version } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
@@ -147,6 +148,56 @@ describe('VideoOutConnection', () => {
 			await flushPromises();
 
 			expect(consoleWarn).toHaveBeenCalledWith('setRemoteDescription failed', error);
+		});
+	});
+
+	describe('ICE restart', () => {
+		const startVideo = async (apiVersion: Version): Promise<void> => {
+			useStore.getState().setApiVersion(apiVersion);
+			vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
+			vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+			await new VideoOutConnection(meetingId, false).startVideo();
+		};
+
+		const failConnection = (): void => {
+			peerConnMock.connectionState = 'failed';
+			(peerConnMock.onconnectionstatechange as () => void)();
+		};
+
+		beforeEach(() => {
+			vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+		});
+
+		afterEach(() => {
+			vi.clearAllTimers();
+		});
+
+		test('sends a new ICE restart offer 5 seconds after a failed one', async () => {
+			const videoIceRestartSpy = vi
+				.spyOn(MeetingsApi, 'videoIceRestart')
+				.mockRejectedValueOnce(new Error('status ko'))
+				.mockResolvedValue({} as Response);
+			await startVideo('1.6.6');
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+
+			expect(peerConnMock.createOffer).toHaveBeenCalledWith({ iceRestart: true });
+			expect(videoIceRestartSpy.mock.calls).toEqual([
+				[meetingId, 'sdp'],
+				[meetingId, 'sdp']
+			]);
+		});
+
+		test('does not restart ICE before API 1.6.6', async () => {
+			const videoIceRestartSpy = vi.spyOn(MeetingsApi, 'videoIceRestart');
+			await startVideo('1.6.5');
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+
+			expect(peerConnMock.createOffer).not.toHaveBeenCalledWith({ iceRestart: true });
+			expect(videoIceRestartSpy).not.toHaveBeenCalled();
 		});
 	});
 });

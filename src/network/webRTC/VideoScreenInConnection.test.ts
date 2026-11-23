@@ -583,6 +583,45 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 	});
 });
 
+describe('VideoScreenInConnection — ICE restart', () => {
+	const videoIceRestart = vi.mocked(MeetingsApi.videoIceRestart);
+	let conn: VideoScreenInConnection;
+
+	const failConnection = (): void => {
+		Object.assign(conn.peerConn, { connectionState: 'failed' });
+		(conn.peerConn.onconnectionstatechange as () => void)();
+	};
+
+	beforeEach(() => {
+		storeMocks.apiVersion = '1.6.15';
+		conn = new VideoScreenInConnection(MEETING_ID);
+		videoIceRestart.mockReset();
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+	});
+
+	it('asks for a new offer again 5 seconds after a failed ICE restart', async () => {
+		videoIceRestart.mockRejectedValueOnce(new Error('status ko')).mockResolvedValue(new Response());
+
+		failConnection();
+		await vi.advanceTimersByTimeAsync(6_000);
+
+		expect(videoIceRestart.mock.calls).toEqual([[MEETING_ID], [MEETING_ID]]);
+	});
+
+	it('does not ask for an ICE restart before API 1.6.6', async () => {
+		storeMocks.apiVersion = '1.6.5';
+
+		failConnection();
+		await vi.advanceTimersByTimeAsync(6_000);
+
+		expect(videoIceRestart).not.toHaveBeenCalled();
+	});
+});
+
 describe('VideoScreenInConnection — tick robustness', () => {
 	let conn: VideoScreenInConnection;
 	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);
