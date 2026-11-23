@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const ICE_RESTART_RETRY_MS = 5000;
+export const ICE_RESTART_FIRST_RETRY_MS = 5000;
+export const ICE_RESTART_MAX_RETRY_MS = 30000;
+export const ICE_RESTART_ANSWER_TIMEOUT_MS = 15000;
 
 const restarting = new WeakSet<RTCPeerConnection>();
 
@@ -14,19 +16,29 @@ const hasSettled = (peerConn: RTCPeerConnection): boolean =>
 export const restartIce = (peerConn: RTCPeerConnection, restart: () => Promise<unknown>): void => {
 	if (restarting.has(peerConn)) return;
 	restarting.add(peerConn);
+	let retryDelay = ICE_RESTART_FIRST_RETRY_MS;
 	const attempt = (): void => {
 		if (hasSettled(peerConn)) {
 			restarting.delete(peerConn);
 			return;
 		}
 		restart()
-			.then(() => restarting.delete(peerConn))
+			// The answer comes back over the websocket and can be lost even when the call succeeds
+			.then(() => setTimeout(attempt, ICE_RESTART_ANSWER_TIMEOUT_MS))
 			.catch((reason) => {
-				console.warn('ICE restart failed, retrying', reason);
-				setTimeout(attempt, ICE_RESTART_RETRY_MS);
+				console.warn(`ICE restart failed, retrying in ${retryDelay} ms`, reason);
+				setTimeout(attempt, retryDelay);
+				retryDelay = Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS);
 			});
 	};
 	attempt();
+};
+
+// An unanswered offer keeps signaling out of 'stable' and blocks every other negotiation
+const rollBackPendingOffer = async (peerConn: RTCPeerConnection): Promise<void> => {
+	if (peerConn.signalingState === 'have-local-offer') {
+		await peerConn.setLocalDescription({ type: 'rollback' });
+	}
 };
 
 export const restartIceWithOffer = (
@@ -34,16 +46,14 @@ export const restartIceWithOffer = (
 	sendOffer: (sdp: string) => Promise<unknown>
 ): void =>
 	restartIce(peerConn, async () => {
+		await rollBackPendingOffer(peerConn);
 		try {
 			await peerConn.setLocalDescription(await peerConn.createOffer({ iceRestart: true }));
 			const sdp = peerConn.localDescription?.sdp;
 			if (!sdp) throw new Error('Missing ICE restart offer');
 			await sendOffer(sdp);
 		} catch (reason) {
-			// An unanswered offer keeps signaling out of 'stable' and blocks every other negotiation
-			if (peerConn.signalingState === 'have-local-offer') {
-				await peerConn.setLocalDescription({ type: 'rollback' });
-			}
+			await rollBackPendingOffer(peerConn);
 			throw reason;
 		}
 	});

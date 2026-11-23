@@ -5,7 +5,6 @@
  */
 
 import BidirectionalConnectionAudioInOut from './BidirectionalConnectionAudioInOut';
-import { ICE_RESTART_RETRY_MS } from './iceRestart';
 import useStore from '../../store/Store';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
@@ -302,6 +301,10 @@ describe('BidirectionalConnectionAudioInOut', () => {
 			vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
 		});
 
+		afterEach(() => {
+			vi.clearAllTimers();
+		});
+
 		test('retries a failed audio ICE restart after 5 seconds until the connection recovers', async () => {
 			useStore.getState().setApiVersion('1.6.6');
 			const audioIceRestartSpy = vi
@@ -312,12 +315,12 @@ describe('BidirectionalConnectionAudioInOut', () => {
 			await flushPromises();
 
 			failConnection();
-			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS);
+			await vi.advanceTimersByTimeAsync(6_000);
 			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
 			expect(audioIceRestartSpy).toHaveBeenCalledWith(meetingId, 'sdp');
 
 			peerConnMock.connectionState = 'connected';
-			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS * 2);
+			await vi.advanceTimersByTimeAsync(60_000);
 			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
 		});
 
@@ -329,7 +332,7 @@ describe('BidirectionalConnectionAudioInOut', () => {
 			await flushPromises();
 
 			failConnection();
-			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS);
+			await vi.advanceTimersByTimeAsync(6_000);
 
 			expect(audioIceRestartSpy).not.toHaveBeenCalled();
 		});
