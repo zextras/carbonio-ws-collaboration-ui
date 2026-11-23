@@ -5,6 +5,8 @@
  */
 
 import BidirectionalConnectionAudioInOut from './BidirectionalConnectionAudioInOut';
+import { ICE_RESTART_RETRY_MS } from './iceRestart';
+import useStore from '../../store/Store';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
@@ -286,5 +288,50 @@ describe('BidirectionalConnectionAudioInOut', () => {
 
 		// Whichever acquisition wins, the sender track must end up enabled
 		expect((senderMock.track as MockAudioTrack).enabled).toBe(true);
+	});
+
+	describe('ICE restart', () => {
+		const failConnection = (): void => {
+			peerConnMock.connectionState = 'failed';
+			(peerConnMock.onconnectionstatechange as () => void)();
+		};
+
+		beforeEach(() => {
+			vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
+			vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+		});
+
+		test('retries a failed audio ICE restart after 5 seconds until the connection recovers', async () => {
+			useStore.getState().setApiVersion('1.6.6');
+			const audioIceRestartSpy = vi
+				.spyOn(MeetingsApi, 'audioIceRestart')
+				.mockRejectedValue(new Error('status ko'));
+			// eslint-disable-next-line no-new
+			new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS);
+			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
+			expect(audioIceRestartSpy).toHaveBeenCalledWith(meetingId, 'sdp');
+
+			peerConnMock.connectionState = 'connected';
+			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS * 2);
+			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
+		});
+
+		test('does not restart ICE when the API version does not support it', async () => {
+			useStore.getState().setApiVersion('1.6.5');
+			const audioIceRestartSpy = vi.spyOn(MeetingsApi, 'audioIceRestart');
+			// eslint-disable-next-line no-new
+			new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(ICE_RESTART_RETRY_MS);
+
+			expect(audioIceRestartSpy).not.toHaveBeenCalled();
+		});
 	});
 });

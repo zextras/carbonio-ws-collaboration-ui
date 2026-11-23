@@ -6,6 +6,7 @@
 
 import { gte } from 'semver';
 
+import { restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
@@ -74,23 +75,9 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	}
 
 	private readonly onConnectionStateChange = (): void => {
-		const state = this.peerConn?.connectionState;
-		if (state === 'failed') {
-			this.peerConn
-				?.createOffer({ iceRestart: true })
-				.then((rtcSessionDesc) => {
-					this.peerConn
-						?.setLocalDescription(rtcSessionDesc)
-						.then(() => {
-							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
-							if (localDesc?.sdp && version && gte(version, '1.6.13')) {
-								screenIceRestart(this.meetingId, localDesc.sdp);
-							}
-						})
-						.catch((reason) => console.warn('setLocalDescription failed', reason));
-				})
-				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		const version = useStore.getState().session.apiVersion;
+		if (this.peerConn?.connectionState === 'failed' && version && gte(version, '1.6.13')) {
+			restartIceWithOffer(this.peerConn, (sdp) => screenIceRestart(this.meetingId, sdp));
 		}
 	};
 
