@@ -10,15 +10,12 @@ export const ICE_RESTART_ANSWER_TIMEOUT_MS = 15000;
 
 const restarting = new WeakSet<RTCPeerConnection>();
 
-const hasSettled = (peerConn: RTCPeerConnection): boolean =>
-	peerConn.connectionState === 'connected' || peerConn.connectionState === 'closed';
-
 export const restartIce = (peerConn: RTCPeerConnection, restart: () => Promise<unknown>): void => {
 	if (restarting.has(peerConn)) return;
 	restarting.add(peerConn);
 	let retryDelay = ICE_RESTART_FIRST_RETRY_MS;
 	const attempt = (): void => {
-		if (hasSettled(peerConn)) {
+		if (peerConn.connectionState === 'connected' || peerConn.connectionState === 'closed') {
 			restarting.delete(peerConn);
 			return;
 		}
