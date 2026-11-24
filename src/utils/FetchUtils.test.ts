@@ -12,6 +12,7 @@ import {
 	RequestType,
 	sendAttachmentFetchAPI,
 	sendFileFetchAPI,
+	uploadAttemptTimeoutMs,
 	uploadFileFetchAPI,
 	wscApiVersionHeader
 } from './FetchUtils';
@@ -276,7 +277,11 @@ describe('FetchUtils', () => {
 
 		expect(global.fetch).toHaveBeenCalledWith(
 			defPath,
-			expect.objectContaining({ method: RequestType.POST, body: expect.any(FormData), signal })
+			expect.objectContaining({
+				method: RequestType.POST,
+				body: expect.any(FormData),
+				signal: expect.any(AbortSignal)
+			})
 		);
 		const [_, { headers, body }] = (global.fetch as Mock).mock.calls[0];
 		expect(headers.get('queue-id')).toBe('idUser1');
@@ -305,6 +310,74 @@ describe('FetchUtils', () => {
 		expect(body.get('description')).toBeNull();
 		expect(body.get('replyToId')).toBeNull();
 		expect(body.get('area')).toBeNull();
+	});
+
+	describe('sendAttachmentFetchAPI attempt timeout', () => {
+		const hangUntilAborted = (): void => {
+			Object.defineProperty(global, 'fetch', {
+				value: vi.fn(
+					(_url: string, init: RequestInit) =>
+						new Promise((_resolve, reject) => {
+							init.signal?.addEventListener('abort', () =>
+								reject(new DOMException('The operation was aborted.', 'AbortError'))
+							);
+						})
+				),
+				configurable: true
+			});
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		test('allows 60 s plus the file at about 256 kbit/s', () => {
+			expect(uploadAttemptTimeoutMs(0)).toBe(60_000);
+			expect(uploadAttemptTimeoutMs(32 * 1024 * 1024)).toBe(60_000 + 1_048_576);
+		});
+
+		test('aborts a hung attempt and rejects with a TimeoutError, which the SDK retries', async () => {
+			hangUntilAborted();
+			const file = new File(['abc'], 'a.pdf');
+
+			const outcome = sendAttachmentFetchAPI('test', file, { tempId: 'tmp-1' }).catch(
+				(error: unknown) => error
+			);
+			await vi.advanceTimersByTimeAsync(uploadAttemptTimeoutMs(file.size) - 1);
+			const [, { signal }] = (global.fetch as Mock).mock.calls[0];
+			expect(signal.aborted).toBe(false);
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			expect(signal.aborted).toBe(true);
+			expect(await outcome).toMatchObject({ name: 'TimeoutError' });
+		});
+
+		test('rejects with the AbortError when the caller signal aborts', async () => {
+			hangUntilAborted();
+			const controller = new AbortController();
+
+			const outcome = sendAttachmentFetchAPI(
+				'test',
+				new File(['abc'], 'a.pdf'),
+				{ tempId: 'tmp-1' },
+				controller.signal
+			).catch((error: unknown) => error);
+			controller.abort();
+
+			expect(await outcome).toMatchObject({ name: 'AbortError' });
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		test('clears its timer once the attempt settles', async () => {
+			await sendAttachmentFetchAPI('test', new File(['abc'], 'a.pdf'), { tempId: 'tmp-1' });
+
+			expect(vi.getTimerCount()).toBe(0);
+		});
 	});
 
 	test('uploadFileFetchAPI is called correctly', async () => {

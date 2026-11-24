@@ -589,6 +589,25 @@ describe('Rooms API', () => {
 			expect(settled).toHaveBeenCalledWith({ id: 'msg-file' });
 		});
 
+		test('a timed-out attempt is retried, not taken for a cancel', async () => {
+			vi.useFakeTimers();
+			useStore.getState().setApiVersion('2.0.0');
+			mockSendAttachmentFetchAPI
+				.mockRejectedValueOnce(new DOMException('Upload attempt timed out', 'TimeoutError'))
+				.mockResolvedValueOnce(buildMessage({ id: 'msg-file', roomId, attachmentId: 'file-1' }));
+			const settled = vi.fn();
+
+			addRoomAttachment(roomId, photo(), {}).then(settled);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(1);
+
+			await vi.advanceTimersByTimeAsync(30_000);
+
+			expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(2);
+			expect(settled).toHaveBeenCalledWith({ id: 'msg-file' });
+		});
+
 		test('reports the outcome of the first attempt once, even when the SDK keeps retrying', async () => {
 			vi.useFakeTimers();
 			useStore.getState().setApiVersion('2.0.0');

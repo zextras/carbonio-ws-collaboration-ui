@@ -120,6 +120,13 @@ export const sendFileFetchAPI = (
 		.catch((err: Error) => Promise.reject(err));
 };
 
+const UPLOAD_ATTEMPT_BASE_MS = 60_000;
+// About 256 kbit/s: slower uploads are taken for hung
+const UPLOAD_MIN_BYTES_PER_MS = 32;
+
+export const uploadAttemptTimeoutMs = (size: number): number =>
+	UPLOAD_ATTEMPT_BASE_MS + Math.ceil(size / UPLOAD_MIN_BYTES_PER_MS);
+
 /**
  * v2 (WSC-pure) attachment upload: one `POST` multipart, answered by the
  * created `Message`. The file name keeps the unicode escaping, which the
@@ -128,6 +135,10 @@ export const sendFileFetchAPI = (
  * clients render the text verbatim (v1 decoded it on receipt). It goes as a
  * part with an explicit UTF-8 charset: a plain string part has no Content-Type,
  * and the backend reads it as US-ASCII, mangling accents and emoji.
+ *
+ * An attempt that outlasts `uploadAttemptTimeoutMs` rejects with a
+ * `TimeoutError`, which the SDK retries with the same tempId; an abort of
+ * `signal` rejects with the fetch's `AbortError`, which gives the upload up.
  */
 export function sendAttachmentFetchAPI<T>(
 	endpoint: string,
@@ -147,12 +158,34 @@ export function sendAttachmentFetchAPI<T>(
 	fields.replyToId && formData.append('replyToId', fields.replyToId);
 	fields.area && formData.append('area', fields.area);
 
+	const controller = new AbortController();
+	const abort = (): void => controller.abort();
+	if (signal?.aborted) abort();
+	signal?.addEventListener('abort', abort);
+	let timedOut = false;
+	const timer = setTimeout(() => {
+		timedOut = true;
+		controller.abort();
+	}, uploadAttemptTimeoutMs(file.size));
+
 	return fetch(BASE_PATH + endpoint, {
 		method: RequestType.POST,
 		headers: buildHeaders(),
 		body: formData,
-		signal
-	}).then((resp: Response) => handleResponse(resp));
+		signal: controller.signal
+	})
+		.then((resp: Response) => handleResponse(resp))
+		.catch((error: unknown) =>
+			Promise.reject(
+				timedOut && !signal?.aborted
+					? new DOMException('Upload attempt timed out', 'TimeoutError')
+					: error
+			)
+		)
+		.finally(() => {
+			clearTimeout(timer);
+			signal?.removeEventListener('abort', abort);
+		});
 }
 
 export const uploadFileFetchAPI = (
