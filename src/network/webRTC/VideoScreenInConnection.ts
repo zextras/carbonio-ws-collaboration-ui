@@ -7,7 +7,12 @@
 import { filter, forEach, keyBy } from 'lodash';
 
 import { isConnectionQualitySupported, videoFpsScore } from './connectionQualityScore';
-import { isIceRestartSupported, restartIce, sendAnswer } from './iceRestart';
+import {
+	ICE_RESTART_FIRST_RETRY_MS,
+	ICE_RESTART_MAX_RETRY_MS,
+	isIceRestartSupported,
+	restartIce
+} from './iceRestart';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -136,6 +141,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// current wait, doubled on every consecutive failure so a failing endpoint is not hit on every reconcile.
 	private readonly requestBackoff = new Map<string, { retryTick: number; delay: number }>();
 
+	private lastAnswer: string | undefined;
+
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
@@ -165,9 +172,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							.setLocalDescription(rtcSessionDesc)
 							.then(() => {
 								if (rtcSessionDesc.sdp) {
-									sendAnswer(this.peerConn, rtcSessionDesc.sdp, (answer) =>
-										createMediaAnswer(this.meetingId, answer)
-									);
+									this.lastAnswer = rtcSessionDesc.sdp;
+									this.sendAnswer(rtcSessionDesc.sdp, ICE_RESTART_FIRST_RETRY_MS);
 								}
 							})
 							.catch((reason) => console.warn('setLocalDescription failed', reason));
@@ -175,6 +181,18 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					.catch((reason) => console.warn('createAnswer failed', reason));
 			})
 			.catch((reason) => console.warn('setRemoteDescription failed', reason));
+	}
+
+	// The server waits for the answer to its offer, so a refused one is still valid until a newer offer replaces it
+	private sendAnswer(sdp: string, retryDelay: number): void {
+		if (sdp !== this.lastAnswer || this.peerConn.signalingState === 'closed') return;
+		createMediaAnswer(this.meetingId, sdp).catch((reason) => {
+			console.warn(`Sending the answer failed, retrying in ${retryDelay} ms`, reason);
+			setTimeout(
+				() => this.sendAnswer(sdp, Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS)),
+				retryDelay
+			);
+		});
 	}
 
 	public handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {

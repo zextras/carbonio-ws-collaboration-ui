@@ -10,8 +10,8 @@ import { Version } from '../../types/store/SessionTypes';
 
 const ICE_RESTART_MIN_API_VERSION = '1.6.6';
 const SCREEN_ICE_RESTART_MIN_API_VERSION = '1.6.13';
-const ICE_RESTART_FIRST_RETRY_MS = 5000;
-const ICE_RESTART_MAX_RETRY_MS = 30000;
+export const ICE_RESTART_FIRST_RETRY_MS = 5000;
+export const ICE_RESTART_MAX_RETRY_MS = 30000;
 const ICE_RESTART_ANSWER_TIMEOUT_MS = 15000;
 
 export const isIceRestartSupported = (apiVersion: Version | undefined): boolean =>
@@ -39,27 +39,6 @@ export const restartIce = (peerConn: RTCPeerConnection, restart: () => Promise<u
 				setTimeout(attempt, retryDelay);
 				retryDelay = Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS);
 			});
-	};
-	attempt();
-};
-
-const currentAnswer = new WeakMap<RTCPeerConnection, string>();
-
-// The server waits for the answer to its offer, so a refused one is still valid until a newer offer replaces it
-export const sendAnswer = (
-	peerConn: RTCPeerConnection,
-	sdp: string,
-	send: (sdp: string) => Promise<unknown>
-): void => {
-	currentAnswer.set(peerConn, sdp);
-	let retryDelay = ICE_RESTART_FIRST_RETRY_MS;
-	const attempt = (): void => {
-		if (currentAnswer.get(peerConn) !== sdp || peerConn.signalingState === 'closed') return;
-		send(sdp).catch((reason) => {
-			console.warn(`Sending the answer failed, retrying in ${retryDelay} ms`, reason);
-			setTimeout(attempt, retryDelay);
-			retryDelay = Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS);
-		});
 	};
 	attempt();
 };

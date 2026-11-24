@@ -22,7 +22,6 @@ const USER_2 = 'user2';
 const FEED_KEY_1 = `${USER_1}-${STREAM_TYPE.VIDEO}`;
 const FEED_KEY_2 = `${USER_2}-${STREAM_TYPE.VIDEO}`;
 const INBOUND_RTP = 'inbound-rtp';
-const ANSWER_SDP = 'answer-sdp';
 
 // Hoisted so they are accessible inside vi.mock factory closures (which are hoisted too).
 const storeMocks = vi.hoisted(() => ({
@@ -621,24 +620,80 @@ describe('VideoScreenInConnection — ICE restart', () => {
 
 		expect(videoIceRestart).not.toHaveBeenCalled();
 	});
+});
 
-	it('sends the answer to an offer again 5 seconds after the server refused it', async () => {
-		const createMediaAnswer = vi.mocked(MeetingsApi.createMediaAnswer);
+describe('VideoScreenInConnection — remote offer', () => {
+	const createMediaAnswer = vi.mocked(MeetingsApi.createMediaAnswer);
+	let conn: VideoScreenInConnection;
+
+	const answerWith = (...answers: string[]): void => {
+		const createAnswer = vi.fn();
+		answers.forEach((sdp) => createAnswer.mockResolvedValueOnce({ sdp, type: 'answer' }));
+		Object.assign(conn.peerConn, { createAnswer });
+	};
+
+	beforeEach(() => {
+		conn = new VideoScreenInConnection(MEETING_ID);
+		createMediaAnswer.mockReset();
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+	});
+
+	it('sends a refused answer again after 5, 10, 20 and then every 30 seconds', async () => {
+		createMediaAnswer.mockRejectedValue(new Error('status ko'));
+		answerWith('answer');
+
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(94_000);
+		expect(createMediaAnswer).toHaveBeenCalledTimes(5);
+
+		await vi.advanceTimersByTimeAsync(2_000);
+		expect(createMediaAnswer).toHaveBeenCalledTimes(6);
+		expect(createMediaAnswer).toHaveBeenCalledWith(MEETING_ID, 'answer');
+	});
+
+	it('stops sending the answer once the server accepts it', async () => {
 		createMediaAnswer
-			.mockReset()
 			.mockRejectedValueOnce(new Error('status ko'))
 			.mockResolvedValue(new Response());
-		Object.assign(conn.peerConn, {
-			createAnswer: vi.fn(() => Promise.resolve({ sdp: ANSWER_SDP, type: 'answer' }))
-		});
+		answerWith('answer');
 
-		conn.handleRemoteOffer('offer-sdp');
-		await vi.advanceTimersByTimeAsync(6_000);
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(createMediaAnswer).toHaveBeenCalledTimes(2);
+	});
+
+	it('stops sending a refused answer once a newer offer is answered', async () => {
+		createMediaAnswer
+			.mockRejectedValueOnce(new Error('status ko'))
+			.mockResolvedValue(new Response());
+		answerWith('first answer', 'second answer');
+
+		conn.handleRemoteOffer('first offer');
+		await vi.advanceTimersByTimeAsync(1_000);
+		conn.handleRemoteOffer('second offer');
+		await vi.advanceTimersByTimeAsync(120_000);
 
 		expect(createMediaAnswer.mock.calls).toEqual([
-			[MEETING_ID, ANSWER_SDP],
-			[MEETING_ID, ANSWER_SDP]
+			[MEETING_ID, 'first answer'],
+			[MEETING_ID, 'second answer']
 		]);
+	});
+
+	it('stops sending a refused answer once the connection is closed', async () => {
+		createMediaAnswer.mockRejectedValue(new Error('status ko'));
+		answerWith('answer');
+
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(1_000);
+		Object.assign(conn.peerConn, { signalingState: 'closed' });
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(createMediaAnswer).toHaveBeenCalledTimes(1);
 	});
 });
 
