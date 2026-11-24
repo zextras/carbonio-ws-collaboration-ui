@@ -6,9 +6,10 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { restartIce, restartIceWithOffer } from './iceRestart';
+import { restartIce, restartIceWithOffer, sendAnswer } from './iceRestart';
 
 const RESTART_SDP = 'restart-sdp';
+const ANSWER_SDP = 'answer-sdp';
 
 type PeerConnMock = {
 	connectionState: RTCPeerConnectionState;
@@ -239,5 +240,57 @@ describe('restartIceWithOffer', () => {
 
 		expect(console.warn).toHaveBeenCalledWith(expect.any(String), closedError);
 		expect(peerConn.createOffer).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('sendAnswer', () => {
+	it('sends a refused answer again after 5, 10, 20 and then every 30 seconds', async () => {
+		const times: number[] = [];
+		const send = timedRestart(times, () => Promise.reject(failure()));
+
+		sendAnswer(asPeerConn(createPeerConnMock()), ANSWER_SDP, send);
+		await vi.advanceTimersByTimeAsync(96_000);
+
+		expect(secondsBetweenCalls(times)).toEqual([5, 10, 20, 30, 30]);
+		expect(send).toHaveBeenCalledWith(ANSWER_SDP);
+		expect(console.warn).toHaveBeenCalledWith(
+			'Sending the answer failed, retrying in 5000 ms',
+			expect.any(Error)
+		);
+	});
+
+	it('stops once the answer is accepted', async () => {
+		const send = vi.fn().mockRejectedValueOnce(failure()).mockResolvedValue(undefined);
+
+		sendAnswer(asPeerConn(createPeerConnMock()), ANSWER_SDP, send);
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(send).toHaveBeenCalledTimes(2);
+	});
+
+	it('stops once the answer to a newer offer replaced it', async () => {
+		const peerConn = asPeerConn(createPeerConnMock());
+		const send = vi.fn((sdp: string) =>
+			sdp === ANSWER_SDP ? Promise.reject(failure()) : Promise.resolve()
+		);
+
+		sendAnswer(peerConn, ANSWER_SDP, send);
+		await vi.advanceTimersByTimeAsync(1_000);
+		sendAnswer(peerConn, 'newer-answer-sdp', send);
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(send.mock.calls).toEqual([[ANSWER_SDP], ['newer-answer-sdp']]);
+	});
+
+	it('stops once the connection is closed', async () => {
+		const peerConn = createPeerConnMock();
+		const send = vi.fn(() => Promise.reject(failure()));
+
+		sendAnswer(asPeerConn(peerConn), ANSWER_SDP, send);
+		await vi.advanceTimersByTimeAsync(1_000);
+		peerConn.signalingState = 'closed';
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(send).toHaveBeenCalledTimes(1);
 	});
 });

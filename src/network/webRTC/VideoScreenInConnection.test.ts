@@ -22,6 +22,7 @@ const USER_2 = 'user2';
 const FEED_KEY_1 = `${USER_1}-${STREAM_TYPE.VIDEO}`;
 const FEED_KEY_2 = `${USER_2}-${STREAM_TYPE.VIDEO}`;
 const INBOUND_RTP = 'inbound-rtp';
+const ANSWER_SDP = 'answer-sdp';
 
 // Hoisted so they are accessible inside vi.mock factory closures (which are hoisted too).
 const storeMocks = vi.hoisted(() => ({
@@ -619,6 +620,25 @@ describe('VideoScreenInConnection — ICE restart', () => {
 		await vi.advanceTimersByTimeAsync(6_000);
 
 		expect(videoIceRestart).not.toHaveBeenCalled();
+	});
+
+	it('sends the answer to an offer again 5 seconds after the server refused it', async () => {
+		const createMediaAnswer = vi.mocked(MeetingsApi.createMediaAnswer);
+		createMediaAnswer
+			.mockReset()
+			.mockRejectedValueOnce(new Error('status ko'))
+			.mockResolvedValue(new Response());
+		Object.assign(conn.peerConn, {
+			createAnswer: vi.fn(() => Promise.resolve({ sdp: ANSWER_SDP, type: 'answer' }))
+		});
+
+		conn.handleRemoteOffer('offer-sdp');
+		await vi.advanceTimersByTimeAsync(6_000);
+
+		expect(createMediaAnswer.mock.calls).toEqual([
+			[MEETING_ID, ANSWER_SDP],
+			[MEETING_ID, ANSWER_SDP]
+		]);
 	});
 });
 

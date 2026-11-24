@@ -43,6 +43,27 @@ export const restartIce = (peerConn: RTCPeerConnection, restart: () => Promise<u
 	attempt();
 };
 
+const currentAnswer = new WeakMap<RTCPeerConnection, string>();
+
+// The server waits for the answer to its offer, so a refused one is still valid until a newer offer replaces it
+export const sendAnswer = (
+	peerConn: RTCPeerConnection,
+	sdp: string,
+	send: (sdp: string) => Promise<unknown>
+): void => {
+	currentAnswer.set(peerConn, sdp);
+	let retryDelay = ICE_RESTART_FIRST_RETRY_MS;
+	const attempt = (): void => {
+		if (currentAnswer.get(peerConn) !== sdp || peerConn.signalingState === 'closed') return;
+		send(sdp).catch((reason) => {
+			console.warn(`Sending the answer failed, retrying in ${retryDelay} ms`, reason);
+			setTimeout(attempt, retryDelay);
+			retryDelay = Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS);
+		});
+	};
+	attempt();
+};
+
 // An unanswered offer keeps signaling out of 'stable' and blocks every other negotiation
 const rollBackPendingOffer = async (peerConn: RTCPeerConnection): Promise<void> => {
 	if (peerConn.signalingState === 'have-local-offer') {

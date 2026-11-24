@@ -7,7 +7,7 @@
 import { filter, forEach, keyBy } from 'lodash';
 
 import { isConnectionQualitySupported, videoFpsScore } from './connectionQualityScore';
-import { isIceRestartSupported, restartIce } from './iceRestart';
+import { isIceRestartSupported, restartIce, sendAnswer } from './iceRestart';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -165,7 +165,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							.setLocalDescription(rtcSessionDesc)
 							.then(() => {
 								if (rtcSessionDesc.sdp) {
-									createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
+									sendAnswer(this.peerConn, rtcSessionDesc.sdp, (answer) =>
+										createMediaAnswer(this.meetingId, answer)
+									);
 								}
 							})
 							.catch((reason) => console.warn('setLocalDescription failed', reason));
