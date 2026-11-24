@@ -5,10 +5,9 @@
  */
 
 import { filter, forEach, keyBy } from 'lodash';
-import { gte } from 'semver';
 
 import { isConnectionQualitySupported, videoFpsScore } from './connectionQualityScore';
-import { restartIce } from './iceRestart';
+import { isIceRestartSupported, restartIce } from './iceRestart';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -147,9 +146,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	private readonly onConnectionStateChange = (): void => {
-		const state = this.peerConn?.connectionState;
-		const version = useStore.getState().session.apiVersion;
-		if (state === 'failed' && version && gte(version, '1.6.6')) {
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
 			restartIce(this.peerConn, () => videoIceRestart(this.meetingId));
 		}
 	};

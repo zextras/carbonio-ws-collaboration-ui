@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { describe, expect, it, vi } from 'vitest';
+
 import { restartIce, restartIceWithOffer } from './iceRestart';
 
 const RESTART_SDP = 'restart-sdp';
@@ -59,7 +61,7 @@ afterEach(() => {
 });
 
 describe('restartIce', () => {
-	test('retries a failed restart after 5, 10, 20 and then every 30 seconds', async () => {
+	it('retries a failed restart after 5, 10, 20 and then every 30 seconds', async () => {
 		const times: number[] = [];
 		const restart = timedRestart(times, () => Promise.reject(failure()));
 
@@ -73,7 +75,7 @@ describe('restartIce', () => {
 		);
 	});
 
-	test('waits 5 seconds again once the connection is back', async () => {
+	it('waits 5 seconds again once the connection is back', async () => {
 		const peerConn = createPeerConnMock();
 		const times: number[] = [];
 		const restart = timedRestart(times, () => Promise.reject(failure()));
@@ -90,7 +92,7 @@ describe('restartIce', () => {
 		expect(secondsBetweenCalls(times)).toEqual([5]);
 	});
 
-	test('restarts again every 15 seconds while an accepted restart does not bring the connection back', async () => {
+	it('restarts again every 15 seconds while an accepted restart does not bring the connection back', async () => {
 		const times: number[] = [];
 		const restart = timedRestart(times, () => Promise.resolve());
 
@@ -119,7 +121,7 @@ describe('restartIce', () => {
 		expect(restart).toHaveBeenCalledTimes(1);
 	});
 
-	test('does not start a restart while another one is in flight or waiting for its answer', async () => {
+	it('does not start a restart while another one is in flight or waiting for its answer', async () => {
 		const peerConn = createPeerConnMock();
 		let accept: () => void = () => undefined;
 		const restart = vi.fn(
@@ -145,7 +147,7 @@ describe('restartIce', () => {
 		expect(restart).toHaveBeenCalledTimes(2);
 	});
 
-	test('does not start a restart while a retry is waiting', async () => {
+	it('does not start a restart while a retry is waiting', async () => {
 		const peerConn = asPeerConn(createPeerConnMock());
 		const restart = vi.fn().mockRejectedValueOnce(failure()).mockResolvedValue(undefined);
 
@@ -160,7 +162,7 @@ describe('restartIce', () => {
 });
 
 describe('restartIceWithOffer', () => {
-	test('sends an ICE restart offer', async () => {
+	it('sends an ICE restart offer', async () => {
 		const peerConn = createPeerConnMock();
 		const sendOffer = vi.fn().mockResolvedValue(undefined);
 
@@ -171,7 +173,7 @@ describe('restartIceWithOffer', () => {
 		expect(sendOffer).toHaveBeenCalledWith(RESTART_SDP);
 	});
 
-	test('rolls back the offer the server refused and offers again after 5 seconds', async () => {
+	it('rolls back the offer the server refused and offers again after 5 seconds', async () => {
 		const peerConn = createPeerConnMock();
 		const sendOffer = vi.fn().mockRejectedValueOnce(failure()).mockResolvedValue(undefined);
 
@@ -185,7 +187,7 @@ describe('restartIceWithOffer', () => {
 		expect(sendOffer).toHaveBeenCalledTimes(2);
 	});
 
-	test('rolls back the offer whose answer never arrived before offering again', async () => {
+	it('rolls back the offer whose answer never arrived before offering again', async () => {
 		const peerConn = createPeerConnMock();
 		const sendOffer = vi.fn().mockResolvedValue(undefined);
 
@@ -223,7 +225,7 @@ describe('restartIceWithOffer', () => {
 		expect(sendOffer).toHaveBeenCalledWith(RESTART_SDP);
 	});
 
-	test('stops without an unhandled rejection when the rollback fails on a closed connection', async () => {
+	it('stops without an unhandled rejection when the rollback fails on a closed connection', async () => {
 		const peerConn = createPeerConnMock();
 		const closedError = new Error('InvalidStateError');
 		const sendOffer = vi.fn(() => {

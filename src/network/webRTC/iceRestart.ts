@@ -4,9 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const ICE_RESTART_FIRST_RETRY_MS = 5000;
-export const ICE_RESTART_MAX_RETRY_MS = 30000;
-export const ICE_RESTART_ANSWER_TIMEOUT_MS = 15000;
+import { gte } from 'semver';
+
+import { Version } from '../../types/store/SessionTypes';
+
+const ICE_RESTART_MIN_API_VERSION = '1.6.6';
+const SCREEN_ICE_RESTART_MIN_API_VERSION = '1.6.13';
+const ICE_RESTART_FIRST_RETRY_MS = 5000;
+const ICE_RESTART_MAX_RETRY_MS = 30000;
+const ICE_RESTART_ANSWER_TIMEOUT_MS = 15000;
+
+export const isIceRestartSupported = (apiVersion: Version | undefined): boolean =>
+	!!apiVersion && gte(apiVersion, ICE_RESTART_MIN_API_VERSION);
+
+export const isScreenIceRestartSupported = (apiVersion: Version | undefined): boolean =>
+	!!apiVersion && gte(apiVersion, SCREEN_ICE_RESTART_MIN_API_VERSION);
 
 const restarting = new WeakSet<RTCPeerConnection>();
 

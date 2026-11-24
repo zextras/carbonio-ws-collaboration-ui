@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { gte } from 'semver';
-
-import { restartIceWithOffer } from './iceRestart';
+import { isScreenIceRestartSupported, restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
@@ -75,8 +73,8 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	}
 
 	private readonly onConnectionStateChange = (): void => {
-		const version = useStore.getState().session.apiVersion;
-		if (this.peerConn?.connectionState === 'failed' && version && gte(version, '1.6.13')) {
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isScreenIceRestartSupported(apiVersion)) {
 			restartIceWithOffer(this.peerConn, (sdp) => screenIceRestart(this.meetingId, sdp));
 		}
 	};

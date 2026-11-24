@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { gte } from 'semver';
-
 import { producibleTiers, TIER_RID } from './connectionQualityScore';
-import { restartIceWithOffer } from './iceRestart';
+import { isIceRestartSupported, restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
@@ -77,8 +75,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	private readonly onConnectionStateChange = (): void => {
-		const version = useStore.getState().session.apiVersion;
-		if (this.peerConn?.connectionState === 'failed' && version && gte(version, '1.6.6')) {
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
 			restartIceWithOffer(this.peerConn, (sdp) => videoIceRestart(this.meetingId, sdp));
 		}
 	};

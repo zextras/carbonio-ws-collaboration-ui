@@ -5,9 +5,8 @@
  */
 
 import { first } from 'lodash';
-import { gte } from 'semver';
 
-import { restartIceWithOffer } from './iceRestart';
+import { isIceRestartSupported, restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
@@ -93,8 +92,8 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 	};
 
 	private readonly onConnectionStateChange = (): void => {
-		const version = useStore.getState().session.apiVersion;
-		if (this.peerConn?.connectionState === 'failed' && version && gte(version, '1.6.6')) {
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
 			restartIceWithOffer(this.peerConn, (sdp) => audioIceRestart(this.meetingId, sdp));
 		}
 	};
