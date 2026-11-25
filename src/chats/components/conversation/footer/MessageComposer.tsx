@@ -124,6 +124,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
+	// Once the user has moved to another room, what was written there is its draft
+	const composerHasText = useCallback(
+		(): boolean =>
+			messageInputRef.current
+				? messageInputRef.current.value.trim() !== ''
+				: !!getDraftMessage(useStore.getState(), roomId),
+		[roomId]
+	);
+
 	// Like a failed upload, an unsent message goes back to the composer, with the quote of a
 	// reply, unless something else has been written in the meantime
 	const restoreIfUnsent = useCallback(
@@ -131,11 +140,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			sending.then((sent) => {
 				if (sent) return;
 				const state = useStore.getState();
-				// Once the user has moved to another room, what was written there is its draft
-				const hasNewText = messageInputRef.current
-					? messageInputRef.current.value.trim() !== ''
-					: !!getDraftMessage(state, roomId);
-				if (!hasNewText) {
+				if (!composerHasText()) {
 					setDraftMessage(roomId, message);
 					if (reference && !getReferenceMessage(state, roomId)) {
 						setReferenceMessage(roomId, reference);
@@ -149,7 +154,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				});
 			});
 		},
-		[createSnackbar, messageNotSentLabel, roomId, setDraftMessage, setReferenceMessage]
+		[
+			composerHasText,
+			createSnackbar,
+			messageNotSentLabel,
+			roomId,
+			setDraftMessage,
+			setReferenceMessage
+		]
 	);
 
 	const loadFiles = useLoadFiles(roomId);
@@ -229,24 +241,31 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return Promise.reject(err);
 			}
 		}
+		const description = isLastFile ? textMessage.trim() : '';
 		// Released on the first attempt: background retries must not hold the next file
 		return new Promise<void>((resolve, reject) => {
+			let released = false;
 			addRoomAttachment(
 				roomId,
 				file.file,
 				{
-					description: isLastFile ? textMessage.trim() : '',
+					description,
 					replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
 					area
 				},
 				signal,
 				(outcome) => {
-					if (outcome !== 'rejected') resolve();
+					if (outcome === 'rejected') return;
+					released = true;
+					resolve();
 				}
 			).then(
 				() => resolve(),
 				(reason: DOMException) => {
 					errorHandler(reason, fileName);
+					if (released && description && !composerHasText()) {
+						setDraftMessage(roomId, description);
+					}
 					reject(reason);
 				}
 			);
