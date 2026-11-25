@@ -146,9 +146,10 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 			.then((response) => {
 				addRoomSnapshots([response]);
 				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
-				return response.meetingId
-					? getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]))
-					: undefined;
+				return response.meetingId ? getMeeting(response.id) : undefined;
+			})
+			.then((meetingResponse) => {
+				if (meetingResponse) state.addMeetings([meetingResponse]);
 			})
 			.catch((err) => {
 				console.error('RoomMemberAdded: room reload failed', err);
