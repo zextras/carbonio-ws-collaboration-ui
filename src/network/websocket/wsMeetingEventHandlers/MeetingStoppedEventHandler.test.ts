@@ -13,6 +13,7 @@ import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingE
 import { MessageType, OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
+const SENT_DATE = '2023-01-01T00:00:00.000Z';
 const oneToOneRoom = createMockRoom({
 	id: 'oneToOneRoomId',
 	type: RoomType.ONE_TO_ONE,
@@ -28,7 +29,7 @@ const groupMeeting = createMockMeeting({ id: groupRoom.meetingId, roomId: groupR
 
 const oneToOneEvent: MeetingStoppedEvent = {
 	type: WsEventType.MEETING_STOPPED,
-	sentDate: '2023-01-01T00:00:00.000Z',
+	sentDate: SENT_DATE,
 	meetingId: oneToOneMeeting.id
 };
 
@@ -82,11 +83,13 @@ describe('MeetingStoppedEventHandler system line on a v2 backend', () => {
 		useStore.getState().startMeeting(oneToOneMeeting.id, '2022-12-31T23:55:00.000Z');
 	});
 
-	test('the meetingEnded line carries the call duration measured from the known start', () => {
+	test('the meetingEnded line carries the call duration of the event', () => {
 		meetingStoppedEventHandler({
 			...oneToOneEvent,
 			endedBy: 'otherUserId',
-			systemEventId: 'sys-end'
+			systemEventId: 'sys-end',
+			systemEventCreatedAt: SENT_DATE,
+			durationSec: 300
 		});
 
 		expect(useStore.getState().chatsRegistry[oneToOneRoom.id]?.lastMessage).toMatchObject({
@@ -99,7 +102,13 @@ describe('MeetingStoppedEventHandler system line on a v2 backend', () => {
 	});
 
 	test('the own stop lands the line without counting it', () => {
-		meetingStoppedEventHandler({ ...oneToOneEvent, endedBy: 'myUserId', systemEventId: 'sys-end' });
+		meetingStoppedEventHandler({
+			...oneToOneEvent,
+			endedBy: 'myUserId',
+			systemEventId: 'sys-end',
+			systemEventCreatedAt: SENT_DATE,
+			durationSec: 300
+		});
 
 		const registry = useStore.getState().chatsRegistry[oneToOneRoom.id];
 		expect(registry?.lastMessage?.id).toBe('sys-end');

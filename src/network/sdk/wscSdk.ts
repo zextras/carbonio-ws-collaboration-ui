@@ -56,7 +56,8 @@ const bridge: StoreBridge = {
 	setIsWriting: (roomId, userId, writing): void =>
 		useStore.getState().setIsWriting(roomId, userId, writing),
 	setSearchResults: (roomId, results: Array<StoreTextMessage>): void =>
-		useStore.getState().setSearchResults(roomId, results as Array<TextMessage>)
+		useStore.getState().setSearchResults(roomId, results as Array<TextMessage>),
+	setRoomFields: (roomId, fields): void => useStore.getState().editRoom(roomId, fields)
 };
 
 const http = createHttpClient({

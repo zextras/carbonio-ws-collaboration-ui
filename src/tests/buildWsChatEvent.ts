@@ -35,7 +35,7 @@ import { WsEventType } from '../types/network/websocket/wsEvents';
 
 /**
  * The WSC-pure chat events as the router receives them: the SDK fixtures,
- * typed on the asyncapi schemas (`sentDate` included), with the discriminant
+ * typed on the asyncapi schemas, with the discriminant
  * swapped to the app's event-type enum.
  */
 
@@ -114,7 +114,6 @@ export const buildWsTypingEvent = (
 /** No SDK fixture: the SDK has no handler for it. The values are the TypingHandler's refusal. */
 export const buildWsErrorEvent = (overrides?: Partial<WsErrorEvent>): WsErrorEvent => ({
 	type: WsEventType.WS_ERROR,
-	sentDate: '2026-08-01T10:00:05.123456Z',
 	message: 'Not a member',
 	code: 'ERR_FORBIDDEN',
 	...overrides

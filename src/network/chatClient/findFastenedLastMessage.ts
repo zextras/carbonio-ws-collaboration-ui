@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { parseIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+import { findLast } from 'lodash';
+
 import useStore from '../../store/Store';
-import { MessageType } from '../../types/store/ChatsRegistryTypes';
+import { FasteningAction, MessageType } from '../../types/store/ChatsRegistryTypes';
 import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 
 /**
@@ -13,14 +16,33 @@ import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
  * EDIT/DELETE fastening, to hand it to the SDK (which never reads the store).
  * Same match the v1 fastening handler performed inline before rebuilding the
  * sidebar entry; resolved at event time so the merge never regresses the
- * sidebar onto a message that stopped being the last one.
+ * sidebar onto a message that stopped being the last one. With `editedAt` the
+ * event is an edit: it is not resolved when the message was deleted (a delete
+ * is terminal) or when a newer edit is already applied (the fastenings are
+ * kept sorted by date; an equal date is the same write, applied idempotently).
  */
 export function findFastenedLastMessage(
 	roomId: string,
-	messageId: string
+	messageId: string,
+	editedAt?: string
 ): TextMessage | undefined {
-	const lastMessage = useStore.getState().chatsRegistry[roomId]?.lastMessage;
-	return lastMessage?.type === MessageType.TEXT_MSG && lastMessage.stanzaId === messageId
-		? lastMessage
-		: undefined;
+	const { chatsRegistry } = useStore.getState();
+	const lastMessage = chatsRegistry[roomId]?.lastMessage;
+	if (lastMessage?.type !== MessageType.TEXT_MSG || lastMessage.stanzaId !== messageId) {
+		return undefined;
+	}
+	if (editedAt !== undefined) {
+		const fastenings = chatsRegistry[roomId]?.fastenings?.[messageId] ?? [];
+		if (fastenings.some((fastening) => fastening.action === FasteningAction.DELETE)) {
+			return undefined;
+		}
+		const latestEdit = findLast(
+			fastenings,
+			(fastening) => fastening.action === FasteningAction.EDIT
+		);
+		if (latestEdit && latestEdit.date > parseIsoMicros(editedAt)) {
+			return undefined;
+		}
+	}
+	return lastMessage;
 }

@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { parseIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+
 import {
 	isPreviewSupported,
 	getPreviewType,
@@ -20,8 +22,10 @@ import {
 	getMimeTypeCategory,
 	getMediaGalleryBucketKey,
 	attachmentMatchesFilter,
+	messageToGalleryAttachment,
 	AttachmentType
 } from './attachmentUtils';
+import { createMockTextMessage } from '../tests/createMock';
 import { Attachment } from '../types/network/models/attachmentTypes';
 import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
@@ -335,5 +339,28 @@ describe('attachmentUtils tests', () => {
 			expect(attachmentMatchesFilter(attachment, { minSize: 4096 })).toBe(false);
 			expect(attachmentMatchesFilter(attachment, { maxSize: 1024 })).toBe(false);
 		});
+	});
+});
+
+describe('messageToGalleryAttachment', () => {
+	test('keeps the microseconds of the message creation date', () => {
+		const createdAt = '2026-08-01T10:05:00.123456Z';
+		const message = createMockTextMessage({
+			id: 'msg-1',
+			roomId: 'room-1',
+			from: 'user-1',
+			date: parseIsoMicros(createdAt),
+			attachment: {
+				id: 'att-1',
+				name: 'file.png',
+				mimeType: 'image/png',
+				size: 1024
+			}
+		});
+		expect(messageToGalleryAttachment(message)?.createdAt).toBe(createdAt);
+	});
+
+	test('is undefined for a message without attachment', () => {
+		expect(messageToGalleryAttachment(createMockTextMessage())).toBeUndefined();
 	});
 });

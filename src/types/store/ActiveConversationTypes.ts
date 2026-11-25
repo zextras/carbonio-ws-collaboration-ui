@@ -38,7 +38,13 @@ export type ActiveConversationsSlice = {
 	removeFilesToAttach: (roomId: string, fileId?: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
-	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
+	setNewReaction: (
+		roomId: string,
+		stanzaId: string,
+		reaction: string,
+		from: string,
+		previousReaction?: string
+	) => void;
 	unsetNewReactions: (roomId: string) => void;
 	setSelectedSearchResult: (roomId: string, stanzaId: string | undefined) => void;
 	setPinnedMessage: (roomId: string, message: TextMessage) => void;
@@ -93,7 +99,7 @@ export type FileToUpload = {
 	localUrl: string;
 };
 
-type NewReaction = {
+export type NewReaction = {
 	stanzaId: string;
 	reaction: string;
 };

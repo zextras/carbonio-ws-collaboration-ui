@@ -32,6 +32,8 @@ import {
 } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 
+const LEGACY_DATE = '2024-05-30T12:34:57Z';
+
 describe('wsMeetingEventsHandler', () => {
 	test('MEETING_CREATED event is handled', () => {
 		useStore.getState().addRooms([createMockRoom({ id: 'roomId' })]);
@@ -43,6 +45,25 @@ describe('wsMeetingEventsHandler', () => {
 		};
 		wsMeetingEventsHandler(event);
 		expect(useStore.getState().meetings[event.meetingId]).toBeDefined();
+	});
+
+	test('MEETING_CREATED takes the stored createdAt, falling back to the 1.6.x sentDate', () => {
+		useStore.getState().addRooms([createMockRoom({ id: 'roomId' })]);
+		wsMeetingEventsHandler({
+			type: WsEventType.MEETING_CREATED,
+			meetingId: 'stored',
+			roomId: 'roomId',
+			createdAt: '2024-05-30T12:34:56.123456Z',
+			sentDate: LEGACY_DATE
+		} as MeetingCreatedEvent);
+		wsMeetingEventsHandler({
+			type: WsEventType.MEETING_CREATED,
+			meetingId: 'legacy',
+			roomId: 'roomId',
+			sentDate: LEGACY_DATE
+		} as MeetingCreatedEvent);
+		expect(useStore.getState().meetings.stored.createdAt).toBe('2024-05-30T12:34:56.123456Z');
+		expect(useStore.getState().meetings.legacy.createdAt).toBe(LEGACY_DATE);
 	});
 
 	test('MEETING_STARTED event is handled', () => {

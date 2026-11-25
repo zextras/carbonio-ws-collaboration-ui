@@ -60,7 +60,11 @@ describe('MeetingDeclinedEventHandler system line on a v2 backend', () => {
 	});
 
 	test("the callee's decline lands the meetingDeclined line and counts it", () => {
-		meetingDeclinedEventHandler({ ...event, systemEventId: 'sys-declined' });
+		meetingDeclinedEventHandler({
+			...event,
+			systemEventId: 'sys-declined',
+			systemEventCreatedAt: '2023-01-01T00:00:00.000Z'
+		});
 
 		const registry = useStore.getState().chatsRegistry[room.id];
 		expect(registry?.lastMessage).toMatchObject({

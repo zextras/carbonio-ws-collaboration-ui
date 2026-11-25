@@ -34,13 +34,15 @@ export type WsMeetingEvent =
 	| MeetingParticipantUplinkStatusChangedEvent;
 
 type BasicMeetingEvent = {
-	sentDate: string;
+	// 1.6.x backends only: 2.0 events carry the stored time in their own field
+	sentDate?: string;
 	meetingId: string;
 };
 
 export type MeetingCreatedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_CREATED;
 	roomId: string;
+	createdAt?: string;
 };
 
 export type MeetingStartedEvent = BasicMeetingEvent & {
@@ -49,11 +51,13 @@ export type MeetingStartedEvent = BasicMeetingEvent & {
 	startedAt: string;
 	// WSC 2.0.0: id of the system line, one-to-one rooms only
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_JOINED;
 	userId: string;
+	joinedAt?: string;
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
@@ -66,6 +70,8 @@ export type MeetingStoppedEvent = BasicMeetingEvent & {
 	// WSC 2.0.0: author and id of the system line, one-to-one rooms only
 	endedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
+	durationSec?: number;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {
@@ -144,6 +150,7 @@ export type MeetingWaitingParticipantClashed = BasicMeetingEvent & {
 export type MeetingRecordingStartedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_RECORDING_STARTED;
 	userId: string;
+	startedAt?: string;
 };
 
 export type MeetingRecordingStoppedEvent = BasicMeetingEvent & {
@@ -169,6 +176,7 @@ export type MeetingDeclinedEvent = BasicMeetingEvent & {
 	userId: string;
 	// WSC 2.0.0: id of the system line, one-to-one rooms only
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type MeetingParticipantUplinkStatusChangedEvent = BasicMeetingEvent & {
