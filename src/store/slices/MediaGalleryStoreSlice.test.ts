@@ -307,6 +307,29 @@ describe('Media gallery slice', () => {
 			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual(['a1']);
 		});
 
+		test('a new attachment shows in a bucket emptied by deletes while older pages remain', () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore
+				.getState()
+				.appendMediaGalleryPage(
+					roomId,
+					DEFAULT_MEDIA_GALLERY_FILTER,
+					[buildAttachment({ id: 'a1', createdAt: '2024-01-01T10:00:04Z' })],
+					5,
+					'cur-1'
+				);
+			useStore.getState().removeMediaGalleryAttachment(roomId, 'a1');
+			useStore
+				.getState()
+				.prependMediaGalleryAttachment(
+					roomId,
+					buildAttachment({ id: 'new', createdAt: '2024-01-01T10:00:09Z' })
+				);
+			expect(getBucket(DEFAULT_MEDIA_GALLERY_FILTER)?.attachments.map((a) => a.id)).toEqual([
+				'new'
+			]);
+		});
+
 		test('skips the buckets whose filter does not match the attachment', () => {
 			useStore.getState().appendMediaGalleryPage(roomId, MINE_FILTER, [], 0, undefined);
 			useStore.getState().appendMediaGalleryPage(roomId, IMAGES_FILTER, [], 0, undefined);

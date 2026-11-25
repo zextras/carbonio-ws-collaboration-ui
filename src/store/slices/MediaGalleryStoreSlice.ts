@@ -85,7 +85,7 @@ const prependToBucket = (
 	}
 	const index = bucket.attachments.findIndex((a) => isNewerInGallery(attachment, a));
 	// Older than everything loaded while pages remain: the next page brings it
-	if (index !== -1 || !bucket.hasMore) {
+	if (index !== -1 || !bucket.hasMore || bucket.attachments.length === 0) {
 		bucket.attachments.splice(index === -1 ? bucket.attachments.length : index, 0, attachment);
 	}
 	if (bucket.total !== undefined) bucket.total += 1;
