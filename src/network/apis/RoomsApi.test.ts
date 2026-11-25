@@ -415,6 +415,23 @@ describe('Rooms API', () => {
 			});
 		});
 
+		test('addRoomAttachment with placeholderRoom logs a failed upload to the new room', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			mockFetchAPI.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
+			mockFetchAPI.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
+			mockUploadFileFetchAPI.mockRejectedValueOnce(new Error('status ko'));
+			const testFile = new File([], 'file.pdf', { type: applicationPdf });
+
+			await addRoomAttachment('placeholder-userId', testFile, {});
+
+			await vi.waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith(
+					'addRoomAttachment: upload to the new room failed',
+					expect.objectContaining({ message: expect.stringContaining('status ko') })
+				)
+			);
+		});
+
 		test('addRoomAttachment(1.6.1) is called correctly', async () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '100' }));

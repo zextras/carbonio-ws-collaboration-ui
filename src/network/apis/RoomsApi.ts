@@ -254,7 +254,11 @@ export const addRoomAttachment = (
 	if (placeholderRoom[1]) {
 		return replacePlaceholderRoom(placeholderRoom[1], optionalFields.description ?? '', file).then(
 			(response) => {
-				addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled);
+				addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled).catch(
+					(err) => {
+						console.error('addRoomAttachment: upload to the new room failed', err);
+					}
+				);
 				return response;
 			}
 		);
