@@ -79,6 +79,11 @@ const UploadSpinnerWrapper = styled(Container)`
 
 const SendButton = styled(Button)<{ alt?: string }>``;
 
+const withoutController = (
+	controllers: AbortController[],
+	controller: AbortController
+): AbortController[] => controllers.filter((pending) => pending !== controller);
+
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	roomId,
 	textMessage,
@@ -138,7 +143,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	// reply, unless something else has been written in the meantime
 	const restoreIfUnsent = useCallback(
 		(sending: Promise<boolean>, message: string, reference?: ReferenceMessage): void => {
-			sending.then((sent) => {
+			const restore = (sent: boolean): void => {
 				if (sent) return;
 				const state = useStore.getState();
 				if (!composerHasText()) {
@@ -153,7 +158,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					label: messageNotSentLabel,
 					hideButton: true
 				});
-			});
+			};
+			// A send that rejects is unsent too
+			sending.then(restore, () => restore(false));
 		},
 		[
 			composerHasText,
@@ -250,7 +257,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			let released = false;
 			setUnsettledUploads((current) => [...current, controller]);
 			const unsettle = (): void =>
-				setUnsettledUploads((current) => current.filter((pending) => pending !== controller));
+				setUnsettledUploads((current) => withoutController(current, controller));
 			addRoomAttachment(
 				roomId,
 				file.file,
