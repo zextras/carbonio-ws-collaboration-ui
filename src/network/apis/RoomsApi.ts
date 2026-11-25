@@ -239,6 +239,13 @@ const uploadWscAttachment = (
 		})
 		.then((message) => ({ id: message?.id ?? tempId }));
 
+// The upload is not waited for: the caller only needs the room that was just created
+const logFailedUploadToNewRoom = (upload: Promise<unknown>): void => {
+	upload.catch((err) => {
+		console.error('addRoomAttachment: upload to the new room failed', err);
+	});
+};
+
 export const addRoomAttachment = (
 	roomId: string,
 	file: File,
@@ -254,10 +261,8 @@ export const addRoomAttachment = (
 	if (placeholderRoom[1]) {
 		return replacePlaceholderRoom(placeholderRoom[1], optionalFields.description ?? '', file).then(
 			(response) => {
-				addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled).catch(
-					(err) => {
-						console.error('addRoomAttachment: upload to the new room failed', err);
-					}
+				logFailedUploadToNewRoom(
+					addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled)
 				);
 				return response;
 			}
