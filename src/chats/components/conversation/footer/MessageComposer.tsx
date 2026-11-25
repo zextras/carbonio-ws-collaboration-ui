@@ -116,6 +116,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
+	const [unsettledUploads, setUnsettledUploads] = useState<AbortController[]>([]);
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
@@ -178,7 +179,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [referenceMessage, textMessage, filesToUploadArray]);
 
 	const abortUploadRequest = useCallback(() => {
-		forEach(listAbortController, (controller: AbortController) => controller.abort());
+		forEach([...listAbortController, ...unsettledUploads], (controller: AbortController) =>
+			controller.abort()
+		);
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			severity: 'info',
@@ -186,7 +189,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			hideButton: true,
 			autoHideTimeout: 3000
 		});
-	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
+	}, [listAbortController, unsettledUploads, uploadAbortedLabel, createSnackbar]);
 
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
@@ -245,6 +248,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		// Released on the first attempt: background retries must not hold the next file
 		return new Promise<void>((resolve, reject) => {
 			let released = false;
+			setUnsettledUploads((current) => [...current, controller]);
+			const unsettle = (): void =>
+				setUnsettledUploads((current) => current.filter((pending) => pending !== controller));
 			addRoomAttachment(
 				roomId,
 				file.file,
@@ -260,8 +266,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					resolve();
 				}
 			).then(
-				() => resolve(),
+				() => {
+					unsettle();
+					resolve();
+				},
 				(reason: DOMException) => {
+					unsettle();
 					errorHandler(reason, fileName);
 					if (released && description && !composerHasText()) {
 						setDraftMessage(roomId, description);
@@ -562,7 +572,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				handleOnPaste={handlePaste}
 			/>
 			{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
-			{isUploading && (
+			{(isUploading || unsettledUploads.length > 0) && (
 				<Tooltip label={stopUploadLabel} placement="top">
 					<UploadSpinnerWrapper width="2.25rem" height="2.5625rem">
 						<LoadingSpinner color="primary" title={uploadingLabel} />

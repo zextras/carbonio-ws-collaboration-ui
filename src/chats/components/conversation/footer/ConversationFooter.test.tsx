@@ -37,6 +37,7 @@ import { now } from '../../../../utils/dateUtils';
 const iconNavigator2 = 'icon: Navigation2';
 const initText = 'we are gonna se';
 const iconAttach = 'icon: Attach';
+const iconCloseOutline = 'icon: CloseOutline';
 const messageNotSentLabel = 'Message not sent. Please try again';
 
 const mockedRoom: RoomBe = createMockRoom({
@@ -610,12 +611,14 @@ describe('Send message', () => {
 	});
 
 	describe('An upload still retried in the background', () => {
+		let confirmLater: (() => void) | undefined;
 		let failLater: ((reason: unknown) => void) | undefined;
 
 		const sendPendingFileWithCaption = async (): Promise<UserEvent> => {
 			vi.spyOn(api, 'addRoomAttachment').mockImplementation(
 				(roomId, file, optionalFields, signal, onFirstAttemptSettled) =>
-					new Promise<{ id: string }>((_resolve, reject) => {
+					new Promise<{ id: string }>((resolve, reject) => {
+						confirmLater = (): void => resolve({ id: 'confirmed' });
 						failLater = reject;
 						signal?.addEventListener('abort', () =>
 							reject(new DOMException('aborted', 'AbortError'))
@@ -650,6 +653,27 @@ describe('Send message', () => {
 
 			expect(await screen.findByText('Something went wrong uploading hello.pdf')).toBeVisible();
 			expect(screen.getByTestId('textAreaComposer')).toHaveValue('something new');
+		});
+
+		test('The stop button stays while the send is pending and cancels it', async () => {
+			await sendPendingFileWithCaption();
+
+			// The first attempt is over: the composer takes new files again
+			expect(await screen.findByTestId(iconAttach)).toBeInTheDocument();
+			fireEvent.click(screen.getByTestId(iconCloseOutline));
+
+			await waitFor(() => expect(screen.queryByTestId(iconCloseOutline)).not.toBeInTheDocument());
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('a caption');
+		});
+
+		test('The stop button goes away once the pending send is confirmed', async () => {
+			await sendPendingFileWithCaption();
+			expect(screen.getByTestId(iconCloseOutline)).toBeInTheDocument();
+
+			act(() => confirmLater?.());
+
+			await waitFor(() => expect(screen.queryByTestId(iconCloseOutline)).not.toBeInTheDocument());
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('');
 		});
 	});
 
