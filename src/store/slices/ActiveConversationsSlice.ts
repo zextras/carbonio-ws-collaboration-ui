@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { concat, find, findIndex, findLast, includes, orderBy, remove, size } from 'lodash';
+import { concat, find, findLast, includes, orderBy, remove, size } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import {
@@ -43,7 +43,7 @@ const dropNewReaction = (
 	reaction: string | undefined
 ): void => {
 	if (!reaction) return;
-	const index = findIndex(reactions, (r) => r.reaction === reaction && r.stanzaId === stanzaId);
+	const index = reactions.findIndex((r) => r.reaction === reaction && r.stanzaId === stanzaId);
 	if (index !== -1) {
 		reactions.splice(index, 1);
 	}
