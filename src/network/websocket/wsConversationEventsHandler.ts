@@ -142,13 +142,17 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 	const state = useStore.getState();
 	landMemberAddedLine(event);
 	if (event.userId === state.session.id) {
-		getRoom(event.roomId).then((response) => {
-			addRoomSnapshots([response]);
-			refreshMembersPresence((response.members ?? []).map((member) => member.userId));
-			if (response.meetingId) {
-				getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
-			}
-		});
+		getRoom(event.roomId)
+			.then((response) => {
+				addRoomSnapshots([response]);
+				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
+				return response.meetingId
+					? getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]))
+					: undefined;
+			})
+			.catch((err) => {
+				console.error('RoomMemberAdded: room reload failed', err);
+			});
 	} else {
 		state.addRoomMember(event.roomId, {
 			userId: event.userId,
@@ -177,10 +181,14 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			getRoom(event.roomId).then((response) => {
-				addRoomSnapshots([response]);
-				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
-			});
+			getRoom(event.roomId)
+				.then((response) => {
+					addRoomSnapshots([response]);
+					refreshMembersPresence((response.members ?? []).map((member) => member.userId));
+				})
+				.catch((err) => {
+					console.error('RoomCreated: room reload failed', err);
+				});
 			landRoomCreatedLastItem(event);
 			chatClient.setOnline();
 			break;

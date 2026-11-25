@@ -80,6 +80,59 @@ describe('wsConversationEventHandler tests', () => {
 		});
 	});
 
+	describe('a failed room reload is logged, not left unhandled', () => {
+		test('ROOM_MEMBER_ADDED of the session user, getRoom failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_MEMBER_ADDED,
+				roomId: room.id,
+				userId: sessionUser.id,
+				sentDate: SENT_DATE
+			} as RoomMemberAddedEvent);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomMemberAdded: room reload failed', failure)
+			);
+		});
+
+		test('ROOM_MEMBER_ADDED of the session user, getMeeting failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockResolvedValue(room);
+			vi.spyOn(api, 'getMeeting').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_MEMBER_ADDED,
+				roomId: room.id,
+				userId: sessionUser.id,
+				sentDate: SENT_DATE
+			} as RoomMemberAddedEvent);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomMemberAdded: room reload failed', failure)
+			);
+		});
+
+		test('ROOM_CREATED, getRoom failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_CREATED,
+				roomId: 'newRoom',
+				sentDate: SENT_DATE
+			} as never);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomCreated: room reload failed', failure)
+			);
+		});
+	});
+
 	test('ROOM_MEMBER_REMOVED: session user is removed from a room with an ongoing meeting', async () => {
 		useStore.getState().addMeetings([meeting]);
 		wsEventsHandler({
