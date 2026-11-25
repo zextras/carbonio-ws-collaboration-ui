@@ -20,10 +20,11 @@ let bootTimer: ReturnType<typeof setTimeout> | undefined;
 const waitAtMost = (previous: Promise<void>, ms: number): Promise<void> =>
 	new Promise<void>((resolve) => {
 		const timer = setTimeout(resolve, ms);
-		previous.then(() => {
+		const done = (): void => {
 			clearTimeout(timer);
 			resolve();
-		});
+		};
+		previous.then(done, done);
 	});
 
 export function refreshInboxSerialized(errorMessage: string): Promise<void> {
@@ -33,10 +34,16 @@ export function refreshInboxSerialized(errorMessage: string): Promise<void> {
 		});
 	const current = lastRefresh ? waitAtMost(lastRefresh, MAX_CHAIN_WAIT_MS).then(run) : run();
 	lastRefresh = current;
-	current.then(() => {
+	const release = (): void => {
 		if (lastRefresh === current) lastRefresh = undefined;
-	});
+	};
+	current.then(release, release);
 	return current;
+}
+
+// For the callers that do not wait for it: the failure is already logged by the refresh itself
+export function refreshInboxInBackground(errorMessage: string): void {
+	refreshInboxSerialized(errorMessage).catch(() => undefined);
 }
 
 export function scheduleBootInbox(): void {
@@ -44,7 +51,7 @@ export function scheduleBootInbox(): void {
 	bootState = 'waiting';
 	bootTimer = setTimeout(() => {
 		bootState = 'loaded';
-		refreshInboxSerialized(BOOT_ERROR);
+		refreshInboxInBackground(BOOT_ERROR);
 	}, BOOT_INBOX_TIMEOUT_MS);
 }
 
@@ -52,7 +59,7 @@ export function onFirstWebsocketConnected(): boolean {
 	if (bootState === 'idle') return false;
 	clearTimeout(bootTimer);
 	bootState = 'idle';
-	refreshInboxSerialized(BOOT_ERROR);
+	refreshInboxInBackground(BOOT_ERROR);
 	return true;
 }
 

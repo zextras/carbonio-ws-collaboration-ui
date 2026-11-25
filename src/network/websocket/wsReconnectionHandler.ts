@@ -11,7 +11,7 @@ import { isWscPure } from '../chatClient/ChatClient';
 import {
 	cancelBootInbox,
 	onFirstWebsocketConnected,
-	refreshInboxSerialized
+	refreshInboxInBackground
 } from '../chatClient/inboxRefresh';
 import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -32,7 +32,7 @@ export function catchUpChatState(): void {
 	cancelBootInbox();
 	useStore.getState().resetXmppData();
 	wscSdk.retryPendingSends();
-	refreshInboxSerialized('catchUpChatState: inbox refresh failed');
+	refreshInboxInBackground('catchUpChatState: inbox refresh failed');
 }
 
 let catchUpPending = false;
