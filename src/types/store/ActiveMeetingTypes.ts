@@ -156,13 +156,13 @@ export type VirtualBackground = {
 };
 
 export enum VirtualBackgroundType {
-	'NONE' = 'None',
-	'BLUR' = 'Blur',
-	'HOME' = 'Home',
-	'JAL_MAHAL' = 'JalMahal',
-	'LIVING_ROOM' = 'LivingRoom',
-	'MOUNTAINS' = 'Mountains',
-	'OFFICE' = 'Office',
-	'COWORKING' = 'Coworking',
-	'IVY' = 'Ivy'
+	NONE = 'None',
+	BLUR = 'Blur',
+	HOME = 'Home',
+	JAL_MAHAL = 'JalMahal',
+	LIVING_ROOM = 'LivingRoom',
+	MOUNTAINS = 'Mountains',
+	OFFICE = 'Office',
+	COWORKING = 'Coworking',
+	IVY = 'Ivy'
 }
