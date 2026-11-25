@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
-
 import { PLACEHOLDER_STANZA_PREFIX } from '../constants/messageConstants';
 import { Message, MarkerStatus, MessageType } from '../types/store/ChatsRegistryTypes';
 
@@ -14,4 +12,4 @@ export const isPendingMessage = (message: Message): boolean =>
 	(message.stanzaId.startsWith(PLACEHOLDER_STANZA_PREFIX) || message.read === MarkerStatus.PENDING);
 
 export const getOldestConfirmedMessage = (messages: ReadonlyArray<Message>): Message | undefined =>
-	find(messages, (message) => !isPendingMessage(message));
+	messages.find((message) => !isPendingMessage(message));
