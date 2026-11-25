@@ -226,8 +226,9 @@ describe('Chat Creation Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
 		const topicInput = screen.getByTestId('description_input');
-		await user.type(
-			topicInput,
+		// Pasted in one go: typing it key by key took the test close to its timeout
+		await user.click(topicInput);
+		await user.paste(
 			"This is a long description that is useful for testing purpose. We need to check if the length of the sentence will trigger the error inside the modal, that's why we have to write this. I hope that this won't break the test because it would be stressful!!!!!"
 		);
 		const topicLabel = screen.getByText(/Maximum topic length is 256 characters/i);
