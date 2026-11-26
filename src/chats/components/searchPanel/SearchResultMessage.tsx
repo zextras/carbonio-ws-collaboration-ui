@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import HighlightedText from './HighlightedText';
 import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
-import { xmppClient } from '../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
@@ -60,10 +60,15 @@ const SearchResultMessage = ({
 	const onResultClick = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
 		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
-			xmppClient.requestMessageResultHistoryToId(message.roomId, message.stanzaId).then(() => {
-				scrollToMessage(message.id);
-				useStore.getState().setScrollPosition(message.roomId, message.id);
-			});
+			chatClient
+				.requestMessageResultHistoryToId(message.roomId, message.stanzaId)
+				.then(() => {
+					scrollToMessage(message.id);
+					useStore.getState().setScrollPosition(message.roomId, message.id);
+				})
+				.catch((err) =>
+					console.error('SearchResultMessage: history to the search result failed', err)
+				);
 		} else {
 			scrollToMessage(message.id);
 		}

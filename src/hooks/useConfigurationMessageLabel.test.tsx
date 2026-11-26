@@ -304,6 +304,40 @@ describe('useConfigurationMessageLabel', () => {
 			});
 			expect(result.current).toBe(`${groupRoom.name} created!`);
 		});
+
+		test('The creation row of a one-to-one room opens the chat like the member added row', () => {
+			const configurationMessage = createMockConfigurationMessage({
+				roomId: oneToOneRoom.id,
+				operation: OperationType.ROOM_CREATION,
+				from: user1.id
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(configurationMessage), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toBe(`New Chat created!`);
+		});
+
+		test('The creation row of a meeting chat has no label', () => {
+			const temporaryRoom = createMockRoom({
+				id: 'temporaryRoomId',
+				name: 'Meeting Room Name',
+				type: RoomType.TEMPORARY,
+				members: [
+					createMockMember({ userId: loggedUser.id }),
+					createMockMember({ userId: user1.id })
+				]
+			});
+			useStore.getState().addRooms([temporaryRoom]);
+			const configurationMessage = createMockConfigurationMessage({
+				roomId: temporaryRoom.id,
+				operation: OperationType.ROOM_CREATION,
+				from: loggedUser.id
+			});
+			const { result } = renderHook(() => useConfigurationMessageLabel(configurationMessage), {
+				wrapper: ProvidersWrapper
+			});
+			expect(result.current).toBe(undefined);
+		});
 	});
 
 	describe('Meeting labels', () => {

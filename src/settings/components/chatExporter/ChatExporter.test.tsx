@@ -8,6 +8,9 @@ import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
+import { resolveChatExportName } from '../../../utils/resolveChatExportName';
+
+vi.mock('../../../utils/resolveChatExportName');
 
 const roomId = 'roomId';
 
@@ -18,6 +21,7 @@ const groupRoom = createMockRoom({
 
 beforeEach(() => {
 	useStore.getState().addRooms([groupRoom]);
+	vi.mocked(resolveChatExportName).mockResolvedValue(groupRoom.name!);
 });
 
 describe('ChatExporter tests', () => {
@@ -39,7 +43,7 @@ describe('ChatExporter tests', () => {
 		expect(spyOnRequestFullHistory).toHaveBeenCalledWith(roomId, message.date);
 	});
 
-	test('Export history when history is complete', () => {
+	test('Export history when history is complete', async () => {
 		const chatExporter = new ChatExporter(roomId);
 		const message = createMockTextMessage();
 		chatExporter.addMessagesToFullHistory([message]);
@@ -54,9 +58,26 @@ describe('ChatExporter tests', () => {
 		document.body.removeChild = vi.fn();
 		URL.createObjectURL = vi.fn().mockReturnValue('blob:url');
 
-		chatExporter.exportHistory();
+		await chatExporter.exportHistory();
 
 		expect(document.body.appendChild).toHaveBeenCalled();
 		expect(document.body.removeChild).toHaveBeenCalled();
+	});
+
+	test('Export filename comes from resolveChatExportName', async () => {
+		vi.mocked(resolveChatExportName).mockResolvedValue('Other User');
+		const chatExporter = new ChatExporter(roomId);
+		chatExporter.addMessagesToFullHistory([createMockTextMessage()]);
+
+		document.body.appendChild = vi.fn();
+		document.body.removeChild = vi.fn();
+		URL.createObjectURL = vi.fn().mockReturnValue('blob:url');
+		const createElementSpy = vi.spyOn(document, 'createElement');
+
+		await chatExporter.exportHistory();
+
+		expect(resolveChatExportName).toHaveBeenCalledWith(roomId);
+		const link = createElementSpy.mock.results.at(-1)?.value as HTMLAnchorElement;
+		expect(link.download).toBe('Other User.txt');
 	});
 });

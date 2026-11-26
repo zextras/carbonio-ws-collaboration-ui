@@ -19,7 +19,9 @@ export function fullHistoryCallback(stanza: Element, queryId: string): void {
 	if (chatExporting?.roomId === roomId) {
 		const isHistoryComplete = getRequiredTagElement(stanza, 'fin').getAttribute('complete');
 		if (isHistoryComplete) {
-			chatExporting.exporter.exportHistory();
+			chatExporting.exporter.exportHistory().catch((err) => {
+				console.error('fullHistoryCallback: chat export failed', err);
+			});
 		} else {
 			chatExporting.exporter.continueExporting();
 		}

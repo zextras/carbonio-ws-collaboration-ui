@@ -23,6 +23,21 @@ export type AdditionalHeaders = {
 	area?: string;
 };
 
+/**
+ * v2 (WSC-pure) upload form fields, the `InsertAttachmentRequestMultipart`
+ * of api.yaml besides `file` and `contentLength`.
+ */
+export type AttachmentUploadFields = {
+	/**
+	 * Client-generated correlation key: the optimistic placeholder's id, which
+	 * the MessageReceived self-echo carries back.
+	 */
+	tempId: string;
+	description?: string;
+	replyToId?: string;
+	area?: string;
+};
+
 export type AttachmentsSortBy = 'created_at' | 'size';
 
 export type AttachmentsSortOrder = 'asc' | 'desc';

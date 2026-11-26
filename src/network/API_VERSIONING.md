@@ -2,6 +2,46 @@
 
 This document tracks internal changes related to API versioning, renamed events, and modified files.
 
+## Version 2.0.0
+
+2.0.0 is a breaking change: a 2.0.0 backend requires 2.0.0-capable clients. Older web and mobile clients do not work against it, and there are no compatibility shims or "update the app" screens.
+
+### Changes
+
+- **Protocol**: WSC-pure backend (MongooseIM replacement): REST writes plus a single push WebSocket. The XMPP connection is skipped when the negotiated version is `>= 2.0.0` (`isWscPure()` / `getIsWscPure`); every v2 branch is gated on it, so the 1.x path is unchanged; the one 1.x-visible change is the renegotiation fallback below (a 1.6.x server newer than 1.6.16 now runs on 1.6.16 instead of failing).
+- **Version negotiation**: `2.0.0` is the first entry of `SUPPORTED_API_VERSIONS` (`src/constants/appConstants.tsx`), which also lists every 1.6.x up to `1.6.16`. REST calls send the newest supported version in `X-WSC-API-VERSION`. On a `422` the client reads the server version from the same header and renegotiates (`src/utils/FetchUtils.ts`): the server version is used if supported, otherwise the highest supported version not above it; if there is none, or it equals the version just sent, the call fails. Renegotiation retries are bounded (`MAX_VERSION_MISMATCH_RETRIES`). The events WebSocket offers the supported versions as sub-protocols.
+- **Client architecture**: chat call sites go through the version-gated `chatClient` façade (`src/network/chatClient/ChatClient.ts`), backed by the SDK (`src/network/sdk/wscSdk.ts`). Chat writes (send, edit, delete, reactions, read markers, pin/unpin, forward, attachment upload) are REST calls that go through the SDK; the upload goes through `wscSdk.sendAttachment`, which runs the app's multipart (`sendAttachmentFetchAPI`) on every attempt with the same `tempId`, owns the retries of an uncertain outcome and confirms the placeholder. Chat events (`MessageReceived`, `MessageEdited`, `MessageDeleted`, `MessageForwarded`, `MessagePinned`, `MessageUnpinned`, `ReactionChanged`, `ReadUpdated`, `PresenceChanged`, `Typing`, `Error`) are routed by `wsChatEventsRouter` to the store (`Error` is only logged).
+- **Room events**: `RoomUpdated` is replaced by `RoomNameChanged` and `RoomDescriptionChanged`, one per changed field, each carrying its own system line, which the SDK lands (`handleRoomNameChanged`, `handleRoomDescriptionChanged`) from `wsConversationEventsHandler`; `RoomUpdated` is handled for 1.6.x only.
+- **Pins**: the pin UI is available; the `zextras:iq:pin` feature is always on. A pin older than the user's `clearedAt` stays visible as text; its attachment thumbnail, preview and download are hidden because the attachment endpoints answer 404 below the visibility floor.
+- **Attachments**: upload is one `POST /rooms/${roomId}/attachments` multipart (`file`, `contentLength`, `tempId`, `description`, `replyToId`, `area`) answered by the created `Message`; the description travels unescaped, as a `text/plain;charset=UTF-8` part (without a charset the backend reads it as US-ASCII), the file name keeps its unicode escaping. The 1.6.x variants (`PUT` multipart with `messageId` from 1.6.1, binary `POST` with headers before) are unchanged (`sendFileFetchAPI`, `uploadFileFetchAPI`, chosen by `addRoomAttachment`). REST attachments carry `messageId` and no `stanzaId`: `getRoomAttachments` fills `stanzaId` from `messageId` so gallery and preview delete and forward work.
+- **Recovery**: on every socket reconnection and on `MessageBrokerRestored` the volatile chat data is reset and re-requested from `GET /inbox` (`wsReconnectionHandler.ts`), serialized so an older response never lands last.
+
+### Legacy XMPP boot sequence → 2.0.0
+
+The XMPP connection handler (`XMPPClient.ts` constructor callback) ran four calls on every connect. On a WSC-pure backend the chat boots through `chatClient.connect` instead, and the sequence dissolves as follows:
+
+| Legacy call | What it actually did | 2.0.0 |
+|---|---|---|
+| `setInbox()` (IQ inbox, XEP-0430) | last message + unread count per room | `GET /inbox` via the SDK (`wscSdk.fetchInbox()`), loaded after the first `WebsocketConnected` (the backend sends it once the events socket is subscribed, so no message can fall between the inbox and the subscription) with a 5 s timeout fallback; the same payload also carries read markers (replacing the smart-markers IQ) and member presence |
+| `getContactList()` (IQ roster) | its only effect (`rosterCallback`): one `getLastActivity(jid)` IQ **per contact** to seed presence/last activity | roster removed by the backend, no replacement needed: `online`/`lastActivity` arrive in the same `GET /inbox` (`room.members[]`) |
+| `setOnline()` (`<presence/>`) | announce presence to contacts | no outbound presence action exists in the protocol: opening the events WebSocket announces you, closing your last socket marks you offline (no grace period) |
+| `getFeatures()` (disco#info) | populates `xmppClient.features`; its real consumer is the pin capability check (`features.includes('zextras:iq:pin')`) | `chatClient.features` returns `['zextras:iq:pin']` |
+
+### Affected Files
+
+- 'src/network/chatClient/ChatClient.ts' (new façade)
+- 'src/network/sdk/wscSdk.ts' (SDK ports + StoreBridge adapter)
+- 'src/network/websocket/wsChatEventsRouter.ts' (new)
+- 'src/network/websocket/wsConversationEventsHandler.ts', 'src/types/network/websocket/wsConversationEvents.ts' (`RoomNameChanged`, `RoomDescriptionChanged`)
+- 'src/network/websocket/wsEventsHandler.ts', 'src/network/websocket/eventHandlersUtilities.ts'
+- 'src/types/network/websocket/wsEvents.ts'
+- 'src/MainApp.tsx' (supportedVersions + boot through the façade)
+- 'src/network/chatClient/inboxRefresh.ts' (boot inbox after the first `WebsocketConnected`, serialized refreshes)
+- 'src/utils/FetchUtils.ts' (version renegotiation fallback)
+- ~20 UI call sites (mechanical `xmppClient` → `chatClient` rename)
+
+---
+
 ## Version 1.6.16
 
 ### Changes

@@ -9,6 +9,9 @@ import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingDeclinedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { isWscPure } from '../../chatClient/ChatClient';
+import { wscSdk } from '../../sdk/wscSdk';
+import { notifyConfigRow } from '../configRowEffects';
 import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingDeclinedEventHandler = (event: MeetingDeclinedEvent): void => {
@@ -18,6 +21,12 @@ export const meetingDeclinedEventHandler = (event: MeetingDeclinedEvent): void =
 
 	// Send custom event to delete an incoming meeting notification if I declined the meeting from another session
 	const meeting = find(useStore.getState().meetings, (meeting) => meeting.id === event.meetingId);
+	if (meeting && isWscPure()) {
+		const row = wscSdk.handleMeetingDeclined(event, meeting.roomId);
+		if (row) {
+			notifyConfigRow(row);
+		}
+	}
 	if (
 		meeting &&
 		useStore.getState().rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&

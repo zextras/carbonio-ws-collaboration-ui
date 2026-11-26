@@ -7,6 +7,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { usePinMessage } from './usePinMessage';
+import { wscSdk } from '../network/sdk/wscSdk';
 import { xmppClient } from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 import {
@@ -412,6 +413,134 @@ describe('usePinMessage', () => {
 			});
 
 			expect(pinMessageSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('on a WSC-pure backend', () => {
+		beforeEach(() => {
+			useStore.getState().setApiVersion('2.0.0');
+		});
+
+		afterEach(() => {
+			// The zustand store survives across tests: leave the version un-negotiated
+			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
+		});
+
+		it('pins an edited message by its stable id, never by the synthetic e_… fastening id', () => {
+			const room = createMockRoom({
+				id: 'roomV2',
+				type: RoomType.ONE_TO_ONE,
+				members: [createMockMember({ userId: user1.id })]
+			});
+			// On v2 the edit projection exposes the synthetic fastening id as
+			// editedStanzaId: it is no wire id and must never reach the PUT
+			const editedMessage = createMockTextMessage({
+				id: 'msg-e1',
+				stanzaId: 'msg-e1',
+				editedStanzaId: 'e_msg-e1_1754560000000',
+				edited: true,
+				roomId: room.id
+			});
+
+			const store = useStore.getState();
+			store.addRooms([room]);
+			store.newMessage(editedMessage);
+
+			const pinSpy = vi.spyOn(wscSdk, 'pinMessage').mockResolvedValue(undefined);
+
+			const { result } = renderHook(() => usePinMessage(editedMessage), {
+				wrapper: ProvidersWrapper
+			});
+
+			act(() => {
+				result.current.pinAction();
+			});
+
+			expect(pinSpy).toHaveBeenCalledWith(room.id, 'msg-e1');
+		});
+
+		it('matches the banner stub against the edited bubble (plain-id comparison)', () => {
+			const room = createMockRoom({
+				id: 'roomV2Stub',
+				type: RoomType.ONE_TO_ONE,
+				members: [createMockMember({ userId: user1.id })]
+			});
+			const editedMessage = createMockTextMessage({
+				id: 'msg-s1',
+				stanzaId: 'msg-s1',
+				editedStanzaId: 'e_msg-s1_1754560000000',
+				edited: true,
+				roomId: room.id
+			});
+
+			const store = useStore.getState();
+			store.addRooms([room]);
+			store.newMessage(editedMessage);
+			// A GET /pin stub carries no editedStanzaId: the v1 comparison would miss
+			store.setPinnedMessage(
+				room.id,
+				createMockTextMessage({ id: 'msg-s1', stanzaId: 'msg-s1', roomId: room.id })
+			);
+
+			const { result } = renderHook(() => usePinMessage(editedMessage), {
+				wrapper: ProvidersWrapper
+			});
+
+			expect(result.current.isMessagePinned).toBe(true);
+		});
+
+		it('unpins by the stable id and removes the banner optimistically', () => {
+			const room = createMockRoom({
+				id: 'roomV2Un',
+				type: RoomType.ONE_TO_ONE,
+				members: [createMockMember({ userId: user1.id })]
+			});
+			const message = createMockTextMessage({
+				id: 'msg-u1',
+				stanzaId: 'msg-u1',
+				roomId: room.id
+			});
+
+			const store = useStore.getState();
+			store.addRooms([room]);
+			store.newMessage(message);
+			store.setPinnedMessage(room.id, message);
+
+			const unpinSpy = vi.spyOn(wscSdk, 'unpinMessage').mockResolvedValue(undefined);
+
+			const { result } = renderHook(() => usePinMessage(message), {
+				wrapper: ProvidersWrapper
+			});
+
+			act(() => {
+				result.current.pinAction();
+			});
+
+			expect(unpinSpy).toHaveBeenCalledWith(room.id, 'msg-u1');
+			expect(useStore.getState().activeConversations[room.id]?.messagePinned).toBeUndefined();
+		});
+
+		it('exposes the pin action without any XMPP feature negotiation', () => {
+			const room = createMockRoom({
+				id: 'roomV2Feat',
+				type: RoomType.ONE_TO_ONE,
+				members: [createMockMember({ userId: user1.id })]
+			});
+			const message = createMockTextMessage({ id: 'msg-f1', roomId: room.id });
+
+			const store = useStore.getState();
+			store.addRooms([room]);
+			store.newMessage(message);
+			// No disco features on v2: the REST contract is the gate
+			xmppClient.features = [];
+
+			const { result } = renderHook(() => usePinMessage(message), {
+				wrapper: ProvidersWrapper
+			});
+
+			expect(result.current.canMessageBePinned).toBe(true);
+
+			xmppClient.features = ['zextras:iq:pin'];
 		});
 	});
 });

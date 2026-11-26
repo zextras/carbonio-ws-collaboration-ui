@@ -6,9 +6,10 @@
  */
 
 import { produce } from 'immer';
-import { find, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
+import { find, findIndex, forEach, map, orderBy, partition, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
@@ -29,7 +30,8 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { isBefore } from '../../utils/dateUtils';
+import { isBefore, isStrictlyBefore } from '../../utils/dateUtils';
+import { getIsWscPure } from '../selectors/SessionSelectors';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
 	const result: T[] = [];
@@ -49,6 +51,30 @@ function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => n
 
 	return result;
 }
+
+const compareMessageKeys = (
+	a: Pick<Message, 'date' | 'id'>,
+	b: Pick<Message, 'date' | 'id'>
+): number => {
+	if (a.date !== b.date) return a.date - b.date;
+	if (a.id === b.id) return 0;
+	return a.id < b.id ? -1 : 1;
+};
+
+const isPendingRow = (message: Message): boolean =>
+	message.type === MessageType.TEXT_MSG && message.read === MarkerStatus.PENDING;
+
+const sortedInsertIndex = (messages: Message[], message: Message): number => {
+	let index = messages.length;
+	if (isPendingRow(message)) return index;
+	while (
+		index > 0 &&
+		(isPendingRow(messages[index - 1]) || compareMessageKeys(messages[index - 1], message) > 0)
+	) {
+		index -= 1;
+	}
+	return index;
+};
 
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
@@ -117,6 +143,19 @@ const addBackfillRequestToQueue = (queue: BackfillRequest[], request: BackfillRe
 	queue.push(request);
 };
 
+/**
+ * Which messages after the own marker make the unread count: the others' text
+ * messages, plus the configuration rows: all of them on v1, like MongooseIM
+ * did, only the ones authored by others on v2, like the WSC backend counts the
+ * system lines.
+ */
+const countsAsUnread = (msg: Message, isWscPure: boolean): boolean => {
+	if (msg.type === MessageType.CONFIGURATION_MSG) {
+		return !isWscPure || !isMyId(msg.from);
+	}
+	return msg.type === MessageType.TEXT_MSG && !isMyId(msg.from);
+};
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -127,13 +166,31 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages } = initRoomChatsRegistry(draft, message.roomId);
-				const alreadyExists = find(messages, { id: message.id });
+				const { messages, markers } = initRoomChatsRegistry(draft, message.roomId);
+				if (!getIsWscPure(draft)) {
+					const alreadyExists = find(messages, { id: message.id });
+					// Replace message if it already exists (placeholder message)
+					if (alreadyExists) {
+						Object.assign(alreadyExists, message);
+					} else {
+						messages.push(message);
+					}
+					return;
+				}
+				const row: Message =
+					message.type === MessageType.TEXT_MSG &&
+					message.read !== MarkerStatus.PENDING &&
+					isMyId(message.from)
+						? { ...message, read: calcReads(message.date, message.roomId, markers) }
+						: message;
+				const existingIndex = findIndex(messages, { id: message.id });
 				// Replace message if it already exists (placeholder message)
-				if (alreadyExists) {
-					Object.assign(alreadyExists, message);
+				if (existingIndex !== -1) {
+					const [existing] = messages.splice(existingIndex, 1);
+					Object.assign(existing, row);
+					messages.splice(sortedInsertIndex(messages, existing), 0, existing);
 				} else {
-					messages.push(message);
+					messages.splice(sortedInsertIndex(messages, row), 0, row);
 				}
 			}),
 			false,
@@ -143,13 +200,24 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setInboxMessages: (inbox: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
+				const isWscPure = getIsWscPure(draft);
 				inbox.forEach((message) => {
 					const registry = initRoomChatsRegistry(draft, message.roomId);
-					registry.inboxMessageId = message.id;
 					if (
-						message.type === MessageType.TEXT_MSG ||
-						message.type === MessageType.CONFIGURATION_MSG
+						message.type !== MessageType.TEXT_MSG &&
+						message.type !== MessageType.CONFIGURATION_MSG
 					) {
+						registry.inboxMessageId = message.id;
+						return;
+					}
+					const { lastMessage } = registry;
+					if (
+						!isWscPure ||
+						!lastMessage ||
+						lastMessage.id === message.id ||
+						compareMessageKeys(message, lastMessage) > 0
+					) {
+						registry.inboxMessageId = message.id;
 						registry.lastMessage = message;
 					}
 				});
@@ -172,10 +240,24 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const newMessages = orderBy(messageArray, ['date'], ['asc']);
-					const merged = mergeSortedArrays(newMessages, messages, (a, b) => a.date - b.date);
+					const isWscPure = getIsWscPure(draft);
+					const compare = isWscPure
+						? compareMessageKeys
+						: (a: Message, b: Message): number => a.date - b.date;
+					// On v2 the pending rows stay last, like in newMessage: their date is the client send time
+					const [pendingRows, storedRows] = isWscPure
+						? partition(messages, isPendingRow)
+						: [[], messages];
+					const [pendingPageRows, pageRows] = isWscPure
+						? partition(messageArray, isPendingRow)
+						: [[], messageArray];
+					const newMessages = [...pageRows].sort(compare);
+					const merged = mergeSortedArrays(newMessages, storedRows, compare);
 					// Check for duplicates and remove them
-					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
+					draft.chatsRegistry[roomId].messages = uniqBy(
+						[...merged, ...pendingRows, ...pendingPageRows],
+						'id'
+					);
 				}
 			}),
 			false,
@@ -256,7 +338,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 
 				const placeholderMessage: TextMessage = {
 					id,
-					stanzaId: `placeholder_${id}`,
+					stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${id}`,
 					roomId,
 					date: Date.now(),
 					type: MessageType.TEXT_MSG,
@@ -319,10 +401,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const { messages, markers, lastMessage } = initRoomChatsRegistry(draft, roomId);
 
 				// Set a member marker only when it's a new marker, or it is more recent than other
+				const myId = draft.session.id;
+				let ownMarkerChanged = false;
 				forEach(newMarkers, (marker) => {
 					const existing = markers[marker.from];
 					if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
 						markers[marker.from] = marker;
+					}
+					if (
+						marker.from === myId &&
+						(!existing || isStrictlyBefore(existing.markerDate, marker.markerDate))
+					) {
+						ownMarkerChanged = true;
 					}
 				});
 
@@ -346,19 +436,21 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					return msg;
 				});
 
-				// Recalculate unread count
-				const myId = draft.session.id;
+				// Recalculate unread count. On v2 only a marker of mine that moves changes it: the count comes from
+				// the server, and the rows in store can be fewer than the unread ones because the history is not
+				// preloaded. A history page repeats the markers it already knows
+				const isWscPure = getIsWscPure(draft);
+				if (isWscPure && !ownMarkerChanged) {
+					return;
+				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
 				const lastMarkedDate = myMarker
 					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
 					: undefined;
 
 				const unreadMessages = messages.filter((msg) => {
-					const isConfigOrFromOthers =
-						msg.type === MessageType.CONFIGURATION_MSG ||
-						(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
 					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
-					return isConfigOrFromOthers && isAfterMarker;
+					return countsAsUnread(msg, isWscPure) && isAfterMarker;
 				});
 
 				draft.chatsRegistry[roomId].unread = unreadMessages.length;

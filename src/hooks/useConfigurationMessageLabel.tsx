@@ -247,6 +247,14 @@ export const useConfigurationMessageLabel = (
 		return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
 	}, [actionMakerUsername, amIModerator, loggedUserId, message.from, t]);
 
+	// v2 writes a creation row for every room type: a one-to-one opens with the v1 member added row,
+	// a meeting chat had none
+	const roomCreationLabel = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE) return memberAddedLabel;
+		if (roomType === RoomType.TEMPORARY) return undefined;
+		return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
+	}, [memberAddedLabel, roomName, roomType, t]);
+
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:
 			return roomNameChangedLabel;
@@ -261,7 +269,7 @@ export const useConfigurationMessageLabel = (
 		case OperationType.MEMBER_REMOVED:
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
-			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
+			return roomCreationLabel;
 		case OperationType.MESSAGE_PINNED:
 			return pinMessageLabel;
 		case OperationType.MESSAGE_UNPINNED:

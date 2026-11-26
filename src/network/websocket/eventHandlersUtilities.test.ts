@@ -25,6 +25,8 @@ const activeMeeting = createMockMeeting({ id: 'activeMeeting', roomId: activeRoo
 export const conversationEvents = [
 	WsEventType.ROOM_CREATED,
 	WsEventType.ROOM_UPDATED,
+	WsEventType.ROOM_NAME_CHANGED,
+	WsEventType.ROOM_DESCRIPTION_CHANGED,
 	WsEventType.ROOM_DELETED,
 	WsEventType.ROOM_OWNER_PROMOTED,
 	WsEventType.ROOM_OWNER_DEMOTED,

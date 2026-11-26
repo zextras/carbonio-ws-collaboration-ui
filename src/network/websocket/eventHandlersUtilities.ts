@@ -12,7 +12,8 @@ import { WsEventType } from '../../types/network/websocket/wsEvents';
 export enum EventArea {
 	GENERAL = 'general',
 	MEETING = 'meeting',
-	CONVERSATION = 'conversation'
+	CONVERSATION = 'conversation',
+	CHAT = 'chat'
 }
 
 export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
@@ -25,6 +26,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		}
 		case WsEventType.ROOM_CREATED:
 		case WsEventType.ROOM_UPDATED:
+		case WsEventType.ROOM_NAME_CHANGED:
+		case WsEventType.ROOM_DESCRIPTION_CHANGED:
 		case WsEventType.ROOM_DELETED:
 		case WsEventType.ROOM_OWNER_PROMOTED:
 		case WsEventType.ROOM_OWNER_DEMOTED:
@@ -36,6 +39,20 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.ROOM_UNMUTED:
 		case WsEventType.ROOM_HISTORY_CLEARED: {
 			return EventArea.CONVERSATION;
+		}
+		case WsEventType.MESSAGE_RECEIVED:
+		case WsEventType.MESSAGE_SENT:
+		case WsEventType.MESSAGE_EDITED:
+		case WsEventType.MESSAGE_DELETED:
+		case WsEventType.MESSAGE_FORWARDED:
+		case WsEventType.MESSAGE_PINNED:
+		case WsEventType.MESSAGE_UNPINNED:
+		case WsEventType.REACTION_CHANGED:
+		case WsEventType.READ_UPDATED:
+		case WsEventType.PRESENCE_CHANGED:
+		case WsEventType.TYPING:
+		case WsEventType.WS_ERROR: {
+			return EventArea.CHAT;
 		}
 		case WsEventType.MEETING_CREATED:
 		case WsEventType.MEETING_STARTED:

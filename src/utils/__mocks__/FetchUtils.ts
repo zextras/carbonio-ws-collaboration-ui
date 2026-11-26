@@ -6,12 +6,15 @@
 export const mockFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
 export const mockSendFileFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
 export const mockUploadFileFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
+export const mockSendAttachmentFetchAPI = vi.fn().mockImplementation(() => Promise.resolve({}));
 
 export const fetchAPI = mockFetchAPI;
 
 export const sendFileFetchAPI = mockSendFileFetchAPI;
 
 export const uploadFileFetchAPI = mockUploadFileFetchAPI;
+
+export const sendAttachmentFetchAPI = mockSendAttachmentFetchAPI;
 
 export const BASE_PATH = '/services/chats/';
 export const wscApiVersionHeader = 'X-WSC-API-VERSION';

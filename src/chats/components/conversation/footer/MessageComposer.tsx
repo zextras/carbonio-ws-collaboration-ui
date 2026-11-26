@@ -34,8 +34,9 @@ import { IME_LANGUAGES, MESSAGE_CHAR_LIMIT } from '../../../../constants/message
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { addRoomAttachment } from '../../../../network';
-import { xmppClient } from '../../../../network/xmpp/XMPPClient';
+import { chatClient } from '../../../../network/chatClient/ChatClient';
 import {
+	getDraftMessage,
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
@@ -78,6 +79,11 @@ const UploadSpinnerWrapper = styled(Container)`
 
 const SendButton = styled(Button)<{ alt?: string }>``;
 
+const withoutController = (
+	controllers: AbortController[],
+	controller: AbortController
+): AbortController[] => controllers.filter((pending) => pending !== controller);
+
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	roomId,
 	textMessage,
@@ -90,6 +96,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 	const actionLabel = t('action.understood', 'Understood');
+	const messageNotSentLabel = t('feedback.messageNotSent', 'Message not sent. Please try again');
 
 	const myUserId = useStore(getUserId);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
@@ -114,6 +121,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
+	const [unsettledUploads, setUnsettledUploads] = useState<AbortController[]>([]);
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
@@ -121,6 +129,48 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
+
+	// Once the user has moved to another room, what was written there is its draft
+	const composerHasText = useCallback(
+		(): boolean =>
+			messageInputRef.current
+				? messageInputRef.current.value.trim() !== ''
+				: !!getDraftMessage(useStore.getState(), roomId),
+		[roomId]
+	);
+
+	// Like a failed upload, an unsent message goes back to the composer, with the quote of a
+	// reply, unless something else has been written in the meantime
+	const restoreIfUnsent = useCallback(
+		(sending: Promise<boolean>, message: string, reference?: ReferenceMessage): void => {
+			const restore = (sent: boolean): void => {
+				if (sent) return;
+				const state = useStore.getState();
+				if (!composerHasText()) {
+					setDraftMessage(roomId, message);
+					if (reference && !getReferenceMessage(state, roomId)) {
+						setReferenceMessage(roomId, reference);
+					}
+				}
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: messageNotSentLabel,
+					hideButton: true
+				});
+			};
+			// A send that rejects is unsent too
+			sending.then(restore, () => restore(false));
+		},
+		[
+			composerHasText,
+			createSnackbar,
+			messageNotSentLabel,
+			roomId,
+			setDraftMessage,
+			setReferenceMessage
+		]
+	);
 
 	const loadFiles = useLoadFiles(roomId);
 
@@ -136,7 +186,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	}, [referenceMessage, textMessage, filesToUploadArray]);
 
 	const abortUploadRequest = useCallback(() => {
-		forEach(listAbortController, (controller: AbortController) => controller.abort());
+		forEach([...listAbortController, ...unsettledUploads], (controller: AbortController) =>
+			controller.abort()
+		);
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			severity: 'info',
@@ -144,7 +196,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			hideButton: true,
 			autoHideTimeout: 3000
 		});
-	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
+	}, [listAbortController, unsettledUploads, uploadAbortedLabel, createSnackbar]);
 
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
@@ -183,14 +235,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAttachmentPromise = async (
 		file: FileToUpload,
 		controller: AbortController
-	): Promise<{ id: string }> => {
+	): Promise<void> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
 		const lastFileId = filesToUploadArray?.at(-1)?.fileId;
 		const isLastFile = filesToUploadArray && file.fileId === lastFileId;
 
-		let area;
+		let area: string | undefined;
 		if (isAttachmentImage(file.file.type)) {
 			try {
 				const imageSize = await getImageSize(file.localUrl);
@@ -199,40 +251,63 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				return Promise.reject(err);
 			}
 		}
-		return addRoomAttachment(
-			roomId,
-			file.file,
-			{
-				description: isLastFile ? textMessage.trim() : '',
-				replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
-				area
-			},
-			signal
-		).catch((reason: DOMException) => {
-			errorHandler(reason, fileName);
-			return Promise.reject(reason);
+		const description = isLastFile ? textMessage.trim() : '';
+		// Released on the first attempt: background retries must not hold the next file
+		return new Promise<void>((resolve, reject) => {
+			let released = false;
+			setUnsettledUploads((current) => [...current, controller]);
+			const unsettle = (): void =>
+				setUnsettledUploads((current) => withoutController(current, controller));
+			addRoomAttachment(
+				roomId,
+				file.file,
+				{
+					description,
+					replyId: isLastFile ? referenceMessage?.stanzaId : undefined,
+					area
+				},
+				signal,
+				(outcome) => {
+					if (outcome === 'rejected') return;
+					released = true;
+					resolve();
+				}
+			).then(
+				() => {
+					unsettle();
+					resolve();
+				},
+				(reason: DOMException) => {
+					unsettle();
+					errorHandler(reason, fileName);
+					if (released && description && !composerHasText()) {
+						setDraftMessage(roomId, description);
+					}
+					reject(reason);
+				}
+			);
 		});
 	};
 
 	// Send isWriting every 3 seconds
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendThrottleIsWriting = useCallback(
-		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
-		[xmppClient, roomId]
+		throttle(() => chatClient.sendIsWriting(roomId), 3000),
+		[chatClient, roomId]
 	);
 
 	// Send paused after 3,5 seconds user stops typing
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendDebouncedPause = useCallback(
-		debounce(() => xmppClient.sendPaused(roomId), 3500),
-		[xmppClient, roomId]
+		debounce(() => chatClient.sendPaused(roomId), 3500),
+		[chatClient, roomId]
 	);
 
 	// Send paused and avoid to send pending isWriting
 	const sendStopWriting = useCallback(() => {
 		sendThrottleIsWriting.cancel();
 		sendDebouncedPause.cancel();
-		xmppClient.sendPaused(roomId);
+		chatClient.sendPaused(roomId);
 	}, [sendThrottleIsWriting, sendDebouncedPause, roomId]);
 
 	const actionToPerformBasedOnType = useCallback(
@@ -243,11 +318,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		): void => {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					xmppClient.sendChatMessageReply(
-						roomId,
+					restoreIfUnsent(
+						chatClient.sendChatMessageReply(
+							roomId,
+							message,
+							referenceMessage.senderId,
+							referenceMessage.stanzaId
+						),
 						message,
-						referenceMessage.senderId,
-						referenceMessage.stanzaId
+						referenceMessage
 					);
 					unsetReferenceMessage(roomId);
 					break;
@@ -258,7 +337,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 						setDeleteMessageModalStatus(true);
 					} else if (completeReferenceMessage.text !== message) {
 						// Avoid to send correction if text doesn't change
-						xmppClient.sendChatMessageEdit(
+						chatClient.sendChatMessageEdit(
 							roomId,
 							message,
 							referenceMessage.stanzaId,
@@ -275,7 +354,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				}
 			}
 		},
-		[roomId, unsetReferenceMessage]
+		[restoreIfUnsent, roomId, unsetReferenceMessage]
 	);
 
 	const sendMessage = useCallback((): void => {
@@ -289,7 +368,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setIsUploading(true);
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = filesToUploadArray.reduce(
-				(acc: Promise<{ id: string } | void>, file, i) =>
+				(acc: Promise<void>, file, i) =>
 					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);
@@ -314,7 +393,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
-			xmppClient.sendChatMessage(roomId, message);
+			restoreIfUnsent(chatClient.sendChatMessage(roomId, message), message);
 			setDraftMessage(roomId);
 			setTextMessage('');
 		}
@@ -325,7 +404,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
-		filesToUploadArray
+		filesToUploadArray,
+		restoreIfUnsent
 	]);
 
 	// Set focus on input after closing DeleteMessageModal
@@ -499,7 +579,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				handleOnPaste={handlePaste}
 			/>
 			{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
-			{isUploading && (
+			{(isUploading || unsettledUploads.length > 0) && (
 				<Tooltip label={stopUploadLabel} placement="top">
 					<UploadSpinnerWrapper width="2.25rem" height="2.5625rem">
 						<LoadingSpinner color="primary" title={uploadingLabel} />

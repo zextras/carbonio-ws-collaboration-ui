@@ -5,10 +5,11 @@
  */
 
 import { includes } from 'lodash';
+import { maxSatisfying } from 'semver';
 
 import { charToUnicode } from './textUtils';
 import useStore from '../store/Store';
-import { AdditionalHeaders } from '../types/network/models/attachmentTypes';
+import { AdditionalHeaders, AttachmentUploadFields } from '../types/network/models/attachmentTypes';
 import { Version } from '../types/store/SessionTypes';
 
 export const BASE_PATH = '/services/chats/';
@@ -49,16 +50,18 @@ const handleResponse = async (response: Response): Promise<any> => {
 			const { session, setApiVersion } = useStore.getState();
 			const serverApiVersion = response.headers.get(wscApiVersionHeader) as Version;
 			const clientApiVersion = session.apiVersion;
-			if (
-				!!serverApiVersion &&
-				serverApiVersion !== clientApiVersion &&
-				session.supportedVersions?.includes(serverApiVersion)
-			) {
-				setApiVersion(serverApiVersion as Version);
+			const negotiatedVersion = serverApiVersion
+				? (maxSatisfying(
+						session.supportedVersions ?? [],
+						`<=${serverApiVersion}`
+					) as Version | null)
+				: null;
+			if (negotiatedVersion && negotiatedVersion !== clientApiVersion) {
+				setApiVersion(negotiatedVersion);
 				return Promise.reject(new Error('version_mismatch'));
 			}
 		}
-		return Promise.reject(new Error('status ko'));
+		throw Object.assign(new Error('status ko'), { status: response.status });
 	}
 
 	const contentType = response.headers.get(contentTypeHeader);
@@ -105,15 +108,139 @@ export const sendFileFetchAPI = (
 	optionalFields?.replyId && formData.append('replyId', optionalFields?.replyId);
 	optionalFields?.area && formData.append('area', optionalFields.area);
 
+	const headers = buildHeaders();
+
 	return fetch(BASE_PATH + endpoint, {
 		method,
-		headers: buildHeaders(),
+		headers,
 		body: formData,
 		signal
 	})
 		.then((resp: Response) => handleResponse(resp))
 		.catch((err: Error) => Promise.reject(err));
 };
+
+export const UPLOAD_STALL_TIMEOUT_MS = 60_000;
+
+const parseResponseHeaders = (raw: string): Headers => {
+	const headers = new Headers();
+	raw.split('\r\n').forEach((line) => {
+		const separator = line.indexOf(':');
+		if (separator > 0)
+			headers.append(line.slice(0, separator).trim(), line.slice(separator + 1).trim());
+	});
+	return headers;
+};
+
+/**
+ * v2 (WSC-pure) attachment upload: one `POST` multipart, answered by the
+ * created `Message`. The file name keeps the unicode escaping, which the
+ * backend decodes (an unescaped name fails with a 500). The description goes
+ * as-is: the backend stores it as the message text without decoding, and v2
+ * clients render the text verbatim (v1 decoded it on receipt). It goes as a
+ * part with an explicit UTF-8 charset: a plain string part has no Content-Type,
+ * and the backend reads it as US-ASCII, mangling accents and emoji.
+ *
+ * An attempt that shows no progress for `UPLOAD_STALL_TIMEOUT_MS` (while
+ * sending the body or waiting for the answer) rejects with a `TimeoutError`,
+ * which the SDK retries with the same tempId, so a slow but alive upload of
+ * any size is never cut; an abort of `signal` rejects with an `AbortError`,
+ * which gives the upload up.
+ */
+export function sendAttachmentFetchAPI<T>(
+	endpoint: string,
+	file: File,
+	fields: AttachmentUploadFields,
+	signal?: AbortSignal
+): Promise<T> {
+	const formData = new FormData();
+	formData.append('file', file, charToUnicode(file.name));
+	formData.append('contentLength', file.size.toString());
+	formData.append('tempId', fields.tempId);
+	fields.description &&
+		formData.append(
+			'description',
+			new Blob([fields.description], { type: 'text/plain;charset=UTF-8' })
+		);
+	fields.replyToId && formData.append('replyToId', fields.replyToId);
+	fields.area && formData.append('area', fields.area);
+
+	return new Promise<T>((resolve, reject) => {
+		const abortError = (): DOMException =>
+			new DOMException('The operation was aborted.', 'AbortError');
+		if (signal?.aborted) {
+			reject(abortError());
+			return;
+		}
+
+		const xhr = new XMLHttpRequest();
+		let settled = false;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const listeners = new AbortController();
+		const settle = (action: () => void): void => {
+			if (settled) return;
+			settled = true;
+			clearTimeout(timer);
+			listeners.abort();
+			action();
+		};
+		const armTimer = (): void => {
+			clearTimeout(timer);
+			timer = setTimeout(
+				() =>
+					settle(() => {
+						xhr.abort();
+						reject(new DOMException('Upload attempt stalled', 'TimeoutError'));
+					}),
+				UPLOAD_STALL_TIMEOUT_MS
+			);
+		};
+
+		xhr.open(RequestType.POST, BASE_PATH + endpoint);
+		xhr.responseType = 'text';
+		buildHeaders().forEach((value, name) => xhr.setRequestHeader(name, value));
+		const options = { signal: listeners.signal };
+		xhr.upload.addEventListener('progress', armTimer, options);
+		xhr.upload.addEventListener('load', armTimer, options);
+		xhr.addEventListener('progress', armTimer, options);
+		xhr.addEventListener(
+			'error',
+			() => settle(() => reject(new TypeError('Failed to fetch'))),
+			options
+		);
+		xhr.addEventListener(
+			'load',
+			() =>
+				settle(() => {
+					// A Response with these statuses must have a null body
+					const nullBody = [204, 205, 304].includes(xhr.status);
+					Promise.resolve()
+						.then(() =>
+							handleResponse(
+								new Response(nullBody ? null : xhr.response, {
+									status: xhr.status,
+									statusText: xhr.statusText,
+									headers: parseResponseHeaders(xhr.getAllResponseHeaders())
+								})
+							)
+						)
+						.then(resolve, reject);
+				}),
+			options
+		);
+		signal?.addEventListener(
+			'abort',
+			() =>
+				settle(() => {
+					xhr.abort();
+					reject(abortError());
+				}),
+			options
+		);
+		armTimer();
+		xhr.send(formData);
+	});
+}
 
 export const uploadFileFetchAPI = (
 	endpoint: string,

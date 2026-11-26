@@ -10,8 +10,10 @@ import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingStartedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MessageType, OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
+const SENT_DATE = '2023-01-01T00:00:00.000Z';
 const oneToOneRoom = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
 const oneToOneMeeting = createMockMeeting({ id: 'oneToOneMeetingId', roomId: oneToOneRoom.id });
 
@@ -20,10 +22,10 @@ const groupMeeting = createMockMeeting({ id: 'groupMeetingId', roomId: groupRoom
 
 const event: MeetingStartedEvent = {
 	type: WsEventType.MEETING_STARTED,
-	sentDate: '2023-01-01T00:00:00.000Z',
+	sentDate: SENT_DATE,
 	meetingId: oneToOneMeeting.id,
 	starterUser: 'starterId',
-	startedAt: '2023-01-01T00:00:00.000Z'
+	startedAt: SENT_DATE
 };
 
 beforeEach(() => {
@@ -60,5 +62,35 @@ describe('MeetingStartedEventHandler tests', () => {
 		meetingStartedEventHandler(event);
 		const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 		expect(dispatchEvent).not.toHaveBeenCalled();
+	});
+});
+
+describe('MeetingStartedEventHandler system line on a v2 backend', () => {
+	beforeEach(() => {
+		useStore.getState().setApiVersion('2.0.0');
+	});
+
+	test("the other user's call lands the meetingStarted line as the room's last message and counts it", () => {
+		meetingStartedEventHandler({
+			...event,
+			meetingId: oneToOneMeeting.id,
+			systemEventId: 'sys-start',
+			systemEventCreatedAt: SENT_DATE
+		});
+
+		const registry = useStore.getState().chatsRegistry[oneToOneRoom.id];
+		expect(registry?.lastMessage).toMatchObject({
+			id: 'sys-start',
+			type: MessageType.CONFIGURATION_MSG,
+			operation: OperationType.MEETING_STARTED,
+			from: event.starterUser
+		});
+		expect(registry?.unread).toBe(1);
+	});
+
+	test('a group meeting lands no line', () => {
+		meetingStartedEventHandler({ ...event, meetingId: groupMeeting.id });
+
+		expect(useStore.getState().chatsRegistry[groupRoom.id]).toBeUndefined();
 	});
 });

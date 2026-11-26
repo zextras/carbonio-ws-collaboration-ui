@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { act } from '@testing-library/react';
 import { now } from 'moment';
 
 import Chat from './Chat';
@@ -407,6 +408,50 @@ describe('Chat', () => {
 			await user.click(screen.getByTestId(iconDropdown));
 			await user.click(screen.getByText(/delete for all/i));
 			expect(screen.queryByTestId(pinSectionDataTestId)).not.toBeInTheDocument();
+		});
+
+		describe('Reconnection', () => {
+			it('should show the pinned message again after a reconnection resets the conversation', () => {
+				const mockedTextMessage = createMockTextMessage({
+					id: 'idSimpleTextMessage',
+					roomId: mockedRoom.id
+				});
+
+				const store: RootStore = useStore.getState();
+
+				// Mock xmppClient.getMessagePin to answer with the pinned message
+				vi.spyOn(xmppClient, 'getMessagePin').mockImplementation(() => {
+					store.setPinnedMessage(mockedRoom.id, mockedTextMessage);
+				});
+
+				setup(
+					<Chat
+						roomId={mockedRoom.id}
+						conversationView={ConversationView.CHAT}
+						setConversationView={vi.fn()}
+					/>
+				);
+
+				act(() => store.resetXmppData());
+				expect(
+					within(screen.getByTestId(pinSectionDataTestId)).getByText(mockedTextMessage.text)
+				).toBeVisible();
+			});
+
+			it('should not ask for the pinned message of a removed room', () => {
+				const getMessagePin = vi.spyOn(xmppClient, 'getMessagePin');
+
+				setup(
+					<Chat
+						roomId={mockedRoom.id}
+						conversationView={ConversationView.CHAT}
+						setConversationView={vi.fn()}
+					/>
+				);
+
+				act(() => useStore.getState().removeRoom(mockedRoom.id));
+				expect(getMessagePin).toHaveBeenCalledTimes(1);
+			});
 		});
 
 		describe('Edit', async () => {

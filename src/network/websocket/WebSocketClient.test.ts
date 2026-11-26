@@ -3,10 +3,16 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { handleChatReconnection } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { chatClient } from '../chatClient/ChatClient';
+import { xmppClient } from '../xmpp/XMPPClient';
 // eslint-disable-next-line import/order
 import { WebSocketClient } from './WebSocketClient';
+
+// The catch-up/flip logic is unit-tested in wsReconnectionHandler.test.ts
+vi.mock('./wsReconnectionHandler');
 
 describe('WebSocketClient', () => {
 	// _tryReconnection schedules a setTimeout(connect, ...) that is never cancelled; under real timers a
@@ -101,6 +107,36 @@ describe('WebSocketClient', () => {
 		wsClient._tryReconnection();
 
 		expect(wsClient._reconnectionTime).toBeLessThanOrEqual(1000 * 60 * 5 + 10000);
+	});
+
+	test('A re-connection triggers the chat catch-up, the first connection does not', () => {
+		const wsClient = new WebSocketClient();
+		wsClient.connect();
+
+		wsClient._onOpen();
+		expect(handleChatReconnection).not.toHaveBeenCalled();
+
+		// A drop armed the exponential backoff: the next open is a RE-connection
+		wsClient._reconnectionTime = 4000;
+		wsClient._onOpen();
+		// The gate value predates the sub-protocol realignment (no version here)
+		expect(handleChatReconnection).toHaveBeenCalledWith(false);
+	});
+
+	test('A re-connection reports the stack the chat booted on when a REST call has already renegotiated the version', () => {
+		useStore.getState().setApiVersion('1.6.16');
+		vi.spyOn(xmppClient, 'connect').mockImplementation(() => undefined);
+		chatClient.connect('token');
+		const wsClient = new WebSocketClient();
+		wsClient.connect();
+		// The backend moved to 2.0.0: a REST call got a 422 and realigned the version before the socket reopened
+		useStore.getState().setApiVersion('2.0.0');
+		wsClient._webSocket = { ...wsClient._webSocket, protocol: '2.0.0' } as WebSocket;
+
+		wsClient._reconnectionTime = 4000;
+		wsClient._onOpen();
+
+		expect(handleChatReconnection).toHaveBeenLastCalledWith(false);
 	});
 
 	test('Set apiVersion on store when selected protocol is different from session apiVersion', () => {

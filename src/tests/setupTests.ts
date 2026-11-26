@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint max-classes-per-file: off */
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
 import failOnConsole from 'vitest-fail-on-console';
@@ -72,6 +73,48 @@ Object.defineProperty(window, 'RTCSessionDescription', {
 		};
 	})
 });
+
+/**
+ * jsdom's WebSocket opens a real connection (wsClient, the XMPP transport): its
+ * failure fires onclose at an I/O-driven time, possibly after the environment
+ * teardown, and the reconnection it schedules then runs without a window. The
+ * fake never connects, so only the fake timers remain, cleared after each test.
+ */
+class WebSocketMock {
+	static readonly CONNECTING = 0;
+
+	static readonly OPEN = 1;
+
+	static readonly CLOSING = 2;
+
+	static readonly CLOSED = 3;
+
+	url: string;
+
+	protocol = '';
+
+	readyState = WebSocketMock.CONNECTING;
+
+	onopen: ((e: Event) => void) | null = null;
+
+	onclose: ((e: CloseEvent) => void) | null = null;
+
+	onerror: ((e: Event) => void) | null = null;
+
+	onmessage: ((e: MessageEvent) => void) | null = null;
+
+	send = vi.fn();
+
+	close = vi.fn();
+
+	addEventListener = vi.fn();
+
+	removeEventListener = vi.fn();
+
+	constructor(url: string | URL) {
+		this.url = String(url);
+	}
+}
 
 Object.defineProperty(window, 'Worker', {
 	value: vi.fn(function Worker() {
@@ -207,6 +250,9 @@ export const mockIntersectionObserverDisconnect = vi.fn();
 export const mockPlayAudio = vi.fn(() => Promise.resolve());
 
 beforeEach(() => {
+	// Per test: vi.unstubAllGlobals() in a test file would restore jsdom's
+	vi.stubGlobal('WebSocket', WebSocketMock);
+
 	Object.defineProperty(window, 'IntersectionObserver', {
 		writable: true,
 		value: vi.fn(function intersectionObserverMock(

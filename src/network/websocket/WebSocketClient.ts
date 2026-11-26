@@ -9,11 +9,14 @@ import { gte } from 'semver';
 
 import { normalizeEventType } from './normalizedEventType';
 import { wsEventsHandler } from './wsEventsHandler';
+import { handleChatReconnection } from './wsReconnectionHandler';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
+import { isWscPure } from '../chatClient/ChatClient';
+import { isChatStackWscPure } from '../chatClient/chatStack';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -89,6 +92,9 @@ export class WebSocketClient {
 
 	_onOpen = (): void => {
 		wsDebug('...connected!');
+		// The backoff only grows after a drop: a non-zero value means this open
+		// is a RE-connection (same discriminator as the strophe handler)
+		const isReconnection = this._reconnectionTime > 0;
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
@@ -100,11 +106,18 @@ export class WebSocketClient {
 		}, this._pingTime);
 
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
+		// The stack the chat is running on: when the version negotiated below asks
+		// for the other one, the backend changed major under a live session. A REST
+		// call may have realigned the version already, so the gate alone cannot tell
+		const wasPure = isChatStackWscPure() ?? isWscPure();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
 		useStore.getState().activeMeeting?.qualityMonitor?.rebroadcast();
 		if (this._webSocket && this._webSocket.protocol !== session.apiVersion) {
 			setApiVersion(this._webSocket.protocol as Version);
+		}
+		if (isReconnection) {
+			handleChatReconnection(wasPure);
 		}
 	};
 

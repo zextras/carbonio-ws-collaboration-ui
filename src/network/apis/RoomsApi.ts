@@ -3,6 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import type {
+	FirstAttemptOutcome,
+	StoreTextMessage,
+	WireMessage
+} from '@zextras/carbonio-ws-collaboration-ui-sdk';
 import { gte } from 'semver';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -30,12 +35,26 @@ import {
 	buildQueryString,
 	fetchAPI,
 	RequestType,
+	sendAttachmentFetchAPI,
 	sendFileFetchAPI,
 	uploadFileFetchAPI
 } from '../../utils/FetchUtils';
+import { chatClient, isWscPure } from '../chatClient/ChatClient';
+import { findRepliedMessage } from '../chatClient/findRepliedMessage';
+import { wscSdk } from '../sdk/wscSdk';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { xmppClient } from '../xmpp/XMPPClient';
+
+/**
+ * Stores rooms read from REST. On WSC 2.0.0 a name or description older than a change already seen
+ * (the snapshot `updatedAt` against the change line times) gives way to that newer change.
+ */
+export const addRoomSnapshots = (roomsBe: RoomBe[], fullSync = false): void => {
+	const rooms = isWscPure()
+		? roomsBe.map((roomBe) => ({ ...roomBe, ...wscSdk.resolveRoomSnapshot(roomBe.id, roomBe) }))
+		: roomsBe;
+	useStore.getState().addRooms(rooms, fullSync);
+};
 
 export const listRooms = (members = false, settings = false): Promise<RoomBe[]> => {
 	let paramsStr = '';
@@ -46,7 +65,7 @@ export const listRooms = (members = false, settings = false): Promise<RoomBe[]> 
 		paramsStr = `?${array.join('&')}`;
 	}
 	return fetchAPI<RoomBe[]>(`rooms${paramsStr}`, RequestType.GET).then((resp) => {
-		useStore.getState().addRooms(resp, true);
+		addRoomSnapshots(resp, true);
 		return resp;
 	});
 };
@@ -128,7 +147,19 @@ export const getRoomAttachments = (
 	roomId: string,
 	params: GetRoomAttachmentsParams
 ): Promise<GetRoomAttachmentsResponse> =>
-	fetchAPI(`rooms/${roomId}/attachments${buildQueryString({ ...params })}`, RequestType.GET);
+	fetchAPI<GetRoomAttachmentsResponse>(
+		`rooms/${roomId}/attachments${buildQueryString({ ...params })}`,
+		RequestType.GET
+	).then((response) => {
+		if (!isWscPure() || !response?.attachments) return response;
+		return {
+			...response,
+			attachments: response.attachments.map((attachment) => ({
+				...attachment,
+				stanzaId: attachment.stanzaId ?? attachment.messageId
+			}))
+		};
+	});
 
 export const bulkDeleteRoomAttachments = (
 	roomId: string,
@@ -164,6 +195,56 @@ export const replacePlaceholderRoom = (
 	});
 };
 
+/**
+ * v2 (WSC-pure) upload through the SDK: every attempt is one multipart POST
+ * with the same tempId, the placeholder's id, which the SDK promotes from the
+ * 201 (idempotent with the self-echo). Retries of an uncertain outcome are the
+ * SDK's (see `sendAttachment`); `onFirstAttemptSettled` reports the first one.
+ */
+const uploadWscAttachment = (
+	roomId: string,
+	tempId: string,
+	file: File,
+	optionalFields: { description?: string; replyId?: string; area?: string },
+	signal?: AbortSignal,
+	onFirstAttemptSettled?: (outcome: FirstAttemptOutcome) => void
+): Promise<{ id: string }> =>
+	wscSdk
+		.sendAttachment({
+			roomId,
+			tempId,
+			upload: (attemptSignal) =>
+				sendAttachmentFetchAPI<WireMessage>(
+					`rooms/${roomId}/attachments`,
+					file,
+					{
+						tempId,
+						description: optionalFields.description,
+						replyToId: optionalFields.replyId,
+						area: optionalFields.area
+					},
+					attemptSignal as AbortSignal
+				),
+			attachment: {
+				name: file.name,
+				mimeType: file.type || 'application/octet-stream',
+				size: file.size,
+				...(optionalFields.area ? { area: optionalFields.area } : {})
+			},
+			repliedMessage: findRepliedMessage(roomId, optionalFields.replyId) as
+				StoreTextMessage | undefined,
+			signal,
+			onFirstAttemptSettled
+		})
+		.then((message) => ({ id: message?.id ?? tempId }));
+
+// The upload is not waited for: the caller only needs the room that was just created
+const logFailedUploadToNewRoom = (upload: Promise<unknown>): void => {
+	upload.catch((err) => {
+		console.error('addRoomAttachment: upload to the new room failed', err);
+	});
+};
+
 export const addRoomAttachment = (
 	roomId: string,
 	file: File,
@@ -172,20 +253,23 @@ export const addRoomAttachment = (
 		replyId?: string;
 		area?: string;
 	},
-	signal?: AbortSignal
+	signal?: AbortSignal,
+	onFirstAttemptSettled?: (outcome: FirstAttemptOutcome) => void
 ): Promise<{ id: string }> => {
 	const placeholderRoom = roomId.split('placeholder-');
 	if (placeholderRoom[1]) {
 		return replacePlaceholderRoom(placeholderRoom[1], optionalFields.description ?? '', file).then(
 			(response) => {
-				addRoomAttachment(response.id, file, optionalFields, signal);
+				logFailedUploadToNewRoom(
+					addRoomAttachment(response.id, file, optionalFields, signal, onFirstAttemptSettled)
+				);
 				return response;
 			}
 		);
 	}
 
 	const lastMessageId = getLastUnreadMessage(roomId);
-	if (lastMessageId) xmppClient.readMessage(roomId, lastMessageId);
+	if (lastMessageId) chatClient.readMessage(roomId, lastMessageId);
 
 	const uuid = uuidGenerator();
 	useStore.getState().setPlaceholderMessage({
@@ -208,11 +292,22 @@ export const addRoomAttachment = (
 		if (sizeLimit !== undefined && file.size > sizeLimit * 1024 * 1024) {
 			removePlaceholderMessage(roomId, uuid);
 			reject(new Error('file_too_large'));
+		} else if (isWscPure()) {
+			uploadWscAttachment(roomId, uuid, file, optionalFields, signal, onFirstAttemptSettled)
+				.then((resp) => {
+					globalThis.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+					resolve(resp);
+				})
+				.catch((error) => {
+					removePlaceholderMessage(roomId, uuid);
+					reject(error instanceof Error ? error : new Error(String(error)));
+				});
 		} else {
 			const optional = {
 				description: optionalFields.description,
 				replyId: optionalFields.replyId,
 				area: optionalFields.area,
+				// v1 correlation: messageId becomes the id of the stanza the backend sends
 				messageId: uuid
 			};
 			// DEPRECATED: This check exists for backward compatibility with previous versions.
@@ -246,11 +341,42 @@ export const forwardMessages = (
 	roomsId: string[],
 	messages: TextMessage[]
 ): Promise<Response[]> => {
+	if (isWscPure()) {
+		// v2 forwards by reference — one bulk POST per destination room, no
+		// content on the wire: the v1 hybrid below (one MAM fetch per message
+		// to rebuild the original stanza XML, body swapped with the projected
+		// text) dissolves. Store updates come from the MessageForwarded echo.
+		const references = messages.map((message) => ({
+			// v2 invariant: id === stanzaId === server UUID
+			sourceRoomId: message.roomId,
+			messageId: message.stanzaId
+		}));
+		const hasAttachments = messages.some((message) => message.attachment);
+		return Promise.allSettled(
+			roomsId.map((roomId) => wscSdk.forwardMessages(roomId, references))
+		).then((results) => {
+			const fulfilled = results.filter((result) => result.status === 'fulfilled');
+			// Forwarding an attachment clones it server-side: same quota effect
+			// as the v1 flow
+			if (hasAttachments && fulfilled.length > 0) {
+				globalThis.dispatchEvent(new CustomEvent(QUOTA_CHANGED_EVENT));
+			}
+			const rejected = results.find(
+				(result): result is PromiseRejectedResult => result.status === 'rejected'
+			);
+			if (rejected) {
+				throw rejected.reason;
+			}
+			// The caller (ForwardMessageModal) only chains then/catch: the v1
+			// Response values were never consumed
+			return [] as Response[];
+		});
+	}
 	const listOfMessages: { [stanzaId: string]: string } = {};
 
 	const promises = messages.map((message) => {
 		const queryId = HistoryAccumulator.getNextId();
-		return xmppClient
+		return chatClient
 			.requestMessageToForward(message.roomId, message.stanzaId, queryId)
 			.then(() => {
 				const historyMessage = HistoryAccumulator.getForwardedMessage(queryId);
