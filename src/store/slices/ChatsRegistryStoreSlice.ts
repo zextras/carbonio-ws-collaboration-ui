@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, map, orderBy, remove, some, uniqBy } from 'lodash';
+import { find, findIndex, forEach, map, orderBy, partition, remove, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
@@ -240,13 +240,24 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const { messages } = initRoomChatsRegistry(draft, roomId);
 				if (messageArray.length > 0) {
-					const compare = getIsWscPure(draft)
+					const isWscPure = getIsWscPure(draft);
+					const compare = isWscPure
 						? compareMessageKeys
 						: (a: Message, b: Message): number => a.date - b.date;
-					const newMessages = [...messageArray].sort(compare);
-					const merged = mergeSortedArrays(newMessages, messages, compare);
+					// On v2 the pending rows stay last, like in newMessage: their date is the client send time
+					const [pendingRows, storedRows] = isWscPure
+						? partition(messages, isPendingRow)
+						: [[], messages];
+					const [pendingPageRows, pageRows] = isWscPure
+						? partition(messageArray, isPendingRow)
+						: [[], messageArray];
+					const newMessages = [...pageRows].sort(compare);
+					const merged = mergeSortedArrays(newMessages, storedRows, compare);
 					// Check for duplicates and remove them
-					draft.chatsRegistry[roomId].messages = uniqBy(merged, 'id');
+					draft.chatsRegistry[roomId].messages = uniqBy(
+						[...merged, ...pendingRows, ...pendingPageRows],
+						'id'
+					);
 				}
 			}),
 			false,

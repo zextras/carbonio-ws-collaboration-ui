@@ -287,6 +287,31 @@ describe('ChatsRegistryStoreSlice tests', () => {
 	});
 
 	describe('updateHistory', () => {
+		test('A pending placeholder stays last when a history page brings newer rows', () => {
+			const roomId = 'room-pending-page';
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().newMessage(
+				createMockTextMessage({
+					id: 'pending',
+					roomId,
+					from: 'me',
+					date: date2,
+					read: MarkerStatus.PENDING
+				})
+			);
+
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id: 'old', roomId, from: 'other', date: date1 }),
+					createMockTextMessage({ id: 'newer', roomId, from: 'other', date: date3 })
+				]);
+
+			const { messages } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['old', 'newer', 'pending']);
+		});
+
 		test('First update history after an inbox message', () => {
 			useStore.getState().setInboxMessages([newTextMessage]);
 			useStore.getState().updateHistory(newTextMessage.roomId, [textMessage0, textMessage1]);
