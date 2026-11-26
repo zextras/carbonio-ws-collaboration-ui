@@ -5,6 +5,7 @@
  */
 
 import BidirectionalConnectionAudioInOut from './BidirectionalConnectionAudioInOut';
+import useStore from '../../store/Store';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
 
@@ -152,15 +153,48 @@ describe('BidirectionalConnectionAudioInOut', () => {
 		expect(createAudioOfferSpy).not.toHaveBeenCalled();
 	});
 
-	test('handleRemoteAnswer sets the remote description when not in have-remote-offer state', async () => {
-		vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
-		vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+	describe('handleRemoteAnswer', () => {
+		const createConnection = async (): Promise<BidirectionalConnectionAudioInOut> => {
+			vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
+			vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+			const conn = new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+			return conn;
+		};
 
-		const conn = new BidirectionalConnectionAudioInOut(meetingId, false);
-		await flushPromises();
+		const withPendingOffer = (): void => {
+			peerConnMock.signalingState = 'have-local-offer';
+		};
 
-		conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
-		expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		test('applies the answer to the pending offer', async () => {
+			const conn = await createConnection();
+			withPendingOffer();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		});
+
+		test('ignores an answer when no offer is pending', async () => {
+			const conn = await createConnection();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('logs an answer that cannot be applied', async () => {
+			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			const conn = await createConnection();
+			withPendingOffer();
+			const error = new Error('InvalidStateError');
+			(peerConnMock.setRemoteDescription as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+			await flushPromises();
+
+			expect(consoleWarn).toHaveBeenCalledWith('setRemoteDescription failed', error);
+		});
 	});
 
 	test('Acquires the audio stream but keeps the track disabled when joining muted', async () => {
@@ -286,5 +320,55 @@ describe('BidirectionalConnectionAudioInOut', () => {
 
 		// Whichever acquisition wins, the sender track must end up enabled
 		expect((senderMock.track as MockAudioTrack).enabled).toBe(true);
+	});
+
+	describe('ICE restart', () => {
+		const failConnection = (): void => {
+			peerConnMock.connectionState = 'failed';
+			(peerConnMock.onconnectionstatechange as () => void)();
+		};
+
+		beforeEach(() => {
+			vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			vi.spyOn(MeetingsApi, 'createAudioOffer').mockResolvedValue({} as Response);
+			vi.spyOn(MeetingsApi, 'updateAudioStreamStatus').mockResolvedValue({} as Response);
+		});
+
+		afterEach(() => {
+			vi.clearAllTimers();
+		});
+
+		test('retries a failed audio ICE restart after 5 seconds until the connection recovers', async () => {
+			useStore.getState().setApiVersion('1.6.6');
+			const audioIceRestartSpy = vi
+				.spyOn(MeetingsApi, 'audioIceRestart')
+				.mockRejectedValue(new Error('status ko'));
+			// eslint-disable-next-line no-new
+			new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
+			expect(audioIceRestartSpy).toHaveBeenCalledWith(meetingId, 'sdp');
+
+			peerConnMock.connectionState = 'connected';
+			await vi.advanceTimersByTimeAsync(60_000);
+			expect(audioIceRestartSpy).toHaveBeenCalledTimes(2);
+		});
+
+		test('does not restart ICE when the API version does not support it', async () => {
+			useStore.getState().setApiVersion('1.6.5');
+			const audioIceRestartSpy = vi.spyOn(MeetingsApi, 'audioIceRestart');
+			// eslint-disable-next-line no-new
+			new BidirectionalConnectionAudioInOut(meetingId, false);
+			await flushPromises();
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+
+			expect(peerConnMock.createOffer).not.toHaveBeenCalledWith({ iceRestart: true });
+			expect(audioIceRestartSpy).not.toHaveBeenCalled();
+		});
 	});
 });

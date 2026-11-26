@@ -7,6 +7,7 @@
 import VideoOutConnection from './VideoOutConnection';
 import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { Version } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import * as UserMediaManager from '../../utils/UserMediaManager';
 import * as MeetingsApi from '../apis/MeetingsApi';
@@ -101,15 +102,103 @@ describe('VideoOutConnection', () => {
 		expect(updateMediaOfferSpy).toHaveBeenCalledWith(meetingId, STREAM_TYPE.VIDEO, false);
 	});
 
-	test('handleRemoteAnswer sets the remote description', async () => {
-		vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
-		vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+	describe('handleRemoteAnswer', () => {
+		const startVideo = async (): Promise<VideoOutConnection> => {
+			vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
+			vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+			const conn = new VideoOutConnection(meetingId, true);
+			await flushPromises();
+			return conn;
+		};
 
-		const conn = new VideoOutConnection(meetingId, true);
-		await flushPromises();
+		test('applies the answer to the pending offer', async () => {
+			const conn = await startVideo();
+			peerConnMock.signalingState = 'have-local-offer';
 
-		conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
-		expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).toHaveBeenCalled();
+		});
+
+		test('ignores an answer when no offer is pending', async () => {
+			const conn = await startVideo();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('ignores an answer once the video is stopped', async () => {
+			const conn = await startVideo();
+			conn.closePeerConnection();
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+
+			expect(peerConnMock.setRemoteDescription).not.toHaveBeenCalled();
+		});
+
+		test('logs an answer that cannot be applied', async () => {
+			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			const conn = await startVideo();
+			peerConnMock.signalingState = 'have-local-offer';
+			const error = new Error('InvalidStateError');
+			(peerConnMock.setRemoteDescription as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+
+			conn.handleRemoteAnswer({ sdp: 'sdp', type: 'answer' });
+			await flushPromises();
+
+			expect(consoleWarn).toHaveBeenCalledWith('setRemoteDescription failed', error);
+		});
+	});
+
+	describe('ICE restart', () => {
+		const startVideo = async (apiVersion: Version): Promise<void> => {
+			useStore.getState().setApiVersion(apiVersion);
+			vi.spyOn(UserMediaManager, 'getVideoStream').mockResolvedValue(mockVideoStream);
+			vi.spyOn(MeetingsApi, 'updateMediaOffer').mockResolvedValue({} as Response);
+			await new VideoOutConnection(meetingId, false).startVideo();
+		};
+
+		const failConnection = (): void => {
+			peerConnMock.connectionState = 'failed';
+			(peerConnMock.onconnectionstatechange as () => void)();
+		};
+
+		beforeEach(() => {
+			vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+		});
+
+		afterEach(() => {
+			vi.clearAllTimers();
+		});
+
+		test('sends a new ICE restart offer 5 seconds after a failed one', async () => {
+			const videoIceRestartSpy = vi
+				.spyOn(MeetingsApi, 'videoIceRestart')
+				.mockRejectedValueOnce(new Error('status ko'))
+				.mockResolvedValue({} as Response);
+			await startVideo('1.6.6');
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+
+			expect(peerConnMock.createOffer).toHaveBeenCalledWith({ iceRestart: true });
+			expect(videoIceRestartSpy.mock.calls).toEqual([
+				[meetingId, 'sdp'],
+				[meetingId, 'sdp']
+			]);
+		});
+
+		test('does not restart ICE before API 1.6.6', async () => {
+			const videoIceRestartSpy = vi.spyOn(MeetingsApi, 'videoIceRestart');
+			await startVideo('1.6.5');
+
+			failConnection();
+			await vi.advanceTimersByTimeAsync(6_000);
+
+			expect(peerConnMock.createOffer).not.toHaveBeenCalledWith({ iceRestart: true });
+			expect(videoIceRestartSpy).not.toHaveBeenCalled();
+		});
 	});
 });
 

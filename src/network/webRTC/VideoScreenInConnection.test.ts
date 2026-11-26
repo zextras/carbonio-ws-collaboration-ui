@@ -583,6 +583,120 @@ describe('VideoScreenInConnection — downlinkShortfall()', () => {
 	});
 });
 
+describe('VideoScreenInConnection — ICE restart', () => {
+	const videoIceRestart = vi.mocked(MeetingsApi.videoIceRestart);
+	let conn: VideoScreenInConnection;
+
+	const failConnection = (): void => {
+		Object.assign(conn.peerConn, { connectionState: 'failed' });
+		(conn.peerConn.onconnectionstatechange as () => void)();
+	};
+
+	beforeEach(() => {
+		storeMocks.apiVersion = '1.6.15';
+		conn = new VideoScreenInConnection(MEETING_ID);
+		videoIceRestart.mockReset();
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+	});
+
+	it('asks for a new offer again 5 seconds after a failed ICE restart', async () => {
+		videoIceRestart.mockRejectedValueOnce(new Error('status ko')).mockResolvedValue(new Response());
+
+		failConnection();
+		await vi.advanceTimersByTimeAsync(6_000);
+
+		expect(videoIceRestart.mock.calls).toEqual([[MEETING_ID], [MEETING_ID]]);
+	});
+
+	it('does not ask for an ICE restart before API 1.6.6', async () => {
+		storeMocks.apiVersion = '1.6.5';
+
+		failConnection();
+		await vi.advanceTimersByTimeAsync(6_000);
+
+		expect(videoIceRestart).not.toHaveBeenCalled();
+	});
+});
+
+describe('VideoScreenInConnection — remote offer', () => {
+	const createMediaAnswer = vi.mocked(MeetingsApi.createMediaAnswer);
+	let conn: VideoScreenInConnection;
+
+	const answerWith = (...answers: string[]): void => {
+		const createAnswer = vi.fn();
+		answers.forEach((sdp) => createAnswer.mockResolvedValueOnce({ sdp, type: 'answer' }));
+		Object.assign(conn.peerConn, { createAnswer });
+	};
+
+	beforeEach(() => {
+		conn = new VideoScreenInConnection(MEETING_ID);
+		createMediaAnswer.mockReset();
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+	});
+
+	it('sends a refused answer again after 5, 10, 20 and then every 30 seconds', async () => {
+		createMediaAnswer.mockRejectedValue(new Error('status ko'));
+		answerWith('answer');
+
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(94_000);
+		expect(createMediaAnswer).toHaveBeenCalledTimes(5);
+
+		await vi.advanceTimersByTimeAsync(2_000);
+		expect(createMediaAnswer).toHaveBeenCalledTimes(6);
+		expect(createMediaAnswer).toHaveBeenCalledWith(MEETING_ID, 'answer');
+	});
+
+	it('stops sending the answer once the server accepts it', async () => {
+		createMediaAnswer
+			.mockRejectedValueOnce(new Error('status ko'))
+			.mockResolvedValue(new Response());
+		answerWith('answer');
+
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(createMediaAnswer).toHaveBeenCalledTimes(2);
+	});
+
+	it('stops sending a refused answer once a newer offer is answered', async () => {
+		createMediaAnswer
+			.mockRejectedValueOnce(new Error('status ko'))
+			.mockResolvedValue(new Response());
+		answerWith('first answer', 'second answer');
+
+		conn.handleRemoteOffer('first offer');
+		await vi.advanceTimersByTimeAsync(1_000);
+		conn.handleRemoteOffer('second offer');
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(createMediaAnswer.mock.calls).toEqual([
+			[MEETING_ID, 'first answer'],
+			[MEETING_ID, 'second answer']
+		]);
+	});
+
+	it('stops sending a refused answer once the connection is closed', async () => {
+		createMediaAnswer.mockRejectedValue(new Error('status ko'));
+		answerWith('answer');
+
+		conn.handleRemoteOffer('offer');
+		await vi.advanceTimersByTimeAsync(1_000);
+		Object.assign(conn.peerConn, { signalingState: 'closed' });
+		await vi.advanceTimersByTimeAsync(120_000);
+
+		expect(createMediaAnswer).toHaveBeenCalledTimes(1);
+	});
+});
+
 describe('VideoScreenInConnection — tick robustness', () => {
 	let conn: VideoScreenInConnection;
 	const requestVideoQuality = vi.mocked(MeetingsApi.requestVideoQuality);

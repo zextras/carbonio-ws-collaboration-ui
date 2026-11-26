@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { gte } from 'semver';
-
 import { producibleTiers, TIER_RID } from './connectionQualityScore';
+import { isIceRestartSupported, restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
@@ -76,23 +75,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	private readonly onConnectionStateChange = (): void => {
-		const state = this.peerConn?.connectionState;
-		if (state === 'failed') {
-			this.peerConn
-				?.createOffer({ iceRestart: true })
-				.then((rtcSessionDesc) => {
-					this.peerConn
-						?.setLocalDescription(rtcSessionDesc)
-						.then(() => {
-							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
-							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
-								videoIceRestart(this.meetingId, localDesc.sdp);
-							}
-						})
-						.catch((reason) => console.warn('setLocalDescription failed', reason));
-				})
-				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
+			restartIceWithOffer(this.peerConn, (sdp) => videoIceRestart(this.meetingId, sdp));
 		}
 	};
 
@@ -189,8 +174,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-		this.peerConn?.setRemoteDescription(remoteDescription);
+		if (this.peerConn?.signalingState !== 'have-local-offer') return;
+		this.peerConn
+			.setRemoteDescription(new RTCSessionDescription(remoteAnswer))
+			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
 	public closePeerConnection(): void {

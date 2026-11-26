@@ -5,8 +5,8 @@
  */
 
 import { first } from 'lodash';
-import { gte } from 'semver';
 
+import { isIceRestartSupported, restartIceWithOffer } from './iceRestart';
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
@@ -92,32 +92,18 @@ export default class BidirectionalConnectionAudioInOut implements IBidirectional
 	};
 
 	private readonly onConnectionStateChange = (): void => {
-		const state = this.peerConn?.connectionState;
-		if (state === 'failed') {
-			this.peerConn
-				?.createOffer({ iceRestart: true })
-				.then((rtcSessionDesc) => {
-					this.peerConn
-						?.setLocalDescription(rtcSessionDesc)
-						.then(() => {
-							const localDesc = this.peerConn?.localDescription;
-							const version = useStore.getState().session.apiVersion;
-							if (localDesc?.sdp && version && gte(version, '1.6.6')) {
-								audioIceRestart(this.meetingId, localDesc.sdp);
-							}
-						})
-						.catch((reason) => console.warn('setLocalDescription failed', reason));
-				})
-				.catch((reason) => console.warn('createOffer with iceRestart failed', reason));
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
+			restartIceWithOffer(this.peerConn, (sdp) => audioIceRestart(this.meetingId, sdp));
 		}
 	};
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		if (this.peerConn.signalingState !== 'have-remote-offer') {
-			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn.setRemoteDescription(remoteDescription);
-		}
+		if (this.peerConn.signalingState !== 'have-local-offer') return;
+		this.peerConn
+			.setRemoteDescription(new RTCSessionDescription(remoteAnswer))
+			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
 	/**

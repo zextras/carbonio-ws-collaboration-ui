@@ -5,9 +5,14 @@
  */
 
 import { filter, forEach, keyBy } from 'lodash';
-import { gte } from 'semver';
 
 import { isConnectionQualitySupported, videoFpsScore } from './connectionQualityScore';
+import {
+	ICE_RESTART_FIRST_RETRY_MS,
+	ICE_RESTART_MAX_RETRY_MS,
+	isIceRestartSupported,
+	restartIce
+} from './iceRestart';
 import {
 	FeedDownlinkState,
 	decideFeedDownlink,
@@ -136,6 +141,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	// current wait, doubled on every consecutive failure so a failing endpoint is not hit on every reconcile.
 	private readonly requestBackoff = new Map<string, { retryTick: number; delay: number }>();
 
+	private lastAnswer: string | undefined;
+
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
@@ -146,10 +153,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	private readonly onConnectionStateChange = (): void => {
-		const state = this.peerConn?.connectionState;
-		const version = useStore.getState().session.apiVersion;
-		if (state === 'failed' && version && gte(version, '1.6.6')) {
-			videoIceRestart(this.meetingId);
+		const { apiVersion } = useStore.getState().session;
+		if (this.peerConn?.connectionState === 'failed' && isIceRestartSupported(apiVersion)) {
+			restartIce(this.peerConn, () => videoIceRestart(this.meetingId));
 		}
 	};
 
@@ -166,7 +172,8 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 							.setLocalDescription(rtcSessionDesc)
 							.then(() => {
 								if (rtcSessionDesc.sdp) {
-									createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
+									this.lastAnswer = rtcSessionDesc.sdp;
+									this.sendAnswer(rtcSessionDesc.sdp, ICE_RESTART_FIRST_RETRY_MS);
 								}
 							})
 							.catch((reason) => console.warn('setLocalDescription failed', reason));
@@ -174,6 +181,18 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 					.catch((reason) => console.warn('createAnswer failed', reason));
 			})
 			.catch((reason) => console.warn('setRemoteDescription failed', reason));
+	}
+
+	// The server waits for the answer to its offer, so a refused one is still valid until a newer offer replaces it
+	private sendAnswer(sdp: string, retryDelay: number): void {
+		if (sdp !== this.lastAnswer || this.peerConn.signalingState === 'closed') return;
+		createMediaAnswer(this.meetingId, sdp).catch((reason) => {
+			console.warn(`Sending the answer failed, retrying in ${retryDelay} ms`, reason);
+			setTimeout(
+				() => this.sendAnswer(sdp, Math.min(retryDelay * 2, ICE_RESTART_MAX_RETRY_MS)),
+				retryDelay
+			);
+		});
 	}
 
 	public handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {
