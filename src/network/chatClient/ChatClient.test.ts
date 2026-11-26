@@ -22,7 +22,7 @@ import type { Mock } from 'vitest';
 
 import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
-import { BOOT_INBOX_TIMEOUT_MS } from './inboxRefresh';
+import { BOOT_INBOX_TIMEOUT_MS, refreshInboxSerialized } from './inboxRefresh';
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import useStore from '../../store/Store';
 import {
@@ -53,6 +53,8 @@ const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const PIN_FEATURE = 'zextras:iq:pin';
 const AUG_FIRST_LATE_MORNING = '2026-08-01T10:00:00Z';
 const inboxRoomId = 'room-se-inbox';
+const twiceRoomId = 'room-twice';
+const flightRoomId = 'room-flight';
 const quotedId = 'msg-quoted';
 const editTargetId = 'msg-target';
 const editedText = 'testo corretto';
@@ -228,6 +230,84 @@ describe('chatClient façade', () => {
 			operation: 'messagePinned',
 			from: 'user-3'
 		});
+	});
+
+	it('does not count twice a message the inbox already counted', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		mockJsonResponse(
+			buildInboxResponse([
+				buildInboxEntry({
+					roomId: twiceRoomId,
+					lastItem: buildMessageTimelineItem(
+						buildWireMessage({
+							id: 'msg-last',
+							roomId: twiceRoomId,
+							senderId: 'user-2',
+							text: 'ciao',
+							createdAt: AUG_FIRST_MORNING
+						})
+					),
+					unreadCount: 3,
+					markers: []
+				})
+			])
+		);
+		await refreshInboxSerialized('inbox refresh failed');
+
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-last',
+					roomId: twiceRoomId,
+					senderId: 'user-2',
+					text: 'ciao',
+					createdAt: AUG_FIRST_MORNING
+				})
+			)
+		);
+
+		expect(useStore.getState().chatsRegistry[twiceRoomId].unread).toBe(3);
+	});
+
+	it('keeps a live message that arrives while the inbox response is in flight', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		// The server snapshot was taken before msg-newer existed
+		mockJsonResponse(
+			buildInboxResponse([
+				buildInboxEntry({
+					roomId: flightRoomId,
+					lastItem: buildMessageTimelineItem(
+						buildWireMessage({
+							id: 'msg-last',
+							roomId: flightRoomId,
+							senderId: 'user-2',
+							text: 'ciao',
+							createdAt: AUG_FIRST_MORNING
+						})
+					),
+					unreadCount: 2,
+					markers: []
+				})
+			])
+		);
+		const refresh = refreshInboxSerialized('inbox refresh failed');
+
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-newer',
+					roomId: flightRoomId,
+					senderId: 'user-2',
+					text: 'nuovo',
+					createdAt: AUG_FIRST_LATE_MORNING
+				})
+			)
+		);
+		await refresh;
+
+		expect(useStore.getState().chatsRegistry[flightRoomId].unread).toBe(3);
 	});
 
 	it('waits for the first WebsocketConnected before loading the boot inbox, once', async () => {

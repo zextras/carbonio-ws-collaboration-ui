@@ -54,7 +54,11 @@ function notifyOthersMessage(
 	// A message a timeline page already brought, or one older than the own read
 	// marker, is part of the unread count the inbox/markers established
 	const ownMarker = getMyLastMarkerOfRoom(useStore.getState(), roomId);
-	if (!alreadyInStore && (!ownMarker || message.date > ownMarker.markerDate)) {
+	if (
+		!alreadyInStore &&
+		!wscSdk.isCountedByInbox(message) &&
+		(!ownMarker || message.date > ownMarker.markerDate)
+	) {
 		useStore.getState().incrementUnreadCount(roomId, 1);
 	}
 	if (alreadyInStore) {

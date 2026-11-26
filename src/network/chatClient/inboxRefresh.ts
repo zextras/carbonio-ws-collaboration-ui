@@ -4,7 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { getMyLastMarkerOfRoom } from '../../store/selectors/ChatsRegistrySelectors';
+import useStore from '../../store/Store';
 import { wscSdk } from '../sdk/wscSdk';
+
+// A row of another user, newer than the own marker, raises the badge
+const countsAsUnread = (row: { roomId: string; from: string; date: number }): boolean => {
+	const state = useStore.getState();
+	if (row.from === state.session.id) return false;
+	const ownMarker = getMyLastMarkerOfRoom(state, row.roomId);
+	return !ownMarker || row.date > ownMarker.markerDate;
+};
 
 export const BOOT_INBOX_TIMEOUT_MS = 5000;
 export const MAX_CHAIN_WAIT_MS = 30000;
@@ -29,7 +39,7 @@ const waitAtMost = (previous: Promise<void>, ms: number): Promise<void> =>
 
 export function refreshInboxSerialized(errorMessage: string): Promise<void> {
 	const run = (): Promise<void> =>
-		wscSdk.fetchInbox().catch((err) => {
+		wscSdk.fetchInbox({ countsAsUnread }).catch((err) => {
 			console.error(errorMessage, err);
 		});
 	const current = lastRefresh ? waitAtMost(lastRefresh, MAX_CHAIN_WAIT_MS).then(run) : run();

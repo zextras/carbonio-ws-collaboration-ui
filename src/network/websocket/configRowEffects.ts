@@ -11,6 +11,7 @@ import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { getMyLastMarkerOfRoom } from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
 import type { Message } from '../../types/store/ChatsRegistryTypes';
+import { wscSdk } from '../sdk/wscSdk';
 
 /**
  * The v1 effects of a configuration row landed from a push event: custom
@@ -26,7 +27,7 @@ export function notifyConfigRow(row: StoreConfigurationMessage): void {
 		return;
 	}
 	const ownMarker = getMyLastMarkerOfRoom(useStore.getState(), row.roomId);
-	if (!ownMarker || row.date > ownMarker.markerDate) {
+	if (!wscSdk.isCountedByInbox(row) && (!ownMarker || row.date > ownMarker.markerDate)) {
 		useStore.getState().incrementUnreadCount(row.roomId, 1);
 	}
 }
