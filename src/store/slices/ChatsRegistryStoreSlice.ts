@@ -30,7 +30,7 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { isBefore } from '../../utils/dateUtils';
+import { isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 import { getIsWscPure } from '../selectors/SessionSelectors';
 
 function mergeSortedArrays<T>(arr1: T[], arr2: T[], compareFn: (a: T, b: T) => number): T[] {
@@ -401,10 +401,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				const { messages, markers, lastMessage } = initRoomChatsRegistry(draft, roomId);
 
 				// Set a member marker only when it's a new marker, or it is more recent than other
+				const myId = draft.session.id;
+				let ownMarkerChanged = false;
 				forEach(newMarkers, (marker) => {
 					const existing = markers[marker.from];
 					if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
 						markers[marker.from] = marker;
+					}
+					if (
+						marker.from === myId &&
+						(!existing || isStrictlyBefore(existing.markerDate, marker.markerDate))
+					) {
+						ownMarkerChanged = true;
 					}
 				});
 
@@ -428,11 +436,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					return msg;
 				});
 
-				// Recalculate unread count. On v2 only a marker of mine changes it: the count comes from the server,
-				// and the rows in store can be fewer than the unread ones because the history is not preloaded
-				const myId = draft.session.id;
+				// Recalculate unread count. On v2 only a marker of mine that moves changes it: the count comes from
+				// the server, and the rows in store can be fewer than the unread ones because the history is not
+				// preloaded. A history page repeats the markers it already knows
 				const isWscPure = getIsWscPure(draft);
-				if (isWscPure && !some(newMarkers, { from: myId })) {
+				if (isWscPure && !ownMarkerChanged) {
 					return;
 				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;

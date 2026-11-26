@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, last } from 'lodash';
+import { find, last, range } from 'lodash';
 
 import {
 	createMockConfigurationMessage,
@@ -557,6 +557,25 @@ describe('ChatsRegistryStoreSlice tests', () => {
 	});
 
 	describe('updateReadStatus', () => {
+		test('A history page that repeats my unchanged marker keeps the unread count of the server', () => {
+			const roomId = 'room-unread-page';
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			const myMarker = createMockMarker({ from: 'me', messageId: 'older', markerDate: date1 - 1 });
+			useStore.getState().updateReadStatus(roomId, [myMarker]);
+			useStore.getState().setUnreadCount(roomId, 80);
+
+			useStore.getState().updateHistory(
+				roomId,
+				range(50).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			useStore.getState().updateReadStatus(roomId, [myMarker]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(80);
+		});
+
 		test('New marker: message read property changes', () => {
 			const room = createMockRoom({
 				id: 'roomIdTest',
