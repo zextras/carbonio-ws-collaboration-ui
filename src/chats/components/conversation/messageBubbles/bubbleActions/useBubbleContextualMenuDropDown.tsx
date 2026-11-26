@@ -115,9 +115,9 @@ const useBubbleContextualMenuDropDown = (
 
 	const deleteMessageAction = useCallback(() => {
 		if (message.attachment) {
-			deleteAttachment(message.attachment.id).then(() =>
-				chatClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
-			);
+			deleteAttachment(message.attachment.id)
+				.then(() => chatClient.sendChatMessageDeletion(message.roomId, message.stanzaId))
+				.catch((err) => console.error('deleteMessageAction: attachment deletion failed', err));
 		} else {
 			chatClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}

@@ -3,8 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { find } from 'lodash';
-
 import { getUser } from '../network/apis/UsersApi';
 import { getRoomNameSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
@@ -44,7 +42,7 @@ export async function resolveChatExportName(roomId: string): Promise<string> {
 
 	const room = state.rooms[roomId];
 	if (room?.type === RoomType.ONE_TO_ONE) {
-		const otherMember = find(room.members ?? [], (member) => member.userId !== state.session.id);
+		const otherMember = room.members?.find((member) => member.userId !== state.session.id);
 		if (otherMember) {
 			try {
 				const user = await withTimeout(getUser(otherMember.userId), RESOLVE_TIMEOUT_MS);

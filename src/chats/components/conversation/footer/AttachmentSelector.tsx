@@ -106,9 +106,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			}
 			if (functionCheck) {
 				getLink({ node: nodes[0], type: 'createLink', description: myDescription })
-					.then((result: { url: string }) => {
-						chatClient.sendChatMessage(roomId, result.url);
-					})
+					.then((result: { url: string }) => chatClient.sendChatMessage(roomId, result.url))
 					.catch(() => {
 						createSnackbar({
 							key: new Date().toLocaleString(),

@@ -61,7 +61,9 @@ function notifyOthersMessage(
 		return;
 	}
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
-	displayMessageBrowserNotification(message as TextMessage);
+	displayMessageBrowserNotification(message as TextMessage).catch((err) =>
+		console.error('wsChatEventsRouter: message notification failed', err)
+	);
 }
 
 /**
@@ -233,7 +235,9 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// a duplicate or stale one: no effect at all then.
 			const fastening = wscSdk.handleReactionChanged(event);
 			if (fastening && !isMyId(event.userId)) {
-				displayReactionBrowserNotification(fastening as MessageFastening);
+				displayReactionBrowserNotification(fastening as MessageFastening).catch((err) =>
+					console.error('wsChatEventsRouter: reaction notification failed', err)
+				);
 				useStore
 					.getState()
 					.setNewReaction(

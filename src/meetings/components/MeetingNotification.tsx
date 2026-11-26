@@ -91,7 +91,9 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (meeting && !disableSendMessage) {
-			chatClient.sendChatMessage(meeting.roomId, message);
+			chatClient
+				.sendChatMessage(meeting.roomId, message)
+				.catch((err) => console.error('MeetingNotification: quick reply failed', err));
 			setMessage('');
 			stopMeetingSound();
 		}

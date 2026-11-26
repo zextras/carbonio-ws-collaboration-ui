@@ -163,7 +163,8 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
 					useStore.getState().setScrollPosition(pinnedMessage.roomId, pinnedMessage.id);
-				});
+				})
+				.catch((err) => console.error('PinMessage: history to the pinned message failed', err));
 		} else {
 			scrollToMessage(pinnedMessage.id);
 		}
