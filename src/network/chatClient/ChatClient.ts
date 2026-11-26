@@ -8,6 +8,7 @@ import type { StoreTextMessage } from '@zextras/carbonio-ws-collaboration-ui-sdk
 import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 
 import { downloadChatExport } from './chatExportDownload';
+import { markChatStack } from './chatStack';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { scheduleBootInbox } from './inboxRefresh';
@@ -198,6 +199,7 @@ export const chatClient: ChatClient = {
 		return xmppClient.features;
 	},
 	connect: (token) => {
+		markChatStack(isWscPure());
 		if (isWscPure()) {
 			wsDebug('chatClient.connect: WSC-pure backend, chat boots through the SDK');
 			// REST has no persistent chat connection: the legacy xmpp status flag

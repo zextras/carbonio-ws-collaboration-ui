@@ -16,6 +16,7 @@ import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { Version } from '../../types/store/SessionTypes';
 import { wsDebug } from '../../utils/debug';
 import { isWscPure } from '../chatClient/ChatClient';
+import { isChatStackWscPure } from '../chatClient/chatStack';
 
 enum WsReadyState {
 	CONNECTING = 0,
@@ -105,9 +106,10 @@ export class WebSocketClient {
 		}, this._pingTime);
 
 		const { setWebsocketStatus, session, setApiVersion } = useStore.getState();
-		// Gate value before the sub-protocol realignment below: a difference
-		// after it means the backend changed major under a live session
-		const wasPure = isWscPure();
+		// The stack the chat is running on: when the version negotiated below asks
+		// for the other one, the backend changed major under a live session. A REST
+		// call may have realigned the version already, so the gate alone cannot tell
+		const wasPure = isChatStackWscPure() ?? isWscPure();
 		// Set WebSocket connection status on store
 		setWebsocketStatus(true);
 		useStore.getState().activeMeeting?.qualityMonitor?.rebroadcast();

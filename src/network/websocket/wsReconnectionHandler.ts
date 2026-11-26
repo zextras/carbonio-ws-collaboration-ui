@@ -8,6 +8,7 @@ import { refreshPresenceOfStoredRooms } from './presenceRefresh';
 import useStore from '../../store/Store';
 import { getToken } from '../apis/InfoApi';
 import { isWscPure } from '../chatClient/ChatClient';
+import { markChatStack } from '../chatClient/chatStack';
 import {
 	cancelBootInbox,
 	onFirstWebsocketConnected,
@@ -71,6 +72,7 @@ export function handleWebsocketConnected(): void {
  *   parity — the events socket never drove chat data on 1.6.x).
  */
 export function handleChatReconnection(wasPure: boolean): void {
+	markChatStack(isWscPure());
 	if (isWscPure()) {
 		if (!wasPure) {
 			xmppClient.disconnect();

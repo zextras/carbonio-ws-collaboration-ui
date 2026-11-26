@@ -18,6 +18,7 @@ import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import * as InfoApi from '../apis/InfoApi';
 import { chatClient } from '../chatClient/ChatClient';
+import { isChatStackWscPure } from '../chatClient/chatStack';
 import { BOOT_INBOX_TIMEOUT_MS } from '../chatClient/inboxRefresh';
 import { wscSdk } from '../sdk/wscSdk';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -84,6 +85,7 @@ describe('wsReconnectionHandler', () => {
 
 		expect(teardownSpy).toHaveBeenCalledTimes(1);
 		expect(useStore.getState().connections.status.xmpp).toBe(true);
+		expect(isChatStackWscPure()).toBe(true);
 		wsGeneralEventsHandler({ type: WsEventType.INITIALIZATION, queueId: 'q' });
 		expect(inboxSpy).toHaveBeenCalledTimes(1);
 	});
