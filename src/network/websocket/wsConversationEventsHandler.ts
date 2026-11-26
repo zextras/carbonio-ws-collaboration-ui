@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import type {
+	WireRoomDescriptionChangedEvent,
 	WireRoomMemberAddedEvent,
+	WireRoomNameChangedEvent,
 	WireRoomPictureChangedEvent,
-	WireRoomPictureDeletedEvent,
-	WireRoomUpdatedEvent
+	WireRoomPictureDeletedEvent
 } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import { notifyConfigRow } from './configRowEffects';
@@ -17,17 +18,18 @@ import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import type {
 	RoomCreatedEvent,
+	RoomDescriptionChangedEvent,
 	RoomHistoryClearedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent,
+	RoomNameChangedEvent,
 	RoomPictureChangedEvent,
-	RoomPictureDeletedEvent,
-	RoomUpdatedEvent
+	RoomPictureDeletedEvent
 } from '../../types/network/websocket/wsConversationEvents';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { chatClient, isWscPure } from '../chatClient/ChatClient';
-import { getMeeting, getRoom } from '../index';
+import { addRoomSnapshots, getMeeting, getRoom } from '../index';
 import { wscSdk } from '../sdk/wscSdk';
 
 /**
@@ -58,11 +60,30 @@ function landMemberRemovedLine(event: RoomMemberRemovedEvent): void {
  * WSC 2.0.0 lands the room change lines from the push events, which carry the
  * line's author (`updatedBy`, `deletedBy`, `clearedBy`); v1 lands them from XMPP.
  */
-function landRoomUpdatedLines(event: RoomUpdatedEvent): void {
+function onRoomNameChanged(event: RoomNameChangedEvent): void {
 	if (!isWscPure()) {
+		useStore.getState().editRoom(event.roomId, { name: event.name });
 		return;
 	}
-	wscSdk.handleRoomUpdated(event as WireRoomUpdatedEvent).forEach(notifyConfigRow);
+	const { row, applied } = wscSdk.handleRoomNameChanged(event as WireRoomNameChangedEvent);
+	if (applied) {
+		useStore.getState().editRoom(event.roomId, { name: event.name });
+	}
+	notifyConfigRow(row);
+}
+
+function onRoomDescriptionChanged(event: RoomDescriptionChangedEvent): void {
+	if (!isWscPure()) {
+		useStore.getState().editRoom(event.roomId, { description: event.description });
+		return;
+	}
+	const { row, applied } = wscSdk.handleRoomDescriptionChanged(
+		event as WireRoomDescriptionChangedEvent
+	);
+	if (applied) {
+		useStore.getState().editRoom(event.roomId, { description: event.description });
+	}
+	notifyConfigRow(row);
 }
 
 function landRoomPictureChangedLine(event: RoomPictureChangedEvent): void {
@@ -121,13 +142,18 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 	const state = useStore.getState();
 	landMemberAddedLine(event);
 	if (event.userId === state.session.id) {
-		getRoom(event.roomId).then((response) => {
-			state.addRooms([response]);
-			refreshMembersPresence((response.members ?? []).map((member) => member.userId));
-			if (response.meetingId) {
-				getMeeting(response.id).then((meetingResponse) => state.addMeetings([meetingResponse]));
-			}
-		});
+		getRoom(event.roomId)
+			.then((response) => {
+				addRoomSnapshots([response]);
+				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
+				return response.meetingId ? getMeeting(response.id) : undefined;
+			})
+			.then((meetingResponse) => {
+				if (meetingResponse) state.addMeetings([meetingResponse]);
+			})
+			.catch((err) => {
+				console.error('RoomMemberAdded: room reload failed', err);
+			});
 	} else {
 		state.addRoomMember(event.roomId, {
 			userId: event.userId,
@@ -137,23 +163,47 @@ function onRoomMemberAdded(event: RoomMemberAddedEvent): void {
 	}
 }
 
+function onRoomHistoryCleared(event: RoomHistoryClearedEvent): void {
+	const state = useStore.getState();
+	state.clearConversation(event.roomId, event.clearedAt);
+	if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
+		if (isWscPure()) {
+			wscSdk.clearPinnedBanner(event.roomId, event.clearedAt);
+		} else {
+			state.removePinnedMessage(event.roomId);
+		}
+	}
+	landHistoryClearedLine(event);
+}
+
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
 	const isMyId = (userId: string): boolean => userId === state.session.id;
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			getRoom(event.roomId).then((response) => {
-				state.addRooms([response]);
-				refreshMembersPresence((response.members ?? []).map((member) => member.userId));
-			});
+			getRoom(event.roomId)
+				.then((response) => {
+					addRoomSnapshots([response]);
+					refreshMembersPresence((response.members ?? []).map((member) => member.userId));
+				})
+				.catch((err) => {
+					console.error('RoomCreated: room reload failed', err);
+				});
 			landRoomCreatedLastItem(event);
 			chatClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
 			state.editRoom(event.roomId, { name: event.name, description: event.description });
-			landRoomUpdatedLines(event);
+			break;
+		}
+		case WsEventType.ROOM_NAME_CHANGED: {
+			onRoomNameChanged(event);
+			break;
+		}
+		case WsEventType.ROOM_DESCRIPTION_CHANGED: {
+			onRoomDescriptionChanged(event);
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
@@ -216,11 +266,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
-			state.clearConversation(event.roomId, event.clearedAt);
-			if (state.rooms[event.roomId]?.type === RoomType.TEMPORARY) {
-				state.removePinnedMessage(event.roomId);
-			}
-			landHistoryClearedLine(event);
+			onRoomHistoryCleared(event);
 			break;
 		}
 		default: {

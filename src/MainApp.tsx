@@ -19,6 +19,7 @@ import MeetingNotificationHandler from './meetings/components/MeetingNotificatio
 import initMeetings from './meetings/initMeetings';
 import { getCapabilities, getToken, listMeetings, listRooms } from './network';
 import { chatClient } from './network/chatClient/ChatClient';
+import { wscSdk } from './network/sdk/wscSdk';
 import { wsClient } from './network/websocket/WebSocketClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
@@ -86,6 +87,11 @@ export default function MainApp(): React.JSX.Element {
 			connect();
 		}
 	}, [authenticated, connect]);
+
+	useEffect(() => {
+		if (!authenticated) return undefined;
+		return (): void => wscSdk.reset();
+	}, [authenticated]);
 
 	initChats();
 	initMeetings();

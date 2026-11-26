@@ -13,6 +13,7 @@ import { MeetingStartedEvent } from '../../../types/network/websocket/wsMeetingE
 import { MessageType, OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
+const SENT_DATE = '2023-01-01T00:00:00.000Z';
 const oneToOneRoom = createMockRoom({ id: 'oneToOneRoomId', type: RoomType.ONE_TO_ONE });
 const oneToOneMeeting = createMockMeeting({ id: 'oneToOneMeetingId', roomId: oneToOneRoom.id });
 
@@ -21,10 +22,10 @@ const groupMeeting = createMockMeeting({ id: 'groupMeetingId', roomId: groupRoom
 
 const event: MeetingStartedEvent = {
 	type: WsEventType.MEETING_STARTED,
-	sentDate: '2023-01-01T00:00:00.000Z',
+	sentDate: SENT_DATE,
 	meetingId: oneToOneMeeting.id,
 	starterUser: 'starterId',
-	startedAt: '2023-01-01T00:00:00.000Z'
+	startedAt: SENT_DATE
 };
 
 beforeEach(() => {
@@ -73,7 +74,8 @@ describe('MeetingStartedEventHandler system line on a v2 backend', () => {
 		meetingStartedEventHandler({
 			...event,
 			meetingId: oneToOneMeeting.id,
-			systemEventId: 'sys-start'
+			systemEventId: 'sys-start',
+			systemEventCreatedAt: SENT_DATE
 		});
 
 		const registry = useStore.getState().chatsRegistry[oneToOneRoom.id];

@@ -10,12 +10,14 @@ import { v4 as uuidGenerator, validate as isServerId } from 'uuid';
 import { downloadChatExport } from './chatExportDownload';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
+import { scheduleBootInbox } from './inboxRefresh';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
+import { getOldestConfirmedMessage } from '../../utils/historyAnchorUtils';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { wscSdk } from '../sdk/wscSdk';
 import { wsClient } from '../websocket/WebSocketClient';
@@ -169,7 +171,9 @@ async function loadHistoryToMessageViaSdk(roomId: string, stanzaId: string): Pro
 		if (useStore.getState().activeConversations[roomId]?.isHistoryFullyLoaded) {
 			return;
 		}
-		const oldest = useStore.getState().chatsRegistry[roomId]?.messages[0];
+		const oldest = getOldestConfirmedMessage(
+			useStore.getState().chatsRegistry[roomId]?.messages ?? []
+		);
 		if (oldest && oldest.id === previousOldestId) {
 			console.warn('chatClient.requestMessageResultHistoryToId: pagination stalled', roomId);
 			return;
@@ -199,9 +203,7 @@ export const chatClient: ChatClient = {
 			// REST has no persistent chat connection: the legacy xmpp status flag
 			// feeds the connection-health banners, so mark it healthy.
 			useStore.getState().setXmppStatus(true);
-			wscSdk.fetchInbox().catch((err) => {
-				console.error('chatClient.connect: inbox hydration failed', err);
-			});
+			scheduleBootInbox();
 			return;
 		}
 		xmppClient.connect(token);
@@ -278,15 +280,14 @@ export const chatClient: ChatClient = {
 			// No optimistic write, v1 parity: the bubble updates on the
 			// ReactionChanged echo (both endpoints answer a bodyless 204).
 			if (reaction === '') {
-				// The v1 removal was an empty-valued stanza; v2 DELETEs the specific
-				// emoji, so resolve my current one from the store — the same
-				// selector the reaction pickers read. Nothing active, nothing to
+				// The v1 removal was an empty-valued stanza; v2 DELETEs the single
+				// reaction of the user. Nothing active in the store, nothing to
 				// remove: the empty v1 stanza was a no-op there too.
 				const myReaction = getMyLastReaction(useStore.getState(), roomId, messageStanzaId);
 				if (!myReaction) {
 					return;
 				}
-				wscSdk.removeReaction(roomId, messageStanzaId, myReaction).catch((err) => {
+				wscSdk.removeReaction(roomId, messageStanzaId).catch((err) => {
 					console.error('chatClient.sendChatMessageReaction: reaction removal failed', err);
 				});
 				return;
@@ -312,7 +313,7 @@ export const chatClient: ChatClient = {
 			if (!room) {
 				return;
 			}
-			const oldest = store.chatsRegistry[roomId]?.messages[0];
+			const oldest = getOldestConfirmedMessage(store.chatsRegistry[roomId]?.messages ?? []);
 			const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
 			wscSdk
 				.fetchTimeline(roomId, {

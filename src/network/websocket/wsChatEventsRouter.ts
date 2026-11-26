@@ -9,6 +9,10 @@ import type { StoreMessage, StoreTextMessage } from '@zextras/carbonio-ws-collab
 import { notifyConfigRow } from './configRowEffects';
 import { isMyId } from './eventHandlersUtilities';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import {
+	getEditAndDeleteFasteningSelector,
+	getMyLastMarkerOfRoom
+} from '../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../store/Store';
 import type {
 	WsMessageForwardedEvent,
@@ -18,6 +22,7 @@ import type {
 } from '../../types/network/websocket/wsChatEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import type { WsEvent } from '../../types/network/websocket/wsEvents';
+import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
 import type { Message, MessageFastening, TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
@@ -27,17 +32,34 @@ import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
 
+function isMessageInStore(roomId: string, messageId: string): boolean {
+	return !!useStore.getState().chatsRegistry[roomId]?.messages.some((row) => row.id === messageId);
+}
+
 /**
  * The v1 receiving effects for another sender's message: unread counter,
  * sound/badge custom event, browser notification. Shared by MESSAGE_RECEIVED
  * and MESSAGE_FORWARDED — v1 landed forwards through the same plain message
  * handler, effects included.
  */
-function notifyOthersMessage(message: StoreMessage, senderId: string, roomId: string): void {
+function notifyOthersMessage(
+	message: StoreMessage,
+	senderId: string,
+	roomId: string,
+	alreadyInStore: boolean
+): void {
 	if (isMyId(senderId)) {
 		return;
 	}
-	useStore.getState().incrementUnreadCount(roomId, 1);
+	// A message a timeline page already brought, or one older than the own read
+	// marker, is part of the unread count the inbox/markers established
+	const ownMarker = getMyLastMarkerOfRoom(useStore.getState(), roomId);
+	if (!alreadyInStore && (!ownMarker || message.date > ownMarker.markerDate)) {
+		useStore.getState().incrementUnreadCount(roomId, 1);
+	}
+	if (alreadyInStore) {
+		return;
+	}
 	sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message as Message });
 	displayMessageBrowserNotification(message as TextMessage);
 }
@@ -66,10 +88,11 @@ function prependGalleryAttachment(message: StoreMessage): void {
  * fallback): an upload's echo prepends the real file to the gallery.
  */
 function routeMessageReceived(event: WsMessageReceivedEvent): void {
+	const alreadyInStore = isMessageInStore(event.message.roomId, event.message.id);
 	const message = wscSdk.handleMessageReceived(event);
 	prependGalleryAttachment(message);
 	// Me/others split like the v1 handler
-	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId, alreadyInStore);
 }
 
 /**
@@ -79,9 +102,10 @@ function routeMessageReceived(event: WsMessageReceivedEvent): void {
  * nothing was optimistic.
  */
 function routeMessageForwarded(event: WsMessageForwardedEvent): void {
+	const alreadyInStore = isMessageInStore(event.message.roomId, event.message.id);
 	const message = wscSdk.handleMessageForwarded(event);
 	prependGalleryAttachment(message);
-	notifyOthersMessage(message, event.message.senderId, event.message.roomId);
+	notifyOthersMessage(message, event.message.senderId, event.message.roomId, alreadyInStore);
 }
 
 /**
@@ -94,8 +118,7 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
 		| StoreTextMessage
 		| undefined;
-	const row = wscSdk.handleMessagePinned(event, resolved);
-	notifyConfigRow(row);
+	notifyConfigRow(wscSdk.handleMessagePinned(event, resolved).row);
 }
 
 /**
@@ -104,8 +127,10 @@ function routeMessagePinned(event: WsMessagePinnedEvent): void {
  * scroll-to-pin selection is cleared like the v1 handler did.
  */
 function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
-	const row = wscSdk.handleMessageUnpinned(event);
-	useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
+	const { row, bannerApplied } = wscSdk.handleMessageUnpinned(event);
+	if (bannerApplied) {
+		useStore.getState().setSelectedPinnedMessage(event.roomId, undefined);
+	}
 	notifyConfigRow(row);
 }
 
@@ -114,10 +139,15 @@ function routeMessageUnpinned(event: WsMessageUnpinnedEvent): void {
  * dedicated messagePinUpdated config (text only), which has no v2 event — the
  * copy refreshes here when an edit targets the pin.
  */
-function refreshPinnedBannerOnEdit(roomId: string, messageId: string, text: string): void {
-	const pinned = useStore.getState().activeConversations[roomId]?.messagePinned;
-	if (pinned?.stanzaId === messageId) {
-		useStore.getState().setPinnedMessage(roomId, { ...pinned, text });
+function refreshPinnedBannerOnEdit(roomId: string, messageId: string): void {
+	const state = useStore.getState();
+	const pinned = state.activeConversations[roomId]?.messagePinned;
+	if (pinned?.stanzaId !== messageId) {
+		return;
+	}
+	const latest = getEditAndDeleteFasteningSelector(state, roomId, messageId);
+	if (latest?.action === FasteningAction.EDIT) {
+		state.setPinnedMessage(roomId, { ...pinned, text: latest.value ?? '' });
 	}
 }
 
@@ -176,9 +206,11 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// actually targets it.
 			wscSdk.handleMessageEdited(
 				event,
-				findFastenedLastMessage(event.roomId, event.messageId) as StoreTextMessage | undefined
+				findFastenedLastMessage(event.roomId, event.messageId, event.editedAt) as
+					| StoreTextMessage
+					| undefined
 			);
-			refreshPinnedBannerOnEdit(event.roomId, event.messageId, event.text);
+			refreshPinnedBannerOnEdit(event.roomId, event.messageId);
 			return;
 		}
 		case WsEventType.MESSAGE_DELETED: {
@@ -199,13 +231,20 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// for removals — hence the write order), browser notification
 			// (self-guarded against empty values), focus reset. No unread bump:
 			// v1 parity, reactions never counted (plan §5.14). The SDK dates the
-			// fastening with the event's sentDate.
+			// fastening with the stored time of the event and returns undefined for
+			// a duplicate or stale one: no effect at all then.
 			const fastening = wscSdk.handleReactionChanged(event);
-			if (!isMyId(event.userId)) {
+			if (fastening && !isMyId(event.userId)) {
 				displayReactionBrowserNotification(fastening as MessageFastening);
 				useStore
 					.getState()
-					.setNewReaction(event.roomId, event.messageId, fastening.value ?? '', event.userId);
+					.setNewReaction(
+						event.roomId,
+						event.messageId,
+						fastening.value ?? '',
+						event.userId,
+						event.operation === 'updated' ? event.previousReaction : undefined
+					);
 				if (useStore.getState().activeConversations[event.roomId]?.inputHasFocus) {
 					setTimeout(() => {
 						useStore.getState().unsetNewReactions(event.roomId);

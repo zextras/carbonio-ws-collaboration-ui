@@ -9,6 +9,7 @@ import React from 'react';
 
 import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import type { FirstAttemptOutcome } from '@zextras/carbonio-ws-collaboration-ui-sdk';
 
 import ConversationFooter from './ConversationFooter';
 import * as api from '../../../../network/apis/RoomsApi';
@@ -36,6 +37,7 @@ import { now } from '../../../../utils/dateUtils';
 const iconNavigator2 = 'icon: Navigation2';
 const initText = 'we are gonna se';
 const iconAttach = 'icon: Attach';
+const iconCloseOutline = 'icon: CloseOutline';
 const messageNotSentLabel = 'Message not sent. Please try again';
 
 const mockedRoom: RoomBe = createMockRoom({
@@ -525,6 +527,154 @@ describe('Send message', () => {
 		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();
+	});
+
+	describe('Files uploaded one after another', () => {
+		const sendTwoFiles = async (): Promise<void> => {
+			vi.spyOn(attachmentUtils, 'getImageSize').mockResolvedValue({ width: 10, height: 10 });
+			const { user } = storeSetupAdvanced();
+			const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+			await user.upload(input, [
+				new File(['a'], 'first.png', { type: 'image/png' }),
+				new File(['b'], 'second.png', { type: 'image/png' })
+			]);
+			await user.click(screen.getByTestId(iconNavigator2));
+		};
+
+		test('A first file whose first attempt is uncertain does not hold the next one', async () => {
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					if (file.name === 'first.png') {
+						onFirstAttemptSettled?.('pending');
+						return new Promise<{ id: string }>(() => {
+							// never settles: a background retry
+						});
+					}
+					return Promise.resolve({ id: 'second' });
+				});
+
+			await sendTwoFiles();
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
+			expect(spy.mock.calls.map((call) => call[1].name)).toEqual(['first.png', 'second.png']);
+		});
+
+		test('The next file never starts before the first attempt of the previous one is over', async () => {
+			let endFirstAttempt = vi.fn<(outcome: FirstAttemptOutcome) => void>();
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					if (file.name === 'first.png') {
+						if (onFirstAttemptSettled) endFirstAttempt = vi.fn(onFirstAttemptSettled);
+						return new Promise<{ id: string }>(() => {
+							// never settles: a background retry
+						});
+					}
+					return Promise.resolve({ id: 'second' });
+				});
+
+			await sendTwoFiles();
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+			await act(
+				() =>
+					new Promise<void>((resolve) => {
+						setTimeout(resolve, 50);
+					})
+			);
+			expect(spy).toHaveBeenCalledTimes(1);
+
+			endFirstAttempt('pending');
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(2));
+		});
+
+		test('A certain rejection of the first file stops the following ones', async () => {
+			const spy = vi
+				.spyOn(api, 'addRoomAttachment')
+				.mockImplementation((roomId, file, optionalFields, signal, onFirstAttemptSettled) => {
+					onFirstAttemptSettled?.('rejected');
+					return Promise.reject(new Error('status ko'));
+				});
+
+			await sendTwoFiles();
+
+			await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+			await act(
+				() =>
+					new Promise<void>((resolve) => {
+						setTimeout(resolve, 50);
+					})
+			);
+			expect(spy).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('An upload still retried in the background', () => {
+		let confirmLater: (() => void) | undefined;
+		let failLater: ((reason: unknown) => void) | undefined;
+
+		const sendPendingFileWithCaption = async (): Promise<UserEvent> => {
+			vi.spyOn(api, 'addRoomAttachment').mockImplementation(
+				(roomId, file, optionalFields, signal, onFirstAttemptSettled) =>
+					new Promise<{ id: string }>((resolve, reject) => {
+						confirmLater = (): void => resolve({ id: 'confirmed' });
+						failLater = reject;
+						signal?.addEventListener('abort', () =>
+							reject(new DOMException('aborted', 'AbortError'))
+						);
+						onFirstAttemptSettled?.('pending');
+					})
+			);
+			const { user } = storeSetupAdvanced();
+			await user.type(await screen.findByTestId('textAreaComposer'), 'a caption');
+			await user.upload(
+				screen.getByTestId('inputSelector') as HTMLInputElement,
+				new File(['hello'], 'hello.pdf', { type: 'application/pdf' })
+			);
+			await user.click(screen.getByTestId(iconNavigator2));
+			await waitFor(() => expect(screen.getByTestId('textAreaComposer')).toHaveValue(''));
+			return user;
+		};
+
+		test('A late rejection gives the caption back to an empty composer', async () => {
+			await sendPendingFileWithCaption();
+
+			act(() => failLater?.(Object.assign(new Error('status ko'), { status: 413 })));
+
+			await waitFor(() => expect(screen.getByTestId('textAreaComposer')).toHaveValue('a caption'));
+		});
+
+		test('A late rejection keeps what has been written since', async () => {
+			const user = await sendPendingFileWithCaption();
+			await user.type(screen.getByTestId('textAreaComposer'), 'something new');
+
+			act(() => failLater?.(Object.assign(new Error('status ko'), { status: 413 })));
+
+			expect(await screen.findByText('Something went wrong uploading hello.pdf')).toBeVisible();
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('something new');
+		});
+
+		test('The stop button stays while the send is pending and cancels it', async () => {
+			await sendPendingFileWithCaption();
+
+			// The first attempt is over: the composer takes new files again
+			expect(await screen.findByTestId(iconAttach)).toBeInTheDocument();
+			fireEvent.click(screen.getByTestId(iconCloseOutline));
+
+			await waitFor(() => expect(screen.queryByTestId(iconCloseOutline)).not.toBeInTheDocument());
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('a caption');
+		});
+
+		test('The stop button goes away once the pending send is confirmed', async () => {
+			await sendPendingFileWithCaption();
+			expect(screen.getByTestId(iconCloseOutline)).toBeInTheDocument();
+
+			act(() => confirmLater?.());
+
+			await waitFor(() => expect(screen.queryByTestId(iconCloseOutline)).not.toBeInTheDocument());
+			expect(screen.getByTestId('textAreaComposer')).toHaveValue('');
+		});
 	});
 
 	test('File description is preserved in input when upload failed', async () => {

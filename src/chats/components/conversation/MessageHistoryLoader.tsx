@@ -8,12 +8,13 @@ import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
 import styled from '@emotion/styled';
 import { Icon } from '@zextras/carbonio-design-system';
-import { debounce, first } from 'lodash';
+import { debounce } from 'lodash';
 
 import { chatClient } from '../../../network/chatClient/ChatClient';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { now } from '../../../utils/dateUtils';
+import { getOldestConfirmedMessage } from '../../../utils/historyAnchorUtils';
 
 type MessageHistoryLoaderProps = {
 	roomId: string;
@@ -83,8 +84,9 @@ const MessageHistoryLoader = ({
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const store = useStore.getState();
-			const roomMessages = store.chatsRegistry[roomId]?.messages;
-			const date = first(roomMessages)?.date ?? now();
+			const roomMessages = store.chatsRegistry[roomId]?.messages ?? [];
+			// A pending placeholder written back after a reconnection keeps its older send date
+			const date = getOldestConfirmedMessage(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
 				chatClient.requestHistory(roomId, date);
 				setHistoryLoadDisabled(roomId, true);

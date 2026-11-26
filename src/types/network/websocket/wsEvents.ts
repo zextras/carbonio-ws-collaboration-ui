@@ -15,6 +15,8 @@ export enum WsEventType {
 	MESSAGE_BROKER_RESTORED = 'MessageBrokerRestored',
 	ROOM_CREATED = 'RoomCreated',
 	ROOM_UPDATED = 'RoomUpdated',
+	ROOM_NAME_CHANGED = 'RoomNameChanged',
+	ROOM_DESCRIPTION_CHANGED = 'RoomDescriptionChanged',
 	ROOM_DELETED = 'RoomDeleted',
 	ROOM_OWNER_PROMOTED = 'RoomOwnerPromoted',
 	ROOM_OWNER_DEMOTED = 'RoomOwnerDemoted',

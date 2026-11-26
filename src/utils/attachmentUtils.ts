@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { toIsoMicros } from '@zextras/carbonio-ws-collaboration-ui-sdk';
+
 import {
 	getImagePreviewURL,
 	getImageThumbnailURL,
@@ -396,7 +398,7 @@ export const messageToGalleryAttachment = (message: TextMessage): Attachment | u
 		size: Number(message.attachment.size) || 0,
 		userId: message.from,
 		roomId: message.roomId,
-		createdAt: new Date(message.date).toISOString(),
+		createdAt: toIsoMicros(message.date),
 		messageId: message.id,
 		stanzaId: message.stanzaId
 	};

@@ -9,6 +9,8 @@ import { WsEventType } from './wsEvents';
 export type WsConversationEvent =
 	| RoomCreatedEvent
 	| RoomUpdatedEvent
+	| RoomNameChangedEvent
+	| RoomDescriptionChangedEvent
 	| RoomDeletedEvent
 	| RoomOwnerPromotedEvent
 	| RoomOwnerDemotedEvent
@@ -22,7 +24,8 @@ export type WsConversationEvent =
 
 type BasicConversationEvent = {
 	type: WsConversationEvent;
-	sentDate: string;
+	// 1.6.x backends only
+	sentDate?: string;
 };
 
 export type RoomCreatedEvent = BasicConversationEvent & {
@@ -35,10 +38,24 @@ export type RoomUpdatedEvent = BasicConversationEvent & {
 	roomId: string;
 	name: string;
 	description: string;
-	// WSC 2.0.0: author and ids of the system lines, one per changed field
-	updatedBy?: string;
-	nameSystemEventId?: string;
-	descriptionSystemEventId?: string;
+};
+
+export type RoomNameChangedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_NAME_CHANGED;
+	roomId: string;
+	name: string;
+	updatedBy: string;
+	systemEventId: string;
+	systemEventCreatedAt: string;
+};
+
+export type RoomDescriptionChangedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_DESCRIPTION_CHANGED;
+	roomId: string;
+	description: string;
+	updatedBy: string;
+	systemEventId: string;
+	systemEventCreatedAt: string;
 };
 
 export type RoomDeletedEvent = BasicConversationEvent & {
@@ -65,6 +82,7 @@ export type RoomPictureChangedEvent = BasicConversationEvent & {
 	// WSC 2.0.0: author and id of the system line
 	updatedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type RoomPictureDeletedEvent = BasicConversationEvent & {
@@ -73,6 +91,7 @@ export type RoomPictureDeletedEvent = BasicConversationEvent & {
 	// WSC 2.0.0: author and id of the system line
 	deletedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type RoomMemberAddedEvent = BasicConversationEvent & {
@@ -83,6 +102,7 @@ export type RoomMemberAddedEvent = BasicConversationEvent & {
 	// WSC 2.0.0: author and id of the system line
 	addedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type RoomMemberRemovedEvent = BasicConversationEvent & {
@@ -92,6 +112,7 @@ export type RoomMemberRemovedEvent = BasicConversationEvent & {
 	// WSC 2.0.0: author and id of the system line, absent on an automatic removal
 	removedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };
 
 export type RoomMutedEvent = BasicConversationEvent & {
@@ -111,4 +132,5 @@ export type RoomHistoryClearedEvent = BasicConversationEvent & {
 	// WSC 2.0.0: author and id of the system line, only when a temporary room is cleared for everyone
 	clearedBy?: string;
 	systemEventId?: string;
+	systemEventCreatedAt?: string;
 };

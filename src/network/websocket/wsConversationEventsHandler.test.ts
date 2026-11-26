@@ -5,6 +5,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
+import type { Mock } from 'vitest';
 
 import * as presenceRefresh from './presenceRefresh';
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
@@ -12,6 +13,7 @@ import { wsEventsHandler } from './wsEventsHandler';
 import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import {
+	createMockMarker,
 	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage,
@@ -21,9 +23,11 @@ import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
 	RoomCreatedEvent,
+	RoomDescriptionChangedEvent,
 	RoomHistoryClearedEvent,
 	RoomMemberAddedEvent,
 	RoomMemberRemovedEvent,
+	RoomNameChangedEvent,
 	RoomPictureChangedEvent,
 	RoomPictureDeletedEvent,
 	RoomUpdatedEvent
@@ -35,6 +39,8 @@ import * as api from '../index';
 import { wscSdk } from '../sdk/wscSdk';
 
 const SENT_DATE = '2023-01-01T00:00:00.000Z';
+const OLDER_AT = '2026-11-04T12:00:00.000000Z';
+const NEWER_AT = '2026-11-04T12:00:00.600000Z';
 
 const sessionUser = createMockUser({ id: 'sessionUserId', name: 'session user' });
 
@@ -71,6 +77,59 @@ describe('wsConversationEventHandler tests', () => {
 		await waitFor(() => {
 			const meeting = getMeetingByRoomId(useStore.getState(), room.id);
 			expect(meeting).toBeDefined();
+		});
+	});
+
+	describe('a failed room reload is logged, not left unhandled', () => {
+		test('ROOM_MEMBER_ADDED of the session user, getRoom failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_MEMBER_ADDED,
+				roomId: room.id,
+				userId: sessionUser.id,
+				sentDate: SENT_DATE
+			} as RoomMemberAddedEvent);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomMemberAdded: room reload failed', failure)
+			);
+		});
+
+		test('ROOM_MEMBER_ADDED of the session user, getMeeting failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockResolvedValue(room);
+			vi.spyOn(api, 'getMeeting').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_MEMBER_ADDED,
+				roomId: room.id,
+				userId: sessionUser.id,
+				sentDate: SENT_DATE
+			} as RoomMemberAddedEvent);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomMemberAdded: room reload failed', failure)
+			);
+		});
+
+		test('ROOM_CREATED, getRoom failing', async () => {
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const failure = new Error('status ko');
+			vi.spyOn(api, 'getRoom').mockRejectedValue(failure);
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_CREATED,
+				roomId: 'newRoom',
+				sentDate: SENT_DATE
+			} as never);
+
+			await waitFor(() =>
+				expect(errorSpy).toHaveBeenCalledWith('RoomCreated: room reload failed', failure)
+			);
 		});
 	});
 
@@ -159,10 +218,12 @@ describe('wsConversationEventHandler tests', () => {
 		const otherUser = 'other';
 		const newMember = 'new-member';
 		const newName = 'New name';
+		const newDescription = 'New description';
 
 		beforeEach(() => {
 			useStore.getState().setApiVersion('2.0.0');
 			vi.spyOn(presenceRefresh, 'refreshPresence').mockImplementation(() => {});
+			wscSdk.reset();
 		});
 		afterEach(() => {
 			useStore.setState({ session: { ...useStore.getState().session, apiVersion: undefined } });
@@ -181,7 +242,7 @@ describe('wsConversationEventHandler tests', () => {
 				isOwner: false,
 				addedBy,
 				systemEventId,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomMemberAddedEvent;
 		}
 
@@ -201,7 +262,7 @@ describe('wsConversationEventHandler tests', () => {
 				userId,
 				removedBy,
 				systemEventId,
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomMemberRemovedEvent;
 		}
 
@@ -268,16 +329,15 @@ describe('wsConversationEventHandler tests', () => {
 			expect(useStore.getState().chatsRegistry['room-v1']).toBeUndefined();
 		});
 
-		test('ROOM_UPDATED by another user lands the name line with the new name and counts it', () => {
+		test('ROOM_NAME_CHANGED by another user lands the name line with the new name and counts it', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: room.id,
 				name: newName,
-				description: room.description,
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-name',
-				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+				systemEventId: 'sys-name',
+				systemEventCreatedAt: SENT_DATE
+			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry[room.id];
 			expect(registry?.lastMessage).toMatchObject({
@@ -289,48 +349,81 @@ describe('wsConversationEventHandler tests', () => {
 			});
 			expect(registry?.unread).toBe(1);
 			expect(useStore.getState().rooms[room.id]?.name).toBe(newName);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(room.description);
 		});
 
-		test('ROOM_UPDATED of name and description lands both lines, the description last', () => {
-			const descriptionLineId = 'sys-description';
+		test('ROOM_DESCRIPTION_CHANGED lands the description line and edits only the description', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
-				roomId: 'room-both',
-				name: newName,
-				description: 'New description',
+				type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+				roomId: room.id,
+				description: newDescription,
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-name',
-				descriptionSystemEventId: descriptionLineId,
-				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+				systemEventId: 'sys-description',
+				systemEventCreatedAt: SENT_DATE
+			} as RoomDescriptionChangedEvent);
 
-			const registry = useStore.getState().chatsRegistry['room-both'];
-			expect(registry?.messages).toEqual([
-				expect.objectContaining({ id: 'sys-name', operation: OperationType.ROOM_NAME_CHANGED }),
-				expect.objectContaining({
-					id: descriptionLineId,
-					operation: OperationType.ROOM_DESCRIPTION_CHANGED,
-					value: 'New description'
-				})
-			]);
-			expect(registry?.lastMessage?.id).toBe(descriptionLineId);
-			expect(registry?.unread).toBe(2);
+			const registry = useStore.getState().chatsRegistry[room.id];
+			expect(registry?.lastMessage).toMatchObject({
+				id: 'sys-description',
+				operation: OperationType.ROOM_DESCRIPTION_CHANGED,
+				value: newDescription,
+				from: otherUser
+			});
+			expect(registry?.unread).toBe(1);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(newDescription);
+			expect(useStore.getState().rooms[room.id]?.name).toBe(room.name);
 		});
 
-		test('ROOM_UPDATED by the session user lands the line without counting it', () => {
+		test('ROOM_DESCRIPTION_CHANGED with an empty description clears it and lands the line', () => {
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+				roomId: room.id,
+				description: '',
+				updatedBy: otherUser,
+				systemEventId: 'sys-description-cleared',
+				systemEventCreatedAt: SENT_DATE
+			} as RoomDescriptionChangedEvent);
+
+			const registry = useStore.getState().chatsRegistry[room.id];
+			expect(registry?.lastMessage).toMatchObject({
+				id: 'sys-description-cleared',
+				operation: OperationType.ROOM_DESCRIPTION_CHANGED
+			});
+			expect(useStore.getState().rooms[room.id]?.description).toBe('');
+		});
+
+		test('ROOM_NAME_CHANGED by the session user lands the line without counting it', () => {
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: 'room-own-name',
 				name: newName,
-				description: '',
 				updatedBy: sessionUser.id,
-				nameSystemEventId: 'sys-own-name',
-				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+				systemEventId: 'sys-own-name',
+				systemEventCreatedAt: SENT_DATE
+			} as RoomNameChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-own-name'];
 			expect(registry?.lastMessage?.id).toBe('sys-own-name');
 			expect(registry?.unread ?? 0).toBe(0);
+		});
+
+		test('ROOM_UPDATED edits name and description and does not ask the SDK for lines', () => {
+			const nameSpy = vi.spyOn(wscSdk, 'handleRoomNameChanged');
+			const descriptionSpy = vi.spyOn(wscSdk, 'handleRoomDescriptionChanged');
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_UPDATED,
+				roomId: room.id,
+				name: newName,
+				description: newDescription,
+				sentDate: SENT_DATE
+			} as RoomUpdatedEvent);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe(newName);
+			expect(useStore.getState().rooms[room.id]?.description).toBe(newDescription);
+			expect(nameSpy).not.toHaveBeenCalled();
+			expect(descriptionSpy).not.toHaveBeenCalled();
+			expect(useStore.getState().chatsRegistry[room.id]).toBeUndefined();
 		});
 
 		test('ROOM_PICTURE_CHANGED by another user lands the picture line and counts it', () => {
@@ -340,7 +433,7 @@ describe('wsConversationEventHandler tests', () => {
 				updatedAt: SENT_DATE,
 				updatedBy: otherUser,
 				systemEventId: 'sys-picture',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomPictureChangedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-picture'];
@@ -358,7 +451,7 @@ describe('wsConversationEventHandler tests', () => {
 				roomId: 'room-no-picture',
 				deletedBy: otherUser,
 				systemEventId: 'sys-no-picture',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomPictureDeletedEvent);
 
 			const registry = useStore.getState().chatsRegistry['room-no-picture'];
@@ -387,7 +480,7 @@ describe('wsConversationEventHandler tests', () => {
 				clearedAt: SENT_DATE,
 				clearedBy: otherUser,
 				systemEventId: 'sys-clear',
-				sentDate: SENT_DATE
+				systemEventCreatedAt: SENT_DATE
 			} as RoomHistoryClearedEvent);
 
 			const registry = useStore.getState().chatsRegistry[temporaryRoom.id];
@@ -398,6 +491,32 @@ describe('wsConversationEventHandler tests', () => {
 				from: otherUser
 			});
 			expect(registry?.unread).toBe(1);
+		});
+
+		test('ROOM_HISTORY_CLEARED of a temporary room removes the pin through the SDK, versioned by clearedAt', () => {
+			const temporaryRoom = createMockRoom({ id: 'room-temporary-pin', type: RoomType.TEMPORARY });
+			useStore.getState().addRooms([temporaryRoom]);
+			useStore
+				.getState()
+				.setPinnedMessage(
+					temporaryRoom.id,
+					createMockTextMessage({ id: 'pinned', roomId: temporaryRoom.id })
+				);
+			const clearSpy = vi.spyOn(wscSdk, 'clearPinnedBanner');
+
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_HISTORY_CLEARED,
+				roomId: temporaryRoom.id,
+				clearedAt: NEWER_AT,
+				clearedBy: otherUser,
+				systemEventId: 'sys-clear-pin',
+				systemEventCreatedAt: NEWER_AT
+			} as RoomHistoryClearedEvent);
+
+			expect(clearSpy).toHaveBeenCalledWith(temporaryRoom.id, NEWER_AT);
+			expect(
+				useStore.getState().activeConversations[temporaryRoom.id]?.messagePinned
+			).toBeUndefined();
 		});
 
 		test('the per-user ROOM_HISTORY_CLEARED lands no line', () => {
@@ -411,18 +530,163 @@ describe('wsConversationEventHandler tests', () => {
 			expect(useStore.getState().chatsRegistry[room.id]).toBeUndefined();
 		});
 
+		function nameChanged(name: string, id: string, at: string): RoomNameChangedEvent {
+			return {
+				type: WsEventType.ROOM_NAME_CHANGED,
+				roomId: room.id,
+				name,
+				updatedBy: otherUser,
+				systemEventId: id,
+				systemEventCreatedAt: at
+			} as RoomNameChangedEvent;
+		}
+
+		test('an older ROOM_NAME_CHANGED delivered late lands its line but keeps the newer name', () => {
+			wsConversationEventsHandler(nameChanged('Second', 'sys-2', NEWER_AT));
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Second');
+			expect(
+				useStore.getState().chatsRegistry[room.id]?.messages.map((message) => message.id)
+			).toEqual(expect.arrayContaining(['sys-1', 'sys-2']));
+		});
+
+		test('an older ROOM_DESCRIPTION_CHANGED delivered late keeps the newer description', () => {
+			const event = (description: string, id: string, at: string): RoomDescriptionChangedEvent =>
+				({
+					type: WsEventType.ROOM_DESCRIPTION_CHANGED,
+					roomId: room.id,
+					description,
+					updatedBy: otherUser,
+					systemEventId: id,
+					systemEventCreatedAt: at
+				}) as RoomDescriptionChangedEvent;
+
+			wsConversationEventsHandler(event('Second', 'sys-2', NEWER_AT));
+			wsConversationEventsHandler(event('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.description).toBe('Second');
+		});
+
+		test('a room snapshot older than an applied rename keeps the newer name', () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', NEWER_AT));
+
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: OLDER_AT })]);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Live');
+		});
+
+		test('a rename seen before the room is stored wins over an older snapshot of that room', () => {
+			const fresh = createMockRoom({ id: 'room-fresh', name: 'Created', updatedAt: OLDER_AT });
+			wsConversationEventsHandler({
+				type: WsEventType.ROOM_NAME_CHANGED,
+				roomId: fresh.id,
+				name: 'Live',
+				updatedBy: otherUser,
+				systemEventId: 'sys-fresh',
+				systemEventCreatedAt: NEWER_AT
+			} as RoomNameChangedEvent);
+
+			api.addRoomSnapshots([fresh]);
+
+			expect(useStore.getState().rooms[fresh.id]?.name).toBe('Live');
+		});
+
+		test('a room snapshot newer than the applied rename replaces the name', () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', OLDER_AT));
+
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: NEWER_AT })]);
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Snapshot');
+		});
+
+		test('a rename older than the room snapshot is not applied', () => {
+			api.addRoomSnapshots([createMockRoom({ ...room, name: 'Snapshot', updatedAt: NEWER_AT })]);
+
+			wsConversationEventsHandler(nameChanged('Late', 'sys-late', OLDER_AT));
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Snapshot');
+		});
+
+		const inboxWith = (name: string, updatedAt: string): Response =>
+			new Response(
+				JSON.stringify({
+					conversations: [
+						{
+							roomId: room.id,
+							room: {
+								id: room.id,
+								type: 'group',
+								members: [],
+								name,
+								description: 'Desc',
+								updatedAt
+							},
+							unreadCount: 0,
+							markers: []
+						}
+					]
+				}),
+				{ status: 200, headers: { 'Content-Type': 'application/json' } }
+			);
+
+		test('the inbox refresh applies a rename whose event was missed', async () => {
+			(global.fetch as Mock).mockResolvedValueOnce(inboxWith('Missed', NEWER_AT));
+
+			await wscSdk.fetchInbox();
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Missed');
+			expect(useStore.getState().rooms[room.id]?.description).toBe('Desc');
+		});
+
+		test('the inbox refresh keeps a rename newer than its snapshot', async () => {
+			wsConversationEventsHandler(nameChanged('Live', 'sys-live', NEWER_AT));
+			(global.fetch as Mock).mockResolvedValueOnce(inboxWith('Older', OLDER_AT));
+
+			await wscSdk.fetchInbox();
+
+			expect(useStore.getState().rooms[room.id]?.name).toBe('Live');
+		});
+
+		test('a line older than the own read marker does not count as unread', () => {
+			useStore.getState().updateReadStatus(room.id, [
+				createMockMarker({
+					from: sessionUser.id,
+					messageId: 'sys-2',
+					markerDate: Date.parse('2026-11-04T12:00:01.000Z')
+				})
+			]);
+
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().chatsRegistry[room.id]?.unread ?? 0).toBe(0);
+		});
+
+		test('a line newer than the own read marker counts as unread', () => {
+			useStore.getState().updateReadStatus(room.id, [
+				createMockMarker({
+					from: sessionUser.id,
+					messageId: 'sys-0',
+					markerDate: Date.parse('2026-11-04T11:00:00.000Z')
+				})
+			]);
+
+			wsConversationEventsHandler(nameChanged('First', 'sys-1', OLDER_AT));
+
+			expect(useStore.getState().chatsRegistry[room.id]?.unread).toBe(1);
+		});
+
 		test('no room change line is landed on 1.6.x, where XMPP brings it', () => {
 			useStore.getState().setApiVersion('1.6.14');
 
 			wsConversationEventsHandler({
-				type: WsEventType.ROOM_UPDATED,
+				type: WsEventType.ROOM_NAME_CHANGED,
 				roomId: 'room-v1-name',
 				name: newName,
-				description: '',
 				updatedBy: otherUser,
-				nameSystemEventId: 'sys-v1-name',
-				sentDate: SENT_DATE
-			} as RoomUpdatedEvent);
+				systemEventId: 'sys-v1-name',
+				systemEventCreatedAt: SENT_DATE
+			} as RoomNameChangedEvent);
 
 			expect(useStore.getState().chatsRegistry['room-v1-name']).toBeUndefined();
 		});
