@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
 import * as api from '../../../network/apis/RoomsApi';
@@ -201,9 +201,10 @@ describe('Chat Creation Modal', () => {
 		await user.click(user2Component);
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
-		const titleInput = screen.getByTestId('name_input');
-		await user.type(
-			titleInput,
+		// the title starts with a placeholder value: clear it, then paste a 129-character title
+		const titleInput = within(screen.getByTestId('name_input')).getByRole('textbox');
+		await user.clear(titleInput);
+		await user.paste(
 			"This is a sentence with the purpose of testing if the control inside new title's input is working correctly or not, that's why!!!"
 		);
 		const titleLabel = screen.getByText(/Maximum title length is 128 characters/i);
@@ -226,7 +227,6 @@ describe('Chat Creation Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
 		const topicInput = screen.getByTestId('description_input');
-		// Pasted in one go: typing it key by key took the test close to its timeout
 		await user.click(topicInput);
 		await user.paste(
 			"This is a long description that is useful for testing purpose. We need to check if the length of the sentence will trigger the error inside the modal, that's why we have to write this. I hope that this won't break the test because it would be stressful!!!!!"

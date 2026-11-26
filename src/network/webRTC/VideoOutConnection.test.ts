@@ -123,7 +123,7 @@ describe('VideoOutConnection — simulcast layers after a track change', () => {
 	};
 
 	const cameraStream = (height: number): MediaStream => {
-		const track = { getSettings: () => ({ height }), stop: vi.fn() };
+		const track = { getSettings: (): MediaTrackSettings => ({ height }), stop: vi.fn() };
 		return { getVideoTracks: () => [track] } as unknown as MediaStream;
 	};
 

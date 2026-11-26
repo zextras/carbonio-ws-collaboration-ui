@@ -1171,9 +1171,9 @@ describe('wsChatEventsRouter - MessagePinned', () => {
 
 		const rows = useStore
 			.getState()
-			.chatsRegistry[
-				'room-pdup'
-			]?.messages.filter((message) => message.type === MessageType.CONFIGURATION_MSG);
+			.chatsRegistry['room-pdup']?.messages.filter(
+				(message) => message.type === MessageType.CONFIGURATION_MSG
+			);
 		expect(rows).toHaveLength(1);
 	});
 });

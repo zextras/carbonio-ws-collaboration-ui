@@ -116,8 +116,7 @@ function routeMessageForwarded(event: WsMessageForwardedEvent): void {
  */
 function routeMessagePinned(event: WsMessagePinnedEvent): void {
 	const resolved = findPinnedMessageContent(event.roomId, event.messageId) as
-		| StoreTextMessage
-		| undefined;
+		StoreTextMessage | undefined;
 	notifyConfigRow(wscSdk.handleMessagePinned(event, resolved).row);
 }
 
@@ -207,8 +206,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			wscSdk.handleMessageEdited(
 				event,
 				findFastenedLastMessage(event.roomId, event.messageId, event.editedAt) as
-					| StoreTextMessage
-					| undefined
+					StoreTextMessage | undefined
 			);
 			refreshPinnedBannerOnEdit(event.roomId, event.messageId);
 			return;

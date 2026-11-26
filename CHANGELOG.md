@@ -1,3 +1,9 @@
+## [0.20.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.6...v0.20.7) (2026-11-26)
+
+### Other changes
+
+* **deps-dev:** migrate to @zextras/carbonio-ui-configs 3.x ([#894](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/894)) ([cee6617](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/cee661796fce170e62e10e15ec64fd8c7eb9cfd1))
+
 ## [0.20.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.5...v0.20.6) (2026-11-23)
 
 ### Bug Fixes

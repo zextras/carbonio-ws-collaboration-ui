@@ -232,8 +232,7 @@ const uploadWscAttachment = (
 				...(optionalFields.area ? { area: optionalFields.area } : {})
 			},
 			repliedMessage: findRepliedMessage(roomId, optionalFields.replyId) as
-				| StoreTextMessage
-				| undefined,
+				StoreTextMessage | undefined,
 			signal,
 			onFirstAttemptSettled
 		})
