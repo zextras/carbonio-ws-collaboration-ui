@@ -1,3 +1,9 @@
+## [0.20.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.7...v0.20.8) (2026-11-26)
+
+### Other changes
+
+* **deps:** update dependency zextras/jenkins-lib-common to v5.5.5 ([#895](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/895)) ([9b44f97](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9b44f97243569ba23387856c162b3e43e3d3f905))
+
 ## [0.20.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.20.6...v0.20.7) (2026-11-26)
 
 ### Other changes
