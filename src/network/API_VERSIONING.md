@@ -8,8 +8,8 @@ This document tracks internal changes related to API versioning, renamed events,
 
 ### Changes
 
-- **Protocol**: WSC-pure backend (MongooseIM replacement): REST writes plus a single push WebSocket. The XMPP connection is skipped when the negotiated version is `>= 2.0.0` (`isWscPure()` / `getIsWscPure`); every v2 branch is gated on it, so the 1.x path is unchanged; the one 1.x-visible change is the renegotiation fallback below (a 1.6.x server newer than 1.6.15 now runs on 1.6.15 instead of failing).
-- **Version negotiation**: `2.0.0` is the first entry of `SUPPORTED_API_VERSIONS` (`src/constants/appConstants.tsx`), which also lists every 1.6.x up to `1.6.15`. REST calls send the newest supported version in `X-WSC-API-VERSION`. On a `422` the client reads the server version from the same header and renegotiates (`src/utils/FetchUtils.ts`): the server version is used if supported, otherwise the highest supported version not above it; if there is none, or it equals the version just sent, the call fails. Renegotiation retries are bounded (`MAX_VERSION_MISMATCH_RETRIES`). The events WebSocket offers the supported versions as sub-protocols.
+- **Protocol**: WSC-pure backend (MongooseIM replacement): REST writes plus a single push WebSocket. The XMPP connection is skipped when the negotiated version is `>= 2.0.0` (`isWscPure()` / `getIsWscPure`); every v2 branch is gated on it, so the 1.x path is unchanged; the one 1.x-visible change is the renegotiation fallback below (a 1.6.x server newer than 1.6.16 now runs on 1.6.16 instead of failing).
+- **Version negotiation**: `2.0.0` is the first entry of `SUPPORTED_API_VERSIONS` (`src/constants/appConstants.tsx`), which also lists every 1.6.x up to `1.6.16`. REST calls send the newest supported version in `X-WSC-API-VERSION`. On a `422` the client reads the server version from the same header and renegotiates (`src/utils/FetchUtils.ts`): the server version is used if supported, otherwise the highest supported version not above it; if there is none, or it equals the version just sent, the call fails. Renegotiation retries are bounded (`MAX_VERSION_MISMATCH_RETRIES`). The events WebSocket offers the supported versions as sub-protocols.
 - **Client architecture**: chat call sites go through the version-gated `chatClient` façade (`src/network/chatClient/ChatClient.ts`), backed by the SDK (`src/network/sdk/wscSdk.ts`). Chat writes (send, edit, delete, reactions, read markers, pin/unpin, forward, attachment upload) are REST calls that go through the SDK; the upload goes through `wscSdk.sendAttachment`, which runs the app's multipart (`sendAttachmentFetchAPI`) on every attempt with the same `tempId`, owns the retries of an uncertain outcome and confirms the placeholder. Chat events (`MessageReceived`, `MessageEdited`, `MessageDeleted`, `MessageForwarded`, `MessagePinned`, `MessageUnpinned`, `ReactionChanged`, `ReadUpdated`, `PresenceChanged`, `Typing`, `Error`) are routed by `wsChatEventsRouter` to the store (`Error` is only logged).
 - **Room events**: `RoomUpdated` is replaced by `RoomNameChanged` and `RoomDescriptionChanged`, one per changed field, each carrying its own system line, which the SDK lands (`handleRoomNameChanged`, `handleRoomDescriptionChanged`) from `wsConversationEventsHandler`; `RoomUpdated` is handled for 1.6.x only.
 - **Pins**: the pin UI is available; the `zextras:iq:pin` feature is always on. A pin older than the user's `clearedAt` stays visible as text; its attachment thumbnail, preview and download are hidden because the attachment endpoints answer 404 below the visibility floor.
@@ -39,6 +39,22 @@ The XMPP connection handler (`XMPPClient.ts` constructor callback) ran four call
 - 'src/network/chatClient/inboxRefresh.ts' (boot inbox after the first `WebsocketConnected`, serialized refreshes)
 - 'src/utils/FetchUtils.ts' (version renegotiation fallback)
 - ~20 UI call sites (mechanical `xmppClient` → `chatClient` rename)
+
+---
+
+## Version 1.6.16
+
+### Changes
+
+- **API**: New `POST /meetings/${meetingId}/kick` endpoint (body `{ userToModerate: userId }`) to let moderators remove a participant from the meeting. Used as feature flag to show/hide the "Remove from meeting" action in the participant list.
+- **WebSocket**: `MeetingParticipantLeft` event always carries a `reason` field, `KICKED` when the participant has been removed and `LEFT` otherwise, so the removed participant leaves the meeting
+
+### Affected Files
+
+- 'src/network/apis/MeetingsApi.ts' on function `kickParticipant`
+- 'src/network/websocket/wsMeetingEventHandlers/MeetingLeftEventHandler.ts'
+- 'src/meetings/components/sidebar/ParticipantsAccordion/MeetingParticipantMoreActions.tsx'
+- 'src/MainApp.tsx'
 
 ---
 

@@ -5,11 +5,14 @@
  */
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { screen, act, within } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import { find } from 'lodash';
 
 import MeetingParticipantsAccordion from './MeetingParticipantsAccordion';
 import MeetingParticipantsList from './MeetingParticipantsList';
+import * as meetingsApi from '../../../../network/apis/MeetingsApi';
+import * as roomsApi from '../../../../network/apis/RoomsApi';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -106,17 +109,23 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		expect(participantList).toHaveLength(3);
 	});
 
-	test('promote moderator', async () => {
+	test('promote moderator from the more actions dropdown', async () => {
+		const spyOnPromote = vi.spyOn(roomsApi, 'promoteRoomMember');
 		const { user } = storeSetupParticipantModerator();
 
-		const promoteButton = screen.getByTestId('icon: CrownOutline');
-		expect(promoteButton).toBeInTheDocument();
-		expect(promoteButton).toBeEnabled();
+		const user2Row = find(screen.getAllByTestId('participant_element'), (element) =>
+			within(element).queryByText(user2.name)
+		);
+		await user.click(within(user2Row as HTMLElement).getByTestId('participant_more_actions'));
+		await user.click(await screen.findByText(/Promote to moderator/i));
 
-		// promote member
-		await user.click(promoteButton);
-		const button = await screen.findByTestId('icon: Crown');
-		expect(button).toBeInTheDocument();
+		expect(spyOnPromote).toHaveBeenCalledWith(expect.any(String), user2.id);
+	});
+
+	test('crown is displayed only for moderators', () => {
+		storeSetupParticipantModerator();
+		expect(screen.getAllByTestId('icon: Crown')).toHaveLength(1);
+		expect(screen.queryByTestId('icon: CrownOutline')).not.toBeInTheDocument();
 	});
 
 	test('Search one member inside list', async () => {
@@ -152,22 +161,26 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		expect(placeholderText).not.toBeInTheDocument();
 	});
 
-	test('mute a member if you are a moderator', async () => {
+	test('mute a member for all from the more actions dropdown', async () => {
+		const spyOnMute = vi.spyOn(meetingsApi, 'updateAudioStreamStatus');
 		const { meeting, user, store } = storeSetupParticipantModerator();
 
 		act(() => {
 			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
 		});
 
-		const muteButton = screen.getByTestId('icon: MicOffOutline');
+		const user2Row = find(screen.getAllByTestId('participant_element'), (element) =>
+			within(element).queryByText(user2.name)
+		);
+		expect(
+			within(user2Row as HTMLElement).queryByTestId('icon: MicOffOutline')
+		).not.toBeInTheDocument();
+		await user.click(within(user2Row as HTMLElement).getByTestId('participant_more_actions'));
+		await user.click(await screen.findByText(/Mute for all/i));
 
-		expect(muteButton).toBeInTheDocument();
-		expect(muteButton).toBeEnabled();
+		expect(await screen.findByTestId('mute_for_all_modal')).toBeInTheDocument();
+		await user.click(screen.getByRole('button', { name: /Mute for all/i }));
 
-		await user.click(muteButton);
-
-		const micOff = await screen.findByTestId('icon: MicOff');
-
-		expect(micOff).toBeVisible();
+		expect(spyOnMute).toHaveBeenCalledWith(meeting.id, false, user2.id);
 	});
 });

@@ -62,7 +62,7 @@ const VisualEffectsList: FC = () => {
 				const elementLabel =
 					element === VirtualBackgroundType.BLUR
 						? t('meeting.visualEffects.blur', 'Blur')
-						: t('meeting.visualEffects.none', 'None');
+						: t('meeting.visualEffects.default', 'None');
 
 				return (
 					<PictureContainer
