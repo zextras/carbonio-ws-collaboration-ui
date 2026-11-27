@@ -15,6 +15,7 @@ import MessageFactory from './messageBubbles/MessageFactory';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
+import useReadMarker from './useReadMarker';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { chatClient } from '../../../network/chatClient/ChatClient';
 import {
@@ -27,7 +28,7 @@ import {
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getIsWscPure, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
@@ -62,6 +63,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 
+	const isWscPure = useStore(getIsWscPure);
+
 	const [showScrollButton, setShowScrollButton] = useState(false);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
@@ -70,6 +73,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLDivElement>[]>([]);
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
+	const markRead = useReadMarker(roomId, MessagesListWrapperRef);
 
 	const readMessage = useCallback(
 		(refId: string) => {
@@ -103,9 +107,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (oldScrollPosition !== refId) {
 				setScrollPosition(roomId, refId);
 			}
-			readMessage(refId);
+			if (isWscPure) {
+				markRead();
+			} else {
+				readMessage(refId);
+			}
 		}, 150),
-		[setScrollPosition, readMessage, roomId]
+		[setScrollPosition, readMessage, markRead, isWscPure, roomId]
 	);
 
 	const intersectionObserverCallback = useCallback(
@@ -153,13 +161,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	// Read last message when user opens the conversation for the first time
 	useEffect(() => {
-		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
+		if (!isWscPure && !actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
 			const lastMessage = last(roomMessages);
 			if (lastMessage) {
 				readMessage(lastMessage.id);
 			}
 		}
-	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
+	}, [isWscPure, roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
 	// Manage initial scroll position
 	useEffect(() => {
@@ -260,7 +268,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				size(roomMessages) > 0 &&
 				event?.detail.roomId === roomId &&
 				(actualScrollPosition === last(roomMessages)?.id ||
-					(event?.detail.roomId === MessageType.TEXT_MSG && event?.detail.roomId === myUserId))
+					(event.detail.type === MessageType.TEXT_MSG && event.detail.from === myUserId))
 			) {
 				setTimeout(() => {
 					scrollToEnd(MessagesListWrapperRef);

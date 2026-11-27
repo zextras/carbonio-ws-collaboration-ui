@@ -568,6 +568,22 @@ describe('chatClient façade', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
+	it('does not PUT a read marker for an optimistic placeholder (404 on its temp id)', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().updateHistory('room-ph', [
+			createMockTextMessage({
+				id: 'tmp-id',
+				roomId: 'room-ph',
+				stanzaId: `${PLACEHOLDER_STANZA_PREFIX}tmp-id`,
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+
+		await expect(chatClient.readMessage('room-ph', 'tmp-id')).resolves.toBe(false);
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
 	it('does not PUT a read marker for a client-synthesized config row (F3: 404 on its id)', () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const livePinRowId = `pin_msg-pinned_${Date.parse(AUG_FIRST_MORNING)}`;
