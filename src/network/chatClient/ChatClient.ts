@@ -13,12 +13,10 @@ import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { refreshStaleUnread, scheduleBootInbox } from './inboxRefresh';
 import {
-	abandonWindowOperation,
-	beginWindowOperation,
-	createQueueCancelledError,
-	isQueueCancelledError,
-	isStaleWindowPageError,
-	isWipedWindowPageError
+	isAbortError,
+	setReplaceScrollTarget,
+	WINDOW_LOAD_TIMEOUT_MS,
+	windowLoadSignal
 } from './windowGuard';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
@@ -124,49 +122,36 @@ function readMessageViaSdk(roomId: string, messageId: string): void {
 	});
 }
 
-export const RETURN_TO_LATEST_TIMEOUT_MS = 20000;
 const MAX_CATCH_UP_PAGES = 10;
 
 type TimelineCursor = { date: number; id?: string };
 
 const windowOperations = new Map<string, Promise<void>>();
 const latestReloads = new Map<string, Promise<void>>();
-// Bumped when a caller gave up on the queue of the room: what was queued before it does not run
-const queueTokens = new Map<string, number>();
 // Where the forward pages of a detached window go on, whatever live rows the window holds
 const forwardCursors = new Map<string, TimelineCursor>();
 
+/** Every timeline load of a window: it fails after a timeout and stops on a reset or a clear of the room. */
+const windowLoadOptions = (roomId: string): { timeoutMs: number; signal: AbortSignal } => ({
+	timeoutMs: WINDOW_LOAD_TIMEOUT_MS,
+	signal: windowLoadSignal(roomId)
+});
+
 /**
  * Operations that grow or replace a room window run one at a time: a page that lands in a window
- * replaced meanwhile would join rows of two unrelated spans and leave a hidden gap. A page that
- * answers after its operation was abandoned or its room wiped is discarded by the SDK fetch
- * (`guardWindowPage`) and ends the operation without an error. An operation queued behind a
- * request that timed out is cancelled: it rejects with `QueueCancelledError`.
+ * replaced meanwhile would join rows of two unrelated spans and leave a hidden gap. A load that
+ * fails, times out or is aborted rejects and the queue moves on; an abort (reset or clear of the
+ * room) is deliberate, so it ends the operation without an error.
  */
-function runWindowOperation<T>(
-	roomId: string,
-	operation: () => Promise<T>,
-	onSkipped?: () => void
-): Promise<T> {
-	const token = queueTokens.get(roomId) ?? 0;
-	const result = (windowOperations.get(roomId) ?? Promise.resolve()).then(async () => {
-		// The caller that gave up on the queue started a new one: this operation belongs to the old
-		if ((queueTokens.get(roomId) ?? 0) !== token) {
-			onSkipped?.();
-			throw createQueueCancelledError();
-		}
-		const end = beginWindowOperation(roomId);
-		try {
-			return await operation();
-		} catch (err) {
-			if (isStaleWindowPageError(err)) {
+function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Promise<T> {
+	const result = (windowOperations.get(roomId) ?? Promise.resolve())
+		.then(operation)
+		.catch((err) => {
+			if (isAbortError(err)) {
 				return undefined as T;
 			}
 			throw err;
-		} finally {
-			end();
-		}
-	});
+		});
 	windowOperations.set(
 		roomId,
 		result.then(
@@ -230,17 +215,20 @@ async function attachWindow(roomId: string, pageNewest?: TimelineCursor): Promis
 		for (let page = 0; cursor && page < MAX_CATCH_UP_PAGES; page += 1) {
 			forwardCursors.set(roomId, cursor);
 			// eslint-disable-next-line no-await-in-loop
-			const result = await wscSdk.fetchTimeline(roomId, { after: cursor.date, afterId: cursor.id });
+			const result = await wscSdk.fetchTimeline(roomId, {
+				after: cursor.date,
+				afterId: cursor.id,
+				...windowLoadOptions(roomId)
+			});
 			hasMore = result.hasMoreAfter;
 			cursor = hasMore ? (result.newest ?? cursor) : undefined;
 		}
 	} catch (err) {
 		// A page that was not read leaves a gap after the cursor: the window is detached again, from
-		// there. A discarded page says nothing about the window: a wiped room has none left, an
-		// abandoned load is replaced by the reload that follows the timeout
-		if (isWipedWindowPageError(err)) {
+		// there. An abort means the room was wiped: there is no window left to detach
+		if (isAbortError(err)) {
 			forwardCursors.delete(roomId);
-		} else if (!isStaleWindowPageError(err)) {
+		} else {
 			useStore.getState().setHasMoreAfter(roomId, true);
 		}
 		throw err;
@@ -254,6 +242,10 @@ async function attachWindow(roomId: string, pageNewest?: TimelineCursor): Promis
 	refreshStaleUnread();
 }
 
+/**
+ * The latest page replaces the window when the response is processed: a load that fails leaves
+ * the window as it was.
+ */
 async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 	const store = useStore.getState();
 	if (!store.rooms[roomId]) {
@@ -261,12 +253,13 @@ async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 	}
 	const notBefore = getNotBefore(roomId);
 	store.setHistoryLoadDisabled(roomId, true);
-	store.clearMessages(roomId);
-	forwardCursors.delete(roomId);
 	try {
 		const { hasMoreAfter, newest } = await wscSdk.fetchTimeline(roomId, {
-			...(notBefore ? { notBefore } : {})
+			replaceWindow: true,
+			...(notBefore ? { notBefore } : {}),
+			...windowLoadOptions(roomId)
 		});
+		forwardCursors.delete(roomId);
 		if (!hasMoreAfter) {
 			await attachWindow(roomId, newest);
 		}
@@ -282,77 +275,22 @@ async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 }
 
 /** One reload of the latest page at a time per room: the callers that come meanwhile share it. */
-function trackReload(roomId: string, run: Promise<void>): Promise<void> {
-	const reload = run
-		.catch((err) => {
-			// Cancelled with its queue: the reload that replaced it carries on
-			if (!isQueueCancelledError(err)) {
-				throw err;
-			}
-		})
-		.finally(() => {
-			if (latestReloads.get(roomId) === reload) {
-				latestReloads.delete(roomId);
-			}
-		});
-	latestReloads.set(roomId, reload);
-	return reload;
-}
-
 function returnToLatestMessagesViaSdk(roomId: string): Promise<void> {
 	const inFlight = latestReloads.get(roomId);
 	if (inFlight) {
 		return inFlight;
 	}
-	return trackReload(
-		roomId,
-		runWindowOperation(roomId, async () => {
-			if (isDetached(roomId)) {
-				await loadLatestWindowViaSdk(roomId);
-			}
-		})
-	);
-}
-
-/** The latest page again, whatever the state of the window: an abandoned load may have cleared it. */
-function restoreWindowViaSdk(roomId: string): void {
-	trackReload(
-		roomId,
-		runWindowOperation(roomId, () => loadLatestWindowViaSdk(roomId))
-	).catch((err) => console.error('chatClient: latest page restore failed', err));
-}
-
-/**
- * Bounds the wait of a caller (a send, the scroll-to-bottom button) behind the window loads of the
- * room. On timeout, unless another caller already gave up on this queue, the operation running is
- * abandoned (its late page is discarded), the operations queued behind it are cancelled, the room
- * queue is released and a fresh reload of the latest page goes on the new queue: the abandoned
- * operation may have cleared the window. Nothing runs beside the new queue.
- */
-function withTimeout<T>(roomId: string, promise: Promise<T>, ms: number): Promise<T> {
-	const token = queueTokens.get(roomId) ?? 0;
-	return new Promise<T>((resolve, reject) => {
-		const timer = setTimeout(() => {
-			if ((queueTokens.get(roomId) ?? 0) === token) {
-				abandonWindowOperation(roomId);
-				queueTokens.set(roomId, token + 1);
-				windowOperations.delete(roomId);
-				latestReloads.delete(roomId);
-				restoreWindowViaSdk(roomId);
-			}
-			reject(new Error('window load timed out'));
-		}, ms);
-		promise.then(
-			(value) => {
-				clearTimeout(timer);
-				resolve(value);
-			},
-			(err) => {
-				clearTimeout(timer);
-				reject(err);
-			}
-		);
+	const reload = runWindowOperation(roomId, async () => {
+		if (isDetached(roomId)) {
+			await loadLatestWindowViaSdk(roomId);
+		}
+	}).finally(() => {
+		if (latestReloads.get(roomId) === reload) {
+			latestReloads.delete(roomId);
+		}
 	});
+	latestReloads.set(roomId, reload);
+	return reload;
 }
 
 /**
@@ -377,11 +315,7 @@ function sendTextViaSdk(
 	}
 	// A message sent from a window cut before the newest one would land after a hidden gap
 	if (isDetached(roomId)) {
-		return withTimeout(
-			roomId,
-			returnToLatestMessagesViaSdk(roomId),
-			RETURN_TO_LATEST_TIMEOUT_MS
-		).then(
+		return returnToLatestMessagesViaSdk(roomId).then(
 			() => (isDetached(roomId) ? false : sendTextViaSdk(caller, roomId, message, replyToId)),
 			(err) => {
 				console.error(`chatClient.${caller}: return to the latest messages failed`, err);
@@ -446,11 +380,12 @@ async function loadBackwardPageViaSdk(
 			// Composite cursor only when the anchor is a message already in store
 			...(oldest?.date === endHistory ? { beforeId: oldest.id } : {}),
 			...(quantity === undefined ? {} : { limit: quantity }),
-			...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
+			...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {}),
+			...windowLoadOptions(roomId)
 		});
 	} catch (err) {
-		// A discarded page asked nothing wrong: the loader can ask again from the window it finds
-		if (isStaleWindowPageError(err)) {
+		// An aborted page asked nothing wrong: the loader can ask again from the window it finds
+		if (isAbortError(err)) {
 			useStore.getState().setHistoryLoadDisabled(roomId, false);
 		}
 		throw err;
@@ -472,10 +407,10 @@ function findKnownMessageDate(roomId: string, stanzaId: string): number | undefi
 /**
  * v2 replacement of the MAM `to-id` form behind the search-result and pin jumps: the window of
  * the room becomes the timeline page around the target (one request, wherever the target is).
- * The rows before and after the old window are not contiguous with it, so the old rows are
- * dropped; the window is flagged as cut before the newest message until the forward pages
- * reach it again. If the page cannot be loaded the latest page is restored. Resolves whether
- * the target is in the window.
+ * The page replaces the rows when the response is processed, so a load that fails leaves the
+ * window as it was. The rows before and after the old window are not contiguous with the new
+ * one: the window is flagged as cut before the newest message until the forward pages reach it.
+ * Resolves whether the target is in the window.
  */
 function loadWindowAroundMessageViaSdk(
 	roomId: string,
@@ -501,41 +436,28 @@ function loadWindowAroundMessageViaSdk(
 		}
 		// The loaders must not page the window while it is replaced
 		store.setHistoryLoadDisabled(roomId, true);
-		store.clearMessages(roomId);
-		forwardCursors.delete(roomId);
-		// Set before the rows land so the list does not scroll to the bottom
-		store.setScrollPosition(roomId, stanzaId);
+		// Applied when the rows land, so the list does not scroll to the bottom for a moment
+		setReplaceScrollTarget(roomId, stanzaId);
 		try {
 			const { hasMoreAfter, newest } = await wscSdk.fetchTimeline(roomId, {
 				around: date,
 				aroundId: stanzaId,
-				...(notBefore ? { notBefore } : {})
+				replaceWindow: true,
+				...(notBefore ? { notBefore } : {}),
+				...windowLoadOptions(roomId)
 			});
+			forwardCursors.delete(roomId);
 			if (!hasMoreAfter) {
 				await attachWindow(roomId, newest);
 			} else if (newest) {
 				forwardCursors.set(roomId, newest);
 			}
-		} catch (err) {
-			if (!isStaleWindowPageError(err)) {
-				await loadLatestWindowViaSdk(roomId).catch((restoreErr) =>
-					console.error('chatClient: latest page restore failed', restoreErr)
-				);
-			}
-			throw err;
 		} finally {
+			setReplaceScrollTarget(roomId, undefined);
 			useStore.getState().setHistoryLoadDisabled(roomId, false);
 		}
 		return isTextMessageStored(roomId, stanzaId);
-	}).then(
-		(loaded) => loaded ?? false,
-		(err) => {
-			if (isQueueCancelledError(err)) {
-				return false;
-			}
-			throw err;
-		}
-	);
+	}).then((loaded) => loaded ?? false);
 }
 
 function loadNextPageAfterViaSdk(roomId: string): Promise<void> {
@@ -547,7 +469,11 @@ function loadNextPageAfterViaSdk(roomId: string): Promise<void> {
 		if (!from) {
 			return;
 		}
-		const result = await wscSdk.fetchTimeline(roomId, { after: from.date, afterId: from.id });
+		const result = await wscSdk.fetchTimeline(roomId, {
+			after: from.date,
+			afterId: from.id,
+			...windowLoadOptions(roomId)
+		});
 		if (!result.hasMoreAfter) {
 			await attachWindow(roomId, result.newest ?? from);
 			return;
@@ -688,14 +614,9 @@ export const chatClient: ChatClient = {
 				return;
 			}
 			const oldestAtCall = getOldestConfirmedMessage(store.chatsRegistry[roomId]?.messages ?? []);
-			runWindowOperation(
-				roomId,
-				() => loadBackwardPageViaSdk(roomId, endHistory, quantity, oldestAtCall?.id),
-				() => useStore.getState().setHistoryLoadDisabled(roomId, false)
+			runWindowOperation(roomId, () =>
+				loadBackwardPageViaSdk(roomId, endHistory, quantity, oldestAtCall?.id)
 			).catch((err) => {
-				if (isQueueCancelledError(err)) {
-					return;
-				}
 				console.error('chatClient.requestHistory: timeline hydration failed', err);
 			});
 			return;
@@ -786,7 +707,7 @@ export const chatClient: ChatClient = {
 		if (!isWscPure()) {
 			return Promise.resolve();
 		}
-		return withTimeout(roomId, returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS);
+		return returnToLatestMessagesViaSdk(roomId);
 	},
 	requestMessageToForward: (roomId, messageToForwardStanzaId, queryId) => {
 		if (isWscPure()) {

@@ -33,7 +33,7 @@ export type ChatsRegistryStoreSlice = {
 	addMessageRange: (roomId: string, range: MessageRange) => void;
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
 	shiftBackfillQueue: (roomId: string) => void;
-	clearMessages: (roomId: string) => void;
+	replaceHistory: (roomId: string, messageArray: Message[]) => void;
 	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean) => void;
 };
 

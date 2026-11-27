@@ -650,13 +650,19 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/ENQUEUE_BACKFILL'
 		);
 	},
-	clearMessages: (roomId: string): void => {
+	replaceHistory: (roomId: string, messageArray: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
 				// Unconfirmed sends stay at the end of the window. Their confirmation is dropped while the
 				// window is detached and comes back with the pages that attach it
-				registry.messages = registry.messages.filter(isPendingRow);
+				const pendingRows = registry.messages.filter(isPendingRow);
+				const [pendingPageRows, pageRows] = partition(messageArray, isPendingRow);
+				registry.messages = uniqBy(
+					[...[...pageRows].sort(compareMessageKeys), ...pendingRows, ...pendingPageRows],
+					'id'
+				);
+				// The page is the window now, and it ends where the page ends until the loads attach it
 				registry.hasMoreAfter = true;
 				const conversation = draft.activeConversations[roomId];
 				if (conversation) {
@@ -664,7 +670,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'CHAT/CLEAR_MESSAGES'
+			'CHAT/REPLACE_HISTORY'
 		);
 	},
 	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean): void => {

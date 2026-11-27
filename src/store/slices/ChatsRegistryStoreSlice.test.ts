@@ -564,7 +564,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
 		});
 
-		test('clearMessages drops the rows, detaches the window and resets the fully loaded flag', () => {
+		test('replaceHistory swaps the rows for the page, detaches the window and resets the fully loaded flag', () => {
 			const store = useStore.getState();
 			store.updateHistory(roomId, [
 				createMockTextMessage({ id: 'm1', roomId, date: date1 }),
@@ -572,25 +572,52 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			]);
 			store.setHistoryIsFullyLoaded(roomId);
 
-			useStore.getState().clearMessages(roomId);
+			useStore
+				.getState()
+				.replaceHistory(roomId, [
+					createMockTextMessage({ id: 'p2', roomId, date: date3 }),
+					createMockTextMessage({ id: 'p1', roomId, date: date2 })
+				]);
 
-			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(0);
+			expect(
+				useStore.getState().chatsRegistry[roomId].messages.map((message) => message.id)
+			).toEqual(['p1', 'p2']);
 			expect(useStore.getState().chatsRegistry[roomId].hasMoreAfter).toBe(true);
 			expect(useStore.getState().activeConversations[roomId]?.isHistoryFullyLoaded).toBe(false);
 		});
 
-		test('clearMessages keeps the unconfirmed sends', () => {
+		test('replaceHistory keeps the unconfirmed sends at the end and takes none twice', () => {
 			const store = useStore.getState();
+			const pending = createMockTextMessage({
+				id: 'pending',
+				roomId,
+				date: date1,
+				read: MarkerStatus.PENDING
+			});
 			store.updateHistory(roomId, [
 				createMockTextMessage({ id: 'm1', roomId, date: date1 }),
-				createMockTextMessage({ id: 'pending', roomId, date: date2, read: MarkerStatus.PENDING })
+				pending
 			]);
 
-			useStore.getState().clearMessages(roomId);
+			useStore
+				.getState()
+				.replaceHistory(roomId, [
+					createMockTextMessage({ id: 'p1', roomId, date: date3 }),
+					pending
+				]);
 
 			expect(
 				useStore.getState().chatsRegistry[roomId].messages.map((message) => message.id)
-			).toEqual(['pending']);
+			).toEqual(['p1', 'pending']);
+		});
+
+		test('replaceHistory with an empty page empties the window', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+
+			useStore.getState().replaceHistory(roomId, []);
+
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(0);
 		});
 
 		test('a live message is not appended while the window is detached', () => {

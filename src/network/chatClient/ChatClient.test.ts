@@ -20,9 +20,10 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { chatClient, isWscPure, RETURN_TO_LATEST_TIMEOUT_MS } from './ChatClient';
+import { chatClient, isWscPure } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import { BOOT_INBOX_TIMEOUT_MS, refreshInboxSerialized } from './inboxRefresh';
+import { WINDOW_LOAD_TIMEOUT_MS } from './windowGuard';
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import useStore from '../../store/Store';
 import {
@@ -51,7 +52,6 @@ vi.mock('./chatExportDownload');
 
 const pendingId = 'msg-pending';
 const AUG_FIRST_EARLY = '2026-08-01T08:00:00Z';
-const TIMED_OUT = 'window load timed out';
 const BACKEND_DOWN = 'backend down';
 const AUG_FIRST_NOON = '2026-08-01T11:00:00Z';
 const NEWEST_ID = 'msg-newest';
@@ -1483,33 +1483,33 @@ describe('chatClient façade', () => {
 		expect(useStore.getState().activeConversations['room-ja']?.isHistoryFullyLoaded).toBe(true);
 	});
 
-	it('restores the latest page and rejects when the page around the target cannot be loaded', async () => {
+	it('leaves the window as it was and rejects when the page around the target cannot be loaded', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		useStore.getState().addRooms([createMockRoom({ id: 'room-jr', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-jr', [
+			createMockTextMessage({
+				id: 'msg-kept',
+				stanzaId: 'msg-kept',
+				roomId: 'room-jr',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		useStore.getState().setScrollPosition('room-jr', 'msg-kept');
 		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
-		mockJsonResponse(
-			buildTimelineResponse(
-				[
-					buildMessageTimelineItem(
-						buildWireMessage({ id: 'msg-latest', roomId: 'room-jr', createdAt: AUG_FIRST_MORNING })
-					)
-				],
-				{ hasMoreBefore: true }
-			)
-		);
-		mockEmptyAfterPage();
 
 		await expect(
 			chatClient.requestMessageResultHistoryToId('room-jr', 'msg-x', Date.parse(JULY_FIRST))
 		).rejects.toThrow(BACKEND_DOWN);
 
-		const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
-		expect(calls[1]).toBe('/services/chats/rooms/room-jr/timeline?limit=50');
+		// One request, no restore: nothing was cleared
+		expect((global.fetch as Mock).mock.calls).toHaveLength(1);
 		const registry = useStore.getState().chatsRegistry['room-jr'];
-		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-latest']);
-		expect(registry?.hasMoreAfter).toBe(false);
-		expect(errorSpy).not.toHaveBeenCalled();
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-kept']);
+		expect(registry?.hasMoreAfter).toBeFalsy();
+		expect(useStore.getState().activeConversations['room-jr']?.scrollPositionMessageId).toBe(
+			'msg-kept'
+		);
+		expect(useStore.getState().activeConversations['room-jr']?.isHistoryLoadDisabled).toBe(false);
 	});
 
 	it('skips every round-trip when the jump target is already loaded', async () => {
@@ -1954,7 +1954,7 @@ describe('chatClient façade', () => {
 		it('brings back an own message confirmed while the window was detached with the after pages', async () => {
 			setUpRoom('room-rb');
 			useStore.getState().setPlaceholderMessage({ roomId: 'room-rb', id: 'tmp-1', text: 'hello' });
-			useStore.getState().clearMessages('room-rb');
+			useStore.getState().replaceHistory('room-rb', []);
 			seedWindow('room-rb');
 			expect(rowIds('room-rb')).toEqual(['w1', 'tmp-1']);
 
@@ -2155,13 +2155,53 @@ describe('chatClient façade', () => {
 			expect(useStore.getState().chatsRegistry['room-rd']?.searchResults).toEqual([]);
 		});
 
-		it('releases the room after a timeout: the restore does not wait and the late page is discarded', async () => {
+		it('keeps the window while the page around the target is in flight and swaps it, with the scroll target, when it lands', async () => {
+			setUpRoom('room-ra1');
+			useStore.getState().updateHistory('room-ra1', [
+				createMockTextMessage({
+					id: 'old-row',
+					stanzaId: 'old-row',
+					roomId: 'room-ra1',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setScrollPosition('room-ra1', 'old-row');
+			const answer = deferResponse();
+			const jump = chatClient.requestMessageResultHistoryToId(
+				'room-ra1',
+				'target',
+				Date.parse(AUG_FIRST_MORNING)
+			);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(rowIds('room-ra1')).toEqual(['old-row']);
+			expect(useStore.getState().chatsRegistry['room-ra1']?.hasMoreAfter).toBeFalsy();
+			expect(useStore.getState().activeConversations['room-ra1']?.scrollPositionMessageId).toBe(
+				'old-row'
+			);
+
+			answer(
+				buildTimelineResponse([row('room-ra1', 'target', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
+			);
+			await expect(jump).resolves.toBe(true);
+
+			expect(rowIds('room-ra1')).toEqual(['target']);
+			expect(useStore.getState().activeConversations['room-ra1']?.scrollPositionMessageId).toBe(
+				'target'
+			);
+		});
+
+		it('fails a page that does not answer in time and the queue moves on to what waited behind it', async () => {
 			setUpRoom('room-rt');
 			seedWindow('room-rt');
-			const answerHung = deferResponse();
-			const hungNext = chatClient.requestMessagesAfter('room-rt');
+			vi.spyOn(console, 'error').mockImplementation(() => undefined);
+			deferResponse();
+			const hung = chatClient.requestMessagesAfter('room-rt');
+			const hungOutcome = expect(hung).rejects.toMatchObject({ name: 'TimeoutError' });
 			await vi.advanceTimersByTimeAsync(0);
-			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 			mockJsonResponse(
 				buildTimelineResponse([row('room-rt', 'latest', AUG_FIRST_NOON) as never], {
 					hasMoreBefore: true,
@@ -2169,126 +2209,57 @@ describe('chatClient façade', () => {
 				})
 			);
 			mockEmptyAfterPage();
+			const reload = chatClient.returnToLatestMessages('room-rt');
+			await vi.advanceTimersByTimeAsync(0);
+			expect(rowIds('room-rt')).toEqual(['w1']);
 
-			const sent = chatClient.sendChatMessage('room-rt', 'ciao');
-			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-			await expect(sent).resolves.toBe(false);
-			expect(errorSpy).toHaveBeenCalledWith(
-				'chatClient.sendChatMessage: return to the latest messages failed',
-				expect.any(Error)
-			);
+			await vi.advanceTimersByTimeAsync(WINDOW_LOAD_TIMEOUT_MS);
+			await hungOutcome;
+			await reload;
 
-			// The reload of the latest page went out at once instead of waiting for the hung page
-			expect(rowIds('room-rt')).toEqual(['latest']);
-			answerHung(
-				buildTimelineResponse([row('room-rt', 'late', AUG_FIRST_MORNING) as never], {
-					hasMoreBefore: true,
-					hasMoreAfter: true
-				})
-			);
-			await expect(hungNext).resolves.toBeUndefined();
 			expect(rowIds('room-rt')).toEqual(['latest']);
 			expect(useStore.getState().chatsRegistry['room-rt']?.hasMoreAfter).toBe(false);
 		});
 
-		it('does not run what was queued behind a request that timed out, beside the new queue', async () => {
-			setUpRoom('room-q3');
-			seedWindow('room-q3');
-			vi.spyOn(console, 'error').mockImplementation(() => undefined);
-			const answerHung = deferResponse();
-			const hung = chatClient.requestMessagesAfter('room-q3');
-			await vi.advanceTimersByTimeAsync(0);
-			const queued = chatClient.requestMessagesAfter('room-q3');
-			const queuedOutcome = expect(queued).rejects.toThrow('window load cancelled');
-			const answerReload = deferResponse();
-			const sent = chatClient.sendChatMessage('room-q3', 'ciao');
-			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-			await expect(sent).resolves.toBe(false);
-			const requestsBefore = (global.fetch as Mock).mock.calls.length;
-
-			answerHung(
-				buildTimelineResponse([row('room-q3', 'late', AUG_FIRST_MORNING) as never], {
-					hasMoreBefore: true,
-					hasMoreAfter: true
-				})
-			);
-			await hung;
-			await queuedOutcome;
-			await vi.advanceTimersByTimeAsync(0);
-
-			// The page queued behind the hung one never goes out beside the restore
-			expect((global.fetch as Mock).mock.calls).toHaveLength(requestsBefore);
-			answerReload(
-				buildTimelineResponse([row('room-q3', 'latest', AUG_FIRST_NOON) as never], {
-					hasMoreBefore: true,
-					hasMoreAfter: false
-				})
-			);
-			mockEmptyAfterPage();
-			await chatClient.returnToLatestMessages('room-q3');
-			expect(rowIds('room-q3')).toEqual(['latest']);
-		});
-
-		it('restores the window when the timeout abandons a reload that had already cleared it', async () => {
-			setUpRoom('room-rr1');
-			seedWindow('room-rr1');
-			vi.spyOn(console, 'error').mockImplementation(() => undefined);
-			const answerHung = deferResponse();
-			const reload = chatClient.returnToLatestMessages('room-rr1');
-			const reloadOutcome = expect(reload).rejects.toThrow(TIMED_OUT);
-			await vi.advanceTimersByTimeAsync(0);
-			expect(rowIds('room-rr1')).toEqual([]);
-			mockJsonResponse(
-				buildTimelineResponse([row('room-rr1', 'latest', AUG_FIRST_NOON) as never], {
-					hasMoreBefore: true,
-					hasMoreAfter: false
-				})
-			);
-			mockEmptyAfterPage();
-
-			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-			await reloadOutcome;
-			answerHung(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: false }));
-			await vi.advanceTimersByTimeAsync(0);
-
-			expect(rowIds('room-rr1')).toEqual(['latest']);
-			expect(useStore.getState().chatsRegistry['room-rr1']?.hasMoreAfter).toBe(false);
-		});
-
-		it('does not let the timer of a later caller abandon the restore the first timeout started', async () => {
-			setUpRoom('room-rk');
-			seedWindow('room-rk');
-			vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		it('leaves the window as it was and gives the text back when the reload of a send times out', async () => {
+			setUpRoom('room-rs');
+			seedWindow('room-rs');
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 			deferResponse();
-			const first = chatClient.returnToLatestMessages('room-rk');
-			const firstOutcome = expect(first).rejects.toThrow(TIMED_OUT);
-			await vi.advanceTimersByTimeAsync(0);
-			await vi.advanceTimersByTimeAsync(10_000);
-			const second = chatClient.returnToLatestMessages('room-rk');
-			const secondOutcome = expect(second).rejects.toThrow();
-			const answerRestore = deferResponse();
-			await vi.advanceTimersByTimeAsync(10_001);
-			await firstOutcome;
-			// The restore went out when the first caller gave up
-			const restoreRequests = (global.fetch as Mock).mock.calls.length;
 
-			// The second caller gives up later: the restore it did not start stays alive
-			await vi.advanceTimersByTimeAsync(10_000);
-			await secondOutcome;
-			answerRestore(
-				buildTimelineResponse([row('room-rk', 'latest', AUG_FIRST_NOON) as never], {
+			const sent = chatClient.sendChatMessage('room-rs', 'ciao');
+			await vi.advanceTimersByTimeAsync(WINDOW_LOAD_TIMEOUT_MS);
+
+			await expect(sent).resolves.toBe(false);
+			expect(errorSpy).toHaveBeenCalledWith(
+				'chatClient.sendChatMessage: return to the latest messages failed',
+				expect.objectContaining({ name: 'TimeoutError' })
+			);
+			expect(rowIds('room-rs')).toEqual(['w1']);
+			expect(useStore.getState().chatsRegistry['room-rs']?.hasMoreAfter).toBe(true);
+		});
+
+		it('leaves the window as it was when the reload fails, and the next try works', async () => {
+			setUpRoom('room-rf2');
+			seedWindow('room-rf2');
+			(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
+
+			await expect(chatClient.returnToLatestMessages('room-rf2')).rejects.toThrow(BACKEND_DOWN);
+			expect(rowIds('room-rf2')).toEqual(['w1']);
+			expect(useStore.getState().chatsRegistry['room-rf2']?.hasMoreAfter).toBe(true);
+
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rf2', 'latest', AUG_FIRST_NOON) as never], {
 					hasMoreBefore: true,
 					hasMoreAfter: false
 				})
 			);
 			mockEmptyAfterPage();
-			await vi.advanceTimersByTimeAsync(0);
-
-			expect((global.fetch as Mock).mock.calls.length).toBe(restoreRequests + 1);
-			expect(rowIds('room-rk')).toEqual(['latest']);
+			await chatClient.returnToLatestMessages('room-rf2');
+			expect(rowIds('room-rf2')).toEqual(['latest']);
 		});
 
-		it('does not detach a window the restore attached when an abandoned catch-up page answers late', async () => {
+		it('detaches the window again from its cursor when a catch-up page times out', async () => {
 			setUpRoom('room-rd4');
 			seedWindow('room-rd4');
 			vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -2298,26 +2269,79 @@ describe('chatClient façade', () => {
 					hasMoreAfter: false
 				})
 			);
-			const answerCatchUp = deferResponse();
+			deferResponse();
 			const next = chatClient.requestMessagesAfter('room-rd4');
+			const outcome = expect(next).rejects.toMatchObject({ name: 'TimeoutError' });
+			await vi.advanceTimersByTimeAsync(WINDOW_LOAD_TIMEOUT_MS);
+			await outcome;
+
+			expect(useStore.getState().chatsRegistry['room-rd4']?.hasMoreAfter).toBe(true);
+			mockEmptyAfterPage();
+			await chatClient.requestMessagesAfter('room-rd4');
+			expect((global.fetch as Mock).mock.calls.at(-1)?.[0]).toContain('afterId=f0');
+		});
+
+		it('keeps every window load on a timeout and on the abort signal of its room', async () => {
+			setUpRoom('room-rg1');
+			seedWindow('room-rg1');
+			deferResponse();
+			const next = chatClient.requestMessagesAfter('room-rg1');
+			next.catch(() => undefined);
 			await vi.advanceTimersByTimeAsync(0);
-			const reload = chatClient.returnToLatestMessages('room-rd4');
-			const reloadOutcome = expect(reload).rejects.toThrow(TIMED_OUT);
+
+			const [, init] = (global.fetch as Mock).mock.calls.at(-1) as [
+				string,
+				{ signal?: AbortSignal }
+			];
+			expect(init.signal?.aborted).toBe(false);
+
+			useStore.getState().resetXmppData();
+			expect(init.signal?.aborted).toBe(true);
+			await next;
+		});
+
+		it('aborts the loads of the room that is cleared and not the ones of another room', async () => {
+			setUpRoom('room-rg2');
+			setUpRoom('room-rg3');
+			seedWindow('room-rg2');
+			seedWindow('room-rg3');
+			deferResponse();
+			const first = chatClient.requestMessagesAfter('room-rg2');
+			deferResponse();
+			const second = chatClient.requestMessagesAfter('room-rg3');
+			second.catch(() => undefined);
+			await vi.advanceTimersByTimeAsync(0);
+			const signals = (global.fetch as Mock).mock.calls.map(
+				(call) => (call[1] as { signal?: AbortSignal }).signal
+			);
+
+			useStore.getState().clearConversation('room-rg2', AUG_SECOND);
+			await first;
+
+			expect(signals[0]?.aborted).toBe(true);
+			expect(signals[1]?.aborted).toBe(false);
+		});
+
+		it('does not abort a load that starts after an abort', async () => {
+			setUpRoom('room-rg4');
+			seedWindow('room-rg4');
+			deferResponse();
+			const aborted = chatClient.requestMessagesAfter('room-rg4');
+			await vi.advanceTimersByTimeAsync(0);
+			useStore.getState().resetXmppData();
+			await aborted;
+
+			setUpRoom('room-rg4');
+			seedWindow('room-rg4');
 			mockJsonResponse(
-				buildTimelineResponse([row('room-rd4', 'latest', AUG_FIRST_NOON) as never], {
+				buildTimelineResponse([row('room-rg4', 'f1', AUG_FIRST_MORNING) as never], {
 					hasMoreBefore: true,
-					hasMoreAfter: false
+					hasMoreAfter: true
 				})
 			);
-			mockEmptyAfterPage();
+			await chatClient.requestMessagesAfter('room-rg4');
 
-			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-			await reloadOutcome;
-			answerCatchUp(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: false }));
-			await expect(next).resolves.toBeUndefined();
-
-			expect(useStore.getState().chatsRegistry['room-rd4']?.hasMoreAfter).toBe(false);
-			expect(rowIds('room-rd4')).toEqual(['latest']);
+			expect(rowIds('room-rg4')).toEqual(['w1', 'f1']);
 		});
 
 		it('keeps the results of a search that was in flight across a reconnection reset', async () => {
@@ -2338,26 +2362,6 @@ describe('chatClient façade', () => {
 			expect(
 				useStore.getState().chatsRegistry['room-re4b']?.searchResults.map((result) => result.id)
 			).toEqual(['foo-1']);
-		});
-
-		it('releases the history loader of a backward page that was queued behind a request that timed out', async () => {
-			setUpRoom('room-q4');
-			seedWindow('room-q4');
-			vi.spyOn(console, 'error').mockImplementation(() => undefined);
-			const answerHung = deferResponse();
-			const hung = chatClient.requestMessagesAfter('room-q4');
-			await vi.advanceTimersByTimeAsync(0);
-			useStore.getState().setHistoryLoadDisabled('room-q4', true);
-			chatClient.requestHistory('room-q4', Date.parse(AUG_FIRST_EARLY));
-			const sent = chatClient.sendChatMessage('room-q4', 'ciao');
-			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-			await expect(sent).resolves.toBe(false);
-
-			answerHung(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: true }));
-			await hung;
-			await vi.advanceTimersByTimeAsync(0);
-
-			expect(useStore.getState().activeConversations['room-q4']?.isHistoryLoadDisabled).toBe(false);
 		});
 
 		it('releases the history loader when its page answers after a reconnection reset', async () => {

@@ -6,82 +6,69 @@
 
 import useStore from '../../store/Store';
 
-type WindowOperation = { epoch: string; abandoned: boolean };
+/** A window load that does not answer in time fails, and the queue of the room moves on. */
+export const WINDOW_LOAD_TIMEOUT_MS = 15000;
 
-const activeOperations = new Map<string, WindowOperation>();
-const TIMELINE_URL = /\/rooms\/([^/?]+)\/timeline(?:\?|$)/;
+const controllers = new Map<string, AbortController>();
+let watching = false;
+const scrollTargets = new Map<string, string>();
 
-/** A timeline page that answered after its operation was abandoned or its room was wiped. */
-export class StaleWindowPageError extends Error {
-	/** `wiped`: the room registry was reset or cleared; `abandoned`: the operation timed out. */
-	readonly reason: 'wiped' | 'abandoned';
+function abortRoomLoads(roomId: string): void {
+	controllers.get(roomId)?.abort();
+	controllers.delete(roomId);
+}
 
-	constructor(reason: 'wiped' | 'abandoned') {
-		super('stale window page');
-		this.name = 'StaleWindowPageError';
-		this.reason = reason;
+// Subscribed on first use: this module is evaluated while the store module is still being built
+function watchWipes(): void {
+	if (watching) {
+		return;
 	}
-}
-
-export const isStaleWindowPageError = (err: unknown): boolean =>
-	err instanceof StaleWindowPageError;
-
-export const isWipedWindowPageError = (err: unknown): boolean =>
-	err instanceof StaleWindowPageError && err.reason === 'wiped';
-
-/** Changes when a reconnection reset or a history clear wipes the room: a page asked before is stale. */
-function getWindowEpoch(roomId: string): string {
-	const epochs = useStore.getState().windowEpochs;
-	return `${epochs['*'] ?? 0}/${epochs[roomId] ?? 0}`;
-}
-
-export function beginWindowOperation(roomId: string): () => void {
-	const operation: WindowOperation = { epoch: getWindowEpoch(roomId), abandoned: false };
-	activeOperations.set(roomId, operation);
-	return (): void => {
-		if (activeOperations.get(roomId) === operation) {
-			activeOperations.delete(roomId);
+	watching = true;
+	useStore.subscribe((state, previous) => {
+		const epochs = state.windowEpochs;
+		const before = previous.windowEpochs;
+		if (epochs === before) {
+			return;
 		}
-	};
-}
-
-/** The operation running for the room stops mattering: its late pages are discarded. */
-export function abandonWindowOperation(roomId: string): void {
-	const operation = activeOperations.get(roomId);
-	if (operation) {
-		operation.abandoned = true;
-		activeOperations.delete(roomId);
-	}
-}
-
-/**
- * Wraps the fetch of the SDK client: the timeline page of a window operation is discarded before
- * the SDK writes anything when, by the time it answers, the operation was abandoned or the room
- * was wiped (reconnection reset, history clear). Only the operation running at issue time counts.
- */
-export function guardWindowPage(url: string, issue: () => Promise<Response>): Promise<Response> {
-	const encodedRoomId = TIMELINE_URL.exec(url)?.[1];
-	const roomId = encodedRoomId ? decodeURIComponent(encodedRoomId) : undefined;
-	const operation = roomId ? activeOperations.get(roomId) : undefined;
-	if (!roomId || !operation) {
-		return issue();
-	}
-	return issue().then((response) => {
-		if (operation.epoch !== getWindowEpoch(roomId)) {
-			throw new StaleWindowPageError('wiped');
+		if (epochs['*'] !== before['*']) {
+			Array.from(controllers.keys()).forEach(abortRoomLoads);
+			return;
 		}
-		if (operation.abandoned) {
-			throw new StaleWindowPageError('abandoned');
-		}
-		return response;
+		Object.keys({ ...before, ...epochs })
+			.filter((roomId) => epochs[roomId] !== before[roomId])
+			.forEach(abortRoomLoads);
 	});
 }
 
-const QUEUE_CANCELLED = 'QueueCancelledError';
+/**
+ * The signal of the loads of a room: a reconnection reset aborts the loads of every room and a
+ * history clear those of that room (see the subscription below). Each abort starts a new
+ * controller, so it never reaches the loads that come after.
+ */
+export function windowLoadSignal(roomId: string): AbortSignal {
+	watchWipes();
+	let controller = controllers.get(roomId);
+	if (!controller) {
+		controller = new AbortController();
+		controllers.set(roomId, controller);
+	}
+	return controller.signal;
+}
 
-/** A window load queued behind a request that timed out: the queue it waited in was given up. */
-export const createQueueCancelledError = (): Error =>
-	Object.assign(new Error('window load cancelled'), { name: QUEUE_CANCELLED });
+export const isAbortError = (err: unknown): boolean =>
+	err instanceof Error && err.name === 'AbortError';
 
-export const isQueueCancelledError = (err: unknown): boolean =>
-	err instanceof Error && err.name === QUEUE_CANCELLED;
+/**
+ * The message a replacing page (a jump) must leave the list scrolled to: set when the rows land,
+ * so the list does not scroll to the bottom for a moment.
+ */
+export function setReplaceScrollTarget(roomId: string, messageId: string | undefined): void {
+	if (messageId) {
+		scrollTargets.set(roomId, messageId);
+	} else {
+		scrollTargets.delete(roomId);
+	}
+}
+
+export const getReplaceScrollTarget = (roomId: string): string | undefined =>
+	scrollTargets.get(roomId);
