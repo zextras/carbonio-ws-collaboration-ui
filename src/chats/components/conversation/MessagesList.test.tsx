@@ -444,6 +444,22 @@ describe('Window cut before the newest message', () => {
 		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
 	});
 
+	test('A detached window with no row yet, or only an unconfirmed send, has no forward loader', () => {
+		const store = useStore.getState();
+		store.setHasMoreAfter(room.id, true);
+		const { unmount } = setup(<MessagesList roomId={room.id} />);
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
+		act(() => {
+			store.setPlaceholderMessage({ roomId: room.id, id: 'tmp-1', text: 'sending' });
+		});
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
+		act(() => {
+			store.updateHistory(room.id, messages);
+		});
+		expect(screen.getByTestId('messageForwardLoader')).toBeVisible();
+		unmount();
+	});
+
 	test('A detached window shows the forward loader at its bottom and the scroll button', () => {
 		detach();
 		setup(<MessagesList roomId={room.id} />);

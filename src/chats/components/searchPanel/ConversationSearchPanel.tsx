@@ -79,7 +79,9 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [loadMoreFailed, setLoadMoreFailed] = useState(false);
 	const resultsContainerRef = useRef<HTMLDivElement>(null);
-	const sentinelRef = useRef<HTMLDivElement>(null);
+	// A state, not a ref object: the sentinel mounts when the status turns to success, after the results
+	// and the flag landed, and the observer must follow it
+	const [sentinelNode, setSentinelNode] = useState<HTMLDivElement | null>(null);
 	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	useEffect(
@@ -150,7 +152,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 
 	// The observer is created again after every page: a sentinel still in view asks for the next one
 	useEffect(() => {
-		if (!hasMore || isLoadingMore || loadMoreFailed || !sentinelRef.current) {
+		if (!hasMore || isLoadingMore || loadMoreFailed || !sentinelNode) {
 			return undefined;
 		}
 		const observer = new IntersectionObserver(
@@ -161,9 +163,9 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 			},
 			{ root: resultsContainerRef.current, threshold: 0 }
 		);
-		observer.observe(sentinelRef.current);
+		observer.observe(sentinelNode);
 		return (): void => observer.disconnect();
-	}, [hasMore, isLoadingMore, loadMore, loadMoreFailed, results?.length]);
+	}, [hasMore, isLoadingMore, loadMore, loadMoreFailed, results?.length, sentinelNode]);
 
 	const searchResults = useMemo(
 		() =>
@@ -208,7 +210,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 						<Container mainAlignment="flex-start" gap="0.5rem">
 							{searchResults}
 							{hasMore && (
-								<Container height="fit" ref={sentinelRef} data-testid="searchResultsSentinel">
+								<Container height="fit" ref={setSentinelNode} data-testid="searchResultsSentinel">
 									<Icon icon="LoaderOutline" color="secondary" size="large" />
 								</Container>
 							)}

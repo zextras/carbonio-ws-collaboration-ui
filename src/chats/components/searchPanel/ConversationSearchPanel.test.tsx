@@ -5,6 +5,9 @@
  */
 import React from 'react';
 
+import { act } from '@testing-library/react';
+import * as shell from '@zextras/carbonio-shell-ui';
+
 import ConversationSearchPanel from './ConversationSearchPanel';
 import { chatClient } from '../../../network/chatClient/ChatClient';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
@@ -15,6 +18,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockIntersectionObserverObserve } from '../../../tests/setupTests';
 import { screen, setup, triggerObserver } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
@@ -239,6 +243,39 @@ describe('ConversationSearchPanel', () => {
 			).toBeVisible();
 			expect(nextPage).toHaveBeenCalledTimes(1);
 			expect(screen.getByText('text of r2')).toBeVisible();
+		});
+
+		test('observes the sentinel that mounts after the results landed while the search was still running', async () => {
+			// The shell hands out a stable tracker; the file mock builds a new one at every render, which
+			// re-runs any effect that depends on it and hides the bug
+			const stableTracker = { capture: vi.fn(), enableTracker: vi.fn(), reset: vi.fn() };
+			vi.spyOn(shell, 'useTracker').mockReturnValue(stableTracker);
+			let finishSearch: () => void = () => undefined;
+			// The real order: the page lands in the store, the request settles later
+			vi.spyOn(chatClient, 'fullTextSearch').mockImplementation((roomId) => {
+				useStore.getState().setSearchResults(roomId, [pageResult('r1'), pageResult('r2')]);
+				useStore.getState().setSearchHasMore(roomId, true);
+				return new Promise<void>((resolve) => {
+					finishSearch = resolve;
+				});
+			});
+			const nextPage = vi.spyOn(chatClient, 'fullTextSearchNextPage').mockResolvedValue(undefined);
+			const { user } = setup(
+				<ConversationSearchPanel roomId={groupRoom.id} goToChatView={vi.fn()} />
+			);
+			await user.type(screen.getByRole('textbox', { name: /search messages/i }), 'query');
+			await user.click(screen.getByRoleWithIcon('button', { icon: searchedIcon }));
+			expect(screen.queryByTestId(sentinelId)).not.toBeInTheDocument();
+
+			await act(async () => {
+				finishSearch();
+				await Promise.resolve();
+			});
+
+			const sentinel = screen.getByTestId(sentinelId);
+			expect(mockIntersectionObserverObserve).toHaveBeenCalledWith(sentinel);
+			await triggerObserver(sentinel);
+			expect(nextPage).toHaveBeenCalledExactlyOnceWith(groupRoom.id, 'query');
 		});
 
 		test('clearing the search removes the sentinel', async () => {

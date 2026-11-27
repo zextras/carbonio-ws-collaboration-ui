@@ -33,6 +33,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
+import { isPendingMessage } from '../../../utils/historyAnchorUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
@@ -60,6 +61,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const hasMoreAfter = useStore((store) => getHasMoreAfterSelector(store, roomId));
+	// Not while the window is being replaced: an empty list has its bottom in view
+	const hasConfirmedRows = useMemo(
+		() => messages.some((row) => !isPendingMessage(row)),
+		[messages]
+	);
 	const setScrollPosition = useStore((store) => store.setScrollPosition);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
@@ -311,7 +317,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
-				{hasMoreAfter && <MessageForwardLoader roomId={roomId} messageListRef={messageListRef} />}
+				{hasMoreAfter && hasConfirmedRows && (
+					<MessageForwardLoader roomId={roomId} messageListRef={messageListRef} />
+				)}
 			</MessagesListWrapper>
 			{(showScrollButton || hasMoreAfter) && (
 				<ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />
