@@ -23,6 +23,7 @@ import type {
 } from '../../types/store/ChatsRegistryTypes';
 import type { Version } from '../../types/store/SessionTypes';
 import { BASE_PATH } from '../../utils/FetchUtils';
+import { getReplaceScrollTarget } from '../chatClient/windowGuard';
 
 // The SDK emits structural store types (string-literal unions with the same
 // wire values as the store enums); the enums are nominal, hence the single
@@ -41,6 +42,13 @@ const bridge: StoreBridge = {
 		useStore.getState().setUserLastActivity(userId, date),
 	updateHistory: (roomId, messages: Array<StoreMessage>): void =>
 		useStore.getState().updateHistory(roomId, messages as Array<Message>),
+	replaceHistory: (roomId, messages: Array<StoreMessage>): void => {
+		useStore.getState().replaceHistory(roomId, messages as Array<Message>);
+		const scrollTarget = getReplaceScrollTarget(roomId);
+		if (scrollTarget) {
+			useStore.getState().setScrollPosition(roomId, scrollTarget);
+		}
+	},
 	setHistoryIsFullyLoaded: (roomId): void => useStore.getState().setHistoryIsFullyLoaded(roomId),
 	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId),
 	newMessage: (message: StoreMessage): void => useStore.getState().newMessage(message as Message),

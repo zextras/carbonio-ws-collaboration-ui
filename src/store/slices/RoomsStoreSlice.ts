@@ -174,6 +174,7 @@ export const useRoomsStoreSlice: StateCreator<
 						...room.userSettings,
 						clearedAt
 					};
+					draft.windowEpochs[roomId] = (draft.windowEpochs[roomId] ?? 0) + 1;
 					if (room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE) {
 						delete draft.chatsRegistry[roomId];
 					}

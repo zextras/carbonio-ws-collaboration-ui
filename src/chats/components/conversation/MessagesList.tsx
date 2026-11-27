@@ -12,6 +12,7 @@ import { debounce, find, groupBy, last, map, size } from 'lodash';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
+import MessageForwardLoader from './MessageForwardLoader';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
@@ -24,6 +25,7 @@ import {
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import {
 	enhanceWithDateMessages,
+	getHasMoreAfterSelector,
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
 } from '../../../store/selectors/ChatsRegistrySelectors';
@@ -31,6 +33,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
+import { isPendingMessage } from '../../../utils/historyAnchorUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
@@ -57,6 +60,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const roomMessages = useMemo(() => enhanceWithDateMessages(messages), [messages]);
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
+	const hasMoreAfter = useStore((store) => getHasMoreAfterSelector(store, roomId));
+	// Not while the window is being replaced: an empty list has its bottom in view
+	const hasConfirmedRows = useMemo(
+		() => messages.some((row) => !isPendingMessage(row)),
+		[messages]
+	);
 	const setScrollPosition = useStore((store) => store.setScrollPosition);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
@@ -64,6 +73,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 
+	const currentRoomIdRef = useRef(roomId);
+	currentRoomIdRef.current = roomId;
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>(null);
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
@@ -153,13 +164,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	// Read last message when user opens the conversation for the first time
 	useEffect(() => {
-		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
+		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus && !hasMoreAfter) {
 			const lastMessage = last(roomMessages);
 			if (lastMessage) {
 				readMessage(lastMessage.id);
 			}
 		}
-	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
+	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus, hasMoreAfter]);
 
 	// Manage initial scroll position
 	useEffect(() => {
@@ -167,9 +178,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
 		const lastMsg = last(store.chatsRegistry[roomId]?.messages)?.id;
 		if (
-			store.chatsRegistry[roomId]?.unread > 0 ||
-			!actualPosition ||
-			(lastMsg === actualPosition && store.chatsRegistry[roomId].unread === 0)
+			!store.chatsRegistry[roomId]?.hasMoreAfter &&
+			(store.chatsRegistry[roomId]?.unread > 0 ||
+				!actualPosition ||
+				(lastMsg === actualPosition && store.chatsRegistry[roomId].unread === 0))
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {
@@ -246,8 +258,21 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
-		scrollToEnd(MessagesListWrapperRef);
 		setInputHasFocus(roomId, true);
+		if (useStore.getState().chatsRegistry[roomId]?.hasMoreAfter) {
+			// The window stops before the newest message: reload the latest page
+			chatClient
+				.returnToLatestMessages(roomId)
+				.then(() => {
+					// The list is shared by the rooms: the reload may end after another room was opened
+					if (currentRoomIdRef.current === roomId) {
+						scrollToEnd(MessagesListWrapperRef);
+					}
+				})
+				.catch((err) => console.error('MessagesList: return to the latest messages failed', err));
+			return;
+		}
+		scrollToEnd(MessagesListWrapperRef);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
 	const newMessageScrollToButtonHandler = useCallback(
@@ -292,8 +317,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
+				{hasMoreAfter && hasConfirmedRows && (
+					<MessageForwardLoader roomId={roomId} messageListRef={messageListRef} />
+				)}
 			</MessagesListWrapper>
-			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
+			{(showScrollButton || hasMoreAfter) && (
+				<ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />
+			)}
 		</Messages>
 	);
 };

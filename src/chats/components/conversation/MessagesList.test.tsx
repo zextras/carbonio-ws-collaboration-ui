@@ -10,6 +10,7 @@ import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import useStore from '../../../store/Store';
 import {
 	createMockConfigurationMessage,
@@ -426,6 +427,94 @@ describe('Scroll position', () => {
 		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(scrollToEnd).toHaveBeenCalled();
+	});
+});
+
+describe('Window cut before the newest message', () => {
+	const detach = (): void => {
+		const store = useStore.getState();
+		store.updateHistory(room.id, messages);
+		store.setScrollPosition(room.id, messages[0].id);
+		store.setHasMoreAfter(room.id, true);
+	};
+
+	test('An attached window has no forward loader', () => {
+		useStore.getState().updateHistory(room.id, messages);
+		setup(<MessagesList roomId={room.id} />);
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
+	});
+
+	test('A detached window with no row yet, or only an unconfirmed send, has no forward loader', () => {
+		const store = useStore.getState();
+		store.setHasMoreAfter(room.id, true);
+		const { unmount } = setup(<MessagesList roomId={room.id} />);
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
+		act(() => {
+			store.setPlaceholderMessage({ roomId: room.id, id: 'tmp-1', text: 'sending' });
+		});
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
+		act(() => {
+			store.updateHistory(room.id, messages);
+		});
+		expect(screen.getByTestId('messageForwardLoader')).toBeVisible();
+		unmount();
+	});
+
+	test('A detached window shows the forward loader at its bottom and the scroll button', () => {
+		detach();
+		setup(<MessagesList roomId={room.id} />);
+		expect(screen.getByTestId('messageForwardLoader')).toBeVisible();
+		expect(screen.getByTestId('scrollButton')).toBeVisible();
+	});
+
+	test('Opening a detached window with unread messages keeps the jump position instead of the bottom', () => {
+		detach();
+		useStore.getState().incrementUnreadCount(room.id, 3);
+		setup(<MessagesList roomId={room.id} />);
+		expect(scrollToEnd).not.toHaveBeenCalled();
+		expect(scrollToMessage).toHaveBeenCalledWith(messages[0].id);
+	});
+
+	test('The scroll button of a detached window reloads the latest page, then scrolls to the end', async () => {
+		detach();
+		const returnToLatest = vi.spyOn(chatClient, 'returnToLatestMessages').mockResolvedValue();
+		const { user } = setup(<MessagesList roomId={room.id} />);
+		await user.click(screen.getByTestId('scrollButton'));
+		expect(returnToLatest).toHaveBeenCalledWith(room.id);
+		await vi.waitFor(() => expect(scrollToEnd).toHaveBeenCalled());
+	});
+
+	test('A reload that ends after another room was opened does not scroll the new room', async () => {
+		detach();
+		let finishReload: () => void = () => undefined;
+		vi.spyOn(chatClient, 'returnToLatestMessages').mockImplementation(
+			() =>
+				new Promise<void>((resolve) => {
+					finishReload = resolve;
+				})
+		);
+		const { user, rerender } = setup(<MessagesList roomId={room.id} />);
+		await user.click(screen.getByTestId('scrollButton'));
+
+		rerender(<MessagesList roomId={mockedRoom.id} />);
+		scrollToEnd.mockClear();
+		await act(async () => {
+			finishReload();
+			await Promise.resolve();
+		});
+
+		expect(scrollToEnd).not.toHaveBeenCalled();
+	});
+
+	test('The scroll button of an attached window only scrolls', async () => {
+		const store = useStore.getState();
+		store.updateHistory(room.id, messages);
+		store.setScrollPosition(room.id, messages[0].id);
+		store.incrementUnreadCount(room.id, 1);
+		const returnToLatest = vi.spyOn(chatClient, 'returnToLatestMessages').mockResolvedValue();
+		setup(<MessagesList roomId={room.id} />);
+		expect(returnToLatest).not.toHaveBeenCalled();
+		expect(screen.queryByTestId('messageForwardLoader')).not.toBeInTheDocument();
 	});
 });
 

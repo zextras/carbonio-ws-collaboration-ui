@@ -17,7 +17,7 @@ import {
 	getIsMessageSelected,
 	getIsMessageSelectedAlreadyStored
 } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
+import { getIsLoggedUser, getIsWscPure } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
@@ -52,6 +52,8 @@ const SearchResultMessage = ({
 		getIsMessageSelectedAlreadyStored(state, message.roomId, message.stanzaId)
 	);
 
+	const isWscPure = useStore(getIsWscPure);
+
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 
@@ -59,12 +61,17 @@ const SearchResultMessage = ({
 
 	const onResultClick = useCallback(() => {
 		useStore.getState().setSelectedSearchResult(message.roomId, message.stanzaId);
-		if (!isMessageSelectedAlreadyStored && !isMessageSelected) {
+		// On v2 a selected result can have left the window again (scroll to bottom): jump anyway
+		if (!isMessageSelectedAlreadyStored && (!isMessageSelected || isWscPure)) {
 			chatClient
-				.requestMessageResultHistoryToId(message.roomId, message.stanzaId)
-				.then(() => {
-					scrollToMessage(message.id);
-					useStore.getState().setScrollPosition(message.roomId, message.id);
+				.requestMessageResultHistoryToId(message.roomId, message.stanzaId, message.date)
+				.then((loaded) => {
+					// A target that did not load leaves the list where it is: a scroll position on a row
+					// that is not there would read as the bottom
+					if (loaded) {
+						scrollToMessage(message.id);
+						useStore.getState().setScrollPosition(message.roomId, message.id);
+					}
 				})
 				.catch((err) =>
 					console.error('SearchResultMessage: history to the search result failed', err)
@@ -72,7 +79,7 @@ const SearchResultMessage = ({
 		} else {
 			scrollToMessage(message.id);
 		}
-	}, [isMessageSelected, isMessageSelectedAlreadyStored, message]);
+	}, [isMessageSelected, isMessageSelectedAlreadyStored, isWscPure, message]);
 
 	return (
 		<CustomContainer

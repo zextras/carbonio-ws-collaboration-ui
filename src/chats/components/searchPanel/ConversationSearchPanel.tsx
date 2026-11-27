@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 /* eslint-disable jsx-a11y/no-autofocus */
-import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect, useRef } from 'react';
 
 import {
 	Button,
@@ -22,6 +22,7 @@ import SearchResultMessage from './SearchResultMessage';
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { chatClient } from '../../../network/chatClient/ChatClient';
+import { getSearchHasMoreSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -74,6 +75,13 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	const [activeSearchText, setActiveSearchText] = useState<string>('');
 
 	const results = useStore((state) => state.chatsRegistry[roomId]?.searchResults);
+	const hasMore = useStore((state) => getSearchHasMoreSelector(state, roomId));
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [loadMoreFailed, setLoadMoreFailed] = useState(false);
+	const resultsContainerRef = useRef<HTMLDivElement>(null);
+	// A state, not a ref object: the sentinel mounts when the status turns to success, after the results
+	// and the flag landed, and the observer must follow it
+	const [sentinelNode, setSentinelNode] = useState<HTMLDivElement | null>(null);
 	const clearSearchResults = useStore((state) => state.clearSearchResults);
 
 	useEffect(
@@ -84,8 +92,9 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	);
 
 	const search = useCallback(() => {
-		if (!searchText || requestStatus === RequestStatus.LOADING) return;
+		if (!searchText || requestStatus === RequestStatus.LOADING || isLoadingMore) return;
 		setRequestStatus(RequestStatus.LOADING);
+		setLoadMoreFailed(false);
 		setActiveSearchText(searchText);
 		capture(TRACKER_EVENT.conversationSearch, {
 			app: CHATS_APP_ID,
@@ -110,7 +119,53 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					label: errorSnackbarLabel
 				});
 			});
-	}, [capture, createSnackbar, errorSnackbarLabel, requestStatus, roomId, roomType, searchText]);
+	}, [
+		capture,
+		createSnackbar,
+		errorSnackbarLabel,
+		isLoadingMore,
+		requestStatus,
+		roomId,
+		roomType,
+		searchText
+	]);
+
+	const loadMore = useCallback(() => {
+		setIsLoadingMore(true);
+		chatClient
+			.fullTextSearchNextPage(roomId, activeSearchText)
+			.catch(() => {
+				setLoadMoreFailed(true);
+				capture(TRACKER_EVENT.conversationSearchError, {
+					app: CHATS_APP_ID,
+					roomType,
+					success: false
+				});
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'error',
+					label: errorSnackbarLabel
+				});
+			})
+			.finally(() => setIsLoadingMore(false));
+	}, [activeSearchText, capture, createSnackbar, errorSnackbarLabel, roomId, roomType]);
+
+	// The observer is created again after every page: a sentinel still in view asks for the next one
+	useEffect(() => {
+		if (!hasMore || isLoadingMore || loadMoreFailed || !sentinelNode) {
+			return undefined;
+		}
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					loadMore();
+				}
+			},
+			{ root: resultsContainerRef.current, threshold: 0 }
+		);
+		observer.observe(sentinelNode);
+		return (): void => observer.disconnect();
+	}, [hasMore, isLoadingMore, loadMore, loadMoreFailed, results?.length, sentinelNode]);
 
 	const searchResults = useMemo(
 		() =>
@@ -154,6 +209,11 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					return (
 						<Container mainAlignment="flex-start" gap="0.5rem">
 							{searchResults}
+							{hasMore && (
+								<Container height="fit" ref={setSentinelNode} data-testid="searchResultsSentinel">
+									<Icon icon="LoaderOutline" color="secondary" size="large" />
+								</Container>
+							)}
 						</Container>
 					);
 				}
@@ -179,6 +239,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	}, [
 		noResults1Label,
 		noResults2Label,
+		hasMore,
 		requestStatus,
 		results,
 		roomType,
@@ -189,8 +250,8 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 	]);
 
 	const isSearchDisabled = useMemo(
-		() => !searchText.trim() || requestStatus === RequestStatus.LOADING,
-		[requestStatus, searchText]
+		() => !searchText.trim() || requestStatus === RequestStatus.LOADING || isLoadingMore,
+		[isLoadingMore, requestStatus, searchText]
 	);
 
 	return (
@@ -221,6 +282,7 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 							onClick={() => {
 								setSearchText('');
 								setRequestStatus(RequestStatus.IDLE);
+								setLoadMoreFailed(false);
 								clearSearchResults(roomId);
 							}}
 						/>
@@ -248,7 +310,13 @@ const ConversationSearchPanel: FC<ConversationSearchPanelProps> = ({ roomId, goT
 					</Tooltip>
 				)}
 			</Container>
-			<Container padding="small" gap="0.5rem" width="fill" style={{ overflowY: 'auto' }}>
+			<Container
+				ref={resultsContainerRef}
+				padding="small"
+				gap="0.5rem"
+				width="fill"
+				style={{ overflowY: 'auto' }}
+			>
 				{resultsComponents}
 			</Container>
 		</Container>

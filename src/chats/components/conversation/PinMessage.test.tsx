@@ -8,6 +8,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 
 import { PinMessage } from './PinMessage';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -18,7 +19,10 @@ import {
 import { screen, setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { scrollToMessage } from '../../../utils/__mocks__/scrollUtils';
 import * as attachmentUtils from '../../../utils/attachmentUtils';
+
+vi.mock('../../../utils/scrollUtils');
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
@@ -40,6 +44,55 @@ const FLOOR_AFTER_PIN = '2026-06-01T00:00:00.000Z';
 const FLOOR_BEFORE_PIN = '2025-06-01T00:00:00.000Z';
 const ATTACHMENT_NAME = 'file_name';
 const EYE_ICON = 'icon: EyeOutline';
+
+const PINNED_FAR_ID = 'pinned-far';
+
+describe('PinMessage jump', () => {
+	const pinned = (): ReturnType<typeof createMockTextMessage> =>
+		createMockTextMessage({
+			id: PINNED_FAR_ID,
+			stanzaId: PINNED_FAR_ID,
+			roomId: oneToOneRoom.id,
+			from: 'user2',
+			date: 1700000000000
+		});
+
+	it('asks to bring a pin that is not in store into view, with its date', async () => {
+		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(true);
+		const message = pinned();
+		const { user } = setup(<PinMessage pinnedMessage={message} />);
+
+		await user.click(screen.getByText(message.text));
+
+		expect(jump).toHaveBeenCalledExactlyOnceWith(oneToOneRoom.id, PINNED_FAR_ID, 1700000000000);
+	});
+
+	it('does not scroll nor move the scroll position when the pin did not load', async () => {
+		vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(false);
+		const message = pinned();
+		useStore.getState().setScrollPosition(oneToOneRoom.id, 'before');
+		const { user } = setup(<PinMessage pinnedMessage={message} />);
+
+		await user.click(screen.getByText(message.text));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(scrollToMessage).not.toHaveBeenCalled();
+		expect(useStore.getState().activeConversations[oneToOneRoom.id]?.scrollPositionMessageId).toBe(
+			'before'
+		);
+	});
+
+	it('does not ask for a pin that is already in store', async () => {
+		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(true);
+		const message = pinned();
+		useStore.getState().updateHistory(oneToOneRoom.id, [message]);
+		const { user } = setup(<PinMessage pinnedMessage={message} />);
+
+		await user.click(screen.getByText(message.text));
+
+		expect(jump).not.toHaveBeenCalled();
+	});
+});
 
 describe('PinMessage', () => {
 	describe('One to one', () => {

@@ -6,6 +6,8 @@
 
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
+	/** Bumped by a reconnection reset ('*') and by a history clear (room): in-flight window loads check it. */
+	windowEpochs: { [roomIdOrAll: string]: number };
 	newMessage: (message: Message) => void;
 	setInboxMessages: (message: Message[]) => void;
 	setLastMessage: (roomId: string, message: TextMessage | ConfigurationMessage) => void;
@@ -21,12 +23,18 @@ export type ChatsRegistryStoreSlice = {
 	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	setUnreadCount: (roomId: string, count: number) => void;
+	clearUnreadStale: (roomId: string, version: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
+	appendSearchResults: (roomId: string, results: TextMessage[]) => void;
+	setSearchHasMore: (roomId: string, hasMore: boolean) => void;
+	beginSearch: (roomId: string) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
 	shiftBackfillQueue: (roomId: string) => void;
+	replaceHistory: (roomId: string, messageArray: Message[]) => void;
+	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean) => void;
 };
 
 export type ChatRegistry = {
@@ -37,6 +45,16 @@ export type ChatRegistry = {
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
 	searchResults: TextMessage[];
+	searchHasMore?: boolean;
+	/** Changes with every new query and every clear: a search page asked before is stale. */
+	searchGeneration?: number;
+	/**
+	 * The loaded window does not end at the newest message (a jump replaced it): live messages are
+	 * not appended to it until the forward pages reach the newest message again.
+	 */
+	hasMoreAfter?: boolean;
+	/** The unread count could not follow an own marker move on a detached window: refresh it. */
+	unreadStale?: number;
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
 };

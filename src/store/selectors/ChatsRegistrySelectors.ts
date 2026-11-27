@@ -82,8 +82,12 @@ export const getRoomIdsWithLastMessage = (
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	forEach(store.rooms, (room) => {
-		const messages = store.chatsRegistry[room.id]?.messages;
-		const lastMessage = messages?.[messages.length - 1];
+		const registry = store.chatsRegistry[room.id];
+		const messages = registry?.messages;
+		// A window cut before the newest message ends earlier than the room does
+		const lastMessage = registry?.hasMoreAfter
+			? registry.lastMessage
+			: messages?.[messages.length - 1];
 		listOfConvByLastMessage.push({
 			roomId: room.id,
 			roomType: room.type,
@@ -179,3 +183,12 @@ export const getTotalUnreadCountSelector = (store: RootStore): number => {
 
 export const getRoomUnreadSelector = (store: RootStore, roomId: string): number =>
 	store.chatsRegistry[roomId]?.unread || 0;
+
+export const getHasMoreAfterSelector = (store: RootStore, roomId: string): boolean =>
+	!!store.chatsRegistry[roomId]?.hasMoreAfter;
+
+export const getSearchHasMoreSelector = (store: RootStore, roomId: string): boolean =>
+	!!store.chatsRegistry[roomId]?.searchHasMore;
+
+export const getRoomMessagesSizeSelector = (store: RootStore, roomId: string): number =>
+	store.chatsRegistry[roomId]?.messages.length ?? 0;

@@ -556,6 +556,287 @@ describe('ChatsRegistryStoreSlice tests', () => {
 		});
 	});
 
+	describe('Window cut before the newest message', () => {
+		const roomId = 'room-window';
+
+		beforeEach(() => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		});
+
+		test('replaceHistory swaps the rows for the page, detaches the window and resets the fully loaded flag', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [
+				createMockTextMessage({ id: 'm1', roomId, date: date1 }),
+				createMockTextMessage({ id: 'm2', roomId, date: date2 })
+			]);
+			store.setHistoryIsFullyLoaded(roomId);
+
+			useStore
+				.getState()
+				.replaceHistory(roomId, [
+					createMockTextMessage({ id: 'p2', roomId, date: date3 }),
+					createMockTextMessage({ id: 'p1', roomId, date: date2 })
+				]);
+
+			expect(
+				useStore.getState().chatsRegistry[roomId].messages.map((message) => message.id)
+			).toEqual(['p1', 'p2']);
+			expect(useStore.getState().chatsRegistry[roomId].hasMoreAfter).toBe(true);
+			expect(useStore.getState().activeConversations[roomId]?.isHistoryFullyLoaded).toBe(false);
+		});
+
+		test('replaceHistory keeps the unconfirmed sends at the end and takes none twice', () => {
+			const store = useStore.getState();
+			const pending = createMockTextMessage({
+				id: 'pending',
+				roomId,
+				date: date1,
+				read: MarkerStatus.PENDING
+			});
+			store.updateHistory(roomId, [
+				createMockTextMessage({ id: 'm1', roomId, date: date1 }),
+				pending
+			]);
+
+			useStore
+				.getState()
+				.replaceHistory(roomId, [
+					createMockTextMessage({ id: 'p1', roomId, date: date3 }),
+					pending
+				]);
+
+			expect(
+				useStore.getState().chatsRegistry[roomId].messages.map((message) => message.id)
+			).toEqual(['p1', 'pending']);
+		});
+
+		test('replaceHistory with an empty page empties the window', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+
+			useStore.getState().replaceHistory(roomId, []);
+
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(0);
+		});
+
+		test('a live message is not appended while the window is detached', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore.getState().newMessage(createMockTextMessage({ id: 'live', roomId, date: date3 }));
+
+			expect(
+				useStore.getState().chatsRegistry[roomId].messages.map((message) => message.id)
+			).toEqual(['m1']);
+		});
+
+		test('a live update of a row already in the detached window still lands', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.newMessage(createMockTextMessage({ id: 'm1', roomId, date: date1, text: 'confirmed' }));
+
+			const [row] = useStore.getState().chatsRegistry[roomId].messages;
+			expect((row as TextMessage).text).toBe('confirmed');
+		});
+
+		test('a live message is appended again once the window is attached', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.setHasMoreAfter(roomId, true);
+			useStore.getState().setHasMoreAfter(roomId, false);
+
+			useStore.getState().newMessage(createMockTextMessage({ id: 'live', roomId, date: date3 }));
+
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(2);
+		});
+
+		test('moving my marker in a detached window takes only the rows it passes from the unread count', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'm0', markerDate: date1 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm2', markerDate: date1 + 2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(8);
+		});
+
+		test('moving my marker to the last message of the room while detached reads everything', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.setLastMessage(roomId, createMockTextMessage({ id: 'last', roomId, date: date3 }));
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'm0', markerDate: date1 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'last', markerDate: date3 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(0);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeUndefined();
+		});
+
+		test('a marker move into the window from outside it leaves the count to a refresh', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'older', markerDate: date1 - 100 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm2', markerDate: date1 + 2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeGreaterThan(0);
+			const version = useStore.getState().chatsRegistry[roomId].unreadStale as number;
+
+			useStore.getState().setUnreadCount(roomId, 7);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+			useStore.getState().clearUnreadStale(roomId, version + 1);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+			useStore.getState().clearUnreadStale(roomId, version);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeUndefined();
+		});
+
+		test('a later exact marker move inside the window keeps the count stale until a refresh', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'older', markerDate: date1 - 100 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm1', markerDate: date1 + 1 })
+				]);
+			const version = useStore.getState().chatsRegistry[roomId].unreadStale;
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm2', markerDate: date1 + 2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+		});
+
+		test('a search generation never repeats after the registry was wiped', () => {
+			const store = useStore.getState();
+			store.beginSearch(roomId);
+			const before = useStore.getState().chatsRegistry[roomId].searchGeneration;
+
+			useStore.getState().resetXmppData();
+			useStore.getState().beginSearch(roomId);
+
+			expect(useStore.getState().chatsRegistry[roomId].searchGeneration).not.toBe(before);
+		});
+
+		test('a marker newer than the newest confirmed row is outside the window, even with a later pending row', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [
+				...range(3).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				),
+				createMockTextMessage({
+					id: 'pending',
+					roomId,
+					date: date3,
+					read: MarkerStatus.PENDING
+				})
+			]);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'm0', markerDate: date1 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'elsewhere', markerDate: date2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeGreaterThan(0);
+		});
+
+		test('a search generation changes with every new query and every clear', () => {
+			const store = useStore.getState();
+			store.beginSearch(roomId);
+			const first = useStore.getState().chatsRegistry[roomId].searchGeneration;
+			store.beginSearch(roomId);
+			const second = useStore.getState().chatsRegistry[roomId].searchGeneration;
+			store.clearSearchResults(roomId);
+			const third = useStore.getState().chatsRegistry[roomId].searchGeneration;
+
+			expect(new Set([first, second, third]).size).toBe(3);
+		});
+
+		test('moving my marker in an attached window still recounts the unread rows', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.setUnreadCount(roomId, 10);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm1', markerDate: date1 + 1 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(2);
+		});
+	});
+
 	describe('updateReadStatus', () => {
 		test('A history page that repeats my unchanged marker keeps the unread count of the server', () => {
 			const roomId = 'room-unread-page';
@@ -747,6 +1028,43 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			];
 			useStore.getState().setSearchResults(roomId, searchMessages);
 			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(2);
+		});
+
+		test('Append the next page of search results, skipping the ones already known', () => {
+			const roomId = 'searchRoomAppend';
+			const store = useStore.getState();
+			store.setSearchResults(roomId, [createMockTextMessage({ id: 'a', roomId })]);
+
+			useStore
+				.getState()
+				.appendSearchResults(roomId, [
+					createMockTextMessage({ id: 'a', roomId }),
+					createMockTextMessage({ id: 'b', roomId })
+				]);
+
+			expect(
+				useStore.getState().chatsRegistry[roomId].searchResults.map((result) => result.id)
+			).toEqual(['a', 'b']);
+		});
+
+		test('A late page appended after the results were cleared is dropped', () => {
+			const roomId = 'searchRoomLate';
+			const store = useStore.getState();
+			store.setSearchResults(roomId, [createMockTextMessage({ id: 'a', roomId })]);
+			store.clearSearchResults(roomId);
+
+			useStore.getState().appendSearchResults(roomId, [createMockTextMessage({ id: 'b', roomId })]);
+
+			expect(useStore.getState().chatsRegistry[roomId].searchResults).toHaveLength(0);
+		});
+
+		test('Clearing the search results resets the has-more flag', () => {
+			const roomId = 'searchRoomHasMore';
+			useStore.getState().setSearchHasMore(roomId, true);
+
+			useStore.getState().clearSearchResults(roomId);
+
+			expect(useStore.getState().chatsRegistry[roomId].searchHasMore).toBe(false);
 		});
 
 		test('Clear search messages', () => {

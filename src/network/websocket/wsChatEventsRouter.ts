@@ -28,6 +28,7 @@ import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
+import { refreshStaleUnread } from '../chatClient/inboxRefresh';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
@@ -193,6 +194,10 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// unread counter from the own marker and the read statuses from the
 			// others' — the v1 single-path displayed-stanza behavior
 			wscSdk.handleReadUpdated(event);
+			// A detached window could not follow the own marker: the server knows the count
+			if (isMyId(event.userId)) {
+				refreshStaleUnread();
+			}
 			return;
 		}
 		case WsEventType.MESSAGE_RECEIVED: {

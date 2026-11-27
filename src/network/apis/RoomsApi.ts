@@ -268,6 +268,16 @@ export const addRoomAttachment = (
 		);
 	}
 
+	// An upload from a window cut before the newest message would land after a hidden gap
+	if (isWscPure() && useStore.getState().chatsRegistry[roomId]?.hasMoreAfter) {
+		return chatClient.returnToLatestMessages(roomId).then(() => {
+			if (useStore.getState().chatsRegistry[roomId]?.hasMoreAfter) {
+				throw new Error('window_detached');
+			}
+			return addRoomAttachment(roomId, file, optionalFields, signal, onFirstAttemptSettled);
+		});
+	}
+
 	const lastMessageId = getLastUnreadMessage(roomId);
 	if (lastMessageId) chatClient.readMessage(roomId, lastMessageId);
 
