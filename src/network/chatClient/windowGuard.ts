@@ -76,3 +76,12 @@ export function guardWindowPage(url: string, issue: () => Promise<Response>): Pr
 		return response;
 	});
 }
+
+const QUEUE_CANCELLED = 'QueueCancelledError';
+
+/** A window load queued behind a request that timed out: the queue it waited in was given up. */
+export const createQueueCancelledError = (): Error =>
+	Object.assign(new Error('window load cancelled'), { name: QUEUE_CANCELLED });
+
+export const isQueueCancelledError = (err: unknown): boolean =>
+	err instanceof Error && err.name === QUEUE_CANCELLED;

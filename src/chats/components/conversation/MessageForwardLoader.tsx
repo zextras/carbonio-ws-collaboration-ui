@@ -10,6 +10,7 @@ import { Icon } from '@zextras/carbonio-design-system';
 
 import { Loader, VisibilityContainer } from './MessageHistoryLoader';
 import { chatClient } from '../../../network/chatClient/ChatClient';
+import { isQueueCancelledError } from '../../../network/chatClient/windowGuard';
 import { getRoomMessagesSizeSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import useStore from '../../../store/Store';
 
@@ -52,6 +53,10 @@ const MessageForwardLoader = ({
 						}
 					})
 					.catch((err) => {
+						// Cancelled with its queue after a timeout: the next intersection asks again
+						if (isQueueCancelledError(err)) {
+							return;
+						}
 						console.error('MessageForwardLoader: next page failed', err);
 						setHasFailed(true);
 					})

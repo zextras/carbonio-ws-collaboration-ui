@@ -89,6 +89,26 @@ describe('MessageForwardLoader', () => {
 		expect((window.IntersectionObserver as unknown as Mock).mock.calls).toHaveLength(1);
 	});
 
+	test('asks again, without giving up, when its page was cancelled with a queue that timed out', async () => {
+		const cancelled = Object.assign(new Error('window load cancelled'), {
+			name: 'QueueCancelledError'
+		});
+		const next = vi.spyOn(chatClient, 'requestMessagesAfter').mockRejectedValueOnce(cancelled);
+		renderLoader();
+
+		await triggerObserver(screen.getByTestId('messageForwardLoader'));
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(0);
+		});
+		next.mockImplementationOnce(() => {
+			addRow('second');
+			return Promise.resolve();
+		});
+		await triggerObserver(screen.getByTestId('messageForwardLoader'));
+
+		expect(next).toHaveBeenCalledTimes(2);
+	});
+
 	test('stops asking after a page that adds no row', async () => {
 		const next = vi.spyOn(chatClient, 'requestMessagesAfter').mockResolvedValue();
 		renderLoader();
