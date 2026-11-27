@@ -9,13 +9,36 @@ import useStore from '../../store/Store';
 /** A window load that does not answer in time fails, and the queue of the room moves on. */
 export const WINDOW_LOAD_TIMEOUT_MS = 15000;
 
+export const LOADER_RETRY_FIRST_MS = 2000;
+export const LOADER_RETRY_MAX_MS = 60000;
+
 const controllers = new Map<string, AbortController>();
+const loaderRetries = new Map<string, { delay: number; timer: ReturnType<typeof setTimeout> }>();
 let watching = false;
 const scrollTargets = new Map<string, string>();
 
-function abortRoomLoads(roomId: string): void {
+/** The history loader asks again on its own: after an error, not at once, or an offline client polls. */
+export function scheduleLoaderRetry(roomId: string, enable: () => void): void {
+	const previous = loaderRetries.get(roomId);
+	clearTimeout(previous?.timer);
+	const delay = previous
+		? Math.min(previous.delay * 2, LOADER_RETRY_MAX_MS)
+		: LOADER_RETRY_FIRST_MS;
+	// The entry stays after the timer fired, until a page succeeds: the next error waits longer
+	const timer = setTimeout(enable, delay);
+	loaderRetries.set(roomId, { delay, timer });
+}
+
+/** A page came: the next error starts again from the first delay. */
+export function resetLoaderRetry(roomId: string): void {
+	clearTimeout(loaderRetries.get(roomId)?.timer);
+	loaderRetries.delete(roomId);
+}
+
+function wipeRoom(roomId: string): void {
 	controllers.get(roomId)?.abort();
 	controllers.delete(roomId);
+	resetLoaderRetry(roomId);
 }
 
 // Subscribed on first use: this module is evaluated while the store module is still being built
@@ -31,12 +54,12 @@ function watchWipes(): void {
 			return;
 		}
 		if (epochs['*'] !== before['*']) {
-			Array.from(controllers.keys()).forEach(abortRoomLoads);
+			Array.from(new Set([...controllers.keys(), ...loaderRetries.keys()])).forEach(wipeRoom);
 			return;
 		}
 		Object.keys({ ...before, ...epochs })
 			.filter((roomId) => epochs[roomId] !== before[roomId])
-			.forEach(abortRoomLoads);
+			.forEach(wipeRoom);
 	});
 }
 

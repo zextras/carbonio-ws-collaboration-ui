@@ -14,6 +14,8 @@ import { findRepliedMessage } from './findRepliedMessage';
 import { refreshStaleUnread, scheduleBootInbox } from './inboxRefresh';
 import {
 	isAbortError,
+	resetLoaderRetry,
+	scheduleLoaderRetry,
 	setReplaceScrollTarget,
 	WINDOW_LOAD_TIMEOUT_MS,
 	windowLoadSignal
@@ -394,6 +396,7 @@ async function loadBackwardPageViaSdk(
 		return;
 	}
 	const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
+	let failed = false;
 	try {
 		await wscSdk.fetchTimeline(roomId, {
 			// With history in store the bound anchors the page backwards from
@@ -409,10 +412,21 @@ async function loadBackwardPageViaSdk(
 			...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {}),
 			...windowLoadOptions(roomId)
 		});
+	} catch (err) {
+		if (!isAbortError(err)) {
+			failed = true;
+		}
+		throw err;
 	} finally {
-		// Whatever the outcome: the loader asks again by itself while it is in view, and a slow or
-		// failing backend must not leave a conversation without history for good
-		useStore.getState().setHistoryLoadDisabled(roomId, false);
+		// The loader asks again by itself while it is in view, so it is enabled again whatever the
+		// outcome: at once after a page or an abort, after a growing delay after an error (a backend
+		// that fails at once, offline or 5xx, must not be asked every half second)
+		if (failed) {
+			scheduleLoaderRetry(roomId, () => useStore.getState().setHistoryLoadDisabled(roomId, false));
+		} else {
+			resetLoaderRetry(roomId);
+			useStore.getState().setHistoryLoadDisabled(roomId, false);
+		}
 	}
 }
 

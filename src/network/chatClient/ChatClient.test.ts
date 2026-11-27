@@ -23,7 +23,7 @@ import type { Mock } from 'vitest';
 import { chatClient, isWscPure, REATTACH_CALLER_DEADLINE_MS } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import { BOOT_INBOX_TIMEOUT_MS, refreshInboxSerialized } from './inboxRefresh';
-import { WINDOW_LOAD_TIMEOUT_MS } from './windowGuard';
+import { LOADER_RETRY_FIRST_MS, LOADER_RETRY_MAX_MS, WINDOW_LOAD_TIMEOUT_MS } from './windowGuard';
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
 import useStore from '../../store/Store';
 import {
@@ -540,8 +540,75 @@ describe('chatClient façade', () => {
 			'chatClient.requestHistory: timeline hydration failed',
 			expect.any(Error)
 		);
-		// Every outcome enables it: a conversation must not stay without history after one failure
+		// Not at once, or a backend that fails at once would be asked again and again; after a delay
+		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(true);
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_FIRST_MS);
 		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(false);
+	});
+
+	it('waits longer after each consecutive failure, up to a cap, and starts again after a page', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-back', createdAt: JULY_FIRST })]);
+		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const enabled = (): boolean | undefined =>
+			useStore.getState().activeConversations['room-back']?.isHistoryLoadDisabled;
+		const fail = async (): Promise<void> => {
+			useStore.getState().setHistoryLoadDisabled('room-back', true);
+			(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
+			chatClient.requestHistory('room-back', Date.parse(AUG_FIRST_MORNING));
+			await vi.advanceTimersByTimeAsync(0);
+		};
+
+		// 2 s, 4 s, 8 s ...
+		await fail();
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_FIRST_MS - 1);
+		expect(enabled()).toBe(true);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(enabled()).toBe(false);
+		await fail();
+		await vi.advanceTimersByTimeAsync(2 * LOADER_RETRY_FIRST_MS - 1);
+		expect(enabled()).toBe(true);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(enabled()).toBe(false);
+
+		// A page comes: the next error starts again from the first delay
+		useStore.getState().setHistoryLoadDisabled('room-back', true);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true }));
+		chatClient.requestHistory('room-back', Date.parse(AUG_FIRST_MORNING));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(enabled()).toBe(false);
+		await fail();
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_FIRST_MS);
+		expect(enabled()).toBe(false);
+	});
+
+	it('caps the wait after a failure and drops the pending retry when the room is wiped', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-cap', createdAt: JULY_FIRST })]);
+		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const fail = async (): Promise<void> => {
+			useStore.getState().setHistoryLoadDisabled('room-cap', true);
+			(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
+			chatClient.requestHistory('room-cap', Date.parse(AUG_FIRST_MORNING));
+			await vi.advanceTimersByTimeAsync(0);
+		};
+		// 2, 4, 8, 16, 32 s, then 60 s: the sixth wait is capped
+		await Array.from({ length: 5 }).reduce<Promise<void>>(async (previous, _, index) => {
+			await previous;
+			await fail();
+			await vi.advanceTimersByTimeAsync(LOADER_RETRY_FIRST_MS * 2 ** index);
+		}, Promise.resolve());
+		await fail();
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_MAX_MS - 1);
+		expect(useStore.getState().activeConversations['room-cap']?.isHistoryLoadDisabled).toBe(true);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(useStore.getState().activeConversations['room-cap']?.isHistoryLoadDisabled).toBe(false);
+
+		await fail();
+		useStore.getState().resetXmppData();
+		useStore.getState().setHistoryLoadDisabled('room-cap', true);
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_MAX_MS * 2);
+		expect(useStore.getState().activeConversations['room-cap']?.isHistoryLoadDisabled).toBe(true);
 	});
 
 	it('enables the history loader again when the first page of a conversation times out', async () => {
@@ -553,6 +620,8 @@ describe('chatClient façade', () => {
 
 		chatClient.requestHistory('room-slow', Date.parse(AUG_FIRST_MORNING));
 		await vi.advanceTimersByTimeAsync(WINDOW_LOAD_TIMEOUT_MS);
+		expect(useStore.getState().activeConversations['room-slow']?.isHistoryLoadDisabled).toBe(true);
+		await vi.advanceTimersByTimeAsync(LOADER_RETRY_FIRST_MS);
 
 		expect(errorSpy).toHaveBeenCalledWith(
 			'chatClient.requestHistory: timeline hydration failed',
