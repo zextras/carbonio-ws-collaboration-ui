@@ -12,6 +12,7 @@ import ReadByPopoverList from './ReadByPopoverList';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMarker,
+	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
 	createMockUser
@@ -22,7 +23,13 @@ const sessionUser = createMockUser({ id: 'sessionUserId' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 const user2 = createMockUser({ id: 'user2', name: 'User 2' });
 
-const room = createMockRoom();
+const room = createMockRoom({
+	members: [
+		createMockMember({ userId: 'sessionUserId' }),
+		createMockMember({ userId: 'user1' }),
+		createMockMember({ userId: 'user2' })
+	]
+});
 
 const now = Date.now();
 const textMessage = createMockTextMessage({
@@ -62,6 +69,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo({ id: sessionUser.id, name: sessionUser.email });
 	store.setUserInfo([user1, user2]);
+	store.addRooms([room]);
 	store.newMessage(textMessage);
 	store.updateReadStatus(room.id, [user1Marker]);
 });
@@ -82,5 +90,16 @@ describe('ReadByPopoverList test', () => {
 		await user.click(screen.getByTestId('clickableDiv'));
 		expect(screen.getByText('User 1')).toBeInTheDocument();
 		expect(screen.queryByText(sessionUser.email)).not.toBeInTheDocument();
+	});
+
+	test('Does not display a former member', async () => {
+		useStore.getState().removeRoomMember(room.id, user2.id);
+		act(() => {
+			useStore.getState().updateReadStatus(room.id, [user2Marker]);
+		});
+		const { user } = setup(<ComplexComponent />);
+		await user.click(screen.getByTestId('clickableDiv'));
+		expect(screen.getByText('User 1')).toBeInTheDocument();
+		expect(screen.queryByText('User 2')).not.toBeInTheDocument();
 	});
 });

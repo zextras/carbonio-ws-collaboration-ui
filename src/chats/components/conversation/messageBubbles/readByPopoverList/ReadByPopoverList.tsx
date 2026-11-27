@@ -5,13 +5,14 @@
  */
 import React, { ReactElement, useMemo } from 'react';
 
-import { find, forEach } from 'lodash';
+import { find, forEach, some } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import {
 	getMessagesSelector,
 	getMarkers
 } from '../../../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomMembers } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 import { MessageType } from '../../../../../types/store/ChatsRegistryTypes';
@@ -30,6 +31,7 @@ const ReadByPopoverList = ({ roomId, stanzaId, anchorRef }: ReadByProps): ReactE
 	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const markers = useStore((store) => getMarkers(store, roomId));
+	const members = useStore((store) => getRoomMembers(store, roomId));
 
 	const readingUsers = useMemo(() => {
 		const messageDate = find(
@@ -42,12 +44,13 @@ const ReadByPopoverList = ({ roomId, stanzaId, anchorRef }: ReadByProps): ReactE
 		forEach(markers, (marker, userId: string) => {
 			const markedMessage = find(messages, (message) => message.id === marker.messageId);
 			const dateToCompare = markedMessage?.date ?? marker.markerDate;
-			if (marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
+			const isCurrentMember = some(members, (member) => member.userId === userId);
+			if (isCurrentMember && marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
 				readBy.push(userId);
 			}
 		});
 		return readBy;
-	}, [markers, messages, sessionId, stanzaId]);
+	}, [markers, members, messages, sessionId, stanzaId]);
 
 	return (
 		<UserPopoverList
