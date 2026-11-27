@@ -18,7 +18,7 @@ import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
-import { getOldestConfirmedMessage } from '../../utils/historyAnchorUtils';
+import { getOldestConfirmedMessage, isPendingMessage } from '../../utils/historyAnchorUtils';
 import { replacePlaceholderRoom } from '../apis/RoomsApi';
 import { wscSdk } from '../sdk/wscSdk';
 import { wsClient } from '../websocket/WebSocketClient';
@@ -56,6 +56,8 @@ export type ChatClient = Pick<
 	 * give the text back; v1 resolves true, the XMPP connection queues it.
 	 */
 	sendChatMessage: (...args: Parameters<typeof xmppClient.sendChatMessage>) => Promise<boolean>;
+	/** v2 resolves false when no marker request was made or it failed; v1 returns nothing. */
+	readMessage: (...args: Parameters<typeof xmppClient.readMessage>) => Promise<boolean> | void;
 	sendChatMessageReply: (
 		...args: Parameters<typeof xmppClient.sendChatMessageReply>
 	) => Promise<boolean>;
@@ -77,7 +79,7 @@ function sdkNotWiredYet(method: string): void {
  * back through the own ReadUpdated echo, like the v1 MUC displayed echo.
  *
  * F3 guard: the marker only lands on rows the backend knows. Text messages
- * always qualify. Config rows (`MessageType.CONFIGURATION_MSG`) qualify when
+ * qualify unless they are still optimistic placeholders. Config rows (`MessageType.CONFIGURATION_MSG`) qualify when
  * they map a timeline system event, whose server UUID `PUT /read` accepts
  * since common-socket 20656f0a (up to 514b238 it 404ed, §9). The live
  * pin/unpin rows carry the system event id when the event brings it; only the
@@ -85,19 +87,23 @@ function sdkNotWiredYet(method: string): void {
  * (`creationMessage-…`) have no server id, a 404. Skipping one leaves the
  * marker on the previous row until the next message.
  */
-function readMessageViaSdk(roomId: string, messageId: string): void {
+function readMessageViaSdk(roomId: string, messageId: string): Promise<boolean> {
 	const message = useStore
 		.getState()
 		.chatsRegistry[roomId]?.messages.find((msg) => msg.id === messageId);
 	const isServerRow =
-		message?.type === MessageType.TEXT_MSG ||
+		(message?.type === MessageType.TEXT_MSG && !isPendingMessage(message)) ||
 		(message?.type === MessageType.CONFIGURATION_MSG && isServerId(message.id));
 	if (!isServerRow) {
-		return;
+		return Promise.resolve(false);
 	}
-	wscSdk.markAsRead(roomId, messageId).catch((err) => {
-		console.error('chatClient.readMessage: read marker update failed', err);
-	});
+	return wscSdk
+		.markAsRead(roomId, messageId)
+		.then(() => true)
+		.catch((err) => {
+			console.error('chatClient.readMessage: read marker update failed', err);
+			return false;
+		});
 }
 
 /**
@@ -385,10 +391,9 @@ export const chatClient: ChatClient = {
 	},
 	readMessage: (roomId, messageId) => {
 		if (isWscPure()) {
-			readMessageViaSdk(roomId, messageId);
-			return;
+			return readMessageViaSdk(roomId, messageId);
 		}
-		xmppClient.readMessage(roomId, messageId);
+		return xmppClient.readMessage(roomId, messageId);
 	},
 	sendIsWriting: (roomId) => {
 		if (isWscPure()) {

@@ -10,6 +10,8 @@ import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import useStore from '../../../store/Store';
 import {
 	createMockConfigurationMessage,
@@ -519,5 +521,90 @@ describe('forward mode', () => {
 		expect(result.current.activeConversations[room.id].forwardMessageList).toHaveLength(2);
 		const markedCheckboxes = await screen.findAllByTestId('icon: CheckmarkSquare');
 		expect(markedCheckboxes).toHaveLength(2);
+	});
+});
+
+describe('Read marker', () => {
+	const myMessage = (idx: number): TextMessage => ({
+		...generateListMessage([{ from: 'userId' }])[0],
+		id: `mine-${idx}`,
+		date: 1665409408796 + idx
+	});
+	const otherMessage = (idx: number): TextMessage => ({
+		...generateListMessage([{ from: fromId }])[0],
+		id: `other-${idx}`,
+		date: 1665409408796 + idx
+	});
+
+	test('v1: marks the last message of another user when the composer has focus', () => {
+		const readSpy = vi.spyOn(chatClient, 'readMessage').mockImplementation(() => undefined);
+		const store = useStore.getState();
+		store.updateHistory(room.id, [otherMessage(1)]);
+		store.setInputHasFocus(room.id, true);
+		setup(<MessagesList roomId={room.id} />);
+		expect(readSpy).toHaveBeenCalledWith(room.id, 'other-1');
+	});
+
+	test('v1: does not mark anything without composer focus', () => {
+		const readSpy = vi.spyOn(chatClient, 'readMessage').mockImplementation(() => undefined);
+		useStore.getState().updateHistory(room.id, [otherMessage(1)]);
+		setup(<MessagesList roomId={room.id} />);
+		expect(readSpy).not.toHaveBeenCalled();
+	});
+
+	test('v1: does not mark when the last message is mine', () => {
+		const readSpy = vi.spyOn(chatClient, 'readMessage').mockImplementation(() => undefined);
+		const store = useStore.getState();
+		store.updateHistory(room.id, [otherMessage(1), myMessage(2)]);
+		store.setInputHasFocus(room.id, true);
+		setup(<MessagesList roomId={room.id} />);
+		expect(readSpy).not.toHaveBeenCalled();
+	});
+
+	test('v2: marks my own last message without composer focus', () => {
+		vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+		const readSpy = vi.spyOn(chatClient, 'readMessage').mockResolvedValue(true);
+		const store = useStore.getState();
+		store.setApiVersion('2.0.0');
+		store.updateHistory(room.id, [otherMessage(1), myMessage(2)]);
+		setup(<MessagesList roomId={room.id} />);
+		expect(readSpy).toHaveBeenCalledTimes(1);
+		expect(readSpy).toHaveBeenCalledWith(room.id, 'mine-2');
+	});
+});
+
+describe('Scroll to the bottom on new message event', () => {
+	const prepare = (): void => {
+		const store = useStore.getState();
+		store.updateHistory(room.id, messages);
+		store.setScrollPosition(room.id, messages[0].id);
+	};
+
+	test('goes to the bottom after my own send even if scrolled up', () => {
+		prepare();
+		setup(<MessagesList roomId={room.id} />);
+		scrollToEnd.mockClear();
+		act(() => {
+			sendCustomEvent({
+				name: EventName.NEW_MESSAGE,
+				data: { ...messages[0], id: 'sent', from: 'userId' }
+			});
+			vi.advanceTimersByTime(250);
+		});
+		expect(scrollToEnd).toHaveBeenCalled();
+	});
+
+	test('stays where it is when a message from another user arrives while scrolled up', () => {
+		prepare();
+		setup(<MessagesList roomId={room.id} />);
+		scrollToEnd.mockClear();
+		act(() => {
+			sendCustomEvent({
+				name: EventName.NEW_MESSAGE,
+				data: { ...messages[0], id: 'received', from: fromId }
+			});
+			vi.advanceTimersByTime(250);
+		});
+		expect(scrollToEnd).not.toHaveBeenCalled();
 	});
 });
