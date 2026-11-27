@@ -23,7 +23,7 @@ const isScrolledToBottom = (element: HTMLElement | null): boolean =>
 
 const useReadMarker = (roomId: string, scrollerRef: RefObject<HTMLElement>): (() => void) => {
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
-	const requestedDates = useRef<Record<string, number>>({});
+	const requestedDates = useRef<Partial<Record<string, number>>>({});
 
 	const markRead = useCallback(() => {
 		const state = useStore.getState();
