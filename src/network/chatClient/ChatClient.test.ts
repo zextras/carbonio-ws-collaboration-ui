@@ -35,7 +35,8 @@ import {
 import {
 	createMockConfigurationMessage,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../tests/createMock';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MarkerStatus } from '../../types/store/ChatsRegistryTypes';
@@ -2191,57 +2192,228 @@ describe('chatClient façade', () => {
 			expect(useStore.getState().chatsRegistry['room-rt']?.hasMoreAfter).toBe(false);
 		});
 
-		it('refreshes the unread count once, only on an own read, and again after a failed refresh', async () => {
-			setUpRoom('room-ru');
-			useStore.getState().updateHistory('room-ru', [
+		it('does not run what was queued behind a request that timed out, beside the new queue', async () => {
+			setUpRoom('room-q3');
+			seedWindow('room-q3');
+			vi.spyOn(console, 'error').mockImplementation(() => undefined);
+			const answerHung = deferResponse();
+			const hung = chatClient.requestMessagesAfter('room-q3');
+			await vi.advanceTimersByTimeAsync(0);
+			const queued = chatClient.requestMessagesAfter('room-q3');
+			const sent = chatClient.sendChatMessage('room-q3', 'ciao');
+			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
+			await expect(sent).resolves.toBe(false);
+
+			const answerReload = deferResponse();
+			const reload = chatClient.returnToLatestMessages('room-q3');
+			await vi.advanceTimersByTimeAsync(0);
+			const requestsBefore = (global.fetch as Mock).mock.calls.length;
+
+			answerHung(
+				buildTimelineResponse([row('room-q3', 'late', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
+			);
+			await hung;
+			await queued;
+			await vi.advanceTimersByTimeAsync(0);
+
+			// The page queued behind the hung one never goes out beside the reload
+			expect((global.fetch as Mock).mock.calls).toHaveLength(requestsBefore);
+			answerReload(
+				buildTimelineResponse([row('room-q3', 'latest', AUG_FIRST_NOON) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockEmptyAfterPage();
+			await reload;
+			expect(rowIds('room-q3')).toEqual(['latest']);
+		});
+
+		it('releases the history loader of a backward page that was queued behind a request that timed out', async () => {
+			setUpRoom('room-q4');
+			seedWindow('room-q4');
+			vi.spyOn(console, 'error').mockImplementation(() => undefined);
+			const answerHung = deferResponse();
+			const hung = chatClient.requestMessagesAfter('room-q4');
+			await vi.advanceTimersByTimeAsync(0);
+			useStore.getState().setHistoryLoadDisabled('room-q4', true);
+			chatClient.requestHistory('room-q4', Date.parse(AUG_FIRST_EARLY));
+			const sent = chatClient.sendChatMessage('room-q4', 'ciao');
+			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
+			await expect(sent).resolves.toBe(false);
+
+			answerHung(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: true }));
+			await hung;
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(useStore.getState().activeConversations['room-q4']?.isHistoryLoadDisabled).toBe(false);
+		});
+
+		it('releases the history loader when its page answers after a reconnection reset', async () => {
+			setUpRoom('room-q5');
+			useStore.getState().updateHistory('room-q5', [
 				createMockTextMessage({
 					id: 'w1',
 					stanzaId: 'w1',
-					roomId: 'room-ru',
-					from: 'u2',
+					roomId: 'room-q5',
 					date: Date.parse(AUG_FIRST_EARLY)
 				})
 			]);
-			useStore.getState().setUnreadCount('room-ru', 10);
-			useStore.getState().setHasMoreAfter('room-ru', true);
-			vi.spyOn(console, 'error').mockImplementation(() => undefined);
-			let releaseInbox: () => void = () => undefined;
-			const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockImplementationOnce(
-				() =>
-					new Promise<void>((_, reject) => {
-						releaseInbox = (): void => reject(new Error(BACKEND_DOWN));
-					})
-			);
-			const ownRead = (): void =>
-				wsChatEventsRouter(
-					buildWsReadUpdatedEvent({
-						roomId: 'room-ru',
-						userId: 'me',
-						itemCreatedAt: AUG_FIRST_LATE_MORNING
-					})
-				);
+			useStore.getState().setHistoryLoadDisabled('room-q5', true);
+			const answer = deferResponse();
+			chatClient.requestHistory('room-q5', Date.parse(AUG_FIRST_EARLY));
+			await vi.advanceTimersByTimeAsync(0);
 
-			wsChatEventsRouter(
-				buildWsReadUpdatedEvent({
-					roomId: 'room-ru',
-					userId: 'u2',
-					itemCreatedAt: AUG_FIRST_LATE_MORNING
+			useStore.getState().resetXmppData();
+			useStore.getState().setHistoryLoadDisabled('room-q5', true);
+			answer(buildTimelineResponse([], { hasMoreBefore: true }));
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(useStore.getState().activeConversations['room-q5']?.isHistoryLoadDisabled).toBe(false);
+		});
+
+		it('goes on from the last catch-up cursor, not from a live row, when the catch-up pages run out', async () => {
+			setUpRoom('room-qx');
+			// Known sender: its live row triggers no user request that would take a mocked page
+			useStore.getState().setUserInfo([createMockUser({ id: 'u2' })]);
+			seedWindow('room-qx');
+			mockJsonResponse(
+				buildTimelineResponse([row('room-qx', 'f0', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
 				})
 			);
-			expect(inboxSpy).not.toHaveBeenCalled();
-
-			ownRead();
-			expect(useStore.getState().chatsRegistry['room-ru']?.unreadStale).toBe(true);
-			ownRead();
-			ownRead();
-			expect(inboxSpy).toHaveBeenCalledTimes(1);
-
-			releaseInbox();
+			const answerFirstCatchUp = deferResponse();
+			Array.from({ length: 9 }, (_, index) => index + 1).forEach((index) =>
+				mockJsonResponse(
+					buildTimelineResponse(
+						[row('room-qx', `c${index}`, `2026-08-01T10:${String(10 + index)}:00Z`) as never],
+						{ hasMoreBefore: true, hasMoreAfter: true }
+					)
+				)
+			);
+			const attach = chatClient.requestMessagesAfter('room-qx');
 			await vi.advanceTimersByTimeAsync(0);
-			expect(useStore.getState().chatsRegistry['room-ru']?.unreadStale).toBe(true);
-			inboxSpy.mockResolvedValueOnce(undefined);
-			ownRead();
-			expect(inboxSpy).toHaveBeenCalledTimes(2);
+			// The window is attached while the catch-up runs: a live row lands in it
+			liveEvent('room-qx', 'live-x', '2026-08-01T23:00:00Z');
+			answerFirstCatchUp(
+				buildTimelineResponse([row('room-qx', 'c0', '2026-08-01T10:10:00Z') as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
+			);
+			await attach;
+			expect(useStore.getState().chatsRegistry['room-qx']?.hasMoreAfter).toBe(true);
+
+			mockEmptyAfterPage();
+			await chatClient.requestMessagesAfter('room-qx');
+
+			const last = (global.fetch as Mock).mock.calls.at(-1)?.[0] as string;
+			expect(last).toContain('afterId=c9');
+			expect(last).not.toContain('live-x');
+		});
+
+		it('detaches the window again from its cursor when a catch-up page fails', async () => {
+			setUpRoom('room-qy');
+			seedWindow('room-qy');
+			mockJsonResponse(
+				buildTimelineResponse([row('room-qy', 'f0', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
+
+			await expect(chatClient.requestMessagesAfter('room-qy')).rejects.toThrow(BACKEND_DOWN);
+
+			expect(useStore.getState().chatsRegistry['room-qy']?.hasMoreAfter).toBe(true);
+			mockEmptyAfterPage();
+			await chatClient.requestMessagesAfter('room-qy');
+			expect((global.fetch as Mock).mock.calls.at(-1)?.[0]).toContain('afterId=f0');
+			expect(useStore.getState().chatsRegistry['room-qy']?.hasMoreAfter).toBe(false);
+		});
+
+		describe('stale unread count of a detached window', () => {
+			const seedStaleRoom = (id: string): void => {
+				setUpRoom(id);
+				useStore.getState().updateHistory(id, [
+					createMockTextMessage({
+						id: `w-${id}`,
+						stanzaId: `w-${id}`,
+						roomId: id,
+						from: 'u2',
+						date: Date.parse(AUG_FIRST_EARLY)
+					})
+				]);
+				useStore.getState().setUnreadCount(id, 10);
+				useStore.getState().setHasMoreAfter(id, true);
+			};
+			const read = (roomId: string, userId: string): void =>
+				wsChatEventsRouter(
+					buildWsReadUpdatedEvent({ roomId, userId, itemCreatedAt: AUG_FIRST_LATE_MORNING })
+				);
+			const staleOf = (roomId: string): number | undefined =>
+				useStore.getState().chatsRegistry[roomId]?.unreadStale;
+
+			it('refreshes once at a time, only on an own read, and keeps the flag after a failed refresh', async () => {
+				seedStaleRoom('room-ru');
+				vi.spyOn(console, 'error').mockImplementation(() => undefined);
+				let failInbox: () => void = () => undefined;
+				const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockImplementationOnce(
+					() =>
+						new Promise<void>((_, reject) => {
+							failInbox = (): void => reject(new Error(BACKEND_DOWN));
+						})
+				);
+
+				read('room-ru', 'u2');
+				expect(inboxSpy).not.toHaveBeenCalled();
+
+				read('room-ru', 'me');
+				expect(staleOf('room-ru')).toBeGreaterThan(0);
+				read('room-ru', 'me');
+				read('room-ru', 'me');
+				expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+				failInbox();
+				await vi.advanceTimersByTimeAsync(0);
+				expect(staleOf('room-ru')).toBeGreaterThan(0);
+				inboxSpy.mockResolvedValueOnce(undefined);
+				read('room-ru', 'me');
+				await vi.advanceTimersByTimeAsync(0);
+				expect(inboxSpy).toHaveBeenCalledTimes(2);
+				expect(staleOf('room-ru')).toBeUndefined();
+			});
+
+			it('releases a room only with a refresh issued after it went stale and runs again for the one that went stale meanwhile', async () => {
+				seedStaleRoom('room-ra2');
+				seedStaleRoom('room-rb2');
+				let answerFirst: () => void = () => undefined;
+				const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockImplementationOnce(
+					() =>
+						new Promise<void>((resolve) => {
+							answerFirst = resolve;
+						})
+				);
+				read('room-ra2', 'me');
+				expect(inboxSpy).toHaveBeenCalledTimes(1);
+				const issuedForA = staleOf('room-ra2');
+
+				// Room B goes stale while the refresh issued for A is in flight
+				inboxSpy.mockResolvedValueOnce(undefined);
+				read('room-rb2', 'me');
+				expect(inboxSpy).toHaveBeenCalledTimes(1);
+				answerFirst();
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(issuedForA).toBeGreaterThan(0);
+				expect(inboxSpy).toHaveBeenCalledTimes(2);
+				expect(staleOf('room-ra2')).toBeUndefined();
+				expect(staleOf('room-rb2')).toBeUndefined();
+			});
 		});
 	});
 

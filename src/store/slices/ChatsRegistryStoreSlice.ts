@@ -98,6 +98,10 @@ const landLiveRow = (
 	}
 };
 
+// Module level so a registry wiped by a reset or a clear never repeats a token a request in flight holds
+let searchGenerationCounter = 0;
+let unreadStaleCounter = 0;
+
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
 		store.chatsRegistry[roomId] = {
@@ -188,11 +192,11 @@ const unreadAfterMarkerMoved = (
 	registry: ChatRegistry,
 	myId: string,
 	previousMarkerDate: number | undefined
-): { unread: number; stale: boolean } => {
+): { unread: number; change: 'reset' | 'adjust' | 'stale' } => {
 	const markerDate = registry.markers[myId]?.markerDate;
-	if (!markerDate) return { unread: registry.unread, stale: false };
+	if (!markerDate) return { unread: registry.unread, change: 'adjust' };
 	if (registry.lastMessage && markerDate >= registry.lastMessage.date) {
-		return { unread: 0, stale: false };
+		return { unread: 0, change: 'reset' };
 	}
 	const confirmedRows = registry.messages.filter((msg) => !isPendingRow(msg));
 	const oldestDate = confirmedRows[0]?.date;
@@ -203,14 +207,14 @@ const unreadAfterMarkerMoved = (
 		newestDate !== undefined &&
 		previousMarkerDate >= oldestDate &&
 		markerDate <= newestDate;
-	if (!insideWindow) return { unread: registry.unread, stale: true };
+	if (!insideWindow) return { unread: registry.unread, change: 'stale' };
 	const readNow = registry.messages.filter(
 		(msg) =>
 			countsAsUnread(msg, true) &&
 			isStrictlyBefore(previousMarkerDate, msg.date) &&
 			isBefore(msg.date, markerDate)
 	).length;
-	return { unread: Math.max(0, registry.unread - readNow), stale: false };
+	return { unread: Math.max(0, registry.unread - readNow), change: 'adjust' };
 };
 
 export const useChatsRegistryStoreSlice: StateCreator<
@@ -509,7 +513,12 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						previousOwnMarkerDate
 					);
 					draft.chatsRegistry[roomId].unread = moved.unread;
-					draft.chatsRegistry[roomId].unreadStale = moved.stale;
+					if (moved.change === 'stale') {
+						unreadStaleCounter += 1;
+						draft.chatsRegistry[roomId].unreadStale = unreadStaleCounter;
+					} else if (moved.change === 'reset') {
+						draft.chatsRegistry[roomId].unreadStale = undefined;
+					}
 					return;
 				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
@@ -533,10 +542,21 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
 				registry.unread = count;
-				registry.unreadStale = false;
 			}),
 			false,
 			'CHAT/SET_UNREAD_COUNT'
+		);
+	},
+	clearUnreadStale: (roomId: string, version: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = draft.chatsRegistry[roomId];
+				if (registry?.unreadStale === version) {
+					registry.unreadStale = undefined;
+				}
+			}),
+			false,
+			'CHAT/CLEAR_UNREAD_STALE'
 		);
 	},
 	incrementUnreadCount: (roomId: string, counter: number): void => {
@@ -585,7 +605,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
-				registry.searchGeneration = (registry.searchGeneration ?? 0) + 1;
+				searchGenerationCounter += 1;
+				registry.searchGeneration = searchGenerationCounter;
 			}),
 			false,
 			'CHAT/BEGIN_SEARCH'
@@ -597,8 +618,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].searchResults = [];
 				draft.chatsRegistry[roomId].searchHasMore = false;
-				draft.chatsRegistry[roomId].searchGeneration =
-					(draft.chatsRegistry[roomId].searchGeneration ?? 0) + 1;
+				searchGenerationCounter += 1;
+				draft.chatsRegistry[roomId].searchGeneration = searchGenerationCounter;
 				if (draft.activeConversations[roomId]) {
 					draft.activeConversations[roomId].selectedSearchResult = undefined;
 				}

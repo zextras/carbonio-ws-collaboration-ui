@@ -674,7 +674,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				]);
 
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(0);
-			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(false);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeUndefined();
 		});
 
 		test('a marker move into the window from outside it leaves the count to a refresh', () => {
@@ -698,9 +698,55 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				]);
 
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
-			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(true);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeGreaterThan(0);
+			const version = useStore.getState().chatsRegistry[roomId].unreadStale as number;
+
 			useStore.getState().setUnreadCount(roomId, 7);
-			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(false);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+			useStore.getState().clearUnreadStale(roomId, version + 1);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+			useStore.getState().clearUnreadStale(roomId, version);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeUndefined();
+		});
+
+		test('a later exact marker move inside the window keeps the count stale until a refresh', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'older', markerDate: date1 - 100 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm1', markerDate: date1 + 1 })
+				]);
+			const version = useStore.getState().chatsRegistry[roomId].unreadStale;
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm2', markerDate: date1 + 2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(version);
+		});
+
+		test('a search generation never repeats after the registry was wiped', () => {
+			const store = useStore.getState();
+			store.beginSearch(roomId);
+			const before = useStore.getState().chatsRegistry[roomId].searchGeneration;
+
+			useStore.getState().resetXmppData();
+			useStore.getState().beginSearch(roomId);
+
+			expect(useStore.getState().chatsRegistry[roomId].searchGeneration).not.toBe(before);
 		});
 
 		test('a marker newer than the newest confirmed row is outside the window, even with a later pending row', () => {
@@ -729,7 +775,7 @@ describe('ChatsRegistryStoreSlice tests', () => {
 				]);
 
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
-			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(true);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBeGreaterThan(0);
 		});
 
 		test('a search generation changes with every new query and every clear', () => {

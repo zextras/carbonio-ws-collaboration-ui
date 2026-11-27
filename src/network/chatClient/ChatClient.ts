@@ -15,7 +15,8 @@ import { refreshStaleUnread, scheduleBootInbox } from './inboxRefresh';
 import {
 	abandonWindowOperation,
 	beginWindowOperation,
-	isStaleWindowPageError
+	isStaleWindowPageError,
+	isWipedWindowPageError
 } from './windowGuard';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
@@ -128,6 +129,10 @@ type TimelineCursor = { date: number; id?: string };
 
 const windowOperations = new Map<string, Promise<void>>();
 const latestReloads = new Map<string, Promise<void>>();
+// Bumped when a caller gave up on the queue of the room: what was queued before it does not run
+const queueTokens = new Map<string, number>();
+// Where the forward pages of a detached window go on, whatever live rows the window holds
+const forwardCursors = new Map<string, TimelineCursor>();
 
 /**
  * Operations that grow or replace a room window run one at a time: a page that lands in a window
@@ -135,8 +140,18 @@ const latestReloads = new Map<string, Promise<void>>();
  * answers after its operation was abandoned or its room wiped is discarded by the SDK fetch
  * (`guardWindowPage`) and ends the operation without an error.
  */
-function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Promise<T> {
+function runWindowOperation<T>(
+	roomId: string,
+	operation: () => Promise<T>,
+	onSkipped?: () => void
+): Promise<T> {
+	const token = queueTokens.get(roomId) ?? 0;
 	const result = (windowOperations.get(roomId) ?? Promise.resolve()).then(async () => {
+		// The caller that gave up on the queue started a new one: this operation belongs to the old
+		if ((queueTokens.get(roomId) ?? 0) !== token) {
+			onSkipped?.();
+			return undefined as T;
+		}
 		const end = beginWindowOperation(roomId);
 		try {
 			return await operation();
@@ -161,13 +176,15 @@ function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Pro
 
 /**
  * Bounds the wait of a caller (a send, the scroll-to-bottom button) behind the window loads of the
- * room. On timeout the operation running is abandoned (its late page is discarded) and the room
- * queue is released, so the next load does not wait for a request that may never answer.
+ * room. On timeout the operation running is abandoned (its late page is discarded), the operations
+ * queued behind it are cancelled and the room queue is released, so the next load does not wait
+ * for a request that may never answer and nothing runs beside it.
  */
 function withTimeout<T>(roomId: string, promise: Promise<T>, ms: number): Promise<T> {
 	return new Promise<T>((resolve, reject) => {
 		const timer = setTimeout(() => {
 			abandonWindowOperation(roomId);
+			queueTokens.set(roomId, (queueTokens.get(roomId) ?? 0) + 1);
 			windowOperations.delete(roomId);
 			latestReloads.delete(roomId);
 			reject(new Error('window load timed out'));
@@ -230,16 +247,31 @@ async function attachWindow(roomId: string, pageNewest?: TimelineCursor): Promis
 	useStore.getState().setHasMoreAfter(roomId, false);
 	let cursor = pageNewest ?? newestServerRow(roomId);
 	let hasMore = false;
-	for (let page = 0; cursor && page < MAX_CATCH_UP_PAGES; page += 1) {
-		// eslint-disable-next-line no-await-in-loop
-		const result = await wscSdk.fetchTimeline(roomId, { after: cursor.date, afterId: cursor.id });
-		hasMore = result.hasMoreAfter;
-		cursor = hasMore ? result.newest : undefined;
+	try {
+		for (let page = 0; cursor && page < MAX_CATCH_UP_PAGES; page += 1) {
+			forwardCursors.set(roomId, cursor);
+			// eslint-disable-next-line no-await-in-loop
+			const result = await wscSdk.fetchTimeline(roomId, { after: cursor.date, afterId: cursor.id });
+			hasMore = result.hasMoreAfter;
+			cursor = hasMore ? (result.newest ?? cursor) : undefined;
+		}
+	} catch (err) {
+		// A page that was not read leaves a gap after the cursor: the window is detached again, from
+		// there. A wiped room has no window left to detach
+		if (isWipedWindowPageError(err)) {
+			forwardCursors.delete(roomId);
+		} else {
+			useStore.getState().setHasMoreAfter(roomId, true);
+		}
+		throw err;
 	}
-	if (hasMore) {
+	if (hasMore && cursor) {
+		forwardCursors.set(roomId, cursor);
 		useStore.getState().setHasMoreAfter(roomId, true);
+	} else {
+		forwardCursors.delete(roomId);
 	}
-	refreshStaleUnread(roomId);
+	refreshStaleUnread();
 }
 
 async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
@@ -250,6 +282,7 @@ async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 	const notBefore = getNotBefore(roomId);
 	store.setHistoryLoadDisabled(roomId, true);
 	store.clearMessages(roomId);
+	forwardCursors.delete(roomId);
 	try {
 		const { hasMoreAfter, newest } = await wscSdk.fetchTimeline(roomId, {
 			...(notBefore ? { notBefore } : {})
@@ -365,19 +398,27 @@ async function loadBackwardPageViaSdk(
 		return;
 	}
 	const lowerBound = room.userSettings?.clearedAt ?? room.createdAt;
-	await wscSdk.fetchTimeline(roomId, {
-		// With history in store the bound anchors the page backwards from
-		// the known head (live events may have landed before the first
-		// load). On an empty store the v1 call-site bound is a synthetic
-		// client-clock now(): omitted, so "the latest N" is decided by the
-		// SERVER clock — a client running behind would otherwise cut off
-		// the most recent messages on the first load.
-		...(oldest ? { before: endHistory } : {}),
-		// Composite cursor only when the anchor is a message already in store
-		...(oldest?.date === endHistory ? { beforeId: oldest.id } : {}),
-		...(quantity === undefined ? {} : { limit: quantity }),
-		...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
-	});
+	try {
+		await wscSdk.fetchTimeline(roomId, {
+			// With history in store the bound anchors the page backwards from
+			// the known head (live events may have landed before the first
+			// load). On an empty store the v1 call-site bound is a synthetic
+			// client-clock now(): omitted, so "the latest N" is decided by the
+			// SERVER clock — a client running behind would otherwise cut off
+			// the most recent messages on the first load.
+			...(oldest ? { before: endHistory } : {}),
+			// Composite cursor only when the anchor is a message already in store
+			...(oldest?.date === endHistory ? { beforeId: oldest.id } : {}),
+			...(quantity === undefined ? {} : { limit: quantity }),
+			...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {})
+		});
+	} catch (err) {
+		// A discarded page asked nothing wrong: the loader can ask again from the window it finds
+		if (isStaleWindowPageError(err)) {
+			useStore.getState().setHistoryLoadDisabled(roomId, false);
+		}
+		throw err;
+	}
 	useStore.getState().setHistoryLoadDisabled(roomId, false);
 }
 
@@ -425,6 +466,7 @@ function loadWindowAroundMessageViaSdk(
 		// The loaders must not page the window while it is replaced
 		store.setHistoryLoadDisabled(roomId, true);
 		store.clearMessages(roomId);
+		forwardCursors.delete(roomId);
 		// Set before the rows land so the list does not scroll to the bottom
 		store.setScrollPosition(roomId, stanzaId);
 		try {
@@ -435,6 +477,8 @@ function loadWindowAroundMessageViaSdk(
 			});
 			if (!hasMoreAfter) {
 				await attachWindow(roomId, newest);
+			} else if (newest) {
+				forwardCursors.set(roomId, newest);
 			}
 		} catch (err) {
 			if (!isStaleWindowPageError(err)) {
@@ -455,18 +499,20 @@ function loadNextPageAfterViaSdk(roomId: string): Promise<void> {
 		if (!isDetached(roomId)) {
 			return;
 		}
-		const newest = newestServerRow(roomId);
-		if (!newest) {
+		const from = forwardCursors.get(roomId) ?? newestServerRow(roomId);
+		if (!from) {
 			return;
 		}
-		const result = await wscSdk.fetchTimeline(roomId, { after: newest.date, afterId: newest.id });
+		const result = await wscSdk.fetchTimeline(roomId, { after: from.date, afterId: from.id });
 		if (!result.hasMoreAfter) {
-			await attachWindow(roomId, result.newest);
+			await attachWindow(roomId, result.newest ?? from);
 			return;
 		}
-		if (newestServerRow(roomId)?.id === newest.id) {
+		if (!result.newest || (result.newest.id === from.id && result.newest.date === from.date)) {
 			console.warn('chatClient.requestMessagesAfter: pagination stalled', roomId);
+			return;
 		}
+		forwardCursors.set(roomId, result.newest ?? from);
 	});
 }
 
@@ -598,8 +644,10 @@ export const chatClient: ChatClient = {
 				return;
 			}
 			const oldestAtCall = getOldestConfirmedMessage(store.chatsRegistry[roomId]?.messages ?? []);
-			runWindowOperation(roomId, () =>
-				loadBackwardPageViaSdk(roomId, endHistory, quantity, oldestAtCall?.id)
+			runWindowOperation(
+				roomId,
+				() => loadBackwardPageViaSdk(roomId, endHistory, quantity, oldestAtCall?.id),
+				() => useStore.getState().setHistoryLoadDisabled(roomId, false)
 			).catch((err) => {
 				console.error('chatClient.requestHistory: timeline hydration failed', err);
 			});

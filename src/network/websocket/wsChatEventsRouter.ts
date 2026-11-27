@@ -196,7 +196,7 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			wscSdk.handleReadUpdated(event);
 			// A detached window could not follow the own marker: the server knows the count
 			if (isMyId(event.userId)) {
-				refreshStaleUnread(event.roomId);
+				refreshStaleUnread();
 			}
 			return;
 		}

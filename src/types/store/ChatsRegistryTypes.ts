@@ -23,6 +23,7 @@ export type ChatsRegistryStoreSlice = {
 	addFastening: (fasteningMessage: MessageFastening[]) => void;
 	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	setUnreadCount: (roomId: string, count: number) => void;
+	clearUnreadStale: (roomId: string, version: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	appendSearchResults: (roomId: string, results: TextMessage[]) => void;
@@ -53,7 +54,7 @@ export type ChatRegistry = {
 	 */
 	hasMoreAfter?: boolean;
 	/** The unread count could not follow an own marker move on a detached window: refresh it. */
-	unreadStale?: boolean;
+	unreadStale?: number;
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
 };

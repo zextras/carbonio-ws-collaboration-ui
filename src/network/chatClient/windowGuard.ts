@@ -13,14 +13,21 @@ const TIMELINE_URL = /\/rooms\/([^/?]+)\/timeline(?:\?|$)/;
 
 /** A timeline page that answered after its operation was abandoned or its room was wiped. */
 export class StaleWindowPageError extends Error {
-	constructor() {
+	/** `wiped`: the room registry was reset or cleared; `abandoned`: the operation timed out. */
+	readonly reason: 'wiped' | 'abandoned';
+
+	constructor(reason: 'wiped' | 'abandoned') {
 		super('stale window page');
 		this.name = 'StaleWindowPageError';
+		this.reason = reason;
 	}
 }
 
 export const isStaleWindowPageError = (err: unknown): boolean =>
 	err instanceof StaleWindowPageError;
+
+export const isWipedWindowPageError = (err: unknown): boolean =>
+	err instanceof StaleWindowPageError && err.reason === 'wiped';
 
 /** Changes when a reconnection reset or a history clear wipes the room: a page asked before is stale. */
 function getWindowEpoch(roomId: string): string {
@@ -60,8 +67,11 @@ export function guardWindowPage(url: string, issue: () => Promise<Response>): Pr
 		return issue();
 	}
 	return issue().then((response) => {
-		if (operation.abandoned || operation.epoch !== getWindowEpoch(roomId)) {
-			throw new StaleWindowPageError();
+		if (operation.epoch !== getWindowEpoch(roomId)) {
+			throw new StaleWindowPageError('wiped');
+		}
+		if (operation.abandoned) {
+			throw new StaleWindowPageError('abandoned');
 		}
 		return response;
 	});
