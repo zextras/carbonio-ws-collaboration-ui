@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, forEach, size } from 'lodash';
+import { find, forEach, size, some } from 'lodash';
 
 import { isBefore } from './dateUtils';
 import useStore from '../store/Store';
@@ -32,7 +32,8 @@ export function calcReads(
 				(message: Message) => message.id === marker.messageId
 			) as TextMessage;
 			const dateToCompare = markedMessage?.date || marker.markerDate;
-			if (marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
+			const isCurrentMember = some(members, (member: Member) => member.userId === userId);
+			if (isCurrentMember && marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
 				readBy.push(userId);
 			}
 		});
