@@ -123,6 +123,7 @@ function readMessageViaSdk(roomId: string, messageId: string): void {
 }
 
 const MAX_CATCH_UP_PAGES = 10;
+export const REATTACH_CALLER_DEADLINE_MS = 20000;
 
 type TimelineCursor = { date: number; id?: string };
 
@@ -294,6 +295,31 @@ function returnToLatestMessagesViaSdk(roomId: string): Promise<void> {
 }
 
 /**
+ * What a send, an attachment or the scroll-to-bottom button waits for: the reload goes on in the
+ * background (nothing is cancelled), but the caller gives up after a while and the text goes back
+ * to the composer. The queue can hold the latest page and up to MAX_CATCH_UP_PAGES more, each as
+ * slow as WINDOW_LOAD_TIMEOUT_MS.
+ */
+function awaitReattach(roomId: string): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		const timer = setTimeout(
+			() => reject(new Error('return to the latest messages is taking too long')),
+			REATTACH_CALLER_DEADLINE_MS
+		);
+		returnToLatestMessagesViaSdk(roomId).then(
+			() => {
+				clearTimeout(timer);
+				resolve();
+			},
+			(err) => {
+				clearTimeout(timer);
+				reject(err);
+			}
+		);
+	});
+}
+
+/**
  * Shared v2 outgoing-text path (plain sends and replies). Optimistic flow:
  * the placeholder id doubles as the self-echo tempId; the SDK promotes it
  * from whichever confirmation lands first. Like v1, the placeholder keeps the
@@ -315,7 +341,7 @@ function sendTextViaSdk(
 	}
 	// A message sent from a window cut before the newest one would land after a hidden gap
 	if (isDetached(roomId)) {
-		return returnToLatestMessagesViaSdk(roomId).then(
+		return awaitReattach(roomId).then(
 			() => (isDetached(roomId) ? false : sendTextViaSdk(caller, roomId, message, replyToId)),
 			(err) => {
 				console.error(`chatClient.${caller}: return to the latest messages failed`, err);
@@ -383,14 +409,11 @@ async function loadBackwardPageViaSdk(
 			...(lowerBound ? { notBefore: dateToTimestamp(lowerBound) } : {}),
 			...windowLoadOptions(roomId)
 		});
-	} catch (err) {
-		// An aborted page asked nothing wrong: the loader can ask again from the window it finds
-		if (isAbortError(err)) {
-			useStore.getState().setHistoryLoadDisabled(roomId, false);
-		}
-		throw err;
+	} finally {
+		// Whatever the outcome: the loader asks again by itself while it is in view, and a slow or
+		// failing backend must not leave a conversation without history for good
+		useStore.getState().setHistoryLoadDisabled(roomId, false);
 	}
-	useStore.getState().setHistoryLoadDisabled(roomId, false);
 }
 
 /** The date of a message that is not in the window: a search result or the pinned message. */
@@ -707,7 +730,7 @@ export const chatClient: ChatClient = {
 		if (!isWscPure()) {
 			return Promise.resolve();
 		}
-		return returnToLatestMessagesViaSdk(roomId);
+		return awaitReattach(roomId);
 	},
 	requestMessageToForward: (roomId, messageToForwardStanzaId, queryId) => {
 		if (isWscPure()) {

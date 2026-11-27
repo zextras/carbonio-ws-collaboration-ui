@@ -20,7 +20,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { chatClient, isWscPure } from './ChatClient';
+import { chatClient, isWscPure, REATTACH_CALLER_DEADLINE_MS } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import { BOOT_INBOX_TIMEOUT_MS, refreshInboxSerialized } from './inboxRefresh';
 import { WINDOW_LOAD_TIMEOUT_MS } from './windowGuard';
@@ -525,7 +525,7 @@ describe('chatClient façade', () => {
 		);
 	});
 
-	it('logs and keeps the loader disabled on a failing history page (v1 parity)', async () => {
+	it('logs a failing history page and enables the loader again so it can ask again', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().addRooms([createMockRoom({ id: 'room-err' })]);
 		// The loader disables itself synchronously before calling the façade
@@ -540,8 +540,25 @@ describe('chatClient façade', () => {
 			'chatClient.requestHistory: timeline hydration failed',
 			expect.any(Error)
 		);
-		// Only the success path re-enables it — the v1 callback did the same
-		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(true);
+		// Every outcome enables it: a conversation must not stay without history after one failure
+		expect(useStore.getState().activeConversations['room-err']?.isHistoryLoadDisabled).toBe(false);
+	});
+
+	it('enables the history loader again when the first page of a conversation times out', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-slow', createdAt: JULY_FIRST })]);
+		useStore.getState().setHistoryLoadDisabled('room-slow', true);
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		deferResponse();
+
+		chatClient.requestHistory('room-slow', Date.parse(AUG_FIRST_MORNING));
+		await vi.advanceTimersByTimeAsync(WINDOW_LOAD_TIMEOUT_MS);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'chatClient.requestHistory: timeline hydration failed',
+			expect.objectContaining({ name: 'TimeoutError' })
+		);
+		expect(useStore.getState().activeConversations['room-slow']?.isHistoryLoadDisabled).toBe(false);
 	});
 
 	it('omits the synthetic client-clock bound on the first load, keeps a real anchor', async () => {
@@ -2219,6 +2236,38 @@ describe('chatClient façade', () => {
 
 			expect(rowIds('room-rt')).toEqual(['latest']);
 			expect(useStore.getState().chatsRegistry['room-rt']?.hasMoreAfter).toBe(false);
+		});
+
+		it('gives the text back after the caller deadline while the reload goes on in the background', async () => {
+			setUpRoom('room-rdl');
+			seedWindow('room-rdl');
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+			// A hung page ahead of the reload: 15 s of its own, then the reload's own wait
+			deferResponse();
+			const hung = chatClient.requestMessagesAfter('room-rdl');
+			hung.catch(() => undefined);
+			await vi.advanceTimersByTimeAsync(0);
+			const answerLatest = deferResponse();
+			const sent = chatClient.sendChatMessage('room-rdl', 'ciao');
+
+			await vi.advanceTimersByTimeAsync(REATTACH_CALLER_DEADLINE_MS);
+
+			await expect(sent).resolves.toBe(false);
+			expect(errorSpy).toHaveBeenCalledWith(
+				'chatClient.sendChatMessage: return to the latest messages failed',
+				expect.objectContaining({ message: expect.stringContaining('taking too long') })
+			);
+			// Nothing was cancelled: the reload carries on and attaches the window
+			answerLatest(
+				buildTimelineResponse([row('room-rdl', 'latest', AUG_FIRST_NOON) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockEmptyAfterPage();
+			await vi.advanceTimersByTimeAsync(0);
+			expect(rowIds('room-rdl')).toEqual(['latest']);
+			expect(useStore.getState().chatsRegistry['room-rdl']?.hasMoreAfter).toBe(false);
 		});
 
 		it('leaves the window as it was and gives the text back when the reload of a send times out', async () => {
