@@ -28,7 +28,7 @@ import { messageToGalleryAttachment } from '../../utils/attachmentUtils';
 import { wsDebug } from '../../utils/debug';
 import { findFastenedLastMessage } from '../chatClient/findFastenedLastMessage';
 import { findPinnedMessageContent } from '../chatClient/findPinnedMessageContent';
-import { refreshInboxInBackground } from '../chatClient/inboxRefresh';
+import { refreshStaleUnread } from '../chatClient/inboxRefresh';
 import { wscSdk } from '../sdk/wscSdk';
 import displayMessageBrowserNotification from '../xmpp/utility/displayMessageBrowserNotification';
 import displayReactionBrowserNotification from '../xmpp/utility/displayReactionBrowserNotification';
@@ -195,8 +195,8 @@ export function wsChatEventsRouter(event: WsEvent): void {
 			// others' — the v1 single-path displayed-stanza behavior
 			wscSdk.handleReadUpdated(event);
 			// A detached window could not follow the own marker: the server knows the count
-			if (useStore.getState().chatsRegistry[event.roomId]?.unreadStale) {
-				refreshInboxInBackground('wsChatEventsRouter: unread refresh after a read failed');
+			if (isMyId(event.userId)) {
+				refreshStaleUnread(event.roomId);
 			}
 			return;
 		}

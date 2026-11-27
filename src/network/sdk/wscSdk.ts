@@ -23,7 +23,7 @@ import type {
 } from '../../types/store/ChatsRegistryTypes';
 import type { Version } from '../../types/store/SessionTypes';
 import { BASE_PATH } from '../../utils/FetchUtils';
-import { isStaleSearchAppend, isStaleWindowWrite } from '../chatClient/windowGuard';
+import { guardWindowPage } from '../chatClient/windowGuard';
 
 // The SDK emits structural store types (string-literal unions with the same
 // wire values as the store enums); the enums are nominal, hence the single
@@ -40,30 +40,15 @@ const bridge: StoreBridge = {
 	setUserPresence: (userId, online): void => useStore.getState().setUserPresence(userId, online),
 	setUserLastActivity: (userId, date): void =>
 		useStore.getState().setUserLastActivity(userId, date),
-	// A load that ran across a reconnection reset or a history clear must not write into the new registry
-	updateHistory: (roomId, messages: Array<StoreMessage>): void => {
-		if (!isStaleWindowWrite(roomId)) {
-			useStore.getState().updateHistory(roomId, messages as Array<Message>);
-		}
-	},
-	setHistoryIsFullyLoaded: (roomId): void => {
-		if (!isStaleWindowWrite(roomId)) {
-			useStore.getState().setHistoryIsFullyLoaded(roomId);
-		}
-	},
-	addCreateRoomMessage: (roomId): void => {
-		if (!isStaleWindowWrite(roomId)) {
-			useStore.getState().addCreateRoomMessage(roomId);
-		}
-	},
+	updateHistory: (roomId, messages: Array<StoreMessage>): void =>
+		useStore.getState().updateHistory(roomId, messages as Array<Message>),
+	setHistoryIsFullyLoaded: (roomId): void => useStore.getState().setHistoryIsFullyLoaded(roomId),
+	addCreateRoomMessage: (roomId): void => useStore.getState().addCreateRoomMessage(roomId),
 	newMessage: (message: StoreMessage): void => useStore.getState().newMessage(message as Message),
 	removePlaceholderMessage: (roomId, messageId): void =>
 		useStore.getState().removePlaceholderMessage(roomId, messageId),
-	addFastening: (fastenings: Array<StoreMessageFastening>): void => {
-		if (!isStaleWindowWrite(fastenings[0]?.roomId ?? '')) {
-			useStore.getState().addFastening(fastenings as Array<MessageFastening>);
-		}
-	},
+	addFastening: (fastenings: Array<StoreMessageFastening>): void =>
+		useStore.getState().addFastening(fastenings as Array<MessageFastening>),
 	setLastMessage: (roomId, message: StoreMessage): void =>
 		useStore.getState().setLastMessage(roomId, message as TextMessage | ConfigurationMessage),
 	setPinnedMessage: (roomId, message: StoreTextMessage): void =>
@@ -73,16 +58,11 @@ const bridge: StoreBridge = {
 		useStore.getState().setIsWriting(roomId, userId, writing),
 	setSearchResults: (roomId, results: Array<StoreTextMessage>): void =>
 		useStore.getState().setSearchResults(roomId, results as Array<TextMessage>),
-	appendSearchResults: (roomId, results: Array<StoreTextMessage>): void => {
-		if (!isStaleSearchAppend(roomId)) {
-			useStore.getState().appendSearchResults(roomId, results as Array<TextMessage>);
-		}
-	},
 	setRoomFields: (roomId, fields): void => useStore.getState().editRoom(roomId, fields)
 };
 
 const http = createHttpClient({
-	fetch: (url, init) => globalThis.fetch(url, init),
+	fetch: (url, init) => guardWindowPage(url, () => globalThis.fetch(url, init)),
 	baseUrl: BASE_PATH,
 	versionStore: {
 		getApiVersion: (): string | undefined => useStore.getState().session.apiVersion,

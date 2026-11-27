@@ -703,36 +703,45 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(false);
 		});
 
-		test('rows buffered while detached join the window in order when it is attached again', () => {
+		test('a marker newer than the newest confirmed row is outside the window, even with a later pending row', () => {
 			const store = useStore.getState();
-			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.updateHistory(roomId, [
+				...range(3).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				),
+				createMockTextMessage({
+					id: 'pending',
+					roomId,
+					date: date3,
+					read: MarkerStatus.PENDING
+				})
+			]);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'm0', markerDate: date1 })
+			]);
+			store.setUnreadCount(roomId, 10);
 			store.setHasMoreAfter(roomId, true);
-			useStore.getState().newMessage(createMockTextMessage({ id: 'live2', roomId, date: date3 }));
-			useStore.getState().newMessage(createMockTextMessage({ id: 'live1', roomId, date: date2 }));
+
 			useStore
 				.getState()
-				.newMessage(createMockTextMessage({ id: 'live1', roomId, date: date2, text: 'edited' }));
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'elsewhere', markerDate: date2 })
+				]);
 
-			useStore.getState().setHasMoreAfter(roomId, false);
-
-			const { messages, detachedBuffer } = useStore.getState().chatsRegistry[roomId];
-			expect(messages.map((message) => message.id)).toEqual(['m1', 'live1', 'live2']);
-			expect((messages[1] as TextMessage).text).toBe('edited');
-			expect(detachedBuffer).toBeUndefined();
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(true);
 		});
 
-		test('a buffered row already in the window is not added twice', () => {
+		test('a search generation changes with every new query and every clear', () => {
 			const store = useStore.getState();
-			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
-			store.setHasMoreAfter(roomId, true);
-			useStore.getState().newMessage(createMockTextMessage({ id: 'live', roomId, date: date2 }));
-			useStore
-				.getState()
-				.updateHistory(roomId, [createMockTextMessage({ id: 'live', roomId, date: date2 })]);
+			store.beginSearch(roomId);
+			const first = useStore.getState().chatsRegistry[roomId].searchGeneration;
+			store.beginSearch(roomId);
+			const second = useStore.getState().chatsRegistry[roomId].searchGeneration;
+			store.clearSearchResults(roomId);
+			const third = useStore.getState().chatsRegistry[roomId].searchGeneration;
 
-			useStore.getState().setHasMoreAfter(roomId, false);
-
-			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(2);
+			expect(new Set([first, second, third]).size).toBe(3);
 		});
 
 		test('moving my marker in an attached window still recounts the unread rows', () => {

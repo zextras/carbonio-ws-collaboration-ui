@@ -6,43 +6,63 @@
 
 import useStore from '../../store/Store';
 
-const activeWindowOperations = new Map<string, string>();
-const searchGenerations = new Map<string, number>();
-const appendTargets = new Map<string, number>();
+type WindowOperation = { epoch: string; abandoned: boolean };
+
+const activeOperations = new Map<string, WindowOperation>();
+const TIMELINE_URL = /\/rooms\/([^/?]+)\/timeline(?:\?|$)/;
+
+/** A timeline page that answered after its operation was abandoned or its room was wiped. */
+export class StaleWindowPageError extends Error {
+	constructor() {
+		super('stale window page');
+		this.name = 'StaleWindowPageError';
+	}
+}
+
+export const isStaleWindowPageError = (err: unknown): boolean =>
+	err instanceof StaleWindowPageError;
 
 /** Changes when a reconnection reset or a history clear wipes the room: a page asked before is stale. */
-export function getWindowEpoch(roomId: string): string {
+function getWindowEpoch(roomId: string): string {
 	const epochs = useStore.getState().windowEpochs;
 	return `${epochs['*'] ?? 0}/${epochs[roomId] ?? 0}`;
 }
 
 export function beginWindowOperation(roomId: string): () => void {
-	const epoch = getWindowEpoch(roomId);
-	activeWindowOperations.set(roomId, epoch);
+	const operation: WindowOperation = { epoch: getWindowEpoch(roomId), abandoned: false };
+	activeOperations.set(roomId, operation);
 	return (): void => {
-		if (activeWindowOperations.get(roomId) === epoch) {
-			activeWindowOperations.delete(roomId);
+		if (activeOperations.get(roomId) === operation) {
+			activeOperations.delete(roomId);
 		}
 	};
 }
 
-/** True while a window load of the room runs across a reset or a clear of the room: nothing it fetched may land. */
-export function isStaleWindowWrite(roomId: string): boolean {
-	const started = activeWindowOperations.get(roomId);
-	return started !== undefined && started !== getWindowEpoch(roomId);
+/** The operation running for the room stops mattering: its late pages are discarded. */
+export function abandonWindowOperation(roomId: string): void {
+	const operation = activeOperations.get(roomId);
+	if (operation) {
+		operation.abandoned = true;
+		activeOperations.delete(roomId);
+	}
 }
 
-/** A new query of the room: a next page of an older query must not land any more. */
-export function startSearch(roomId: string): void {
-	searchGenerations.set(roomId, (searchGenerations.get(roomId) ?? 0) + 1);
-}
-
-export function beginSearchPage(roomId: string): () => boolean {
-	const generation = searchGenerations.get(roomId) ?? 0;
-	appendTargets.set(roomId, generation);
-	return (): boolean => (searchGenerations.get(roomId) ?? 0) === generation;
-}
-
-export function isStaleSearchAppend(roomId: string): boolean {
-	return (appendTargets.get(roomId) ?? 0) !== (searchGenerations.get(roomId) ?? 0);
+/**
+ * Wraps the fetch of the SDK client: the timeline page of a window operation is discarded before
+ * the SDK writes anything when, by the time it answers, the operation was abandoned or the room
+ * was wiped (reconnection reset, history clear). Only the operation running at issue time counts.
+ */
+export function guardWindowPage(url: string, issue: () => Promise<Response>): Promise<Response> {
+	const encodedRoomId = TIMELINE_URL.exec(url)?.[1];
+	const roomId = encodedRoomId ? decodeURIComponent(encodedRoomId) : undefined;
+	const operation = roomId ? activeOperations.get(roomId) : undefined;
+	if (!roomId || !operation) {
+		return issue();
+	}
+	return issue().then((response) => {
+		if (operation.abandoned || operation.epoch !== getWindowEpoch(roomId)) {
+			throw new StaleWindowPageError();
+		}
+		return response;
+	});
 }

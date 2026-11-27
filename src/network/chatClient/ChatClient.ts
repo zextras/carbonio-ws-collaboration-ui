@@ -11,17 +11,17 @@ import { downloadChatExport } from './chatExportDownload';
 import { markChatStack } from './chatStack';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
-import { scheduleBootInbox } from './inboxRefresh';
+import { refreshStaleUnread, scheduleBootInbox } from './inboxRefresh';
 import {
-	beginSearchPage,
+	abandonWindowOperation,
 	beginWindowOperation,
-	isStaleWindowWrite,
-	startSearch
+	isStaleWindowPageError
 } from './windowGuard';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/ChatsRegistryTypes';
+import type { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import { wsDebug } from '../../utils/debug';
 import { getOldestConfirmedMessage, isPendingMessage } from '../../utils/historyAnchorUtils';
@@ -70,7 +70,7 @@ export type ChatClient = Pick<
 		roomId: string,
 		stanzaId: string,
 		date?: number
-	) => Promise<void>;
+	) => Promise<boolean>;
 	/** v2: the next page of the room search results, after the last one in store. */
 	fullTextSearchNextPage: (roomId: string, text: string) => Promise<void>;
 	/** v2: the next page after the newest row of a window cut before the newest message. */
@@ -122,36 +122,29 @@ function readMessageViaSdk(roomId: string, messageId: string): void {
 }
 
 export const RETURN_TO_LATEST_TIMEOUT_MS = 20000;
+const MAX_CATCH_UP_PAGES = 10;
 
-/** Bounds the wait of a caller (a send, the scroll-to-bottom button) behind the queue of window loads. */
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-	return new Promise<T>((resolve, reject) => {
-		const timer = setTimeout(() => reject(new Error('window load timed out')), ms);
-		promise.then(
-			(value) => {
-				clearTimeout(timer);
-				resolve(value);
-			},
-			(err) => {
-				clearTimeout(timer);
-				reject(err);
-			}
-		);
-	});
-}
+type TimelineCursor = { date: number; id?: string };
 
 const windowOperations = new Map<string, Promise<void>>();
 const latestReloads = new Map<string, Promise<void>>();
 
 /**
  * Operations that grow or replace a room window run one at a time: a page that lands in a window
- * replaced meanwhile would join rows of two unrelated spans and leave a hidden gap.
+ * replaced meanwhile would join rows of two unrelated spans and leave a hidden gap. A page that
+ * answers after its operation was abandoned or its room wiped is discarded by the SDK fetch
+ * (`guardWindowPage`) and ends the operation without an error.
  */
 function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Promise<T> {
 	const result = (windowOperations.get(roomId) ?? Promise.resolve()).then(async () => {
 		const end = beginWindowOperation(roomId);
 		try {
 			return await operation();
+		} catch (err) {
+			if (isStaleWindowPageError(err)) {
+				return undefined as T;
+			}
+			throw err;
 		} finally {
 			end();
 		}
@@ -166,6 +159,32 @@ function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Pro
 	return result;
 }
 
+/**
+ * Bounds the wait of a caller (a send, the scroll-to-bottom button) behind the window loads of the
+ * room. On timeout the operation running is abandoned (its late page is discarded) and the room
+ * queue is released, so the next load does not wait for a request that may never answer.
+ */
+function withTimeout<T>(roomId: string, promise: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const timer = setTimeout(() => {
+			abandonWindowOperation(roomId);
+			windowOperations.delete(roomId);
+			latestReloads.delete(roomId);
+			reject(new Error('window load timed out'));
+		}, ms);
+		promise.then(
+			(value) => {
+				clearTimeout(timer);
+				resolve(value);
+			},
+			(err) => {
+				clearTimeout(timer);
+				reject(err);
+			}
+		);
+	});
+}
+
 function getNotBefore(roomId: string): number | undefined {
 	const room = useStore.getState().rooms[roomId];
 	const lowerBound = room?.userSettings?.clearedAt ?? room?.createdAt;
@@ -174,6 +193,53 @@ function getNotBefore(roomId: string): number | undefined {
 
 function isDetached(roomId: string): boolean {
 	return !!useStore.getState().chatsRegistry[roomId]?.hasMoreAfter;
+}
+
+/** Only server rows anchor a cursor: no placeholder, no synthesized line. */
+function newestServerRow(roomId: string): TimelineCursor | undefined {
+	return useStore
+		.getState()
+		.chatsRegistry[roomId]?.messages.findLast(
+			(message) =>
+				!isPendingMessage(message) &&
+				(message.type === MessageType.TEXT_MSG || isServerId(message.id))
+		);
+}
+
+/** True while no new query started and the search results were not cleared since this call. */
+function searchTracker(roomId: string): () => boolean {
+	const generation = useStore.getState().chatsRegistry[roomId]?.searchGeneration;
+	return (): boolean => useStore.getState().chatsRegistry[roomId]?.searchGeneration === generation;
+}
+
+function isTextMessageStored(roomId: string, stanzaId: string): boolean {
+	return !!useStore
+		.getState()
+		.chatsRegistry[roomId]?.messages.some(
+			(message) => message.type === MessageType.TEXT_MSG && message.stanzaId === stanzaId
+		);
+}
+
+/**
+ * The window now reaches the newest message, so live rows land in it again. Rows the live events
+ * brought while it was detached were dropped: read what was committed after the page again, from
+ * the newest row the page brought (a live row appended meanwhile would hide older ones). The
+ * pages are bounded; if more is left the window is detached again and the forward loader goes on.
+ */
+async function attachWindow(roomId: string, pageNewest?: TimelineCursor): Promise<void> {
+	useStore.getState().setHasMoreAfter(roomId, false);
+	let cursor = pageNewest ?? newestServerRow(roomId);
+	let hasMore = false;
+	for (let page = 0; cursor && page < MAX_CATCH_UP_PAGES; page += 1) {
+		// eslint-disable-next-line no-await-in-loop
+		const result = await wscSdk.fetchTimeline(roomId, { after: cursor.date, afterId: cursor.id });
+		hasMore = result.hasMoreAfter;
+		cursor = hasMore ? result.newest : undefined;
+	}
+	if (hasMore) {
+		useStore.getState().setHasMoreAfter(roomId, true);
+	}
+	refreshStaleUnread(roomId);
 }
 
 async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
@@ -185,19 +251,17 @@ async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 	store.setHistoryLoadDisabled(roomId, true);
 	store.clearMessages(roomId);
 	try {
-		const { hasMoreAfter } = await wscSdk.fetchTimeline(roomId, {
+		const { hasMoreAfter, newest } = await wscSdk.fetchTimeline(roomId, {
 			...(notBefore ? { notBefore } : {})
 		});
-		if (isStaleWindowWrite(roomId)) {
-			return;
+		if (!hasMoreAfter) {
+			await attachWindow(roomId, newest);
 		}
-		const current = useStore.getState();
-		current.setHasMoreAfter(roomId, hasMoreAfter);
-		const newest = current.chatsRegistry[roomId]?.messages.findLast(
-			(message) => !isPendingMessage(message)
-		);
-		if (newest) {
-			current.setScrollPosition(roomId, newest.id);
+		const newestRow = useStore
+			.getState()
+			.chatsRegistry[roomId]?.messages.findLast((message) => !isPendingMessage(message));
+		if (newestRow) {
+			useStore.getState().setScrollPosition(roomId, newestRow.id);
 		}
 	} finally {
 		useStore.getState().setHistoryLoadDisabled(roomId, false);
@@ -213,7 +277,11 @@ function returnToLatestMessagesViaSdk(roomId: string): Promise<void> {
 		if (isDetached(roomId)) {
 			await loadLatestWindowViaSdk(roomId);
 		}
-	}).finally(() => latestReloads.delete(roomId));
+	}).finally(() => {
+		if (latestReloads.get(roomId) === reload) {
+			latestReloads.delete(roomId);
+		}
+	});
 	latestReloads.set(roomId, reload);
 	return reload;
 }
@@ -240,7 +308,11 @@ function sendTextViaSdk(
 	}
 	// A message sent from a window cut before the newest one would land after a hidden gap
 	if (isDetached(roomId)) {
-		return withTimeout(returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS).then(
+		return withTimeout(
+			roomId,
+			returnToLatestMessagesViaSdk(roomId),
+			RETURN_TO_LATEST_TIMEOUT_MS
+		).then(
 			() => (isDetached(roomId) ? false : sendTextViaSdk(caller, roomId, message, replyToId)),
 			(err) => {
 				console.error(`chatClient.${caller}: return to the latest messages failed`, err);
@@ -325,29 +397,30 @@ function findKnownMessageDate(roomId: string, stanzaId: string): number | undefi
  * the room becomes the timeline page around the target (one request, wherever the target is).
  * The rows before and after the old window are not contiguous with it, so the old rows are
  * dropped; the window is flagged as cut before the newest message until the forward pages
- * reach it again. If the page cannot be loaded the latest page is restored.
+ * reach it again. If the page cannot be loaded the latest page is restored. Resolves whether
+ * the target is in the window.
  */
 function loadWindowAroundMessageViaSdk(
 	roomId: string,
 	stanzaId: string,
 	dateHint?: number
-): Promise<void> {
+): Promise<boolean> {
 	return runWindowOperation(roomId, async () => {
 		const store = useStore.getState();
 		// v2 invariant id === stanzaId: the same by-id lookup the reply hydration
 		// uses matches the panel's "already stored" selector on confirmed messages
-		if (!store.rooms[roomId] || findRepliedMessage(roomId, stanzaId)) {
-			return;
+		if (!store.rooms[roomId] || isTextMessageStored(roomId, stanzaId)) {
+			return isTextMessageStored(roomId, stanzaId);
 		}
 		const date = dateHint ?? findKnownMessageDate(roomId, stanzaId);
 		if (date === undefined) {
 			console.warn('chatClient.requestMessageResultHistoryToId: unknown message date', stanzaId);
-			return;
+			return false;
 		}
 		const notBefore = getNotBefore(roomId);
 		// Below the cleared-history floor (a pin can be): the page would be empty and leave no anchor
 		if (notBefore !== undefined && date < notBefore) {
-			return;
+			return false;
 		}
 		// The loaders must not page the window while it is replaced
 		store.setHistoryLoadDisabled(roomId, true);
@@ -355,16 +428,16 @@ function loadWindowAroundMessageViaSdk(
 		// Set before the rows land so the list does not scroll to the bottom
 		store.setScrollPosition(roomId, stanzaId);
 		try {
-			const { hasMoreAfter } = await wscSdk.fetchTimeline(roomId, {
+			const { hasMoreAfter, newest } = await wscSdk.fetchTimeline(roomId, {
 				around: date,
 				aroundId: stanzaId,
 				...(notBefore ? { notBefore } : {})
 			});
-			if (!isStaleWindowWrite(roomId)) {
-				useStore.getState().setHasMoreAfter(roomId, hasMoreAfter);
+			if (!hasMoreAfter) {
+				await attachWindow(roomId, newest);
 			}
 		} catch (err) {
-			if (!isStaleWindowWrite(roomId)) {
+			if (!isStaleWindowPageError(err)) {
 				await loadLatestWindowViaSdk(roomId).catch((restoreErr) =>
 					console.error('chatClient: latest page restore failed', restoreErr)
 				);
@@ -373,40 +446,27 @@ function loadWindowAroundMessageViaSdk(
 		} finally {
 			useStore.getState().setHistoryLoadDisabled(roomId, false);
 		}
-	});
+		return isTextMessageStored(roomId, stanzaId);
+	}).then((loaded) => loaded ?? false);
 }
 
 function loadNextPageAfterViaSdk(roomId: string): Promise<void> {
 	return runWindowOperation(roomId, async () => {
-		const messages = useStore.getState().chatsRegistry[roomId]?.messages ?? [];
 		if (!isDetached(roomId)) {
 			return;
 		}
-		// Only server rows anchor a cursor: no placeholder, no synthesized line
-		const newest = messages.findLast(
-			(message) =>
-				!isPendingMessage(message) &&
-				(message.type === MessageType.TEXT_MSG || isServerId(message.id))
-		);
+		const newest = newestServerRow(roomId);
 		if (!newest) {
 			return;
 		}
-		const { hasMoreAfter } = await wscSdk.fetchTimeline(roomId, {
-			after: newest.date,
-			afterId: newest.id
-		});
-		if (isStaleWindowWrite(roomId)) {
+		const result = await wscSdk.fetchTimeline(roomId, { after: newest.date, afterId: newest.id });
+		if (!result.hasMoreAfter) {
+			await attachWindow(roomId, result.newest);
 			return;
 		}
-		const current = useStore.getState();
-		const landed = current.chatsRegistry[roomId]?.messages.findLast(
-			(message) => !isPendingMessage(message)
-		);
-		if (hasMoreAfter && landed?.id === newest.id) {
+		if (newestServerRow(roomId)?.id === newest.id) {
 			console.warn('chatClient.requestMessagesAfter: pagination stalled', roomId);
-			return;
 		}
-		current.setHasMoreAfter(roomId, hasMoreAfter);
 	});
 }
 
@@ -568,11 +628,20 @@ export const chatClient: ChatClient = {
 			// spec has no server-side lower bound, the SDK filters client-side.
 			// Optional chaining is an improvement: v1 threw on unknown rooms.
 			const notBefore = getNotBefore(roomId);
-			startSearch(roomId);
-			useStore.getState().setSearchHasMore(roomId, false);
+			const store = useStore.getState();
+			store.beginSearch(roomId);
+			store.setSearchHasMore(roomId, false);
+			const isCurrent = searchTracker(roomId);
+			// The page is written here, after the check: the SDK would write the page of a query that
+			// is no longer the current one
 			return wscSdk
-				.searchMessages(roomId, text, { ...(notBefore ? { notBefore } : {}) })
-				.then(({ hasMore }) => useStore.getState().setSearchHasMore(roomId, hasMore));
+				.searchMessages(roomId, text, { writeResults: false, ...(notBefore ? { notBefore } : {}) })
+				.then(({ messages, hasMore }) => {
+					if (isCurrent()) {
+						useStore.getState().setSearchResults(roomId, messages as Array<TextMessage>);
+						useStore.getState().setSearchHasMore(roomId, hasMore);
+					}
+				});
 		}
 		return xmppClient.fullTextSearch(roomId, text);
 	},
@@ -586,19 +655,20 @@ export const chatClient: ChatClient = {
 			return Promise.resolve();
 		}
 		const notBefore = getNotBefore(roomId);
-		const isCurrentQuery = beginSearchPage(roomId);
+		const isCurrent = searchTracker(roomId);
 		return wscSdk
 			.searchMessages(roomId, text, {
 				before: oldest.date,
 				beforeId: oldest.id,
-				append: true,
+				writeResults: false,
 				...(notBefore ? { notBefore } : {})
 			})
 			.then(({ messages, hasMore }) => {
 				// The query changed while the page was in flight: it belongs to the old one
-				if (!isCurrentQuery()) {
+				if (!isCurrent()) {
 					return;
 				}
+				useStore.getState().appendSearchResults(roomId, messages as Array<TextMessage>);
 				// A page that adds nothing ends the paging, whatever the server says: no endless requests
 				useStore.getState().setSearchHasMore(roomId, hasMore && messages.length > 0);
 			});
@@ -607,7 +677,9 @@ export const chatClient: ChatClient = {
 		if (isWscPure()) {
 			return loadWindowAroundMessageViaSdk(roomId, stanzaId, date);
 		}
-		return xmppClient.requestMessageResultHistoryToId(roomId, stanzaId);
+		return xmppClient
+			.requestMessageResultHistoryToId(roomId, stanzaId)
+			.then(() => isTextMessageStored(roomId, stanzaId));
 	},
 	requestMessagesAfter: (roomId) => {
 		if (!isWscPure()) {
@@ -619,7 +691,7 @@ export const chatClient: ChatClient = {
 		if (!isWscPure()) {
 			return Promise.resolve();
 		}
-		return withTimeout(returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS);
+		return withTimeout(roomId, returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS);
 	},
 	requestMessageToForward: (roomId, messageToForwardStanzaId, queryId) => {
 		if (isWscPure()) {

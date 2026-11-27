@@ -56,6 +56,22 @@ export function refreshInboxInBackground(errorMessage: string): void {
 	refreshInboxSerialized(errorMessage).catch(() => undefined);
 }
 
+let staleUnreadRefresh = false;
+
+/**
+ * A detached window could not follow an own marker move: the server knows the unread count. One
+ * refresh at a time; while it fails the flag stays on and the next own read or reattach retries.
+ */
+export function refreshStaleUnread(roomId: string): void {
+	if (staleUnreadRefresh || !useStore.getState().chatsRegistry[roomId]?.unreadStale) {
+		return;
+	}
+	staleUnreadRefresh = true;
+	refreshInboxSerialized('refreshStaleUnread: inbox refresh failed').finally(() => {
+		staleUnreadRefresh = false;
+	});
+}
+
 export function scheduleBootInbox(): void {
 	clearTimeout(bootTimer);
 	bootState = 'waiting';

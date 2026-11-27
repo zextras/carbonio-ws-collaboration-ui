@@ -68,6 +68,7 @@ const jumpRoomId = 'room-j';
 const jumpTargetId = 'msg-jump-target';
 const jumpRecentId = 'msg-recent';
 
+const AUG_FIRST_TWELVE_ONE = '2026-08-01T12:00:01Z';
 const AUG_FIRST_TWELVE = '2026-08-01T12:00:00Z';
 const AUG_SECOND = '2026-08-02T00:00:00Z';
 const CONTENT_TYPE = 'content-type';
@@ -112,6 +113,11 @@ function mockJsonResponse(body: unknown): void {
 			blob: (): Promise<unknown> => Promise.resolve(undefined)
 		})
 	);
+}
+
+/** The page that follows the attach of a window: nothing was committed meanwhile. */
+function mockEmptyAfterPage(): void {
+	mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: false }));
 }
 
 describe('chatClient façade', () => {
@@ -1346,7 +1352,7 @@ describe('chatClient façade', () => {
 				jumpTargetId,
 				Date.parse('2026-08-01T09:30:00Z')
 			)
-		).resolves.toBeUndefined();
+		).resolves.toBe(true);
 
 		const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
 		expect(calls).toEqual([
@@ -1463,6 +1469,7 @@ describe('chatClient façade', () => {
 				{ hasMoreBefore: false, hasMoreAfter: false }
 			)
 		);
+		mockEmptyAfterPage();
 
 		await chatClient.requestMessageResultHistoryToId(
 			'room-ja',
@@ -1489,6 +1496,7 @@ describe('chatClient façade', () => {
 				{ hasMoreBefore: true }
 			)
 		);
+		mockEmptyAfterPage();
 
 		await expect(
 			chatClient.requestMessageResultHistoryToId('room-jr', 'msg-x', Date.parse(JULY_FIRST))
@@ -1562,6 +1570,7 @@ describe('chatClient façade', () => {
 				{ hasMoreBefore: true, hasMoreAfter: false }
 			)
 		);
+		mockEmptyAfterPage();
 
 		await chatClient.requestMessagesAfter('room-f');
 
@@ -1573,6 +1582,8 @@ describe('chatClient façade', () => {
 		await chatClient.requestMessagesAfter('room-f');
 
 		expect((global.fetch as Mock).mock.calls[1]?.[0]).toContain('afterId=msg-f2');
+		// The window is attached: the page after its newest row catches what was committed meanwhile
+		expect((global.fetch as Mock).mock.calls[2]?.[0]).toContain('afterId=msg-f3');
 		const registry = useStore.getState().chatsRegistry['room-f'];
 		expect(registry?.hasMoreAfter).toBe(false);
 		expect(registry?.messages.map((message) => message.id)).toEqual([
@@ -1644,13 +1655,18 @@ describe('chatClient façade', () => {
 				{ hasMoreBefore: true, hasMoreAfter: false }
 			)
 		);
+		mockEmptyAfterPage();
 
 		await Promise.all([
 			chatClient.returnToLatestMessages('room-l'),
 			chatClient.returnToLatestMessages('room-l')
 		]);
 
-		expect((global.fetch as Mock).mock.calls).toHaveLength(1);
+		// The latest page, then the page after its newest row: once for the two calls
+		expect((global.fetch as Mock).mock.calls).toHaveLength(2);
+		expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(
+			`/services/chats/rooms/room-l/timeline?after=2026-08-01T10%3A00%3A00.000000Z&afterId=${NEWEST_ID}&limit=50`
+		);
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
 			'/services/chats/rooms/room-l/timeline?limit=50'
 		);
@@ -1722,6 +1738,7 @@ describe('chatClient façade', () => {
 				{ hasMoreBefore: true }
 			)
 		);
+		mockEmptyAfterPage();
 		mockJsonResponse(
 			buildWireMessage({ id: 'msg-sent', roomId: 'room-sd', senderId: 'me', text: 'ciao' })
 		);
@@ -1805,112 +1822,139 @@ describe('chatClient façade', () => {
 		};
 		const rowIds = (id: string): Array<string> =>
 			useStore.getState().chatsRegistry[id]?.messages.map((message) => message.id) ?? [];
+		const row = (roomId: string, id: string, createdAt: string): unknown =>
+			buildMessageTimelineItem(buildWireMessage({ id, roomId, createdAt }));
+		const liveEvent = (roomId: string, id: string, createdAt: string): void =>
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(buildWireMessage({ id, roomId, senderId: 'u2', createdAt }))
+			);
+		const seedWindow = (roomId: string, id = 'w1'): void => {
+			useStore
+				.getState()
+				.updateHistory(roomId, [
+					createMockTextMessage({ id, stanzaId: id, roomId, date: Date.parse(AUG_FIRST_EARLY) })
+				]);
+			useStore.getState().setHasMoreAfter(roomId, true);
+		};
 
-		it('keeps a live message that lands while the latest page is in flight', async () => {
+		it('reads again what was committed while the latest page was in flight', async () => {
 			setUpRoom('room-ra');
-			useStore.getState().updateHistory('room-ra', [
-				createMockTextMessage({
-					id: 'old',
-					stanzaId: 'old',
-					roomId: 'room-ra',
-					date: Date.parse(AUG_FIRST_EARLY)
-				})
-			]);
-			useStore.getState().setHasMoreAfter('room-ra', true);
+			seedWindow('room-ra', 'old');
 			const answer = deferResponse();
 			const reload = chatClient.returnToLatestMessages('room-ra');
 			await vi.advanceTimersByTimeAsync(0);
 
-			wsChatEventsRouter(
-				buildWsMessageReceivedEvent(
-					buildWireMessage({
-						id: 'live',
-						roomId: 'room-ra',
-						senderId: 'u2',
-						createdAt: '2026-08-01T12:00:01Z'
-					})
-				)
-			);
+			// Committed after the server read the page, its event arrives before the page is processed
+			liveEvent('room-ra', 'live', AUG_FIRST_TWELVE_ONE);
 			answer(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({ id: 'snap', roomId: 'room-ra', createdAt: AUG_FIRST_TWELVE })
-						)
-					],
-					{ hasMoreBefore: true, hasMoreAfter: false }
-				)
+				buildTimelineResponse([row('room-ra', 'snap', AUG_FIRST_TWELVE) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockJsonResponse(
+				buildTimelineResponse([row('room-ra', 'live', AUG_FIRST_TWELVE_ONE) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
 			);
 			await reload;
-			wsChatEventsRouter(
-				buildWsMessageReceivedEvent(
-					buildWireMessage({
-						id: 'live2',
-						roomId: 'room-ra',
-						senderId: 'u2',
-						createdAt: '2026-08-01T12:00:02Z'
-					})
-				)
-			);
+			liveEvent('room-ra', 'live2', '2026-08-01T12:00:02Z');
 
+			const timelineCalls = (global.fetch as Mock).mock.calls
+				.map((call) => call[0] as string)
+				.filter((url) => url.includes('/timeline?'));
+			expect(timelineCalls[1]).toContain('afterId=snap');
 			expect(rowIds('room-ra')).toEqual(['snap', 'live', 'live2']);
 			expect(useStore.getState().chatsRegistry['room-ra']?.hasMoreAfter).toBe(false);
-			expect(useStore.getState().chatsRegistry['room-ra']?.detachedBuffer).toBeUndefined();
 		});
 
-		it('keeps a live message that lands while a forward page is in flight', async () => {
+		it('reads again what was committed while the last forward page was in flight', async () => {
 			setUpRoom('room-rf');
-			useStore.getState().updateHistory('room-rf', [
-				createMockTextMessage({
-					id: 'w1',
-					stanzaId: 'w1',
-					roomId: 'room-rf',
-					date: Date.parse(AUG_FIRST_EARLY)
-				})
-			]);
-			useStore.getState().setHasMoreAfter('room-rf', true);
+			seedWindow('room-rf');
 			const answer = deferResponse();
 			const next = chatClient.requestMessagesAfter('room-rf');
 			await vi.advanceTimersByTimeAsync(0);
 
-			wsChatEventsRouter(
-				buildWsMessageReceivedEvent(
-					buildWireMessage({
-						id: 'live',
-						roomId: 'room-rf',
-						senderId: 'u2',
-						createdAt: '2026-08-01T12:00:01Z'
-					})
-				)
-			);
+			liveEvent('room-rf', 'live', AUG_FIRST_TWELVE_ONE);
 			answer(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({ id: 'f1', roomId: 'room-rf', createdAt: AUG_FIRST_TWELVE })
-						)
-					],
-					{ hasMoreBefore: true, hasMoreAfter: false }
-				)
+				buildTimelineResponse([row('room-rf', 'f1', AUG_FIRST_TWELVE) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rf', 'live', AUG_FIRST_TWELVE_ONE) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
 			);
 			await next;
 
 			expect(rowIds('room-rf')).toEqual(['w1', 'f1', 'live']);
 		});
 
-		it('shows an own message confirmed while the window is detached once the window is attached again', () => {
-			setUpRoom('room-rb');
-			useStore.getState().updateHistory('room-rb', [
-				createMockTextMessage({
-					id: 'old',
-					stanzaId: 'old',
-					roomId: 'room-rb',
-					date: Date.parse(AUG_FIRST_EARLY)
+		it('keeps paging after the attach while the catch-up has more, from the newest row of the page', async () => {
+			setUpRoom('room-rm');
+			seedWindow('room-rm');
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rm', 'f1', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
 				})
-			]);
+			);
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rm', 'c1', AUG_FIRST_LATE_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
+			);
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rm', 'c2', AUG_FIRST_NOON) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+
+			await chatClient.requestMessagesAfter('room-rm');
+
+			const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
+			expect(calls[1]).toContain('afterId=f1');
+			expect(calls[2]).toContain('afterId=c1');
+			expect(rowIds('room-rm')).toEqual(['w1', 'f1', 'c1', 'c2']);
+			expect(useStore.getState().chatsRegistry['room-rm']?.hasMoreAfter).toBe(false);
+		});
+
+		it('detaches the window again when the catch-up pages run out', async () => {
+			setUpRoom('room-rx');
+			seedWindow('room-rx');
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rx', 'f0', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			Array.from({ length: 10 }, (_, index) => index).forEach((index) =>
+				mockJsonResponse(
+					buildTimelineResponse(
+						[row('room-rx', `c${index}`, `2026-08-01T10:${String(10 + index)}:00Z`) as never],
+						{ hasMoreBefore: true, hasMoreAfter: true }
+					)
+				)
+			);
+
+			await chatClient.requestMessagesAfter('room-rx');
+
+			expect((global.fetch as Mock).mock.calls).toHaveLength(11);
+			expect(useStore.getState().chatsRegistry['room-rx']?.hasMoreAfter).toBe(true);
+		});
+
+		it('brings back an own message confirmed while the window was detached with the after pages', async () => {
+			setUpRoom('room-rb');
 			useStore.getState().setPlaceholderMessage({ roomId: 'room-rb', id: 'tmp-1', text: 'hello' });
 			useStore.getState().clearMessages('room-rb');
-			expect(rowIds('room-rb')).toEqual(['tmp-1']);
+			seedWindow('room-rb');
+			expect(rowIds('room-rb')).toEqual(['w1', 'tmp-1']);
 
 			wsChatEventsRouter(
 				buildWsMessageReceivedEvent(
@@ -1924,11 +1968,18 @@ describe('chatClient façade', () => {
 					{ tempId: 'tmp-1' }
 				)
 			);
-			expect(rowIds('room-rb')).toEqual([]);
+			expect(rowIds('room-rb')).toEqual(['w1']);
 
-			useStore.getState().setHasMoreAfter('room-rb', false);
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rb', 'srv-1', AUG_FIRST_TWELVE) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockEmptyAfterPage();
+			await chatClient.requestMessagesAfter('room-rb');
 
-			expect(rowIds('room-rb')).toEqual(['srv-1']);
+			expect(rowIds('room-rb')).toEqual(['w1', 'srv-1']);
 		});
 
 		it('ignores a target below the cleared-history floor without touching the window', async () => {
@@ -1942,83 +1993,72 @@ describe('chatClient façade', () => {
 				})
 			]);
 
-			await chatClient.requestMessageResultHistoryToId(
+			const loaded = await chatClient.requestMessageResultHistoryToId(
 				'room-rg',
 				'pinned',
 				Date.parse(AUG_FIRST_EARLY)
 			);
 
+			expect(loaded).toBe(false);
 			expect(global.fetch).not.toHaveBeenCalled();
 			expect(rowIds('room-rg')).toEqual(['visible']);
 			expect(useStore.getState().chatsRegistry['room-rg']?.hasMoreAfter).toBeFalsy();
 		});
 
-		it('keeps the page around the target as the window even when the target is not in it', async () => {
+		it('keeps the page around the target as the window when the target is not in it, and says so', async () => {
 			setUpRoom('room-rn');
 			mockJsonResponse(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({ id: 'near', roomId: 'room-rn', createdAt: AUG_FIRST_MORNING })
-						)
-					],
-					{ hasMoreBefore: true, hasMoreAfter: true }
-				)
+				buildTimelineResponse([row('room-rn', 'near', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
 			);
 
-			await chatClient.requestMessageResultHistoryToId(
+			const loaded = await chatClient.requestMessageResultHistoryToId(
 				'room-rn',
 				'deleted-target',
 				Date.parse(AUG_FIRST_MORNING)
 			);
 
+			expect(loaded).toBe(false);
 			expect(rowIds('room-rn')).toEqual(['near']);
 			expect(useStore.getState().chatsRegistry['room-rn']?.hasMoreAfter).toBe(true);
 		});
 
-		it('does not let a forward page in flight write into the registry of a reconnection reset', async () => {
+		it('discards a forward page that answers after a reconnection reset, keeping the live events', async () => {
 			setUpRoom('room-rr');
-			useStore.getState().updateHistory('room-rr', [
-				createMockTextMessage({
-					id: 'w1',
-					stanzaId: 'w1',
-					roomId: 'room-rr',
-					date: Date.parse(AUG_FIRST_EARLY)
-				})
-			]);
-			useStore.getState().setHasMoreAfter('room-rr', true);
+			seedWindow('room-rr');
 			const answer = deferResponse();
 			const next = chatClient.requestMessagesAfter('room-rr');
 			await vi.advanceTimersByTimeAsync(0);
 
 			useStore.getState().resetXmppData();
+			liveEvent('room-rr', 'live', '2026-08-05T12:00:00Z');
 			wsChatEventsRouter(
-				buildWsMessageReceivedEvent(
-					buildWireMessage({
-						id: 'live',
-						roomId: 'room-rr',
-						senderId: 'u2',
-						createdAt: '2026-08-05T12:00:00Z'
-					})
-				)
+				buildWsReactionChangedEvent({
+					roomId: 'room-rr',
+					messageId: 'live',
+					userId: 'u2',
+					reaction: '👍'
+				})
 			);
 			answer(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({ id: 'f1', roomId: 'room-rr', createdAt: AUG_FIRST_MORNING })
-						)
-					],
-					{ hasMoreBefore: true, hasMoreAfter: true }
-				)
+				buildTimelineResponse([row('room-rr', 'f1', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
 			);
-			await next;
+			await expect(next).resolves.toBeUndefined();
 
 			expect(rowIds('room-rr')).toEqual(['live']);
 			expect(useStore.getState().chatsRegistry['room-rr']?.hasMoreAfter).toBeFalsy();
+			// A live reaction written while a stale load was in flight is a real one
+			expect(
+				useStore.getState().chatsRegistry['room-rr']?.fastenings.live?.map((f) => f.value)
+			).toEqual(['👍']);
 		});
 
-		it('does not let a jump in flight write into a cleared history', async () => {
+		it('discards a jump page that answers after a history clear', async () => {
 			setUpRoom('room-rc');
 			const answer = deferResponse();
 			const jump = chatClient.requestMessageResultHistoryToId(
@@ -2030,80 +2070,128 @@ describe('chatClient façade', () => {
 
 			useStore.getState().clearConversation('room-rc', AUG_SECOND);
 			answer(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({ id: 'target', roomId: 'room-rc', createdAt: AUG_FIRST_MORNING })
-						)
-					],
-					{ hasMoreBefore: true, hasMoreAfter: true }
-				)
+				buildTimelineResponse([row('room-rc', 'target', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
 			);
-			await jump;
+			await expect(jump).resolves.toBe(false);
 
 			expect(rowIds('room-rc')).toEqual([]);
 			expect(useStore.getState().chatsRegistry['room-rc']?.hasMoreAfter).toBeFalsy();
 		});
 
-		it('drops a late next page of an old query and keeps the results of the new one', async () => {
+		it('drops the first page of an old query that answers after a new query started', async () => {
 			setUpRoom('room-re');
-			useStore.getState().setSearchResults('room-re', [
-				createMockTextMessage({
-					id: 'foo-1',
-					stanzaId: 'foo-1',
-					roomId: 'room-re',
-					date: Date.parse(AUG_FIRST_LATE_MORNING)
-				})
-			]);
 			const answerFoo = deferResponse();
-			const next = chatClient.fullTextSearchNextPage('room-re', 'foo');
+			const first = chatClient.fullTextSearch('room-re', 'foo');
 			await vi.advanceTimersByTimeAsync(0);
-
-			useStore.getState().clearSearchResults('room-re');
 			mockJsonResponse({
 				messages: [buildWireMessage({ id: 'bar-1', roomId: 'room-re', createdAt: AUG_FIRST_NOON })],
 				hasMore: true
 			});
 			await chatClient.fullTextSearch('room-re', 'bar');
+
 			answerFoo({
 				messages: [
-					buildWireMessage({ id: 'foo-2', roomId: 'room-re', createdAt: AUG_FIRST_MORNING })
+					buildWireMessage({ id: 'foo-1', roomId: 'room-re', createdAt: AUG_FIRST_MORNING })
 				],
 				hasMore: false
 			});
-			await next;
+			await first;
 
 			const registry = useStore.getState().chatsRegistry['room-re'];
 			expect(registry?.searchResults.map((result) => result.id)).toEqual(['bar-1']);
 			expect(registry?.searchHasMore).toBe(true);
 		});
 
-		it('gives up a send from a detached window when the latest page does not come in time', async () => {
+		it('drops a next page of an old query even when the new query already asked its own', async () => {
+			setUpRoom('room-rq');
+			const hit = (id: string, createdAt: string): Record<string, string> => ({
+				id,
+				roomId: 'room-rq',
+				senderId: 'user-2',
+				text: 'x',
+				createdAt
+			});
+			mockJsonResponse({ messages: [hit('foo-1', AUG_FIRST_NOON)], hasMore: true });
+			await chatClient.fullTextSearch('room-rq', 'foo');
+			const answerFoo = deferResponse();
+			const oldNext = chatClient.fullTextSearchNextPage('room-rq', 'foo');
+			await vi.advanceTimersByTimeAsync(0);
+
+			mockJsonResponse({ messages: [hit('bar-1', AUG_FIRST_NOON)], hasMore: true });
+			await chatClient.fullTextSearch('room-rq', 'bar');
+			const answerBar = deferResponse();
+			const newNext = chatClient.fullTextSearchNextPage('room-rq', 'bar');
+			await vi.advanceTimersByTimeAsync(0);
+			answerBar({ messages: [hit('bar-2', AUG_FIRST_MORNING)], hasMore: false });
+			await newNext;
+			answerFoo({ messages: [hit('foo-2', AUG_FIRST_EARLY)], hasMore: true });
+			await oldNext;
+
+			const registry = useStore.getState().chatsRegistry['room-rq'];
+			expect(registry?.searchResults.map((result) => result.id)).toEqual(['bar-1', 'bar-2']);
+			expect(registry?.searchHasMore).toBe(false);
+		});
+
+		it('drops a late search page after the results were cleared', async () => {
+			setUpRoom('room-rd');
+			const answer = deferResponse();
+			const first = chatClient.fullTextSearch('room-rd', 'foo');
+			await vi.advanceTimersByTimeAsync(0);
+
+			useStore.getState().clearSearchResults('room-rd');
+			answer({
+				messages: [
+					buildWireMessage({ id: 'foo-1', roomId: 'room-rd', createdAt: AUG_FIRST_MORNING })
+				],
+				hasMore: true
+			});
+			await first;
+
+			expect(useStore.getState().chatsRegistry['room-rd']?.searchResults).toEqual([]);
+		});
+
+		it('releases the room after a timeout: the next load does not wait and the late page is discarded', async () => {
 			setUpRoom('room-rt');
-			useStore.getState().updateHistory('room-rt', [
-				createMockTextMessage({
-					id: 'old',
-					stanzaId: 'old',
-					roomId: 'room-rt',
-					date: Date.parse(AUG_FIRST_EARLY)
-				})
-			]);
-			useStore.getState().setHasMoreAfter('room-rt', true);
-			deferResponse();
+			seedWindow('room-rt');
+			const answerHung = deferResponse();
+			const hungNext = chatClient.requestMessagesAfter('room-rt');
+			await vi.advanceTimersByTimeAsync(0);
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
 			const sent = chatClient.sendChatMessage('room-rt', 'ciao');
 			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
-
 			await expect(sent).resolves.toBe(false);
 			expect(errorSpy).toHaveBeenCalledWith(
 				'chatClient.sendChatMessage: return to the latest messages failed',
 				expect.any(Error)
 			);
-			expect(rowIds('room-rt')).not.toContain(expect.stringMatching(/ciao/));
+
+			// The queue is free: a reload goes out at once instead of waiting for the hung page
+			mockJsonResponse(
+				buildTimelineResponse([row('room-rt', 'latest', AUG_FIRST_NOON) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: false
+				})
+			);
+			mockEmptyAfterPage();
+			await chatClient.returnToLatestMessages('room-rt');
+			expect(rowIds('room-rt')).toEqual(['latest']);
+
+			answerHung(
+				buildTimelineResponse([row('room-rt', 'late', AUG_FIRST_MORNING) as never], {
+					hasMoreBefore: true,
+					hasMoreAfter: true
+				})
+			);
+			await expect(hungNext).resolves.toBeUndefined();
+			expect(rowIds('room-rt')).toEqual(['latest']);
+			expect(useStore.getState().chatsRegistry['room-rt']?.hasMoreAfter).toBe(false);
 		});
 
-		it('refreshes the unread count when an own read moves the marker outside a detached window', async () => {
+		it('refreshes the unread count once, only on an own read, and again after a failed refresh', async () => {
 			setUpRoom('room-ru');
 			useStore.getState().updateHistory('room-ru', [
 				createMockTextMessage({
@@ -2116,19 +2204,44 @@ describe('chatClient façade', () => {
 			]);
 			useStore.getState().setUnreadCount('room-ru', 10);
 			useStore.getState().setHasMoreAfter('room-ru', true);
-			const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+			vi.spyOn(console, 'error').mockImplementation(() => undefined);
+			let releaseInbox: () => void = () => undefined;
+			const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockImplementationOnce(
+				() =>
+					new Promise<void>((_, reject) => {
+						releaseInbox = (): void => reject(new Error(BACKEND_DOWN));
+					})
+			);
+			const ownRead = (): void =>
+				wsChatEventsRouter(
+					buildWsReadUpdatedEvent({
+						roomId: 'room-ru',
+						userId: 'me',
+						itemCreatedAt: AUG_FIRST_LATE_MORNING
+					})
+				);
 
 			wsChatEventsRouter(
 				buildWsReadUpdatedEvent({
 					roomId: 'room-ru',
-					userId: 'me',
+					userId: 'u2',
 					itemCreatedAt: AUG_FIRST_LATE_MORNING
 				})
 			);
-			await vi.advanceTimersByTimeAsync(0);
+			expect(inboxSpy).not.toHaveBeenCalled();
 
+			ownRead();
 			expect(useStore.getState().chatsRegistry['room-ru']?.unreadStale).toBe(true);
+			ownRead();
+			ownRead();
 			expect(inboxSpy).toHaveBeenCalledTimes(1);
+
+			releaseInbox();
+			await vi.advanceTimersByTimeAsync(0);
+			expect(useStore.getState().chatsRegistry['room-ru']?.unreadStale).toBe(true);
+			inboxSpy.mockResolvedValueOnce(undefined);
+			ownRead();
+			expect(inboxSpy).toHaveBeenCalledTimes(2);
 		});
 	});
 

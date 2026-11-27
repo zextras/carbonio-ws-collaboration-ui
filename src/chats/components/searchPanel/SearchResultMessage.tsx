@@ -65,9 +65,13 @@ const SearchResultMessage = ({
 		if (!isMessageSelectedAlreadyStored && (!isMessageSelected || isWscPure)) {
 			chatClient
 				.requestMessageResultHistoryToId(message.roomId, message.stanzaId, message.date)
-				.then(() => {
-					scrollToMessage(message.id);
-					useStore.getState().setScrollPosition(message.roomId, message.id);
+				.then((loaded) => {
+					// A target that did not load leaves the list where it is: a scroll position on a row
+					// that is not there would read as the bottom
+					if (loaded) {
+						scrollToMessage(message.id);
+						useStore.getState().setScrollPosition(message.roomId, message.id);
+					}
 				})
 				.catch((err) =>
 					console.error('SearchResultMessage: history to the search result failed', err)

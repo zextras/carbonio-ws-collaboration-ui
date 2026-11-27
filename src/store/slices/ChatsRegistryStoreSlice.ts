@@ -194,8 +194,9 @@ const unreadAfterMarkerMoved = (
 	if (registry.lastMessage && markerDate >= registry.lastMessage.date) {
 		return { unread: 0, stale: false };
 	}
-	const oldestDate = registry.messages[0]?.date;
-	const newestDate = registry.messages[registry.messages.length - 1]?.date;
+	const confirmedRows = registry.messages.filter((msg) => !isPendingRow(msg));
+	const oldestDate = confirmedRows[0]?.date;
+	const newestDate = confirmedRows[confirmedRows.length - 1]?.date;
 	const insideWindow =
 		previousMarkerDate !== undefined &&
 		oldestDate !== undefined &&
@@ -236,13 +237,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 				const existingIndex = findIndex(messages, { id: message.id });
 				// A window that does not end at the newest message must not grow at the end: a hidden gap.
-				// The row waits until the window reaches the newest message
+				// The row is read again with the pages that attach the window
 				if (hasMoreAfter && existingIndex === -1) {
-					const registry = draft.chatsRegistry[message.roomId];
-					registry.detachedBuffer = [
-						...(registry.detachedBuffer ?? []).filter((buffered) => buffered.id !== message.id),
-						message
-					];
 					return;
 				}
 				landLiveRow(messages, markers, message);
@@ -585,12 +581,24 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/SET_SEARCH_HAS_MORE'
 		);
 	},
+	beginSearch: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = initRoomChatsRegistry(draft, roomId);
+				registry.searchGeneration = (registry.searchGeneration ?? 0) + 1;
+			}),
+			false,
+			'CHAT/BEGIN_SEARCH'
+		);
+	},
 	clearSearchResults: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].searchResults = [];
 				draft.chatsRegistry[roomId].searchHasMore = false;
+				draft.chatsRegistry[roomId].searchGeneration =
+					(draft.chatsRegistry[roomId].searchGeneration ?? 0) + 1;
 				if (draft.activeConversations[roomId]) {
 					draft.activeConversations[roomId].selectedSearchResult = undefined;
 				}
@@ -625,7 +633,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				const registry = initRoomChatsRegistry(draft, roomId);
-				// Unconfirmed sends stay: their confirmation replaces them by id
+				// Unconfirmed sends stay at the end of the window. Their confirmation is dropped while the
+				// window is detached and comes back with the pages that attach it
 				registry.messages = registry.messages.filter(isPendingRow);
 				registry.hasMoreAfter = true;
 				const conversation = draft.activeConversations[roomId];
@@ -640,17 +649,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				const registry = initRoomChatsRegistry(draft, roomId);
-				registry.hasMoreAfter = hasMoreAfter;
-				if (!hasMoreAfter && registry.detachedBuffer) {
-					// The window reaches the newest message: the live rows it missed join it
-					const buffered = registry.detachedBuffer;
-					registry.detachedBuffer = undefined;
-					const knownIds = new Set(registry.messages.map((row) => row.id));
-					buffered
-						.filter((row) => !knownIds.has(row.id))
-						.forEach((row) => landLiveRow(registry.messages, registry.markers, row));
-				}
+				initRoomChatsRegistry(draft, roomId).hasMoreAfter = hasMoreAfter;
 			}),
 			false,
 			'CHAT/SET_HAS_MORE_AFTER'

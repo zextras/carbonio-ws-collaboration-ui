@@ -27,6 +27,7 @@ export type ChatsRegistryStoreSlice = {
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
 	appendSearchResults: (roomId: string, results: TextMessage[]) => void;
 	setSearchHasMore: (roomId: string, hasMore: boolean) => void;
+	beginSearch: (roomId: string) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
@@ -44,13 +45,13 @@ export type ChatRegistry = {
 	markers: { [userId: string]: Marker };
 	searchResults: TextMessage[];
 	searchHasMore?: boolean;
+	/** Changes with every new query and every clear: a search page asked before is stale. */
+	searchGeneration?: number;
 	/**
 	 * The loaded window does not end at the newest message (a jump replaced it): live messages are
 	 * not appended to it until the forward pages reach the newest message again.
 	 */
 	hasMoreAfter?: boolean;
-	/** Live rows not appended to a detached window: they join it when it reaches the newest message. */
-	detachedBuffer?: Message[];
 	/** The unread count could not follow an own marker move on a detached window: refresh it. */
 	unreadStale?: boolean;
 	messageRanges?: MessageRange[];

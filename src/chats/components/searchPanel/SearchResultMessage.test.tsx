@@ -31,7 +31,7 @@ beforeEach(() => {
 
 describe('SearchResultMessage jump', () => {
 	test('asks to bring a result that is not in store into view, with its date, then scrolls to it', async () => {
-		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue();
+		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(true);
 		const { user } = setup(<SearchResultMessage message={result} searchText="zzz" />);
 
 		await user.click(screen.getByText('needle'));
@@ -41,8 +41,22 @@ describe('SearchResultMessage jump', () => {
 		expect(useStore.getState().activeConversations[room.id]?.selectedSearchResult).toBe(RESULT_ID);
 	});
 
+	test('does not scroll nor move the scroll position when the result did not load', async () => {
+		vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(false);
+		useStore.getState().setScrollPosition(room.id, 'before');
+		const { user } = setup(<SearchResultMessage message={result} searchText="zzz" />);
+
+		await user.click(screen.getByText('needle'));
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(scrollToMessage).not.toHaveBeenCalled();
+		expect(useStore.getState().activeConversations[room.id]?.scrollPositionMessageId).toBe(
+			'before'
+		);
+	});
+
 	test('only scrolls to a result that is already in store', async () => {
-		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue();
+		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(true);
 		useStore.getState().updateHistory(room.id, [result]);
 		const { user } = setup(<SearchResultMessage message={result} searchText="zzz" />);
 
@@ -54,7 +68,7 @@ describe('SearchResultMessage jump', () => {
 
 	test('on 2.0.0 jumps again to a selected result that has left the window', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue();
+		const jump = vi.spyOn(chatClient, 'requestMessageResultHistoryToId').mockResolvedValue(true);
 		useStore.getState().setSelectedSearchResult(room.id, RESULT_ID);
 		const { user } = setup(<SearchResultMessage message={result} searchText="zzz" />);
 
