@@ -156,6 +156,26 @@ const countsAsUnread = (msg: Message, isWscPure: boolean): boolean => {
 	return msg.type === MessageType.TEXT_MSG && !isMyId(msg.from);
 };
 
+/**
+ * A window that stops before the newest message cannot recount the unread rows after the marker:
+ * the count of the server stays, less the countable rows the marker just moved over.
+ */
+const unreadAfterMarkerMoved = (
+	registry: ChatRegistry,
+	myId: string,
+	previousMarkerDate: number | undefined
+): number => {
+	const markerDate = registry.markers[myId]?.markerDate;
+	if (!markerDate) return registry.unread;
+	const readNow = registry.messages.filter(
+		(msg) =>
+			countsAsUnread(msg, true) &&
+			(!previousMarkerDate || isStrictlyBefore(previousMarkerDate, msg.date)) &&
+			isBefore(msg.date, markerDate)
+	).length;
+	return Math.max(0, registry.unread - readNow);
+};
+
 export const useChatsRegistryStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -166,7 +186,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				const { messages, markers } = initRoomChatsRegistry(draft, message.roomId);
+				const { messages, markers, hasMoreAfter } = initRoomChatsRegistry(draft, message.roomId);
 				if (!getIsWscPure(draft)) {
 					const alreadyExists = find(messages, { id: message.id });
 					// Replace message if it already exists (placeholder message)
@@ -184,6 +204,10 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						? { ...message, read: calcReads(message.date, message.roomId, markers) }
 						: message;
 				const existingIndex = findIndex(messages, { id: message.id });
+				// A window that does not end at the newest message must not grow at the end: a hidden gap
+				if (hasMoreAfter && existingIndex === -1) {
+					return;
+				}
 				// Replace message if it already exists (placeholder message)
 				if (existingIndex !== -1) {
 					const [existing] = messages.splice(existingIndex, 1);
@@ -396,9 +420,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 		);
 	},
 	updateReadStatus: (roomId: string, newMarkers: Marker[]): void => {
+		const ownId = get().session.id;
+		const previousOwnMarkerDate = ownId
+			? get().chatsRegistry[roomId]?.markers[ownId]?.markerDate
+			: undefined;
 		set(
 			produce((draft: RootStore) => {
-				const { messages, markers, lastMessage } = initRoomChatsRegistry(draft, roomId);
+				const { messages, markers, lastMessage, hasMoreAfter } = initRoomChatsRegistry(
+					draft,
+					roomId
+				);
 
 				// Set a member marker only when it's a new marker, or it is more recent than other
 				const myId = draft.session.id;
@@ -441,6 +472,16 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// preloaded. A history page repeats the markers it already knows
 				const isWscPure = getIsWscPure(draft);
 				if (isWscPure && !ownMarkerChanged) {
+					return;
+				}
+				// A window that stops before the newest message cannot recount the unread rows after the
+				// marker: take away the ones the marker just moved over
+				if (isWscPure && hasMoreAfter && myId) {
+					draft.chatsRegistry[roomId].unread = unreadAfterMarkerMoved(
+						draft.chatsRegistry[roomId],
+						myId,
+						previousOwnMarkerDate
+					);
 					return;
 				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
@@ -488,11 +529,34 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'CHAT/SET_SEARCH_RESULTS'
 		);
 	},
+	appendSearchResults: (roomId: string, results: TextMessage[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = initRoomChatsRegistry(draft, roomId);
+				// Results cleared meanwhile (panel closed, query reset): a late page has nothing to join
+				if (registry.searchResults.length === 0) return;
+				const knownIds = new Set(registry.searchResults.map((result) => result.id));
+				registry.searchResults.push(...results.filter((result) => !knownIds.has(result.id)));
+			}),
+			false,
+			'CHAT/APPEND_SEARCH_RESULTS'
+		);
+	},
+	setSearchHasMore: (roomId: string, hasMore: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId).searchHasMore = hasMore;
+			}),
+			false,
+			'CHAT/SET_SEARCH_HAS_MORE'
+		);
+	},
 	clearSearchResults: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				initRoomChatsRegistry(draft, roomId);
 				draft.chatsRegistry[roomId].searchResults = [];
+				draft.chatsRegistry[roomId].searchHasMore = false;
 				if (draft.activeConversations[roomId]) {
 					draft.activeConversations[roomId].selectedSearchResult = undefined;
 				}
@@ -521,6 +585,31 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			}),
 			false,
 			'CHAT/ENQUEUE_BACKFILL'
+		);
+	},
+	clearMessages: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const registry = initRoomChatsRegistry(draft, roomId);
+				// Unconfirmed sends stay: their confirmation replaces them by id
+				registry.messages = registry.messages.filter(isPendingRow);
+				registry.hasMoreAfter = true;
+				const conversation = draft.activeConversations[roomId];
+				if (conversation) {
+					conversation.isHistoryFullyLoaded = false;
+				}
+			}),
+			false,
+			'CHAT/CLEAR_MESSAGES'
+		);
+	},
+	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				initRoomChatsRegistry(draft, roomId).hasMoreAfter = hasMoreAfter;
+			}),
+			false,
+			'CHAT/SET_HAS_MORE_AFTER'
 		);
 	},
 	shiftBackfillQueue: (roomId: string): void => {

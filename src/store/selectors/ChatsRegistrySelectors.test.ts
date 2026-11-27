@@ -4,8 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { getMyLastReaction } from './ChatsRegistrySelectors';
-import { createMockMessageFastening } from '../../tests/createMock';
+import { getMyLastReaction, getRoomIdsWithLastMessage } from './ChatsRegistrySelectors';
+import {
+	createMockMessageFastening,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
 import { FasteningAction, MessageFastening } from '../../types/store/ChatsRegistryTypes';
 import useStore from '../Store';
 
@@ -69,5 +73,32 @@ describe('getMyLastReaction', () => {
 		useStore.getState().setApiVersion('1.6.14');
 		seed(reaction('r2', 2000, '❤️'), reaction('r1', 1000, '👍'));
 		expect(getMyLastReaction(useStore.getState(), roomId, stanzaId)).toBe('👍');
+	});
+});
+
+describe('getRoomIdsWithLastMessage', () => {
+	const roomId = 'room-last';
+
+	beforeEach(() => {
+		useStore.getState().addRooms([createMockRoom({ id: roomId })]);
+		useStore
+			.getState()
+			.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: 1000 })]);
+		useStore
+			.getState()
+			.setLastMessage(roomId, createMockTextMessage({ id: 'm9', roomId, date: 9000 }));
+	});
+
+	const lastDateOfRoom = (): number | undefined =>
+		getRoomIdsWithLastMessage(useStore.getState()).find((room) => room.roomId === roomId)
+			?.lastMessageTimestamp;
+
+	test('uses the newest row of the window', () => {
+		expect(lastDateOfRoom()).toBe(1000);
+	});
+
+	test('uses the last message of the room when the window ends before it', () => {
+		useStore.getState().setHasMoreAfter(roomId, true);
+		expect(lastDateOfRoom()).toBe(9000);
 	});
 });

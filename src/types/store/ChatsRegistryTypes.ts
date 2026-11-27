@@ -23,10 +23,14 @@ export type ChatsRegistryStoreSlice = {
 	setUnreadCount: (roomId: string, count: number) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 	setSearchResults: (roomId: string, results: TextMessage[]) => void;
+	appendSearchResults: (roomId: string, results: TextMessage[]) => void;
+	setSearchHasMore: (roomId: string, hasMore: boolean) => void;
 	clearSearchResults: (roomId: string) => void;
 	addMessageRange: (roomId: string, range: MessageRange) => void;
 	enqueueBackfill: (roomId: string, gaps: BackfillRequest[]) => void;
 	shiftBackfillQueue: (roomId: string) => void;
+	clearMessages: (roomId: string) => void;
+	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean) => void;
 };
 
 export type ChatRegistry = {
@@ -37,6 +41,12 @@ export type ChatRegistry = {
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };
 	searchResults: TextMessage[];
+	searchHasMore?: boolean;
+	/**
+	 * The loaded window does not end at the newest message (a jump replaced it): live messages are
+	 * not appended to it until the forward pages reach the newest message again.
+	 */
+	hasMoreAfter?: boolean;
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
 };

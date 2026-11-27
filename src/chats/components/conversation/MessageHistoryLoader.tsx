@@ -21,7 +21,7 @@ type MessageHistoryLoaderProps = {
 	messageListRef: React.RefObject<HTMLDivElement>;
 };
 
-const Loader = styled.div`
+export const Loader = styled.div`
 	background-color: ${({ theme }): string => theme.palette.gray6.active};
 	color: #999;
 	text-align: center;
@@ -65,7 +65,7 @@ const Loader = styled.div`
 	}
 `;
 
-const VisibilityContainer = styled.div`
+export const VisibilityContainer = styled.div`
 	width: 100%;
 	text-align: center;
 `;

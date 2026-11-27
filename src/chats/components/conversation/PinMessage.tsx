@@ -157,9 +157,14 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 			useStore.getState().setSelectedPinnedMessage(pinnedMessage.roomId, undefined);
 		}, 5000);
 
-		if (!isMessageInStore && !isMessageSelected) {
+		// On v2 a selected pin can have left the window again (scroll to bottom): jump anyway
+		if (!isMessageInStore && (!isMessageSelected || isWscPure)) {
 			chatClient
-				.requestMessageResultHistoryToId(pinnedMessage.roomId, pinnedMessage.stanzaId)
+				.requestMessageResultHistoryToId(
+					pinnedMessage.roomId,
+					pinnedMessage.stanzaId,
+					pinnedMessage.date
+				)
 				.then(() => {
 					scrollToMessage(pinnedMessage.id);
 					useStore.getState().setScrollPosition(pinnedMessage.roomId, pinnedMessage.id);
@@ -172,6 +177,8 @@ export const PinMessage = ({ pinnedMessage }: PinMessageProps): React.JSX.Elemen
 		isClickable,
 		isMessageInStore,
 		isMessageSelected,
+		isWscPure,
+		pinnedMessage.date,
 		pinnedMessage.id,
 		pinnedMessage.roomId,
 		pinnedMessage.stanzaId

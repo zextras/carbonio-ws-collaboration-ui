@@ -48,6 +48,10 @@ import { xmppClient } from '../xmpp/XMPPClient';
 vi.mock('./chatExportDownload');
 
 const pendingId = 'msg-pending';
+const AUG_FIRST_EARLY = '2026-08-01T08:00:00Z';
+const BACKEND_DOWN = 'backend down';
+const AUG_FIRST_NOON = '2026-08-01T11:00:00Z';
+const NEWEST_ID = 'msg-newest';
 const JULY_FIRST = '2026-07-01T00:00:00Z';
 const AUG_FIRST_MORNING = '2026-08-01T09:00:00Z';
 const PIN_FEATURE = 'zextras:iq:pin';
@@ -341,7 +345,7 @@ describe('chatClient façade', () => {
 	it('logs and survives a failing inbox hydration on connect', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
 
 		chatClient.connect('token');
 		await vi.advanceTimersByTimeAsync(BOOT_INBOX_TIMEOUT_MS);
@@ -359,7 +363,7 @@ describe('chatClient façade', () => {
 		useStore.getState().setApiVersion('2.0.0');
 		// The real-world case: ROOM_CREATED shares the room's createdAt (same
 		// transaction), landing exactly at the notBefore bound the façade derives
-		const roomCreatedAt = '2026-08-01T08:00:00Z';
+		const roomCreatedAt = AUG_FIRST_EARLY;
 		useStore.getState().addRooms([createMockRoom({ id: 'room-t', createdAt: roomCreatedAt })]);
 		const timeline = buildTimelineResponse(
 			[
@@ -487,7 +491,7 @@ describe('chatClient façade', () => {
 		// The loader disables itself synchronously before calling the façade
 		useStore.getState().setHistoryLoadDisabled('room-err', true);
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error('backend down')));
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
 
 		chatClient.requestHistory('room-err', Date.parse(AUG_FIRST_MORNING));
 		await vi.advanceTimersByTimeAsync(0);
@@ -1152,7 +1156,7 @@ describe('chatClient façade', () => {
 		expect(sendSpy).not.toHaveBeenCalled();
 	});
 
-	it('searches through the SDK with the cleared-history bound, one shot like v1', async () => {
+	it('searches the first page through the SDK with the cleared-history bound', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().addRooms([
 			createMockRoom({
@@ -1175,7 +1179,7 @@ describe('chatClient façade', () => {
 					roomId: 'room-s',
 					senderId: 'user-2',
 					text: 'trovami',
-					createdAt: '2026-08-01T11:00:00Z'
+					createdAt: AUG_FIRST_NOON
 				}
 			],
 			hasMore: false
@@ -1188,6 +1192,68 @@ describe('chatClient façade', () => {
 		expect(useStore.getState().chatsRegistry['room-s']?.searchResults).toEqual([
 			expect.objectContaining({ id: 'msg-hit', stanzaId: 'msg-hit', text: 'trovami' })
 		]);
+		expect(useStore.getState().chatsRegistry['room-s']?.searchHasMore).toBe(false);
+	});
+
+	it('appends the next search page after the oldest result and stops when the server has no more', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-sp', createdAt: JULY_FIRST })]);
+		const hit = (id: string, createdAt: string): Record<string, string> => ({
+			id,
+			roomId: 'room-sp',
+			senderId: 'user-2',
+			text: 'trovami',
+			createdAt
+		});
+		mockJsonResponse({
+			messages: [hit('msg-p1', '2026-08-01T12:00:00Z'), hit('msg-p2', AUG_FIRST_NOON)],
+			hasMore: true
+		});
+		mockJsonResponse({
+			messages: [hit('msg-p3', '2026-08-01T10:00:00Z')],
+			hasMore: false
+		});
+
+		await chatClient.fullTextSearch('room-sp', 'trovami');
+		expect(useStore.getState().chatsRegistry['room-sp']?.searchHasMore).toBe(true);
+
+		await chatClient.fullTextSearchNextPage('room-sp', 'trovami');
+
+		expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(
+			'/services/chats/rooms/room-sp/messages/search?q=trovami&limit=50&before=2026-08-01T11%3A00%3A00.000000Z&beforeId=msg-p2'
+		);
+		const registry = useStore.getState().chatsRegistry['room-sp'];
+		expect(registry?.searchResults.map((result) => result.id)).toEqual([
+			'msg-p1',
+			'msg-p2',
+			'msg-p3'
+		]);
+		expect(registry?.searchHasMore).toBe(false);
+	});
+
+	it('ends the search paging on a page that adds nothing, whatever hasMore says', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-sz', createdAt: JULY_FIRST })]);
+		useStore
+			.getState()
+			.setSearchResults('room-sz', [
+				createMockTextMessage({ id: 'msg-sz', stanzaId: 'msg-sz', roomId: 'room-sz' })
+			]);
+		useStore.getState().setSearchHasMore('room-sz', true);
+		mockJsonResponse({ messages: [], hasMore: true });
+
+		await chatClient.fullTextSearchNextPage('room-sz', 'x');
+
+		expect(useStore.getState().chatsRegistry['room-sz']?.searchHasMore).toBe(false);
+	});
+
+	it('asks no further search page without results in store', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-sn' })]);
+
+		await chatClient.fullTextSearchNextPage('room-sn', 'x');
+
+		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
 	it('rejects the search on a definitive error, leaving the panel snackbar path intact', async () => {
@@ -1206,7 +1272,7 @@ describe('chatClient façade', () => {
 		expect(useStore.getState().chatsRegistry['room-se']?.searchResults ?? []).toEqual([]);
 	});
 
-	it('walks backward pages until the jump target enters the store (contiguous history)', async () => {
+	it('replaces the room window with the page around the jump target in one request', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore
 			.getState()
@@ -1219,21 +1285,7 @@ describe('chatClient façade', () => {
 				date: Date.parse('2026-08-01T12:00:00Z')
 			})
 		]);
-		// First page: still no target; second page: the target lands
-		mockJsonResponse(
-			buildTimelineResponse(
-				[
-					buildMessageTimelineItem(
-						buildWireMessage({
-							id: 'msg-middle',
-							roomId: jumpRoomId,
-							createdAt: AUG_FIRST_LATE_MORNING
-						})
-					)
-				],
-				{ hasMoreBefore: true }
-			)
-		);
+		useStore.getState().setHistoryIsFullyLoaded(jumpRoomId);
 		mockJsonResponse(
 			buildTimelineResponse(
 				[
@@ -1243,28 +1295,45 @@ describe('chatClient façade', () => {
 							roomId: jumpRoomId,
 							createdAt: '2026-08-01T09:30:00Z'
 						})
+					),
+					buildMessageTimelineItem(
+						buildWireMessage({
+							id: 'msg-after-target',
+							roomId: jumpRoomId,
+							createdAt: '2026-08-01T09:45:00Z'
+						})
 					)
 				],
-				{ hasMoreBefore: true }
+				{ hasMoreBefore: true, hasMoreAfter: true }
 			)
 		);
 
 		await expect(
-			chatClient.requestMessageResultHistoryToId(jumpRoomId, jumpTargetId)
+			chatClient.requestMessageResultHistoryToId(
+				jumpRoomId,
+				jumpTargetId,
+				Date.parse('2026-08-01T09:30:00Z')
+			)
 		).resolves.toBeUndefined();
 
 		const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
-		expect(calls).toHaveLength(2);
-		// Composite cursor anchored to the oldest loaded message, page by page
-		expect(calls[0]).toContain('/rooms/room-j/timeline?');
-		expect(calls[0]).toContain('beforeId=msg-recent');
-		expect(calls[1]).toContain('beforeId=msg-middle');
-		expect(
-			useStore.getState().chatsRegistry[jumpRoomId]?.messages.map((message) => message.id)
-		).toEqual([jumpTargetId, 'msg-middle', jumpRecentId]);
+		expect(calls).toEqual([
+			`/services/chats/rooms/room-j/timeline?around=2026-08-01T09%3A30%3A00.000000Z&aroundId=${jumpTargetId}&limit=50`
+		]);
+		const registry = useStore.getState().chatsRegistry[jumpRoomId];
+		// The old window is not contiguous with the new one: it is dropped
+		expect(registry?.messages.map((message) => message.id)).toEqual([
+			jumpTargetId,
+			'msg-after-target'
+		]);
+		expect(registry?.hasMoreAfter).toBe(true);
+		const conversation = useStore.getState().activeConversations[jumpRoomId];
+		expect(conversation?.isHistoryFullyLoaded).toBe(false);
+		expect(conversation?.isHistoryLoadDisabled).toBe(false);
+		expect(conversation?.scrollPositionMessageId).toBe(jumpTargetId);
 	});
 
-	it('never anchors the jump walk on a pending placeholder', async () => {
+	it('keeps an unconfirmed send across the jump', async () => {
 		useStore.getState().setApiVersion('2.0.0');
 		useStore.getState().addRooms([createMockRoom({ id: 'room-jp', createdAt: JULY_FIRST })]);
 		useStore.getState().updateHistory('room-jp', [
@@ -1289,19 +1358,116 @@ describe('chatClient façade', () => {
 						buildWireMessage({
 							id: jumpTargetId,
 							roomId: 'room-jp',
-							createdAt: '2026-08-01T08:00:00Z'
+							createdAt: AUG_FIRST_EARLY
 						})
+					)
+				],
+				{ hasMoreBefore: true, hasMoreAfter: true }
+			)
+		);
+
+		await chatClient.requestMessageResultHistoryToId(
+			'room-jp',
+			jumpTargetId,
+			Date.parse(AUG_FIRST_EARLY)
+		);
+
+		expect(
+			useStore.getState().chatsRegistry['room-jp']?.messages.map((message) => message.id)
+		).toEqual([jumpTargetId, pendingId]);
+	});
+
+	it('takes the date of the jump target from the search results or the pinned message', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-jd', createdAt: JULY_FIRST })]);
+		useStore.getState().setSearchResults('room-jd', [
+			createMockTextMessage({
+				id: 'msg-hit',
+				stanzaId: 'msg-hit',
+				roomId: 'room-jd',
+				date: Date.parse(AUG_FIRST_LATE_MORNING)
+			})
+		]);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: false, hasMoreAfter: false }));
+
+		await chatClient.requestMessageResultHistoryToId('room-jd', 'msg-hit');
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-jd/timeline?around=2026-08-01T10%3A00%3A00.000000Z&aroundId=msg-hit&limit=50'
+		);
+	});
+
+	it('leaves the window alone when the date of the jump target is unknown', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-ju', createdAt: JULY_FIRST })]);
+		useStore
+			.getState()
+			.updateHistory('room-ju', [
+				createMockTextMessage({ id: 'msg-keep', stanzaId: 'msg-keep', roomId: 'room-ju' })
+			]);
+
+		await chatClient.requestMessageResultHistoryToId('room-ju', 'msg-ghost');
+
+		expect(global.fetch).not.toHaveBeenCalled();
+		expect(warnSpy).toHaveBeenCalledWith(
+			'chatClient.requestMessageResultHistoryToId: unknown message date',
+			'msg-ghost'
+		);
+		expect(useStore.getState().chatsRegistry['room-ju']?.messages).toHaveLength(1);
+		expect(useStore.getState().chatsRegistry['room-ju']?.hasMoreAfter).toBeFalsy();
+	});
+
+	it('attaches the window again when the page around the target ends at the newest message', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-ja', createdAt: JULY_FIRST })]);
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({ id: 'msg-near', roomId: 'room-ja', createdAt: AUG_FIRST_MORNING })
+					)
+				],
+				{ hasMoreBefore: false, hasMoreAfter: false }
+			)
+		);
+
+		await chatClient.requestMessageResultHistoryToId(
+			'room-ja',
+			'msg-near',
+			Date.parse(AUG_FIRST_MORNING)
+		);
+
+		expect(useStore.getState().chatsRegistry['room-ja']?.hasMoreAfter).toBe(false);
+		expect(useStore.getState().activeConversations['room-ja']?.isHistoryFullyLoaded).toBe(true);
+	});
+
+	it('restores the latest page and rejects when the page around the target cannot be loaded', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-jr', createdAt: JULY_FIRST })]);
+		(global.fetch as Mock).mockImplementationOnce(() => Promise.reject(new Error(BACKEND_DOWN)));
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({ id: 'msg-latest', roomId: 'room-jr', createdAt: AUG_FIRST_MORNING })
 					)
 				],
 				{ hasMoreBefore: true }
 			)
 		);
 
-		await chatClient.requestMessageResultHistoryToId('room-jp', jumpTargetId);
+		await expect(
+			chatClient.requestMessageResultHistoryToId('room-jr', 'msg-x', Date.parse(JULY_FIRST))
+		).rejects.toThrow(BACKEND_DOWN);
 
-		const [firstCall] = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
-		expect(firstCall).toContain('beforeId=msg-real');
-		expect(firstCall).not.toContain('beforeId=msg-pending');
+		const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
+		expect(calls[1]).toBe('/services/chats/rooms/room-jr/timeline?limit=50');
+		const registry = useStore.getState().chatsRegistry['room-jr'];
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-latest']);
+		expect(registry?.hasMoreAfter).toBe(false);
+		expect(errorSpy).not.toHaveBeenCalled();
 	});
 
 	it('skips every round-trip when the jump target is already loaded', async () => {
@@ -1321,72 +1487,279 @@ describe('chatClient façade', () => {
 		expect(global.fetch).not.toHaveBeenCalled();
 	});
 
-	it('stops the jump on a fully loaded history when the target does not exist', async () => {
+	it('loads the page after the newest confirmed row until the window reaches the newest message', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		useStore.getState().addRooms([createMockRoom({ id: 'room-jf', createdAt: AUG_FIRST_MORNING })]);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-f', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-f', [
+			createMockTextMessage({
+				id: 'msg-f1',
+				stanzaId: 'msg-f1',
+				roomId: 'room-f',
+				date: Date.parse(AUG_FIRST_MORNING)
+			}),
+			createMockTextMessage({
+				id: pendingId,
+				stanzaId: `${PLACEHOLDER_STANZA_PREFIX}${pendingId}`,
+				roomId: 'room-f',
+				date: Date.parse('2026-08-01T07:00:00Z'),
+				read: MarkerStatus.PENDING
+			})
+		]);
+		useStore.getState().setHasMoreAfter('room-f', true);
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({ id: 'msg-f2', roomId: 'room-f', createdAt: AUG_FIRST_LATE_MORNING })
+					)
+				],
+				{ hasMoreBefore: true, hasMoreAfter: true }
+			)
+		);
 		mockJsonResponse(
 			buildTimelineResponse(
 				[
 					buildMessageTimelineItem(
 						buildWireMessage({
-							id: 'msg-only',
-							roomId: 'room-jf',
+							id: 'msg-f3',
+							roomId: 'room-f',
+							createdAt: AUG_FIRST_NOON
+						})
+					)
+				],
+				{ hasMoreBefore: true, hasMoreAfter: false }
+			)
+		);
+
+		await chatClient.requestMessagesAfter('room-f');
+
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-f/timeline?after=2026-08-01T09%3A00%3A00.000000Z&afterId=msg-f1&limit=50'
+		);
+		expect(useStore.getState().chatsRegistry['room-f']?.hasMoreAfter).toBe(true);
+
+		await chatClient.requestMessagesAfter('room-f');
+
+		expect((global.fetch as Mock).mock.calls[1]?.[0]).toContain('afterId=msg-f2');
+		const registry = useStore.getState().chatsRegistry['room-f'];
+		expect(registry?.hasMoreAfter).toBe(false);
+		expect(registry?.messages.map((message) => message.id)).toEqual([
+			'msg-f1',
+			'msg-f2',
+			'msg-f3',
+			pendingId
+		]);
+		expect(useStore.getState().activeConversations['room-f']?.isHistoryFullyLoaded).toBeFalsy();
+	});
+
+	it('does not page forward once the window is attached', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-fa', createdAt: JULY_FIRST })]);
+		useStore
+			.getState()
+			.updateHistory('room-fa', [
+				createMockTextMessage({ id: 'msg-fa', stanzaId: 'msg-fa', roomId: 'room-fa' })
+			]);
+
+		await chatClient.requestMessagesAfter('room-fa');
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('does not spin on a forward page that moves nothing', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+		useStore.getState().addRooms([createMockRoom({ id: 'room-fs', createdAt: JULY_FIRST })]);
+		useStore
+			.getState()
+			.updateHistory('room-fs', [
+				createMockTextMessage({ id: 'msg-fs', stanzaId: 'msg-fs', roomId: 'room-fs' })
+			]);
+		useStore.getState().setHasMoreAfter('room-fs', true);
+		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true, hasMoreAfter: true }));
+
+		await chatClient.requestMessagesAfter('room-fs');
+
+		expect(warnSpy).toHaveBeenCalledWith(
+			'chatClient.requestMessagesAfter: pagination stalled',
+			'room-fs'
+		);
+		expect(useStore.getState().chatsRegistry['room-fs']?.hasMoreAfter).toBe(true);
+	});
+
+	it('reloads the latest page and attaches the window again, once for concurrent calls', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-l', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-l', [
+			createMockTextMessage({
+				id: 'msg-old-window',
+				stanzaId: 'msg-old-window',
+				roomId: 'room-l'
+			})
+		]);
+		useStore.getState().setHasMoreAfter('room-l', true);
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({
+							id: NEWEST_ID,
+							roomId: 'room-l',
 							createdAt: AUG_FIRST_LATE_MORNING
 						})
 					)
 				],
-				{ hasMoreBefore: false }
+				{ hasMoreBefore: true, hasMoreAfter: false }
 			)
 		);
 
-		await expect(
-			chatClient.requestMessageResultHistoryToId('room-jf', 'msg-ghost')
-		).resolves.toBeUndefined();
+		await Promise.all([
+			chatClient.returnToLatestMessages('room-l'),
+			chatClient.returnToLatestMessages('room-l')
+		]);
 
 		expect((global.fetch as Mock).mock.calls).toHaveLength(1);
-		expect(useStore.getState().activeConversations['room-jf']?.isHistoryFullyLoaded).toBeTruthy();
+		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+			'/services/chats/rooms/room-l/timeline?limit=50'
+		);
+		const registry = useStore.getState().chatsRegistry['room-l'];
+		expect(registry?.hasMoreAfter).toBe(false);
+		expect(registry?.messages.map((message) => message.id)).toEqual([NEWEST_ID]);
+		expect(useStore.getState().activeConversations['room-l']?.scrollPositionMessageId).toBe(
+			NEWEST_ID
+		);
 	});
 
-	it('breaks the jump walk when a page moves nothing (defensive stall guard)', async () => {
+	it('makes no request to return to the latest page of an attached window', async () => {
 		useStore.getState().setApiVersion('2.0.0');
-		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-		useStore.getState().addRooms([createMockRoom({ id: 'room-js', createdAt: AUG_FIRST_MORNING })]);
-		useStore.getState().updateHistory('room-js', [
+		useStore.getState().addRooms([createMockRoom({ id: 'room-la', createdAt: JULY_FIRST })]);
+
+		await chatClient.returnToLatestMessages('room-la');
+
+		expect(global.fetch).not.toHaveBeenCalled();
+	});
+
+	it('does not append a live message to a window cut before the newest message, but counts it unread', () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().addRooms([createMockRoom({ id: 'room-ld', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-ld', [
 			createMockTextMessage({
-				id: 'msg-top',
-				stanzaId: 'msg-top',
-				roomId: 'room-js',
-				date: Date.parse('2026-08-01T12:00:00Z')
+				id: 'msg-ld',
+				stanzaId: 'msg-ld',
+				roomId: 'room-ld',
+				date: Date.parse(AUG_FIRST_MORNING)
 			})
 		]);
-		const redundantPage = (): void =>
-			mockJsonResponse(
-				buildTimelineResponse(
-					[
-						buildMessageTimelineItem(
-							buildWireMessage({
-								id: 'msg-stuck',
-								roomId: 'room-js',
-								createdAt: AUG_FIRST_LATE_MORNING
-							})
-						)
-					],
-					{ hasMoreBefore: true }
-				)
-			);
-		// A buggy backend repeating the same page forever must not spin the walk
-		redundantPage();
-		redundantPage();
+		useStore.getState().setHasMoreAfter('room-ld', true);
 
-		await expect(
-			chatClient.requestMessageResultHistoryToId('room-js', 'msg-ghost')
-		).resolves.toBeUndefined();
-
-		expect((global.fetch as Mock).mock.calls).toHaveLength(2);
-		expect(warnSpy).toHaveBeenCalledWith(
-			'chatClient.requestMessageResultHistoryToId: pagination stalled',
-			'room-js'
+		wsChatEventsRouter(
+			buildWsMessageReceivedEvent(
+				buildWireMessage({
+					id: 'msg-live',
+					roomId: 'room-ld',
+					senderId: 'user-2',
+					text: 'nuovo',
+					createdAt: AUG_FIRST_LATE_MORNING
+				})
+			)
 		);
+
+		const registry = useStore.getState().chatsRegistry['room-ld'];
+		expect(registry?.messages.map((message) => message.id)).toEqual(['msg-ld']);
+		expect(registry?.unread).toBe(1);
+	});
+
+	it('returns to the latest page before sending from a window cut before the newest message', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+		useStore.getState().addRooms([createMockRoom({ id: 'room-sd', createdAt: JULY_FIRST })]);
+		useStore
+			.getState()
+			.updateHistory('room-sd', [
+				createMockTextMessage({ id: 'msg-sd', stanzaId: 'msg-sd', roomId: 'room-sd' })
+			]);
+		useStore.getState().setHasMoreAfter('room-sd', true);
+		mockJsonResponse(
+			buildTimelineResponse(
+				[
+					buildMessageTimelineItem(
+						buildWireMessage({ id: 'msg-sd-new', roomId: 'room-sd', createdAt: AUG_FIRST_MORNING })
+					)
+				],
+				{ hasMoreBefore: true }
+			)
+		);
+		mockJsonResponse(
+			buildWireMessage({ id: 'msg-sent', roomId: 'room-sd', senderId: 'me', text: 'ciao' })
+		);
+
+		const sent = chatClient.sendChatMessage('room-sd', 'ciao');
+		await vi.advanceTimersByTimeAsync(0);
+		await sent;
+
+		const calls = (global.fetch as Mock).mock.calls.map((call) => call[0] as string);
+		const timelineIndex = calls.indexOf('/services/chats/rooms/room-sd/timeline?limit=50');
+		const sendIndex = calls.findIndex((url) => url.endsWith('/rooms/room-sd/messages'));
+		expect(timelineIndex).toBeGreaterThanOrEqual(0);
+		expect(sendIndex).toBeGreaterThan(timelineIndex);
+		expect(useStore.getState().chatsRegistry['room-sd']?.hasMoreAfter).toBe(false);
+	});
+
+	it('drops the backward page asked from a window that was replaced meanwhile', async () => {
+		useStore.getState().setApiVersion('2.0.0');
+		useStore.getState().addRooms([createMockRoom({ id: 'room-q', createdAt: JULY_FIRST })]);
+		useStore.getState().updateHistory('room-q', [
+			createMockTextMessage({
+				id: 'msg-q-old',
+				stanzaId: 'msg-q-old',
+				roomId: 'room-q',
+				date: Date.parse(AUG_FIRST_MORNING)
+			})
+		]);
+		let releaseAroundPage: () => void = () => undefined;
+		(global.fetch as Mock).mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					releaseAroundPage = (): void =>
+						resolve({
+							ok: true,
+							status: 200,
+							headers: { get: (): string | null => 'application/json' },
+							json: (): Promise<unknown> =>
+								Promise.resolve(
+									buildTimelineResponse(
+										[
+											buildMessageTimelineItem(
+												buildWireMessage({
+													id: 'msg-q-target',
+													roomId: 'room-q',
+													createdAt: JULY_FIRST
+												})
+											)
+										],
+										{ hasMoreBefore: true, hasMoreAfter: true }
+									)
+								),
+							blob: (): Promise<unknown> => Promise.resolve(undefined)
+						});
+				})
+		);
+
+		const jump = chatClient.requestMessageResultHistoryToId(
+			'room-q',
+			'msg-q-target',
+			Date.parse(JULY_FIRST)
+		);
+		await vi.advanceTimersByTimeAsync(0);
+		// The loader asks while the window is being replaced: its anchor belongs to the old window
+		chatClient.requestHistory('room-q', Date.now());
+		releaseAroundPage();
+		await jump;
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect((global.fetch as Mock).mock.calls).toHaveLength(1);
+		expect(useStore.getState().activeConversations['room-q']?.isHistoryLoadDisabled).toBe(false);
 	});
 
 	it('exports the chat as a server-streamed download on a WSC-pure backend', () => {

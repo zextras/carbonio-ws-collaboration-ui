@@ -6,6 +6,7 @@
 import React from 'react';
 
 import ConversationSearchPanel from './ConversationSearchPanel';
+import { chatClient } from '../../../network/chatClient/ChatClient';
 import { xmppClient } from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import {
@@ -14,7 +15,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { screen, setup } from '../../../tests/test-utils';
+import { screen, setup, triggerObserver } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
 import { formatDate } from '../../../utils/dateUtils';
@@ -180,5 +181,73 @@ describe('ConversationSearchPanel', () => {
 		expect(
 			screen.getByText(/Something went wrong with the search. Please try again./i)
 		).toBeVisible();
+	});
+
+	describe('Paging', () => {
+		const sentinelId = 'searchResultsSentinel';
+		const pageResult = (id: string): ReturnType<typeof createMockTextMessage> =>
+			createMockTextMessage({ id, roomId: groupRoom.id, from: user2.id, text: `text of ${id}` });
+
+		const searchWithFirstPage = async (hasMore: boolean): Promise<ReturnType<typeof setup>> => {
+			vi.spyOn(chatClient, 'fullTextSearch').mockImplementation((roomId) => {
+				useStore.getState().setSearchResults(roomId, [pageResult('r1'), pageResult('r2')]);
+				useStore.getState().setSearchHasMore(roomId, hasMore);
+				return Promise.resolve();
+			});
+			const rendered = setup(
+				<ConversationSearchPanel roomId={groupRoom.id} goToChatView={vi.fn()} />
+			);
+			await rendered.user.type(screen.getByRole('textbox', { name: /search messages/i }), 'query');
+			await rendered.user.click(screen.getByRoleWithIcon('button', { icon: searchedIcon }));
+			return rendered;
+		};
+
+		test('renders no sentinel when the server has no more results', async () => {
+			await searchWithFirstPage(false);
+
+			expect(screen.getByText('text of r2')).toBeVisible();
+			expect(screen.queryByTestId(sentinelId)).not.toBeInTheDocument();
+		});
+
+		test('loads the next page with the active query when the sentinel comes into view, until the last one', async () => {
+			const nextPage = vi
+				.spyOn(chatClient, 'fullTextSearchNextPage')
+				.mockImplementation((roomId) => {
+					useStore.getState().appendSearchResults(roomId, [pageResult('r3')]);
+					useStore.getState().setSearchHasMore(roomId, false);
+					return Promise.resolve();
+				});
+			await searchWithFirstPage(true);
+
+			await triggerObserver(screen.getByTestId(sentinelId));
+
+			expect(nextPage).toHaveBeenCalledExactlyOnceWith(groupRoom.id, 'query');
+			expect(await screen.findByText('text of r3')).toBeVisible();
+			expect(screen.queryByTestId(sentinelId)).not.toBeInTheDocument();
+		});
+
+		test('does not ask again after a failed page and shows the error snackbar', async () => {
+			const nextPage = vi
+				.spyOn(chatClient, 'fullTextSearchNextPage')
+				.mockRejectedValue(new Error('page failed'));
+			await searchWithFirstPage(true);
+
+			await triggerObserver(screen.getByTestId(sentinelId));
+
+			expect(
+				await screen.findByText(/Something went wrong with the search. Please try again./i)
+			).toBeVisible();
+			expect(nextPage).toHaveBeenCalledTimes(1);
+			expect(screen.getByText('text of r2')).toBeVisible();
+		});
+
+		test('clearing the search removes the sentinel', async () => {
+			const { user } = await searchWithFirstPage(true);
+			expect(screen.getByTestId(sentinelId)).toBeInTheDocument();
+
+			await user.click(screen.getByRoleWithIcon('button', { icon: clearSearchIcon }));
+
+			expect(screen.queryByTestId(sentinelId)).not.toBeInTheDocument();
+		});
 	});
 });
