@@ -468,6 +468,28 @@ describe('Window cut before the newest message', () => {
 		await vi.waitFor(() => expect(scrollToEnd).toHaveBeenCalled());
 	});
 
+	test('A reload that ends after another room was opened does not scroll the new room', async () => {
+		detach();
+		let finishReload: () => void = () => undefined;
+		vi.spyOn(chatClient, 'returnToLatestMessages').mockImplementation(
+			() =>
+				new Promise<void>((resolve) => {
+					finishReload = resolve;
+				})
+		);
+		const { user, rerender } = setup(<MessagesList roomId={room.id} />);
+		await user.click(screen.getByTestId('scrollButton'));
+
+		rerender(<MessagesList roomId={mockedRoom.id} />);
+		scrollToEnd.mockClear();
+		await act(async () => {
+			finishReload();
+			await Promise.resolve();
+		});
+
+		expect(scrollToEnd).not.toHaveBeenCalled();
+	});
+
 	test('The scroll button of an attached window only scrolls', async () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);

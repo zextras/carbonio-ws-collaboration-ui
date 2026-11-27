@@ -76,6 +76,28 @@ const sortedInsertIndex = (messages: Message[], message: Message): number => {
 	return index;
 };
 
+/** v2: a live row at its sorted place, replacing the row with the same id (a placeholder). */
+const landLiveRow = (
+	messages: Message[],
+	markers: ChatRegistry['markers'],
+	message: Message
+): void => {
+	const row: Message =
+		message.type === MessageType.TEXT_MSG &&
+		message.read !== MarkerStatus.PENDING &&
+		isMyId(message.from)
+			? { ...message, read: calcReads(message.date, message.roomId, markers) }
+			: message;
+	const existingIndex = findIndex(messages, { id: message.id });
+	if (existingIndex !== -1) {
+		const [existing] = messages.splice(existingIndex, 1);
+		Object.assign(existing, row);
+		messages.splice(sortedInsertIndex(messages, existing), 0, existing);
+	} else {
+		messages.splice(sortedInsertIndex(messages, row), 0, row);
+	}
+};
+
 const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
 		store.chatsRegistry[roomId] = {
@@ -157,23 +179,37 @@ const countsAsUnread = (msg: Message, isWscPure: boolean): boolean => {
 };
 
 /**
- * A window that stops before the newest message cannot recount the unread rows after the marker:
- * the count of the server stays, less the countable rows the marker just moved over.
+ * A window that stops before the newest message cannot recount the unread rows after the marker.
+ * A marker at or after the last message of the room reads everything; a move between two rows of
+ * the window takes only the rows it passes from the server count; any other move leaves the
+ * count to a refresh (`stale`).
  */
 const unreadAfterMarkerMoved = (
 	registry: ChatRegistry,
 	myId: string,
 	previousMarkerDate: number | undefined
-): number => {
+): { unread: number; stale: boolean } => {
 	const markerDate = registry.markers[myId]?.markerDate;
-	if (!markerDate) return registry.unread;
+	if (!markerDate) return { unread: registry.unread, stale: false };
+	if (registry.lastMessage && markerDate >= registry.lastMessage.date) {
+		return { unread: 0, stale: false };
+	}
+	const oldestDate = registry.messages[0]?.date;
+	const newestDate = registry.messages[registry.messages.length - 1]?.date;
+	const insideWindow =
+		previousMarkerDate !== undefined &&
+		oldestDate !== undefined &&
+		newestDate !== undefined &&
+		previousMarkerDate >= oldestDate &&
+		markerDate <= newestDate;
+	if (!insideWindow) return { unread: registry.unread, stale: true };
 	const readNow = registry.messages.filter(
 		(msg) =>
 			countsAsUnread(msg, true) &&
-			(!previousMarkerDate || isStrictlyBefore(previousMarkerDate, msg.date)) &&
+			isStrictlyBefore(previousMarkerDate, msg.date) &&
 			isBefore(msg.date, markerDate)
 	).length;
-	return Math.max(0, registry.unread - readNow);
+	return { unread: Math.max(0, registry.unread - readNow), stale: false };
 };
 
 export const useChatsRegistryStoreSlice: StateCreator<
@@ -183,6 +219,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	ChatsRegistryStoreSlice
 > = (set, get) => ({
 	chatsRegistry: {},
+	windowEpochs: {},
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -197,25 +234,18 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					}
 					return;
 				}
-				const row: Message =
-					message.type === MessageType.TEXT_MSG &&
-					message.read !== MarkerStatus.PENDING &&
-					isMyId(message.from)
-						? { ...message, read: calcReads(message.date, message.roomId, markers) }
-						: message;
 				const existingIndex = findIndex(messages, { id: message.id });
-				// A window that does not end at the newest message must not grow at the end: a hidden gap
+				// A window that does not end at the newest message must not grow at the end: a hidden gap.
+				// The row waits until the window reaches the newest message
 				if (hasMoreAfter && existingIndex === -1) {
+					const registry = draft.chatsRegistry[message.roomId];
+					registry.detachedBuffer = [
+						...(registry.detachedBuffer ?? []).filter((buffered) => buffered.id !== message.id),
+						message
+					];
 					return;
 				}
-				// Replace message if it already exists (placeholder message)
-				if (existingIndex !== -1) {
-					const [existing] = messages.splice(existingIndex, 1);
-					Object.assign(existing, row);
-					messages.splice(sortedInsertIndex(messages, existing), 0, existing);
-				} else {
-					messages.splice(sortedInsertIndex(messages, row), 0, row);
-				}
+				landLiveRow(messages, markers, message);
 			}),
 			false,
 			'CHAT/NEW_MESSAGE'
@@ -477,11 +507,13 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				// A window that stops before the newest message cannot recount the unread rows after the
 				// marker: take away the ones the marker just moved over
 				if (isWscPure && hasMoreAfter && myId) {
-					draft.chatsRegistry[roomId].unread = unreadAfterMarkerMoved(
+					const moved = unreadAfterMarkerMoved(
 						draft.chatsRegistry[roomId],
 						myId,
 						previousOwnMarkerDate
 					);
+					draft.chatsRegistry[roomId].unread = moved.unread;
+					draft.chatsRegistry[roomId].unreadStale = moved.stale;
 					return;
 				}
 				const myMarker = myId ? draft.chatsRegistry[roomId]?.markers[myId] : undefined;
@@ -503,7 +535,9 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setUnreadCount: (roomId: string, count: number): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId).unread = count;
+				const registry = initRoomChatsRegistry(draft, roomId);
+				registry.unread = count;
+				registry.unreadStale = false;
 			}),
 			false,
 			'CHAT/SET_UNREAD_COUNT'
@@ -606,7 +640,17 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	setHasMoreAfter: (roomId: string, hasMoreAfter: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId).hasMoreAfter = hasMoreAfter;
+				const registry = initRoomChatsRegistry(draft, roomId);
+				registry.hasMoreAfter = hasMoreAfter;
+				if (!hasMoreAfter && registry.detachedBuffer) {
+					// The window reaches the newest message: the live rows it missed join it
+					const buffered = registry.detachedBuffer;
+					registry.detachedBuffer = undefined;
+					const knownIds = new Set(registry.messages.map((row) => row.id));
+					buffered
+						.filter((row) => !knownIds.has(row.id))
+						.forEach((row) => landLiveRow(registry.messages, registry.markers, row));
+				}
 			}),
 			false,
 			'CHAT/SET_HAS_MORE_AFTER'

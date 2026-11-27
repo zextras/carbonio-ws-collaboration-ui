@@ -50,6 +50,7 @@ import {
 } from '../../utils/__mocks__/FetchUtils';
 import { dateToISODate } from '../../utils/dateUtils';
 import { RequestType } from '../../utils/FetchUtils';
+import { chatClient } from '../chatClient/ChatClient';
 import { wscSdk } from '../sdk/wscSdk';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { xmppClient } from '../xmpp/XMPPClient';
@@ -539,6 +540,26 @@ describe('Rooms API', () => {
 					area: '2x2'
 				}
 			});
+		});
+
+		test('returns to the latest page before the placeholder of an upload from a detached window', async () => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setHasMoreAfter(roomId, true);
+			const returnToLatest = vi
+				.spyOn(chatClient, 'returnToLatestMessages')
+				.mockImplementation(() => {
+					expect(mockSendAttachmentFetchAPI).not.toHaveBeenCalled();
+					expect(useStore.getState().chatsRegistry[roomId]?.messages ?? []).toHaveLength(0);
+					useStore.getState().setHasMoreAfter(roomId, false);
+					return Promise.resolve();
+				});
+			mockSendAttachmentFetchAPI.mockReturnValueOnce(new Promise((): void => {}));
+
+			addRoomAttachment(roomId, photo(), { area: '2x2' });
+			await vi.waitFor(() => expect(mockSendAttachmentFetchAPI).toHaveBeenCalledTimes(1));
+
+			expect(returnToLatest).toHaveBeenCalledExactlyOnceWith(roomId);
+			expect(useStore.getState().chatsRegistry[roomId]?.messages).toHaveLength(1);
 		});
 
 		test('promotes the placeholder from the 201 with the uploaded file under the server id', async () => {

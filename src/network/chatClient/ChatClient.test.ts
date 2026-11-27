@@ -20,7 +20,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { chatClient, isWscPure } from './ChatClient';
+import { chatClient, isWscPure, RETURN_TO_LATEST_TIMEOUT_MS } from './ChatClient';
 import { downloadChatExport } from './chatExportDownload';
 import { BOOT_INBOX_TIMEOUT_MS, refreshInboxSerialized } from './inboxRefresh';
 import { PLACEHOLDER_STANZA_PREFIX } from '../../constants/messageConstants';
@@ -29,7 +29,8 @@ import {
 	buildWsMessageDeletedEvent,
 	buildWsMessageEditedEvent,
 	buildWsMessageReceivedEvent,
-	buildWsReactionChangedEvent
+	buildWsReactionChangedEvent,
+	buildWsReadUpdatedEvent
 } from '../../tests/buildWsChatEvent';
 import {
 	createMockConfigurationMessage,
@@ -67,6 +68,37 @@ const jumpRoomId = 'room-j';
 const jumpTargetId = 'msg-jump-target';
 const jumpRecentId = 'msg-recent';
 
+const AUG_FIRST_TWELVE = '2026-08-01T12:00:00Z';
+const AUG_SECOND = '2026-08-02T00:00:00Z';
+const CONTENT_TYPE = 'content-type';
+const JSON_TYPE = 'application/json';
+
+function jsonResponse(body: unknown): unknown {
+	return {
+		ok: true,
+		status: 200,
+		headers: {
+			get: (name: string): string | null => (name.toLowerCase() === CONTENT_TYPE ? JSON_TYPE : null)
+		},
+		json: (): Promise<unknown> => Promise.resolve(body),
+		blob: (): Promise<unknown> => Promise.resolve(undefined)
+	};
+}
+
+/** The next request stays open until the returned function answers it. */
+function deferResponse(): (body: unknown) => void {
+	let answer = (body: unknown): void => {
+		expect(body).toBeUndefined();
+	};
+	(global.fetch as Mock).mockImplementationOnce(
+		() =>
+			new Promise((resolve) => {
+				answer = (body): void => resolve(jsonResponse(body));
+			})
+	);
+	return (body): void => answer(body);
+}
+
 function mockJsonResponse(body: unknown): void {
 	(global.fetch as Mock).mockImplementationOnce(() =>
 		Promise.resolve({
@@ -74,7 +106,7 @@ function mockJsonResponse(body: unknown): void {
 			status: 200,
 			headers: {
 				get: (name: string): string | null =>
-					name.toLowerCase() === 'content-type' ? 'application/json' : null
+					name.toLowerCase() === CONTENT_TYPE ? JSON_TYPE : null
 			},
 			json: (): Promise<unknown> => Promise.resolve(body),
 			blob: (): Promise<unknown> => Promise.resolve(undefined)
@@ -394,7 +426,7 @@ describe('chatClient façade', () => {
 		);
 		mockJsonResponse(timeline);
 
-		chatClient.requestHistory('room-t', Date.parse('2026-08-02T00:00:00Z'));
+		chatClient.requestHistory('room-t', Date.parse(AUG_SECOND));
 		await vi.advanceTimersByTimeAsync(0);
 
 		// Empty store: the caller bound is a synthetic client-clock now() and is
@@ -477,7 +509,7 @@ describe('chatClient façade', () => {
 		]);
 		mockJsonResponse(buildTimelineResponse([], { hasMoreBefore: true }));
 
-		chatClient.requestHistory('room-po', Date.parse('2026-08-02T00:00:00Z'));
+		chatClient.requestHistory('room-po', Date.parse(AUG_SECOND));
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
@@ -657,7 +689,7 @@ describe('chatClient façade', () => {
 							status: 201,
 							headers: {
 								get: (name: string): string | null =>
-									name.toLowerCase() === 'content-type' ? 'application/json' : null
+									name.toLowerCase() === CONTENT_TYPE ? JSON_TYPE : null
 							},
 							json: (): Promise<unknown> =>
 								Promise.resolve(
@@ -1206,11 +1238,11 @@ describe('chatClient façade', () => {
 			createdAt
 		});
 		mockJsonResponse({
-			messages: [hit('msg-p1', '2026-08-01T12:00:00Z'), hit('msg-p2', AUG_FIRST_NOON)],
+			messages: [hit('msg-p1', AUG_FIRST_TWELVE), hit('msg-p2', AUG_FIRST_NOON)],
 			hasMore: true
 		});
 		mockJsonResponse({
-			messages: [hit('msg-p3', '2026-08-01T10:00:00Z')],
+			messages: [hit('msg-p3', AUG_FIRST_LATE_MORNING)],
 			hasMore: false
 		});
 
@@ -1282,7 +1314,7 @@ describe('chatClient façade', () => {
 				id: jumpRecentId,
 				stanzaId: jumpRecentId,
 				roomId: jumpRoomId,
-				date: Date.parse('2026-08-01T12:00:00Z')
+				date: Date.parse(AUG_FIRST_TWELVE)
 			})
 		]);
 		useStore.getState().setHistoryIsFullyLoaded(jumpRoomId);
@@ -1725,7 +1757,7 @@ describe('chatClient façade', () => {
 						resolve({
 							ok: true,
 							status: 200,
-							headers: { get: (): string | null => 'application/json' },
+							headers: { get: (): string | null => JSON_TYPE },
 							json: (): Promise<unknown> =>
 								Promise.resolve(
 									buildTimelineResponse(
@@ -1760,6 +1792,344 @@ describe('chatClient façade', () => {
 
 		expect((global.fetch as Mock).mock.calls).toHaveLength(1);
 		expect(useStore.getState().activeConversations['room-q']?.isHistoryLoadDisabled).toBe(false);
+	});
+
+	describe('window loads racing with live events, resets and queries', () => {
+		const setUpRoom = (
+			id: string,
+			extra: Partial<Parameters<typeof createMockRoom>[0]> = {}
+		): void => {
+			useStore.getState().setApiVersion('2.0.0');
+			useStore.getState().setLoginInfo({ id: 'me', name: 'Me' });
+			useStore.getState().addRooms([createMockRoom({ id, createdAt: JULY_FIRST, ...extra })]);
+		};
+		const rowIds = (id: string): Array<string> =>
+			useStore.getState().chatsRegistry[id]?.messages.map((message) => message.id) ?? [];
+
+		it('keeps a live message that lands while the latest page is in flight', async () => {
+			setUpRoom('room-ra');
+			useStore.getState().updateHistory('room-ra', [
+				createMockTextMessage({
+					id: 'old',
+					stanzaId: 'old',
+					roomId: 'room-ra',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setHasMoreAfter('room-ra', true);
+			const answer = deferResponse();
+			const reload = chatClient.returnToLatestMessages('room-ra');
+			await vi.advanceTimersByTimeAsync(0);
+
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(
+					buildWireMessage({
+						id: 'live',
+						roomId: 'room-ra',
+						senderId: 'u2',
+						createdAt: '2026-08-01T12:00:01Z'
+					})
+				)
+			);
+			answer(
+				buildTimelineResponse(
+					[
+						buildMessageTimelineItem(
+							buildWireMessage({ id: 'snap', roomId: 'room-ra', createdAt: AUG_FIRST_TWELVE })
+						)
+					],
+					{ hasMoreBefore: true, hasMoreAfter: false }
+				)
+			);
+			await reload;
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(
+					buildWireMessage({
+						id: 'live2',
+						roomId: 'room-ra',
+						senderId: 'u2',
+						createdAt: '2026-08-01T12:00:02Z'
+					})
+				)
+			);
+
+			expect(rowIds('room-ra')).toEqual(['snap', 'live', 'live2']);
+			expect(useStore.getState().chatsRegistry['room-ra']?.hasMoreAfter).toBe(false);
+			expect(useStore.getState().chatsRegistry['room-ra']?.detachedBuffer).toBeUndefined();
+		});
+
+		it('keeps a live message that lands while a forward page is in flight', async () => {
+			setUpRoom('room-rf');
+			useStore.getState().updateHistory('room-rf', [
+				createMockTextMessage({
+					id: 'w1',
+					stanzaId: 'w1',
+					roomId: 'room-rf',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setHasMoreAfter('room-rf', true);
+			const answer = deferResponse();
+			const next = chatClient.requestMessagesAfter('room-rf');
+			await vi.advanceTimersByTimeAsync(0);
+
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(
+					buildWireMessage({
+						id: 'live',
+						roomId: 'room-rf',
+						senderId: 'u2',
+						createdAt: '2026-08-01T12:00:01Z'
+					})
+				)
+			);
+			answer(
+				buildTimelineResponse(
+					[
+						buildMessageTimelineItem(
+							buildWireMessage({ id: 'f1', roomId: 'room-rf', createdAt: AUG_FIRST_TWELVE })
+						)
+					],
+					{ hasMoreBefore: true, hasMoreAfter: false }
+				)
+			);
+			await next;
+
+			expect(rowIds('room-rf')).toEqual(['w1', 'f1', 'live']);
+		});
+
+		it('shows an own message confirmed while the window is detached once the window is attached again', () => {
+			setUpRoom('room-rb');
+			useStore.getState().updateHistory('room-rb', [
+				createMockTextMessage({
+					id: 'old',
+					stanzaId: 'old',
+					roomId: 'room-rb',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setPlaceholderMessage({ roomId: 'room-rb', id: 'tmp-1', text: 'hello' });
+			useStore.getState().clearMessages('room-rb');
+			expect(rowIds('room-rb')).toEqual(['tmp-1']);
+
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(
+					buildWireMessage({
+						id: 'srv-1',
+						roomId: 'room-rb',
+						senderId: 'me',
+						text: 'hello',
+						createdAt: AUG_FIRST_TWELVE
+					}),
+					{ tempId: 'tmp-1' }
+				)
+			);
+			expect(rowIds('room-rb')).toEqual([]);
+
+			useStore.getState().setHasMoreAfter('room-rb', false);
+
+			expect(rowIds('room-rb')).toEqual(['srv-1']);
+		});
+
+		it('ignores a target below the cleared-history floor without touching the window', async () => {
+			setUpRoom('room-rg', { userSettings: { clearedAt: '2026-08-10T00:00:00Z', muted: false } });
+			useStore.getState().updateHistory('room-rg', [
+				createMockTextMessage({
+					id: 'visible',
+					stanzaId: 'visible',
+					roomId: 'room-rg',
+					date: Date.parse('2026-08-20T08:00:00Z')
+				})
+			]);
+
+			await chatClient.requestMessageResultHistoryToId(
+				'room-rg',
+				'pinned',
+				Date.parse(AUG_FIRST_EARLY)
+			);
+
+			expect(global.fetch).not.toHaveBeenCalled();
+			expect(rowIds('room-rg')).toEqual(['visible']);
+			expect(useStore.getState().chatsRegistry['room-rg']?.hasMoreAfter).toBeFalsy();
+		});
+
+		it('keeps the page around the target as the window even when the target is not in it', async () => {
+			setUpRoom('room-rn');
+			mockJsonResponse(
+				buildTimelineResponse(
+					[
+						buildMessageTimelineItem(
+							buildWireMessage({ id: 'near', roomId: 'room-rn', createdAt: AUG_FIRST_MORNING })
+						)
+					],
+					{ hasMoreBefore: true, hasMoreAfter: true }
+				)
+			);
+
+			await chatClient.requestMessageResultHistoryToId(
+				'room-rn',
+				'deleted-target',
+				Date.parse(AUG_FIRST_MORNING)
+			);
+
+			expect(rowIds('room-rn')).toEqual(['near']);
+			expect(useStore.getState().chatsRegistry['room-rn']?.hasMoreAfter).toBe(true);
+		});
+
+		it('does not let a forward page in flight write into the registry of a reconnection reset', async () => {
+			setUpRoom('room-rr');
+			useStore.getState().updateHistory('room-rr', [
+				createMockTextMessage({
+					id: 'w1',
+					stanzaId: 'w1',
+					roomId: 'room-rr',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setHasMoreAfter('room-rr', true);
+			const answer = deferResponse();
+			const next = chatClient.requestMessagesAfter('room-rr');
+			await vi.advanceTimersByTimeAsync(0);
+
+			useStore.getState().resetXmppData();
+			wsChatEventsRouter(
+				buildWsMessageReceivedEvent(
+					buildWireMessage({
+						id: 'live',
+						roomId: 'room-rr',
+						senderId: 'u2',
+						createdAt: '2026-08-05T12:00:00Z'
+					})
+				)
+			);
+			answer(
+				buildTimelineResponse(
+					[
+						buildMessageTimelineItem(
+							buildWireMessage({ id: 'f1', roomId: 'room-rr', createdAt: AUG_FIRST_MORNING })
+						)
+					],
+					{ hasMoreBefore: true, hasMoreAfter: true }
+				)
+			);
+			await next;
+
+			expect(rowIds('room-rr')).toEqual(['live']);
+			expect(useStore.getState().chatsRegistry['room-rr']?.hasMoreAfter).toBeFalsy();
+		});
+
+		it('does not let a jump in flight write into a cleared history', async () => {
+			setUpRoom('room-rc');
+			const answer = deferResponse();
+			const jump = chatClient.requestMessageResultHistoryToId(
+				'room-rc',
+				'target',
+				Date.parse(AUG_FIRST_MORNING)
+			);
+			await vi.advanceTimersByTimeAsync(0);
+
+			useStore.getState().clearConversation('room-rc', AUG_SECOND);
+			answer(
+				buildTimelineResponse(
+					[
+						buildMessageTimelineItem(
+							buildWireMessage({ id: 'target', roomId: 'room-rc', createdAt: AUG_FIRST_MORNING })
+						)
+					],
+					{ hasMoreBefore: true, hasMoreAfter: true }
+				)
+			);
+			await jump;
+
+			expect(rowIds('room-rc')).toEqual([]);
+			expect(useStore.getState().chatsRegistry['room-rc']?.hasMoreAfter).toBeFalsy();
+		});
+
+		it('drops a late next page of an old query and keeps the results of the new one', async () => {
+			setUpRoom('room-re');
+			useStore.getState().setSearchResults('room-re', [
+				createMockTextMessage({
+					id: 'foo-1',
+					stanzaId: 'foo-1',
+					roomId: 'room-re',
+					date: Date.parse(AUG_FIRST_LATE_MORNING)
+				})
+			]);
+			const answerFoo = deferResponse();
+			const next = chatClient.fullTextSearchNextPage('room-re', 'foo');
+			await vi.advanceTimersByTimeAsync(0);
+
+			useStore.getState().clearSearchResults('room-re');
+			mockJsonResponse({
+				messages: [buildWireMessage({ id: 'bar-1', roomId: 'room-re', createdAt: AUG_FIRST_NOON })],
+				hasMore: true
+			});
+			await chatClient.fullTextSearch('room-re', 'bar');
+			answerFoo({
+				messages: [
+					buildWireMessage({ id: 'foo-2', roomId: 'room-re', createdAt: AUG_FIRST_MORNING })
+				],
+				hasMore: false
+			});
+			await next;
+
+			const registry = useStore.getState().chatsRegistry['room-re'];
+			expect(registry?.searchResults.map((result) => result.id)).toEqual(['bar-1']);
+			expect(registry?.searchHasMore).toBe(true);
+		});
+
+		it('gives up a send from a detached window when the latest page does not come in time', async () => {
+			setUpRoom('room-rt');
+			useStore.getState().updateHistory('room-rt', [
+				createMockTextMessage({
+					id: 'old',
+					stanzaId: 'old',
+					roomId: 'room-rt',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setHasMoreAfter('room-rt', true);
+			deferResponse();
+			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+			const sent = chatClient.sendChatMessage('room-rt', 'ciao');
+			await vi.advanceTimersByTimeAsync(RETURN_TO_LATEST_TIMEOUT_MS + 1);
+
+			await expect(sent).resolves.toBe(false);
+			expect(errorSpy).toHaveBeenCalledWith(
+				'chatClient.sendChatMessage: return to the latest messages failed',
+				expect.any(Error)
+			);
+			expect(rowIds('room-rt')).not.toContain(expect.stringMatching(/ciao/));
+		});
+
+		it('refreshes the unread count when an own read moves the marker outside a detached window', async () => {
+			setUpRoom('room-ru');
+			useStore.getState().updateHistory('room-ru', [
+				createMockTextMessage({
+					id: 'w1',
+					stanzaId: 'w1',
+					roomId: 'room-ru',
+					from: 'u2',
+					date: Date.parse(AUG_FIRST_EARLY)
+				})
+			]);
+			useStore.getState().setUnreadCount('room-ru', 10);
+			useStore.getState().setHasMoreAfter('room-ru', true);
+			const inboxSpy = vi.spyOn(wscSdk, 'fetchInbox').mockResolvedValue(undefined);
+
+			wsChatEventsRouter(
+				buildWsReadUpdatedEvent({
+					roomId: 'room-ru',
+					userId: 'me',
+					itemCreatedAt: AUG_FIRST_LATE_MORNING
+				})
+			);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(useStore.getState().chatsRegistry['room-ru']?.unreadStale).toBe(true);
+			expect(inboxSpy).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	it('exports the chat as a server-streamed download on a WSC-pure backend', () => {

@@ -67,6 +67,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 
+	const currentRoomIdRef = useRef(roomId);
+	currentRoomIdRef.current = roomId;
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>(null);
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
@@ -255,7 +257,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			// The window stops before the newest message: reload the latest page
 			chatClient
 				.returnToLatestMessages(roomId)
-				.then(() => scrollToEnd(MessagesListWrapperRef))
+				.then(() => {
+					// The list is shared by the rooms: the reload may end after another room was opened
+					if (currentRoomIdRef.current === roomId) {
+						scrollToEnd(MessagesListWrapperRef);
+					}
+				})
 				.catch((err) => console.error('MessagesList: return to the latest messages failed', err));
 			return;
 		}

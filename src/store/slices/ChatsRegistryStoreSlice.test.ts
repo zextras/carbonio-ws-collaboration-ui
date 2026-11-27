@@ -652,6 +652,89 @@ describe('ChatsRegistryStoreSlice tests', () => {
 			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(8);
 		});
 
+		test('moving my marker to the last message of the room while detached reads everything', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.setLastMessage(roomId, createMockTextMessage({ id: 'last', roomId, date: date3 }));
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'm0', markerDate: date1 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'last', markerDate: date3 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(0);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(false);
+		});
+
+		test('a marker move into the window from outside it leaves the count to a refresh', () => {
+			const store = useStore.getState();
+			store.updateHistory(
+				roomId,
+				range(4).map((index) =>
+					createMockTextMessage({ id: `m${index}`, roomId, from: 'other', date: date1 + index })
+				)
+			);
+			store.updateReadStatus(roomId, [
+				createMockMarker({ from: 'me', messageId: 'older', markerDate: date1 - 100 })
+			]);
+			store.setUnreadCount(roomId, 10);
+			store.setHasMoreAfter(roomId, true);
+
+			useStore
+				.getState()
+				.updateReadStatus(roomId, [
+					createMockMarker({ from: 'me', messageId: 'm2', markerDate: date1 + 2 })
+				]);
+
+			expect(useStore.getState().chatsRegistry[roomId].unread).toBe(10);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(true);
+			useStore.getState().setUnreadCount(roomId, 7);
+			expect(useStore.getState().chatsRegistry[roomId].unreadStale).toBe(false);
+		});
+
+		test('rows buffered while detached join the window in order when it is attached again', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.setHasMoreAfter(roomId, true);
+			useStore.getState().newMessage(createMockTextMessage({ id: 'live2', roomId, date: date3 }));
+			useStore.getState().newMessage(createMockTextMessage({ id: 'live1', roomId, date: date2 }));
+			useStore
+				.getState()
+				.newMessage(createMockTextMessage({ id: 'live1', roomId, date: date2, text: 'edited' }));
+
+			useStore.getState().setHasMoreAfter(roomId, false);
+
+			const { messages, detachedBuffer } = useStore.getState().chatsRegistry[roomId];
+			expect(messages.map((message) => message.id)).toEqual(['m1', 'live1', 'live2']);
+			expect((messages[1] as TextMessage).text).toBe('edited');
+			expect(detachedBuffer).toBeUndefined();
+		});
+
+		test('a buffered row already in the window is not added twice', () => {
+			const store = useStore.getState();
+			store.updateHistory(roomId, [createMockTextMessage({ id: 'm1', roomId, date: date1 })]);
+			store.setHasMoreAfter(roomId, true);
+			useStore.getState().newMessage(createMockTextMessage({ id: 'live', roomId, date: date2 }));
+			useStore
+				.getState()
+				.updateHistory(roomId, [createMockTextMessage({ id: 'live', roomId, date: date2 })]);
+
+			useStore.getState().setHasMoreAfter(roomId, false);
+
+			expect(useStore.getState().chatsRegistry[roomId].messages).toHaveLength(2);
+		});
+
 		test('moving my marker in an attached window still recounts the unread rows', () => {
 			const store = useStore.getState();
 			store.updateHistory(

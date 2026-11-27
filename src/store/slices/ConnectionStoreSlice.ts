@@ -69,6 +69,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					};
 				});
 				draft.chatsRegistry = {};
+				draft.windowEpochs['*'] = (draft.windowEpochs['*'] ?? 0) + 1;
 				draft.activeConversations = {};
 			}),
 			false,

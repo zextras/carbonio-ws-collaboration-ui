@@ -12,6 +12,12 @@ import { markChatStack } from './chatStack';
 import { findPinnedMessageContent } from './findPinnedMessageContent';
 import { findRepliedMessage } from './findRepliedMessage';
 import { scheduleBootInbox } from './inboxRefresh';
+import {
+	beginSearchPage,
+	beginWindowOperation,
+	isStaleWindowWrite,
+	startSearch
+} from './windowGuard';
 import { getMyLastReaction } from '../../store/selectors/ChatsRegistrySelectors';
 import { getIsWscPure } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
@@ -115,6 +121,25 @@ function readMessageViaSdk(roomId: string, messageId: string): void {
 	});
 }
 
+export const RETURN_TO_LATEST_TIMEOUT_MS = 20000;
+
+/** Bounds the wait of a caller (a send, the scroll-to-bottom button) behind the queue of window loads. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		const timer = setTimeout(() => reject(new Error('window load timed out')), ms);
+		promise.then(
+			(value) => {
+				clearTimeout(timer);
+				resolve(value);
+			},
+			(err) => {
+				clearTimeout(timer);
+				reject(err);
+			}
+		);
+	});
+}
+
 const windowOperations = new Map<string, Promise<void>>();
 const latestReloads = new Map<string, Promise<void>>();
 
@@ -123,7 +148,14 @@ const latestReloads = new Map<string, Promise<void>>();
  * replaced meanwhile would join rows of two unrelated spans and leave a hidden gap.
  */
 function runWindowOperation<T>(roomId: string, operation: () => Promise<T>): Promise<T> {
-	const result = (windowOperations.get(roomId) ?? Promise.resolve()).then(operation);
+	const result = (windowOperations.get(roomId) ?? Promise.resolve()).then(async () => {
+		const end = beginWindowOperation(roomId);
+		try {
+			return await operation();
+		} finally {
+			end();
+		}
+	});
 	windowOperations.set(
 		roomId,
 		result.then(
@@ -156,6 +188,9 @@ async function loadLatestWindowViaSdk(roomId: string): Promise<void> {
 		const { hasMoreAfter } = await wscSdk.fetchTimeline(roomId, {
 			...(notBefore ? { notBefore } : {})
 		});
+		if (isStaleWindowWrite(roomId)) {
+			return;
+		}
 		const current = useStore.getState();
 		current.setHasMoreAfter(roomId, hasMoreAfter);
 		const newest = current.chatsRegistry[roomId]?.messages.findLast(
@@ -205,7 +240,7 @@ function sendTextViaSdk(
 	}
 	// A message sent from a window cut before the newest one would land after a hidden gap
 	if (isDetached(roomId)) {
-		return returnToLatestMessagesViaSdk(roomId).then(
+		return withTimeout(returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS).then(
 			() => (isDetached(roomId) ? false : sendTextViaSdk(caller, roomId, message, replyToId)),
 			(err) => {
 				console.error(`chatClient.${caller}: return to the latest messages failed`, err);
@@ -310,6 +345,10 @@ function loadWindowAroundMessageViaSdk(
 			return;
 		}
 		const notBefore = getNotBefore(roomId);
+		// Below the cleared-history floor (a pin can be): the page would be empty and leave no anchor
+		if (notBefore !== undefined && date < notBefore) {
+			return;
+		}
 		// The loaders must not page the window while it is replaced
 		store.setHistoryLoadDisabled(roomId, true);
 		store.clearMessages(roomId);
@@ -321,11 +360,15 @@ function loadWindowAroundMessageViaSdk(
 				aroundId: stanzaId,
 				...(notBefore ? { notBefore } : {})
 			});
-			useStore.getState().setHasMoreAfter(roomId, hasMoreAfter);
+			if (!isStaleWindowWrite(roomId)) {
+				useStore.getState().setHasMoreAfter(roomId, hasMoreAfter);
+			}
 		} catch (err) {
-			await loadLatestWindowViaSdk(roomId).catch((restoreErr) =>
-				console.error('chatClient: latest page restore failed', restoreErr)
-			);
+			if (!isStaleWindowWrite(roomId)) {
+				await loadLatestWindowViaSdk(roomId).catch((restoreErr) =>
+					console.error('chatClient: latest page restore failed', restoreErr)
+				);
+			}
 			throw err;
 		} finally {
 			useStore.getState().setHistoryLoadDisabled(roomId, false);
@@ -352,6 +395,9 @@ function loadNextPageAfterViaSdk(roomId: string): Promise<void> {
 			after: newest.date,
 			afterId: newest.id
 		});
+		if (isStaleWindowWrite(roomId)) {
+			return;
+		}
 		const current = useStore.getState();
 		const landed = current.chatsRegistry[roomId]?.messages.findLast(
 			(message) => !isPendingMessage(message)
@@ -522,6 +568,7 @@ export const chatClient: ChatClient = {
 			// spec has no server-side lower bound, the SDK filters client-side.
 			// Optional chaining is an improvement: v1 threw on unknown rooms.
 			const notBefore = getNotBefore(roomId);
+			startSearch(roomId);
 			useStore.getState().setSearchHasMore(roomId, false);
 			return wscSdk
 				.searchMessages(roomId, text, { ...(notBefore ? { notBefore } : {}) })
@@ -539,6 +586,7 @@ export const chatClient: ChatClient = {
 			return Promise.resolve();
 		}
 		const notBefore = getNotBefore(roomId);
+		const isCurrentQuery = beginSearchPage(roomId);
 		return wscSdk
 			.searchMessages(roomId, text, {
 				before: oldest.date,
@@ -547,6 +595,10 @@ export const chatClient: ChatClient = {
 				...(notBefore ? { notBefore } : {})
 			})
 			.then(({ messages, hasMore }) => {
+				// The query changed while the page was in flight: it belongs to the old one
+				if (!isCurrentQuery()) {
+					return;
+				}
 				// A page that adds nothing ends the paging, whatever the server says: no endless requests
 				useStore.getState().setSearchHasMore(roomId, hasMore && messages.length > 0);
 			});
@@ -567,7 +619,7 @@ export const chatClient: ChatClient = {
 		if (!isWscPure()) {
 			return Promise.resolve();
 		}
-		return returnToLatestMessagesViaSdk(roomId);
+		return withTimeout(returnToLatestMessagesViaSdk(roomId), RETURN_TO_LATEST_TIMEOUT_MS);
 	},
 	requestMessageToForward: (roomId, messageToForwardStanzaId, queryId) => {
 		if (isWscPure()) {

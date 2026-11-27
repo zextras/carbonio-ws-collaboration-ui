@@ -6,6 +6,8 @@
 
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
+	/** Bumped by a reconnection reset ('*') and by a history clear (room): in-flight window loads check it. */
+	windowEpochs: { [roomIdOrAll: string]: number };
 	newMessage: (message: Message) => void;
 	setInboxMessages: (message: Message[]) => void;
 	setLastMessage: (roomId: string, message: TextMessage | ConfigurationMessage) => void;
@@ -47,6 +49,10 @@ export type ChatRegistry = {
 	 * not appended to it until the forward pages reach the newest message again.
 	 */
 	hasMoreAfter?: boolean;
+	/** Live rows not appended to a detached window: they join it when it reaches the newest message. */
+	detachedBuffer?: Message[];
+	/** The unread count could not follow an own marker move on a detached window: refresh it. */
+	unreadStale?: boolean;
 	messageRanges?: MessageRange[];
 	backfillQueue: BackfillRequest[];
 };
